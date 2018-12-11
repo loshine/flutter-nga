@@ -1,7 +1,15 @@
 import 'package:flutter_nga/data/entity/forum.dart';
 
 class ForumRepository {
+  static final ForumRepository _singleton = ForumRepository._internal();
+
   static final List<ForumGroup> forumGroupList = [];
+
+  factory ForumRepository() {
+    return _singleton;
+  }
+
+  ForumRepository._internal();
 
   List<ForumGroup> getForumList() {
     if (forumGroupList.isEmpty) {
@@ -189,7 +197,7 @@ class ForumRepository {
         Forum(-314508, "世界尽头的百货公司"),
         Forum(-2671, "耳机区"),
         Forum(-970841, "东方教主陈乔恩"),
-        Forum(-3355501, "彩虹天堂"),
+        Forum(-3355501, "饭饭的小窝"),
         Forum(-403298, "怨灵图纸收藏室"),
         Forum(-3432136, "飘落的诗章"),
         Forum(-187628, "家居 装修"),
