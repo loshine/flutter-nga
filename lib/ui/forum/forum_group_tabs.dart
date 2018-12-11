@@ -5,10 +5,10 @@ import 'package:flutter_nga/ui/forum/forum_group.dart';
 
 class ForumGroupTabsPage extends StatefulWidget {
   @override
-  ForumGroupTabsState createState() => ForumGroupTabsState();
+  _ForumGroupTabsState createState() => _ForumGroupTabsState();
 }
 
-class ForumGroupTabsState extends State<ForumGroupTabsPage> {
+class _ForumGroupTabsState extends State<ForumGroupTabsPage> {
   List<ForumGroup> _forumGroupList = [];
 
   @override

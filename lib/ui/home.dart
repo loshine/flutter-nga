@@ -63,27 +63,41 @@ class _HomePageState extends State<HomePage> {
                 color: Palette.colorBackground,
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: Icon(
-                        Icons.forum,
+                    Material(
+                      child: InkWell(
+                        child: ListTile(
+                          leading: Icon(
+                            Icons.forum,
+                          ),
+                          title: Text("论坛"),
+                          selected: _index == 0,
+                        ),
+                        onTap: () {
+                          _setSelection(0);
+                        },
                       ),
-                      title: Text("论坛"),
-                      onTap: () {
-                        _setSelection(0);
-                      },
+                      color: Palette.colorBackground,
                     ),
-                    ListTile(
-                      leading: SvgPicture.asset(
-                        'images/medal.svg',
-                        fit: BoxFit.none,
-                        height: 24,
-                        width: 24,
-                        color: Palette.colorIcon,
+                    Material(
+                      child: InkWell(
+                        child: ListTile(
+                          leading: SvgPicture.asset(
+                            'images/medal.svg',
+                            fit: BoxFit.none,
+                            height: 24,
+                            width: 24,
+                            color: _index == 1
+                                ? Palette.colorPrimary
+                                : Palette.colorIcon,
+                          ),
+                          title: Text("赛事"),
+                          selected: _index == 1,
+                        ),
+                        onTap: () {
+                          _setSelection(1);
+                        },
                       ),
-                      title: Text("赛事"),
-                      onTap: () {
-                        _setSelection(1);
-                      },
+                      color: Palette.colorBackground,
                     ),
                   ],
                 ),
