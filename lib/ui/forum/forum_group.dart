@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
+import 'package:flutter_nga/ui/forum/forum_grid.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
 class ForumGroupPage extends StatefulWidget {
@@ -8,16 +9,16 @@ class ForumGroupPage extends StatefulWidget {
   final ForumGroup group;
 
   @override
-  ForumGroupState createState() => ForumGroupState();
+  _ForumGroupState createState() => _ForumGroupState();
 }
 
-class ForumGroupState extends State<ForumGroupPage> {
+class _ForumGroupState extends State<ForumGroupPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Palette.colorBackground,
-      child: Center(
-        child: Text(widget.group.name),
+      child: ForumGridPage(
+        forumList: widget.group.forumList,
       ),
     );
   }
