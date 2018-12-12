@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
+import 'package:flutter_nga/ui/match/match_tabs.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -16,20 +18,25 @@ class _HomePageState extends State<HomePage> {
 
   final pageList = [
     ForumGroupTabsPage(),
-    ForumGroupTabsPage(),
+    MatchTabsPage(),
   ];
 
   void _setSelection(int i) {
+    Navigator.pop(context);
     setState(() {
       _index = i;
     });
+  }
+
+  double _getElevation() {
+    return _index == 0 ? 0 : 4;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
+        elevation: _getElevation(),
         title: Text(widget.title),
       ),
       backgroundColor: Palette.colorBackground,
@@ -45,8 +52,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Image(
                     image: AssetImage("assets/images/logo.png"),
-                    width: 100.0,
-                    height: 100.0,
+                    width: 96.0,
+                    height: 96.0,
                   ),
                   Padding(
                     padding: EdgeInsets.all(8.0),
@@ -57,18 +64,29 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            Divider(height: 1),
             Expanded(
               child: Container(
                 color: Palette.colorBackground,
                 child: Column(
                   children: [
+                    Divider(height: 1),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                      height: 56,
+                      child: Align(
+                        child: Text(
+                          "模块",
+                          style: TextStyle(color: Colors.black45),
+                          textAlign: TextAlign.left,
+                          textDirection: TextDirection.ltr,
+                        ),
+                        alignment: Alignment.centerLeft,
+                      ),
+                    ),
                     Material(
                       child: InkWell(
                         child: ListTile(
-                          leading: Icon(
-                            Icons.forum,
-                          ),
+                          leading: Icon(Icons.forum),
                           title: Text("论坛"),
                           selected: _index == 0,
                         ),
@@ -99,6 +117,44 @@ class _HomePageState extends State<HomePage> {
                       ),
                       color: Palette.colorBackground,
                     ),
+                    Divider(height: 1),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                      height: 56,
+                      child: Align(
+                        child: Text(
+                          "其它",
+                          style: TextStyle(color: Colors.black45),
+                          textAlign: TextAlign.left,
+                          textDirection: TextDirection.ltr,
+                        ),
+                        alignment: Alignment.centerLeft,
+                      ),
+                    ),
+                    Material(
+                      child: InkWell(
+                        child: ListTile(
+                          leading: Icon(Icons.settings),
+                          title: Text("设置"),
+                        ),
+                        onTap: () {
+                          // TODO: 点击设置
+                        },
+                      ),
+                      color: Palette.colorBackground,
+                    ),
+                    Material(
+                      child: InkWell(
+                        child: ListTile(
+                          leading: Icon(Icons.info_outline),
+                          title: Text("关于"),
+                        ),
+                        onTap: () {
+                          // TODO: 点击关于
+                        },
+                      ),
+                      color: Palette.colorBackground,
+                    ),
                   ],
                 ),
               ),
@@ -108,5 +164,19 @@ class _HomePageState extends State<HomePage> {
       ),
       body: pageList[_index],
     );
+  }
+
+  @override
+  void initState() {
+    // 初始化数据库
+    Data.init();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // 关闭数据库
+    Data.close();
+    super.dispose();
   }
 }

@@ -9,9 +9,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Nga',
       theme: ThemeData(
         primarySwatch: Palette.colorPrimary,
+        scaffoldBackgroundColor: Palette.colorBackground,
         dividerColor: Palette.colorDivider,
         splashColor: Palette.colorSplash,
         highlightColor: Palette.colorHighlight,
