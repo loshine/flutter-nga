@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
-import 'package:flutter_nga/ui/forum/forum_grid.dart';
-import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/ui/forum/forum_grid_item_widget.dart';
 
 class ForumGroupPage extends StatefulWidget {
   ForumGroupPage({Key key, this.group}) : super(key: key);
@@ -15,11 +14,18 @@ class ForumGroupPage extends StatefulWidget {
 class _ForumGroupState extends State<ForumGroupPage> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Palette.colorBackground,
-      child: ForumGridPage(
-        forumList: widget.group.forumList,
-      ),
+    final size = MediaQuery.of(context).size;
+
+    /*24 is for notification bar on Android*/
+    final double itemHeight = 96;
+    final double itemWidth = size.width / 3;
+
+    return GridView.count(
+      crossAxisCount: 3,
+      childAspectRatio: itemWidth / itemHeight,
+      children: widget.group.forumList
+          .map((forum) => ForumGridItemWidget(forum))
+          .toList(),
     );
   }
 }
