@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/home.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  // 初始化数据库
+  await Data().init();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
