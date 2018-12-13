@@ -42,20 +42,24 @@ class _TopicListState extends State<TopicListPage> {
 
   @override
   void initState() {
-    Data.forumRepository.isFavourite(widget.forum).then((isFavourite) {
+    Data().forumRepository.isFavourite(widget.forum).then((isFavourite) {
       setState(() {
         _defaultFavourite = isFavourite;
         this.isFavourite = isFavourite;
       });
+    });
+    Data().topicRepository.getTopicList(widget.forum.fid, 1).then((list) {
+      debugPrint(list.toString());
+      setState(() {});
     });
     super.initState();
   }
 
   _switchFavourite() async {
     if (isFavourite) {
-      await Data.forumRepository.deleteFavourite(widget.forum);
+      await Data().forumRepository.deleteFavourite(widget.forum);
     } else {
-      await Data.forumRepository.saveFavourite(widget.forum);
+      await Data().forumRepository.saveFavourite(widget.forum);
     }
     setState(() {
       isFavourite = !isFavourite;

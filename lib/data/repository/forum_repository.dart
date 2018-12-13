@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:objectdb/objectdb.dart';
-import 'package:path_provider/path_provider.dart';
 
 /// 版块相关数据知识库
 class ForumRepository {
@@ -218,15 +215,9 @@ class ForumRepository {
     return forumGroupList;
   }
 
-  void init() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    String forumDbPath = [appDocDir.path, 'forum.db'].join('/');
-    _forumDb = ObjectDB(forumDbPath);
+  void init(ObjectDB db) async {
+    _forumDb = db;
     _forumDb.open();
-  }
-
-  void close() async {
-    _forumDb.close();
   }
 
   Future<bool> isFavourite(Forum forum) async {

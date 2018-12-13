@@ -38,7 +38,7 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage> {
   }
 
   void _refreshData() {
-    Data.forumRepository.getFavouriteList().then((list) {
+    Data().forumRepository.getFavouriteList().then((list) {
       setState(() {
         _forumList.clear();
         _forumList.addAll(list);

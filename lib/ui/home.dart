@@ -167,16 +167,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void initState() {
-    // 初始化数据库
-    Data.init();
-    super.initState();
-  }
-
-  @override
   void dispose() {
     // 关闭数据库
-    Data.close();
+    Data().close();
     super.dispose();
   }
 }
