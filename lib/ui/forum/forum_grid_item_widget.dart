@@ -20,7 +20,7 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
     return Material(
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) {
             return TopicListPage(widget.forum);
           })).then((changed) {
             if (widget.onFavouriteChanged != null) {
