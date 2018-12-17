@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/match/match_tabs.dart';
+import 'package:flutter_nga/ui/user/login.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -28,6 +29,11 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _goLogin(BuildContext context) {
+    Navigator.of(context).pop();
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPage()));
+  }
+
   double _getElevation() {
     return _index == 0 ? 0 : 4;
   }
@@ -43,25 +49,28 @@ class _HomePageState extends State<HomePage> {
       drawer: Drawer(
         child: Column(
           children: [
-            Container(
-              height: 240.0,
-              width: double.infinity,
-              color: Palette.colorBackground,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image(
-                    image: AssetImage("assets/images/logo.png"),
-                    width: 96.0,
-                    height: 96.0,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      "TO-DOs",
+            InkWell(
+              onTap: () => _goLogin(context),
+              child: Container(
+                height: 240.0,
+                width: double.infinity,
+                color: Palette.colorBackground,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image(
+                      image: AssetImage("assets/images/logo.png"),
+                      width: 96.0,
+                      height: 96.0,
                     ),
-                  )
-                ],
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        "TO-DOs",
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
             Expanded(

@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
+import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TopicListPage extends StatefulWidget {
@@ -15,6 +17,8 @@ class TopicListPage extends StatefulWidget {
 class _TopicListState extends State<TopicListPage> {
   bool _defaultFavourite = false;
   bool isFavourite = false;
+
+  List<Topic> _topicList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +40,17 @@ class _TopicListState extends State<TopicListPage> {
             ),
           ],
         ),
+        body: ListView.builder(
+          itemCount: _topicList.length + 1,
+          itemBuilder: (context, index) {
+            if (index == _topicList.length) {
+              // 加载更多
+              return _buildProgressIndicator();
+            } else {
+              return _buildListItemWidget(_topicList[index]);
+            }
+          },
+        ),
       ),
     );
   }
@@ -48,11 +63,37 @@ class _TopicListState extends State<TopicListPage> {
         this.isFavourite = isFavourite;
       });
     });
-    Data().topicRepository.getTopicList(widget.forum.fid, 1).then((list) {
-      debugPrint(list.toString());
-      setState(() {});
-    });
+    Data()
+        .topicRepository
+        .getTopicList(widget.forum.fid, 1)
+        .then((TopicListData data) =>
+            setState(() => _topicList.addAll(data.topicList.values)))
+        .catchError((DioError error) => debugPrint(error.message));
     super.initState();
+  }
+
+  Widget _buildProgressIndicator() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: Opacity(
+//          opacity: isPerformingRequest ? 1.0 : 0.0,
+          opacity: 1.0,
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListItemWidget(Topic topic) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: Column(
+        children: [
+          Text(topic.subject),
+        ],
+      ),
+    );
   }
 
   _switchFavourite() async {
