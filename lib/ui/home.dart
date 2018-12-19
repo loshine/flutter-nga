@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/match/match_tabs.dart';
-import 'package:flutter_nga/ui/user/login.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -16,7 +18,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var _index = 0;
-
+  StreamSubscription _subscription;
   final pageList = [
     ForumGroupTabsPage(),
     MatchTabsPage(),
@@ -31,11 +33,34 @@ class _HomePageState extends State<HomePage> {
 
   void _goLogin(BuildContext context) {
     Navigator.of(context).pop();
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPage()));
+    AndroidLogin.startLogin()
+        .then((result) => debugPrint("goAndroidLogin result: $result"))
+        .catchError((e) => debugPrint(e.toString()));
+//    Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPage()));
   }
 
   double _getElevation() {
     return _index == 0 ? 0 : 4;
+  }
+
+  @override
+  void initState() {
+    _subscription = AndroidLogin.cookieStream.listen(
+          (cookies) {
+        Data().userRepository.saveLoginCookies(cookies);
+      },
+      onError: (e) => debugPrint(e.toString()),
+    );
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // 关闭数据库
+    Data().close();
+    // 取消监听
+    _subscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -173,12 +198,5 @@ class _HomePageState extends State<HomePage> {
       ),
       body: pageList[_index],
     );
-  }
-
-  @override
-  void dispose() {
-    // 关闭数据库
-    Data().close();
-    super.dispose();
   }
 }

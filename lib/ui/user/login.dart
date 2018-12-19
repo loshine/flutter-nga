@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   _saveCookies(BuildContext context) async {
     var cookies = await flutterWebviewPlugin.getCookies();
     try {
-      var user = await Data().userRepository.saveLoginCookies(cookies);
+//      var user = await Data().userRepository.saveLoginCookies(cookies);
     } catch (e) {
       print(e.toString());
     } finally {
