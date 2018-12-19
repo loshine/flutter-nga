@@ -30,11 +30,11 @@ class UserRepository {
       print(c);
       // 因为 key 带空格，so。。
       if (c.contains(TAG_UID)) {
-        uid = c.substring(TAG_UID.length + 1);
+        uid = c.trim().substring(TAG_UID.length + 1);
       } else if (c.contains(TAG_CID)) {
-        cid = c.substring(TAG_CID.length + 1);
+        cid = c.trim().substring(TAG_CID.length + 1);
       } else if (c.contains(TAG_USER_NAME)) {
-        username = c.substring(TAG_USER_NAME.length + 1);
+        username = c.trim().substring(TAG_USER_NAME.length + 1);
         try {
           username = decodeGbk(username.codeUnits);
           username = decodeGbk(username.codeUnits);
@@ -51,6 +51,10 @@ class UserRepository {
         username != null &&
         username.isNotEmpty) {
       var user = User(uid, cid, username);
+      List<Map<dynamic, dynamic>> list = await _userDb.find({'uid': uid});
+      if (list.isNotEmpty) {
+        return User.fromMap(list[0]);
+      }
       await _userDb.insert(user.toMap());
       return user;
     }

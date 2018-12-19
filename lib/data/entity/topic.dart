@@ -18,11 +18,16 @@ class TopicListData {
   final int rRows;
 
   factory TopicListData.fromJson(Map<String, dynamic> map) {
+    Map<String, dynamic> topicMap = map["__T"];
+    Map<String, Topic> tempMap = {};
+    for (MapEntry<String, dynamic> entry in topicMap.entries) {
+      tempMap[entry.key] = Topic.fromJson(entry.value);
+    }
     return TopicListData(
       global: map["__GLOBAL"],
       forum: map["__F"],
       rows: map["__ROWS"],
-      topicList: map["__T"],
+      topicList: tempMap,
       currentRows: map["__T__ROWS"],
       topicRows: map["__T__ROWS__PAGE"],
       rRows: map["__R__ROWS_PAGE"],
@@ -56,7 +61,7 @@ class Topic {
   final int fid;
   final String tpcurl;
   final int quoteFrom;
-  final int quoteTo;
+  final String quoteTo;
   final String author;
   final dynamic authorId; // 匿名时为 String，非匿名时为 Int
   final String subject;
@@ -68,7 +73,7 @@ class Topic {
   final int recommend;
   final int type;
   final int replies;
-  final int topicMisc;
+  final String topicMisc;
 
   final TopicParent parent;
 
@@ -91,7 +96,7 @@ class Topic {
       type: map["type"],
       replies: map["replies"],
       topicMisc: map["topic_misc"],
-      parent: map["parent"],
+      parent: TopicParent.fromJson(map["parent"] == null ? {} : map["parent"]),
     );
   }
 }

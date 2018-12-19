@@ -14,11 +14,12 @@ class TopicRepository {
 
   Future<TopicListData> getTopicList(int fid, int page) async {
     try {
-      Response response = await Data().dio.get("/thread.php?lite=js&noprefix",
-          data: {'fid': fid, 'page': page});
+      Response response = await Data()
+          .dio
+          .get("/thread.php?lite=js&noprefix&fid=$fid&page=$page");
       return TopicListData.fromJson(response.data);
     } catch (err) {
-      debugPrint(err.message);
+      debugPrint(err.toString());
       throw err;
     }
   }

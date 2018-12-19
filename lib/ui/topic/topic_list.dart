@@ -63,12 +63,10 @@ class _TopicListState extends State<TopicListPage> {
         this.isFavourite = isFavourite;
       });
     });
-    Data()
-        .topicRepository
-        .getTopicList(widget.forum.fid, 1)
-        .then((TopicListData data) =>
-            setState(() => _topicList.addAll(data.topicList.values)))
-        .catchError((DioError error) => debugPrint(error.message));
+    Data().topicRepository.getTopicList(widget.forum.fid, 1).then(
+        (TopicListData data) =>
+            setState(() => _topicList.addAll(data.topicList.values)));
+//        .catchError((DioError error) => debugPrint(error.toString()));
     super.initState();
   }
 
