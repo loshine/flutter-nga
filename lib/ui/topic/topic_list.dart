@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
@@ -23,8 +22,9 @@ class _TopicListState extends State<TopicListPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () {
+      onWillPop: () async {
         Navigator.pop(context, _defaultFavourite != isFavourite);
+        return false;
       },
       child: Scaffold(
         appBar: AppBar(

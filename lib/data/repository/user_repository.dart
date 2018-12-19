@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:objectdb/objectdb.dart';
@@ -44,6 +47,14 @@ class UserRepository {
       }
     }
     print("cid = $cid, uid = $uid, username = $username");
+    List<Cookie> cookieList = [
+      Cookie(TAG_CID, cid),
+      Cookie(TAG_UID, uid),
+    ];
+    Data()
+        .dio
+        .cookieJar
+        .saveFromResponse(Uri.parse("https://bbs.nga.cn/"), cookieList);
     if (cid != null &&
         cid.isNotEmpty &&
         uid != null &&
@@ -52,8 +63,9 @@ class UserRepository {
         username.isNotEmpty) {
       var user = User(uid, cid, username);
       List<Map<dynamic, dynamic>> list = await _userDb.find({'uid': uid});
+      // 有以前登陆过的就把以前登陆过的删除
       if (list.isNotEmpty) {
-        return User.fromMap(list[0]);
+        await _userDb.remove({'uid': uid});
       }
       await _userDb.insert(user.toMap());
       return user;
