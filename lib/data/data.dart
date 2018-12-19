@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
@@ -61,25 +62,26 @@ class Data {
 
     _dio = Dio();
 
+    _dio.cookieJar = PersistCookieJar([appDocDir.path, 'cookies'].join('/'));
     // 配置dio实例
     _dio.options.baseUrl = "https://bbs.nga.cn";
     _dio.options.connectTimeout = 10000; // 10s
     _dio.options.receiveTimeout = 10000; // 10s
     // 因为需要 gbk -> utf-8, 所以需要流的形式
     _dio.options.responseType = ResponseType.STREAM;
-//    _dio.options.headers["User-Agent"] =
+    _dio.options.headers["User-Agent"] = "okhttp/3.12.0";
 //        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36";
     _dio.options.headers["Accept-Encoding"] = "gzip";
     _dio.options.headers["Cache-Control"] = "max-age=0";
     _dio.options.headers["Connection"] = "Keep-Alive";
 
     _dio.interceptor.request.onSend = (Options options) async {
-      try {
-        final user = await userRepository.getDefaultUser();
-        options.headers["Cookie"] = "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
-      } catch (e) {
-        print("no login user");
-      }
+//      try {
+//        final user = await userRepository.getDefaultUser();
+//        options.headers["Cookie"] = "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
+//      } catch (e) {
+//        print("no login user");
+//      }
       options.headers.forEach((k, v) => debugPrint("$k : $v"));
       // 在请求被发送之前做一些事情
       return options; //continue
