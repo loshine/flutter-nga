@@ -60,7 +60,7 @@ class Topic {
   final int tid;
   final int fid;
   final String tpcurl;
-  final int quoteFrom;
+  final dynamic quoteFrom;
   final String quoteTo;
   final String author;
   final dynamic authorId; // 匿名时为 String，非匿名时为 Int
@@ -85,7 +85,6 @@ class Topic {
       quoteFrom: map["quote_from"],
       quoteTo: map["quote_to"],
       author: map["author"],
-      authorId: map["authorid"],
       subject: map["subject"],
       icon: map["icon"],
       postDate: map["postdate"],
@@ -93,6 +92,7 @@ class Topic {
       lastPost: map["lastpost"],
       lastModify: map["lastmodify"],
       recommend: map["recommend"],
+      authorId: map["authorid"],
       type: map["type"],
       replies: map["replies"],
       topicMisc: map["topic_misc"],
@@ -104,7 +104,7 @@ class Topic {
 class TopicParent {
   const TopicParent(this.name);
 
-  final String name;
+  final dynamic name;
 
   factory TopicParent.fromJson(Map<String, dynamic> map) {
     return TopicParent(map["2"]);
