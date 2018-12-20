@@ -10,4 +10,6 @@ class Palette {
   static final colorIcon = Colors.black45;
   static final colorSplash = Colors.black12;
   static final colorHighlight = Colors.black12;
+
+  static final colorTextSecondary = Colors.black54;
 }
