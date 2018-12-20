@@ -74,7 +74,6 @@ class Data {
 
     _dio.interceptor.request.onSend = (Options options) async {
       options.headers.forEach((k, v) => debugPrint("$k : $v"));
-      // 在请求被发送之前做一些事情
       return options; //continue
       // 如果你想完成请求并返回一些自定义数据，可以返回一个`Response`对象或返回`dio.resolve(data)`。
       // 这样请求将会被终止，上层then会被调用，then中返回的数据将是你的自定义数据data.
