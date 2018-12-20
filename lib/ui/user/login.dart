@@ -1,6 +1,5 @@
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 class LoginPage extends StatefulWidget {
@@ -42,13 +41,13 @@ class _LoginPageState extends State<LoginPage> {
             onPressed: () => _refreshBrowser(),
           ),
           IconButton(
-            icon: SvgPicture.asset(
-              "images/cookie.svg",
-              fit: BoxFit.none,
+            icon: Icon(
+              CommunityMaterialIcons.cookie,
+              size: 24,
               color: Colors.white,
             ),
             onPressed: () => _saveCookies(context),
-          ),
+          )
         ],
       ),
     );

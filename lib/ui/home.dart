@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/match/match_tabs.dart';
 import 'package:flutter_nga/utils/palette.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     _subscription = AndroidLogin.cookieStream.listen(
-          (cookies) {
+      (cookies) {
         Data().userRepository.saveLoginCookies(cookies);
       },
       onError: (e) => debugPrint(e.toString()),
@@ -133,11 +133,9 @@ class _HomePageState extends State<HomePage> {
                     Material(
                       child: InkWell(
                         child: ListTile(
-                          leading: SvgPicture.asset(
-                            'images/medal.svg',
-                            fit: BoxFit.none,
-                            height: 24,
-                            width: 24,
+                          leading: Icon(
+                            CommunityMaterialIcons.medal,
+                            size: 24,
                             color: _index == 1
                                 ? Palette.colorPrimary
                                 : Palette.colorIcon,

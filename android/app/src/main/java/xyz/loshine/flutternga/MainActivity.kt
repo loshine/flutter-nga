@@ -4,6 +4,7 @@ import android.os.Bundle
 import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
 import xyz.loshine.flutternga.plugins.FlutterCookiesPlugin
+import xyz.loshine.flutternga.plugins.FlutterGbkPlugin
 import xyz.loshine.flutternga.plugins.FlutterLoginPlugin
 
 class MainActivity : FlutterActivity() {
@@ -15,6 +16,7 @@ class MainActivity : FlutterActivity() {
 
         FlutterLoginPlugin.registerWith(registrarFor(FlutterLoginPlugin.CHANNEL))
         FlutterCookiesPlugin.registerWith(registrarFor(FlutterCookiesPlugin.CHANNEL))
+        FlutterGbkPlugin.registerWith(registrarFor(FlutterGbkPlugin.CHANNEL))
     }
 
 }

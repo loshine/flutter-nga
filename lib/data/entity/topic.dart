@@ -83,8 +83,9 @@ class Topic {
       fid: map["fid"],
       tpcurl: map["tpcurl"],
       quoteFrom: map["quote_from"],
-      quoteTo: map["quote_to"],
+      quoteTo: map["quote_to"].toString(), // 有一些不正常数据是 int 类型
       author: map["author"],
+      authorId: map["authorid"],
       subject: map["subject"],
       icon: map["icon"],
       postDate: map["postdate"],
@@ -92,7 +93,6 @@ class Topic {
       lastPost: map["lastpost"],
       lastModify: map["lastmodify"],
       recommend: map["recommend"],
-      authorId: map["authorid"],
       type: map["type"],
       replies: map["replies"],
       topicMisc: map["topic_misc"],
@@ -104,7 +104,7 @@ class Topic {
 class TopicParent {
   const TopicParent(this.name);
 
-  final dynamic name;
+  final String name;
 
   factory TopicParent.fromJson(Map<String, dynamic> map) {
     return TopicParent(map["2"]);

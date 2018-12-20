@@ -51,10 +51,10 @@ class UserRepository {
       Cookie(TAG_CID, cid),
       Cookie(TAG_UID, uid),
     ];
-    Data()
-        .dio
-        .cookieJar
-        .saveFromResponse(Uri.parse("https://bbs.nga.cn/"), cookieList);
+    var uri = Uri.parse("https://bbs.nga.cn/");
+    Data().dio.cookieJar.saveFromResponse(uri, cookieList);
+    // 不调用如下方法 cookie 存进去也没用。。
+    Data().dio.cookieJar.loadForRequest(uri);
     if (cid != null &&
         cid.isNotEmpty &&
         uid != null &&
