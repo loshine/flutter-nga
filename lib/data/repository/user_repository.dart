@@ -53,8 +53,6 @@ class UserRepository {
     ];
     var uri = Uri.parse("https://bbs.nga.cn/");
     Data().dio.cookieJar.saveFromResponse(uri, cookieList);
-    // 不调用如下方法 cookie 存进去也没用。。
-    Data().dio.cookieJar.loadForRequest(Uri.parse("https://bbs.nga.cn/xx"));
     if (cid != null &&
         cid.isNotEmpty &&
         uid != null &&
