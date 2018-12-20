@@ -9,7 +9,6 @@ import 'package:flutter_nga/data/repository/forum_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
-import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:objectdb/objectdb.dart';
 import 'package:path_provider/path_provider.dart';
 
