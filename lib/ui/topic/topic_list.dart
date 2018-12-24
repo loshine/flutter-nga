@@ -10,6 +10,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import "package:pull_to_refresh/pull_to_refresh.dart";
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:flutter_nga/utils/constant.dart';
 
 class TopicListPage extends StatefulWidget {
   TopicListPage(this.forum, {Key key}) : super(key: key);
@@ -58,8 +59,7 @@ class _TopicListState extends State<TopicListPage> {
           onRefresh: _onRefresh,
           child: ListView.builder(
             itemCount: _topicList.length,
-            itemBuilder: (context, index) =>
-                _buildListItemWidget(_topicList[index]),
+            itemBuilder: (context, index) => _buildListItemWidget(_topicList[index]),
           ),
         ),
         floatingActionButton: _fabVisible
@@ -110,10 +110,7 @@ class _TopicListState extends State<TopicListPage> {
           child: Column(
             children: [
               SizedBox(
-                child: Text(
-                  CodeUtils.unescapeHtml(topic.subject),
-                  style: TextStyle(fontSize: Dimen.subheading),
-                ),
+                child: _getTitleText(topic),
                 width: double.infinity,
               ),
               Padding(
@@ -136,6 +133,16 @@ class _TopicListState extends State<TopicListPage> {
                             color: Palette.colorTextSecondary,
                           ),
                         ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        child: (topic.type & TOPIC_MASK_TYPE_ATTACHMENT == TOPIC_MASK_TYPE_ATTACHMENT
+                            ? Icon(
+                                Icons.attachment,
+                                size: 12,
+                                color: Palette.colorIcon,
+                              )
+                            : null),
                       ),
                       Padding(
                         padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
@@ -192,10 +199,7 @@ class _TopicListState extends State<TopicListPage> {
     if (up) {
       //headerIndicator callback
       _page = 1;
-      Data()
-          .topicRepository
-          .getTopicList(widget.forum.fid, _page)
-          .then((TopicListData data) {
+      Data().topicRepository.getTopicList(widget.forum.fid, _page).then((TopicListData data) {
         _page++;
         _refreshController.sendBack(true, RefreshStatus.completed);
         setState(() {
@@ -210,10 +214,7 @@ class _TopicListState extends State<TopicListPage> {
       });
     } else {
       //footerIndicator Callback
-      Data()
-          .topicRepository
-          .getTopicList(widget.forum.fid, _page)
-          .then((TopicListData data) {
+      Data().topicRepository.getTopicList(widget.forum.fid, _page).then((TopicListData data) {
         _page++;
         _refreshController.sendBack(false, RefreshStatus.canRefresh);
         setState(() => _topicList.addAll(data.topicList.values));
@@ -224,17 +225,37 @@ class _TopicListState extends State<TopicListPage> {
   }
 
   _scrollListener() {
-    if (_refreshController.scrollController.position.userScrollDirection ==
-        ScrollDirection.reverse) {
+    if (_refreshController.scrollController.position.userScrollDirection == ScrollDirection.reverse) {
       if (_fabVisible) {
         setState(() => _fabVisible = false);
       }
     }
-    if (_refreshController.scrollController.position.userScrollDirection ==
-        ScrollDirection.forward) {
+    if (_refreshController.scrollController.position.userScrollDirection == ScrollDirection.forward) {
       if (!_fabVisible) {
         setState(() => _fabVisible = true);
       }
     }
+  }
+
+  _getTitleText(Topic topic) {
+    var text = new RichText(
+      text: new TextSpan(
+        // Note: Styles for TextSpans must be explicitly defined.
+        // Child text spans will inherit styles from parent
+        text: CodeUtils.unescapeHtml(topic.subject),
+        style: new TextStyle(fontSize: Dimen.subheading, color: Palette.colorPrimary),
+        children: <TextSpan>[
+          new TextSpan(
+            text: (topic.type & TOPIC_MASK_TYPE_LOCK == TOPIC_MASK_TYPE_LOCK ? "[锁定]" : ""),
+            style: new TextStyle(color: Palette.colorTextLock),
+          ),
+          new TextSpan(
+            text: (topic.type & TOPIC_MASK_TYPE_ASSEMBLE == TOPIC_MASK_TYPE_ASSEMBLE ? "[合集]" : ""),
+            style: new TextStyle(color: Palette.colorTextAssemble),
+          ),
+        ],
+      ),
+    );
+    return text;
   }
 }
