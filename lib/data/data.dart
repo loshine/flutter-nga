@@ -11,6 +11,7 @@ import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:objectdb/objectdb.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_nga/utils/constant.dart';
 
 class Data {
   static final Data _singleton = Data._internal();
@@ -60,9 +61,14 @@ class Data {
 
     _dio.cookieJar = PersistCookieJar([appDocDir.path, 'cookies'].join('/'));
     // 配置dio实例
-    _dio.options.baseUrl = "https://bbs.nga.cn";
+    _dio.options.baseUrl = DOMAIN;
     _dio.options.connectTimeout = 10000; // 10s
     _dio.options.receiveTimeout = 10000; // 10s
+//    _dio.onHttpClientCreate = (HttpClient client) {
+//      client.findProxy = (uri) {
+//        return "PROXY 172.25.108.10:8888";
+//      };
+//    };
     // 因为需要 gbk -> utf-8, 所以需要流的形式
     _dio.options.responseType = ResponseType.STREAM;
     _dio.options.headers["User-Agent"] = "okhttp/3.12.0";
