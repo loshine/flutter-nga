@@ -1,6 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:flutter_nga/utils/constant.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -8,7 +9,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  var _url = "https://bbs.nga.cn/nuke.php?__lib=login&__act=account&login";
 
 //  var _url = "https://bbs.nga.cn/";
   final flutterWebviewPlugin = FlutterWebviewPlugin();
@@ -25,13 +25,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _refreshBrowser() {
-    flutterWebviewPlugin.launch("https://bbs.nga.cn/", hidden: false);
+    flutterWebviewPlugin.launch(DOMAIN, hidden: false);
   }
 
   @override
   Widget build(BuildContext context) {
     return WebviewScaffold(
-      url: _url,
+      url: LOGIN_URL,
       clearCookies: false,
       appBar: AppBar(
         title: Text("登陆"),
