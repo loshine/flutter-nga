@@ -84,7 +84,7 @@ class Topic {
       tpcurl: map["tpcurl"],
       quoteFrom: map["quote_from"],
       quoteTo: map["quote_to"].toString(), // 有一些不正常数据是 int 类型
-      author: map["author"],
+      author: map["author"].toString(), // 写 PHP 的都没有一点数据类型的意识么？
       authorId: map["authorid"],
       subject: map["subject"],
       icon: map["icon"],

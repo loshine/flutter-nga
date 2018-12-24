@@ -49,7 +49,10 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
-              child: Text(widget.forum.name),
+              child: Text(
+                widget.forum.name,
+                overflow: TextOverflow.ellipsis,
+              ),
             )
           ],
         ),
