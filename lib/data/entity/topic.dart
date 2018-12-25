@@ -165,7 +165,7 @@ class Topic {
       }
       var bytes = base64.decode(misc);
       if (bytes != null && bytes.isNotEmpty && bytes[0].toInt() == 1) {
-        return bytes[bytes.last].toInt();
+        return bytes[4].toInt();
       }
     }
     return 0;
