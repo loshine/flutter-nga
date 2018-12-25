@@ -113,6 +113,24 @@ class _TopicListState extends State<TopicListPage> {
                 child: _getTitleText(topic),
                 width: double.infinity,
               ),
+              SizedBox(
+                child: (topic.parent != null &&
+                        topic.parent.name != null &&
+                        topic.parent.name.isNotEmpty)
+                    ? Padding(
+                        padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                        child: Text(
+                          "[${topic.parent.name}]",
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                            fontSize: Dimen.caption,
+                            color: Palette.colorTextSecondary,
+                          ),
+                        ),
+                      )
+                    : null,
+                width: double.infinity,
+              ),
               Padding(
                 padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
                 child: Row(
