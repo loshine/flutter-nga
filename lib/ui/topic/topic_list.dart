@@ -1,5 +1,4 @@
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/data/data.dart';
@@ -51,17 +50,19 @@ class _TopicListState extends State<TopicListPage> {
             ),
           ],
         ),
-        body: SmartRefresher(
-          enablePullDown: true,
-          enablePullUp: _enablePullUp,
-          controller: _refreshController,
-          onRefresh: _onRefresh,
-          child: ListView.builder(
-            itemCount: _topicList.length,
-            itemBuilder: (context, index) =>
-                _buildListItemWidget(_topicList[index]),
-          ),
-        ),
+        body: Builder(builder: (BuildContext context) {
+          return SmartRefresher(
+            enablePullDown: true,
+            enablePullUp: _enablePullUp,
+            controller: _refreshController,
+            onRefresh: (b) => _onRefresh(context, b),
+            child: ListView.builder(
+              itemCount: _topicList.length,
+              itemBuilder: (context, index) =>
+                  _buildListItemWidget(_topicList[index]),
+            ),
+          );
+        }),
         floatingActionButton: _fabVisible
             ? FloatingActionButton(
                 onPressed: null,
@@ -97,7 +98,6 @@ class _TopicListState extends State<TopicListPage> {
   @override
   void dispose() {
     _refreshController.scrollController.removeListener(_scrollListener);
-    _refreshController.scrollController.dispose();
     super.dispose();
   }
 
@@ -196,14 +196,13 @@ class _TopicListState extends State<TopicListPage> {
     });
   }
 
-  _onRefresh(bool up) {
+  _onRefresh(BuildContext context, bool up) async {
     if (up) {
       //headerIndicator callback
-      _page = 1;
-      Data()
-          .topicRepository
-          .getTopicList(widget.forum.fid, _page)
-          .then((TopicListData data) {
+      try {
+        _page = 1;
+        TopicListData data =
+            await Data().topicRepository.getTopicList(widget.forum.fid, _page);
         _page++;
         _refreshController.sendBack(true, RefreshStatus.completed);
         setState(() {
@@ -213,21 +212,26 @@ class _TopicListState extends State<TopicListPage> {
           _topicList.clear();
           _topicList.addAll(data.topicList.values);
         });
-      }).catchError((DioError error) {
+      } catch (err) {
         _refreshController.sendBack(true, RefreshStatus.failed);
-      });
+        Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(err.message)),
+        );
+      }
     } else {
       //footerIndicator Callback
-      Data()
-          .topicRepository
-          .getTopicList(widget.forum.fid, _page)
-          .then((TopicListData data) {
+      try {
+        TopicListData data =
+            await Data().topicRepository.getTopicList(widget.forum.fid, _page);
         _page++;
         _refreshController.sendBack(false, RefreshStatus.canRefresh);
         setState(() => _topicList.addAll(data.topicList.values));
-      }).catchError((DioError error) {
+      } catch (err) {
         _refreshController.sendBack(false, RefreshStatus.failed);
-      });
+        Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(err.message)),
+        );
+      }
     }
   }
 
