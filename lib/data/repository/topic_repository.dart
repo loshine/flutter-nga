@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 
@@ -18,9 +17,8 @@ class TopicRepository {
           .dio
           .get("/thread.php?lite=js&noprefix&fid=$fid&page=$page");
       return TopicListData.fromJson(response.data);
-    } catch (err) {
-      debugPrint(err.toString());
-      throw err;
+    } catch (error) {
+      rethrow;
     }
   }
 }
