@@ -11,6 +11,7 @@ class Palette {
   static final colorSplash = Colors.black12;
   static final colorHighlight = Colors.black12;
 
+  static final colorTextPrimary = Colors.black87;
   static final colorTextSecondary = Colors.black54;
   static final colorTextLock = Color(0xFFC58080);
   static final colorTextAssemble = Color(0xFFA0B4F0);
