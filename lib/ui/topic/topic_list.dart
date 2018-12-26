@@ -277,18 +277,28 @@ class _TopicListState extends State<TopicListPage> {
         style: TextStyle(
           fontSize: Dimen.subheading,
           color: topic.getSubjectColor(),
-          fontWeight: topic.isBold() ? FontWeight.bold : null,
+          fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,
           fontStyle: topic.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration: topic.isUnderline() ? TextDecoration.underline : null,
         ),
         children: <TextSpan>[
           TextSpan(
             text: (topic.locked() ? " [锁定]" : ""),
-            style: TextStyle(color: Palette.colorTextLock),
+            style: TextStyle(
+              color: Palette.colorTextLock,
+              fontWeight: FontWeight.normal,
+              fontStyle: FontStyle.normal,
+              decoration: null,
+            ),
           ),
           TextSpan(
             text: (topic.isAssemble() ? " [合集]" : ""),
-            style: TextStyle(color: Palette.colorTextAssemble),
+            style: TextStyle(
+              color: Palette.colorTextAssemble,
+              fontWeight: FontWeight.normal,
+              fontStyle: FontStyle.normal,
+              decoration: null,
+            ),
           ),
         ],
       ),
