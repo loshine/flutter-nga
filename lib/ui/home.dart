@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/match/match_tabs.dart';
@@ -47,7 +48,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     _subscription = AndroidLogin.cookieStream.listen(
       (cookies) {
-        Data().userRepository.saveLoginCookies(cookies);
+        if (cookies.contains(TAG_CID)) {
+          Data().userRepository.saveLoginCookies(cookies);
+        }
       },
       onError: (e) => debugPrint(e.toString()),
     );
