@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/ui/topic/topic_detail.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
@@ -59,7 +60,7 @@ class _TopicListState extends State<TopicListPage> {
             child: ListView.builder(
               itemCount: _topicList.length,
               itemBuilder: (context, index) =>
-                  _buildListItemWidget(_topicList[index]),
+                  _TopicListItemWidget(topic: _topicList[index]),
             ),
           );
         }),
@@ -99,108 +100,6 @@ class _TopicListState extends State<TopicListPage> {
   void dispose() {
     _refreshController.scrollController.removeListener(_scrollListener);
     super.dispose();
-  }
-
-  Widget _buildListItemWidget(Topic topic) {
-    return Column(
-      children: <Widget>[
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
-          child: Column(
-            children: [
-              SizedBox(
-                child: _getTitleText(topic),
-                width: double.infinity,
-              ),
-              SizedBox(
-                child: (topic.parent != null &&
-                        topic.parent.name != null &&
-                        topic.parent.name.isNotEmpty)
-                    ? Padding(
-                        padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
-                        child: Text(
-                          "[${topic.parent.name}]",
-                          textAlign: TextAlign.end,
-                          style: TextStyle(
-                            fontSize: Dimen.caption,
-                            color: Palette.colorTextSecondary,
-                          ),
-                        ),
-                      )
-                    : null,
-                width: double.infinity,
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
-                child: Row(
-                  children: [
-                    Padding(
-                      child: Icon(
-                        CommunityMaterialIcons.account,
-                        size: 12,
-                        color: Palette.colorIcon,
-                      ),
-                      padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
-                    ),
-                    Expanded(
-                      child: Text(
-                        topic.author,
-                        style: TextStyle(
-                          fontSize: Dimen.caption,
-                          color: Palette.colorTextSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
-                      child: (topic.hasAttachment()
-                          ? Icon(
-                              Icons.attachment,
-                              size: 12,
-                              color: Palette.colorIcon,
-                            )
-                          : null),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
-                      child: Icon(
-                        CommunityMaterialIcons.comment,
-                        size: 12,
-                        color: Palette.colorIcon,
-                      ),
-                    ),
-                    Text(
-                      "${topic.replies}",
-                      style: TextStyle(
-                        fontSize: Dimen.caption,
-                        color: Palette.colorTextSecondary,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(16, 0, 8, 0),
-                      child: Icon(
-                        CommunityMaterialIcons.clock,
-                        size: 12,
-                        color: Palette.colorIcon,
-                      ),
-                    ),
-                    Text(
-                      "${timeago.format(DateTime.fromMillisecondsSinceEpoch(topic.lastPost * 1000))}",
-                      style: TextStyle(
-                        fontSize: Dimen.caption,
-                        color: Palette.colorTextSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Divider(height: 1),
-      ],
-    );
   }
 
   _switchFavourite() async {
@@ -267,6 +166,118 @@ class _TopicListState extends State<TopicListPage> {
       }
     }
   }
+}
+
+class _TopicListItemWidget extends StatelessWidget {
+  const _TopicListItemWidget({Key key, this.topic}) : super(key: key);
+
+  final Topic topic;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => _goTopicDetail(context, topic),
+      child: Column(
+        children: <Widget>[
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: Column(
+              children: [
+                SizedBox(
+                  child: _getTitleText(topic),
+                  width: double.infinity,
+                ),
+                SizedBox(
+                  child: (topic.parent != null &&
+                          topic.parent.name != null &&
+                          topic.parent.name.isNotEmpty)
+                      ? Padding(
+                          padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                          child: Text(
+                            "[${topic.parent.name}]",
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                              fontSize: Dimen.caption,
+                              color: Palette.colorTextSecondary,
+                            ),
+                          ),
+                        )
+                      : null,
+                  width: double.infinity,
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                  child: Row(
+                    children: [
+                      Padding(
+                        child: Icon(
+                          CommunityMaterialIcons.account,
+                          size: 12,
+                          color: Palette.colorIcon,
+                        ),
+                        padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                      ),
+                      Expanded(
+                        child: Text(
+                          topic.author,
+                          style: TextStyle(
+                            fontSize: Dimen.caption,
+                            color: Palette.colorTextSecondary,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
+                        child: (topic.hasAttachment()
+                            ? Icon(
+                                Icons.attachment,
+                                size: 12,
+                                color: Palette.colorIcon,
+                              )
+                            : null),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        child: Icon(
+                          CommunityMaterialIcons.comment,
+                          size: 12,
+                          color: Palette.colorIcon,
+                        ),
+                      ),
+                      Text(
+                        "${topic.replies}",
+                        style: TextStyle(
+                          fontSize: Dimen.caption,
+                          color: Palette.colorTextSecondary,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16, 0, 8, 0),
+                        child: Icon(
+                          CommunityMaterialIcons.clock,
+                          size: 12,
+                          color: Palette.colorIcon,
+                        ),
+                      ),
+                      Text(
+                        "${timeago.format(DateTime.fromMillisecondsSinceEpoch(topic.lastPost * 1000))}",
+                        style: TextStyle(
+                          fontSize: Dimen.caption,
+                          color: Palette.colorTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1),
+        ],
+      ),
+    );
+  }
 
   _getTitleText(Topic topic) {
     return RichText(
@@ -303,5 +314,10 @@ class _TopicListState extends State<TopicListPage> {
         ],
       ),
     );
+  }
+
+  _goTopicDetail(BuildContext context, Topic topic) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => TopicDetailPage(topic: topic)));
   }
 }
