@@ -1,20 +1,22 @@
+import 'dart:collection';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
-import "package:pull_to_refresh/pull_to_refresh.dart";
+import 'package:flutter_nga/utils/palette.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicDetailPage extends StatefulWidget {
-  TopicDetailPage(this.topic, {Key key}) : super(key: key);
+  const TopicDetailPage(this.topic, {Key key}) : super(key: key);
 
   final Topic topic;
 
   @override
-  _TopicDetailState createState() {
-    return _TopicDetailState();
-  }
+  _TopicDetailState createState() => _TopicDetailState();
 }
 
 class _TopicDetailState extends State<TopicDetailPage> {
@@ -23,6 +25,8 @@ class _TopicDetailState extends State<TopicDetailPage> {
 
   var _page = 1;
   List<Reply> _replyList = [];
+  List<User> _userList = [];
+  Set<Group> _groupSet = HashSet();
 
   RefreshController _refreshController;
 
@@ -38,8 +42,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
           onRefresh: (b) => _onRefresh(context, b),
           child: ListView.builder(
             itemCount: _replyList.length,
-            itemBuilder: (context, index) =>
-                _buildListItemWidget(_replyList[index]),
+            itemBuilder: _buildListItem,
           ),
         );
       }),
@@ -47,7 +50,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
           ? FloatingActionButton(
               onPressed: null,
               child: Icon(
-                CommunityMaterialIcons.pencil,
+                CommunityMaterialIcons.comment,
                 color: Colors.white,
               ),
             )
@@ -68,16 +71,6 @@ class _TopicDetailState extends State<TopicDetailPage> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    _refreshController.scrollController.removeListener(_scrollListener);
-    super.dispose();
-  }
-
-  Widget _buildListItemWidget(Reply reply) {
-    return GestureDetector(child: Column());
-  }
-
   _onRefresh(BuildContext context, bool up) async {
     if (up) {
       //headerIndicator callback
@@ -94,8 +87,13 @@ class _TopicDetailState extends State<TopicDetailPage> {
           }
           _replyList.clear();
           _replyList.addAll(data.replyList.values);
+          _userList.clear();
+          _userList.addAll(data.userList.values);
+          _groupSet.clear();
+          _groupSet.addAll(data.groupList.values);
         });
       } catch (err) {
+        debugPrint(err.toString());
         _refreshController.sendBack(true, RefreshStatus.failed);
         Scaffold.of(context).showSnackBar(
           SnackBar(content: Text(err.message)),
@@ -109,7 +107,11 @@ class _TopicDetailState extends State<TopicDetailPage> {
             .getTopicDetail(widget.topic.tid, _page);
         _page++;
         _refreshController.sendBack(false, RefreshStatus.canRefresh);
-        setState(() => _replyList.addAll(data.replyList.values));
+        setState(() {
+          _replyList.addAll(data.replyList.values);
+          _userList.addAll(data.userList.values);
+          _groupSet.addAll(data.groupList.values);
+        });
       } catch (err) {
         _refreshController.sendBack(false, RefreshStatus.failed);
         Scaffold.of(context).showSnackBar(
@@ -132,5 +134,79 @@ class _TopicDetailState extends State<TopicDetailPage> {
         setState(() => _fabVisible = true);
       }
     }
+  }
+
+  Widget _buildListItem(BuildContext context, int index) {
+    final reply = _replyList[index];
+    User user;
+    for (var u in _userList) {
+      if (u.uid == reply.authorId) {
+        user = u;
+        break;
+      }
+    }
+    if (user == null) {
+      user = User();
+    }
+
+    Group group;
+    if (user.memberId != null) {
+      for (var g in _groupSet) {
+        if (g.id == user.memberId) {
+          group = g;
+          break;
+        }
+      }
+    }
+    return _TopicReplyItemWidget(reply: reply, user: user, group: group);
+  }
+}
+
+class _TopicReplyItemWidget extends StatelessWidget {
+  final Reply reply;
+  final User user;
+  final Group group;
+
+  const _TopicReplyItemWidget({Key key, this.reply, this.user, this.group})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CachedNetworkImage(
+                width: 32,
+                height: 32,
+                imageUrl: user.avatar,
+                placeholder: Image.asset(
+                  'images/default_forum_icon.png',
+                  width: 32,
+                  height: 32,
+                ),
+                errorWidget: Image.asset(
+                  'images/default_forum_icon.png',
+                  width: 32,
+                  height: 32,
+                ),
+              ),
+              Column(
+                children: [
+                  Text(user.userName),
+                  Text(group == null ? "" : group.name),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Divider(
+          color: Palette.colorDivider,
+          height: 1,
+        )
+      ],
+    );
   }
 }
