@@ -18,8 +18,6 @@ class TopicDetailPage extends StatefulWidget {
 }
 
 class _TopicDetailState extends State<TopicDetailPage> {
-  bool _isFavourite = false;
-  bool _defaultFavourite = false;
   bool _enablePullUp = false;
   bool _fabVisible = true;
 
@@ -30,46 +28,30 @@ class _TopicDetailState extends State<TopicDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pop(context, _defaultFavourite != _isFavourite);
-        return false;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.topic.subject),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(
-                _isFavourite ? Icons.star : Icons.star_border,
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.topic.subject)),
+      body: Builder(builder: (BuildContext context) {
+        return SmartRefresher(
+          enablePullDown: true,
+          enablePullUp: _enablePullUp,
+          controller: _refreshController,
+          onRefresh: (b) => _onRefresh(context, b),
+          child: ListView.builder(
+            itemCount: _replyList.length,
+            itemBuilder: (context, index) =>
+                _buildListItemWidget(_replyList[index]),
+          ),
+        );
+      }),
+      floatingActionButton: _fabVisible
+          ? FloatingActionButton(
+              onPressed: null,
+              child: Icon(
+                CommunityMaterialIcons.pencil,
                 color: Colors.white,
               ),
-              onPressed: () => _switchFavourite(),
-            ),
-          ],
-        ),
-        body: Builder(builder: (BuildContext context) {
-          return SmartRefresher(
-            enablePullDown: true,
-            enablePullUp: _enablePullUp,
-            controller: _refreshController,
-            onRefresh: (b) => _onRefresh(context, b),
-            child: ListView.builder(
-              itemCount: _replyList.length,
-              itemBuilder: (context, index) => _buildListItemWidget(_replyList[index]),
-            ),
-          );
-        }),
-        floatingActionButton: _fabVisible
-            ? FloatingActionButton(
-                onPressed: null,
-                child: Icon(
-                  CommunityMaterialIcons.pencil,
-                  color: Colors.white,
-                ),
-              )
-            : null,
-      ),
+            )
+          : null,
     );
   }
 
@@ -96,14 +78,14 @@ class _TopicDetailState extends State<TopicDetailPage> {
     return GestureDetector(child: Column());
   }
 
-  _switchFavourite() async {}
-
   _onRefresh(BuildContext context, bool up) async {
     if (up) {
       //headerIndicator callback
       try {
         _page = 1;
-        TopicDetailData data = await Data().topicRepository.getTopicDetail(widget.topic.tid, _page);
+        TopicDetailData data = await Data()
+            .topicRepository
+            .getTopicDetail(widget.topic.tid, _page);
         _page++;
         _refreshController.sendBack(true, RefreshStatus.completed);
         setState(() {
@@ -122,7 +104,9 @@ class _TopicDetailState extends State<TopicDetailPage> {
     } else {
       //footerIndicator Callback
       try {
-        TopicDetailData data = await Data().topicRepository.getTopicDetail(widget.topic.tid, _page);
+        TopicDetailData data = await Data()
+            .topicRepository
+            .getTopicDetail(widget.topic.tid, _page);
         _page++;
         _refreshController.sendBack(false, RefreshStatus.canRefresh);
         setState(() => _replyList.addAll(data.replyList.values));
@@ -136,12 +120,14 @@ class _TopicDetailState extends State<TopicDetailPage> {
   }
 
   _scrollListener() {
-    if (_refreshController.scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+    if (_refreshController.scrollController.position.userScrollDirection ==
+        ScrollDirection.reverse) {
       if (_fabVisible) {
         setState(() => _fabVisible = false);
       }
     }
-    if (_refreshController.scrollController.position.userScrollDirection == ScrollDirection.forward) {
+    if (_refreshController.scrollController.position.userScrollDirection ==
+        ScrollDirection.forward) {
       if (!_fabVisible) {
         setState(() => _fabVisible = true);
       }
