@@ -318,6 +318,6 @@ class _TopicListItemWidget extends StatelessWidget {
 
   _goTopicDetail(BuildContext context, Topic topic) {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => TopicDetailPage(topic: topic)));
+        .push(MaterialPageRoute(builder: (_) => TopicDetailPage(topic)));
   }
 }
