@@ -96,12 +96,6 @@ class _TopicListState extends State<TopicListPage> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    _refreshController.scrollController.removeListener(_scrollListener);
-    super.dispose();
-  }
-
   _switchFavourite() async {
     if (_isFavourite) {
       await Data().forumRepository.deleteFavourite(widget.forum);

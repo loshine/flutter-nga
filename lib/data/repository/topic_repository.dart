@@ -16,7 +16,7 @@ class TopicRepository {
     try {
       Response response = await Data()
           .dio
-          .get("/thread.php?lite=js&noprefix&fid=$fid&page=$page");
+          .get("thread.php?lite=js&noprefix&fid=$fid&page=$page");
       return TopicListData.fromJson(response.data);
     } catch (error) {
       rethrow;
@@ -27,7 +27,7 @@ class TopicRepository {
     try {
       Response response = await Data()
           .dio
-          .get("/read.php?lite=js&noprefix&tid=$tid&page=$page");
+          .get("read.php?lite=js&noprefix&tid=$tid&page=$page");
       return TopicDetailData.fromJson(response.data);
     } catch (error) {
       rethrow;

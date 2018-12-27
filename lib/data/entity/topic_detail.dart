@@ -1,13 +1,10 @@
-import 'dart:convert';
-import 'dart:ui';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_nga/utils/constant.dart';
-import 'package:flutter_nga/utils/palette.dart';
-
 class TopicDetailData {
   final Map<String, Reply> replyList;
   final Map<String, User> userList;
+
+  final Map<String, Group> groupList;
+  final Map<String, Medal> medalList;
+  final Map<String, Reputation> reputationList;
 
   final dynamic global;
   final int rows;
@@ -18,6 +15,9 @@ class TopicDetailData {
     this.global,
     this.userList,
     this.replyList,
+    this.groupList,
+    this.medalList,
+    this.reputationList,
     this.rows,
     this.currentRows,
     this.rRows,
@@ -26,20 +26,44 @@ class TopicDetailData {
   factory TopicDetailData.fromJson(Map<String, dynamic> map) {
     Map<String, dynamic> userMap = map["__U"];
     Map<String, dynamic> replyMap = map["__R"];
-    Map<String, User> tempMap = {};
+    Map<String, User> tempUserMap = {};
+    Map<String, Group> tempGroupMap = {};
+    Map<String, Medal> tempMedalMap = {};
+    Map<String, Reputation> tempReputationMap = {};
     for (MapEntry<String, dynamic> entry in userMap.entries) {
-      if (entry.key.runtimeType == String)
-        continue;
-      tempMap[entry.key] = User.fromJson(entry.value);
+      int key = int.tryParse(entry.key);
+      if (key == null) {
+        // __GROUPS 用户等级
+        if ("__GROUPS" == entry.key) {
+          for (MapEntry<String, dynamic> m in entry.value.entries) {
+            tempGroupMap[m.key] = Group.fromJson(m.value);
+          }
+        } else if ("__MEDALS" == entry.key) {
+          // __MEDALS 奖牌
+          for (MapEntry<String, dynamic> m in entry.value.entries) {
+            tempMedalMap[m.key] = Medal.fromJson(m.value);
+          }
+        } else if ("__REPUTATIONS" == entry.key) {
+          // __REPUTATIONS 威望
+          for (MapEntry<String, dynamic> m in entry.value.entries) {
+            tempReputationMap[m.key] = Reputation.fromJson(m.value);
+          }
+        }
+      } else {
+        tempUserMap[entry.key] = User.fromJson(entry.value);
+      }
     }
-    Map<String, Reply> tempMap2 = {};
+    Map<String, Reply> tempReplyMap = {};
     for (MapEntry<String, dynamic> entry in replyMap.entries) {
-      tempMap2[entry.key] = Reply.fromJson(entry.value);
+      tempReplyMap[entry.key] = Reply.fromJson(entry.value);
     }
     return TopicDetailData(
       global: map["__GLOBAL"],
-      userList: tempMap,
-      replyList: tempMap2,
+      userList: tempUserMap,
+      replyList: tempReplyMap,
+      groupList: tempGroupMap,
+      medalList: tempMedalMap,
+      reputationList: tempReputationMap,
       currentRows: map["__R__ROWS"],
       rRows: map["__R__ROWS_PAGE"],
       rows: map["__ROWS"],
@@ -55,7 +79,8 @@ class User {
   final String reputation;
   final int groupId;
   final int memberId;
-  final String avatar;
+  final String avatar; // 可能是 String，也可能是 map
+  final List<String> avatarList; // 当 avatar 是 map 的时候用来替代
   final int yz;
   final String site;
   final String honor;
@@ -78,6 +103,7 @@ class User {
       this.groupId,
       this.memberId,
       this.avatar,
+      this.avatarList,
       this.yz,
       this.site,
       this.honor,
@@ -92,15 +118,29 @@ class User {
       this.bitData});
 
   factory User.fromJson(Map<String, dynamic> map) {
+    dynamic avatar = map["avatar"];
+    List<String> avatarList = [];
+    if (avatar is String) {
+      avatarList.add(avatar);
+    } else {
+      final size = avatar["l"];
+      if (size != null && size is int) {
+        for (int i = 0; i < size; i++) {
+          avatarList.add(avatar["$i"]);
+        }
+      }
+      avatar = avatarList[0];
+    }
     return User(
       uid: map["uid"],
       userName: map["username"],
       credit: map["credit"],
-      medal: map["medal"],
-      reputation: map["reputation"],
+      medal: map["medal"].toString(),
+      reputation: map["reputation"].toString(),
       groupId: map["groupid"],
       memberId: map["memberid"],
       avatar: map["avatar"],
+      avatarList: avatarList,
       yz: map["yz"],
       site: map["site"],
       honor: map["honor"],
@@ -152,6 +192,7 @@ class Reply {
       this.postDateTimestamp});
 
   factory Reply.fromJson(Map<String, dynamic> map) {
+    final contentLength = int.tryParse(map["content_length"]);
     return Reply(
       content: map["content"],
       alterInfo: map["alterinfo"],
@@ -166,8 +207,40 @@ class Reply {
       pid: map["pid"],
       recommend: map["recommend"],
       lou: map["lou"],
-      contentLength: map["content_length"],
+      contentLength: contentLength ?? 0,
       postDateTimestamp: map["postdatetimestamp"],
     );
+  }
+}
+
+class Group {
+  final int id;
+  final String name;
+
+  const Group(this.id, this.name);
+
+  factory Group.fromJson(Map<String, dynamic> map) {
+    return Group(map["2"], map["0"]);
+  }
+}
+
+class Medal {
+  final int id;
+  final String name;
+  final String description;
+  final String image;
+
+  const Medal(this.id, this.name, this.description, this.image);
+
+  factory Medal.fromJson(Map<String, dynamic> map) {
+    return Medal(map["3"], map["1"], map["2"], map["0"]);
+  }
+}
+
+class Reputation {
+  const Reputation();
+
+  factory Reputation.fromJson(Map<String, dynamic> map) {
+    return Reputation();
   }
 }
