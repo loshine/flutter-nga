@@ -1,5 +1,7 @@
 # flutter_nga
 
+[![Build Status](https://travis-ci.org/fallenwood/flutter-nga.svg?branch=master)](https://travis-ci.org/fallenwood/flutter-nga)
+
 A new Flutter project.
 
 ## Getting Started
