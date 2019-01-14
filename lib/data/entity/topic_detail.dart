@@ -192,7 +192,8 @@ class Reply {
       this.postDateTimestamp});
 
   factory Reply.fromJson(Map<String, dynamic> map) {
-    final contentLength = int.tryParse(map["content_length"]);
+    final contentLength = int.tryParse(map["content_length"].toString());
+    print(map["content"]);
     return Reply(
       content: map["content"],
       alterInfo: map["alterinfo"],
