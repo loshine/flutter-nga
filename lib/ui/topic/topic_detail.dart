@@ -92,12 +92,19 @@ class _TopicDetailState extends State<TopicDetailPage> {
           _groupSet.clear();
           _groupSet.addAll(data.groupList.values);
         });
-      } catch (err) {
+      } on NoSuchMethodError catch (error) {
+        throw error;
+      } on TypeError catch (error) {
+        throw error;
+      } catch (err, stackTrace) {
         debugPrint(err.toString());
+        debugPrint(stackTrace.toString());
         _refreshController.sendBack(true, RefreshStatus.failed);
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(err.message)),
-        );
+        if (err != null) {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(content: Text(err.message)),
+          );
+        }
       }
     } else {
       //footerIndicator Callback
@@ -112,6 +119,10 @@ class _TopicDetailState extends State<TopicDetailPage> {
           _userList.addAll(data.userList.values);
           _groupSet.addAll(data.groupList.values);
         });
+      } on NoSuchMethodError catch (error) {
+        throw error;
+      } on TypeError catch (error) {
+        throw error;
       } catch (err) {
         _refreshController.sendBack(false, RefreshStatus.failed);
         Scaffold.of(context).showSnackBar(
@@ -178,7 +189,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
           padding: EdgeInsets.all(16),
           child: Row(
             children: [
-              CachedNetworkImage(
+              user.avatar != null ? CachedNetworkImage(
                 width: 32,
                 height: 32,
                 imageUrl: user.avatar,
@@ -192,21 +203,64 @@ class _TopicReplyItemWidget extends StatelessWidget {
                   width: 32,
                   height: 32,
                 ),
+              ): Image(
+                width: 32,
+                height: 32,
+                image: AssetImage('images/default_forum_icon.png'),
               ),
               Column(
                 children: [
-                  Text(user.userName),
-                  Text(group == null ? "" : group.name),
+                  Text(user.userName ?? user.nickname ?? "#Anonymous#"),  // TODO: 显示匿名用户的用户名
+                  Text("级别: ${group == null ? "" : group.name}"),
+                  // TODO: Text("威望: ${user?.toString() ?? "0.0"}"),
+                  Text("发帖: ${user.postNum?.toString() ?? "null"}"),
+                  Text("[${reply.lou.toString()} 楼]"),
+                  Text(reply.postDate),
+                  // TODO: 发帖设备
                 ],
               ),
             ],
           ),
         ),
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: _RichTextWidget(reply.content),
+        ),
+        // TODO: 不显示空的签名和分割线
         Divider(
           color: Palette.colorDivider,
           height: 1,
-        )
+        ),
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: _RichTextWidget(user.signature),
+        ),
+        Divider(
+          color: Palette.colorDivider,
+          height: 1,
+        ),
       ],
     );
+  }
+}
+
+class _RichTextWidget extends StatelessWidget {
+  String text;
+
+  _RichTextWidget(String text) {
+    this.text = text ?? "";
+  }
+
+  // TODO: 使用WebView
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+        textAlign: TextAlign.left,
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style,
+          children: <TextSpan>[
+            TextSpan(text: text),
+          ],
+        ));
   }
 }

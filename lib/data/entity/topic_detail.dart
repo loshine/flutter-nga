@@ -120,26 +120,28 @@ class User {
   factory User.fromJson(Map<String, dynamic> map) {
     dynamic avatar = map["avatar"];
     List<String> avatarList = [];
-    if (avatar is String) {
-      avatarList.add(avatar);
-    } else {
-      final size = avatar["l"];
-      if (size != null && size is int) {
-        for (int i = 0; i < size; i++) {
-          avatarList.add(avatar["$i"]);
+    if (avatar != null) {
+      if (avatar is String) {
+        avatarList.add(avatar);
+      } else {
+        final size = avatar["l"];
+        if (size != null && size is int) {
+          for (int i = 0; i < size; i++) {
+            avatarList.add(avatar["$i"]);
+          }
         }
+        avatar = avatarList[0];
       }
-      avatar = avatarList[0];
     }
     return User(
       uid: map["uid"],
-      userName: map["username"],
+      userName: map["username"].toString(), // 可能是int
       credit: map["credit"],
       medal: map["medal"].toString(),
       reputation: map["reputation"].toString(),
       groupId: map["groupid"],
       memberId: map["memberid"],
-      avatar: map["avatar"],
+      avatar: avatar,
       avatarList: avatarList,
       yz: map["yz"],
       site: map["site"],
@@ -150,7 +152,7 @@ class User {
       rvrc: map["rvrc"],
       money: map["money"],
       thisVisit: map["thisvisit"],
-      signature: map["signature"],
+      signature: map["signature"].toString(), // 可能是int
       nickname: map["nickname"],
       bitData: map["bit_data"],
     );
@@ -193,7 +195,6 @@ class Reply {
 
   factory Reply.fromJson(Map<String, dynamic> map) {
     final contentLength = int.tryParse(map["content_length"].toString());
-    print(map["content"]);
     return Reply(
       content: map["content"],
       alterInfo: map["alterinfo"],
