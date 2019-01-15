@@ -3,14 +3,13 @@ import 'dart:io';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_nga/ui/widget/expression_group_tabs_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PublishReplyPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() {
-    return _PublishReplyState();
-  }
+  _PublishReplyState createState() => _PublishReplyState();
 }
 
 class _PublishReplyState extends State<PublishReplyPage> {
@@ -24,6 +23,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
 
   bool _hasFocus = false;
   final _editFocusNode = FocusNode();
+  final _emptyFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -33,17 +33,16 @@ class _PublishReplyState extends State<PublishReplyPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = AppBar(
-      title: Text("回帖"),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.send),
-          onPressed: () => debugPrint("回帖"),
-        ),
-      ],
-    );
     return Scaffold(
-      appBar: appBar,
+      appBar: AppBar(
+        title: Text("回帖"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.send),
+            onPressed: () => debugPrint("回帖"),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -73,17 +72,21 @@ class _PublishReplyState extends State<PublishReplyPage> {
           ),
           Container(
             color: Palette.colorPrimary,
-            height: appBar.preferredSize.height,
+            height: kToolbarHeight,
             width: double.infinity,
-            child:
-                Row(children: _getBottomBarData(appBar.preferredSize.height)),
+            child: Row(children: _getBottomBarData()),
           ),
+          Container(
+            width: double.infinity,
+            height: 240,
+            child: ExpressionGroupTabsWidget(),
+          )
         ],
       ),
     );
   }
 
-  List<Widget> _getBottomBarData(double height) {
+  List<Widget> _getBottomBarData() {
     return _bottomData
         .asMap()
         .map((i, iconData) {
@@ -94,7 +97,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
                 color: Colors.transparent,
                 child: InkWell(
                   child: Container(
-                    height: height,
+                    height: kToolbarHeight,
                     child: Icon(
                       iconData,
                       color: Colors.white,
@@ -110,7 +113,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
                         CommunityMaterialIcons.tag_multiple) {
                     } else if (iconData == CommunityMaterialIcons.keyboard) {
                       if (_hasFocus) {
-                        FocusScope.of(context).requestFocus(FocusNode());
+                        FocusScope.of(context).requestFocus(_emptyFocusNode);
                       } else {
                         FocusScope.of(context).requestFocus(_editFocusNode);
                       }

@@ -15,7 +15,7 @@ class ForumRepository {
 
   ForumRepository._internal();
 
-  List<ForumGroup> getForumList() {
+  List<ForumGroup> getForumGroups() {
     if (forumGroupList.isEmpty) {
       var forumList = [
         Forum(-7, "大漩涡"),

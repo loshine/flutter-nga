@@ -5,13 +5,14 @@ import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
+import 'package:flutter_nga/utils/constant.dart';
 import 'package:objectdb/objectdb.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_nga/utils/constant.dart';
 
 class Data {
   static final Data _singleton = Data._internal();
@@ -22,6 +23,10 @@ class Data {
   ObjectDB _userDb;
 
   Dio get dio => _dio;
+
+  ExpressionRepository _expressionRepository;
+
+  ExpressionRepository get expressionRepository => _expressionRepository;
 
   ForumRepository _forumRepository;
 
@@ -44,6 +49,8 @@ class Data {
   Future init() async {
     // 创建并初始化
     Directory appDocDir = await getApplicationDocumentsDirectory();
+
+    _expressionRepository = ExpressionRepository();
 
     String forumDbPath = [appDocDir.path, 'forum.db'].join('/');
     _forumDb = ObjectDB(forumDbPath);
@@ -103,7 +110,8 @@ class Data {
       responseBody =
           responseBody.replaceAll("\t", "\\t").replaceAll("\\x", "\\\\x");
       debugPrint(
-          "request url : ${response.request.baseUrl + response.request.path}\n" +
+          "request url : ${response.request.baseUrl +
+              response.request.path}\n" +
               "request data : ${response.request.data.toString()}\n" +
               "response data : $responseBody");
       Map<String, dynamic> map = json.decode(responseBody);
