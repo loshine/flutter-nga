@@ -189,28 +189,31 @@ class _TopicReplyItemWidget extends StatelessWidget {
           padding: EdgeInsets.all(16),
           child: Row(
             children: [
-              user.avatar != null ? CachedNetworkImage(
-                width: 32,
-                height: 32,
-                imageUrl: user.avatar,
-                placeholder: Image.asset(
-                  'images/default_forum_icon.png',
-                  width: 32,
-                  height: 32,
-                ),
-                errorWidget: Image.asset(
-                  'images/default_forum_icon.png',
-                  width: 32,
-                  height: 32,
-                ),
-              ): Image(
-                width: 32,
-                height: 32,
-                image: AssetImage('images/default_forum_icon.png'),
-              ),
+              user.avatar != null
+                  ? CachedNetworkImage(
+                      width: 32,
+                      height: 32,
+                      imageUrl: user.avatar,
+                      placeholder: Image.asset(
+                        'images/default_forum_icon.png',
+                        width: 32,
+                        height: 32,
+                      ),
+                      errorWidget: Image.asset(
+                        'images/default_forum_icon.png',
+                        width: 32,
+                        height: 32,
+                      ),
+                    )
+                  : Image(
+                      width: 32,
+                      height: 32,
+                      image: AssetImage('images/default_forum_icon.png'),
+                    ),
               Column(
                 children: [
-                  Text(user.userName ?? user.nickname ?? "#Anonymous#"),  // TODO: 显示匿名用户的用户名
+                  Text(user.username ?? user.nickname ?? "#Anonymous#"),
+                  // TODO: 显示匿名用户的用户名
                   Text("级别: ${group == null ? "" : group.name}"),
                   // TODO: Text("威望: ${user?.toString() ?? "0.0"}"),
                   Text("发帖: ${user.postNum?.toString() ?? "null"}"),

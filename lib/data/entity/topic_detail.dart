@@ -123,11 +123,15 @@ class User {
     if (avatar != null) {
       if (avatar is String) {
         avatarList.add(avatar);
-      } else {
+      } else if (avatar is Map) {
         final size = avatar["l"];
         if (size != null && size is int) {
           for (int i = 0; i < size; i++) {
-            avatarList.add(avatar["$i"]);
+            if (avatar["$i"] is String) {
+              avatarList.add(avatar["$i"]);
+            } else if (avatar["$i"] is Map) {
+              avatarList.add(avatar["$i"][0]);
+            }
           }
         }
         avatar = avatarList[0];
@@ -135,7 +139,7 @@ class User {
     }
     return User(
       uid: map["uid"],
-      userName: map["username"].toString(), // 可能是int
+      username: map["username"].toString(), // 可能是int
       credit: map["credit"],
       medal: map["medal"].toString(),
       reputation: map["reputation"].toString(),
