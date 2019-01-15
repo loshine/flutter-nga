@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/ui/reply/publish_reply.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -48,7 +49,10 @@ class _TopicDetailState extends State<TopicDetailPage> {
       }),
       floatingActionButton: _fabVisible
           ? FloatingActionButton(
-              onPressed: null,
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => PublishReplyPage()));
+              },
               child: Icon(
                 CommunityMaterialIcons.comment,
                 color: Colors.white,
