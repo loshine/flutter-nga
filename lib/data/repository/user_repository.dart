@@ -78,7 +78,7 @@ class UserRepository {
       final map = await _userDb.first({});
       return User.fromMap(map);
     } else {
-      throw "no login user";
+      return null;
     }
   }
 }
