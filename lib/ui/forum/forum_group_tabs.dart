@@ -33,9 +33,9 @@ class _ForumGroupTabsState extends State<ForumGroupTabsPage> {
 
   @override
   void initState() {
-    var list = Data().forumRepository.getForumList();
+    super.initState();
+    var list = Data().forumRepository.getForumGroups();
     _tabs.addAll(list.map((group) => Tab(text: group.name)));
     _tabBarViews.addAll(list.map((group) => ForumGroupPage(group: group)));
-    super.initState();
   }
 }
