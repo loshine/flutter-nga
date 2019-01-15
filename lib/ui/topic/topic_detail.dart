@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -175,31 +176,76 @@ class _TopicReplyItemWidget extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            children: [
-              CachedNetworkImage(
-                width: 32,
-                height: 32,
-                imageUrl: user.avatar,
-                placeholder: Image.asset(
-                  'images/default_forum_icon.png',
-                  width: 32,
-                  height: 32,
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: ClipOval(
+                    child: CachedNetworkImage(
+                      width: 32,
+                      height: 32,
+                      imageUrl: user.avatar,
+                      fit: BoxFit.cover,
+                      placeholder: Image.asset(
+                        'images/default_forum_icon.png',
+                        width: 32,
+                        height: 32,
+                      ),
+                      errorWidget: Image.asset(
+                        'images/default_forum_icon.png',
+                        width: 32,
+                        height: 32,
+                      ),
+                    ),
+                  ),
                 ),
-                errorWidget: Image.asset(
-                  'images/default_forum_icon.png',
-                  width: 32,
-                  height: 32,
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(child: Text(user.username)),
+                            Text(
+                              "[${reply.lou} 楼]",
+                              style: TextStyle(
+                                color: Palette.colorTextSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  group == null ? "" : group.name,
+                                  style: TextStyle(
+                                    color: Palette.colorTextSecondary,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                CodeUtils.toPostDateTimeString(
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        reply.postDateTimestamp * 1000)),
+                                style: TextStyle(
+                                  color: Palette.colorTextSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              Column(
-                children: [
-                  Text(user.userName),
-                  Text(group == null ? "" : group.name),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         Divider(
