@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -93,12 +92,19 @@ class _TopicDetailState extends State<TopicDetailPage> {
           _groupSet.clear();
           _groupSet.addAll(data.groupList.values);
         });
-      } catch (err) {
+      } on NoSuchMethodError catch (error) {
+        throw error;
+      } on TypeError catch (error) {
+        throw error;
+      } catch (err, stackTrace) {
         debugPrint(err.toString());
+        debugPrint(stackTrace.toString());
         _refreshController.sendBack(true, RefreshStatus.failed);
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(err.message)),
-        );
+        if (err != null) {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(content: Text(err.message)),
+          );
+        }
       }
     } else {
       //footerIndicator Callback
@@ -113,6 +119,10 @@ class _TopicDetailState extends State<TopicDetailPage> {
           _userList.addAll(data.userList.values);
           _groupSet.addAll(data.groupList.values);
         });
+      } on NoSuchMethodError catch (error) {
+        throw error;
+      } on TypeError catch (error) {
+        throw error;
       } catch (err) {
         _refreshController.sendBack(false, RefreshStatus.failed);
         Scaffold.of(context).showSnackBar(
@@ -176,83 +186,81 @@ class _TopicReplyItemWidget extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: ClipOval(
-                    child: CachedNetworkImage(
-                      width: 32,
-                      height: 32,
-                      imageUrl: user.avatar,
-                      fit: BoxFit.cover,
-                      placeholder: Image.asset(
-                        'images/default_forum_icon.png',
-                        width: 32,
-                        height: 32,
-                      ),
-                      errorWidget: Image.asset(
-                        'images/default_forum_icon.png',
-                        width: 32,
-                        height: 32,
-                      ),
-                    ),
-                  ),
+          padding: EdgeInsets.all(16),
+          child: Row(
+            children: [
+              user.avatar != null ? CachedNetworkImage(
+                width: 32,
+                height: 32,
+                imageUrl: user.avatar,
+                placeholder: Image.asset(
+                  'images/default_forum_icon.png',
+                  width: 32,
+                  height: 32,
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(child: Text(user.username)),
-                            Text(
-                              "[${reply.lou} 楼]",
-                              style: TextStyle(
-                                color: Palette.colorTextSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  group == null ? "" : group.name,
-                                  style: TextStyle(
-                                    color: Palette.colorTextSecondary,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                CodeUtils.toPostDateTimeString(
-                                    DateTime.fromMillisecondsSinceEpoch(
-                                        reply.postDateTimestamp * 1000)),
-                                style: TextStyle(
-                                  color: Palette.colorTextSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                errorWidget: Image.asset(
+                  'images/default_forum_icon.png',
+                  width: 32,
+                  height: 32,
                 ),
-              ],
-            ),
+              ): Image(
+                width: 32,
+                height: 32,
+                image: AssetImage('images/default_forum_icon.png'),
+              ),
+              Column(
+                children: [
+                  Text(user.userName ?? user.nickname ?? "#Anonymous#"),  // TODO: 显示匿名用户的用户名
+                  Text("级别: ${group == null ? "" : group.name}"),
+                  // TODO: Text("威望: ${user?.toString() ?? "0.0"}"),
+                  Text("发帖: ${user.postNum?.toString() ?? "null"}"),
+                  Text("[${reply.lou.toString()} 楼]"),
+                  Text(reply.postDate),
+                  // TODO: 发帖设备
+                ],
+              ),
+            ],
           ),
+        ),
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: _RichTextWidget(reply.content),
+        ),
+        // TODO: 不显示空的签名和分割线
+        Divider(
+          color: Palette.colorDivider,
+          height: 1,
+        ),
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: _RichTextWidget(user.signature),
         ),
         Divider(
           color: Palette.colorDivider,
           height: 1,
-        )
+        ),
       ],
     );
+  }
+}
+
+class _RichTextWidget extends StatelessWidget {
+  String text;
+
+  _RichTextWidget(String text) {
+    this.text = text ?? "";
+  }
+
+  // TODO: 使用WebView
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+        textAlign: TextAlign.left,
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style,
+          children: <TextSpan>[
+            TextSpan(text: text),
+          ],
+        ));
   }
 }
