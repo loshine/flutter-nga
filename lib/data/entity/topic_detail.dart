@@ -73,7 +73,7 @@ class TopicDetailData {
 
 class User {
   final int uid;
-  final String userName;
+  final String username;
   final int credit;
   final String medal;
   final String reputation;
@@ -96,7 +96,7 @@ class User {
 
   const User(
       {this.uid,
-      this.userName,
+      this.username,
       this.credit,
       this.medal,
       this.reputation,
@@ -194,7 +194,6 @@ class Reply {
       this.postDateTimestamp});
 
   factory Reply.fromJson(Map<String, dynamic> map) {
-    final contentLength = int.tryParse(map["content_length"].toString());
     return Reply(
       content: map["content"],
       alterInfo: map["alterinfo"],
@@ -209,7 +208,8 @@ class Reply {
       pid: map["pid"],
       recommend: map["recommend"],
       lou: map["lou"],
-      contentLength: contentLength ?? 0,
+// 实际上无用属性，还可能是字符串，干脆不要了
+//      contentLength: int.tryParse(map["content_length"]) ?? 0,
       postDateTimestamp: map["postdatetimestamp"],
     );
   }
