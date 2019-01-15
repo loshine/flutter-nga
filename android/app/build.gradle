@@ -27,7 +27,7 @@ apply plugin: 'kotlin-android-extensions'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 27
 
     lintOptions {
         disable 'InvalidPackage'
@@ -36,7 +36,7 @@ android {
     defaultConfig {
         applicationId "xyz.loshine.flutternga"
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 27
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -58,9 +58,9 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.0-alpha3'
+    implementation 'com.android.support:design:27.1.1'
 
     testImplementation 'junit:junit:4.12'
 

@@ -2,8 +2,8 @@ package xyz.loshine.flutternga.plugins
 
 import android.app.Activity
 import android.content.IntentFilter
+import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.PluginRegistry
 import xyz.loshine.flutternga.receiver.CookiesReceiver

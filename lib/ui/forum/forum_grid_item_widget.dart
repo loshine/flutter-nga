@@ -18,6 +18,7 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (_) {
@@ -57,7 +58,6 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
           ],
         ),
       ),
-      color: Colors.transparent,
     );
   }
 }
