@@ -24,9 +24,9 @@ class Data {
 
   Dio get dio => _dio;
 
-  ExpressionRepository _expressionRepository;
+  EmoticonRepository _emoticonRepository;
 
-  ExpressionRepository get expressionRepository => _expressionRepository;
+  EmoticonRepository get emoticonRepository => _emoticonRepository;
 
   ForumRepository _forumRepository;
 
@@ -50,7 +50,7 @@ class Data {
     // 创建并初始化
     Directory appDocDir = await getApplicationDocumentsDirectory();
 
-    _expressionRepository = ExpressionRepository();
+    _emoticonRepository = EmoticonRepository();
 
     String forumDbPath = [appDocDir.path, 'forum.db'].join('/');
     _forumDb = ObjectDB(forumDbPath);

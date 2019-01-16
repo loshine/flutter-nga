@@ -28,6 +28,7 @@ dependencies:
   gbk2utf8: ^0.0.1
   html_unescape: ^1.0.1+2
   timeago: ^2.0.10
+  keyboard_visibility: ^0.5.1
 
   flutter_webview_plugin: ^0.3.0+2
   image_picker: ^0.4.12

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_nga/ui/widget/expression_group_tabs_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class PublishReplyPage extends StatefulWidget {
   @override
@@ -21,67 +22,83 @@ class _PublishReplyState extends State<PublishReplyPage> {
     CommunityMaterialIcons.keyboard
   ];
 
-  bool _hasFocus = false;
-  final _editFocusNode = FocusNode();
-  final _emptyFocusNode = FocusNode();
+  bool _keyboardVisible = false;
+  bool _bottomPanelVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _editFocusNode.addListener(() => _hasFocus = _editFocusNode.hasFocus);
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) {
+        // called when the keyboard visibility changes
+        _keyboardVisible = visible;
+        if (visible && _bottomPanelVisible) {
+          _hideBottomPanel();
+        }
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("回帖"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.send),
-            onPressed: () => debugPrint("回帖"),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Column(
-                children: [
-                  TextField(
-                    maxLines: 1,
-                    decoration: InputDecoration(hintText: "标题(可选)"),
-                    keyboardType: TextInputType.text,
-                  ),
-                  Expanded(
-                    child: TextField(
-                      focusNode: _editFocusNode,
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "回复内容",
-                      ),
-                      keyboardType: TextInputType.multiline,
+    return WillPopScope(
+      onWillPop: () async {
+        if (_bottomPanelVisible) {
+          _hideBottomPanel();
+          return false;
+        } else {
+          return true;
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("回帖"),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.send),
+              onPressed: () => debugPrint("回帖"),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  children: [
+                    TextField(
+                      maxLines: 1,
+                      decoration: InputDecoration(hintText: "标题(可选)"),
+                      keyboardType: TextInputType.text,
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: TextField(
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "回复内容",
+                        ),
+                        keyboardType: TextInputType.multiline,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Container(
-            color: Palette.colorPrimary,
-            height: kToolbarHeight,
-            width: double.infinity,
-            child: Row(children: _getBottomBarData()),
-          ),
-          Container(
-            width: double.infinity,
-            height: 240,
-            child: ExpressionGroupTabsWidget(),
-          )
-        ],
+            Container(
+              color: Palette.colorPrimary,
+              height: kToolbarHeight,
+              width: double.infinity,
+              child: Row(children: _getBottomBarData()),
+            ),
+            Container(
+              width: double.infinity,
+              height: _bottomPanelVisible ? 240 : 0,
+              child: EmoticonGroupTabsWidget(),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -105,6 +122,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
                   ),
                   onTap: () async {
                     if (iconData == CommunityMaterialIcons.emoticon) {
+                      _emoticonIconClicked();
                     } else if (iconData == CommunityMaterialIcons.format_text) {
                     } else if (iconData == Icons.image) {
                       File image = await ImagePicker.pickImage(
@@ -112,11 +130,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
                     } else if (iconData ==
                         CommunityMaterialIcons.tag_multiple) {
                     } else if (iconData == CommunityMaterialIcons.keyboard) {
-                      if (_hasFocus) {
-                        FocusScope.of(context).requestFocus(_emptyFocusNode);
-                      } else {
-                        FocusScope.of(context).requestFocus(_editFocusNode);
-                      }
+                      _keyboardIconClicked();
                     }
                   },
                 ),
@@ -126,5 +140,31 @@ class _PublishReplyState extends State<PublishReplyPage> {
         })
         .values
         .toList();
+  }
+
+  void _keyboardIconClicked() {
+    if (_keyboardVisible) {
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+    } else {
+      if (_bottomPanelVisible) {
+        _hideBottomPanel();
+      }
+      SystemChannels.textInput.invokeMethod('TextInput.show');
+    }
+  }
+
+  void _emoticonIconClicked() {
+    if (_keyboardVisible) {
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+    }
+    setState(() {
+      _bottomPanelVisible = !_bottomPanelVisible;
+    });
+  }
+
+  void _hideBottomPanel() {
+    setState(() {
+      _bottomPanelVisible = false;
+    });
   }
 }
