@@ -1,15 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/data/entity/expression.dart';
+import 'package:flutter_nga/data/entity/emoticon.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
-class ExpressionGroupTabsWidget extends StatefulWidget {
+class EmoticonGroupTabsWidget extends StatefulWidget {
   @override
-  _ExpressionGroupTabsState createState() => _ExpressionGroupTabsState();
+  _EmoticonGroupTabsState createState() => _EmoticonGroupTabsState();
 }
 
-class _ExpressionGroupTabsState extends State<ExpressionGroupTabsWidget> {
+class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
   List<Tab> _tabs = [];
   List<Widget> _tabBarViews = [];
 
@@ -37,23 +37,23 @@ class _ExpressionGroupTabsState extends State<ExpressionGroupTabsWidget> {
   @override
   void initState() {
     super.initState();
-    var list = Data().expressionRepository.getExpressionGroups();
+    var list = Data().emoticonRepository.getEmoticonGroups();
     debugPrint(list.toString());
     _tabs.addAll(list.map((group) => Tab(text: group.name)));
     _tabBarViews
-        .addAll(list.map((group) => _ExpressionGroupWidget(group: group)));
+        .addAll(list.map((group) => _EmoticonGroupWidget(group: group)));
   }
 }
 
-class _ExpressionGroupWidget extends StatelessWidget {
-  _ExpressionGroupWidget({Key key, this.group}) : super(key: key);
+class _EmoticonGroupWidget extends StatelessWidget {
+  _EmoticonGroupWidget({Key key, this.group}) : super(key: key);
 
-  final ExpressionGroup group;
+  final EmoticonGroup group;
 
   @override
   Widget build(BuildContext context) {
     return GridView.count(
-      crossAxisCount: 4,
+      crossAxisCount: 6,
       children: group.expressionList
           .map(
             (expression) => Material(

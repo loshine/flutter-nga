@@ -1,6 +1,6 @@
 /// 表情实体类
-class Expression {
-  const Expression({this.content, this.url})
+class Emoticon {
+  const Emoticon({this.content, this.url})
       : assert(content != null),
         assert(url != null);
   final String content;
@@ -8,11 +8,11 @@ class Expression {
 }
 
 /// 表情包实体类
-class ExpressionGroup {
-  const ExpressionGroup(this.name, this.expressionList)
+class EmoticonGroup {
+  const EmoticonGroup(this.name, this.expressionList)
       : assert(name != null),
         assert(expressionList != null);
 
   final String name;
-  final List<Expression> expressionList;
+  final List<Emoticon> expressionList;
 }
