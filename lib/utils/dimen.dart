@@ -11,4 +11,6 @@ class Dimen {
   static final double display2 = 45;
   static final double display3 = 56;
   static final double display4 = 112;
+
+  static final double bottomPanelHeight = 240;
 }

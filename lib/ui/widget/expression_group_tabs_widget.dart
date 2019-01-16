@@ -38,7 +38,6 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
   void initState() {
     super.initState();
     var list = Data().emoticonRepository.getEmoticonGroups();
-    debugPrint(list.toString());
     _tabs.addAll(list.map((group) => Tab(text: group.name)));
     _tabBarViews
         .addAll(list.map((group) => _EmoticonGroupWidget(group: group)));
