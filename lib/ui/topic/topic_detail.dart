@@ -50,8 +50,8 @@ class _TopicDetailState extends State<TopicDetailPage> {
       floatingActionButton: _fabVisible
           ? FloatingActionButton(
               onPressed: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => PublishReplyPage()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => PublishReplyPage(widget.topic)));
               },
               child: Icon(
                 CommunityMaterialIcons.comment,
