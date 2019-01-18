@@ -1,3 +1,5 @@
+import 'package:flutter_nga/data/entity/topic.dart';
+
 class TopicDetailData {
   final Map<String, Reply> replyList;
   final Map<String, User> userList;
@@ -11,6 +13,8 @@ class TopicDetailData {
   final int currentRows;
   final int rRows;
 
+  final Topic topic;
+
   const TopicDetailData({
     this.global,
     this.userList,
@@ -21,6 +25,7 @@ class TopicDetailData {
     this.rows,
     this.currentRows,
     this.rRows,
+    this.topic,
   });
 
   factory TopicDetailData.fromJson(Map<String, dynamic> map) {
@@ -67,6 +72,7 @@ class TopicDetailData {
       currentRows: map["__R__ROWS"],
       rRows: map["__R__ROWS_PAGE"],
       rows: map["__ROWS"],
+      topic: Topic.fromJson(map["__T"]),
     );
   }
 }
@@ -139,7 +145,8 @@ class User {
     }
     return User(
       uid: map["uid"],
-      username: map["username"].toString(), // 可能是int
+      username: map["username"].toString(),
+      // 可能是int
       credit: map["credit"],
       medal: map["medal"].toString(),
       reputation: map["reputation"].toString(),
@@ -156,7 +163,8 @@ class User {
       rvrc: map["rvrc"],
       money: map["money"],
       thisVisit: map["thisvisit"],
-      signature: map["signature"].toString(), // 可能是int
+      signature: map["signature"].toString(),
+      // 可能是int
       nickname: map["nickname"],
       bitData: map["bit_data"],
     );
