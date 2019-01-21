@@ -1,16 +1,13 @@
-import 'dart:io';
-
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
-import 'package:flutter_nga/data/entity/topic_tag.dart';
+import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
+import 'package:flutter_nga/ui/widget/forum_tag_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class PublishReplyPage extends StatefulWidget {
@@ -27,8 +24,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
     CommunityMaterialIcons.ninja,
     CommunityMaterialIcons.emoticon,
     CommunityMaterialIcons.format_text,
-    Icons.image,
-    CommunityMaterialIcons.keyboard
+    CommunityMaterialIcons.attachment,
   ];
 
   bool _keyboardVisible = false;
@@ -37,14 +33,65 @@ class _PublishReplyState extends State<PublishReplyPage> {
 
   List<String> _tagList = [];
 
+  final _contentController = TextEditingController();
+
   final _emoticonGroupTabsWidget = EmoticonGroupTabsWidget();
-  final _fontStyleWidget = FontStyleWidget();
+  Widget _fontStyleWidget;
+  final _attachmentWdiget = AttachmentWidget();
 
   Widget _currentBottomPanelChild;
+  final _selectionList = [0, 0];
 
   @override
   void initState() {
     super.initState();
+    _contentController.addListener(() {
+      if (_contentController.selection.start > -1) {
+        _selectionList[0] = _contentController.selection.start;
+      }
+      if (_contentController.selection.end > -1) {
+        _selectionList[1] = _contentController.selection.end;
+      }
+    });
+    _fontStyleWidget = FontStyleWidget(callback: (startTag, endTag, hasEnd) {
+      final leftPartString =
+          _contentController.text.substring(0, _selectionList[0]);
+      final rightPartString = _contentController.text
+          .substring(_selectionList[1], _contentController.text.length);
+      if (_selectionList[0] == _selectionList[1]) {
+        // 未选中词语
+        _contentController.text =
+            "$leftPartString$startTag${hasEnd ? endTag : ""}$rightPartString";
+        int position = leftPartString.length + startTag.length;
+        _contentController.selection = TextSelection(
+          extentOffset: position,
+          baseOffset: position,
+        );
+      } else {
+        // 选中了词语
+        final selectionString = _contentController.text
+            .substring(_selectionList[0], _selectionList[1]);
+        if (hasEnd) {
+          _contentController.text =
+              "$leftPartString$startTag$selectionString$endTag$rightPartString";
+          int position = leftPartString.length +
+              startTag.length +
+              selectionString.length +
+              endTag.length;
+          _contentController.selection = TextSelection(
+            extentOffset: position,
+            baseOffset: position,
+          );
+        } else {
+          _contentController.text = "$leftPartString$startTag$rightPartString";
+          int position = leftPartString.length + startTag.length;
+          _contentController.selection = TextSelection(
+            extentOffset: position,
+            baseOffset: position,
+          );
+        }
+      }
+    });
     _currentBottomPanelChild = _emoticonGroupTabsWidget;
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
@@ -123,6 +170,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
                     Expanded(
                       child: TextField(
                         maxLines: null,
+                        controller: _contentController,
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           labelText: "回复内容",
@@ -190,11 +238,8 @@ class _PublishReplyState extends State<PublishReplyPage> {
                       _emoticonIconClicked();
                     } else if (iconData == CommunityMaterialIcons.format_text) {
                       _formatTextIconClicked();
-                    } else if (iconData == Icons.image) {
-                      File image = await ImagePicker.pickImage(
-                          source: ImageSource.gallery);
-                    } else if (iconData == CommunityMaterialIcons.keyboard) {
-                      _keyboardIconClicked();
+                    } else if (iconData == CommunityMaterialIcons.attachment) {
+                      _attachmentIconClicked();
                     }
                   },
                 ),
@@ -206,17 +251,6 @@ class _PublishReplyState extends State<PublishReplyPage> {
         .toList();
   }
 
-  void _keyboardIconClicked() {
-    if (_keyboardVisible) {
-      SystemChannels.textInput.invokeMethod('TextInput.hide');
-    } else {
-      if (_bottomPanelVisible) {
-        _hideBottomPanel();
-      }
-      SystemChannels.textInput.invokeMethod('TextInput.show');
-    }
-  }
-
   void _hideBottomPanel() {
     setState(() {
       _bottomPanelVisible = false;
@@ -224,9 +258,6 @@ class _PublishReplyState extends State<PublishReplyPage> {
   }
 
   void _ninjaIconClicked(BuildContext c) {
-    if (_keyboardVisible) {
-      SystemChannels.textInput.invokeMethod('TextInput.hide');
-    }
     Scaffold.of(c)
         .showSnackBar(SnackBar(content: Text(_isAnonymous ? "关闭匿名" : "开启匿名")));
     setState(() {
@@ -235,30 +266,26 @@ class _PublishReplyState extends State<PublishReplyPage> {
   }
 
   void _emoticonIconClicked() {
-    if (_keyboardVisible) {
-      SystemChannels.textInput.invokeMethod('TextInput.hide');
-    }
-    setState(() {
-      if (_currentBottomPanelChild == _emoticonGroupTabsWidget &&
-          _bottomPanelVisible) {
-        _bottomPanelVisible = false;
-      } else {
-        _currentBottomPanelChild = _emoticonGroupTabsWidget;
-        _bottomPanelVisible = true;
-      }
-    });
+    togglePanel(_emoticonGroupTabsWidget);
   }
 
   void _formatTextIconClicked() {
+    togglePanel(_fontStyleWidget);
+  }
+
+  void _attachmentIconClicked() {
+    togglePanel(_attachmentWdiget);
+  }
+
+  void togglePanel(Widget widget) {
     if (_keyboardVisible) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
     }
     setState(() {
-      if (_currentBottomPanelChild == _fontStyleWidget &&
-          _bottomPanelVisible) {
+      if (_currentBottomPanelChild == widget && _bottomPanelVisible) {
         _bottomPanelVisible = false;
       } else {
-        _currentBottomPanelChild = _fontStyleWidget;
+        _currentBottomPanelChild = widget;
         _bottomPanelVisible = true;
       }
     });
@@ -268,59 +295,16 @@ class _PublishReplyState extends State<PublishReplyPage> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Text("主题分类"),
-              Text(
-                " (下滑有更多标签)",
-                style: TextStyle(
-                    fontSize: Dimen.caption, color: Palette.colorTextSecondary),
-              )
-            ],
-          ),
-          content: FutureBuilder(
-            future: Data().topicRepository.getTopicTagList(widget.topic.fid),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<TopicTag>> snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.none:
-                  return Text('Press button to start.');
-                case ConnectionState.active:
-                case ConnectionState.waiting:
-                  return Text('Awaiting result...');
-                case ConnectionState.done:
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return SizedBox(
-                      width: 0,
-                      height: 240,
-                      child: ListView.builder(
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (context, position) {
-                          final content = snapshot.data[position].content;
-                          return InkWell(
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Text("$content"),
-                            ),
-                            onTap: () {
-                              if (!_tagList.contains(content)) {
-                                setState(() {
-                                  _tagList.add(content);
-                                });
-                              }
-                              Navigator.of(context).pop();
-                            },
-                          );
-                        },
-                      ),
-                    );
-                  }
-              }
-            },
-          ),
+        return ForumTagDialog(
+          fid: widget.topic.fid,
+          onSelected: (tag) {
+            if (!_tagList.contains(tag)) {
+              setState(() {
+                _tagList.add(tag);
+              });
+            }
+            Navigator.of(context).pop();
+          },
         );
       },
     );
