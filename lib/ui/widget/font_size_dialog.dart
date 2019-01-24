@@ -3,7 +3,7 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 
 class FontSizeDialog extends StatelessWidget {
   const FontSizeDialog({this.callback, Key key}) : super(key: key);
-  final FontStyleCallback callback;
+  final InputCallback callback;
 
   static const sizeList = [
     "110%",

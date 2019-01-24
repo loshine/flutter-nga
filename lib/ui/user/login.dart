@@ -1,6 +1,6 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:flutter_native_web/flutter_native_web.dart';
 import 'package:flutter_nga/utils/constant.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,12 +9,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
-//  var _url = "https://bbs.nga.cn/";
-  final flutterWebviewPlugin = FlutterWebviewPlugin();
+  WebController _controller;
 
   _saveCookies(BuildContext context) async {
-    var cookies = await flutterWebviewPlugin.getCookies();
+//    var cookies = await flutterWebviewPlugin.getCookies();
     try {
 //      var user = await Data().userRepository.saveLoginCookies(cookies);
     } catch (e) {
@@ -25,14 +23,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _refreshBrowser() {
-    flutterWebviewPlugin.launch(DOMAIN, hidden: false);
+    _controller.loadUrl(LOGIN_URL);
   }
 
   @override
   Widget build(BuildContext context) {
-    return WebviewScaffold(
-      url: LOGIN_URL,
-      clearCookies: false,
+    return Scaffold(
       appBar: AppBar(
         title: Text("登陆"),
         actions: [
@@ -50,6 +46,12 @@ class _LoginPageState extends State<LoginPage> {
           )
         ],
       ),
+      body: FlutterNativeWeb(onWebCreated: (controller) {
+        if (_controller == null) {
+          _controller = controller;
+        }
+        _refreshBrowser();
+      }),
     );
   }
 }
