@@ -7,4 +7,8 @@ class AndroidGbk {
   static Future<String> decode(List<int> bytes) async {
     return await _gbkChannel.invokeMethod('decode', {"bytes": bytes});
   }
+
+  static Future<String> urlEncode(String content) async {
+    return await _gbkChannel.invokeMethod("urlEncode", {"content": content});
+  }
 }

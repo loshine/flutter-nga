@@ -5,6 +5,7 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
+import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:path/path.dart';
 
 class TopicRepository {
@@ -93,6 +94,19 @@ class TopicRepository {
           .dio
           .post("http://img.nga.178.com:8080/attach.php", data: formData);
       return response.data["url"];
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<String> sendReply(
+      int tid, int fid, String subject, String content) async {
+    final postData =
+        "step=2&post_content=${await AndroidGbk.urlEncode(content)}&tid=$tid&action=reply&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}&fid=$fid";
+    try {
+      Response<String> response =
+          await Data().dio.post("post.php", data: postData);
+      return response.data;
     } catch (error) {
       rethrow;
     }

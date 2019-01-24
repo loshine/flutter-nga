@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AttachmentWidget extends StatefulWidget {
@@ -71,8 +72,15 @@ class _AttachmentState extends State<AttachmentWidget> {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              if (widget.callback != null && _list.length > index) {
-                widget.callback("[img]./${_list[index]}[/img]", "", false);
+              if (widget.callback != null) {
+                if (_list.length > index) {
+                  widget.callback("[img]./${_list[index]}[/img]", "", false);
+                } else {
+                  Fluttertoast.instance.showToast(
+                    msg: "上传文件中，请稍候",
+                    gravity: ToastGravity.CENTER,
+                  );
+                }
               }
             },
             child: Stack(

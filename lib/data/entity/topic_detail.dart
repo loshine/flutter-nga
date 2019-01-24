@@ -207,14 +207,14 @@ class Reply {
 
   factory Reply.fromJson(Map<String, dynamic> map) {
     return Reply(
-      content: map["content"],
+      content: map["content"].toString(), // 这都可能会是 int 我也是服气
       alterInfo: map["alterinfo"],
       tid: map["tid"],
       score: map["score"],
       score2: map["score_2"],
       postDate: map["postdate"],
       authorId: map["authorid"],
-      subject: map["subject"],
+      subject: map["subject"].toString(),
       type: map["type"],
       fid: map["fid"],
       pid: map["pid"],

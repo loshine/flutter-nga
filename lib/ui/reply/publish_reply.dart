@@ -1,6 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/ui/widget/forum_tag_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class PublishReplyPage extends StatefulWidget {
@@ -33,6 +35,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
 
   List<String> _tagList = [];
 
+  final _subjectController = TextEditingController();
   final _contentController = TextEditingController();
 
   final _emoticonGroupTabsWidget = EmoticonGroupTabsWidget();
@@ -87,7 +90,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
           actions: [
             IconButton(
               icon: Icon(Icons.send),
-              onPressed: () => debugPrint("回帖"),
+              onPressed: _sendReply,
             ),
           ],
         ),
@@ -100,6 +103,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
                   children: [
                     TextField(
                       maxLines: 1,
+                      controller: _subjectController,
                       decoration: InputDecoration(
                         labelText: "标题(可选)",
                         suffixIcon: InkWell(
@@ -158,9 +162,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
                     color: Palette.colorPrimary,
                     height: kToolbarHeight,
                     width: double.infinity,
-                    child: Builder(
-                        builder: (BuildContext c) =>
-                            Row(children: _getBottomBarData(c))),
+                    child: Row(children: _getBottomBarData()),
                   ),
                   Container(
                     color: Palette.colorBackground,
@@ -177,7 +179,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
     );
   }
 
-  List<Widget> _getBottomBarData(BuildContext c) {
+  List<Widget> _getBottomBarData() {
     return _bottomData
         .asMap()
         .map((i, iconData) {
@@ -199,7 +201,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
                   ),
                   onTap: () async {
                     if (iconData == CommunityMaterialIcons.ninja) {
-                      _ninjaIconClicked(c);
+                      _ninjaIconClicked();
                     } else if (iconData == CommunityMaterialIcons.emoticon) {
                       _emoticonIconClicked();
                     } else if (iconData == CommunityMaterialIcons.format_text) {
@@ -223,9 +225,11 @@ class _PublishReplyState extends State<PublishReplyPage> {
     });
   }
 
-  void _ninjaIconClicked(BuildContext c) {
-    Scaffold.of(c)
-        .showSnackBar(SnackBar(content: Text(_isAnonymous ? "关闭匿名" : "开启匿名")));
+  void _ninjaIconClicked() {
+    Fluttertoast.instance.showToast(
+      msg: _isAnonymous ? "关闭匿名" : "开启匿名",
+      gravity: ToastGravity.CENTER,
+    );
     setState(() {
       _isAnonymous = !_isAnonymous;
     });
@@ -314,5 +318,22 @@ class _PublishReplyState extends State<PublishReplyPage> {
         );
       },
     );
+  }
+
+  void _sendReply() async {
+    try {
+      await Data().topicRepository.sendReply(widget.topic.tid, widget.topic.fid,
+          _subjectController.text, _contentController.text);
+      Fluttertoast.instance.showToast(
+        msg: "回复成功",
+        gravity: ToastGravity.CENTER,
+      );
+      Navigator.pop(context);
+    } catch (error) {
+      Fluttertoast.instance.showToast(
+        msg: error.message,
+        gravity: ToastGravity.CENTER,
+      );
+    }
   }
 }

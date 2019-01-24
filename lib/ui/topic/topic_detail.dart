@@ -9,6 +9,7 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/reply/publish_reply.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicDetailPage extends StatefulWidget {
@@ -105,8 +106,12 @@ class _TopicDetailState extends State<TopicDetailPage> {
         debugPrint(stackTrace.toString());
         _refreshController.sendBack(true, RefreshStatus.failed);
         if (err != null) {
-          Scaffold.of(context).showSnackBar(
-            SnackBar(content: Text(err.message)),
+//          Scaffold.of(context).showSnackBar(
+//            SnackBar(content: Text(err.message)),
+//          );
+          Fluttertoast.instance.showToast(
+            msg: err.message,
+            gravity: ToastGravity.CENTER,
           );
         }
       }
@@ -129,8 +134,12 @@ class _TopicDetailState extends State<TopicDetailPage> {
         throw error;
       } catch (err) {
         _refreshController.sendBack(false, RefreshStatus.failed);
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(err.message)),
+//        Scaffold.of(context).showSnackBar(
+//          SnackBar(content: Text(err.message)),
+//        );
+        Fluttertoast.instance.showToast(
+          msg: err.message,
+          gravity: ToastGravity.CENTER,
         );
       }
     }
