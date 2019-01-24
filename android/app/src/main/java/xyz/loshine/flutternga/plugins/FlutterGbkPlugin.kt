@@ -3,6 +3,7 @@ package xyz.loshine.flutternga.plugins
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
+import java.net.URLEncoder
 import java.nio.charset.Charset
 
 class FlutterGbkPlugin : MethodChannel.MethodCallHandler {
@@ -26,6 +27,11 @@ class FlutterGbkPlugin : MethodChannel.MethodCallHandler {
                 val byteArray = call.argument<ByteArray>("bytes") ?: byteArrayOf()
                 val string = String(byteArray, Charset.forName("gbk"))
                 // 返回给 flutter 的参数
+                result.success(string)
+            }
+            "urlEncode" -> {
+                val content: String = call.argument("content") ?: ""
+                val string = URLEncoder.encode(content, "gbk")
                 result.success(string)
             }
             else -> result.notImplemented()

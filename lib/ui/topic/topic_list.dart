@@ -8,6 +8,7 @@ import 'package:flutter_nga/ui/topic/topic_detail.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import "package:pull_to_refresh/pull_to_refresh.dart";
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -125,8 +126,12 @@ class _TopicListState extends State<TopicListPage> {
         });
       } catch (err) {
         _refreshController.sendBack(true, RefreshStatus.failed);
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(err.message)),
+//        Scaffold.of(context).showSnackBar(
+//          SnackBar(content: Text(err.message)),
+//        );
+        Fluttertoast.instance.showToast(
+          msg: err.message,
+          gravity: ToastGravity.CENTER,
         );
       }
     } else {
@@ -139,8 +144,12 @@ class _TopicListState extends State<TopicListPage> {
         setState(() => _topicList.addAll(data.topicList.values));
       } catch (err) {
         _refreshController.sendBack(false, RefreshStatus.failed);
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(err.message)),
+//        Scaffold.of(context).showSnackBar(
+//          SnackBar(content: Text(err.message)),
+//        );
+        Fluttertoast.instance.showToast(
+          msg: err.message,
+          gravity: ToastGravity.CENTER,
         );
       }
     }

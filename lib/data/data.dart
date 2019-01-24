@@ -110,34 +110,38 @@ class Data {
       // 直接制表符替换为 \t, \x 替换为 \\x
       responseBody =
           responseBody.replaceAll("\t", "\\t").replaceAll("\\x", "\\\\x");
-      if (!responseBody.startsWith("{\"")) {
+      if (!responseBody.startsWith("{\"") && responseBody.startsWith("{")) {
         responseBody = await AndroidFormatJson.decode(responseBody);
       }
       debugPrint(
           "request url : ${response.request.baseUrl + response.request.path}\n" +
               "request data : ${response.request.data.toString()}\n" +
               "response data : $responseBody");
-      Map<String, dynamic> map = json.decode(responseBody);
-      // 如果是 api 错误，抛出错误内容
-      if (map["data"] is Map<String, dynamic> &&
-          map["data"].containsKey("__MESSAGE")) {
-        String errorMessage = map["data"]["__MESSAGE"]["1"];
-        throw DioError(
-          response: response,
-          message: errorMessage,
-          type: DioErrorType.RESPONSE,
-        );
+      try {
+        Map<String, dynamic> map = json.decode(responseBody);
+        // 如果是 api 错误，抛出错误内容
+        if (map["data"] is Map<String, dynamic> &&
+            map["data"].containsKey("__MESSAGE")) {
+          String errorMessage = map["data"]["__MESSAGE"]["1"];
+          throw DioError(
+            response: response,
+            message: errorMessage,
+            type: DioErrorType.RESPONSE,
+          );
+        }
+        // 上传附件时的错误
+        if (map["error"] is String) {
+          String errorMessage = map["error"];
+          throw DioError(
+            response: response,
+            message: errorMessage,
+            type: DioErrorType.RESPONSE,
+          );
+        }
+        response.data = map["data"];
+      } catch (error) {
+        response.data = responseBody;
       }
-      // 上传附件时的错误
-      if (map["error"] is String) {
-        String errorMessage = map["error"];
-        throw DioError(
-          response: response,
-          message: errorMessage,
-          type: DioErrorType.RESPONSE,
-        );
-      }
-      response.data = map["data"];
       return response;
     };
     _dio.interceptor.response.onError = (DioError e) {
