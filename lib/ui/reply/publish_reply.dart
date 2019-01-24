@@ -37,7 +37,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
 
   final _emoticonGroupTabsWidget = EmoticonGroupTabsWidget();
   Widget _fontStyleWidget;
-  final _attachmentWdiget = AttachmentWidget();
+  Widget _attachmentWidget;
 
   Widget _currentBottomPanelChild;
   final _selectionList = [0, 0];
@@ -53,45 +53,11 @@ class _PublishReplyState extends State<PublishReplyPage> {
         _selectionList[1] = _contentController.selection.end;
       }
     });
-    _fontStyleWidget = FontStyleWidget(callback: (startTag, endTag, hasEnd) {
-      final leftPartString =
-          _contentController.text.substring(0, _selectionList[0]);
-      final rightPartString = _contentController.text
-          .substring(_selectionList[1], _contentController.text.length);
-      if (_selectionList[0] == _selectionList[1]) {
-        // 未选中词语
-        _contentController.text =
-            "$leftPartString$startTag${hasEnd ? endTag : ""}$rightPartString";
-        int position = leftPartString.length + startTag.length;
-        _contentController.selection = TextSelection(
-          extentOffset: position,
-          baseOffset: position,
-        );
-      } else {
-        // 选中了词语
-        final selectionString = _contentController.text
-            .substring(_selectionList[0], _selectionList[1]);
-        if (hasEnd) {
-          _contentController.text =
-              "$leftPartString$startTag$selectionString$endTag$rightPartString";
-          int position = leftPartString.length +
-              startTag.length +
-              selectionString.length +
-              endTag.length;
-          _contentController.selection = TextSelection(
-            extentOffset: position,
-            baseOffset: position,
-          );
-        } else {
-          _contentController.text = "$leftPartString$startTag$rightPartString";
-          int position = leftPartString.length + startTag.length;
-          _contentController.selection = TextSelection(
-            extentOffset: position,
-            baseOffset: position,
-          );
-        }
-      }
-    });
+    _fontStyleWidget = FontStyleWidget(callback: _inputCallback);
+    _attachmentWidget = AttachmentWidget(
+      topic: widget.topic,
+      callback: _inputCallback,
+    );
     _currentBottomPanelChild = _emoticonGroupTabsWidget;
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
@@ -274,7 +240,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
   }
 
   void _attachmentIconClicked() {
-    togglePanel(_attachmentWdiget);
+    togglePanel(_attachmentWidget);
   }
 
   void togglePanel(Widget widget) {
@@ -289,6 +255,46 @@ class _PublishReplyState extends State<PublishReplyPage> {
         _bottomPanelVisible = true;
       }
     });
+  }
+
+  void _inputCallback(startTag, endTag, hasEnd) {
+    final leftPartString =
+        _contentController.text.substring(0, _selectionList[0]);
+    final rightPartString = _contentController.text
+        .substring(_selectionList[1], _contentController.text.length);
+    if (_selectionList[0] == _selectionList[1]) {
+      // 未选中词语
+      _contentController.text =
+          "$leftPartString$startTag${hasEnd ? endTag : ""}$rightPartString";
+      int position = leftPartString.length + startTag.length;
+      _contentController.selection = TextSelection(
+        extentOffset: position,
+        baseOffset: position,
+      );
+    } else {
+      // 选中了词语
+      final selectionString = _contentController.text
+          .substring(_selectionList[0], _selectionList[1]);
+      if (hasEnd) {
+        _contentController.text =
+            "$leftPartString$startTag$selectionString$endTag$rightPartString";
+        int position = leftPartString.length +
+            startTag.length +
+            selectionString.length +
+            endTag.length;
+        _contentController.selection = TextSelection(
+          extentOffset: position,
+          baseOffset: position,
+        );
+      } else {
+        _contentController.text = "$leftPartString$startTag$rightPartString";
+        int position = leftPartString.length + startTag.length;
+        _contentController.selection = TextSelection(
+          extentOffset: position,
+          baseOffset: position,
+        );
+      }
+    }
   }
 
   void _showTagDialog() {

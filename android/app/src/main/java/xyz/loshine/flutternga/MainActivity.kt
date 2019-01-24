@@ -5,6 +5,7 @@ import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
 import xyz.loshine.flutternga.plugins.FlutterCookiesPlugin
 import xyz.loshine.flutternga.plugins.FlutterGbkPlugin
+import xyz.loshine.flutternga.plugins.FlutterJsonPlugin
 import xyz.loshine.flutternga.plugins.FlutterLoginPlugin
 
 class MainActivity : FlutterActivity() {
@@ -14,9 +15,10 @@ class MainActivity : FlutterActivity() {
 
         GeneratedPluginRegistrant.registerWith(this)
 
-        FlutterLoginPlugin.registerWith(registrarFor(FlutterLoginPlugin.CHANNEL))
         FlutterCookiesPlugin.registerWith(registrarFor(FlutterCookiesPlugin.CHANNEL))
         FlutterGbkPlugin.registerWith(registrarFor(FlutterGbkPlugin.CHANNEL))
+        FlutterJsonPlugin.registerWith(registrarFor(FlutterJsonPlugin.CHANNEL))
+        FlutterLoginPlugin.registerWith(registrarFor(FlutterLoginPlugin.CHANNEL))
     }
 
 }

@@ -231,7 +231,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
         ),
         Padding(
           padding: EdgeInsets.all(16),
-          child: _RichTextWidget(reply.content),
+          child: _RichTextWidget(text: reply.content),
         ),
         // TODO: 不显示空的签名和分割线
         Divider(
@@ -240,7 +240,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
         ),
         Padding(
           padding: EdgeInsets.all(16),
-          child: _RichTextWidget(user.signature),
+          child: _RichTextWidget(text: user.signature),
         ),
         Divider(
           color: Palette.colorDivider,
@@ -252,13 +252,10 @@ class _TopicReplyItemWidget extends StatelessWidget {
 }
 
 class _RichTextWidget extends StatelessWidget {
-  String text;
+  const _RichTextWidget({this.text, Key key}) : super(key: key);
 
-  _RichTextWidget(String text) {
-    this.text = text ?? "";
-  }
+  final String text;
 
-  // TODO: 使用WebView
   @override
   Widget build(BuildContext context) {
     return RichText(

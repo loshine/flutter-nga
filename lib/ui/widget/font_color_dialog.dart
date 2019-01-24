@@ -3,7 +3,7 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 
 class FontColorDialog extends StatelessWidget {
   const FontColorDialog({this.callback, Key key}) : super(key: key);
-  final FontStyleCallback callback;
+  final InputCallback callback;
 
   static const colorMap = {
     "skyblue": Color(0xFF87CEEB),
