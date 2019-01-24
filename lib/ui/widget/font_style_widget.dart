@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/ui/widget/font_color_dialog.dart';
 import 'package:flutter_nga/ui/widget/font_size_dialog.dart';
 
-typedef FontStyleCallback = void Function(
+typedef InputCallback = void Function(
     String startTag, String endTag, bool hasEnd);
 
 class FontStyleWidget extends StatelessWidget {
@@ -22,7 +22,7 @@ class FontStyleWidget extends StatelessWidget {
     ">折叠<": CommunityMaterialIcons.arrow_collapse_vertical,
   };
 
-  final FontStyleCallback callback;
+  final InputCallback callback;
 
   @override
   Widget build(BuildContext context) {

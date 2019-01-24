@@ -9,6 +9,7 @@ import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
+import 'package:flutter_nga/plugins/android_format_json.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:objectdb/objectdb.dart';
@@ -109,9 +110,11 @@ class Data {
       // 直接制表符替换为 \t, \x 替换为 \\x
       responseBody =
           responseBody.replaceAll("\t", "\\t").replaceAll("\\x", "\\\\x");
+      if (!responseBody.startsWith("{\"")) {
+        responseBody = await AndroidFormatJson.decode(responseBody);
+      }
       debugPrint(
-          "request url : ${response.request.baseUrl +
-              response.request.path}\n" +
+          "request url : ${response.request.baseUrl + response.request.path}\n" +
               "request data : ${response.request.data.toString()}\n" +
               "response data : $responseBody");
       Map<String, dynamic> map = json.decode(responseBody);
@@ -119,6 +122,15 @@ class Data {
       if (map["data"] is Map<String, dynamic> &&
           map["data"].containsKey("__MESSAGE")) {
         String errorMessage = map["data"]["__MESSAGE"]["1"];
+        throw DioError(
+          response: response,
+          message: errorMessage,
+          type: DioErrorType.RESPONSE,
+        );
+      }
+      // 上传附件时的错误
+      if (map["error"] is String) {
+        String errorMessage = map["error"];
         throw DioError(
           response: response,
           message: errorMessage,
