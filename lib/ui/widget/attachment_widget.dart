@@ -8,12 +8,17 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
+typedef AttachmentCallback = void Function(
+    String attachments, String attachmentsCheck);
+
 class AttachmentWidget extends StatefulWidget {
-  const AttachmentWidget({this.topic, this.callback, Key key})
+  const AttachmentWidget(
+      {this.topic, this.callback, this.attachmentCallback, Key key})
       : super(key: key);
 
   final Topic topic;
   final InputCallback callback;
+  final AttachmentCallback attachmentCallback;
 
   @override
   _AttachmentState createState() => _AttachmentState();
@@ -50,10 +55,11 @@ class _AttachmentState extends State<AttachmentWidget> {
                     .topicRepository
                     .getAuthCode(widget.topic.fid, widget.topic.tid, "reply");
               }
-              String url = await Data()
+              Map<String, dynamic> data = await Data()
                   .topicRepository
                   .uploadAttachment(widget.topic.fid, _authCode, image);
-              setState(() => _list.add(url));
+              widget.attachmentCallback(data["attachments"], data["attachments_check"]);
+              setState(() => _list.add(data["url"]));
             } catch (error) {
               setState(() => _imageFileList.remove(image));
             }

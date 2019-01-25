@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
@@ -45,6 +46,9 @@ class _PublishReplyState extends State<PublishReplyPage> {
   Widget _currentBottomPanelChild;
   final _selectionList = [0, 0];
 
+  StringBuffer _attachments = StringBuffer();
+  StringBuffer _attachmentsCheck = StringBuffer();
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +64,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
     _attachmentWidget = AttachmentWidget(
       topic: widget.topic,
       callback: _inputCallback,
+      attachmentCallback: _attachmentCallback,
     );
     _currentBottomPanelChild = _emoticonGroupTabsWidget;
     KeyboardVisibilityNotification().addNewListener(
@@ -301,6 +306,14 @@ class _PublishReplyState extends State<PublishReplyPage> {
     }
   }
 
+  void _attachmentCallback(attachments, attachmentsCheck) async {
+    final tab = await AndroidGbk.urlEncode("\t");
+    _attachments.write(tab);
+    _attachments.write(await AndroidGbk.urlEncode(attachments));
+    _attachmentsCheck.write(tab);
+    _attachmentsCheck.write(await AndroidGbk.urlEncode(attachmentsCheck));
+  }
+
   void _showTagDialog() {
     showDialog(
       context: context,
@@ -322,10 +335,16 @@ class _PublishReplyState extends State<PublishReplyPage> {
 
   void _sendReply() async {
     try {
-      await Data().topicRepository.sendReply(widget.topic.tid, widget.topic.fid,
-          _subjectController.text, _contentController.text);
+      String message = await Data().topicRepository.sendReply(
+          widget.topic.tid,
+          widget.topic.fid,
+          _subjectController.text,
+          _contentController.text,
+          _isAnonymous,
+          _attachments.toString(),
+          _attachmentsCheck.toString());
       Fluttertoast.instance.showToast(
-        msg: "回复成功",
+        msg: message,
         gravity: ToastGravity.CENTER,
       );
       Navigator.pop(context);

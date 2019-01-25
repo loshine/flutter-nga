@@ -6,4 +6,8 @@ class CodeUtils {
   static String unescapeHtml(String data) {
     return _htmlUnescape.convert(data);
   }
+
+  static bool isStringEmpty(String content) {
+    return content == null || content.isEmpty;
+  }
 }
