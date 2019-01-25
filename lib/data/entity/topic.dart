@@ -40,6 +40,10 @@ class TopicListData {
       rRows: map["__R__ROWS_PAGE"],
     );
   }
+
+  int getMaxPage() {
+    return rows ~/ rRows + (rows % rRows != 0 ? 1 : 0);
+  }
 }
 
 class Topic {
