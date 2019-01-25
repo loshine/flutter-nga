@@ -6,10 +6,14 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:path/path.dart';
 
 class TopicRepository {
   static final TopicRepository _singleton = TopicRepository._internal();
+
+  static const _RESULT_START_TAG = "<span style='color:#aaa'>&gt;</span>";
+  static const _RESULT_END_TAG = "<br/>";
 
   factory TopicRepository() {
     return _singleton;
@@ -65,7 +69,7 @@ class TopicRepository {
     }
   }
 
-  Future<String> uploadAttachment(
+  Future<Map<String, dynamic>> uploadAttachment(
     int fid,
     String authCode,
     File file,
@@ -93,20 +97,38 @@ class TopicRepository {
       Response<Map<String, dynamic>> response = await Data()
           .dio
           .post("http://img.nga.178.com:8080/attach.php", data: formData);
-      return response.data["url"];
+      return response.data;
     } catch (error) {
       rethrow;
     }
   }
 
-  Future<String> sendReply(
-      int tid, int fid, String subject, String content) async {
-    final postData =
-        "step=2&post_content=${await AndroidGbk.urlEncode(content)}&tid=$tid&action=reply&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}&fid=$fid";
+  Future<String> sendReply(int tid, int fid, String subject, String content,
+      bool isAnonymous, String attachments, String attachmentsCheck) async {
+    final postData = "step=2"
+        "&post_content=${await AndroidGbk.urlEncode(content)}"
+        "&tid=$tid"
+        "&action=reply"
+        "&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}"
+        "&fid=$fid${isAnonymous ? "anony=1" : ""}"
+        "${!CodeUtils.isStringEmpty(attachments) ? "attachments=$attachments" : ""}"
+        "${!CodeUtils.isStringEmpty(attachmentsCheck) ? "attachments_check=$attachmentsCheck" : ""}";
     try {
-      Response<String> response =
-          await Data().dio.post("post.php", data: postData);
-      return response.data;
+      final options = Options();
+      options.contentType =
+          ContentType.parse("application/x-www-form-urlencoded");
+      Response<String> response = await Data().dio.post(
+            "post.php",
+            data: postData,
+            options: options,
+          );
+      final html = response.data;
+      int start = html.indexOf(_RESULT_START_TAG);
+      if (start == -1) return "发帖失败";
+      start += _RESULT_START_TAG.length;
+      int end = html.indexOf(_RESULT_END_TAG, start);
+      if (end < 0) return "发帖失败";
+      return html.substring(start, end);
     } catch (error) {
       rethrow;
     }

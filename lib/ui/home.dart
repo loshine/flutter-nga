@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
+import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/match/match_tabs.dart';
 import 'package:flutter_nga/utils/palette.dart';
-import 'package:flutter_nga/data/entity/user.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -20,7 +21,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var _index = 0;
-  User user = null;
+  User user;
+  String _nickname;
   StreamSubscription _subscription;
   final pageList = [
     ForumGroupTabsPage(),
@@ -49,6 +51,12 @@ class _HomePageState extends State<HomePage> {
   void setUser(User user) {
     if (this.mounted) {
       setState(() => this.user = user);
+      if (user != null) {
+        setState(() async {
+          final firstTimeDecode = await AndroidGbk.urlDecode(user.nickname);
+          _nickname = await AndroidGbk.urlDecode(firstTimeDecode);
+        });
+      }
     }
   }
 
@@ -58,8 +66,10 @@ class _HomePageState extends State<HomePage> {
     _subscription = AndroidLogin.cookieStream.listen(
       (cookies) {
         if (cookies.contains(TAG_CID)) {
-          Data().userRepository.saveLoginCookies(cookies)
-            .then((user) => setUser(user));
+          Data()
+              .userRepository
+              .saveLoginCookies(cookies)
+              .then((user) => setUser(user));
         }
       },
       onError: (e) => debugPrint(e.toString()),
@@ -104,7 +114,7 @@ class _HomePageState extends State<HomePage> {
                     Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        user?.nickname ?? "TO-DOs",
+                        _nickname ?? "TO-DOs",
                       ),
                     )
                   ],
