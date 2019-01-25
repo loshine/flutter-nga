@@ -32,6 +32,8 @@ class _TopicDetailState extends State<TopicDetailPage> {
 
   RefreshController _refreshController;
 
+  int _maxPage;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,6 +87,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
             .topicRepository
             .getTopicDetail(widget.topic.tid, _page);
         _page++;
+        _maxPage = data.getMaxPage();
         _refreshController.sendBack(true, RefreshStatus.completed);
         setState(() {
           if (!_enablePullUp) {
@@ -117,11 +120,16 @@ class _TopicDetailState extends State<TopicDetailPage> {
       }
     } else {
       //footerIndicator Callback
+      if (_page >= _maxPage) {
+        _refreshController.sendBack(false, RefreshStatus.noMore);
+        return;
+      }
       try {
         TopicDetailData data = await Data()
             .topicRepository
             .getTopicDetail(widget.topic.tid, _page);
         _page++;
+        _maxPage = data.getMaxPage();
         _refreshController.sendBack(false, RefreshStatus.canRefresh);
         setState(() {
           _replyList.addAll(data.replyList.values);
