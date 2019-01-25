@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
@@ -79,7 +80,10 @@ class Data {
 //    };
     // 因为需要 gbk -> utf-8, 所以需要流的形式
     _dio.options.responseType = ResponseType.STREAM;
-    _dio.options.headers["User-Agent"] = "okhttp/3.12.0";
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    _dio.options.headers["User-Agent"] =
+        "Nga_Official/2102([${androidInfo.brand} ${androidInfo.model}];Android${androidInfo.version.release})";
 //        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36";
     _dio.options.headers["Accept-Encoding"] = "gzip";
     _dio.options.headers["Cache-Control"] = "max-age=0";
