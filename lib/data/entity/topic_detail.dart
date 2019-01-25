@@ -75,6 +75,10 @@ class TopicDetailData {
       topic: Topic.fromJson(map["__T"]),
     );
   }
+
+  int getMaxPage() {
+    return rows ~/ rRows + (rows % rRows != 0 ? 1 : 0);
+  }
 }
 
 class User {
@@ -207,7 +211,8 @@ class Reply {
 
   factory Reply.fromJson(Map<String, dynamic> map) {
     return Reply(
-      content: map["content"].toString(), // 这都可能会是 int 我也是服气
+      content: map["content"].toString(),
+      // 这都可能会是 int 我也是服气
       alterInfo: map["alterinfo"],
       tid: map["tid"],
       score: map["score"],

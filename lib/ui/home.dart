@@ -48,14 +48,13 @@ class _HomePageState extends State<HomePage> {
     return _index == 0 ? 0 : 4;
   }
 
-  void setUser(User user) {
+  void setUser(User user) async {
     if (this.mounted) {
       setState(() => this.user = user);
       if (user != null) {
-        setState(() async {
-          final firstTimeDecode = await AndroidGbk.urlDecode(user.nickname);
-          _nickname = await AndroidGbk.urlDecode(firstTimeDecode);
-        });
+        final firstTimeDecode = await AndroidGbk.urlDecode(user.nickname);
+        final decodedNickname = await AndroidGbk.urlDecode(firstTimeDecode);
+        setState(() => _nickname = decodedNickname);
       }
     }
   }

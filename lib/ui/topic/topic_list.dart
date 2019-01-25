@@ -32,6 +32,8 @@ class _TopicListState extends State<TopicListPage> {
 
   RefreshController _refreshController;
 
+  int _maxPage;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -116,6 +118,7 @@ class _TopicListState extends State<TopicListPage> {
         TopicListData data =
             await Data().topicRepository.getTopicList(widget.forum.fid, _page);
         _page++;
+        _maxPage = data.getMaxPage();
         _refreshController.sendBack(true, RefreshStatus.completed);
         setState(() {
           if (!_enablePullUp) {
@@ -136,10 +139,15 @@ class _TopicListState extends State<TopicListPage> {
       }
     } else {
       //footerIndicator Callback
+      if (_page >= _maxPage) {
+        _refreshController.sendBack(false, RefreshStatus.noMore);
+        return;
+      }
       try {
         TopicListData data =
             await Data().topicRepository.getTopicList(widget.forum.fid, _page);
         _page++;
+        _maxPage = data.getMaxPage();
         _refreshController.sendBack(false, RefreshStatus.canRefresh);
         setState(() => _topicList.addAll(data.topicList.values));
       } catch (err) {
