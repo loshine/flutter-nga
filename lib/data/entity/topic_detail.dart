@@ -173,6 +173,10 @@ class User {
       bitData: map["bit_data"],
     );
   }
+
+  String getShowName() {
+    return username ?? nickname ?? "#Anonymous#";
+  }
 }
 
 class Reply {

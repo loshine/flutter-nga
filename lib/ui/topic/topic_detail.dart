@@ -8,6 +8,7 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/reply/publish_reply.dart';
+import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -69,9 +70,6 @@ class _TopicDetailState extends State<TopicDetailPage> {
   void initState() {
     _refreshController = RefreshController();
     Future.delayed(const Duration(milliseconds: 0)).then((val) {
-      setState(() {
-        _refreshController.sendBack(true, RefreshStatus.refreshing);
-      });
       _refreshController.scrollController.addListener(_scrollListener);
       _refreshController.requestRefresh(true);
     });
@@ -206,58 +204,79 @@ class _TopicReplyItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            children: [
-              user.avatar != null
-                  ? CachedNetworkImage(
-                      width: 32,
-                      height: 32,
-                      imageUrl: user.avatar,
-                      placeholder: Image.asset(
-                        'images/default_forum_icon.png',
-                        width: 32,
-                        height: 32,
-                      ),
-                      errorWidget: Image.asset(
-                        'images/default_forum_icon.png',
-                        width: 32,
-                        height: 32,
-                      ),
-                    )
-                  : Image(
-                      width: 32,
-                      height: 32,
-                      image: AssetImage('images/default_forum_icon.png'),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: ClipOval(child: _getAvatar()),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(0, 8, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            user.getShowName(),
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ),
+                        Text(
+                          "[${reply.lou} 楼]",
+                          style: TextStyle(
+                            color: Palette.colorTextSecondary,
+                            fontSize: Dimen.caption,
+                          ),
+                        ),
+                      ],
                     ),
-              Column(
-                children: [
-                  Text(user.username ?? user.nickname ?? "#Anonymous#"),
-                  // TODO: 显示匿名用户的用户名
-                  Text("级别: ${group == null ? "" : group.name}"),
-                  // TODO: Text("威望: ${user?.toString() ?? "0.0"}"),
-                  Text("发帖: ${user.postNum?.toString() ?? "null"}"),
-                  Text("[${reply.lou.toString()} 楼]"),
-                  Text(reply.postDate),
-                  // TODO: 发帖设备
-                ],
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      child: Row(
+                        children: [
+                          Text(
+                            "级别: ${group == null ? "" : group.name}",
+                            style: TextStyle(
+                              color: Palette.colorTextSecondary,
+                              fontSize: Dimen.caption,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                            child: Text(
+                              "威望: ${user.rvrc / 10.0 ?? "0.0"}",
+                              style: TextStyle(
+                                color: Palette.colorTextSecondary,
+                                fontSize: Dimen.caption,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                            child: Text(
+                              "发帖: ${user.postNum}",
+                              style: TextStyle(
+                                color: Palette.colorTextSecondary,
+                                fontSize: Dimen.caption,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: _RichTextWidget(text: reply.content),
-        ),
-        // TODO: 不显示空的签名和分割线
-        Divider(
-          color: Palette.colorDivider,
-          height: 1,
-        ),
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: _RichTextWidget(text: user.signature),
         ),
         Divider(
           color: Palette.colorDivider,
@@ -265,6 +284,31 @@ class _TopicReplyItemWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _getAvatar() {
+    return user.avatar != null
+        ? CachedNetworkImage(
+            width: 48,
+            height: 48,
+            fit: BoxFit.cover,
+            imageUrl: user.avatar,
+            placeholder: Image.asset(
+              'images/default_forum_icon.png',
+              width: 48,
+              height: 48,
+            ),
+            errorWidget: Image.asset(
+              'images/default_forum_icon.png',
+              width: 48,
+              height: 48,
+            ),
+          )
+        : Image.asset(
+            'images/default_forum_icon.png',
+            width: 48,
+            height: 48,
+          );
   }
 }
 
@@ -275,13 +319,17 @@ class _RichTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
+    return Container(
+      width: double.infinity,
+      child: RichText(
         textAlign: TextAlign.left,
         text: TextSpan(
           style: DefaultTextStyle.of(context).style,
           children: <TextSpan>[
             TextSpan(text: text),
           ],
-        ));
+        ),
+      ),
+    );
   }
 }
