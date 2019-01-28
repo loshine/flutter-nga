@@ -90,9 +90,6 @@ class _TopicListState extends State<TopicListPage> {
       });
     });
     Future.delayed(const Duration(milliseconds: 0)).then((val) {
-      setState(() {
-        _refreshController.sendBack(true, RefreshStatus.refreshing);
-      });
       _refreshController.scrollController.addListener(_scrollListener);
       _refreshController.requestRefresh(true);
     });

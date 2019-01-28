@@ -111,8 +111,8 @@ class TopicRepository {
         "&action=reply"
         "&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}"
         "&fid=$fid${isAnonymous ? "anony=1" : ""}"
-        "${!CodeUtils.isStringEmpty(attachments) ? "attachments=$attachments" : ""}"
-        "${!CodeUtils.isStringEmpty(attachmentsCheck) ? "attachments_check=$attachmentsCheck" : ""}";
+        "${!CodeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
+        "${!CodeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options();
       options.contentType =
