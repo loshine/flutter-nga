@@ -37,7 +37,7 @@ class FontStyleWidget extends StatelessWidget {
                 Icon(entry.value),
                 Padding(
                   child: Text(entry.key),
-                  padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                  padding: EdgeInsets.only(top: 8),
                 ),
               ],
             ),

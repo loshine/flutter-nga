@@ -12,6 +12,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class TopicDetailPage extends StatefulWidget {
   const TopicDetailPage(this.topic, {Key key}) : super(key: key);
@@ -30,6 +31,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
   List<Reply> _replyList = [];
   List<User> _userList = [];
   Set<Group> _groupSet = HashSet();
+  Set<Medal> _medalSet = HashSet();
 
   RefreshController _refreshController;
 
@@ -97,6 +99,8 @@ class _TopicDetailState extends State<TopicDetailPage> {
           _userList.addAll(data.userList.values);
           _groupSet.clear();
           _groupSet.addAll(data.groupList.values);
+          _medalSet.clear();
+          _medalSet.addAll(data.medalList.values);
         });
       } on NoSuchMethodError catch (error) {
         throw error;
@@ -133,6 +137,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
           _replyList.addAll(data.replyList.values);
           _userList.addAll(data.userList.values);
           _groupSet.addAll(data.groupList.values);
+          _medalSet.addAll(data.medalList.values);
         });
       } on NoSuchMethodError catch (error) {
         throw error;
@@ -188,7 +193,24 @@ class _TopicDetailState extends State<TopicDetailPage> {
         }
       }
     }
-    return _TopicReplyItemWidget(reply: reply, user: user, group: group);
+
+    List<Medal> medalList = [];
+    if (user.medal != null && user.medal.isNotEmpty) {
+      user.medal.split(",").forEach((id) {
+        for (var m in _medalSet) {
+          if (id == m.id.toString()) {
+            medalList.add(m);
+            break;
+          }
+        }
+      });
+    }
+    return _TopicReplyItemWidget(
+      reply: reply,
+      user: user,
+      group: group,
+      medalList: medalList,
+    );
   }
 }
 
@@ -196,8 +218,10 @@ class _TopicReplyItemWidget extends StatelessWidget {
   final Reply reply;
   final User user;
   final Group group;
+  final List<Medal> medalList;
 
-  const _TopicReplyItemWidget({Key key, this.reply, this.user, this.group})
+  const _TopicReplyItemWidget(
+      {Key key, this.reply, this.user, this.group, this.medalList})
       : super(key: key);
 
   @override
@@ -234,39 +258,40 @@ class _TopicReplyItemWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                      child: Row(
-                        children: [
-                          Text(
-                            "级别: ${group == null ? "" : group.name}",
+                    Row(
+                      children: [
+                        Text(
+                          "级别: ${group == null ? "" : group.name}",
+                          style: TextStyle(
+                            color: Palette.colorTextSecondary,
+                            fontSize: Dimen.caption,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                          child: Text(
+                            "威望: ${user.getShowReputation()}",
                             style: TextStyle(
                               color: Palette.colorTextSecondary,
                               fontSize: Dimen.caption,
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
-                            child: Text(
-                              "威望: ${user.rvrc / 10.0 ?? "0.0"}",
-                              style: TextStyle(
-                                color: Palette.colorTextSecondary,
-                                fontSize: Dimen.caption,
-                              ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                          child: Text(
+                            "发帖: ${user.postNum}",
+                            style: TextStyle(
+                              color: Palette.colorTextSecondary,
+                              fontSize: Dimen.caption,
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
-                            child: Text(
-                              "发帖: ${user.postNum}",
-                              style: TextStyle(
-                                color: Palette.colorTextSecondary,
-                                fontSize: Dimen.caption,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 6),
+                      child: Wrap(children: _getMedalListWidgets()),
                     ),
                   ],
                 ),
@@ -276,7 +301,59 @@ class _TopicReplyItemWidget extends StatelessWidget {
         ),
         Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: _RichTextWidget(text: reply.content),
+//          child: _RichTextWidget(text: reply.content),
+          child: Html(data: reply.content),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Palette.colorThumbBackground,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        CommunityMaterialIcons.thumb_up_outline,
+                        color: Palette.colorIcon,
+                        size: 14,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: Text(
+                          "${reply.recommend ?? 0}",
+                          style: TextStyle(
+                              fontSize: Dimen.caption,
+                              color: Palette.colorTextSecondary),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: Icon(
+                          CommunityMaterialIcons.thumb_down_outline,
+                          color: Palette.colorIcon,
+                          size: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Spacer(),
+              Text(
+                reply.postDate,
+                style: TextStyle(
+                  fontSize: Dimen.caption,
+                  color: Palette.colorTextSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
         Divider(
           color: Palette.colorDivider,
@@ -310,26 +387,28 @@ class _TopicReplyItemWidget extends StatelessWidget {
             height: 48,
           );
   }
-}
 
-class _RichTextWidget extends StatelessWidget {
-  const _RichTextWidget({this.text, Key key}) : super(key: key);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      child: RichText(
-        textAlign: TextAlign.left,
-        text: TextSpan(
-          style: DefaultTextStyle.of(context).style,
-          children: <TextSpan>[
-            TextSpan(text: text),
-          ],
+  List<Widget> _getMedalListWidgets() {
+    if (medalList.isEmpty)
+      return [
+        Text(
+          "-",
+          style: TextStyle(
+            fontSize: Dimen.caption,
+            color: Palette.colorTextSecondary,
+          ),
+        )
+      ];
+    return medalList.map((medal) {
+      return Padding(
+        padding: EdgeInsets.only(right: 4),
+        child: CachedNetworkImage(
+          imageUrl: "https://img4.nga.178.com/ngabbs/medal/${medal.image}",
+          width: 12,
+          height: 12,
+          fit: BoxFit.cover,
         ),
-      ),
-    );
+      );
+    }).toList();
   }
 }

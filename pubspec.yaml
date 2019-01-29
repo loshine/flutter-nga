@@ -31,6 +31,7 @@ dependencies:
   device_info: ^0.4.0
 
   flutter_native_web: ^1.0.1
+  flutter_html: ^0.8.2
   image_picker: ^0.4.12
   pull_to_refresh: ^1.1.6
   cached_network_image: ^0.5.1

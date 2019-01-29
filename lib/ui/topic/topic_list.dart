@@ -201,7 +201,7 @@ class _TopicListItemWidget extends StatelessWidget {
                           topic.parent.name != null &&
                           topic.parent.name.isNotEmpty)
                       ? Padding(
-                          padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                          padding: EdgeInsets.only(top: 8),
                           child: Text(
                             "[${topic.parent.name}]",
                             textAlign: TextAlign.end,
@@ -215,7 +215,7 @@ class _TopicListItemWidget extends StatelessWidget {
                   width: double.infinity,
                 ),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                  padding: EdgeInsets.only(top: 8),
                   child: Row(
                     children: [
                       Padding(
@@ -224,7 +224,7 @@ class _TopicListItemWidget extends StatelessWidget {
                           size: 12,
                           color: Palette.colorIcon,
                         ),
-                        padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        padding: EdgeInsets.only(right: 8),
                       ),
                       Expanded(
                         child: Text(
@@ -236,7 +236,7 @@ class _TopicListItemWidget extends StatelessWidget {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
+                        padding: EdgeInsets.only(right: 16),
                         child: (topic.hasAttachment()
                             ? Icon(
                                 Icons.attachment,
@@ -246,7 +246,7 @@ class _TopicListItemWidget extends StatelessWidget {
                             : null),
                       ),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        padding: EdgeInsets.only(right: 8),
                         child: Icon(
                           CommunityMaterialIcons.comment,
                           size: 12,
