@@ -15,4 +15,6 @@ class Palette {
   static final colorTextSecondary = Colors.black54;
   static final colorTextLock = Color(0xFFC58080);
   static final colorTextAssemble = Color(0xFFA0B4F0);
+
+  static final colorThumbBackground = Color(0xFFE0C19E);
 }

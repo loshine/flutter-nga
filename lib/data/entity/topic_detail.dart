@@ -177,6 +177,10 @@ class User {
   String getShowName() {
     return username ?? nickname ?? "#Anonymous#";
   }
+
+  String getShowReputation() {
+    return "${rvrc != null ? rvrc / 10.0 : 0.0}";
+  }
 }
 
 class Reply {
