@@ -17,4 +17,6 @@ class Palette {
   static final colorTextAssemble = Color(0xFFA0B4F0);
 
   static final colorThumbBackground = Color(0xFFE0C19E);
+
+  static final colorQuoteBackground = Color(0xFFF9EFD6);
 }

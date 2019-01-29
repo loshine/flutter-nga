@@ -8,11 +8,13 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/reply/publish_reply.dart';
+import 'package:flutter_nga/utils/content_parser.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/renderer.dart';
+import 'package:flutter_nga_html/flutter_nga_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:flutter_html/flutter_html.dart';
 
 class TopicDetailPage extends StatefulWidget {
   const TopicDetailPage(this.topic, {Key key}) : super(key: key);
@@ -302,7 +304,10 @@ class _TopicReplyItemWidget extends StatelessWidget {
         Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
 //          child: _RichTextWidget(text: reply.content),
-          child: Html(data: reply.content),
+          child: Html(
+            data: ContentParser.parse(reply.content),
+            customRender: ngaRenderer(),
+          ),
         ),
         Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
