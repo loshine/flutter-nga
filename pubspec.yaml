@@ -35,9 +35,7 @@ dependencies:
   pull_to_refresh: ^1.1.6
   cached_network_image: ^0.5.1
   fluttertoast: ^2.2.7
-
-  flutter_nga_html:
-    path: ./flutter_nga_html
+  flutter_html: ^0.8.2
 
 dev_dependencies:
   flutter_test:

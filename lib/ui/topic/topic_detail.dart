@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_nga/utils/content_parser.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/renderer.dart';
-import 'package:flutter_nga_html/flutter_nga_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -228,6 +228,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(ContentParser.parse(reply.content));
     return Column(
       children: [
         Row(
