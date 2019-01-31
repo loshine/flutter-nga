@@ -162,7 +162,7 @@ class User {
       site: map["site"],
       honor: map["honor"],
       regDate: map["regdate"],
-      muteTime: map["mute_time"],
+      muteTime: map["mute_time"].toString(),
       postNum: map["postnum"],
       rvrc: map["rvrc"],
       money: map["money"],

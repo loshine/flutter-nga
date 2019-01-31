@@ -2,9 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/emoticon.dart';
+import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
 class EmoticonGroupTabsWidget extends StatefulWidget {
+  const EmoticonGroupTabsWidget({this.callback, Key key}) : super(key: key);
+  final InputCallback callback;
+
   @override
   _EmoticonGroupTabsState createState() => _EmoticonGroupTabsState();
 }
@@ -39,15 +43,18 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
     super.initState();
     var list = Data().emoticonRepository.getEmoticonGroups();
     _tabs.addAll(list.map((group) => Tab(text: group.name)));
-    _tabBarViews
-        .addAll(list.map((group) => _EmoticonGroupWidget(group: group)));
+    _tabBarViews.addAll(list.map((group) => _EmoticonGroupWidget(
+          group: group,
+          callback: widget.callback,
+        )));
   }
 }
 
 class _EmoticonGroupWidget extends StatelessWidget {
-  _EmoticonGroupWidget({Key key, this.group}) : super(key: key);
+  _EmoticonGroupWidget({this.group, this.callback, Key key}) : super(key: key);
 
   final EmoticonGroup group;
+  final InputCallback callback;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +65,7 @@ class _EmoticonGroupWidget extends StatelessWidget {
             (expression) => Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () => debugPrint(expression.content),
+                    onTap: () => callback(expression.content, "", false),
                     child: Padding(
                       padding: EdgeInsets.all(16),
                       child: CachedNetworkImage(

@@ -164,6 +164,23 @@ ngaRenderer() {
               children: children,
             ),
           );
+        // 相册
+        case "album":
+          return Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16),
+            margin: EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: Palette.colorAlbumBackground,
+              border: Border.all(color: Palette.colorAlbumBorder),
+            ),
+            child: Wrap(
+              // TODO: 在 WrapCrossAlignment 有 baseline 之后需要替换为 baseline
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: children,
+            ),
+          );
+          break;
       }
     }
     return null;

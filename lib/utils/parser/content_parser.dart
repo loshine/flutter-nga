@@ -1,6 +1,46 @@
-class ContentParser {
+import 'package:flutter_nga/data/data.dart';
+
+class NgaContentParser {
+  static List<Parser> _parserList = [
+    _AlbumParser(),
+    _ContentParser(),
+    _EmoticonParser(),
+  ];
+
   static String parse(String content) {
-    // TODO: [] 标签转为 html 标签
+    var parseContent = content;
+    _parserList.forEach((parser) {
+      parseContent = parser.parse(parseContent);
+    });
+    return parseContent;
+  }
+}
+
+abstract class Parser {
+  String parse(String content);
+}
+
+class _AlbumParser implements Parser {
+  @override
+  String parse(String content) {
+    String c = content.replaceAllMapped(
+        RegExp("\\[album(=([\\s\\S]*?)?)?]([\\s\\S]*?)?\\[/album]"), (match) {
+      final value = match.group(3);
+      // [url]图片1[/url]
+      // [url]图片2[/url]
+      // [url]图片3[/url]
+      // todo: 提取出来
+      return "<album>${match.group(1) != null ? match.group(2) : "查看相册"}$value</album>";
+    });
+    print(c);
+
+    return c;
+  }
+}
+
+class _ContentParser implements Parser {
+  @override
+  String parse(String content) {
     return content
         .replaceAllMapped(
             RegExp("\\[img]([\\s\\S]*?)\\[/img]"), _imgReplaceFunc) // 处理 [img]
@@ -68,31 +108,47 @@ class ContentParser {
         .replaceAll("[quote]", "<blockquote>")
         .replaceAll("[/quote]", "</blockquote>");
   }
-}
 
-String _imgReplaceFunc(Match match) {
-  final group = match.group(1);
-  final imgUrl = group.startsWith("./mon_")
-      ? "https://img.nga.178.com/attachments${group.substring(1)}"
-      : group;
-  return "<a href='$imgUrl'><img src='$imgUrl' ></a>";
-}
+  String _imgReplaceFunc(Match match) {
+    final group = match.group(1);
+    final imgUrl = group.startsWith("./mon_")
+        ? "https://img.nga.178.com/attachments${group.substring(1)}"
+        : group;
+    return "<a href='$imgUrl'><img src='$imgUrl' ></a>";
+  }
 
-String _urlReplaceFunc(Match match) {
-  final group = match.group(1);
-  if (group.startsWith("/")) {
-    return "<a href='https://bbs.nga.cn$group'>[站内链接]</a>";
-  } else {
-    return "<a href='$group'>$group</a>";
+  String _urlReplaceFunc(Match match) {
+    final group = match.group(1);
+    if (group.startsWith("/")) {
+      return "<a href='https://bbs.nga.cn$group'>[站内链接]</a>";
+    } else {
+      return "<a href='$group'>$group</a>";
+    }
+  }
+
+  String _url2ReplaceFunc(Match match) {
+    final group1 = match.group(1);
+    final group2 = match.group(2);
+    if (group1.startsWith("/")) {
+      return "<a href='https://bbs.nga.cn$group1'>$group2</a>";
+    } else {
+      return "<a href='$group1'>$group2</a>";
+    }
   }
 }
 
-String _url2ReplaceFunc(Match match) {
-  final group1 = match.group(1);
-  final group2 = match.group(2);
-  if (group1.startsWith("/")) {
-    return "<a href='https://bbs.nga.cn$group1'>$group2</a>";
-  } else {
-    return "<a href='$group1'>$group2</a>";
+class _EmoticonParser implements Parser {
+  static final list = Data().emoticonRepository.getEmoticonGroups();
+
+  @override
+  String parse(String content) {
+    var parseContent = content;
+    list.forEach((group) {
+      group.expressionList.forEach((emoticon) {
+        parseContent = parseContent.replaceAll(
+            emoticon.content, "<img src='${emoticon.url}' >");
+      });
+    });
+    return parseContent;
   }
 }
