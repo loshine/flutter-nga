@@ -19,4 +19,6 @@ class Palette {
   static final colorThumbBackground = Color(0xFFE0C19E);
 
   static final colorQuoteBackground = Color(0xFFF9EFD6);
+  static final colorAlbumBorder = Color(0xFF91B262);
+  static final colorAlbumBackground = Color(0xFFd6dcae);
 }

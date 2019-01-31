@@ -9,9 +9,10 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/reply/publish_reply.dart';
-import 'package:flutter_nga/utils/content_parser.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_nga/utils/renderer.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -42,7 +43,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.topic.subject)),
+      appBar: AppBar(title: Text(CodeUtils.unescapeHtml(widget.topic.subject))),
       body: Builder(builder: (BuildContext context) {
         return SmartRefresher(
           enablePullDown: true,
@@ -228,7 +229,6 @@ class _TopicReplyItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(ContentParser.parse(reply.content));
     return Column(
       children: [
         Row(
@@ -283,7 +283,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
                           child: Text(
-                            "发帖: ${user.postNum}",
+                            "发帖: ${user.postNum ?? 0}",
                             style: TextStyle(
                               color: Palette.colorTextSecondary,
                               fontSize: Dimen.caption,
@@ -306,7 +306,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
 //          child: _RichTextWidget(text: reply.content),
           child: Html(
-            data: ContentParser.parse(reply.content),
+            data: NgaContentParser.parse(reply.content),
             customRender: ngaRenderer(),
           ),
         ),
