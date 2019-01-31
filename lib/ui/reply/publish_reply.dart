@@ -39,7 +39,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
   final _subjectController = TextEditingController();
   final _contentController = TextEditingController();
 
-  final _emoticonGroupTabsWidget = EmoticonGroupTabsWidget();
+  Widget _emoticonGroupTabsWidget;
   Widget _fontStyleWidget;
   Widget _attachmentWidget;
 
@@ -60,6 +60,8 @@ class _PublishReplyState extends State<PublishReplyPage> {
         _selectionList[1] = _contentController.selection.end;
       }
     });
+    _emoticonGroupTabsWidget =
+        EmoticonGroupTabsWidget(callback: _inputCallback);
     _fontStyleWidget = FontStyleWidget(callback: _inputCallback);
     _attachmentWidget = AttachmentWidget(
       topic: widget.topic,

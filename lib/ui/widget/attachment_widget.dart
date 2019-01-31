@@ -70,8 +70,6 @@ class _AttachmentState extends State<AttachmentWidget> {
     }
     widgets.add(_addImageWidget);
     if (_imageFileList.isNotEmpty) {
-      debugPrint(
-          "list size = ${_list.length}, file size = ${_imageFileList.length}");
       widgets.addAll(_imageFileList.map((image) {
         var index = _imageFileList.indexOf(image);
         return Material(
