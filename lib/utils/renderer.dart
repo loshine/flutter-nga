@@ -175,7 +175,6 @@ ngaRenderer() {
               border: Border.all(color: Palette.colorAlbumBorder),
             ),
             child: Wrap(
-              // TODO: 在 WrapCrossAlignment 有 baseline 之后需要替换为 baseline
               crossAxisAlignment: WrapCrossAlignment.center,
               children: children,
             ),
