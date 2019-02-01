@@ -23,18 +23,13 @@ abstract class Parser {
 class _AlbumParser implements Parser {
   @override
   String parse(String content) {
-    String c = content.replaceAllMapped(
+    return content.replaceAllMapped(
         RegExp("\\[album(=([\\s\\S]*?)?)?]([\\s\\S]*?)?\\[/album]"), (match) {
-      final value = match.group(3);
-      // [url]图片1[/url]
-      // [url]图片2[/url]
-      // [url]图片3[/url]
-      // todo: 提取出来
-      return "<album>${match.group(1) != null ? match.group(2) : "查看相册"}$value</album>";
+      final value = match.group(3).replaceAllMapped(
+          RegExp("\\[url]([\\s\\S]*?)?\\[/url]"),
+          (m) => "<img src='${m.group(1)}'/>");
+      return "<album>${match.group(1) != null ? match.group(2) : "相册"}$value</album>";
     });
-    print(c);
-
-    return c;
   }
 }
 
