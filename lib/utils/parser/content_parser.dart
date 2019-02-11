@@ -3,6 +3,7 @@ import 'package:flutter_nga/data/data.dart';
 class NgaContentParser {
   static List<Parser> _parserList = [
     _AlbumParser(),
+    _TableParser(),
     _ContentParser(),
     _EmoticonParser(),
   ];
@@ -30,6 +31,30 @@ class _AlbumParser implements Parser {
           (m) => "<img src='${m.group(1)}'/>");
       return "<album>${match.group(1) != null ? match.group(2) : "相册"}$value</album>";
     });
+  }
+}
+
+class _TableParser implements Parser {
+  @override
+  String parse(String content) {
+    return content
+        .replaceAllMapped(RegExp("\\[([/]?(tr|td))]"),
+            (match) => "<${match.group(1)}>") // 处理tr, td
+        .replaceAll("[table]", "<div><table><tbody>")
+        .replaceAll("[/table]", "</tbody></table></div>")
+        .replaceAllMapped(RegExp("\\[td([\\d]{1,3})+]"),
+            (match) => "<td style='width:${match.group(1)}%;'>") // 处理 [td20]
+        .replaceAllMapped(RegExp("\\[td (rowspan|colspan)=([\\d]+?)]"),
+            (match) => "<td ${match.group(1)}='${match.group(2)}'")
+        .replaceAllMapped(
+            RegExp(
+                "\\[td (rowspan|colspan)=([\\d]+?) (rowspan|colspan)=([\\d]+?)]"),
+            (match) =>
+                "<td ${match.group(1)}='${match.group(2)}' ${match.group(3)}='${match.group(4)}'")
+        .replaceAllMapped(RegExp("<([/]?(table|tbody|tr|td))><br/>"),
+            (match) => "<${match.group(1)}>") // 处理表格外面的额外空行
+        .replaceAllMapped(RegExp("[ ]?<br/><(table|tbody|tr|td)>"),
+            (match) => "<${match.group(1)}>");
   }
 }
 
@@ -85,21 +110,15 @@ class _ContentParser implements Parser {
                 "<collapse title='${match.group(1)}'>${match.group(2)}</collapse>")
         .replaceAllMapped(RegExp("\\[collapse]([\\s\\S]*?)?\\[/collapse]"),
             (match) => "<collapse>${match.group(1)}</collapse>")
-        .replaceAllMapped(RegExp("\\[([/]?(b|u|i|del|tr|td))]"),
-            (match) => "<${match.group(1)}>") // 处理 b, u, i, del, tr, td
-        .replaceAll("[table]", "<div><table><tbody>")
-        .replaceAll("[/table]", "</tbody></table></div>")
-        .replaceAllMapped(RegExp("\\[td([\\d]{1,3})+]"),
-            (match) => "<td style='width:${match.group(1)}%;'>") // 处理 [td20]
-        .replaceAllMapped(RegExp("\\[td (rowspan|colspan)=([\\d]+?)]"),
-            (match) => "<td ${match.group(1)}='${match.group(2)}'")
-        .replaceAllMapped(RegExp("<([/]?(table|tbody|tr|td))><br/>"),
-            (match) => "<${match.group(1)}>") // 处理表格外面的额外空行
+        .replaceAllMapped(RegExp("\\[([/]?(b|u|i|del))]"),
+            (match) => "<${match.group(1)}>") // 处理 b, u, i, del
         .replaceAll(RegExp("[-]{6,}"), "<h5></h5>")
         .replaceAll("[list]", "<ul>")
         .replaceAll("[/list]", "</ul>")
         .replaceAllMapped(RegExp("\\[\\*](.+?)<br/>"),
             (match) => "<li>${match.group(1)}</li>") // 处理 [*]
+        .replaceAllMapped(RegExp("\\[\\*](.+?)"),
+            (match) => "<li>${match.group(1)}</li>")
         .replaceAll("[quote]", "<blockquote>")
         .replaceAll("[/quote]", "</blockquote>");
   }

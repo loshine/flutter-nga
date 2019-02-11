@@ -11,6 +11,53 @@ ngaRenderer() {
   return (dom.Node node, List<Widget> children) {
     if (node is dom.Element) {
       switch (node.localName) {
+        case "td":
+          int colSpan = 1;
+          if (node.attributes['colspan'] != null) {
+            colSpan = int.tryParse(node.attributes['colspan']);
+          }
+          return Expanded(
+            flex: colSpan,
+            child: Container(
+              padding: EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                border: Border(
+                  right: BorderSide(color: Palette.colorDivider),
+                ),
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Wrap(children: children),
+              ),
+            ),
+          );
+        case "tr":
+          return Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: Palette.colorDivider),
+              ),
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                children: children,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+              ),
+            ),
+          );
+        case "table":
+          return Container(
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(color: Palette.colorDivider),
+                top: BorderSide(color: Palette.colorDivider),
+              ),
+            ),
+            child: Column(
+              children: children,
+              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          );
         case "li":
           String type = node.parent.localName; // Parent type; usually ol or ul
           const EdgeInsets markPadding = EdgeInsets.only(right: 8.0);
