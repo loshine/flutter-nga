@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/ui/content/content_details.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -16,18 +17,28 @@ ngaRenderer() {
           if (node.attributes['colspan'] != null) {
             colSpan = int.tryParse(node.attributes['colspan']);
           }
+          // TODO: 因为可能会展示不全，所以需要添加点击事件跳转页面显示全部内容
           return Expanded(
             flex: colSpan,
-            child: Container(
-              padding: EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                border: Border(
-                  right: BorderSide(color: Palette.colorDivider),
-                ),
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Wrap(children: children),
+            child: Material(
+              color: Palette.colorBackground,
+              child: Builder(
+                builder: (context) => InkWell(
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => ContentDetailsPage(children))),
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            right: BorderSide(color: Palette.colorDivider),
+                          ),
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Wrap(children: children),
+                        ),
+                      ),
+                    ),
               ),
             ),
           );
@@ -71,22 +82,24 @@ ngaRenderer() {
             } else if (node.parent.parent.localName == "ul" &&
                 (node.parent.parent.parent.localName != "ul" ||
                     node.parent.parent.parent == null)) {
+              // 两层
               iconData = CommunityMaterialIcons.circle_outline;
             } else if (node.parent.parent.parent.localName == "ul" &&
                 (node.parent.parent.parent.parent.localName != "ul" ||
                     node.parent.parent.parent.parent == null)) {
+              // 三层最多了
               iconData = CommunityMaterialIcons.square;
             }
             Widget mark =
                 Padding(child: Icon(iconData, size: 6), padding: markPadding);
+            List<Widget> widgets = [];
+            widgets.add(mark);
+            widgets.addAll(children);
             return Container(
               width: double.infinity,
               child: Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  mark,
-                  Wrap(children: children),
-                ],
+                children: widgets,
               ),
             );
           }
