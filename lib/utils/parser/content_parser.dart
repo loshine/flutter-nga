@@ -53,8 +53,9 @@ class _TableParser implements Parser {
                 "<td ${match.group(1)}='${match.group(2)}' ${match.group(3)}='${match.group(4)}'")
         .replaceAllMapped(RegExp("<([/]?(table|tbody|tr|td))><br/>"),
             (match) => "<${match.group(1)}>") // 处理表格外面的额外空行
-        .replaceAllMapped(RegExp("[ ]?<br/><(table|tbody|tr|td)>"),
-            (match) => "<${match.group(1)}>");
+        .replaceAllMapped(RegExp("[ ]?<br/><[/]?(table|tbody|tr|td)>"),
+            (match) => "<${match.group(1)}>")
+        .replaceAll("</table>", "</table><br/><br/>"); // 表格后面加2个空行
   }
 }
 
@@ -117,8 +118,8 @@ class _ContentParser implements Parser {
         .replaceAll("[/list]", "</ul>")
         .replaceAllMapped(RegExp("\\[\\*](.+?)<br/>"),
             (match) => "<li>${match.group(1)}</li>") // 处理 [*]
-        .replaceAllMapped(RegExp("\\[\\*](.+?)"),
-            (match) => "<li>${match.group(1)}</li>")
+        .replaceAllMapped(
+            RegExp("\\[\\*](.+?)"), (match) => "<li>${match.group(1)}</li>")
         .replaceAll("[quote]", "<blockquote>")
         .replaceAll("[/quote]", "</blockquote>");
   }
