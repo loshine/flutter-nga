@@ -12,7 +12,7 @@ import 'package:flutter_nga/ui/match/match_tabs.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.title}) : super(key: key);
+  const HomePage({Key key, this.title}) : super(key: key);
   final String title;
 
   @override

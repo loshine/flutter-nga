@@ -184,21 +184,22 @@ class User {
 }
 
 class Reply {
-  final String content;
-  final String alterInfo;
-  final int tid;
+  String content;
+  String alterInfo;
+  int tid;
   int score;
-  final int score2;
-  final String postDate;
-  final int authorId;
-  final String subject;
-  final int type;
-  final int fid;
-  final int pid;
-  final int recommend;
-  final int lou;
-  final int contentLength;
-  final int postDateTimestamp;
+  int score2;
+  String postDate;
+  int authorId;
+  String subject;
+  int type;
+  int fid;
+  int pid;
+  int recommend;
+  int lou;
+  int contentLength;
+  int postDateTimestamp;
+  List<Reply> commentList;
 
   Reply(
       {this.content,
@@ -215,11 +216,17 @@ class Reply {
       this.recommend,
       this.lou,
       this.contentLength,
-      this.postDateTimestamp});
+      this.postDateTimestamp,
+      this.commentList});
 
   factory Reply.fromJson(Map<String, dynamic> map) {
+    Map<String, dynamic> commentMap = map["comment"];
+    List<Reply> commentList = [];
+    if (commentMap != null) {
+      commentMap.forEach((k, v) => commentList.add(Reply.fromJson(v)));
+    }
     return Reply(
-      content: map["content"].toString(),
+      content: map["content"] == null ? "" : map["content"].toString(),
       // 这都可能会是 int 我也是服气
       alterInfo: map["alterinfo"],
       tid: map["tid"],
@@ -227,7 +234,7 @@ class Reply {
       score2: map["score_2"],
       postDate: map["postdate"],
       authorId: map["authorid"],
-      subject: map["subject"].toString(),
+      subject: map["subject"] == null ? "" : map["subject"].toString(),
       type: map["type"],
       fid: map["fid"],
       pid: map["pid"],
@@ -236,7 +243,22 @@ class Reply {
 // 实际上无用属性，还可能是字符串，干脆不要了
 //      contentLength: int.tryParse(map["content_length"]) ?? 0,
       postDateTimestamp: map["postdatetimestamp"],
+      commentList: commentList,
     );
+  }
+
+  void merge(Reply comment) {
+//    content = comment.content;
+    alterInfo = comment.alterInfo;
+    tid = comment.tid;
+    score = comment.score;
+    score2 = comment.score2;
+    type = comment.type;
+    fid = comment.fid;
+    recommend = comment.recommend;
+    contentLength = comment.contentLength;
+    postDateTimestamp = comment.postDateTimestamp;
+    commentList = comment.commentList;
   }
 }
 
