@@ -187,7 +187,7 @@ class Reply {
   final String content;
   final String alterInfo;
   final int tid;
-  final int score;
+  int score;
   final int score2;
   final String postDate;
   final int authorId;
@@ -200,7 +200,7 @@ class Reply {
   final int contentLength;
   final int postDateTimestamp;
 
-  const Reply(
+  Reply(
       {this.content,
       this.alterInfo,
       this.tid,

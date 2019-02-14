@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/data/entity/toggle_like_reaction.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
@@ -129,6 +130,42 @@ class TopicRepository {
       int end = html.indexOf(_RESULT_END_TAG, start);
       if (end < 0) return "发帖失败";
       return html.substring(start, end);
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<ToggleLikeReaction> likeReply(int tid, int pid) async {
+    final postData =
+        "__output=8&__lib=topic_recommend&__act=add&raw=3&pid=$pid&value=1&tid=$tid";
+    try {
+      final options = Options();
+      options.contentType =
+          ContentType.parse("application/x-www-form-urlencoded");
+      Response<Map<String, dynamic>> response = await Data().dio.post(
+            "nuke.php",
+            data: postData,
+            options: options,
+          );
+      return ToggleLikeReaction.fromMap(response.data);
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<ToggleLikeReaction> dislikeReply(int tid, int pid) async {
+    final postData =
+        "__output=8&__lib=topic_recommend&__act=add&raw=3&pid=$pid&value=-1&tid=$tid";
+    try {
+      final options = Options();
+      options.contentType =
+          ContentType.parse("application/x-www-form-urlencoded");
+      Response<Map<String, dynamic>> response = await Data().dio.post(
+            "nuke.php",
+            data: postData,
+            options: options,
+          );
+      return ToggleLikeReaction.fromMap(response.data);
     } catch (error) {
       rethrow;
     }

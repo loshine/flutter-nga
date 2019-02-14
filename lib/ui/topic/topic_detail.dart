@@ -217,7 +217,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
   }
 }
 
-class _TopicReplyItemWidget extends StatelessWidget {
+class _TopicReplyItemWidget extends StatefulWidget {
   final Reply reply;
   final User user;
   final Group group;
@@ -227,6 +227,11 @@ class _TopicReplyItemWidget extends StatelessWidget {
       {Key key, this.reply, this.user, this.group, this.medalList})
       : super(key: key);
 
+  @override
+  _TopicReplyItemState createState() => _TopicReplyItemState();
+}
+
+class _TopicReplyItemState extends State<_TopicReplyItemWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -248,12 +253,12 @@ class _TopicReplyItemWidget extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            user.getShowName(),
+                            widget.user.getShowName(),
                             style: TextStyle(color: Colors.black),
                           ),
                         ),
                         Text(
-                          "[${reply.lou} 楼]",
+                          "[${widget.reply.lou} 楼]",
                           style: TextStyle(
                             color: Palette.colorTextSecondary,
                             fontSize: Dimen.caption,
@@ -264,7 +269,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          "级别: ${group == null ? "" : group.name}",
+                          "级别: ${widget.group == null ? "" : widget.group.name}",
                           style: TextStyle(
                             color: Palette.colorTextSecondary,
                             fontSize: Dimen.caption,
@@ -273,7 +278,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
                           child: Text(
-                            "威望: ${user.getShowReputation()}",
+                            "威望: ${widget.user.getShowReputation()}",
                             style: TextStyle(
                               color: Palette.colorTextSecondary,
                               fontSize: Dimen.caption,
@@ -283,7 +288,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
                           child: Text(
-                            "发帖: ${user.postNum ?? 0}",
+                            "发帖: ${widget.user.postNum ?? 0}",
                             style: TextStyle(
                               color: Palette.colorTextSecondary,
                               fontSize: Dimen.caption,
@@ -304,9 +309,8 @@ class _TopicReplyItemWidget extends StatelessWidget {
         ),
         Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-//          child: _RichTextWidget(text: reply.content),
           child: Html(
-            data: NgaContentParser.parse(reply.content),
+            data: NgaContentParser.parse(widget.reply.content),
             customRender: ngaRenderer(),
           ),
         ),
@@ -324,26 +328,33 @@ class _TopicReplyItemWidget extends StatelessWidget {
                   padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
                   child: Row(
                     children: <Widget>[
-                      Icon(
-                        CommunityMaterialIcons.thumb_up_outline,
-                        color: Palette.colorIcon,
-                        size: 14,
+                      GestureDetector(
+                        child: Icon(
+                          CommunityMaterialIcons.thumb_up,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                        onTap: toggleLike,
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 8),
                         child: Text(
-                          "${reply.recommend ?? 0}",
+                          "${widget.reply.score}",
                           style: TextStyle(
-                              fontSize: Dimen.caption,
-                              color: Palette.colorTextSecondary),
+                            fontSize: Dimen.caption,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 8),
-                        child: Icon(
-                          CommunityMaterialIcons.thumb_down_outline,
-                          color: Palette.colorIcon,
-                          size: 14,
+                        child: GestureDetector(
+                          onTap: toggleDislike,
+                          child: Icon(
+                            CommunityMaterialIcons.thumb_down,
+                            color: Colors.white,
+                            size: 14,
+                          ),
                         ),
                       ),
                     ],
@@ -352,7 +363,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
               ),
               Spacer(),
               Text(
-                reply.postDate,
+                widget.reply.postDate,
                 style: TextStyle(
                   fontSize: Dimen.caption,
                   color: Palette.colorTextSecondary,
@@ -370,12 +381,12 @@ class _TopicReplyItemWidget extends StatelessWidget {
   }
 
   Widget _getAvatar() {
-    return user.avatar != null
+    return widget.user.avatar != null
         ? CachedNetworkImage(
             width: 48,
             height: 48,
             fit: BoxFit.cover,
-            imageUrl: user.avatar,
+            imageUrl: widget.user.avatar,
             placeholder: Image.asset(
               'images/default_forum_icon.png',
               width: 48,
@@ -395,7 +406,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
   }
 
   List<Widget> _getMedalListWidgets() {
-    if (medalList.isEmpty)
+    if (widget.medalList.isEmpty)
       return [
         Text(
           "-",
@@ -405,7 +416,7 @@ class _TopicReplyItemWidget extends StatelessWidget {
           ),
         )
       ];
-    return medalList.map((medal) {
+    return widget.medalList.map((medal) {
       return Padding(
         padding: EdgeInsets.only(right: 4),
         child: CachedNetworkImage(
@@ -416,5 +427,43 @@ class _TopicReplyItemWidget extends StatelessWidget {
         ),
       );
     }).toList();
+  }
+
+  toggleLike() async {
+    try {
+      final reaction = await Data()
+          .topicRepository
+          .likeReply(widget.reply.tid, widget.reply.pid);
+      setState(() => widget.reply.score += reaction.countChange);
+      Fluttertoast.instance.showToast(
+        msg: reaction.message,
+        gravity: ToastGravity.CENTER,
+      );
+    } catch (err) {
+      print(err.toString());
+      Fluttertoast.instance.showToast(
+        msg: err.message,
+        gravity: ToastGravity.CENTER,
+      );
+    }
+  }
+
+  toggleDislike() async {
+    try {
+      final reaction = await Data()
+          .topicRepository
+          .dislikeReply(widget.reply.tid, widget.reply.pid);
+      setState(() => widget.reply.score += reaction.countChange);
+      Fluttertoast.instance.showToast(
+        msg: reaction.message,
+        gravity: ToastGravity.CENTER,
+      );
+    } catch (err) {
+      print(err.toString());
+      Fluttertoast.instance.showToast(
+        msg: err.message,
+        gravity: ToastGravity.CENTER,
+      );
+    }
   }
 }
