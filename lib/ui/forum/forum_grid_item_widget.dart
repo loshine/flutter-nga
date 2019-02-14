@@ -7,7 +7,7 @@ class ForumGridItemWidget extends StatefulWidget {
   final Forum forum;
   final OnFavouriteChangedCallback onFavouriteChanged;
 
-  ForumGridItemWidget(this.forum, {Key key, this.onFavouriteChanged})
+  const ForumGridItemWidget(this.forum, {Key key, this.onFavouriteChanged})
       : super(key: key);
 
   @override

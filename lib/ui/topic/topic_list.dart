@@ -13,7 +13,7 @@ import "package:pull_to_refresh/pull_to_refresh.dart";
 import 'package:timeago/timeago.dart' as timeago;
 
 class TopicListPage extends StatefulWidget {
-  TopicListPage(this.forum, {Key key}) : super(key: key);
+  const TopicListPage(this.forum, {Key key}) : super(key: key);
 
   final Forum forum;
 

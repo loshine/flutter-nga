@@ -16,18 +16,23 @@ class _CollapseState extends State<CollapseWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RaisedButton(
-          onPressed: () => setState(() => _collapsed = !_collapsed),
-          child: Text("${_collapsed ? "点击展开" : "点击收起"}:${widget.title ?? ""}"),
-        ),
-        SizedBox(
-          height: _collapsed ? 0 : null,
-          child: Wrap(children: widget.children),
-        ),
-      ],
+    // 因为要占据一行，所以必须 infinity
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RaisedButton(
+            onPressed: () => setState(() => _collapsed = !_collapsed),
+            child:
+                Text("${_collapsed ? "点击展开" : "点击收起"}:${widget.title ?? ""}"),
+          ),
+          SizedBox(
+            height: _collapsed ? 0 : null,
+            child: Wrap(children: widget.children),
+          ),
+        ],
+      ),
     );
   }
 }
