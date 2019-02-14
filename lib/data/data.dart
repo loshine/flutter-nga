@@ -121,31 +121,44 @@ class Data {
           "request url : ${response.request.baseUrl + response.request.path}\n" +
               "request data : ${response.request.data.toString()}\n" +
               "response data : $responseBody");
+      Map<String, dynamic> map;
       try {
-        Map<String, dynamic> map = json.decode(responseBody);
-        // 如果是 api 错误，抛出错误内容
-        if (map["data"] is Map<String, dynamic> &&
-            map["data"].containsKey("__MESSAGE")) {
-          String errorMessage = map["data"]["__MESSAGE"]["1"];
-          throw DioError(
-            response: response,
-            message: errorMessage,
-            type: DioErrorType.RESPONSE,
-          );
-        }
-        // 上传附件时的错误
-        if (map["error"] is String) {
-          String errorMessage = map["error"];
-          throw DioError(
-            response: response,
-            message: errorMessage,
-            type: DioErrorType.RESPONSE,
-          );
-        }
-        response.data = map["data"];
+        map = json.decode(responseBody);
       } catch (error) {
         response.data = responseBody;
+        return response;
       }
+      // 如果是 api 错误，抛出错误内容
+      if (map["data"] is Map<String, dynamic> &&
+          map["data"].containsKey("__MESSAGE")) {
+        String errorMessage = map["data"]["__MESSAGE"]["1"];
+        throw DioError(
+          response: response,
+          message: errorMessage,
+          type: DioErrorType.RESPONSE,
+        );
+      }
+      // 点赞时的错误
+      if (map["error"] is Map) {
+        Map<String, dynamic> err = map["error"];
+        if (err["0"] is String) {
+          throw DioError(
+            response: response,
+            message: err["0"],
+            type: DioErrorType.RESPONSE,
+          );
+        }
+      }
+      // 上传附件时的错误
+      if (map["error"] is String) {
+        String errorMessage = map["error"];
+        throw DioError(
+          response: response,
+          message: errorMessage,
+          type: DioErrorType.RESPONSE,
+        );
+      }
+      response.data = map["data"];
       return response;
     };
     _dio.interceptor.response.onError = (DioError e) {
