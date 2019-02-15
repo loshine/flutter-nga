@@ -4,6 +4,7 @@ class NgaContentParser {
   static List<Parser> _parserList = [
     _AlbumParser(),
     _TableParser(),
+    _ReplyParser(),
     _ContentParser(),
     _EmoticonParser(),
   ];
@@ -59,6 +60,27 @@ class _TableParser implements Parser {
   }
 }
 
+class _ReplyParser implements Parser {
+  @override
+  String parse(String content) {
+    return content
+        .replaceAllMapped(
+            RegExp(
+                "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
+            (match) =>
+                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(4)}'>[${match.group(5)}]</a> (${match.group(6)}):")
+        .replaceAllMapped(
+            RegExp(
+                "\\[b]Reply to \\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
+            (match) =>
+                "<blockquote><a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}</blockquote>")
+        .replaceAll(
+            RegExp(
+                "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
+            "");
+  }
+}
+
 class _ContentParser implements Parser {
   @override
   String parse(String content) {
@@ -95,16 +117,6 @@ class _ContentParser implements Parser {
             (match) =>
                 "<span style='font-family:${match.group(1)}'>") // 处理 [font=?]
         .replaceAll("[/font]", "</span>") // [/font]
-        .replaceAllMapped(
-            RegExp(
-                "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
-            (match) =>
-                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(4)}'>[${match.group(5)}]</a> (${match.group(6)}):")
-        .replaceAllMapped(
-            RegExp(
-                "\\[b]Reply to \\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
-            (match) =>
-                "<blockquote><a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}</blockquote>")
         .replaceAllMapped(
             RegExp("\\[collapse=([\\s\\S]*?)]([\\s\\S]*?)?\\[/collapse]"),
             (match) =>

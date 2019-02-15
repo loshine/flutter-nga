@@ -56,6 +56,9 @@ class TopicDetailData {
         }
       } else {
         tempUserMap[entry.key] = User.fromJson(entry.value);
+        if (key != tempUserMap[entry.key].uid) {
+          tempUserMap[entry.key].uid = key;
+        }
       }
     }
     Map<String, Reply> tempReplyMap = {};
@@ -82,7 +85,7 @@ class TopicDetailData {
 }
 
 class User {
-  final int uid;
+  int uid;
   final String username;
   final int credit;
   final String medal;
@@ -104,7 +107,7 @@ class User {
   final String nickname;
   final int bitData;
 
-  const User(
+  User(
       {this.uid,
       this.username,
       this.credit,
