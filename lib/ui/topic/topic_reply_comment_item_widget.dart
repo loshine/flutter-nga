@@ -54,7 +54,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
               ),
             ],
           ),
-          Html(data: NgaContentParser.parse(reply.content)),
+          Html(data: NgaContentParser.parseComment(reply.content)),
         ],
       ),
     );

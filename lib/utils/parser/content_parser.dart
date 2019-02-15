@@ -4,13 +4,25 @@ class NgaContentParser {
   static List<Parser> _parserList = [
     _AlbumParser(),
     _TableParser(),
-    _ReplyParser(),
     _ContentParser(),
     _EmoticonParser(),
   ];
 
+  static Parser _replyParser = _ReplyParser();
+  static Parser _commentParser = _CommentParser();
+
   static String parse(String content) {
     var parseContent = content;
+    parseContent = _replyParser.parse(parseContent);
+    _parserList.forEach((parser) {
+      parseContent = parser.parse(parseContent);
+    });
+    return parseContent;
+  }
+
+  static String parseComment(String content) {
+    var parseContent = content;
+    parseContent = _commentParser.parse(parseContent);
     _parserList.forEach((parser) {
       parseContent = parser.parse(parseContent);
     });
@@ -73,10 +85,26 @@ class _ReplyParser implements Parser {
             RegExp(
                 "\\[b]Reply to \\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
             (match) =>
-                "<blockquote><a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}</blockquote>")
+                "<blockquote><a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}</blockquote>");
+  }
+}
+
+class _CommentParser implements Parser {
+  @override
+  String parse(String content) {
+    return content
         .replaceAll(
             RegExp(
-                "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
+                "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
+            "")
+        .replaceAll(
+            RegExp(
+                "\\[b]Reply to \\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
+            "")
+        .replaceAll("[color=gray](楼)[/color]", "")
+        .replaceAll(
+            RegExp(
+                "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid(=(\\d+)?)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
             "");
   }
 }

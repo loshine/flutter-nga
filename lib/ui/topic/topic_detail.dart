@@ -116,9 +116,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
         throw error;
       } on TypeError catch (error) {
         throw error;
-      } catch (err, stackTrace) {
-        debugPrint(err.toString());
-        debugPrint(stackTrace.toString());
+      } catch (err) {
         _refreshController.sendBack(true, RefreshStatus.failed);
         if (err != null) {
           Fluttertoast.instance.showToast(
@@ -234,7 +232,6 @@ class _TopicDetailState extends State<TopicDetailPage> {
         }
       });
     }
-    debugPrint("${commentUserList.length}");
     return TopicReplyItemWidget(
       reply: reply,
       user: user,

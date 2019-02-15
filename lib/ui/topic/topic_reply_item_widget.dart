@@ -129,7 +129,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             padding: EdgeInsets.only(left: 16, right: 16),
             child: Html(
               data: NgaContentParser.parse(widget.reply.content),
-              customRender: ngaRenderer(),
+              customRender: ngaRenderer,
             ),
           ),
         ),
