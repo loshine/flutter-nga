@@ -196,7 +196,14 @@ ngaRenderer() {
         // 图片
         case "img":
           if (node.attributes['src'] != null) {
-            return CachedNetworkImage(imageUrl: node.attributes['src']);
+            return CachedNetworkImage(
+              imageUrl: node.attributes['src'],
+              placeholder: Icon(
+                Icons.image,
+                size: 48,
+                color: Palette.colorIcon,
+              ),
+            );
           } else if (node.attributes['alt'] != null) {
             //Temp fix for https://github.com/flutter/flutter/issues/736
             if (node.attributes['alt'].endsWith(" ")) {
