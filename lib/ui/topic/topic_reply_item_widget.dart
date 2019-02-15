@@ -5,6 +5,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/topic/topic_reply_comment_item_widget.dart';
+import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
@@ -17,9 +18,15 @@ class TopicReplyItemWidget extends StatefulWidget {
   final User user;
   final Group group;
   final List<Medal> medalList;
+  final List<User> userList;
 
   const TopicReplyItemWidget(
-      {Key key, this.reply, this.user, this.group, this.medalList})
+      {Key key,
+      this.reply,
+      this.user,
+      this.group,
+      this.medalList,
+      this.userList})
       : super(key: key);
 
   @override
@@ -36,7 +43,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           children: [
             Padding(
               padding: EdgeInsets.all(16),
-              child: ClipOval(child: _getAvatar()),
+              child: AvatarWidget(widget.user.avatar),
             ),
             Expanded(
               child: Padding(
@@ -132,9 +139,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           child: Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
-              children: widget.reply.commentList
-                  .map((reply) => TopicReplyCommentItemWidget(reply))
-                  .toList(),
+              children: _getCommentListWidgets(),
             ),
           ),
         ),
@@ -204,31 +209,6 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     );
   }
 
-  Widget _getAvatar() {
-    return widget.user.avatar != null
-        ? CachedNetworkImage(
-            width: 48,
-            height: 48,
-            fit: BoxFit.cover,
-            imageUrl: widget.user.avatar,
-            placeholder: Image.asset(
-              'images/default_forum_icon.png',
-              width: 48,
-              height: 48,
-            ),
-            errorWidget: Image.asset(
-              'images/default_forum_icon.png',
-              width: 48,
-              height: 48,
-            ),
-          )
-        : Image.asset(
-            'images/default_forum_icon.png',
-            width: 48,
-            height: 48,
-          );
-  }
-
   List<Widget> _getMedalListWidgets() {
     if (widget.medalList.isEmpty)
       return [
@@ -289,5 +269,33 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         gravity: ToastGravity.CENTER,
       );
     }
+  }
+
+  _getCommentListWidgets() {
+    List<Widget> widgets = [];
+    widgets.add(Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Palette.colorDivider,
+          ),
+        ),
+      ),
+      child: Text(
+        "评论",
+        style: TextStyle(
+          fontSize: Dimen.subheading,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ));
+    widgets.addAll(widget.reply.commentList.map((comment) =>
+        TopicReplyCommentItemWidget(
+            comment,
+            widget.userList.firstWhere((user) => user.uid == comment.authorId,
+                orElse: () => null))));
+    return widgets;
   }
 }

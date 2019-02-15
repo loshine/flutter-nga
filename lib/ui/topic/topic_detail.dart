@@ -92,6 +92,12 @@ class _TopicDetailState extends State<TopicDetailPage> {
           if (!_enablePullUp) {
             _enablePullUp = true;
           }
+          _userList.clear();
+          _userList.addAll(data.userList.values);
+          _groupSet.clear();
+          _groupSet.addAll(data.groupList.values);
+          _medalSet.clear();
+          _medalSet.addAll(data.medalList.values);
           _replyList.clear();
           _commentList.clear();
           data.replyList.values.forEach((reply) {
@@ -105,12 +111,6 @@ class _TopicDetailState extends State<TopicDetailPage> {
             _replyList.add(reply);
             _commentList.addAll(reply.commentList);
           });
-          _userList.clear();
-          _userList.addAll(data.userList.values);
-          _groupSet.clear();
-          _groupSet.addAll(data.groupList.values);
-          _medalSet.clear();
-          _medalSet.addAll(data.medalList.values);
         });
       } on NoSuchMethodError catch (error) {
         throw error;
@@ -141,6 +141,9 @@ class _TopicDetailState extends State<TopicDetailPage> {
         _maxPage = data.getMaxPage();
         _refreshController.sendBack(false, RefreshStatus.canRefresh);
         setState(() {
+          _userList.addAll(data.userList.values);
+          _groupSet.addAll(data.groupList.values);
+          _medalSet.addAll(data.medalList.values);
           data.replyList.values.forEach((reply) {
             if (reply.tid == null) {
               Reply comment = _commentList
@@ -152,9 +155,6 @@ class _TopicDetailState extends State<TopicDetailPage> {
             _replyList.add(reply);
             _commentList.addAll(reply.commentList);
           });
-          _userList.addAll(data.userList.values);
-          _groupSet.addAll(data.groupList.values);
-          _medalSet.addAll(data.medalList.values);
         });
       } on NoSuchMethodError catch (error) {
         throw error;
@@ -222,11 +222,25 @@ class _TopicDetailState extends State<TopicDetailPage> {
         }
       });
     }
+
+    List<User> commentUserList = [];
+    if (reply.commentList != null && reply.commentList.isNotEmpty) {
+      reply.commentList.forEach((comment) {
+        for (var user in _userList) {
+          if (user.uid == comment.authorId) {
+            commentUserList.add(user);
+            break;
+          }
+        }
+      });
+    }
+    debugPrint("${commentUserList.length}");
     return TopicReplyItemWidget(
       reply: reply,
       user: user,
       group: group,
       medalList: medalList,
+      userList: commentUserList,
     );
   }
 }
