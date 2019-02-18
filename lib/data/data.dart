@@ -106,10 +106,17 @@ class Data {
 //          .transform(StreamTransformer.fromHandlers(
 //              handleData: (data, EventSink sink) => sink.add(decodeGbk(data))))
 //          .join();
-      // flutter 的 gbk 库有少许字符解析不出来，暂时使用 Java 代替
-      String responseBody = await stream.asyncMap((list) async {
-        return await AndroidGbk.decode(list);
-      }).join();
+      // XXX: flutter 的 gbk 库有少许字符解析不出来，暂时使用 Java 代替
+      String responseBody = await stream
+          .fold(<int>[], (List<int> sum, List<int> list) {
+            sum.addAll(list);
+            return sum;
+          })
+          .asStream()
+          .asyncMap((list) async {
+            return await AndroidGbk.decodeList(list);
+          })
+          .join();
       // 处理一些可能导致错误的字符串
       // 直接制表符替换为 \t, \x 替换为 \\x
       responseBody =
@@ -118,7 +125,7 @@ class Data {
         responseBody = await AndroidFormatJson.decode(responseBody);
       }
       debugPrint(
-          "request url : ${response.request.baseUrl + response.request.path}\n" +
+          "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}\n" +
               "request data : ${response.request.data.toString()}\n" +
               "response data : $responseBody");
       Map<String, dynamic> map;
