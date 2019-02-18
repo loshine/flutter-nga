@@ -9,6 +9,7 @@ import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/match/match_tabs.dart';
+import 'package:flutter_nga/ui/settings/settings.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
 class HomePage extends StatefulWidget {
@@ -192,7 +193,8 @@ class _HomePageState extends State<HomePage> {
                           title: Text("设置"),
                         ),
                         onTap: () {
-                          // TODO: 点击设置
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => SettingsPage()));
                         },
                       ),
                       color: Palette.colorBackground,

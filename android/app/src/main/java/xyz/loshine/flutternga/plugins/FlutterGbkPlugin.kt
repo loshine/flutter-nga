@@ -30,6 +30,13 @@ class FlutterGbkPlugin : MethodChannel.MethodCallHandler {
                 // 返回给 flutter 的参数
                 result.success(string)
             }
+            "decodeList" -> {
+                val content: List<Int> = call.argument("content") ?: listOf()
+                val byteArray = content.map { it.toByte() }.toByteArray()
+                val string = String(byteArray, Charset.forName("gbk"))
+                // 返回给 flutter 的参数
+                result.success(string)
+            }
             "urlDecode" -> {
                 val content: String = call.argument("content") ?: ""
                 val string = URLDecoder.decode(content, "gbk")
