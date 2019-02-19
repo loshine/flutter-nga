@@ -13,9 +13,12 @@ import "package:pull_to_refresh/pull_to_refresh.dart";
 import 'package:timeago/timeago.dart' as timeago;
 
 class TopicListPage extends StatefulWidget {
-  const TopicListPage(this.forum, {Key key}) : super(key: key);
+  const TopicListPage({this.name, this.fid, Key key})
+      : assert(fid != null),
+        super(key: key);
 
-  final Forum forum;
+  final String name;
+  final int fid;
 
   @override
   _TopicListState createState() => _TopicListState();
@@ -43,7 +46,7 @@ class _TopicListState extends State<TopicListPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.forum.name),
+          title: Text(widget.name),
           actions: <Widget>[
             IconButton(
               icon: Icon(
@@ -83,7 +86,10 @@ class _TopicListState extends State<TopicListPage> {
   @override
   void initState() {
     _refreshController = RefreshController();
-    Data().forumRepository.isFavourite(widget.forum).then((isFavourite) {
+    Data()
+        .forumRepository
+        .isFavourite(Forum(widget.fid, widget.name))
+        .then((isFavourite) {
       setState(() {
         _defaultFavourite = isFavourite;
         this._isFavourite = isFavourite;
@@ -98,9 +104,9 @@ class _TopicListState extends State<TopicListPage> {
 
   _switchFavourite() async {
     if (_isFavourite) {
-      await Data().forumRepository.deleteFavourite(widget.forum);
+      await Data().forumRepository.deleteFavourite(Forum(widget.fid, widget.name));
     } else {
-      await Data().forumRepository.saveFavourite(widget.forum);
+      await Data().forumRepository.saveFavourite(Forum(widget.fid, widget.name));
     }
     setState(() {
       _isFavourite = !_isFavourite;
@@ -113,7 +119,7 @@ class _TopicListState extends State<TopicListPage> {
       try {
         _page = 1;
         TopicListData data =
-            await Data().topicRepository.getTopicList(widget.forum.fid, _page);
+            await Data().topicRepository.getTopicList(widget.fid, _page);
         _page++;
         _maxPage = data.getMaxPage();
         _refreshController.sendBack(true, RefreshStatus.completed);
@@ -142,7 +148,7 @@ class _TopicListState extends State<TopicListPage> {
       }
       try {
         TopicListData data =
-            await Data().topicRepository.getTopicList(widget.forum.fid, _page);
+            await Data().topicRepository.getTopicList(widget.fid, _page);
         _page++;
         _maxPage = data.getMaxPage();
         _refreshController.sendBack(false, RefreshStatus.canRefresh);

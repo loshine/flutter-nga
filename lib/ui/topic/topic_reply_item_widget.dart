@@ -43,7 +43,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           children: [
             Padding(
               padding: EdgeInsets.all(16),
-              child: AvatarWidget(widget.user.avatar),
+              child: AvatarWidget(
+                widget.user.avatar,
+                username: widget.user.username,
+              ),
             ),
             Expanded(
               child: Padding(

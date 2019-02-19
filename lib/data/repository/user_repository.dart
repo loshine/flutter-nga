@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
+import 'package:flutter_nga/plugins/android_gbk.dart';
+import 'package:flutter_nga/utils/constant.dart';
 import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:objectdb/objectdb.dart';
-import 'package:flutter_nga/utils/constant.dart';
 
 const TAG_CID = "ngaPassportCid";
 const TAG_UID = "ngaPassportUid";
@@ -66,7 +68,7 @@ class UserRepository {
       if (list.isNotEmpty) {
         await _userDb.remove({'uid': uid});
       }
-      await _userDb.insert(user.toMap());
+      await _userDb.insert(user.toJson());
       return user;
     }
     throw "cookies parse error: cookies = $cookies";
@@ -76,9 +78,22 @@ class UserRepository {
     final list = await _userDb.find({});
     if (list.isNotEmpty) {
       final map = await _userDb.first({});
-      return User.fromMap(map);
+      return User.fromJson(map);
     } else {
       return null;
+    }
+  }
+
+  Future<UserInfo> getUserInfo(String username) async {
+    try {
+      final encodedUsername = await AndroidGbk.urlEncode(username);
+      Response<Map<String, dynamic>> response = await Data().dio.get(
+          "nuke.php?__lib=ucp&__act=get&lite=js&noprefix&username=$encodedUsername");
+      // {"0": { userinfo }};
+      Map<String, dynamic> userInfoMap = response.data["0"];
+      return UserInfo.fromJson(userInfoMap);
+    } catch (error) {
+      rethrow;
     }
   }
 }

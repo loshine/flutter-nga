@@ -34,6 +34,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                 child: AvatarWidget(
                   user.avatar,
                   size: 36,
+                  username: user.username,
                 ),
               ),
               Column(
