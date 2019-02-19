@@ -3,11 +3,11 @@ class ToggleLikeReaction {
       : assert(message != null),
         assert(countChange != null);
 
-  Map toMap() {
+  Map toJson() {
     return {'0': message, '1': countChange};
   }
 
-  factory ToggleLikeReaction.fromMap(Map map) {
+  factory ToggleLikeReaction.fromJson(Map map) {
     return ToggleLikeReaction(map['0'], map['1']);
   }
 

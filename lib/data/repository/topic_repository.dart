@@ -147,7 +147,7 @@ class TopicRepository {
             data: postData,
             options: options,
           );
-      return ToggleLikeReaction.fromMap(response.data);
+      return ToggleLikeReaction.fromJson(response.data);
     } catch (error) {
       rethrow;
     }
@@ -165,7 +165,7 @@ class TopicRepository {
             data: postData,
             options: options,
           );
-      return ToggleLikeReaction.fromMap(response.data);
+      return ToggleLikeReaction.fromJson(response.data);
     } catch (error) {
       rethrow;
     }
