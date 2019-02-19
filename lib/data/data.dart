@@ -119,8 +119,10 @@ class Data {
           .join();
       // 处理一些可能导致错误的字符串
       // 直接制表符替换为 \t, \x 替换为 \\x
-      responseBody =
-          responseBody.replaceAll("\t", "\\t").replaceAll("\\x", "\\\\x");
+      responseBody = responseBody
+          .replaceAll("\t", "\\t")
+          .replaceAll("\\x", "\\\\x")
+          .replaceAll("window.script_muti_get_var_store=", "");
       if (!responseBody.startsWith("{\"") && responseBody.startsWith("{")) {
         responseBody = await AndroidFormatJson.decode(responseBody);
       }

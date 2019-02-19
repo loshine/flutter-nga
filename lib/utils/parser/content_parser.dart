@@ -121,7 +121,7 @@ class _ContentParser implements Parser {
         .replaceAllMapped(RegExp("\\[url]([\\s\\S]*?)?\\[/url]"),
             _urlReplaceFunc) // 处理 [url]asd[/url]
         .replaceAllMapped(RegExp("\\[url=([\\s\\S]*?)?]([\\s\\S]*?)?\\[/url]"),
-            _url2ReplaceFunc) // 处理[url=xxx]asd[/url]
+            _url2ReplaceFunc) // 处理[url=asd]asd[/url]
         .replaceAllMapped(
             RegExp("\\[flash]([\\s\\S]*?)?\\[/flash]"),
             (match) =>

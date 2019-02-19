@@ -221,20 +221,20 @@ class ForumRepository {
   }
 
   Future<bool> isFavourite(Forum forum) async {
-    List<Map> list = await _forumDb.find(forum.toMap());
+    List<Map> list = await _forumDb.find(forum.toJson());
     return list.isNotEmpty;
   }
 
   Future<ObjectId> saveFavourite(Forum forum) {
-    return _forumDb.insert(forum.toMap());
+    return _forumDb.insert(forum.toJson());
   }
 
   Future<int> deleteFavourite(Forum forum) {
-    return _forumDb.remove(forum.toMap());
+    return _forumDb.remove(forum.toJson());
   }
 
   Future<List<Forum>> getFavouriteList() async {
     List<Map> results = await _forumDb.find({});
-    return results.map((map) => Forum.fromMap(map)).toList();
+    return results.map((map) => Forum.fromJson(map)).toList();
   }
 }
