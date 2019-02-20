@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
-import 'package:flutter_nga/ui/topic/topic_list.dart';
+import 'package:flutter_nga/ui/page/topic/topic_list.dart';
 
 class ForumGridItemWidget extends StatefulWidget {
   final Forum forum;

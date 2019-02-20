@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/ui/forum/favourite_forum_group.dart';
-import 'package:flutter_nga/ui/forum/forum_group.dart';
-
+import 'package:flutter_nga/ui/page/forum/favourite_forum_group.dart';
+import 'package:flutter_nga/ui/page/forum/forum_group.dart';
 class ForumGroupTabsPage extends StatefulWidget {
   @override
   _ForumGroupTabsState createState() => _ForumGroupTabsState();

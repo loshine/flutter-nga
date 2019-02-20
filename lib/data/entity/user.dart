@@ -1,11 +1,12 @@
 class User {
-  User(this.uid,
-      this.cid,
-      this.nickname, {
-        this.avatarUrl,
-        this.replyCount,
-        this.replyString,
-      });
+  User(
+    this.uid,
+    this.cid,
+    this.nickname, {
+    this.avatarUrl,
+    this.replyCount,
+    this.replyString,
+  });
 
   final String uid;
   final String cid;
@@ -75,6 +76,7 @@ class UserInfo {
         reputationList.add(ForumReputation.fromJson(v));
       });
     }
+    final userForum = map['userForum'];
     return UserInfo(
       uid: map['uid'],
       username: map['username'],
@@ -89,7 +91,7 @@ class UserInfo {
       fame: map['fame'],
       money: map['money'],
       adminForums: map['adminForums'],
-      userForum: map['userForum'],
+      userForum: userForum is Map ? userForum : null,
       reputation: reputationList,
     );
   }

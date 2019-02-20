@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
-import 'package:flutter_nga/ui/forum/forum_grid_item_widget.dart';
+import 'package:flutter_nga/ui/page/forum/forum_grid_item_widget.dart';
 
 class FavouriteForumGroupPage extends StatefulWidget {
   @override
