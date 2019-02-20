@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/ui/content/content_details.dart';
+import 'package:flutter_nga/ui/page/content/content_details.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/dimen.dart';
