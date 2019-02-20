@@ -4,7 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
-import 'package:flutter_nga/ui/topic/topic_detail.dart';
+import 'package:flutter_nga/ui/page/topic/topic_detail.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';

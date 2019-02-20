@@ -7,9 +7,9 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/plugins/login.dart';
-import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
-import 'package:flutter_nga/ui/match/match_tabs.dart';
-import 'package:flutter_nga/ui/settings/settings.dart';
+import 'package:flutter_nga/ui/page/forum/forum_group_tabs.dart';
+import 'package:flutter_nga/ui/page/match/match_tabs.dart';
+import 'package:flutter_nga/ui/page/settings/settings.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 

@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/bloc/user_info_bloc.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/ui/topic/topic_list.dart';
+import 'package:flutter_nga/ui/page/topic/topic_list.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -22,63 +24,92 @@ class UserInfoPage extends StatefulWidget {
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  UserInfo _userInfo;
+  UserInfoBloc _bloc;
+  StreamSubscription _subscription;
   final _format = DateFormat('yyyy-MM-dd hh:mm:ss');
 
   @override
   void initState() {
     super.initState();
-    Data()
-        .userRepository
-        .getUserInfo(widget.username)
-        .then((user) => setState(() => _userInfo = user))
-        .catchError((err) => Fluttertoast.instance.showToast(
-              msg: err.message,
-              gravity: ToastGravity.CENTER,
-            ));
+    _createBloc();
+  }
+
+  @override
+  void didUpdateWidget(UserInfoPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _disposeBloc();
+    _createBloc();
+  }
+
+  @override
+  void dispose() {
+    _disposeBloc();
+    super.dispose();
+  }
+
+  void _createBloc() {
+    _bloc = UserInfoBloc(widget.username);
+    _subscription = _bloc.outErrorMessage.listen(
+      (message) => Fluttertoast.instance.showToast(
+            msg: message,
+            gravity: ToastGravity.CENTER,
+          ),
+    );
+  }
+
+  void _disposeBloc() {
+    _subscription.cancel();
+    _bloc.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 200,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text(
-                _userInfo == null ? "" : _userInfo.username,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.0,
+      body: StreamBuilder<UserInfo>(
+        stream: _bloc.outUserInfo,
+        builder: (context, snapshot) {
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                floating: false,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  title: Text(
+                    snapshot.data == null ? "" : snapshot.data.username,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  background: Container(
+                      child: snapshot.data == null
+                          ? SizedBox.expand()
+                          : CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl: snapshot.data.avatar,
+                              placeholder:
+                                  Image.asset('images/default_forum_icon.png'),
+                              errorWidget:
+                                  Image.asset('images/default_forum_icon.png'),
+                            ),
+                      foregroundDecoration:
+                          BoxDecoration(color: Colors.black38)),
                 ),
               ),
-              background: Container(
-                  child: _userInfo == null
-                      ? SizedBox.expand()
-                      : CachedNetworkImage(
-                          fit: BoxFit.cover,
-                          imageUrl: _userInfo.avatar,
-                          placeholder:
-                              Image.asset('images/default_forum_icon.png'),
-                          errorWidget:
-                              Image.asset('images/default_forum_icon.png'),
-                        ),
-                  foregroundDecoration: BoxDecoration(color: Colors.black38)),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate(_getBodyWidgets()),
-          )
-        ],
+              SliverList(
+                delegate:
+                    SliverChildListDelegate(_getBodyWidgets(snapshot.data)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  List<Widget> _getAdminForumWidgets() {
+  List<Widget> _getAdminForumWidgets(UserInfo userInfo) {
     List<Widget> widgets = [
       Padding(
         padding: EdgeInsets.only(bottom: 8),
@@ -97,10 +128,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
       )
     ];
 
-    if (_userInfo != null &&
-        _userInfo.adminForums != null &&
-        _userInfo.adminForums.isNotEmpty) {
-      widgets.addAll(_userInfo.adminForums.entries.map(
+    if (userInfo != null &&
+        userInfo.adminForums != null &&
+        userInfo.adminForums.isNotEmpty) {
+      widgets.addAll(userInfo.adminForums.entries.map(
         (entry) => GestureDetector(
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => TopicListPage(
@@ -119,7 +150,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return widgets;
   }
 
-  List<Widget> _getReputationWidgets() {
+  List<Widget> _getReputationWidgets(UserInfo userInfo) {
     List<Widget> widgets = [
       Padding(
         padding: EdgeInsets.only(bottom: 8),
@@ -139,12 +170,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
     ];
     widgets.add(InfoWidget(
       title: "威望: ",
-      subTitle: "${_userInfo == null ? 0 : _userInfo.fame / 10}",
+      subTitle: "${userInfo == null ? 0 : userInfo.fame / 10}",
     ));
-    if (_userInfo != null &&
-        _userInfo.reputation != null &&
-        _userInfo.reputation.isNotEmpty) {
-      widgets.addAll(_userInfo.reputation.map((reputation) => InfoWidget(
+    if (userInfo != null &&
+        userInfo.reputation != null &&
+        userInfo.reputation.isNotEmpty) {
+      widgets.addAll(userInfo.reputation.map((reputation) => InfoWidget(
             title: "${reputation.name}: ",
             subTitle: "${reputation.value}",
           )));
@@ -152,7 +183,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return widgets;
   }
 
-  List<Widget> _getBodyWidgets() {
+  List<Widget> _getBodyWidgets(UserInfo userInfo) {
     List<Widget> widgets = [
       Card(
         margin: EdgeInsets.fromLTRB(8, 8, 8, 4),
@@ -177,29 +208,29 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 ),
                 InfoWidget(
                   title: "用户ID: ",
-                  subTitle: _userInfo == null ? "N/A" : "${_userInfo.uid}",
+                  subTitle: userInfo == null ? "N/A" : "${userInfo.uid}",
                 ),
                 InfoWidget(
                   title: "用户名: ",
-                  subTitle: _userInfo == null ? "N/A" : "${_userInfo.username}",
+                  subTitle: userInfo == null ? "N/A" : "${userInfo.username}",
                 ),
                 InfoWidget(
                   title: "用户组: ",
-                  subTitle: _userInfo == null
+                  subTitle: userInfo == null
                       ? "N/A"
-                      : "${_userInfo.group}(${_userInfo.groupId})",
+                      : "${userInfo.group}(${userInfo.groupId})",
                 ),
                 InfoWidget(
                   title: "财富: ",
-                  subTitle: _userInfo == null || _userInfo.money == null
+                  subTitle: userInfo == null || userInfo.money == null
                       ? "N/A"
-                      : "${_userInfo.money ~/ 10000}金 ${(_userInfo.money % 10000) ~/ 100}银 ${_userInfo.money % 100}铜",
+                      : "${userInfo.money ~/ 10000}金 ${(userInfo.money % 10000) ~/ 100}银 ${userInfo.money % 100}铜",
                 ),
                 InfoWidget(
                   title: "注册日期: ",
-                  subTitle: _userInfo == null
+                  subTitle: userInfo == null
                       ? "N/A"
-                      : "${_format.format(DateTime.fromMillisecondsSinceEpoch(_userInfo.registerDate * 1000))}",
+                      : "${_format.format(DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate * 1000))}",
                 ),
               ],
             ),
@@ -228,9 +259,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   ),
                 ),
                 Html(
-                  data: _userInfo == null
+                  data: userInfo == null
                       ? ""
-                      : NgaContentParser.parse(_userInfo.sign),
+                      : NgaContentParser.parse(userInfo.sign),
                 )
               ],
             ),
@@ -246,7 +277,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
             padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: _getAdminForumWidgets(),
+              children: _getAdminForumWidgets(userInfo),
             ),
           ),
         ),
@@ -260,15 +291,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
             padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: _getReputationWidgets(),
+              children: _getReputationWidgets(userInfo),
             ),
           ),
         ),
       ),
     ];
 
-    if (_userInfo != null && _userInfo.userForum != null) {
-      final forumName = _userInfo.userForum['1'];
+    if (userInfo != null && userInfo.userForum != null) {
+      final forumName = userInfo.userForum['1'];
       if (forumName != null) {
         widgets.add(
           Card(
@@ -299,7 +330,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     GestureDetector(
                       onTap: () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => TopicListPage(
-                                fid: _userInfo.userForum['0'],
+                                fid: userInfo.userForum['0'],
                                 name: forumName,
                               ))),
                       child: Text(

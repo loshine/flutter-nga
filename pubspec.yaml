@@ -30,6 +30,7 @@ dependencies:
   keyboard_visibility: ^0.5.1
   device_info: ^0.4.0
   intl: ^0.15.7
+  rxdart: ^0.20.0
 
   flutter_native_web: ^1.0.1
   image_picker: ^0.4.12
