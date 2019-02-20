@@ -10,6 +10,7 @@ import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/match/match_tabs.dart';
 import 'package:flutter_nga/ui/settings/settings.dart';
+import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,6 +24,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   var _index = 0;
   User user;
+  UserInfo _userInfo;
   String _nickname;
   StreamSubscription _subscription;
   final pageList = [
@@ -55,6 +57,10 @@ class _HomePageState extends State<HomePage> {
       if (user != null) {
         final firstTimeDecode = await AndroidGbk.urlDecode(user.nickname);
         final decodedNickname = await AndroidGbk.urlDecode(firstTimeDecode);
+        Data()
+            .userRepository
+            .getUserInfo(decodedNickname)
+            .then((userInfo) => setState(() => _userInfo = userInfo));
         setState(() => _nickname = decodedNickname);
       }
     }
@@ -106,17 +112,15 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image(
-                      image: AssetImage("assets/images/logo.png"),
-                      width: 96.0,
-                      height: 96.0,
-                    ),
                     Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        _nickname ?? "TO-DOs",
+                      padding: EdgeInsets.all(16),
+                      child: AvatarWidget(
+                        _userInfo != null ? _userInfo.avatar : "",
+                        size: 56,
+                        username: _nickname,
                       ),
-                    )
+                    ),
+                    Text(_nickname ?? "点击登陆"),
                   ],
                 ),
               ),
