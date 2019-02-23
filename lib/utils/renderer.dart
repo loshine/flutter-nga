@@ -196,11 +196,11 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
         if (node.attributes['src'] != null) {
           return CachedNetworkImage(
             imageUrl: node.attributes['src'],
-            placeholder: Icon(
-              Icons.image,
-              size: 48,
-              color: Palette.colorIcon,
-            ),
+            placeholder: (context, url) => Icon(
+                  Icons.image,
+                  size: 48,
+                  color: Palette.colorIcon,
+                ),
           );
         } else if (node.attributes['alt'] != null) {
           //Temp fix for https://github.com/flutter/flutter/issues/736

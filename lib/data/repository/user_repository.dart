@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
-import 'package:flutter_nga/utils/constant.dart';
-import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:objectdb/objectdb.dart';
 
 const TAG_CID = "ngaPassportCid";
@@ -42,20 +38,13 @@ class UserRepository {
       } else if (c.contains(TAG_USER_NAME)) {
         username = c.trim().substring(TAG_USER_NAME.length + 1);
         try {
-          username = decodeGbk(username.codeUnits);
-          username = decodeGbk(username.codeUnits);
+          username = await AndroidGbk.decode(username.codeUnits);
+          username = await AndroidGbk.decode(username.codeUnits);
         } catch (e) {
           print(e.toString());
         }
       }
     }
-    print("cid = $cid, uid = $uid, username = $username");
-    List<Cookie> cookieList = [
-      Cookie(TAG_CID, cid),
-      Cookie(TAG_UID, uid),
-    ];
-    var uri = Uri.parse(DOMAIN);
-    Data().dio.cookieJar.saveFromResponse(uri, cookieList);
     if (cid != null &&
         cid.isNotEmpty &&
         uid != null &&

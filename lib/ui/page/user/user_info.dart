@@ -89,9 +89,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           : CachedNetworkImage(
                               fit: BoxFit.cover,
                               imageUrl: snapshot.data.avatar,
-                              placeholder:
+                              placeholder: (context, url) =>
                                   Image.asset('images/default_forum_icon.png'),
-                              errorWidget:
+                              errorWidget: (context, url, e) =>
                                   Image.asset('images/default_forum_icon.png'),
                             ),
                       foregroundDecoration:

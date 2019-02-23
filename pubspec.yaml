@@ -20,23 +20,21 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   community_material_icon: ^2.8.94
-  flutter_svg: ^0.7.0+1
 
-  dio: ^1.0.9
+  dio: ^2.0.11
   objectdb: ^1.0.5
-  gbk2utf8: ^0.0.1
   html_unescape: ^1.0.1+2
   timeago: ^2.0.10
   keyboard_visibility: ^0.5.1
   device_info: ^0.4.0+1
   intl: ^0.15.7
-  rxdart: ^0.20.0
+  rxdart: ^0.21.0
 
-  image_picker: ^0.4.12
+  image_picker: ^0.5.0+3
   pull_to_refresh: ^1.1.6
-  cached_network_image: ^0.5.1
+  cached_network_image: 0.6.0+1
   fluttertoast: ^3.0.1
-  flutter_html: ^0.8.2
+  flutter_html: ^0.9.4
 
 dev_dependencies:
   flutter_test:
