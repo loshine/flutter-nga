@@ -242,13 +242,13 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           .topicRepository
           .likeReply(widget.reply.tid, widget.reply.pid);
       setState(() => widget.reply.score += reaction.countChange);
-      Fluttertoast.instance.showToast(
+      Fluttertoast.showToast(
         msg: reaction.message,
         gravity: ToastGravity.CENTER,
       );
     } catch (err) {
       print(err.toString());
-      Fluttertoast.instance.showToast(
+      Fluttertoast.showToast(
         msg: err.message,
         gravity: ToastGravity.CENTER,
       );
@@ -261,13 +261,13 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           .topicRepository
           .dislikeReply(widget.reply.tid, widget.reply.pid);
       setState(() => widget.reply.score += reaction.countChange);
-      Fluttertoast.instance.showToast(
+      Fluttertoast.showToast(
         msg: reaction.message,
         gravity: ToastGravity.CENTER,
       );
     } catch (err) {
       print(err.toString());
-      Fluttertoast.instance.showToast(
+      Fluttertoast.showToast(
         msg: err.message,
         gravity: ToastGravity.CENTER,
       );

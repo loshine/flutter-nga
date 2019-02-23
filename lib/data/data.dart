@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +67,8 @@ class Data {
 
     _dio = Dio();
 
-    _dio.cookieJar = PersistCookieJar([appDocDir.path, 'cookies'].join('/'));
+//    _dio.cookieJar =
+//        PersistCookieJar(dir: [appDocDir.path, 'cookies'].join('/'));
     // 配置dio实例
     _dio.options.baseUrl = DOMAIN;
     _dio.options.connectTimeout = 10000; // 10s
@@ -83,14 +83,17 @@ class Data {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     _dio.options.headers["User-Agent"] =
-        "Nga_Official/2102([${androidInfo.brand} ${androidInfo.model}];Android${androidInfo.version.release})";
-//        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36";
+        "Nga_Official/2102([${androidInfo.brand} ${androidInfo.model}];"
+            "Android${androidInfo.version.release})";
     _dio.options.headers["Accept-Encoding"] = "gzip";
     _dio.options.headers["Cache-Control"] = "max-age=0";
     _dio.options.headers["Connection"] = "Keep-Alive";
 
     _dio.interceptor.request.onSend = (Options options) async {
-      options.headers.forEach((k, v) => debugPrint("$k : $v"));
+      final user = await _userRepository.getDefaultUser();
+      if (user != null) {
+        options.headers["Cookie"] = "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
+      }
       return options; //continue
       // 如果你想完成请求并返回一些自定义数据，可以返回一个`Response`对象或返回`dio.resolve(data)`。
       // 这样请求将会被终止，上层then会被调用，then中返回的数据将是你的自定义数据data.

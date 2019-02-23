@@ -119,7 +119,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
       } catch (err) {
         _refreshController.sendBack(true, RefreshStatus.failed);
         if (err != null) {
-          Fluttertoast.instance.showToast(
+          Fluttertoast.showToast(
             msg: err.message,
             gravity: ToastGravity.CENTER,
           );
@@ -163,7 +163,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
 //        Scaffold.of(context).showSnackBar(
 //          SnackBar(content: Text(err.message)),
 //        );
-        Fluttertoast.instance.showToast(
+        Fluttertoast.showToast(
           msg: err.message,
           gravity: ToastGravity.CENTER,
         );

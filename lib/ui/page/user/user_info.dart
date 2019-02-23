@@ -50,7 +50,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   void _createBloc() {
     _bloc = UserInfoBloc(widget.username);
     _subscription = _bloc.outErrorMessage.listen(
-      (message) => Fluttertoast.instance.showToast(
+      (message) => Fluttertoast.showToast(
             msg: message,
             gravity: ToastGravity.CENTER,
           ),

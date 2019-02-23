@@ -80,7 +80,7 @@ class _AttachmentState extends State<AttachmentWidget> {
                 if (_list.length > index) {
                   widget.callback("[img]./${_list[index]}[/img]", "", false);
                 } else {
-                  Fluttertoast.instance.showToast(
+                  Fluttertoast.showToast(
                     msg: "上传文件中，请稍候",
                     gravity: ToastGravity.CENTER,
                   );

@@ -233,7 +233,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
   }
 
   void _ninjaIconClicked() {
-    Fluttertoast.instance.showToast(
+    Fluttertoast.showToast(
       msg: _isAnonymous ? "关闭匿名" : "开启匿名",
       gravity: ToastGravity.CENTER,
     );
@@ -345,13 +345,13 @@ class _PublishReplyState extends State<PublishReplyPage> {
           _isAnonymous,
           _attachments.toString(),
           _attachmentsCheck.toString());
-      Fluttertoast.instance.showToast(
+      Fluttertoast.showToast(
         msg: message,
         gravity: ToastGravity.CENTER,
       );
       Navigator.pop(context);
     } catch (error) {
-      Fluttertoast.instance.showToast(
+      Fluttertoast.showToast(
         msg: error.message,
         gravity: ToastGravity.CENTER,
       );

@@ -2,7 +2,7 @@ package xyz.loshine.flutternga.plugins
 
 import android.app.Activity
 import android.content.IntentFilter
-import android.support.v4.content.LocalBroadcastManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.PluginRegistry
@@ -26,7 +26,7 @@ class FlutterCookiesPlugin(private val activity: Activity) : EventChannel.Stream
     override fun onListen(any: Any?, eventSink: EventChannel.EventSink) {
         receiver = CookiesReceiver(eventSink)
         receiver?.let {
-            LocalBroadcastManager.getInstance(activity).registerReceiver(it, IntentFilter(FILTER))
+            androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(activity).registerReceiver(it, IntentFilter(FILTER))
         }
     }
 
@@ -34,7 +34,7 @@ class FlutterCookiesPlugin(private val activity: Activity) : EventChannel.Stream
         Log.i("FlutterCookiesPlugin", "FlutterCookiesPlugin:onCancel")
         activity.unregisterReceiver(receiver)
         receiver?.let {
-            LocalBroadcastManager.getInstance(activity).unregisterReceiver(it)
+            androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(activity).unregisterReceiver(it)
         }
         receiver = null
     }
