@@ -40,16 +40,16 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
               height: 48,
               imageUrl:
                   "http://img4.nga.178.com/ngabbs/nga_classic/f/app/${widget.forum.fid}.png",
-              placeholder: Image.asset(
-                'images/default_forum_icon.png',
-                width: 48,
-                height: 48,
-              ),
-              errorWidget: Image.asset(
-                'images/default_forum_icon.png',
-                width: 48,
-                height: 48,
-              ),
+              placeholder: (context, url) => Image.asset(
+                    'images/default_forum_icon.png',
+                    width: 48,
+                    height: 48,
+                  ),
+              errorWidget: (context, url, e) => Image.asset(
+                    'images/default_forum_icon.png',
+                    width: 48,
+                    height: 48,
+                  ),
             ),
             Padding(
               padding: EdgeInsets.only(top: 8),
