@@ -1,7 +1,8 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/ui/page/content/content_details.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -18,25 +19,13 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
         }
         return Expanded(
           flex: colSpan,
-          child: Material(
-            color: Palette.colorBackground,
-            child: Builder(
-              builder: (context) => InkWell(
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => ContentDetailsPage(children))),
-                    child: Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(color: Palette.colorDivider),
-                        ),
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Wrap(children: children),
-                      ),
-                    ),
-                  ),
+          child: Container(
+            padding: EdgeInsets.all(4),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: children),
             ),
           ),
         );
@@ -47,12 +36,7 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
               bottom: BorderSide(color: Palette.colorDivider),
             ),
           ),
-          child: IntrinsicHeight(
-            child: Row(
-              children: children,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-            ),
-          ),
+          child: Row(children: children),
         );
       case "table":
         return Container(
@@ -60,6 +44,7 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
             border: Border(
               left: BorderSide(color: Palette.colorDivider),
               top: BorderSide(color: Palette.colorDivider),
+              right: BorderSide(color: Palette.colorDivider),
             ),
           ),
           child: Column(
@@ -119,7 +104,10 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Wrap(children: children),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: children,
+                ),
                 Divider(height: 1),
               ],
             ),
@@ -159,7 +147,9 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
             final multiple =
                 int.parse(fontSize.substring(0, fontSize.length - 1)) / 100;
             return DefaultTextStyle.merge(
-              child: Wrap(children: children),
+              child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: children),
               style: TextStyle(fontSize: Dimen.body * multiple),
             );
           }
@@ -170,14 +160,19 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
         if (node.attributes['color'] != null) {
           String color = node.attributes['color'];
           return DefaultTextStyle.merge(
-            child: Wrap(children: children),
+            child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: children),
             style: TextStyle(
               color: TEXT_COLOR_MAP[color],
               decorationColor: TEXT_COLOR_MAP[color],
             ),
           );
         } else {
-          return DefaultTextStyle.merge(child: Wrap(children: children));
+          return DefaultTextStyle.merge(
+              child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: children));
         }
         break;
       // 收起展开
@@ -194,13 +189,20 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
       // 图片
       case "img":
         if (node.attributes['src'] != null) {
+          if (node.attributes['src'].startsWith("data:image") &&
+              node.attributes['src'].contains("base64,")) {
+            return Image.memory(base64
+                .decode(node.attributes['src'].split("base64,")[1].trim()));
+          }
+          // XXX: CachedNetworkImage 最新版有 bug，不要急需升级，https://github.com/renefloor/flutter_cached_network_image/issues/128
           return CachedNetworkImage(
+            fit: BoxFit.cover,
             imageUrl: node.attributes['src'],
-            placeholder: (context, url) => Icon(
-                  Icons.image,
-                  size: 48,
-                  color: Palette.colorIcon,
-                ),
+            placeholder: Icon(
+              Icons.image,
+              size: 48,
+              color: Palette.colorIcon,
+            ),
           );
         } else if (node.attributes['alt'] != null) {
           //Temp fix for https://github.com/flutter/flutter/issues/736
