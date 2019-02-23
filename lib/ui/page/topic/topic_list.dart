@@ -135,7 +135,7 @@ class _TopicListState extends State<TopicListPage> {
 //        Scaffold.of(context).showSnackBar(
 //          SnackBar(content: Text(err.message)),
 //        );
-        Fluttertoast.instance.showToast(
+        Fluttertoast.showToast(
           msg: err.message,
           gravity: ToastGravity.CENTER,
         );
@@ -158,7 +158,7 @@ class _TopicListState extends State<TopicListPage> {
 //        Scaffold.of(context).showSnackBar(
 //          SnackBar(content: Text(err.message)),
 //        );
-        Fluttertoast.instance.showToast(
+        Fluttertoast.showToast(
           msg: err.message,
           gravity: ToastGravity.CENTER,
         );
