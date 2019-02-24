@@ -1,7 +1,9 @@
 import 'package:html_unescape/html_unescape.dart';
+import 'package:intl/intl.dart';
 
 class CodeUtils {
   static final _htmlUnescape = HtmlUnescape();
+  static final _dateTimeFormat = DateFormat('yyyy-MM-dd hh:mm:ss');
 
   static String unescapeHtml(String data) {
     return _htmlUnescape.convert(data);
@@ -36,5 +38,9 @@ class CodeUtils {
       size = size * 100 ~/ 1024;
       return "${size ~/ 100}.${size % 100}GB";
     }
+  }
+
+  static String formatDate(DateTime dateTime){
+    return _dateTimeFormat.format(dateTime);
   }
 }

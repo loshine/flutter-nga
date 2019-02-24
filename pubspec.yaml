@@ -21,6 +21,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   community_material_icon: ^2.8.94
 
+  flutter_bloc: ^0.7.0
   dio: ^2.0.11
   objectdb: ^1.0.5
   html_unescape: ^1.0.1+2
@@ -28,7 +29,6 @@ dependencies:
   keyboard_visibility: ^0.5.1
   device_info: ^0.4.0+1
   intl: ^0.15.7
-  rxdart: ^0.21.0
 
   image_picker: ^0.5.0+3
   pull_to_refresh: ^1.1.6
