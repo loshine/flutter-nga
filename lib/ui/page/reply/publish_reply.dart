@@ -337,7 +337,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
 
   void _sendReply() async {
     try {
-      String message = await Data().topicRepository.sendReply(
+      String message = await Data().topicRepository.createReply(
           widget.topic.tid,
           widget.topic.fid,
           _subjectController.text,

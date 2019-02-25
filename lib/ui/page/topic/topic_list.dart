@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/ui/page/favourite_forum_group/favourite_forum_group.dart';
 import 'package:flutter_nga/ui/page/topic/topic_detail.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -41,7 +42,10 @@ class _TopicListState extends State<TopicListPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context, _defaultFavourite != _isFavourite);
+        if (_defaultFavourite != _isFavourite) {
+          FavouriteForumGroupBloc().onChanged();
+        }
+        Navigator.pop(context);
         return false;
       },
       child: Scaffold(
@@ -104,9 +108,13 @@ class _TopicListState extends State<TopicListPage> {
 
   _switchFavourite() async {
     if (_isFavourite) {
-      await Data().forumRepository.deleteFavourite(Forum(widget.fid, widget.name));
+      await Data()
+          .forumRepository
+          .deleteFavourite(Forum(widget.fid, widget.name));
     } else {
-      await Data().forumRepository.saveFavourite(Forum(widget.fid, widget.name));
+      await Data()
+          .forumRepository
+          .saveFavourite(Forum(widget.fid, widget.name));
     }
     setState(() {
       _isFavourite = !_isFavourite;

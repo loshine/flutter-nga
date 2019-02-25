@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/ui/page/topic/topic_list.dart';
 
-typedef OnFavouriteChangedCallback = void Function(bool);
-
 class ForumGridItemWidget extends StatelessWidget {
   final Forum forum;
-  final OnFavouriteChangedCallback onFavouriteChanged;
 
-  const ForumGridItemWidget(this.forum, {Key key, this.onFavouriteChanged})
-      : super(key: key);
+  const ForumGridItemWidget(this.forum, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +19,7 @@ class ForumGridItemWidget extends StatelessWidget {
               fid: forum.fid,
               name: forum.name,
             );
-          })).then((changed) {
-            if (onFavouriteChanged != null) {
-              onFavouriteChanged(changed);
-            }
-          });
+          }));
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
