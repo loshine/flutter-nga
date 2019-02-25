@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/ui/page/forum/favourite_forum_group.dart';
+import 'package:flutter_nga/ui/page/favourite_forum_group/favourite_forum_group_page.dart';
 import 'package:flutter_nga/ui/page/forum/forum_group.dart';
 
 class ForumGroupTabsPage extends StatelessWidget {
@@ -9,7 +9,7 @@ class ForumGroupTabsPage extends StatelessWidget {
     List<Tab> _tabs = [Tab(text: "我的收藏")];
     List<Widget> _tabBarViews = [FavouriteForumGroupPage()];
 
-    var list = Data().forumRepository.getForumGroups();
+    final list = Data().forumRepository.getForumGroups();
 
     _tabs.addAll(list.map((group) => Tab(text: group.name)));
     _tabBarViews.addAll(list.map((group) => ForumGroupPage(group: group)));

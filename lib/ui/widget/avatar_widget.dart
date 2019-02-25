@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/ui/page/user/user_info.dart';
+import 'package:flutter_nga/ui/page/user_info/user_info.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 
 class AvatarWidget extends StatelessWidget {
