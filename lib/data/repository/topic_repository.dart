@@ -104,7 +104,48 @@ class TopicRepository {
     }
   }
 
-  Future<String> sendReply(int tid, int fid, String subject, String content,
+  Future<String> checkCreateTopic(int fid) async {
+    try {
+      Response<Map<String, dynamic>> response = await Data()
+          .dio
+          .get("nuke.php?fid=$fid&__output=8&lite=js&action=new");
+      return response.data['auth'];
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<String> createTopic(int fid, String subject, String content,
+      bool isAnonymous, String attachments, String attachmentsCheck) async {
+    final postData = "step=2"
+        "&post_content=${await AndroidGbk.urlEncode(content)}"
+        "&action=new"
+        "&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}"
+        "&fid=$fid${isAnonymous ? "anony=1" : ""}"
+        "${!CodeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
+        "${!CodeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
+    try {
+      final options = Options();
+      options.contentType =
+          ContentType.parse("application/x-www-form-urlencoded");
+      Response<String> response = await Data().dio.post(
+            "post.php",
+            data: postData,
+            options: options,
+          );
+      final html = response.data;
+      int start = html.indexOf(_RESULT_START_TAG);
+      if (start == -1) return "发帖失败";
+      start += _RESULT_START_TAG.length;
+      int end = html.indexOf(_RESULT_END_TAG, start);
+      if (end < 0) return "发帖失败";
+      return html.substring(start, end);
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<String> createReply(int tid, int fid, String subject, String content,
       bool isAnonymous, String attachments, String attachmentsCheck) async {
     final postData = "step=2"
         "&post_content=${await AndroidGbk.urlEncode(content)}"

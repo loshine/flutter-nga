@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/ui/page/user/user_info_event.dart';
-import 'package:flutter_nga/ui/page/user/user_info_state.dart';
+import 'package:flutter_nga/ui/page/user_info/user_info.dart';
+import 'package:flutter_nga/ui/page/user_info/user_info_state.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:fluttertoast/fluttertoast.dart';
