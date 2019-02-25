@@ -151,9 +151,7 @@ class _HomePageState extends State<HomePage> {
                           title: Text("论坛"),
                           selected: _index == 0,
                         ),
-                        onTap: () {
-                          _setSelection(0);
-                        },
+                        onTap: () => _setSelection(0),
                       ),
                       color: Palette.colorBackground,
                     ),
@@ -170,9 +168,7 @@ class _HomePageState extends State<HomePage> {
                           title: Text("赛事"),
                           selected: _index == 1,
                         ),
-                        onTap: () {
-                          _setSelection(1);
-                        },
+                        onTap: () => _setSelection(1),
                       ),
                       color: Palette.colorBackground,
                     ),
