@@ -26,7 +26,7 @@ class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
           userInfo.adminForums.isNotEmpty) {
         userInfo.adminForums.entries.forEach((entry) {
           moderatorForumsMap[int.parse(entry.key)] =
-              "[${CodeUtils.unescapeHtml(entry.value)}]";
+              "${CodeUtils.unescapeHtml(entry.value)}";
         });
       }
       final reputationMap = <String, String>{};
@@ -41,7 +41,7 @@ class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
       final personalForumMap = <int, String>{};
       if (userInfo != null && userInfo.userForum != null) {
         personalForumMap[userInfo.userForum['0']] =
-            "[${CodeUtils.unescapeHtml(userInfo.userForum['1'])}]";
+            "${CodeUtils.unescapeHtml(userInfo.userForum['1'])}";
       }
       yield UserInfoState(
         uid: userInfo.uid,

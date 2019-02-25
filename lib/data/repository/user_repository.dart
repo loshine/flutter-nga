@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
+import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:objectdb/objectdb.dart';
 
 const TAG_CID = "ngaPassportCid";
@@ -38,8 +39,8 @@ class UserRepository {
       } else if (c.contains(TAG_USER_NAME)) {
         username = c.trim().substring(TAG_USER_NAME.length + 1);
         try {
-          username = await AndroidGbk.decode(username.codeUnits);
-          username = await AndroidGbk.decode(username.codeUnits);
+          username = decodeGbk(username.codeUnits);
+          username = decodeGbk(username.codeUnits);
         } catch (e) {
           print(e.toString());
         }
