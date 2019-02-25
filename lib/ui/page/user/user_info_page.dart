@@ -123,7 +123,7 @@ class UserInfoWidget extends StatelessWidget {
                             name: entry.value,
                           ))),
                   child: Text(
-                    entry.value,
+                    "[${entry.value}]",
                     style: TextStyle(color: Palette.colorTextSubTitle),
                   ),
                 )),
@@ -284,7 +284,7 @@ class UserInfoWidget extends StatelessWidget {
                                 name: entry.value,
                               ))),
                       child: Text(
-                        entry.value,
+                        "[${entry.value}]",
                         style: TextStyle(color: Palette.colorTextSubTitle),
                       ),
                     );
