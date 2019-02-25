@@ -11,8 +11,8 @@ import 'package:flutter_nga/data/repository/forum_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/android_format_json.dart';
-import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/utils/constant.dart';
+import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:objectdb/objectdb.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -114,12 +114,7 @@ class Data {
         // 在返回响应数据之前做一些预处理
         // gbk 编码 json 转 utf8
         List<int> bytes = response.data;
-//      String responseBody = await stream
-//          .transform(StreamTransformer.fromHandlers(
-//              handleData: (data, EventSink sink) => sink.add(decodeGbk(data))))
-//          .join();
-        // XXX: flutter 的 gbk 库有少许字符解析不出来，暂时使用 Java 代替
-        String responseBody = await AndroidGbk.decodeList(bytes);
+        String responseBody = decodeGbk(bytes);
         // 处理一些可能导致错误的字符串
         // 直接制表符替换为 \t, \x 替换为 \\x
         responseBody = responseBody
