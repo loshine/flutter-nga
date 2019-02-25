@@ -14,38 +14,43 @@ class AvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipOval(
-        child: Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          if (!CodeUtils.isStringEmpty(username)) {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => UserInfoPage(username)));
-          }
-        },
-        child: avatar != null
-            ? CachedNetworkImage(
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                imageUrl: avatar,
-                placeholder: Image.asset(
-                  'images/default_forum_icon.png',
-                  width: size,
-                  height: size,
-                ),
-                errorWidget: Image.asset(
-                  'images/default_forum_icon.png',
-                  width: size,
-                  height: size,
-                ),
-              )
-            : Image.asset(
-                'images/default_forum_icon.png',
-                width: size,
-                height: size,
+      child: CodeUtils.isStringEmpty(avatar)
+          ? _getAvatarImage()
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => UserInfoPage(username)));
+                },
+                child: _getAvatarImage(),
               ),
-      ),
-    ));
+            ),
+    );
+  }
+
+  Widget _getAvatarImage() {
+    return avatar != null
+        ? CachedNetworkImage(
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            imageUrl: avatar,
+            placeholder: Image.asset(
+              'images/default_forum_icon.png',
+              width: size,
+              height: size,
+            ),
+            errorWidget: Image.asset(
+              'images/default_forum_icon.png',
+              width: size,
+              height: size,
+            ),
+          )
+        : Image.asset(
+            'images/default_forum_icon.png',
+            width: size,
+            height: size,
+          );
   }
 }
