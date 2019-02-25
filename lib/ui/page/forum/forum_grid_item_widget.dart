@@ -3,18 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/ui/page/topic/topic_list.dart';
 
-class ForumGridItemWidget extends StatefulWidget {
+typedef OnFavouriteChangedCallback = void Function(bool);
+
+class ForumGridItemWidget extends StatelessWidget {
   final Forum forum;
   final OnFavouriteChangedCallback onFavouriteChanged;
 
   const ForumGridItemWidget(this.forum, {Key key, this.onFavouriteChanged})
       : super(key: key);
 
-  @override
-  _ForumGridItemState createState() => _ForumGridItemState();
-}
-
-class _ForumGridItemState extends State<ForumGridItemWidget> {
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -23,12 +20,12 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (_) {
             return TopicListPage(
-              fid: widget.forum.fid,
-              name: widget.forum.name,
+              fid: forum.fid,
+              name: forum.name,
             );
           })).then((changed) {
-            if (widget.onFavouriteChanged != null) {
-              widget.onFavouriteChanged(changed);
+            if (onFavouriteChanged != null) {
+              onFavouriteChanged(changed);
             }
           });
         },
@@ -39,7 +36,7 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
               width: 48,
               height: 48,
               imageUrl:
-                  "http://img4.nga.178.com/ngabbs/nga_classic/f/app/${widget.forum.fid}.png",
+                  "http://img4.nga.178.com/ngabbs/nga_classic/f/app/${forum.fid}.png",
               placeholder: Image.asset(
                 'images/default_forum_icon.png',
                 width: 48,
@@ -54,7 +51,7 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
             Padding(
               padding: EdgeInsets.only(top: 8),
               child: Text(
-                widget.forum.name,
+                forum.name,
                 overflow: TextOverflow.ellipsis,
               ),
             )
@@ -64,5 +61,3 @@ class _ForumGridItemState extends State<ForumGridItemWidget> {
     );
   }
 }
-
-typedef OnFavouriteChangedCallback = void Function(bool);
