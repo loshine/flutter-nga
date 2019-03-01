@@ -14,7 +14,7 @@ class AvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipOval(
-      child: CodeUtils.isStringEmpty(avatar)
+      child: CodeUtils.isStringEmpty(username)
           ? _getAvatarImage()
           : Material(
               color: Colors.transparent,

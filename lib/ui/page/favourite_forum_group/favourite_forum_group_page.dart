@@ -3,7 +3,30 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_nga/ui/page/favourite_forum_group/favourite_forum_group.dart';
 import 'package:flutter_nga/ui/page/forum/forum_grid_item_widget.dart';
 
-class FavouriteForumGroupPage extends StatelessWidget {
+class FavouriteForumGroupPage extends StatefulWidget {
+  @override
+  _FavouriteForumGroupState createState() => _FavouriteForumGroupState();
+}
+
+class _FavouriteForumGroupState extends State<FavouriteForumGroupPage> {
+  final _bloc = FavouriteForumGroupBloc();
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc.onChanged();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      bloc: _bloc,
+      child: _FavouriteForumGroupWidget(),
+    );
+  }
+}
+
+class _FavouriteForumGroupWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -13,7 +36,7 @@ class FavouriteForumGroupPage extends StatelessWidget {
     final double itemWidth = size.width / 3;
 
     return BlocBuilder(
-      bloc: FavouriteForumGroupBloc(),
+      bloc: BlocProvider.of<FavouriteForumGroupBloc>(context),
       builder: (context, FavouriteForumGroupState state) {
         return GridView.count(
           crossAxisCount: 3,
