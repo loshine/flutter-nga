@@ -140,9 +140,6 @@ class _TopicListState extends State<TopicListPage> {
         });
       } catch (err) {
         _refreshController.sendBack(true, RefreshStatus.failed);
-//        Scaffold.of(context).showSnackBar(
-//          SnackBar(content: Text(err.message)),
-//        );
         Fluttertoast.showToast(
           msg: err.message,
           gravity: ToastGravity.CENTER,
@@ -163,9 +160,6 @@ class _TopicListState extends State<TopicListPage> {
         setState(() => _topicList.addAll(data.topicList.values));
       } catch (err) {
         _refreshController.sendBack(false, RefreshStatus.failed);
-//        Scaffold.of(context).showSnackBar(
-//          SnackBar(content: Text(err.message)),
-//        );
         Fluttertoast.showToast(
           msg: err.message,
           gravity: ToastGravity.CENTER,
