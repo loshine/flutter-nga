@@ -5,13 +5,15 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_nga/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+//  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
 //    // Build our app and trigger a frame.
 //    await tester.pumpWidget(MyApp());
 //
@@ -26,5 +28,11 @@ void main() {
 //    // Verify that our counter has incremented.
 //    expect(find.text('1'), findsOneWidget);
 //    expect(find.text('0'), findsNothing);
-  });
+//  });
+
+  final map = {};
+  map['test'] = "早乙女•测试";
+
+  Map<String, dynamic> result = json.decode(json.encode(map));
+  print(result["test"]);
 }

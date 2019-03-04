@@ -121,17 +121,17 @@ class Data {
             .replaceAll("\t", "\\t")
             .replaceAll("\\x", "\\\\x")
             .replaceAll("window.script_muti_get_var_store=", "");
-        if (!responseBody.startsWith("{\"") && responseBody.startsWith("{")) {
-          responseBody = await AndroidFormatJson.decode(responseBody);
-        }
         debugPrint(
             "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}\n" +
                 "request data : ${response.request.data.toString()}\n" +
                 "response data : $responseBody");
         Map<String, dynamic> map;
         try {
+          // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
+          responseBody = await AndroidFormatJson.decode(responseBody);
           map = json.decode(responseBody);
         } catch (error) {
+          debugPrint(error.toString());
           response.data = responseBody;
           return response;
         }
