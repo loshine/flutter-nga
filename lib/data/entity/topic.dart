@@ -41,9 +41,7 @@ class TopicListData {
     );
   }
 
-  int getMaxPage() {
-    return rows ~/ rRows + (rows % rRows != 0 ? 1 : 0);
-  }
+  int get maxPage => rows ~/ rRows + (rows % rRows != 0 ? 1 : 0);
 }
 
 class Topic {

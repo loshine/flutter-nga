@@ -2,7 +2,6 @@ package xyz.loshine.flutternga.plugins
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.orhanobut.logger.Logger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
@@ -31,7 +30,6 @@ class FlutterJsonPlugin : MethodChannel.MethodCallHandler {
                     val jsonString = call.argument<String>("json")
                     val formattedJson = gson.toJson(gson.fromJson(jsonString, JsonObject::class.java))
                     // 返回给 flutter 的参数
-                    Logger.d("response", formattedJson)
                     result.success(formattedJson)
                 } catch (e: Exception) {
                     result.error("Json Decode error", e.message, null)
