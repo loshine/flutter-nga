@@ -18,6 +18,12 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _bloc.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       bloc: _bloc,
