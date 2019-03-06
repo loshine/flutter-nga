@@ -20,8 +20,6 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
       try {
         TopicListData data =
             await Data().topicRepository.getTopicList(event.fid, 1);
-        debugPrint(
-            "page = ${currentState.page + 1}, maxPage = ${data.maxPage}");
         event.completer.complete();
         yield TopicListState(
           page: 1,
