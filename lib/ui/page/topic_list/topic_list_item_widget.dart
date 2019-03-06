@@ -1,7 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
-import 'package:flutter_nga/ui/page/topic/topic_detail.dart';
+import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';

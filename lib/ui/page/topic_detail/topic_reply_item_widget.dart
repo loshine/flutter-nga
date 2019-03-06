@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
-import 'package:flutter_nga/ui/page/topic/topic_reply_comment_item_widget.dart';
+import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -20,14 +20,14 @@ class TopicReplyItemWidget extends StatefulWidget {
   final List<Medal> medalList;
   final List<User> userList;
 
-  const TopicReplyItemWidget(
-      {Key key,
-      this.reply,
-      this.user,
-      this.group,
-      this.medalList,
-      this.userList})
-      : super(key: key);
+  const TopicReplyItemWidget({
+    Key key,
+    this.reply,
+    this.user,
+    this.group,
+    this.medalList,
+    this.userList,
+  }) : super(key: key);
 
   @override
   _TopicReplyItemState createState() => _TopicReplyItemState();
