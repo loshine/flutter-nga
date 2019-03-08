@@ -33,4 +33,9 @@ class TopicDetailState {
         groupSet: HashSet(),
         medalSet: HashSet(),
       );
+
+  @override
+  String toString() {
+    return 'TopicDetailState{page: $page, maxPage: $maxPage, enablePullUp: $enablePullUp, replyList: $replyList, userList: $userList, commentList: $commentList, groupSet: $groupSet, medalSet: $medalSet}';
+  }
 }
