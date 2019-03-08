@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_event.dart';
@@ -19,9 +21,8 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
       try {
         TopicDetailData data =
             await Data().topicRepository.getTopicDetail(event.tid, 1);
-        event.completer.complete();
-        final replyList = [];
-        final commentList = [];
+        List<Reply> replyList = [];
+        List<Reply> commentList = [];
         data.replyList.values.forEach((reply) {
           if (reply.tid == null) {
             Reply comment =
@@ -33,6 +34,7 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
           replyList.add(reply);
           commentList.addAll(reply.commentList);
         });
+        event.completer.complete();
         yield TopicDetailState(
           page: 1,
           maxPage: data.maxPage,
@@ -63,7 +65,7 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
         data.replyList.values.forEach((reply) {
           if (reply.tid == null) {
             Reply comment =
-            commentList.firstWhere((comment) => comment.pid == reply.pid);
+                commentList.firstWhere((comment) => comment.pid == reply.pid);
             if (comment != null) {
               reply.merge(comment);
             }
