@@ -202,23 +202,24 @@ class Reply {
   int postDateTimestamp;
   List<Reply> commentList;
 
-  Reply(
-      {this.content,
-      this.alterInfo,
-      this.tid,
-      this.score,
-      this.score2,
-      this.postDate,
-      this.authorId,
-      this.subject,
-      this.type,
-      this.fid,
-      this.pid,
-      this.recommend,
-      this.lou,
-      this.contentLength,
-      this.postDateTimestamp,
-      this.commentList});
+  Reply({
+    this.content,
+    this.alterInfo,
+    this.tid,
+    this.score,
+    this.score2,
+    this.postDate,
+    this.authorId,
+    this.subject,
+    this.type,
+    this.fid,
+    this.pid,
+    this.recommend,
+    this.lou,
+    this.contentLength,
+    this.postDateTimestamp,
+    this.commentList,
+  });
 
   factory Reply.fromJson(Map<String, dynamic> map) {
     Map<String, dynamic> commentMap = map["comment"];

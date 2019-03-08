@@ -24,7 +24,9 @@ class TopicDetailPage extends StatefulWidget {
 
 class _TopicDetailState extends State<TopicDetailPage> {
   bool _fabVisible = true;
-  RefreshController _refreshController;
+
+  final _refreshController = RefreshController();
+  final _refreshKey = GlobalKey<RefreshIndicatorState>();
   final _bloc = TopicDetailBloc();
 
   @override
@@ -36,6 +38,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
           appBar:
               AppBar(title: Text(CodeUtils.unescapeHtml(widget.topic.subject))),
           body: RefreshIndicator(
+            key: _refreshKey,
             onRefresh: _onRefresh,
             child: SmartRefresher(
               enablePullDown: false,
@@ -69,12 +72,12 @@ class _TopicDetailState extends State<TopicDetailPage> {
 
   @override
   void initState() {
-    _refreshController = RefreshController();
-    Future.delayed(const Duration(milliseconds: 0)).then((val) {
-      _refreshController.scrollController.addListener(_scrollListener);
-      _refreshController.requestRefresh(true);
-    });
     super.initState();
+    Future.delayed(const Duration(milliseconds: 0)).then((val) {
+      // 进入的时候自动刷新
+      _refreshKey.currentState.show();
+      _refreshController.scrollController.addListener(_scrollListener);
+    });
   }
 
   Future<void> _onRefresh() {
