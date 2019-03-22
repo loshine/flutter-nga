@@ -85,6 +85,7 @@ class FontStyleWidget extends StatelessWidget {
         callback("[quote]", "[/quote]", true);
         break;
       case "[url]":
+        callback("[url]", "[/url]", true);
         break;
       case ">折叠<":
         callback("[collapse]", "[/collapse]", true);
