@@ -204,7 +204,7 @@ class _EmoticonParser implements Parser {
     list.forEach((group) {
       group.expressionList.forEach((emoticon) {
         parseContent = parseContent.replaceAll(
-            emoticon.content, "<img src='${emoticon.url}' >");
+            emoticon.content, "<emoticon src='${emoticon.url}' >");
       });
     });
     return parseContent;

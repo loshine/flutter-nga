@@ -13,16 +13,21 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
-class PublishReplyPage extends StatefulWidget {
-  const PublishReplyPage(this.topic, {Key key}) : super(key: key);
+class PublishPage extends StatefulWidget {
+  const PublishPage({
+    this.topic,
+    this.fid,
+    Key key,
+  }) : super(key: key);
 
   final Topic topic;
+  final int fid;
 
   @override
   _PublishReplyState createState() => _PublishReplyState();
 }
 
-class _PublishReplyState extends State<PublishReplyPage> {
+class _PublishReplyState extends State<PublishPage> {
   final _bottomData = [
     CommunityMaterialIcons.ninja,
     CommunityMaterialIcons.emoticon,
@@ -97,7 +102,7 @@ class _PublishReplyState extends State<PublishReplyPage> {
           actions: [
             IconButton(
               icon: Icon(Icons.send),
-              onPressed: _sendReply,
+              onPressed: _publish,
             ),
           ],
         ),
@@ -335,26 +340,48 @@ class _PublishReplyState extends State<PublishReplyPage> {
     );
   }
 
-  void _sendReply() async {
-    try {
-      String message = await Data().topicRepository.createReply(
-          widget.topic.tid,
-          widget.topic.fid,
-          _subjectController.text,
-          _contentController.text,
-          _isAnonymous,
-          _attachments.toString(),
-          _attachmentsCheck.toString());
-      Fluttertoast.showToast(
-        msg: message,
-        gravity: ToastGravity.CENTER,
-      );
-      Navigator.pop(context);
-    } catch (error) {
-      Fluttertoast.showToast(
-        msg: error.message,
-        gravity: ToastGravity.CENTER,
-      );
+  void _publish() async {
+    if (widget.topic != null) {
+      try {
+        String message = await Data().topicRepository.createReply(
+            widget.topic.tid,
+            widget.topic.fid,
+            _subjectController.text,
+            _contentController.text,
+            _isAnonymous,
+            _attachments.toString(),
+            _attachmentsCheck.toString());
+        Fluttertoast.showToast(
+          msg: message,
+          gravity: ToastGravity.CENTER,
+        );
+        Navigator.pop(context);
+      } catch (error) {
+        Fluttertoast.showToast(
+          msg: error.message,
+          gravity: ToastGravity.CENTER,
+        );
+      }
+    } else if (widget.fid != null) {
+      try {
+        String message = await Data().topicRepository.createTopic(
+            widget.fid,
+            _subjectController.text,
+            _contentController.text,
+            _isAnonymous,
+            _attachments.toString(),
+            _attachmentsCheck.toString());
+        Fluttertoast.showToast(
+          msg: message,
+          gravity: ToastGravity.CENTER,
+        );
+        Navigator.pop(context);
+      } catch (error) {
+        Fluttertoast.showToast(
+          msg: error.message,
+          gravity: ToastGravity.CENTER,
+        );
+      }
     }
   }
 }

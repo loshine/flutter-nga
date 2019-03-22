@@ -4,6 +4,7 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/topic_list/favourite_button/topic_list_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_bloc.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_item_widget.dart';
@@ -64,7 +65,10 @@ class _TopicListState extends State<TopicListPage> {
           }),
           floatingActionButton: _fabVisible
               ? FloatingActionButton(
-                  onPressed: null,
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => PublishPage(fid: widget.fid)));
+                  },
                   child: Icon(
                     CommunityMaterialIcons.pencil,
                     color: Colors.white,

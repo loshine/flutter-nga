@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
-import 'package:flutter_nga/ui/page/reply/publish_reply.dart';
+import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_bloc.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_state.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
@@ -57,7 +57,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
               ? FloatingActionButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => PublishReplyPage(widget.topic)));
+                        builder: (_) => PublishPage(topic: widget.topic)));
                   },
                   child: Icon(
                     CommunityMaterialIcons.comment,

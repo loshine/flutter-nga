@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_event.dart';
