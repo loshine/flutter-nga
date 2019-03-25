@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
+import 'package:flutter_nga/data/repository/resource_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/android_format_json.dart';
@@ -35,6 +36,10 @@ class Data {
 
   ForumRepository get forumRepository => _forumRepository;
 
+  ResourceRepository _resourceRepository;
+
+  ResourceRepository get resourceRepository => _resourceRepository;
+
   TopicRepository _topicRepository;
 
   TopicRepository get topicRepository => _topicRepository;
@@ -60,6 +65,7 @@ class Data {
     _forumRepository = ForumRepository();
     _forumRepository.init(_forumDb);
 
+    _resourceRepository = ResourceRepository();
     _topicRepository = TopicRepository();
 
     String userDbPath = [appDocDir.path, 'user.db'].join('/');
@@ -111,6 +117,10 @@ class Data {
         // 这样请求将被中止并触发异常，上层catchError会被调用。
       },
       onResponse: (Response response) async {
+        // 不是请求 Api 的，就直接返回 bytes
+        if (response.request.path.startsWith("http")) {
+          return response;
+        }
         // 在返回响应数据之前做一些预处理
         // gbk 编码 json 转 utf8
         List<int> bytes = response.data;
