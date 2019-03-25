@@ -117,10 +117,6 @@ class Data {
         // 这样请求将被中止并触发异常，上层catchError会被调用。
       },
       onResponse: (Response response) async {
-        // 不是请求 Api 的，就直接返回 bytes
-        if (response.request.path.startsWith("http")) {
-          return response;
-        }
         // 在返回响应数据之前做一些预处理
         // gbk 编码 json 转 utf8
         List<int> bytes = response.data;
