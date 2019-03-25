@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/page/photo_preview/photo_preview_bloc.dart';
 import 'package:flutter_nga/ui/page/photo_preview/photo_preview_state.dart';
-import 'package:flutter_nga/utils/download_utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
@@ -63,7 +63,7 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
     Map<PermissionGroup, PermissionStatus> permissions =
         await PermissionHandler().requestPermissions([PermissionGroup.storage]);
     if (permissions[PermissionGroup.storage] == PermissionStatus.granted) {
-      final file = await DownloadUtils.saveImage(widget.url);
+      final file = await Data().resourceRepository.downloadImage(widget.url);
       Fluttertoast.showToast(
         msg: "保存成功, 路径位于${file.path}",
         gravity: ToastGravity.CENTER,
