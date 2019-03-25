@@ -1,23 +1,24 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_nga/data/data.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ResourceRepository {
+  Dio _dio;
+
   static final ResourceRepository _singleton = ResourceRepository._internal();
 
   factory ResourceRepository() {
     return _singleton;
   }
 
-  ResourceRepository._internal();
+  ResourceRepository._internal() {
+    _dio = Dio();
+    _dio.options.responseType = ResponseType.bytes;
+  }
 
   Future<File> downloadImage(String url) async {
-    final options = Options();
-    options.responseType = ResponseType.bytes;
-    Response<List<int>> bytesResponse =
-        await Data().dio.get(url, options: options);
+    Response<List<int>> bytesResponse = await _dio.get(url);
     Directory dir = await getExternalStorageDirectory();
     String path = [dir.path, 'NationalGayAlliance', 'Image'].join('/');
     // Save the thumbnail as a PNG.
