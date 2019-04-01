@@ -72,9 +72,9 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
           commentList.addAll(reply.commentList);
         });
         yield TopicDetailState(
-          page: 1,
+          page: currentState.page + 1,
           maxPage: data.maxPage,
-          enablePullUp: 1 < data.maxPage,
+          enablePullUp: currentState.page + 1 < data.maxPage,
           replyList: replyList,
           userList: currentState.userList..addAll(data.userList.values),
           commentList: commentList,
