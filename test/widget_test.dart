@@ -26,4 +26,10 @@ void main() {
     expect(find.text('1'), findsOneWidget);
     expect(find.text('0'), findsNothing);
   });
+
+  test('Substring test', () {
+    String url = "./mon_201901/23/7nQ5-1s5nK1kT1kSb9-45.png.thumb.jpg";
+    expect(url.substring(0, url.length - 10),
+        "./mon_201901/23/7nQ5-1s5nK1kT1kSb9-45.png");
+  });
 }

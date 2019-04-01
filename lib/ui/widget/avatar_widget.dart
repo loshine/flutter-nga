@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget(this.avatar, {this.size = 48, this.username, Key key})
@@ -14,7 +14,7 @@ class AvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipOval(
-      child: CodeUtils.isStringEmpty(username)
+      child: codeUtils.isStringEmpty(username)
           ? _getAvatarImage()
           : Material(
               color: Colors.transparent,
