@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_state.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -28,7 +28,7 @@ class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
           userInfo.adminForums.isNotEmpty) {
         userInfo.adminForums.entries.forEach((entry) {
           moderatorForumsMap[int.parse(entry.key)] =
-              "${CodeUtils.unescapeHtml(entry.value)}";
+              "${codeUtils.unescapeHtml(entry.value)}";
         });
       }
       final reputationMap = <String, String>{};
@@ -43,7 +43,7 @@ class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
       final personalForumMap = <int, String>{};
       if (userInfo != null && userInfo.userForum != null) {
         personalForumMap[userInfo.userForum['0']] =
-            "${CodeUtils.unescapeHtml(userInfo.userForum['1'])}";
+            "${codeUtils.unescapeHtml(userInfo.userForum['1'])}";
       }
       yield UserInfoState(
         uid: userInfo.uid,
@@ -56,9 +56,9 @@ class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
           '财富':
               '${userInfo.money ~/ 10000}金 ${(userInfo.money % 10000) ~/ 100}银 ${userInfo.money % 100}铜',
           '注册日期':
-              '${CodeUtils.formatDate(DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate * 1000))}'
+              '${codeUtils.formatDate(DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate * 1000))}'
         },
-        signature: CodeUtils.isStringEmpty(userInfo.sign)
+        signature: codeUtils.isStringEmpty(userInfo.sign)
             ? "暂无签名"
             : "${NgaContentParser.parse(userInfo.sign)}",
         moderatorForums: moderatorForumsMap,

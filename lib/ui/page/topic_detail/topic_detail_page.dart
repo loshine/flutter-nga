@@ -10,7 +10,7 @@ import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_bloc.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_state.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicDetailPage extends StatefulWidget {
@@ -31,13 +31,12 @@ class _TopicDetailState extends State<TopicDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder(
-      bloc: _bloc,
-      builder: (_, TopicDetailState state) {
-        return Scaffold(
-          appBar:
-              AppBar(title: Text(CodeUtils.unescapeHtml(widget.topic.subject))),
-          body: RefreshIndicator(
+    return Scaffold(
+      appBar: AppBar(title: Text(codeUtils.unescapeHtml(widget.topic.subject))),
+      body: BlocBuilder(
+        bloc: _bloc,
+        builder: (_, TopicDetailState state) {
+          return RefreshIndicator(
             key: _refreshKey,
             onRefresh: _onRefresh,
             child: SmartRefresher(
@@ -52,21 +51,21 @@ class _TopicDetailState extends State<TopicDetailPage> {
                     _buildListItem(context, position, state),
               ),
             ),
-          ),
-          floatingActionButton: _fabVisible
-              ? FloatingActionButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => PublishPage(topic: widget.topic)));
-                  },
-                  child: Icon(
-                    CommunityMaterialIcons.comment,
-                    color: Colors.white,
-                  ),
-                )
-              : null,
-        );
-      },
+          );
+        },
+      ),
+      floatingActionButton: _fabVisible
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => PublishPage(topic: widget.topic)));
+              },
+              child: Icon(
+                CommunityMaterialIcons.comment,
+                color: Colors.white,
+              ),
+            )
+          : null,
     );
   }
 

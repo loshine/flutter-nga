@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/page/photo_preview/photo_preview_bloc.dart';
 import 'package:flutter_nga/ui/page/photo_preview/photo_preview_state.dart';
+import 'package:flutter_nga/utils/picture_utils.dart' as pictureUtils;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
@@ -25,31 +26,47 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("查看图片"),
-        actions: [
-          IconButton(
-            icon: Icon(CommunityMaterialIcons.content_save),
-            onPressed: _save,
+    return BlocBuilder(
+      bloc: _bloc,
+      builder: (context, PhotoPreviewState state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("查看图片"),
+            actions: [
+              Offstage(
+                offstage: state.originalMode,
+                child: IconButton(
+                  icon: Icon(
+                    CommunityMaterialIcons.image_search,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => _bloc.onSwitch2OriginalMode(
+                      pictureUtils.getOriginalUrl(widget.url),
+                      widget.screenWidth),
+                  tooltip: "查看原图",
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  CommunityMaterialIcons.content_save,
+                  color: Colors.white,
+                ),
+                onPressed: () => _save(state),
+                tooltip: "保存",
+              ),
+            ],
           ),
-        ],
-      ),
-      body: BlocBuilder(
-        bloc: _bloc,
-        builder: (context, PhotoPreviewState state) {
-          if (state.loading) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            return PhotoView(
-              imageProvider: CachedNetworkImageProvider(widget.url),
-              minScale: state.minScale,
-            );
-          }
-        },
-      ),
+          body: state.loading
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : PhotoView(
+                  imageProvider:
+                      CachedNetworkImageProvider(_getShowUrlByState(state)),
+                  minScale: state.minScale,
+                ),
+        );
+      },
     );
   }
 
@@ -59,15 +76,24 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
     _bloc.onLoad(widget.url, widget.screenWidth);
   }
 
-  _save() async {
+  _save(PhotoPreviewState state) async {
     Map<PermissionGroup, PermissionStatus> permissions =
         await PermissionHandler().requestPermissions([PermissionGroup.storage]);
     if (permissions[PermissionGroup.storage] == PermissionStatus.granted) {
-      final file = await Data().resourceRepository.downloadImage(widget.url);
+      final file = await Data()
+          .resourceRepository
+          .downloadImage(_getShowUrlByState(state));
       Fluttertoast.showToast(
         msg: "保存成功, 路径位于${file.path}",
         gravity: ToastGravity.CENTER,
       );
     }
+  }
+
+  String _getShowUrlByState(PhotoPreviewState state) {
+    if (state.originalMode) {
+      return pictureUtils.getOriginalUrl(widget.url);
+    }
+    return widget.url;
   }
 }

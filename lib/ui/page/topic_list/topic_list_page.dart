@@ -32,51 +32,49 @@ class _TopicListState extends State<TopicListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder(
-      bloc: _bloc,
-      builder: (_, TopicListState state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(widget.name),
-            actions: <Widget>[
-              TopicListFavouriteButtonWidget(
-                fid: widget.fid,
-                name: widget.name,
-              ),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.name),
+        actions: <Widget>[
+          TopicListFavouriteButtonWidget(
+            fid: widget.fid,
+            name: widget.name,
           ),
-          body: Builder(builder: (BuildContext context) {
-            return RefreshIndicator(
-              key: _refreshKey,
-              child: SmartRefresher(
-                onRefresh: _onLoadMore,
-                controller: _refreshController,
-                enableOverScroll: false,
-                enablePullUp: state.enablePullUp,
-                enablePullDown: false,
-                child: ListView.builder(
-                  itemCount: state.list.length,
-                  itemBuilder: (context, index) =>
-                      TopicListItemWidget(topic: state.list[index]),
-                ),
+        ],
+      ),
+      body: BlocBuilder(
+        bloc: _bloc,
+        builder: (_, TopicListState state) {
+          return RefreshIndicator(
+            key: _refreshKey,
+            child: SmartRefresher(
+              onRefresh: _onLoadMore,
+              controller: _refreshController,
+              enableOverScroll: false,
+              enablePullUp: state.enablePullUp,
+              enablePullDown: false,
+              child: ListView.builder(
+                itemCount: state.list.length,
+                itemBuilder: (context, index) =>
+                    TopicListItemWidget(topic: state.list[index]),
               ),
-              onRefresh: _onRefresh,
-            );
-          }),
-          floatingActionButton: _fabVisible
-              ? FloatingActionButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => PublishPage(fid: widget.fid)));
-                  },
-                  child: Icon(
-                    CommunityMaterialIcons.pencil,
-                    color: Colors.white,
-                  ),
-                )
-              : null,
-        );
-      },
+            ),
+            onRefresh: _onRefresh,
+          );
+        },
+      ),
+      floatingActionButton: _fabVisible
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => PublishPage(fid: widget.fid)));
+              },
+              child: Icon(
+                CommunityMaterialIcons.pencil,
+                color: Colors.white,
+              ),
+            )
+          : null,
     );
   }
 
@@ -109,12 +107,10 @@ class _TopicListState extends State<TopicListPage> {
   void _scrollListener() {
     if (_refreshController.scrollController.position.userScrollDirection ==
         ScrollDirection.reverse) {
-      debugPrint("reverse");
       if (_fabVisible) setState(() => _fabVisible = false);
     }
     if (_refreshController.scrollController.position.userScrollDirection ==
         ScrollDirection.forward) {
-      debugPrint("forward");
       if (!_fabVisible) setState(() => _fabVisible = true);
     }
   }

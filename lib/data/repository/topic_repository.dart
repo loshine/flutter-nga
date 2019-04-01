@@ -7,7 +7,7 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:path/path.dart';
 
 class TopicRepository {
@@ -122,8 +122,8 @@ class TopicRepository {
         "&action=new"
         "&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}"
         "&fid=$fid${isAnonymous ? "anony=1" : ""}"
-        "${!CodeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
-        "${!CodeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
+        "${!codeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
+        "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options();
       options.contentType =
@@ -153,8 +153,8 @@ class TopicRepository {
         "&action=reply"
         "&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}"
         "&fid=$fid${isAnonymous ? "anony=1" : ""}"
-        "${!CodeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
-        "${!CodeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
+        "${!codeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
+        "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options();
       options.contentType =

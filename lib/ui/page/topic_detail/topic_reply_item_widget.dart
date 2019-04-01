@@ -6,7 +6,7 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
@@ -113,7 +113,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ],
         ),
         SizedBox(
-          height: CodeUtils.isStringEmpty(widget.reply.subject) ? 0 : null,
+          height: codeUtils.isStringEmpty(widget.reply.subject) ? 0 : null,
           width: double.infinity,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
@@ -127,7 +127,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         SizedBox(
-          height: CodeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
+          height: codeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
             child: Html(

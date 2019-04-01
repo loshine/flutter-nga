@@ -39,12 +39,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _goLogin(BuildContext context) {
-    Navigator.of(context).pop();
-    AndroidLogin.startLogin()
-        .then((result) => debugPrint("goAndroidLogin result: $result"))
-        .catchError((e) => debugPrint(e.toString()));
+  void _maybeGoLogin(BuildContext context) async {
+    User user = await Data().userRepository.getDefaultUser();
+    if (user == null) {
+      Navigator.of(context).pop();
+      AndroidLogin.startLogin()
+          .then((result) => debugPrint("goAndroidLogin result: $result"))
+          .catchError((e) => debugPrint(e.toString()));
 //    Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPage()));
+    }
   }
 
   double _getElevation() {
@@ -104,7 +107,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             InkWell(
-              onTap: () => _goLogin(context),
+              onTap: () => _maybeGoLogin(context),
               child: Container(
                 height: 240.0,
                 width: double.infinity,

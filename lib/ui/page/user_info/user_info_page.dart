@@ -5,7 +5,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
@@ -71,7 +71,7 @@ class UserInfoWidget extends StatelessWidget {
                       ),
                     ),
                     background: Container(
-                        child: CodeUtils.isStringEmpty(state.avatar)
+                        child: codeUtils.isStringEmpty(state.avatar)
                             ? SizedBox.expand(child: Text(""))
                             : CachedNetworkImage(
                                 fit: BoxFit.cover,

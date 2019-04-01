@@ -1,5 +1,5 @@
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 
 class NgaContentParser {
   static List<Parser> _parserList = [
@@ -14,7 +14,7 @@ class NgaContentParser {
 
   static String parse(String content) {
     var parseContent = content;
-    parseContent = CodeUtils.unescapeHtml(parseContent);
+    parseContent = codeUtils.unescapeHtml(parseContent);
     parseContent = _replyParser.parse(parseContent);
     _parserList.forEach((parser) {
       parseContent = parser.parse(parseContent);
@@ -24,7 +24,7 @@ class NgaContentParser {
 
   static String parseComment(String content) {
     var parseContent = content;
-    parseContent = CodeUtils.unescapeHtml(parseContent);
+    parseContent = codeUtils.unescapeHtml(parseContent);
     parseContent = _commentParser.parse(parseContent);
     _parserList.forEach((parser) {
       parseContent = parser.parse(parseContent);
