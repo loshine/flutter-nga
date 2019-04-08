@@ -37,21 +37,23 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                   username: user.username,
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 4),
-                    child: Text(user.getShowName()),
-                  ),
-                  Text(
-                    reply.postDate,
-                    style: TextStyle(
-                      fontSize: Dimen.caption,
-                      color: Palette.colorTextSecondary,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 4),
+                      child: Text(user.getShowName()),
                     ),
-                  ),
-                ],
+                    Text(
+                      reply.postDate,
+                      style: TextStyle(
+                        fontSize: Dimen.caption,
+                        color: Palette.colorTextSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
