@@ -98,7 +98,7 @@ class _PublishReplyState extends State<PublishPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("回帖"),
+          title: Text(widget.topic != null ? "回帖" : "发帖"),
           actions: [
             IconButton(
               icon: Icon(Icons.send),
@@ -326,7 +326,7 @@ class _PublishReplyState extends State<PublishPage> {
       context: context,
       builder: (context) {
         return ForumTagDialog(
-          fid: widget.topic.fid,
+          fid: widget.topic != null ? widget.topic.fid : widget.fid,
           onSelected: (tag) {
             if (!_tagList.contains(tag)) {
               setState(() {

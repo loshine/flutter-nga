@@ -32,4 +32,12 @@ void main() {
     expect(url.substring(0, url.length - 10),
         "./mon_201901/23/7nQ5-1s5nK1kT1kSb9-45.png");
   });
+
+  test('RegExp test', () {
+    RegExp regExp = RegExp(
+        "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid]([\\s\\S]*?)\\[/uid]\\[color=gray]\\(([\\s\\S]*?)\\)\\[/color] \\(([\\s\\S]*?)\\)\\[/b]");
+    String content =
+        "[b]Reply to [tid=16893894]Topic[/tid] Post by [uid]#anony_6b0df884c0e44bf854e195a52cbc3a0e[/uid][color=gray](0楼)[/color] (2019-04-08 14:29)[/b]  哈哈哈哈哈哈";
+    expect(content.replaceAll(regExp, ""), "  哈哈哈哈哈哈");
+  });
 }

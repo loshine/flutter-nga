@@ -96,6 +96,7 @@ class _CommentParser implements Parser {
   @override
   String parse(String content) {
     return content
+        .replaceAll("[color=gray](楼)[/color]", "")
         .replaceAll(
             RegExp(
                 "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
@@ -104,10 +105,13 @@ class _CommentParser implements Parser {
             RegExp(
                 "\\[b]Reply to \\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
             "")
-        .replaceAll("[color=gray](楼)[/color]", "")
         .replaceAll(
             RegExp(
                 "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid(=(\\d+)?)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
+            "")
+        .replaceAll(
+            RegExp(
+                "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid]([\\s\\S]*?)\\[/uid]\\[color=gray]\\(([\\s\\S]*?)\\)\\[/color] \\(([\\s\\S]*?)\\)\\[/b]"),
             "");
   }
 }
