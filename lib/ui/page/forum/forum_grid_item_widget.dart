@@ -27,8 +27,7 @@ class ForumGridItemWidget extends StatelessWidget {
             CachedNetworkImage(
               width: 48,
               height: 48,
-              imageUrl:
-                  "http://img4.nga.178.com/ngabbs/nga_classic/f/app/${forum.fid}.png",
+              imageUrl: forum.getIconUrl(),
               placeholder: Image.asset(
                 'images/default_forum_icon.png',
                 width: 48,

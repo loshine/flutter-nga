@@ -101,7 +101,8 @@ class ForumRepository {
       forumList = [
         Forum(482, "CS:GO"),
         Forum(321, "DOTA2"),
-        Forum(622, "刀塔卡牌 Artifact")
+        Forum(622, "刀塔卡牌 Artifact"),
+        Forum(641, "DotA自走棋"),
       ];
       group = ForumGroup("Valve Games", forumList);
       forumGroupList.add(group);

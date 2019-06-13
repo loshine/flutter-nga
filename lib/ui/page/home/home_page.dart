@@ -79,6 +79,7 @@ class _HomePageState extends State<HomePage> {
               .userRepository
               .saveLoginCookies(cookies)
               .then((user) => setUser(user));
+          debugPrint("开始啦");
         }
       },
       onError: (e) => debugPrint(e.toString()),
