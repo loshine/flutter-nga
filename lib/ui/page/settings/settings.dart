@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/ui/page/settings/account_management/account_management_page.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -16,6 +17,10 @@ class _SettingsState extends State<SettingsPage> {
             ListTile(
               title: Text("账号管理"),
               subtitle: Text("管理您的账号"),
+              onTap: () =>
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                    return AccountManagementPage();
+                  })),
             ),
           ],
         ),
