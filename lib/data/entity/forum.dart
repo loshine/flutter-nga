@@ -1,6 +1,6 @@
 /// 版块实体类
 class Forum {
-  const Forum(this.fid, this.name)
+  Forum(this.fid, this.name)
       : assert(fid != null),
         assert(name != null);
 
@@ -11,8 +11,12 @@ class Forum {
     return {'fid': fid, 'name': name};
   }
 
-  factory Forum.fromJson(Map map){
+  factory Forum.fromJson(Map map) {
     return Forum(map['fid'], map['name']);
+  }
+
+  String getIconUrl() {
+    return "http://img4.nga.178.com/ngabbs/nga_classic/f/app/$fid.png";
   }
 }
 
