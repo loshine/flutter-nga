@@ -11,6 +11,7 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:html/dom.dart' as dom;
 
 Widget ngaRenderer(dom.Node node, List<Widget> children) {
+  debugPrint("自定义渲染ing！！！");
   if (node is dom.Element) {
     switch (node.localName) {
       case "td":
@@ -189,6 +190,7 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
         break;
       // 图片
       case "img":
+        debugPrint("图片图片");
         if (node.attributes['src'] != null) {
           if (node.attributes['src'].startsWith("data:image") &&
               node.attributes['src'].contains("base64,")) {
@@ -208,11 +210,11 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
                 imageUrl: node.attributes['src'],
-                placeholder: Icon(
-                  Icons.image,
-                  size: 48,
-                  color: Palette.colorIcon,
-                ),
+                placeholder: (context, url) => Icon(
+                      Icons.image,
+                      size: 48,
+                      color: Palette.colorIcon,
+                    ),
               ),
             );
           });
@@ -231,11 +233,11 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
         return CachedNetworkImage(
           fit: BoxFit.cover,
           imageUrl: node.attributes['src'],
-          placeholder: Icon(
-            Icons.image,
-            size: 48,
-            color: Palette.colorIcon,
-          ),
+          placeholder: (context, url) => Icon(
+                Icons.image,
+                size: 48,
+                color: Palette.colorIcon,
+              ),
         );
       // 引用
       case "blockquote":

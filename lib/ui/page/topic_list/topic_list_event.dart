@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 abstract class TopicListEvent {
-  factory TopicListEvent.refresh(int fid, Completer<void> completer) =>
-      TopicListRefreshEvent(fid: fid, completer: completer);
+  factory TopicListEvent.refresh(int fid, RefreshController controller) =>
+      TopicListRefreshEvent(fid: fid, controller: controller);
 
   factory TopicListEvent.loadMore(int fid, RefreshController controller) =>
       TopicListLoadMoreEvent(fid: fid, controller: controller);
@@ -12,9 +10,9 @@ abstract class TopicListEvent {
 
 class TopicListRefreshEvent implements TopicListEvent {
   final int fid;
-  final Completer<void> completer;
+  final RefreshController controller;
 
-  const TopicListRefreshEvent({this.fid, this.completer});
+  const TopicListRefreshEvent({this.fid, this.controller});
 }
 
 class TopicListLoadMoreEvent implements TopicListEvent {
