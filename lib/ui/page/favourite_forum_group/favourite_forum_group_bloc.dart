@@ -26,7 +26,6 @@ class FavouriteForumGroupBloc
 
   @override
   Stream<FavouriteForumGroupState> mapEventToState(
-      FavouriteForumGroupState currentState,
       FavouriteChangedEvent event) async* {
     final favouriteForumList = await Data().forumRepository.getFavouriteList();
     yield FavouriteForumGroupState(favouriteForumList);

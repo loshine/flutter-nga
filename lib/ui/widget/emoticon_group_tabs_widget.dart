@@ -70,9 +70,9 @@ class _EmoticonGroupWidget extends StatelessWidget {
                       padding: EdgeInsets.all(16),
                       child: CachedNetworkImage(
                         imageUrl: expression.url,
-                        placeholder:
+                        placeholder: (context, url) =>
                             Image.asset('images/default_forum_icon.png'),
-                        errorWidget:
+                        errorWidget: (context, url, err) =>
                             Image.asset('images/default_forum_icon.png'),
                       ),
                     ),

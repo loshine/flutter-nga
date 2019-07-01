@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,7 +28,6 @@ class _TopicListState extends State<TopicListPage> {
   bool _fabVisible = true;
   RefreshController _refreshController = RefreshController();
 
-  final _refreshKey = GlobalKey<RefreshIndicatorState>();
   final _bloc = TopicListBloc();
 
   @override
@@ -45,21 +45,16 @@ class _TopicListState extends State<TopicListPage> {
       body: BlocBuilder(
         bloc: _bloc,
         builder: (_, TopicListState state) {
-          return RefreshIndicator(
-            key: _refreshKey,
-            child: SmartRefresher(
-              onRefresh: _onLoadMore,
-              controller: _refreshController,
-              enableOverScroll: false,
-              enablePullUp: state.enablePullUp,
-              enablePullDown: false,
-              child: ListView.builder(
-                itemCount: state.list.length,
-                itemBuilder: (context, index) =>
-                    TopicListItemWidget(topic: state.list[index]),
-              ),
-            ),
+          return SmartRefresher(
+            onLoading: _onLoading,
+            controller: _refreshController,
+            enablePullUp: state.enablePullUp,
             onRefresh: _onRefresh,
+            child: ListView.builder(
+              itemCount: state.list.length,
+              itemBuilder: (context, index) =>
+                  TopicListItemWidget(topic: state.list[index]),
+            ),
           );
         },
       ),
@@ -83,8 +78,8 @@ class _TopicListState extends State<TopicListPage> {
     super.initState();
     Future.delayed(const Duration(milliseconds: 0)).then((val) {
       // 进入的时候自动刷新
-      _refreshKey.currentState.show();
-      _refreshController.scrollController.addListener(_scrollListener);
+      _refreshController.requestRefresh();
+      _refreshController.position.addListener(_scrollListener);
     });
   }
 
@@ -94,22 +89,20 @@ class _TopicListState extends State<TopicListPage> {
     _bloc.dispose();
   }
 
-  Future<void> _onRefresh() async {
-    final completer = Completer<void>();
-    _bloc.onRefresh(widget.fid, completer);
-    return completer.future;
+  _onRefresh() async {
+    _bloc.onRefresh(widget.fid, _refreshController);
   }
 
-  _onLoadMore(bool up) async {
+  _onLoading() async {
     _bloc.onLoadMore(widget.fid, _refreshController);
   }
 
   void _scrollListener() {
-    if (_refreshController.scrollController.position.userScrollDirection ==
+    if (_refreshController.position.userScrollDirection ==
         ScrollDirection.reverse) {
       if (_fabVisible) setState(() => _fabVisible = false);
     }
-    if (_refreshController.scrollController.position.userScrollDirection ==
+    if (_refreshController.position.userScrollDirection ==
         ScrollDirection.forward) {
       if (!_fabVisible) setState(() => _fabVisible = true);
     }

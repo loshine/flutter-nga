@@ -97,7 +97,7 @@ class Topic {
       author: map["author"].toString(),
       // 写 PHP 的都没有一点数据类型的意识么？
       authorId: map["authorid"],
-      subject: map["subject"],
+      subject: map["subject"].toString(),
       icon: map["icon"],
       postDate: map["postdate"],
       lastPoster: map["lastposter"],

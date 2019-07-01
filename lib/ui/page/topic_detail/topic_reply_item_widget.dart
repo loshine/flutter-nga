@@ -118,7 +118,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Text(
-              widget.reply.subject ?? "",
+              codeUtils.unescapeHtml(widget.reply.subject) ?? "",
               style: TextStyle(
                 fontSize: Dimen.title,
                 fontWeight: FontWeight.bold,
@@ -131,6 +131,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
             child: Html(
+              useRichText: false,
               data: NgaContentParser.parse(widget.reply.content),
               customRender: ngaRenderer,
             ),

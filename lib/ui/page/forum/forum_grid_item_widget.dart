@@ -28,16 +28,16 @@ class ForumGridItemWidget extends StatelessWidget {
               width: 48,
               height: 48,
               imageUrl: forum.getIconUrl(),
-              placeholder: Image.asset(
-                'images/default_forum_icon.png',
-                width: 48,
-                height: 48,
-              ),
-              errorWidget: Image.asset(
-                'images/default_forum_icon.png',
-                width: 48,
-                height: 48,
-              ),
+              placeholder: (context, url) => Image.asset(
+                    'images/default_forum_icon.png',
+                    width: 48,
+                    height: 48,
+                  ),
+              errorWidget: (context, url, err) => Image.asset(
+                    'images/default_forum_icon.png',
+                    width: 48,
+                    height: 48,
+                  ),
             ),
             Padding(
               padding: EdgeInsets.only(top: 8),

@@ -20,8 +20,8 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      bloc: _bloc,
       child: _FavouriteForumGroupWidget(),
+      builder: (BuildContext context) => _bloc,
     );
   }
 }

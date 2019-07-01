@@ -11,9 +11,17 @@ class TopicListFavouriteButtonBloc
   TopicListFavouriteButtonState get initialState =>
       TopicListFavouriteButtonState.initial();
 
+  onFavouriteChanged(bool isFavourite, int fid, String name) async {
+    dispatch(
+        TopicListFavouriteButtonEvent.favouriteChanged(isFavourite, fid, name));
+  }
+
+  void onLoadFavourite(int fid, String name) {
+    dispatch(TopicListFavouriteButtonEvent.load(fid, name));
+  }
+
   @override
   Stream<TopicListFavouriteButtonState> mapEventToState(
-      TopicListFavouriteButtonState currentState,
       TopicListFavouriteButtonEvent event) async* {
     if (event is TopicListFavouriteButtonChangedEvent) {
       if (!event.isFavourite) {
@@ -33,14 +41,5 @@ class TopicListFavouriteButtonBloc
           .isFavourite(Forum(event.fid, event.name));
       yield TopicListFavouriteButtonState(isFavourite);
     }
-  }
-
-  onFavouriteChanged(bool isFavourite, int fid, String name) async {
-    dispatch(
-        TopicListFavouriteButtonEvent.favouriteChanged(isFavourite, fid, name));
-  }
-
-  void onLoadFavourite(int fid, String name) {
-    dispatch(TopicListFavouriteButtonEvent.load(fid, name));
   }
 }

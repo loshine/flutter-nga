@@ -38,8 +38,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      bloc: _userInfoBloc,
       child: UserInfoWidget(),
+      builder: (context) => _userInfoBloc,
     );
   }
 }
@@ -76,9 +76,9 @@ class UserInfoWidget extends StatelessWidget {
                             : CachedNetworkImage(
                                 fit: BoxFit.cover,
                                 imageUrl: state.avatar,
-                                placeholder: Image.asset(
+                                placeholder: (context, url) => Image.asset(
                                     'images/default_forum_icon.png'),
-                                errorWidget: Image.asset(
+                                errorWidget: (context, url, err) => Image.asset(
                                     'images/default_forum_icon.png'),
                               ),
                         foregroundDecoration:

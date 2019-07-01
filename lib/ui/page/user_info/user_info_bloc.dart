@@ -18,8 +18,7 @@ class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
   UserInfoState get initialState => UserInfoState.initial();
 
   @override
-  Stream<UserInfoState> mapEventToState(
-      UserInfoState currentState, GetUserInfoEvent event) async* {
+  Stream<UserInfoState> mapEventToState(GetUserInfoEvent event) async* {
     try {
       final userInfo = await Data().userRepository.getUserInfo(event.username);
       final moderatorForumsMap = <int, String>{};

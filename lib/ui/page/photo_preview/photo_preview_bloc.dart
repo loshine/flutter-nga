@@ -11,9 +11,12 @@ class PhotoPreviewBloc extends Bloc<PhotoPreviewEvent, PhotoPreviewState> {
   @override
   PhotoPreviewState get initialState => PhotoPreviewState.loading();
 
+  void onLoad(String url, double screenWidth) {
+    dispatch(PhotoPreviewEvent.load(url, screenWidth));
+  }
+
   @override
-  Stream<PhotoPreviewState> mapEventToState(
-      PhotoPreviewState currentState, PhotoPreviewEvent event) async* {
+  Stream<PhotoPreviewState> mapEventToState(PhotoPreviewEvent event) async* {
     if (event is PhotoPreviewLoadEvent) {
       final completer = Completer<double>();
       CachedNetworkImageProvider(pictureUtils.getOriginalUrl(event.url))
@@ -22,9 +25,5 @@ class PhotoPreviewBloc extends Bloc<PhotoPreviewEvent, PhotoPreviewState> {
               completer.complete(event.screenWidth / info.image.width));
       yield PhotoPreviewState.loadComplete(await completer.future);
     }
-  }
-
-  void onLoad(String url, double screenWidth) {
-    dispatch(PhotoPreviewEvent.load(url, screenWidth));
   }
 }
