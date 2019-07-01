@@ -12,9 +12,16 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
   @override
   TopicDetailState get initialState => TopicDetailState.initial();
 
+  void onRefresh(int tid, RefreshController controller) {
+    dispatch(TopicDetailEvent.refresh(tid, controller));
+  }
+
+  void onLoadMore(int tid, RefreshController controller) {
+    dispatch(TopicDetailEvent.loadMore(tid, controller));
+  }
+
   @override
-  Stream<TopicDetailState> mapEventToState(
-      TopicDetailState currentState, TopicDetailEvent event) async* {
+  Stream<TopicDetailState> mapEventToState(TopicDetailEvent event) async* {
     if (event is TopicDetailRefreshEvent) {
       try {
         TopicDetailData data =
@@ -32,7 +39,7 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
           replyList.add(reply);
           commentList.addAll(reply.commentList);
         });
-        event.completer.complete();
+        event.controller.refreshCompleted(resetFooterState: true);
         yield TopicDetailState(
           page: 1,
           maxPage: data.maxPage,
@@ -44,7 +51,7 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
           medalSet: data.medalList.values.toSet(),
         );
       } catch (err) {
-        event.completer.complete();
+        event.controller.refreshFailed();
         if (err != null) {
           Fluttertoast.showToast(
             msg: err.message,
@@ -57,7 +64,7 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
         TopicDetailData data = await Data()
             .topicRepository
             .getTopicDetail(event.tid, currentState.page + 1);
-        event.controller.sendBack(false, RefreshStatus.canRefresh);
+        event.controller.loadComplete();
         final commentList = currentState.commentList;
         final replyList = currentState.replyList;
         data.replyList.values.forEach((reply) {
@@ -82,20 +89,12 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
           medalSet: currentState.medalSet..addAll(data.medalList.values),
         );
       } catch (err) {
-        event.controller.sendBack(false, RefreshStatus.failed);
+        event.controller.loadFailed();
         Fluttertoast.showToast(
           msg: err.message,
           gravity: ToastGravity.CENTER,
         );
       }
     }
-  }
-
-  void onRefresh(int tid, Completer<void> completer) {
-    dispatch(TopicDetailEvent.refresh(tid, completer));
-  }
-
-  void onLoadMore(int tid, RefreshController controller) {
-    dispatch(TopicDetailEvent.loadMore(tid, controller));
   }
 }

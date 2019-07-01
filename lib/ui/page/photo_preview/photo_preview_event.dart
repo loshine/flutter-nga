@@ -7,5 +7,5 @@ class PhotoPreviewLoadEvent implements PhotoPreviewEvent {
   final String url;
   final double screenWidth;
 
-  PhotoPreviewLoadEvent({this.url, this.screenWidth});
+  const PhotoPreviewLoadEvent({this.url, this.screenWidth});
 }

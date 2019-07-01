@@ -120,7 +120,7 @@ class Data {
         // 在返回响应数据之前做一些预处理
         // gbk 编码 json 转 utf8
         List<int> bytes = response.data;
-        String responseBody = decodeGbk(bytes);
+        String responseBody = gbk.decode(bytes);
         // 处理一些可能导致错误的字符串
         // 直接制表符替换为 \t, \x 替换为 \\x
         responseBody = responseBody

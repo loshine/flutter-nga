@@ -36,16 +36,16 @@ class AvatarWidget extends StatelessWidget {
             height: size,
             fit: BoxFit.cover,
             imageUrl: avatar,
-            placeholder: Image.asset(
-              'images/default_forum_icon.png',
-              width: size,
-              height: size,
-            ),
-            errorWidget: Image.asset(
-              'images/default_forum_icon.png',
-              width: size,
-              height: size,
-            ),
+            placeholder: (context, url) => Image.asset(
+                  'images/default_forum_icon.png',
+                  width: size,
+                  height: size,
+                ),
+            errorWidget: (context, url, err) => Image.asset(
+                  'images/default_forum_icon.png',
+                  width: size,
+                  height: size,
+                ),
           )
         : Image.asset(
             'images/default_forum_icon.png',

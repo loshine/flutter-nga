@@ -39,8 +39,8 @@ class UserRepository {
       } else if (c.contains(TAG_USER_NAME)) {
         username = c.trim().substring(TAG_USER_NAME.length + 1);
         try {
-          username = decodeGbk(username.codeUnits);
-          username = decodeGbk(username.codeUnits);
+          username = gbk.decode(username.codeUnits);
+          username = gbk.decode(username.codeUnits);
         } catch (e) {
           print(e.toString());
         }
@@ -72,6 +72,11 @@ class UserRepository {
     } else {
       return null;
     }
+  }
+
+  Future<List<User>> getAllLoginUser() async {
+    final list = await _userDb.find({});
+    return list.map((m) => User.fromJson(m));
   }
 
   Future<UserInfo> getUserInfo(String username) async {

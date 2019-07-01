@@ -12,14 +12,21 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
   @override
   TopicListState get initialState => TopicListState.initial();
 
+  void onRefresh(int fid, RefreshController controller) {
+    dispatch(TopicListEvent.refresh(fid, controller));
+  }
+
+  void onLoadMore(int fid, RefreshController controller) {
+    dispatch(TopicListEvent.loadMore(fid, controller));
+  }
+
   @override
-  Stream<TopicListState> mapEventToState(
-      TopicListState currentState, TopicListEvent event) async* {
+  Stream<TopicListState> mapEventToState(TopicListEvent event) async* {
     if (event is TopicListRefreshEvent) {
       try {
         TopicListData data =
             await Data().topicRepository.getTopicList(event.fid, 1);
-        event.completer.complete();
+        event.controller.refreshCompleted(resetFooterState: true);
         yield TopicListState(
           page: 1,
           maxPage: data.maxPage,
@@ -27,7 +34,7 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
           list: data.topicList.values.toList(),
         );
       } catch (err) {
-        event.completer.complete();
+        event.controller.refreshFailed();
         Fluttertoast.showToast(
           msg: err.message,
           gravity: ToastGravity.CENTER,
@@ -38,11 +45,11 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
         TopicListData data = await Data()
             .topicRepository
             .getTopicList(event.fid, currentState.page + 1);
-        event.controller.sendBack(
-            false,
-            currentState.page + 1 < data.maxPage
-                ? RefreshStatus.canRefresh
-                : RefreshStatus.noMore);
+        if (currentState.page + 1 < data.maxPage) {
+          event.controller.loadComplete();
+        } else {
+          event.controller.loadNoData();
+        }
         yield TopicListState(
           page: currentState.page + 1,
           maxPage: data.maxPage,
@@ -50,20 +57,12 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
           list: currentState.list..addAll(data.topicList.values),
         );
       } catch (err) {
-        event.controller.sendBack(false, RefreshStatus.failed);
+        event.controller.loadFailed();
         Fluttertoast.showToast(
           msg: err.message,
           gravity: ToastGravity.CENTER,
         );
       }
     }
-  }
-
-  void onRefresh(int fid, Completer<void> completer) {
-    dispatch(TopicListEvent.refresh(fid, completer));
-  }
-
-  void onLoadMore(int fid, RefreshController controller) {
-    dispatch(TopicListEvent.loadMore(fid, controller));
   }
 }
