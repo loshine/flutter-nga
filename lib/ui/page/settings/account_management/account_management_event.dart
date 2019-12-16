@@ -1,28 +1,38 @@
+import 'dart:async';
+
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 abstract class AccountManagementEvent {
   const AccountManagementEvent();
 
-  factory AccountManagementEvent.load() => AccountLoadEvent();
+  factory AccountManagementEvent.refresh(RefreshController controller) =>
+      AccountRefreshEvent(controller);
 
-  factory AccountManagementEvent.delete(String uid) => AccountDeleteEvent(uid);
+  factory AccountManagementEvent.quit(String uid) => AccountQuitEvent(uid);
 
-  factory AccountManagementEvent.deleteAll() => AccountDeleteAllEvent();
+  factory AccountManagementEvent.quitAll(Completer completer) =>
+      AccountQuitAllEvent(completer);
 
   factory AccountManagementEvent.activate(String uid) =>
       AccountActivateEvent(uid);
 }
 
-class AccountLoadEvent extends AccountManagementEvent {
-  const AccountLoadEvent();
+class AccountRefreshEvent extends AccountManagementEvent {
+  final RefreshController controller;
+
+  const AccountRefreshEvent(this.controller);
 }
 
-class AccountDeleteEvent extends AccountManagementEvent {
+class AccountQuitEvent extends AccountManagementEvent {
   final String uid;
 
-  const AccountDeleteEvent(this.uid);
+  const AccountQuitEvent(this.uid);
 }
 
-class AccountDeleteAllEvent extends AccountManagementEvent {
-  const AccountDeleteAllEvent();
+class AccountQuitAllEvent extends AccountManagementEvent {
+  final Completer completer;
+
+  const AccountQuitAllEvent(this.completer);
 }
 
 class AccountActivateEvent extends AccountManagementEvent {

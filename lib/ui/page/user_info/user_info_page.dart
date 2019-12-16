@@ -26,7 +26,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   void dispose() {
     super.dispose();
-    _userInfoBloc.dispose();
+    _userInfoBloc.close();
   }
 
   @override
@@ -39,7 +39,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       child: UserInfoWidget(),
-      builder: (context) => _userInfoBloc,
+      create: (context) => _userInfoBloc,
     );
   }
 }

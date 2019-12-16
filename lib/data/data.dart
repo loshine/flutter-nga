@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
@@ -147,7 +148,7 @@ class Data {
           String errorMessage = map["data"]["__MESSAGE"]["1"];
           throw DioError(
             response: response,
-            message: errorMessage,
+            error: errorMessage,
             type: DioErrorType.RESPONSE,
           );
         }
@@ -157,7 +158,7 @@ class Data {
           if (err["0"] is String) {
             throw DioError(
               response: response,
-              message: err["0"],
+              error: err["0"],
               type: DioErrorType.RESPONSE,
             );
           }
@@ -167,7 +168,7 @@ class Data {
           String errorMessage = map["error"];
           throw DioError(
             response: response,
-            message: errorMessage,
+            error: errorMessage,
             type: DioErrorType.RESPONSE,
           );
         }

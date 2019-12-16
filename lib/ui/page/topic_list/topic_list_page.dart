@@ -49,6 +49,8 @@ class _TopicListState extends State<TopicListPage> {
             onLoading: _onLoading,
             controller: _refreshController,
             enablePullUp: state.enablePullUp,
+            header: ClassicHeader(),
+            footer: ClassicFooter(),
             onRefresh: _onRefresh,
             child: ListView.builder(
               itemCount: state.list.length,
@@ -86,7 +88,8 @@ class _TopicListState extends State<TopicListPage> {
   @override
   void dispose() {
     super.dispose();
-    _bloc.dispose();
+    _bloc.close();
+    _refreshController.dispose();
   }
 
   _onRefresh() async {

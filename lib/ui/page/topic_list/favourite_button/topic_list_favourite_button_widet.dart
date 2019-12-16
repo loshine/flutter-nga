@@ -30,10 +30,10 @@ class _TopicListFavouriteButtonState
             color: Colors.white,
           ),
           onPressed: () => _bloc.onFavouriteChanged(
-                !state.isFavourite,
-                widget.fid,
-                widget.name,
-              ),
+            !state.isFavourite,
+            widget.fid,
+            widget.name,
+          ),
         );
       },
     );
@@ -48,6 +48,6 @@ class _TopicListFavouriteButtonState
   @override
   void dispose() {
     super.dispose();
-    _bloc.dispose();
+    _bloc.close();
   }
 }

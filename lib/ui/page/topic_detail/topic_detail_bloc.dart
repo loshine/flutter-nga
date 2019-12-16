@@ -13,11 +13,11 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
   TopicDetailState get initialState => TopicDetailState.initial();
 
   void onRefresh(int tid, RefreshController controller) {
-    dispatch(TopicDetailEvent.refresh(tid, controller));
+    onEvent(TopicDetailEvent.refresh(tid, controller));
   }
 
   void onLoadMore(int tid, RefreshController controller) {
-    dispatch(TopicDetailEvent.loadMore(tid, controller));
+    onEvent(TopicDetailEvent.loadMore(tid, controller));
   }
 
   @override
@@ -63,10 +63,10 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
       try {
         TopicDetailData data = await Data()
             .topicRepository
-            .getTopicDetail(event.tid, currentState.page + 1);
+            .getTopicDetail(event.tid, state.page + 1);
         event.controller.loadComplete();
-        final commentList = currentState.commentList;
-        final replyList = currentState.replyList;
+        final commentList = state.commentList;
+        final replyList = state.replyList;
         data.replyList.values.forEach((reply) {
           if (reply.tid == null) {
             Reply comment =
@@ -79,14 +79,14 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
           commentList.addAll(reply.commentList);
         });
         yield TopicDetailState(
-          page: currentState.page + 1,
+          page: state.page + 1,
           maxPage: data.maxPage,
-          enablePullUp: currentState.page + 1 < data.maxPage,
+          enablePullUp: state.page + 1 < data.maxPage,
           replyList: replyList,
-          userList: currentState.userList..addAll(data.userList.values),
+          userList: state.userList..addAll(data.userList.values),
           commentList: commentList,
-          groupSet: currentState.groupSet..addAll(data.groupList.values),
-          medalSet: currentState.medalSet..addAll(data.medalList.values),
+          groupSet: state.groupSet..addAll(data.groupList.values),
+          medalSet: state.medalSet..addAll(data.medalList.values),
         );
       } catch (err) {
         event.controller.loadFailed();

@@ -76,10 +76,10 @@ class TopicRepository {
     File file,
   ) async {
     try {
-      var fileName = basename(file.path);
-      final formData = FormData.from({
-        "attachment_file1": UploadFileInfo(file, fileName,
-            contentType: ContentType.parse("image/jpeg")),
+      final fileName = basename(file.path);
+      final formData = FormData.fromMap({
+        "attachment_file1":
+            MultipartFile.fromFile(file.path, filename: fileName),
         "attachment_file1_url_utf8_name": fileName,
         "fid": "$fid",
         "auth": authCode,
@@ -126,8 +126,7 @@ class TopicRepository {
         "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options();
-      options.contentType =
-          ContentType.parse("application/x-www-form-urlencoded");
+      options.contentType = "application/x-www-form-urlencoded";
       Response<String> response = await Data().dio.post(
             "post.php",
             data: postData,
@@ -157,8 +156,7 @@ class TopicRepository {
         "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options();
-      options.contentType =
-          ContentType.parse("application/x-www-form-urlencoded");
+      options.contentType = "application/x-www-form-urlencoded";
       Response<String> response = await Data().dio.post(
             "post.php",
             data: postData,
@@ -181,8 +179,7 @@ class TopicRepository {
         "__output=8&__lib=topic_recommend&__act=add&raw=3&pid=$pid&value=1&tid=$tid";
     try {
       final options = Options();
-      options.contentType =
-          ContentType.parse("application/x-www-form-urlencoded");
+      options.contentType = "application/x-www-form-urlencoded";
       Response<Map<String, dynamic>> response = await Data().dio.post(
             "nuke.php",
             data: postData,
@@ -199,8 +196,7 @@ class TopicRepository {
         "__output=8&__lib=topic_recommend&__act=add&raw=3&pid=$pid&value=-1&tid=$tid";
     try {
       final options = Options();
-      options.contentType =
-          ContentType.parse("application/x-www-form-urlencoded");
+      options.contentType = "application/x-www-form-urlencoded";
       Response<Map<String, dynamic>> response = await Data().dio.post(
             "nuke.php",
             data: postData,

@@ -5,7 +5,7 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
-import 'package:timeago/timeago.dart' as timeago;
+import 'package:timeago/timeago.dart' as timeAgo;
 
 class TopicListItemWidget extends StatelessWidget {
   const TopicListItemWidget({Key key, this.topic}) : super(key: key);
@@ -100,7 +100,7 @@ class TopicListItemWidget extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "${timeago.format(DateTime.fromMillisecondsSinceEpoch(topic.lastPost * 1000))}",
+                        "${timeAgo.format(DateTime.fromMillisecondsSinceEpoch(topic.lastPost * 1000))}",
                         style: TextStyle(
                           fontSize: Dimen.caption,
                           color: Palette.colorTextSecondary,

@@ -29,6 +29,7 @@ class ForumTagDialog extends StatelessWidget {
       content: FutureBuilder(
         future: Data().topicRepository.getTopicTagList(fid),
         builder:
+            // ignore: missing_return
             (BuildContext context, AsyncSnapshot<List<TopicTag>> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
