@@ -3,12 +3,12 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/utils/custom_time_messages.dart';
 import 'package:flutter_nga/utils/palette.dart';
-import 'package:timeago/timeago.dart' as timeago;
+import 'package:timeago/timeago.dart' as timeAgo;
 
 void main() async {
   // 初始化数据库
   await Data().init();
-  timeago.setLocaleMessages('en', CustomTimeMessages());
+  timeAgo.setLocaleMessages('en', CustomTimeMessages());
   runApp(MyApp());
 }
 

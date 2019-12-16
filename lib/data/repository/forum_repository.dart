@@ -29,7 +29,7 @@ class ForumRepository {
         Forum(414, "游戏综合讨论"),
         Forum(436, "消费电子 IT新闻"),
         Forum(334, "硬件配置"),
-        Forum(498, "二手交易")
+        Forum(498, "二手交易"),
       ];
       var group = ForumGroup("网事杂谈", forumList);
       forumGroupList.add(group);
@@ -73,7 +73,7 @@ class ForumRepository {
         Forum(116, "奇迹之泉"),
         Forum(323, "国服以外"),
         Forum(10, "银色黎明"),
-        Forum(230, "风纪委员会")
+        Forum(230, "风纪委员会"),
       ];
 
       group = ForumGroup("魔兽世界", forumList);
@@ -85,7 +85,7 @@ class ForumRepository {
         Forum(318, "暗黑破坏神3"),
         Forum(431, "风暴英雄"),
         Forum(406, "星际争霸2"),
-        Forum(490, "魔兽争霸")
+        Forum(490, "魔兽争霸"),
       ];
       group = ForumGroup("暴雪游戏", forumList);
       forumGroupList.add(group);
@@ -93,7 +93,8 @@ class ForumRepository {
       forumList = [
         Forum(-152678, "英雄联盟"),
         Forum(479, "英雄联盟赛事"),
-        Forum(418, "英雄联盟视频")
+        Forum(418, "英雄联盟视频"),
+        Forum(660, "云顶之弈"),
       ];
       group = ForumGroup("拳头游戏", forumList);
       forumGroupList.add(group);
@@ -103,6 +104,7 @@ class ForumRepository {
         Forum(321, "DOTA2"),
         Forum(622, "刀塔卡牌 Artifact"),
         Forum(641, "DotA自走棋"),
+        Forum(659, "刀塔霸业"),
       ];
       group = ForumGroup("Valve Games", forumList);
       forumGroupList.add(group);
@@ -110,7 +112,7 @@ class ForumRepository {
       forumList = [
         Forum(614, "PlayStation"),
         Forum(615, "XBox"),
-        Forum(616, "Nintendo")
+        Forum(616, "Nintendo"),
       ];
       group = ForumGroup("主机游戏", forumList);
       forumGroupList.add(group);
@@ -165,7 +167,7 @@ class ForumRepository {
         Forum(493, "刀塔战纪"),
         Forum(494, "魔龙之魂"),
         Forum(495, "光荣三国志系列"),
-        Forum(496, "九十九姬")
+        Forum(496, "九十九姬"),
       ];
       group = ForumGroup("其他游戏", forumList);
       forumGroupList.add(group);
@@ -175,7 +177,7 @@ class ForumRepository {
         Forum(334, "PC软硬件"),
         Forum(201, "系统问题"),
         Forum(335, "网站开发"),
-        Forum(275, "测试版面")
+        Forum(275, "测试版面"),
       ];
       group = ForumGroup("系统软硬件讨论", forumList);
       forumGroupList.add(group);
@@ -207,7 +209,7 @@ class ForumRepository {
         Forum(-3432136, "飘落的诗章"),
         Forum(-187628, "家居 装修"),
         Forum(-8627585, "牛头人酋长乐队"),
-        Forum(-17100, "全民健身中心")
+        Forum(-17100, "全民健身中心"),
       ];
       group = ForumGroup("个人版面", forumList);
       forumGroupList.add(group);

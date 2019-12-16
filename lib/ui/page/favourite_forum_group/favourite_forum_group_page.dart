@@ -21,8 +21,14 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       child: _FavouriteForumGroupWidget(),
-      builder: (BuildContext context) => _bloc,
+      create: (context) => _bloc,
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _bloc.close();
   }
 }
 

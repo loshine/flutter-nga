@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
-import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:objectdb/objectdb.dart';
 
 const TAG_CID = "ngaPassportCid";
@@ -38,12 +37,7 @@ class UserRepository {
         cid = c.trim().substring(TAG_CID.length + 1);
       } else if (c.contains(TAG_USER_NAME)) {
         username = c.trim().substring(TAG_USER_NAME.length + 1);
-        try {
-          username = gbk.decode(username.codeUnits);
-          username = gbk.decode(username.codeUnits);
-        } catch (e) {
-          print(e.toString());
-        }
+        username = await AndroidGbk.decodeName(username);
       }
     }
     if (cid != null &&
@@ -76,7 +70,8 @@ class UserRepository {
 
   Future<List<User>> getAllLoginUser() async {
     final list = await _userDb.find({});
-    return list.map((m) => User.fromJson(m));
+    print(list.toString());
+    return list.map((m) => User.fromJson(m)).toList();
   }
 
   Future<UserInfo> getUserInfo(String username) async {
@@ -90,5 +85,9 @@ class UserRepository {
     } catch (error) {
       rethrow;
     }
+  }
+
+  Future<int> quitAllLoginUser() {
+    return _userDb.remove({});
   }
 }
