@@ -11,4 +11,8 @@ class AndroidGbk {
   static Future<String> urlEncode(String content) async {
     return await _gbkChannel.invokeMethod("urlEncode", {"content": content});
   }
+
+  static Future<String> decodeName(String name) async {
+    return await urlDecode(await urlDecode(name));
+  }
 }

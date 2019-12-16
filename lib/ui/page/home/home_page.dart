@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
-import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/page/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/match/match_tabs.dart';
@@ -58,13 +57,11 @@ class _HomePageState extends State<HomePage> {
     if (this.mounted) {
       setState(() => this.user = user);
       if (user != null) {
-        final firstTimeDecode = await AndroidGbk.urlDecode(user.nickname);
-        final decodedNickname = await AndroidGbk.urlDecode(firstTimeDecode);
         Data()
             .userRepository
-            .getUserInfo(decodedNickname)
+            .getUserInfo(user.nickname)
             .then((userInfo) => setState(() => _userInfo = userInfo));
-        setState(() => _nickname = decodedNickname);
+        setState(() => _nickname = user.nickname);
       }
     }
   }
@@ -79,7 +76,6 @@ class _HomePageState extends State<HomePage> {
               .userRepository
               .saveLoginCookies(cookies)
               .then((user) => setUser(user));
-          debugPrint("开始啦");
         }
       },
       onError: (e) => debugPrint(e.toString()),

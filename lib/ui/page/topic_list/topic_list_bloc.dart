@@ -13,11 +13,11 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
   TopicListState get initialState => TopicListState.initial();
 
   void onRefresh(int fid, RefreshController controller) {
-    dispatch(TopicListEvent.refresh(fid, controller));
+    onEvent(TopicListEvent.refresh(fid, controller));
   }
 
   void onLoadMore(int fid, RefreshController controller) {
-    dispatch(TopicListEvent.loadMore(fid, controller));
+    onEvent(TopicListEvent.loadMore(fid, controller));
   }
 
   @override
@@ -44,17 +44,17 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
       try {
         TopicListData data = await Data()
             .topicRepository
-            .getTopicList(event.fid, currentState.page + 1);
-        if (currentState.page + 1 < data.maxPage) {
+            .getTopicList(event.fid, state.page + 1);
+        if (state.page + 1 < data.maxPage) {
           event.controller.loadComplete();
         } else {
           event.controller.loadNoData();
         }
         yield TopicListState(
-          page: currentState.page + 1,
+          page: state.page + 1,
           maxPage: data.maxPage,
-          enablePullUp: currentState.page + 1 < data.maxPage,
-          list: currentState.list..addAll(data.topicList.values),
+          enablePullUp: state.page + 1 < data.maxPage,
+          list: state.list..addAll(data.topicList.values),
         );
       } catch (err) {
         event.controller.loadFailed();

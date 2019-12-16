@@ -11,7 +11,6 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:html/dom.dart' as dom;
 
 Widget ngaRenderer(dom.Node node, List<Widget> children) {
-  debugPrint("自定义渲染ing！！！");
   if (node is dom.Element) {
     switch (node.localName) {
       case "td":
@@ -190,7 +189,6 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
         break;
       // 图片
       case "img":
-        debugPrint("图片图片");
         if (node.attributes['src'] != null) {
           if (node.attributes['src'].startsWith("data:image") &&
               node.attributes['src'].contains("base64,")) {

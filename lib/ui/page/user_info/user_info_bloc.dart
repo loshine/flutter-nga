@@ -11,7 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
   void onLoad(String username) {
-    dispatch(GetUserInfoEvent(username));
+    onEvent(GetUserInfoEvent(username));
   }
 
   @override
