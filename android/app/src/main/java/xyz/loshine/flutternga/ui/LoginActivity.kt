@@ -9,9 +9,9 @@ import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.activity_login.*
 import xyz.loshine.flutternga.R
+import xyz.loshine.flutternga.event.CookiesEventHandler
 import xyz.loshine.flutternga.plugins.FlutterCookiesPlugin
 
 class LoginActivity : AppCompatActivity() {
@@ -42,8 +42,7 @@ class LoginActivity : AppCompatActivity() {
         if (!TextUtils.isEmpty(cookieString)) {
             val intent = Intent()
             intent.action = FlutterCookiesPlugin.FILTER
-            intent.putExtra("cookies", cookieString)
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+            CookiesEventHandler.onCookiesChanges(cookieString)
         }
         super.onPause()
     }
