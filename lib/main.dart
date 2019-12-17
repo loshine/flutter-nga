@@ -5,7 +5,8 @@ import 'package:flutter_nga/utils/custom_time_messages.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
-void main() async {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
   // 初始化数据库
   await Data().init();
   timeAgo.setLocaleMessages('en', CustomTimeMessages());
