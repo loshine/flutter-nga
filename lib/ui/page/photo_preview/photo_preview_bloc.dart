@@ -12,7 +12,7 @@ class PhotoPreviewBloc extends Bloc<PhotoPreviewEvent, PhotoPreviewState> {
   PhotoPreviewState get initialState => PhotoPreviewState.loading();
 
   void onLoad(String url, double screenWidth) {
-    onEvent(PhotoPreviewEvent.load(url, screenWidth));
+    add(PhotoPreviewEvent.load(url, screenWidth));
   }
 
   @override

@@ -13,11 +13,11 @@ class TopicListBloc extends Bloc<TopicListEvent, TopicListState> {
   TopicListState get initialState => TopicListState.initial();
 
   void onRefresh(int fid, RefreshController controller) {
-    onEvent(TopicListEvent.refresh(fid, controller));
+    add(TopicListEvent.refresh(fid, controller));
   }
 
   void onLoadMore(int fid, RefreshController controller) {
-    onEvent(TopicListEvent.loadMore(fid, controller));
+    add(TopicListEvent.loadMore(fid, controller));
   }
 
   @override

@@ -13,11 +13,11 @@ class AccountManagementBloc
   AccountManagementState get initialState => AccountManagementState.initial();
 
   void onRefresh(RefreshController controller) {
-    onEvent(AccountManagementEvent.refresh(controller));
+    add(AccountManagementEvent.refresh(controller));
   }
 
   void onQuitAll(Completer completer) {
-    onEvent(AccountManagementEvent.quitAll(completer));
+    add(AccountManagementEvent.quitAll(completer));
   }
 
   @override
