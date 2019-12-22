@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/utils/custom_time_messages.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 初始化数据库
   await Data().init();
@@ -25,6 +27,17 @@ class MyApp extends StatelessWidget {
         splashColor: Palette.colorSplash,
         highlightColor: Palette.colorHighlight,
       ),
+      localizationsDelegates: [
+        // 这行是关键
+        RefreshLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate
+      ],
+      supportedLocales: [
+        const Locale('en'),
+        const Locale('zh'),
+      ],
+      localeResolutionCallback: (locale, supportedLocales) => locale,
       home: HomePage(title: 'NGA'),
     );
   }
