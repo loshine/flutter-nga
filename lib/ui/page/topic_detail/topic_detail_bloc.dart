@@ -13,11 +13,11 @@ class TopicDetailBloc extends Bloc<TopicDetailEvent, TopicDetailState> {
   TopicDetailState get initialState => TopicDetailState.initial();
 
   void onRefresh(int tid, RefreshController controller) {
-    onEvent(TopicDetailEvent.refresh(tid, controller));
+    add(TopicDetailEvent.refresh(tid, controller));
   }
 
   void onLoadMore(int tid, RefreshController controller) {
-    onEvent(TopicDetailEvent.loadMore(tid, controller));
+    add(TopicDetailEvent.loadMore(tid, controller));
   }
 
   @override

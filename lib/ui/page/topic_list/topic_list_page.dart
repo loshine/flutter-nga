@@ -49,6 +49,7 @@ class _TopicListState extends State<TopicListPage> {
             onLoading: _onLoading,
             controller: _refreshController,
             enablePullUp: state.enablePullUp,
+
             header: ClassicHeader(),
             footer: ClassicFooter(),
             onRefresh: _onRefresh,
@@ -89,7 +90,6 @@ class _TopicListState extends State<TopicListPage> {
   void dispose() {
     super.dispose();
     _bloc.close();
-    _refreshController.dispose();
   }
 
   _onRefresh() async {

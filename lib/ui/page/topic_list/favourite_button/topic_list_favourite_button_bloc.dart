@@ -12,12 +12,12 @@ class TopicListFavouriteButtonBloc
       TopicListFavouriteButtonState.initial();
 
   onFavouriteChanged(bool isFavourite, int fid, String name) async {
-    onEvent(
+    add(
         TopicListFavouriteButtonEvent.favouriteChanged(isFavourite, fid, name));
   }
 
   void onLoadFavourite(int fid, String name) {
-    onEvent(TopicListFavouriteButtonEvent.load(fid, name));
+    add(TopicListFavouriteButtonEvent.load(fid, name));
   }
 
   @override

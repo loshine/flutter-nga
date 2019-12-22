@@ -18,7 +18,7 @@ class FavouriteForumGroupBloc
   FavouriteForumGroupBloc._internal();
 
   onChanged() {
-    onEvent(FavouriteChangedEvent());
+    add(FavouriteChangedEvent());
   }
 
   @override
