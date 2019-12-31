@@ -88,7 +88,9 @@ class _HomePageState extends State<HomePage> {
     // 关闭数据库
     Data().close();
     // 取消监听
-    _subscription.cancel();
+    if (_subscription != null) {
+      _subscription.cancel();
+    }
     super.dispose();
   }
 

@@ -7,16 +7,6 @@ import 'package:flutter_nga/ui/page/favourite_forum_group/favourite_forum_group_
 
 class FavouriteForumGroupBloc
     extends Bloc<FavouriteChangedEvent, FavouriteForumGroupState> {
-  // ignore: close_sinks
-  static final FavouriteForumGroupBloc _singleton =
-      FavouriteForumGroupBloc._internal();
-
-  factory FavouriteForumGroupBloc() {
-    return _singleton;
-  }
-
-  FavouriteForumGroupBloc._internal();
-
   onChanged() {
     add(FavouriteChangedEvent());
   }

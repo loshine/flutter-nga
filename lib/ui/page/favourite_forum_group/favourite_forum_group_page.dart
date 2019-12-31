@@ -26,9 +26,15 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage> {
   }
 
   @override
+  void deactivate() {
+    _bloc.onChanged();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
-    super.dispose();
     _bloc.close();
+    super.dispose();
   }
 }
 
