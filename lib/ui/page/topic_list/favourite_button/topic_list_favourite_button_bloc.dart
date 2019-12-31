@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
-import 'package:flutter_nga/ui/page/favourite_forum_group/favourite_forum_group.dart';
 import 'package:flutter_nga/ui/page/topic_list/favourite_button/topic_list_favourite_button_event.dart';
 import 'package:flutter_nga/ui/page/topic_list/favourite_button/topic_list_favourite_button_state.dart';
 
@@ -11,9 +10,8 @@ class TopicListFavouriteButtonBloc
   TopicListFavouriteButtonState get initialState =>
       TopicListFavouriteButtonState.initial();
 
-  onFavouriteChanged(bool isFavourite, int fid, String name) async {
-    add(
-        TopicListFavouriteButtonEvent.favouriteChanged(isFavourite, fid, name));
+  onFavouriteChanged(bool isFavourite, int fid, String name) {
+    add(TopicListFavouriteButtonEvent.favouriteChanged(isFavourite, fid, name));
   }
 
   void onLoadFavourite(int fid, String name) {
@@ -33,7 +31,6 @@ class TopicListFavouriteButtonBloc
             .forumRepository
             .saveFavourite(Forum(event.fid, event.name));
       }
-      FavouriteForumGroupBloc().onChanged();
       yield TopicListFavouriteButtonState(event.isFavourite);
     } else if (event is TopicListFavouriteButtonLoadEvent) {
       final isFavourite = await Data()
