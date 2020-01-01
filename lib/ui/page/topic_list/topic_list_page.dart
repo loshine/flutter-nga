@@ -49,9 +49,6 @@ class _TopicListState extends State<TopicListPage> {
             onLoading: _onLoading,
             controller: _refreshController,
             enablePullUp: state.enablePullUp,
-
-            header: ClassicHeader(),
-            footer: ClassicFooter(),
             onRefresh: _onRefresh,
             child: ListView.builder(
               itemCount: state.list.length,
