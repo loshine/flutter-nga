@@ -1,6 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_nga/ui/widget/forum_tag_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class PublishPage extends StatefulWidget {
   const PublishPage({
