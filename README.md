@@ -1,6 +1,7 @@
 # flutter_nga
 
-[![Build Status](https://travis-ci.org/fallenwood/flutter-nga.svg?branch=master)](https://travis-ci.org/fallenwood/flutter-nga)
+![https://github.com/loshine/flutter-nga/workflows/test/badge.svg](https://github.com/loshine/flutter-nga/actions?query=workflow%3Atest)
+![https://github.com/loshine/flutter-nga/workflows/release/badge.svg](https://github.com/loshine/flutter-nga/actions?query=workflow%3Arelease)
 
 ## Flutter 开源版 NGA
 
