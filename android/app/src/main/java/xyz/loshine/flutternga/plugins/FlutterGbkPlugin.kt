@@ -1,13 +1,13 @@
 package xyz.loshine.flutternga.plugins
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import java.net.URLDecoder
 import java.net.URLEncoder
-import java.nio.charset.Charset
 
-class FlutterGbkPlugin : MethodChannel.MethodCallHandler {
+class FlutterGbkPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     companion object {
 
@@ -20,6 +20,8 @@ class FlutterGbkPlugin : MethodChannel.MethodCallHandler {
             channel.setMethodCallHandler(instance)
         }
     }
+
+    private var channel: MethodChannel? = null
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         // 通过 MethodCall 可以获取参数和方法名
@@ -38,4 +40,13 @@ class FlutterGbkPlugin : MethodChannel.MethodCallHandler {
         }
     }
 
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        channel = MethodChannel(binding.binaryMessenger, CHANNEL)
+        channel?.setMethodCallHandler(this)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        channel?.setMethodCallHandler(null)
+        channel = null
+    }
 }
