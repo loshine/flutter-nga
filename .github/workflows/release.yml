@@ -15,8 +15,8 @@ jobs:
         with:
           java-version: "12.x"
       - uses: subosito/flutter-action@v1
-          with:
-            channel: 'stable' # or: 'dev' or 'beta'
+        with:
+          channel: 'stable' # or: 'dev' or 'beta'
       - run: flutter pub get
       - run: flutter analyze --no-pub --no-current-package lib/ test/
       - run: flutter test --no-pub test/
