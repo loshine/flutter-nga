@@ -2,6 +2,7 @@ package xyz.loshine.flutternga.plugins
 
 import android.app.Activity
 import android.content.Intent
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
@@ -9,7 +10,7 @@ import xyz.loshine.flutternga.ui.LoginActivity
 
 
 class FlutterLoginPlugin
-private constructor(private val activity: Activity) : MethodChannel.MethodCallHandler {
+constructor(private val activity: Activity) : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     companion object {
 
@@ -23,6 +24,8 @@ private constructor(private val activity: Activity) : MethodChannel.MethodCallHa
         }
     }
 
+    private var channel: MethodChannel? = null
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         // 通过 MethodCall 可以获取参数和方法名
         when (call.method) {
@@ -35,5 +38,16 @@ private constructor(private val activity: Activity) : MethodChannel.MethodCallHa
             }
             else -> result.notImplemented()
         }
+    }
+
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        channel = MethodChannel(binding.binaryMessenger, CHANNEL)
+        // setMethodCallHandler在此通道上接收方法调用的回调
+        channel?.setMethodCallHandler(this)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        channel?.setMethodCallHandler(null)
+        channel = null
     }
 }
