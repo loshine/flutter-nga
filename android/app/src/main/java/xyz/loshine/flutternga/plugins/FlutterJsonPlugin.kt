@@ -2,12 +2,13 @@ package xyz.loshine.flutternga.plugins
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 
 
-class FlutterJsonPlugin : MethodChannel.MethodCallHandler {
+class FlutterJsonPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     companion object {
 
@@ -21,6 +22,8 @@ class FlutterJsonPlugin : MethodChannel.MethodCallHandler {
             channel.setMethodCallHandler(instance)
         }
     }
+
+    private var channel: MethodChannel? = null
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         // 通过 MethodCall 可以获取参数和方法名
@@ -39,4 +42,13 @@ class FlutterJsonPlugin : MethodChannel.MethodCallHandler {
         }
     }
 
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        channel = MethodChannel(binding.binaryMessenger, CHANNEL)
+        channel?.setMethodCallHandler(this)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        channel?.setMethodCallHandler(null)
+        channel = null
+    }
 }
