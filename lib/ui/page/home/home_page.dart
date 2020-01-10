@@ -8,6 +8,7 @@ import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/page/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/match/match_tabs.dart';
+import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
@@ -30,6 +31,18 @@ class _HomePageState extends State<HomePage> {
     ForumGroupTabsPage(),
     MatchTabsPage(),
   ];
+
+  List<Widget> _getActionsByPage(int index) {
+    return index == 0
+        ? [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => SearchPage())),
+            ),
+          ]
+        : [];
+  }
 
   void _setSelection(int i) {
     Navigator.pop(context);
@@ -100,6 +113,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         elevation: _getElevation(),
         title: Text(widget.title),
+        actions: _getActionsByPage(_index),
       ),
       backgroundColor: Palette.colorBackground,
       drawer: Drawer(
