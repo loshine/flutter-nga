@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/page/favourite_forum_group/favourite_forum_group_page.dart';
 import 'package:flutter_nga/ui/page/forum/forum_group.dart';
+import 'package:flutter_nga/ui/page/search/search_page.dart';
 
 class ForumGroupTabsPage extends StatelessWidget {
   @override
