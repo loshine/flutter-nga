@@ -137,8 +137,8 @@ class Data {
           // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
           responseBody = await AndroidFormatJson.decode(responseBody);
           map = json.decode(responseBody);
-        } catch (error) {
-          debugPrint(error.toString());
+        } catch (err) {
+          debugPrint(err.toString());
           response.data = responseBody;
           return response;
         }

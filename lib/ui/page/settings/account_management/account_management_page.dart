@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/plugins/login.dart';
+import 'package:flutter_nga/store/account_list.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
-import 'package:flutter_nga/ui/page/settings/account_management/account_management_bloc.dart';
-import 'package:flutter_nga/ui/page/settings/account_management/account_management_state.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -15,9 +14,8 @@ class AccountManagementPage extends StatefulWidget {
 }
 
 class _AccountManagementState extends State<AccountManagementPage> {
-  final _bloc = AccountManagementBloc();
+  final _store = AccountList();
   final _refreshController = RefreshController();
-  final _quitAllCompleter = Completer();
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +24,7 @@ class _AccountManagementState extends State<AccountManagementPage> {
         title: Text("账号管理"),
         actions: [
           IconButton(
-            onPressed: () => _bloc.onQuitAll(_quitAllCompleter),
+            onPressed: _quitAll,
             icon: Icon(
               Icons.delete_forever,
               color: Colors.white,
@@ -35,26 +33,25 @@ class _AccountManagementState extends State<AccountManagementPage> {
           ),
         ],
       ),
-      body: BlocBuilder(
-        bloc: _bloc,
-        builder: (BuildContext context, AccountManagementState state) {
+      body: Observer(
+        builder: (_) {
           return SmartRefresher(
             onRefresh: _onRefresh,
             enablePullUp: false,
             controller: _refreshController,
             child: ListView.builder(
-              itemCount: state.accountList.length,
+              itemCount: _store.list.length,
               itemBuilder: (context, position) => Material(
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () => Fluttertoast.showToast(
-                      msg: state.accountList[position].nickname),
+                      msg: _store.list[position].nickname),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
                         padding: EdgeInsets.all(16),
-                        child: Text(state.accountList[position].nickname),
+                        child: Text(_store.list[position].nickname),
                       ),
                       Divider(height: 1),
                     ],
@@ -82,13 +79,21 @@ class _AccountManagementState extends State<AccountManagementPage> {
     Future.delayed(const Duration(milliseconds: 0)).then((val) {
       _refreshController.requestRefresh();
     });
-    _quitAllCompleter.future.asStream().listen((d) => Navigator.of(context)
-        .pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => HomePage(title: 'NGA')),
-            (Route<dynamic> route) => false));
   }
 
   _onRefresh() {
-    _bloc.onRefresh(_refreshController);
+    _store.refresh().whenComplete(() => _refreshController.refreshCompleted());
+  }
+
+  _quitAll() {
+    _store
+        .quitAll()
+        .then((_) => Fluttertoast.showToast(
+              msg: "成功",
+              gravity: ToastGravity.CENTER,
+            ))
+        .whenComplete(() => Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => HomePage(title: 'NGA')),
+            (Route<dynamic> route) => false));
   }
 }

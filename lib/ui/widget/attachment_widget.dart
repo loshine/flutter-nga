@@ -60,7 +60,7 @@ class _AttachmentState extends State<AttachmentWidget> {
                   .uploadAttachment(widget.topic.fid, _authCode, image);
               widget.attachmentCallback(data["attachments"], data["attachments_check"]);
               setState(() => _list.add(data["url"]));
-            } catch (error) {
+            } catch (err) {
               setState(() => _imageFileList.remove(image));
             }
           },

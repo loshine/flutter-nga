@@ -356,9 +356,9 @@ class _PublishReplyState extends State<PublishPage> {
           gravity: ToastGravity.CENTER,
         );
         Navigator.pop(context);
-      } catch (error) {
+      } catch (err) {
         Fluttertoast.showToast(
-          msg: error.message,
+          msg: err.message,
           gravity: ToastGravity.CENTER,
         );
       }
@@ -376,9 +376,9 @@ class _PublishReplyState extends State<PublishPage> {
           gravity: ToastGravity.CENTER,
         );
         Navigator.pop(context);
-      } catch (error) {
+      } catch (err) {
         Fluttertoast.showToast(
-          msg: error.message,
+          msg: err.message,
           gravity: ToastGravity.CENTER,
         );
       }
