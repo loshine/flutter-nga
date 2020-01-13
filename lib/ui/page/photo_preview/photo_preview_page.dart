@@ -41,7 +41,7 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
       ),
       body: Observer(
         builder: (_) {
-          return _store.loading
+          return _store.minScale == 0
               ? Center(child: CircularProgressIndicator())
               : PhotoView(
                   imageProvider: CachedNetworkImageProvider(

@@ -4,14 +4,14 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/store/topic_detail.dart';
 import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
-import 'package:flutter_nga/ui/page/topic_detail/topic_detail_bloc.dart';
-import 'package:flutter_nga/ui/page/topic_detail/topic_detail_state.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicDetailPage extends StatefulWidget {
@@ -27,24 +27,23 @@ class _TopicDetailState extends State<TopicDetailPage> {
   bool _fabVisible = true;
 
   final _refreshController = RefreshController();
-  final _bloc = TopicDetailBloc();
+  final _store = TopicDetail();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(codeUtils.unescapeHtml(widget.topic.subject))),
-      body: BlocBuilder(
-        bloc: _bloc,
-        builder: (_, TopicDetailState state) {
+      body: Observer(
+        builder: (_) {
           return SmartRefresher(
             onRefresh: _onRefresh,
-            enablePullUp: state.enablePullUp,
+            enablePullUp: _store.state.enablePullUp,
             controller: _refreshController,
             onLoading: _onLoading,
             child: ListView.builder(
-              itemCount: state.replyList.length,
+              itemCount: _store.state.replyList.length,
               itemBuilder: (context, position) =>
-                  _buildListItem(context, position, state),
+                  _buildListItem(context, position, _store.state),
             ),
           );
         },
@@ -67,18 +66,31 @@ class _TopicDetailState extends State<TopicDetailPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 0)).then((val) {
+    Future.delayed(const Duration()).then((_) {
       _refreshController.requestRefresh();
       _refreshController.position.addListener(_scrollListener);
     });
   }
 
   _onRefresh() {
-    _bloc.onRefresh(widget.topic.tid, _refreshController);
+    _store.refresh(widget.topic.tid).catchError((err) {
+      _refreshController.loadFailed();
+      Fluttertoast.showToast(
+        msg: err.message,
+        gravity: ToastGravity.CENTER,
+      );
+    }).whenComplete(
+        () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
   _onLoading() {
-    _bloc.onLoadMore(widget.topic.tid, _refreshController);
+    _store.loadMore(widget.topic.tid).catchError((err) {
+      _refreshController.loadFailed();
+      Fluttertoast.showToast(
+        msg: err.message,
+        gravity: ToastGravity.CENTER,
+      );
+    }).whenComplete(() => _refreshController.loadComplete());
   }
 
   _scrollListener() {

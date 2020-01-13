@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/utils/picture_utils.dart' as pictureUtils;
@@ -10,9 +8,6 @@ part 'photo_preview.g.dart';
 class PhotoPreview = _PhotoPreview with _$PhotoPreview;
 
 abstract class _PhotoPreview with Store {
-  @observable
-  bool loading = true;
-
   @observable
   double minScale = 0;
 

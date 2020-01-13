@@ -17,10 +17,11 @@ abstract class _FavouriteForum with Store {
 
   @action
   Future toggle(int fid, String name) async {
-    if (!isFavourite) {
+    if (isFavourite) {
       await Data().forumRepository.deleteFavourite(Forum(fid, name));
     } else {
       await Data().forumRepository.saveFavourite(Forum(fid, name));
     }
+    isFavourite = !isFavourite;
   }
 }
