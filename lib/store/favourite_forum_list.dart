@@ -13,9 +13,7 @@ abstract class _FavouriteForumList with Store {
   @action
   void refresh() {
     Data().forumRepository.getFavouriteList().then((list) {
-      this.list
-        ..clear()
-        ..addAll(list);
+      this.list = list;
     });
   }
 }

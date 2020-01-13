@@ -31,7 +31,7 @@ class _TopicListFavouriteButtonState
           ),
           onPressed: () {
             _favouriteForumStore.toggle(widget.fid, widget.name).then((_) {
-              Provider.of<FavouriteForumList>(context).refresh();
+              Provider.of<FavouriteForumList>(context, listen: false).refresh();
             });
           },
         );

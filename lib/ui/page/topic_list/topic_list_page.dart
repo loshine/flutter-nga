@@ -10,6 +10,7 @@ import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_item_widget.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicListPage extends StatefulWidget {
@@ -81,7 +82,7 @@ class _TopicListState extends State<TopicListPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 0)).then((val) {
+    Future.delayed(const Duration()).then((_) {
       // 进入的时候自动刷新
       _refreshController.requestRefresh();
       _refreshController.position.addListener(_scrollListener);
@@ -89,11 +90,14 @@ class _TopicListState extends State<TopicListPage> {
   }
 
   _onRefresh() {
-    _store
-        .refresh(widget.fid)
-        .catchError(() => _refreshController.refreshFailed())
-        .whenComplete(
-            () => _refreshController.refreshCompleted(resetFooterState: true));
+    _store.refresh(widget.fid).catchError((err) {
+      _refreshController.refreshFailed();
+      Fluttertoast.showToast(
+        msg: err.message,
+        gravity: ToastGravity.CENTER,
+      );
+    }).whenComplete(
+        () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
   _onLoading() async {
@@ -103,7 +107,7 @@ class _TopicListState extends State<TopicListPage> {
       } else {
         _refreshController.loadNoData();
       }
-    }).catchError(() => _refreshController.loadFailed());
+    }).catchError((_) => _refreshController.loadFailed());
   }
 
   void _scrollListener() {

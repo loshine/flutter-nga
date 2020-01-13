@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
         Provider<FavouriteForumList>(create: (_) => FavouriteForumList())
       ],
       child: MaterialApp(
+        showPerformanceOverlay: true,
         theme: ThemeData(
           primarySwatch: Palette.colorPrimary,
           scaffoldBackgroundColor: Palette.colorBackground,
