@@ -4,13 +4,12 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_nga/store/topic_list.dart';
 import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
-import 'package:flutter_nga/ui/page/topic_list/favourite_button/topic_list_favourite_button_widet.dart';
-import 'package:flutter_nga/ui/page/topic_list/topic_list_bloc.dart';
+import 'package:flutter_nga/ui/page/topic_list/topic_list_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_item_widget.dart';
-import 'package:flutter_nga/ui/page/topic_list/topic_list_state.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicListPage extends StatefulWidget {
@@ -29,7 +28,7 @@ class _TopicListState extends State<TopicListPage> {
   bool _fabVisible = true;
   RefreshController _refreshController = RefreshController();
 
-  final _bloc = TopicListBloc();
+  final _store = TopicList();
 
   @override
   Widget build(BuildContext context) {
@@ -51,21 +50,18 @@ class _TopicListState extends State<TopicListPage> {
           ),
         ],
       ),
-      body: BlocBuilder(
-        bloc: _bloc,
-        builder: (_, TopicListState state) {
-          return SmartRefresher(
-            onLoading: _onLoading,
-            controller: _refreshController,
-            enablePullUp: state.enablePullUp,
-            onRefresh: _onRefresh,
-            child: ListView.builder(
-              itemCount: state.list.length,
-              itemBuilder: (context, index) =>
-                  TopicListItemWidget(topic: state.list[index]),
-            ),
-          );
-        },
+      body: Observer(
+        builder: (_) => SmartRefresher(
+          onLoading: _onLoading,
+          controller: _refreshController,
+          enablePullUp: _store.state.enablePullUp,
+          onRefresh: _onRefresh,
+          child: ListView.builder(
+            itemCount: _store.state.list.length,
+            itemBuilder: (context, index) =>
+                TopicListItemWidget(topic: _store.state.list[index]),
+          ),
+        ),
       ),
       floatingActionButton: _fabVisible
           ? FloatingActionButton(
@@ -92,18 +88,22 @@ class _TopicListState extends State<TopicListPage> {
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _bloc.close();
-  }
-
-  _onRefresh() async {
-    _bloc.onRefresh(widget.fid, _refreshController);
+  _onRefresh() {
+    _store
+        .refresh(widget.fid)
+        .catchError(() => _refreshController.refreshFailed())
+        .whenComplete(
+            () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
   _onLoading() async {
-    _bloc.onLoadMore(widget.fid, _refreshController);
+    _store.loadMore(widget.fid).then((state) {
+      if (state.page + 1 < state.maxPage) {
+        _refreshController.loadComplete();
+      } else {
+        _refreshController.loadNoData();
+      }
+    }).catchError(() => _refreshController.loadFailed());
   }
 
   void _scrollListener() {

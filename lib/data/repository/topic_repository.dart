@@ -28,7 +28,7 @@ class TopicRepository {
           .dio
           .get("thread.php?lite=js&noprefix&fid=$fid&page=$page");
       return TopicListData.fromJson(response.data);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -38,7 +38,7 @@ class TopicRepository {
       Response<Map<String, dynamic>> response =
           await Data().dio.get("read.php?lite=js&noprefix&tid=$tid&page=$page");
       return TopicDetailData.fromJson(response.data);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -54,7 +54,7 @@ class TopicRepository {
         list.add(TopicTag(id: int.tryParse(k), content: v["0"]));
       });
       return list;
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -65,7 +65,7 @@ class TopicRepository {
             "post.php?lite=js&noprefix&fid=$fid&tid=$tid&action=$action",
           );
       return response.data["auth"];
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -99,7 +99,7 @@ class TopicRepository {
           .dio
           .post("http://img.nga.178.com:8080/attach.php", data: formData);
       return response.data;
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -110,7 +110,7 @@ class TopicRepository {
           .dio
           .get("nuke.php?fid=$fid&__output=8&lite=js&action=new");
       return response.data['auth'];
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -139,7 +139,7 @@ class TopicRepository {
       int end = html.indexOf(_RESULT_END_TAG, start);
       if (end < 0) return "发帖失败";
       return html.substring(start, end);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -169,7 +169,7 @@ class TopicRepository {
       int end = html.indexOf(_RESULT_END_TAG, start);
       if (end < 0) return "发帖失败";
       return html.substring(start, end);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -186,7 +186,7 @@ class TopicRepository {
             options: options,
           );
       return ToggleLikeReaction.fromJson(response.data);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
@@ -203,7 +203,7 @@ class TopicRepository {
             options: options,
           );
       return ToggleLikeReaction.fromJson(response.data);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
