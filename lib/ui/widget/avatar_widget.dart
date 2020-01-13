@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/ui/page/user_info/user_info.dart';
+import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 
 class AvatarWidget extends StatelessWidget {
@@ -37,15 +37,15 @@ class AvatarWidget extends StatelessWidget {
             fit: BoxFit.cover,
             imageUrl: avatar,
             placeholder: (context, url) => Image.asset(
-                  'images/default_forum_icon.png',
-                  width: size,
-                  height: size,
-                ),
+              'images/default_forum_icon.png',
+              width: size,
+              height: size,
+            ),
             errorWidget: (context, url, err) => Image.asset(
-                  'images/default_forum_icon.png',
-                  width: size,
-                  height: size,
-                ),
+              'images/default_forum_icon.png',
+              width: size,
+              height: size,
+            ),
           )
         : Image.asset(
             'images/default_forum_icon.png',

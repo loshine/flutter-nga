@@ -82,7 +82,7 @@ class UserRepository {
       // {"0": { userinfo }};
       Map<String, dynamic> userInfoMap = response.data["0"];
       return UserInfo.fromJson(userInfoMap);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }

@@ -1,26 +1,20 @@
-import 'dart:async';
-
-import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/ui/page/user_info/user_info.dart';
-import 'package:flutter_nga/ui/page/user_info/user_info_state.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/parser/content_parser.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mobx/mobx.dart';
 
-class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
-  void onLoad(String username) {
-    add(GetUserInfoEvent(username));
-  }
+part 'user_info.g.dart';
 
-  @override
-  UserInfoState get initialState => UserInfoState.initial();
+class UserInfo = _UserInfo with _$UserInfo;
 
-  @override
-  Stream<UserInfoState> mapEventToState(GetUserInfoEvent event) async* {
+abstract class _UserInfo with Store {
+  @observable
+  UserInfoState state = UserInfoState.initial();
+
+  @action
+  Future<UserInfoState> load(String username) async {
     try {
-      final userInfo = await Data().userRepository.getUserInfo(event.username);
+      final userInfo = await Data().userRepository.getUserInfo(username);
       final moderatorForumsMap = <int, String>{};
       if (userInfo != null &&
           userInfo.adminForums != null &&
@@ -44,7 +38,7 @@ class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
         personalForumMap[userInfo.userForum['0']] =
             "${codeUtils.unescapeHtml(userInfo.userForum['1'])}";
       }
-      yield UserInfoState(
+      state = UserInfoState(
         uid: userInfo.uid,
         username: userInfo.username,
         avatar: userInfo.avatar,
@@ -64,16 +58,50 @@ class UserInfoBloc extends Bloc<GetUserInfoEvent, UserInfoState> {
         reputationMap: reputationMap,
         personalForum: personalForumMap,
       );
-    } on DioError catch (err) {
-      Fluttertoast.showToast(
-        msg: err.message,
-        gravity: ToastGravity.CENTER,
-      );
-    } on Error catch (err) {
-      Fluttertoast.showToast(
-        msg: err.toString(),
-        gravity: ToastGravity.CENTER,
-      );
+      return state;
+    } catch (err) {
+      rethrow;
     }
   }
+}
+
+class UserInfoState {
+  final int uid;
+  final String username;
+  final String avatar;
+  final Map<String, String> basicInfoMap;
+  final String signature;
+  final Map<int, String> moderatorForums; // 管理版面
+  final Map<String, String> reputationMap; // 声望
+  final Map<int, String> personalForum; // 个人版面
+
+  const UserInfoState({
+    this.uid,
+    this.username,
+    this.avatar,
+    this.basicInfoMap,
+    this.signature,
+    this.moderatorForums,
+    this.reputationMap,
+    this.personalForum,
+  });
+
+  factory UserInfoState.initial() => UserInfoState(
+        uid: 0,
+        username: "",
+        avatar: "",
+        basicInfoMap: {
+          '用户ID': 'N/A',
+          '用户名': 'N/A',
+          '用户组': 'N/A',
+          '财富': 'N/A',
+          '注册日期': 'N/A'
+        },
+        signature: "N/A",
+        moderatorForums: {},
+        reputationMap: {
+          '威望': '0.0',
+        },
+        personalForum: {},
+      );
 }

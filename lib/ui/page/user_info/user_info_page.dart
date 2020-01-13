@@ -1,15 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_nga/store/user_info.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_page.dart';
-import 'package:flutter_nga/ui/page/user_info/user_info.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
-
-import 'user_info_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class UserInfoPage extends StatefulWidget {
   final String username;
@@ -21,76 +21,69 @@ class UserInfoPage extends StatefulWidget {
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  UserInfoBloc _userInfoBloc = UserInfoBloc();
-
-  @override
-  void dispose() {
-    super.dispose();
-    _userInfoBloc.close();
-  }
+  UserInfo _store = UserInfo();
 
   @override
   void initState() {
     super.initState();
-    _userInfoBloc.onLoad(widget.username);
+    _store.load(widget.username).catchError((err) {
+      if (err is DioError) {
+        Fluttertoast.showToast(
+          msg: err.message,
+          gravity: ToastGravity.CENTER,
+        );
+      } else if (err is Error) {
+        Fluttertoast.showToast(
+          msg: err.toString(),
+          gravity: ToastGravity.CENTER,
+        );
+      }
+    });
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      child: UserInfoWidget(),
-      create: (context) => _userInfoBloc,
-    );
-  }
-}
-
-class UserInfoWidget extends StatelessWidget {
-  const UserInfoWidget({
-    Key key,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder(
-          bloc: BlocProvider.of<UserInfoBloc>(context),
-          builder: (context, UserInfoState state) {
-            return CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  expandedHeight: 200,
-                  floating: false,
-                  pinned: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    title: Text(
-                      state.username,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                      ),
+      body: Observer(
+        builder: (_) {
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                floating: false,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  title: Text(
+                    _store.state.username,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
                     ),
-                    background: Container(
-                        child: codeUtils.isStringEmpty(state.avatar)
-                            ? SizedBox.expand(child: Text(""))
-                            : CachedNetworkImage(
-                                fit: BoxFit.cover,
-                                imageUrl: state.avatar,
-                                placeholder: (context, url) => Image.asset(
-                                    'images/default_forum_icon.png'),
-                                errorWidget: (context, url, err) => Image.asset(
-                                    'images/default_forum_icon.png'),
-                              ),
-                        foregroundDecoration:
-                            BoxDecoration(color: Colors.black38)),
                   ),
+                  background: Container(
+                      child: codeUtils.isStringEmpty(_store.state.avatar)
+                          ? SizedBox.expand(child: Text(""))
+                          : CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl: _store.state.avatar,
+                              placeholder: (context, url) =>
+                                  Image.asset('images/default_forum_icon.png'),
+                              errorWidget: (context, url, err) =>
+                                  Image.asset('images/default_forum_icon.png'),
+                            ),
+                      foregroundDecoration:
+                          BoxDecoration(color: Colors.black38)),
                 ),
-                SliverList(
-                  delegate: SliverChildListDelegate(_getBodyWidgets(state)),
-                ),
-              ],
-            );
-          }),
+              ),
+              SliverList(
+                delegate:
+                    SliverChildListDelegate(_getBodyWidgets(_store.state)),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
