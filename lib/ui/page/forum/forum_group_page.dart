@@ -22,14 +22,14 @@ class _ForumGroupState extends State<ForumGroupPage>
     final double itemHeight = 96;
     final double itemWidth = size.width / 3;
     return GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          childAspectRatio: itemWidth / itemHeight,
-        ),
-        itemCount: widget.group.forumList.length,
-        itemBuilder: (_, index) {
-          return ForumGridItemWidget(widget.group.forumList[index]);
-        });
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: itemWidth / itemHeight,
+      ),
+      itemCount: widget.group.forumList.length,
+      itemBuilder: (_, index) =>
+          ForumGridItemWidget(widget.group.forumList[index]),
+    );
   }
 
   @override
