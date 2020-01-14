@@ -29,25 +29,15 @@ class Data {
   Dio get dio => _dio;
   PersistCookieJar _cookieJar;
 
-  EmoticonRepository _emoticonRepository;
+  EmoticonRepository get emoticonRepository => EmoticonDataRepository();
 
-  EmoticonRepository get emoticonRepository => _emoticonRepository;
+  ForumRepository get forumRepository => ForumDataRepository(_forumDb);
 
-  ForumRepository _forumRepository;
+  ResourceRepository get resourceRepository => ResourceDataRepository();
 
-  ForumRepository get forumRepository => _forumRepository;
+  TopicRepository get topicRepository => TopicDataRepository();
 
-  ResourceRepository _resourceRepository;
-
-  ResourceRepository get resourceRepository => _resourceRepository;
-
-  TopicRepository _topicRepository;
-
-  TopicRepository get topicRepository => _topicRepository;
-
-  UserRepository _userRepository;
-
-  UserRepository get userRepository => _userRepository;
+  UserRepository get userRepository => UserDataRepository(_userDb);
 
   factory Data() {
     return _singleton;
@@ -59,20 +49,11 @@ class Data {
     // 创建并初始化
     Directory appDocDir = await getApplicationDocumentsDirectory();
 
-    _emoticonRepository = EmoticonRepository();
-
     String forumDbPath = [appDocDir.path, 'forum.db'].join('/');
-    _forumDb = ObjectDB(forumDbPath);
-    _forumRepository = ForumRepository();
-    _forumRepository.init(_forumDb);
-
-    _resourceRepository = ResourceRepository();
-    _topicRepository = TopicRepository();
+    _forumDb = ObjectDB(forumDbPath)..open();
 
     String userDbPath = [appDocDir.path, 'user.db'].join('/');
-    _userDb = ObjectDB(userDbPath);
-    _userRepository = UserRepository();
-    _userRepository.init(_userDb);
+    _userDb = ObjectDB(userDbPath)..open();
 
     _dio = Dio();
 
@@ -102,7 +83,7 @@ class Data {
     _dio.interceptors.add(CookieManager(_cookieJar));
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (RequestOptions options) async {
-        final user = await _userRepository.getDefaultUser();
+        final user = await userRepository.getDefaultUser();
         if (user != null && options.headers["Cookie"] == null) {
           options.headers["Cookie"] =
               "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";

@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
       if (user != null) {
         Data()
             .userRepository
-            .getUserInfo(user.nickname)
+            .getUserInfoByName(user.nickname)
             .then((userInfo) => setState(() => _userInfo = userInfo));
         setState(() => _nickname = user.nickname);
       }

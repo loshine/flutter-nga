@@ -26,7 +26,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   void initState() {
     super.initState();
-    _store.load(widget.username).catchError((err) {
+    _store.loadByName(widget.username).catchError((err) {
       if (err is DioError) {
         Fluttertoast.showToast(
           msg: err.message,
