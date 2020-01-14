@@ -33,12 +33,13 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage>
 
     return Observer(builder: (_) {
       return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            childAspectRatio: itemWidth / itemHeight,
-          ),
-          itemCount: _store.list.length,
-          itemBuilder: (_, index) => ForumGridItemWidget(_store.list[index]));
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          childAspectRatio: itemWidth / itemHeight,
+        ),
+        itemCount: _store.list.length,
+        itemBuilder: (_, index) => ForumGridItemWidget(_store.list[index]),
+      );
     });
   }
 

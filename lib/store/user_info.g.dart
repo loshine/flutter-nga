@@ -26,10 +26,17 @@ mixin _$UserInfo on _UserInfo, Store {
     }, _$stateAtom, name: '${_$stateAtom.name}_set');
   }
 
-  final _$loadAsyncAction = AsyncAction('load');
+  final _$loadByNameAsyncAction = AsyncAction('loadByName');
 
   @override
-  Future<UserInfoState> load(String username) {
-    return _$loadAsyncAction.run(() => super.load(username));
+  Future<UserInfoState> loadByName(String username) {
+    return _$loadByNameAsyncAction.run(() => super.loadByName(username));
+  }
+
+  final _$loadByUidAsyncAction = AsyncAction('loadByUid');
+
+  @override
+  Future<UserInfoState> loadByUid(String uid) {
+    return _$loadByUidAsyncAction.run(() => super.loadByUid(uid));
   }
 }

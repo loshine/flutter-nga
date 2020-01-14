@@ -3,20 +3,20 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
-class ResourceRepository {
+/// 资源资源库
+abstract class ResourceRepository {
+  Future<File> downloadImage(String url);
+}
+
+class ResourceDataRepository implements ResourceRepository {
   Dio _dio;
 
-  static final ResourceRepository _singleton = ResourceRepository._internal();
-
-  factory ResourceRepository() {
-    return _singleton;
-  }
-
-  ResourceRepository._internal() {
+  ResourceDataRepository() {
     _dio = Dio();
     _dio.options.responseType = ResponseType.bytes;
   }
 
+  @override
   Future<File> downloadImage(String url) async {
     Response<List<int>> bytesResponse = await _dio.get(url);
     Directory dir = await getExternalStorageDirectory();
