@@ -26,6 +26,7 @@ dependencies:
   provider: ^4.0.1
   mobx: ^0.4.0+1
   flutter_mobx: ^0.3.6
+  fluro: ^1.5.1
   dio: ^3.0.7
   dio_cookie_manager: ^1.0.0
   gbk2utf8: ^1.0.1

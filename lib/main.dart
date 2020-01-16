@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/ui/page/home/home_page.dart';
-import 'package:flutter_nga/utils/custom_time_messages.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
 
 import 'store/favourite_forum_list.dart';
+import 'ui/page/splash/splash_page.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // 初始化数据库
-  await Data().init();
-  timeAgo.setLocaleMessages('en', CustomTimeMessages());
   runApp(MyApp());
 }
 
@@ -27,10 +20,11 @@ class MyApp extends StatelessWidget {
         Provider<FavouriteForumList>(create: (_) => FavouriteForumList())
       ],
       child: MaterialApp(
-        showPerformanceOverlay: true,
+//        showPerformanceOverlay: true,
         theme: ThemeData(
           primarySwatch: Palette.colorPrimary,
           scaffoldBackgroundColor: Palette.colorBackground,
+          backgroundColor: Palette.colorBackground,
           dividerColor: Palette.colorDivider,
           splashColor: Palette.colorSplash,
           highlightColor: Palette.colorHighlight,
@@ -46,7 +40,7 @@ class MyApp extends StatelessWidget {
           const Locale('zh'),
         ],
         localeResolutionCallback: (locale, supportedLocales) => locale,
-        home: HomePage(title: 'NGA'),
+        home: SplashPage(),
       ),
     );
   }
