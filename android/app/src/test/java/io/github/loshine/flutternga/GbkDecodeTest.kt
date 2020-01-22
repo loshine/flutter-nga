@@ -1,4 +1,4 @@
-package xyz.loshine.flutternga
+package io.github.loshine.flutternga
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject

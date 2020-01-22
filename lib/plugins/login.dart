@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 
 class AndroidLogin {
   static const _loginChannel =
-      const MethodChannel('xyz.loshine.flutternga.login/plugin');
+      const MethodChannel('io.github.loshine.flutternga.login/plugin');
   static const _cookieChannel =
-      const EventChannel('xyz.loshine.flutternga.cookies/plugin');
+      const EventChannel('io.github.loshine.flutternga.cookies/plugin');
 
   static Stream<dynamic> get cookieStream =>
       _cookieChannel.receiveBroadcastStream();

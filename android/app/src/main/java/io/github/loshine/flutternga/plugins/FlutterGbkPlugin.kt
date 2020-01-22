@@ -1,24 +1,21 @@
-package xyz.loshine.flutternga.plugins
+package io.github.loshine.flutternga.plugins
 
-import android.app.Activity
-import android.content.Intent
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
-import xyz.loshine.flutternga.ui.LoginActivity
+import java.net.URLDecoder
+import java.net.URLEncoder
 
-
-class FlutterLoginPlugin
-constructor(private val activity: Activity) : FlutterPlugin, MethodChannel.MethodCallHandler {
+class FlutterGbkPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     companion object {
 
-        const val CHANNEL = "xyz.loshine.flutternga.login/plugin"
+        const val CHANNEL = "io.github.loshine.flutternga.gbk/plugin"
 
         fun registerWith(registrar: PluginRegistry.Registrar) {
             val channel = MethodChannel(registrar.messenger(), CHANNEL)
-            val instance = FlutterLoginPlugin(registrar.activity())
+            val instance = FlutterGbkPlugin()
             // setMethodCallHandler在此通道上接收方法调用的回调
             channel.setMethodCallHandler(instance)
         }
@@ -29,12 +26,15 @@ constructor(private val activity: Activity) : FlutterPlugin, MethodChannel.Metho
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         // 通过 MethodCall 可以获取参数和方法名
         when (call.method) {
-            "start_login" -> {
-                // 跳转到登录页
-                val intent = Intent(activity, LoginActivity::class.java)
-                activity.startActivity(intent)
-                // 返回给 flutter 的参数
-                result.success("success")
+            "urlDecode" -> {
+                val content: String = call.argument("content") ?: ""
+                val string = URLDecoder.decode(content, "gbk")
+                result.success(string)
+            }
+            "urlEncode" -> {
+                val content: String = call.argument("content") ?: ""
+                val string = URLEncoder.encode(content, "gbk")
+                result.success(string)
             }
             else -> result.notImplemented()
         }
@@ -42,7 +42,6 @@ constructor(private val activity: Activity) : FlutterPlugin, MethodChannel.Metho
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(binding.binaryMessenger, CHANNEL)
-        // setMethodCallHandler在此通道上接收方法调用的回调
         channel?.setMethodCallHandler(this)
     }
 

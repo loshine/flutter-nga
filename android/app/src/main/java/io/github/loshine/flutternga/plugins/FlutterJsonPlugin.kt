@@ -1,21 +1,23 @@
-package xyz.loshine.flutternga.plugins
+package io.github.loshine.flutternga.plugins
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
-import java.net.URLDecoder
-import java.net.URLEncoder
 
-class FlutterGbkPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
+
+class FlutterJsonPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     companion object {
 
-        const val CHANNEL = "xyz.loshine.flutternga.gbk/plugin"
+        const val CHANNEL = "io.github.loshine.flutternga.json/plugin"
+        val gson = Gson()
 
         fun registerWith(registrar: PluginRegistry.Registrar) {
             val channel = MethodChannel(registrar.messenger(), CHANNEL)
-            val instance = FlutterGbkPlugin()
+            val instance = FlutterJsonPlugin()
             // setMethodCallHandler在此通道上接收方法调用的回调
             channel.setMethodCallHandler(instance)
         }
@@ -26,15 +28,15 @@ class FlutterGbkPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         // 通过 MethodCall 可以获取参数和方法名
         when (call.method) {
-            "urlDecode" -> {
-                val content: String = call.argument("content") ?: ""
-                val string = URLDecoder.decode(content, "gbk")
-                result.success(string)
-            }
-            "urlEncode" -> {
-                val content: String = call.argument("content") ?: ""
-                val string = URLEncoder.encode(content, "gbk")
-                result.success(string)
+            "decode" -> {
+                try {
+                    val jsonString = call.argument<String>("json")
+                    val formattedJson = gson.toJson(gson.fromJson(jsonString, JsonObject::class.java))
+                    // 返回给 flutter 的参数
+                    result.success(formattedJson)
+                } catch (e: Exception) {
+                    result.error("Json Decode error", e.message, null)
+                }
             }
             else -> result.notImplemented()
         }

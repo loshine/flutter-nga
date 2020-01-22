@@ -1,16 +1,16 @@
-package xyz.loshine.flutternga.plugins
+package io.github.loshine.flutternga.plugins
 
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.PluginRegistry
-import xyz.loshine.flutternga.event.CookiesEventHandler
+import io.github.loshine.flutternga.event.CookiesEventHandler
 
 class FlutterCookiesPlugin : FlutterPlugin, EventChannel.StreamHandler {
 
     companion object {
-        const val CHANNEL = "xyz.loshine.flutternga.cookies/plugin"
-        const val FILTER = "xyz.loshine.flutternga.cookies"
+        const val CHANNEL = "io.github.loshine.flutternga.cookies/plugin"
+        const val FILTER = "io.github.loshine.flutternga.cookies"
 
         fun registerWith(registrar: PluginRegistry.Registrar) {
             val channel = EventChannel(registrar.messenger(), CHANNEL)
