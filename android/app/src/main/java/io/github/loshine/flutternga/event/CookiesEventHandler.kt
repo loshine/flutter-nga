@@ -1,4 +1,4 @@
-package xyz.loshine.flutternga.event
+package io.github.loshine.flutternga.event
 
 import io.flutter.plugin.common.EventChannel
 import io.reactivex.BackpressureStrategy

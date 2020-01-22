@@ -1,23 +1,24 @@
-package xyz.loshine.flutternga.plugins
+package io.github.loshine.flutternga.plugins
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
+import android.app.Activity
+import android.content.Intent
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
+import io.github.loshine.flutternga.ui.LoginActivity
 
 
-class FlutterJsonPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
+class FlutterLoginPlugin
+constructor(private val activity: Activity) : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     companion object {
 
-        const val CHANNEL = "xyz.loshine.flutternga.json/plugin"
-        val gson = Gson()
+        const val CHANNEL = "io.github.loshine.flutternga.login/plugin"
 
         fun registerWith(registrar: PluginRegistry.Registrar) {
             val channel = MethodChannel(registrar.messenger(), CHANNEL)
-            val instance = FlutterJsonPlugin()
+            val instance = FlutterLoginPlugin(registrar.activity())
             // setMethodCallHandler在此通道上接收方法调用的回调
             channel.setMethodCallHandler(instance)
         }
@@ -28,15 +29,12 @@ class FlutterJsonPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         // 通过 MethodCall 可以获取参数和方法名
         when (call.method) {
-            "decode" -> {
-                try {
-                    val jsonString = call.argument<String>("json")
-                    val formattedJson = gson.toJson(gson.fromJson(jsonString, JsonObject::class.java))
-                    // 返回给 flutter 的参数
-                    result.success(formattedJson)
-                } catch (e: Exception) {
-                    result.error("Json Decode error", e.message, null)
-                }
+            "start_login" -> {
+                // 跳转到登录页
+                val intent = Intent(activity, LoginActivity::class.java)
+                activity.startActivity(intent)
+                // 返回给 flutter 的参数
+                result.success("success")
             }
             else -> result.notImplemented()
         }
@@ -44,6 +42,7 @@ class FlutterJsonPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(binding.binaryMessenger, CHANNEL)
+        // setMethodCallHandler在此通道上接收方法调用的回调
         channel?.setMethodCallHandler(this)
     }
 
