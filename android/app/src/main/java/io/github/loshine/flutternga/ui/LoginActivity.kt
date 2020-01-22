@@ -1,4 +1,4 @@
-package xyz.loshine.flutternga.ui
+package io.github.loshine.flutternga.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -10,9 +10,9 @@ import android.webkit.WebChromeClient
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_login.*
-import xyz.loshine.flutternga.R
-import xyz.loshine.flutternga.event.CookiesEventHandler
-import xyz.loshine.flutternga.plugins.FlutterCookiesPlugin
+import io.github.loshine.flutternga.R
+import io.github.loshine.flutternga.event.CookiesEventHandler
+import io.github.loshine.flutternga.plugins.FlutterCookiesPlugin
 
 class LoginActivity : AppCompatActivity() {
 
