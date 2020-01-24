@@ -3,7 +3,7 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/store/photo_preview.dart';
+import 'package:flutter_nga/store/photo_min_scale_store.dart';
 import 'package:flutter_nga/utils/picture_utils.dart' as pictureUtils;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -21,7 +21,7 @@ class PhotoPreviewPage extends StatefulWidget {
 }
 
 class _PhotoPreviewState extends State<PhotoPreviewPage> {
-  final _store = PhotoPreview();
+  final _store = PhotoMinScaleStore();
 
   @override
   Widget build(BuildContext context) {

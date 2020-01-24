@@ -2,11 +2,11 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:mobx/mobx.dart';
 
-part 'favourite_forum.g.dart';
+part 'favourite_forum_store.g.dart';
 
-class FavouriteForum = _FavouriteForum with _$FavouriteForum;
+class FavouriteForumStore = _FavouriteForumStore with _$FavouriteForumStore;
 
-abstract class _FavouriteForum with Store {
+abstract class _FavouriteForumStore with Store {
   @observable
   bool isFavourite = false;
 

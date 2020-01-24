@@ -3,11 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/utils/picture_utils.dart' as pictureUtils;
 import 'package:mobx/mobx.dart';
 
-part 'photo_preview.g.dart';
+part 'photo_min_scale_store.g.dart';
 
-class PhotoPreview = _PhotoPreview with _$PhotoPreview;
+class PhotoMinScaleStore = _PhotoMinScaleStore with _$PhotoMinScaleStore;
 
-abstract class _PhotoPreview with Store {
+abstract class _PhotoMinScaleStore with Store {
   @observable
   double minScale = 0;
 

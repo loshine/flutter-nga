@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/topic_list.dart';
+import 'package:flutter_nga/store/topic_list_store.dart';
 import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_favourite_button_widet.dart';
@@ -29,7 +29,7 @@ class _TopicListState extends State<TopicListPage> {
   bool _fabVisible = true;
   RefreshController _refreshController = RefreshController();
 
-  final _store = TopicList();
+  final _store = TopicListStore();
 
   @override
   Widget build(BuildContext context) {

@@ -2,11 +2,11 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:mobx/mobx.dart';
 
-part 'account_list.g.dart';
+part 'account_list_store.g.dart';
 
-class AccountList = _AccountList with _$AccountList;
+class AccountListStore = _AccountListStore with _$AccountListStore;
 
-abstract class _AccountList with Store {
+abstract class _AccountListStore with Store {
   @observable
   List<User> list = [];
 
