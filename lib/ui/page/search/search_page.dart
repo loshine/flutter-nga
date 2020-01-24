@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/input_deletion.dart';
-import 'package:flutter_nga/store/search.dart';
+import 'package:flutter_nga/store/input_deletion_status_store.dart';
+import 'package:flutter_nga/store/search_options_store.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
@@ -13,15 +13,15 @@ class SearchPage extends StatefulWidget {
 
 class _SearchState extends State<SearchPage> {
   final _searchQuery = TextEditingController();
-  final _searchStore = Search();
-  final _inputDeletionStore = InputDeletion();
+  final _searchStore = SearchOptionsStore();
+  final _inputDeletionStatuStore = InputDeletionStatusStore();
 
   _SearchState() {
     _searchQuery.addListener(listenQueryChanged);
   }
 
   listenQueryChanged() {
-    _inputDeletionStore.setVisible(_searchQuery.text.isNotEmpty);
+    _inputDeletionStatuStore.setVisible(_searchQuery.text.isNotEmpty);
   }
 
   firstOnChanged(int val) {
@@ -56,7 +56,7 @@ class _SearchState extends State<SearchPage> {
             hintStyle: TextStyle(color: Palette.colorTextHintWhite),
             suffixIcon: Observer(
               builder: (_) {
-                return _inputDeletionStore.visible
+                return _inputDeletionStatuStore.visible
                     ? IconButton(
                         icon: Icon(
                           Icons.close,

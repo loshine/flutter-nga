@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/plugins/login.dart';
-import 'package:flutter_nga/store/account_list.dart';
+import 'package:flutter_nga/store/account_list_store.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -14,7 +14,7 @@ class AccountManagementPage extends StatefulWidget {
 }
 
 class _AccountManagementState extends State<AccountManagementPage> {
-  final _store = AccountList();
+  final _store = AccountListStore();
   final _refreshController = RefreshController();
 
   @override
@@ -39,22 +39,24 @@ class _AccountManagementState extends State<AccountManagementPage> {
             onRefresh: _onRefresh,
             enablePullUp: false,
             controller: _refreshController,
-            child: ListView.builder(
-              itemCount: _store.list.length,
-              itemBuilder: (context, position) => Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => Fluttertoast.showToast(
-                      msg: _store.list[position].nickname),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text(_store.list[position].nickname),
-                      ),
-                      Divider(height: 1),
-                    ],
+            child: Observer(
+              builder: (_) => ListView.builder(
+                itemCount: _store.list.length,
+                itemBuilder: (context, position) => Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => Fluttertoast.showToast(
+                        msg: _store.list[position].nickname),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text(_store.list[position].nickname),
+                        ),
+                        Divider(height: 1),
+                      ],
+                    ),
                   ),
                 ),
               ),

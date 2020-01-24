@@ -1,10 +1,10 @@
 import 'package:mobx/mobx.dart';
 
-part 'search.g.dart';
+part 'search_options_store.g.dart';
 
-class Search = _Search with _$Search;
+class SearchOptionsStore = _SearchOptionsStore with _$SearchOptionsStore;
 
-abstract class _Search with Store {
+abstract class _SearchOptionsStore with Store {
   @observable
   SearchState state = SearchState.allForumTopic();
 

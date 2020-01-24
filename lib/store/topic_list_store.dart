@@ -2,11 +2,11 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:mobx/mobx.dart';
 
-part 'topic_list.g.dart';
+part 'topic_list_store.g.dart';
 
-class TopicList = _TopicList with _$TopicList;
+class TopicListStore = _TopicListStore with _$TopicListStore;
 
-abstract class _TopicList with Store {
+abstract class _TopicListStore with Store {
   @observable
   TopicListState state = TopicListState.initial();
 

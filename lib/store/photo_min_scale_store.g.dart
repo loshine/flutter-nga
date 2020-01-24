@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'photo_preview.dart';
+part of 'photo_min_scale_store.dart';
 
 // **************************************************************************
 // StoreGenerator
@@ -8,8 +8,8 @@ part of 'photo_preview.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
-mixin _$PhotoPreview on _PhotoPreview, Store {
-  final _$minScaleAtom = Atom(name: '_PhotoPreview.minScale');
+mixin _$PhotoMinScaleStore on _PhotoMinScaleStore, Store {
+  final _$minScaleAtom = Atom(name: '_PhotoMinScaleStore.minScale');
 
   @override
   double get minScale {
@@ -26,16 +26,16 @@ mixin _$PhotoPreview on _PhotoPreview, Store {
     }, _$minScaleAtom, name: '${_$minScaleAtom.name}_set');
   }
 
-  final _$_PhotoPreviewActionController =
-      ActionController(name: '_PhotoPreview');
+  final _$_PhotoMinScaleStoreActionController =
+      ActionController(name: '_PhotoMinScaleStore');
 
   @override
   void load(String url, double screenWidth) {
-    final _$actionInfo = _$_PhotoPreviewActionController.startAction();
+    final _$actionInfo = _$_PhotoMinScaleStoreActionController.startAction();
     try {
       return super.load(url, screenWidth);
     } finally {
-      _$_PhotoPreviewActionController.endAction(_$actionInfo);
+      _$_PhotoMinScaleStoreActionController.endAction(_$actionInfo);
     }
   }
 }

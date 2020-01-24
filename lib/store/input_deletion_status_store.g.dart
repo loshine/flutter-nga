@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'input_deletion.dart';
+part of 'input_deletion_status_store.dart';
 
 // **************************************************************************
 // StoreGenerator
@@ -8,8 +8,8 @@ part of 'input_deletion.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
-mixin _$InputDeletion on _InputDeletion, Store {
-  final _$visibleAtom = Atom(name: '_InputDeletion.visible');
+mixin _$InputDeletionStatusStore on _InputDeletionStatusStore, Store {
+  final _$visibleAtom = Atom(name: '_InputDeletionStatusStore.visible');
 
   @override
   bool get visible {
@@ -26,16 +26,17 @@ mixin _$InputDeletion on _InputDeletion, Store {
     }, _$visibleAtom, name: '${_$visibleAtom.name}_set');
   }
 
-  final _$_InputDeletionActionController =
-      ActionController(name: '_InputDeletion');
+  final _$_InputDeletionStatusStoreActionController =
+      ActionController(name: '_InputDeletionStatusStore');
 
   @override
   void setVisible(bool val) {
-    final _$actionInfo = _$_InputDeletionActionController.startAction();
+    final _$actionInfo =
+        _$_InputDeletionStatusStoreActionController.startAction();
     try {
       return super.setVisible(val);
     } finally {
-      _$_InputDeletionActionController.endAction(_$actionInfo);
+      _$_InputDeletionStatusStoreActionController.endAction(_$actionInfo);
     }
   }
 }

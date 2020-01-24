@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/user_info.dart';
+import 'package:flutter_nga/store/user_info_store.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_page.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
@@ -21,7 +21,7 @@ class UserInfoPage extends StatefulWidget {
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  UserInfo _store = UserInfo();
+  UserInfoStore _store = UserInfoStore();
 
   @override
   void initState() {

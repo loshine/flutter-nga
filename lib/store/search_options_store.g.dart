@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'search.dart';
+part of 'search_options_store.dart';
 
 // **************************************************************************
 // StoreGenerator
@@ -8,8 +8,8 @@ part of 'search.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
-mixin _$Search on _Search, Store {
-  final _$stateAtom = Atom(name: '_Search.state');
+mixin _$SearchOptionsStore on _SearchOptionsStore, Store {
+  final _$stateAtom = Atom(name: '_SearchOptionsStore.state');
 
   @override
   SearchState get state {
@@ -26,45 +26,46 @@ mixin _$Search on _Search, Store {
     }, _$stateAtom, name: '${_$stateAtom.name}_set');
   }
 
-  final _$_SearchActionController = ActionController(name: '_Search');
+  final _$_SearchOptionsStoreActionController =
+      ActionController(name: '_SearchOptionsStore');
 
   @override
   void checkFirstRadio(int value) {
-    final _$actionInfo = _$_SearchActionController.startAction();
+    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction();
     try {
       return super.checkFirstRadio(value);
     } finally {
-      _$_SearchActionController.endAction(_$actionInfo);
+      _$_SearchOptionsStoreActionController.endAction(_$actionInfo);
     }
   }
 
   @override
   void checkTopicRadio(int value) {
-    final _$actionInfo = _$_SearchActionController.startAction();
+    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction();
     try {
       return super.checkTopicRadio(value);
     } finally {
-      _$_SearchActionController.endAction(_$actionInfo);
+      _$_SearchOptionsStoreActionController.endAction(_$actionInfo);
     }
   }
 
   @override
   void checkUserRadio(int value) {
-    final _$actionInfo = _$_SearchActionController.startAction();
+    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction();
     try {
       return super.checkUserRadio(value);
     } finally {
-      _$_SearchActionController.endAction(_$actionInfo);
+      _$_SearchOptionsStoreActionController.endAction(_$actionInfo);
     }
   }
 
   @override
   void checkContent(bool value) {
-    final _$actionInfo = _$_SearchActionController.startAction();
+    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction();
     try {
       return super.checkContent(value);
     } finally {
-      _$_SearchActionController.endAction(_$actionInfo);
+      _$_SearchOptionsStoreActionController.endAction(_$actionInfo);
     }
   }
 }

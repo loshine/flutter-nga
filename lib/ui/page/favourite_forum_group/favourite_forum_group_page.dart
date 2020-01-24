@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/favourite_forum_list.dart';
+import 'package:flutter_nga/store/favourite_forum_list_store.dart';
 import 'package:flutter_nga/ui/page/forum/forum_grid_item_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +11,7 @@ class FavouriteForumGroupPage extends StatefulWidget {
 
 class _FavouriteForumGroupState extends State<FavouriteForumGroupPage>
     with AutomaticKeepAliveClientMixin {
-  FavouriteForumList _store;
+  FavouriteForumListStore _store;
 
   @override
   void initState() {
@@ -24,7 +24,7 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    _store = Provider.of<FavouriteForumList>(context);
+    _store = Provider.of<FavouriteForumListStore>(context);
     final size = MediaQuery.of(context).size;
 
     /*24 is for notification bar on Android*/

@@ -4,7 +4,7 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-import 'store/favourite_forum_list.dart';
+import 'store/favourite_forum_list_store.dart';
 import 'ui/page/splash/splash_page.dart';
 
 void main() async {
@@ -17,7 +17,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<FavouriteForumList>(create: (_) => FavouriteForumList())
+        Provider<FavouriteForumListStore>(
+            create: (_) => FavouriteForumListStore())
       ],
       child: MaterialApp(
 //        showPerformanceOverlay: true,
