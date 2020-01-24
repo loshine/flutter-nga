@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'topic_list.dart';
+part of 'topic_list_store.dart';
 
 // **************************************************************************
 // StoreGenerator
@@ -8,8 +8,8 @@ part of 'topic_list.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
-mixin _$TopicList on _TopicList, Store {
-  final _$stateAtom = Atom(name: '_TopicList.state');
+mixin _$TopicListStore on _TopicListStore, Store {
+  final _$stateAtom = Atom(name: '_TopicListStore.state');
 
   @override
   TopicListState get state {

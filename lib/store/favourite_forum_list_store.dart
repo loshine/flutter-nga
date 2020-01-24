@@ -2,11 +2,11 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:mobx/mobx.dart';
 
-part 'favourite_forum_list.g.dart';
+part 'favourite_forum_list_store.g.dart';
 
-class FavouriteForumList = _FavouriteForumList with _$FavouriteForumList;
+class FavouriteForumListStore = _FavouriteForumListStore with _$FavouriteForumListStore;
 
-abstract class _FavouriteForumList with Store {
+abstract class _FavouriteForumListStore with Store {
   @observable
   List<Forum> list = [];
 

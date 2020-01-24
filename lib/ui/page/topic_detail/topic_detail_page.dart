@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
-import 'package:flutter_nga/store/topic_detail.dart';
+import 'package:flutter_nga/store/topic_detail_store.dart';
 import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
@@ -27,7 +27,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
   bool _fabVisible = true;
 
   final _refreshController = RefreshController();
-  final _store = TopicDetail();
+  final _store = TopicDetailStore();
 
   @override
   Widget build(BuildContext context) {

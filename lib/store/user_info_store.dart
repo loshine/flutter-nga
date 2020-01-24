@@ -4,11 +4,11 @@ import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:mobx/mobx.dart';
 
-part 'user_info.g.dart';
+part 'user_info_store.g.dart';
 
-class UserInfo = _UserInfo with _$UserInfo;
+class UserInfoStore = _UserInfoStore with _$UserInfoStore;
 
-abstract class _UserInfo with Store {
+abstract class _UserInfoStore with Store {
   @observable
   UserInfoState state = UserInfoState.initial();
 

@@ -4,11 +4,11 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:mobx/mobx.dart';
 
-part 'topic_detail.g.dart';
+part 'topic_detail_store.g.dart';
 
-class TopicDetail = _TopicDetail with _$TopicDetail;
+class TopicDetailStore = _TopicDetailStore with _$TopicDetailStore;
 
-abstract class _TopicDetail with Store {
+abstract class _TopicDetailStore with Store {
   @observable
   TopicDetailState state = TopicDetailState.initial();
 
