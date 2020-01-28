@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/store/account_list_store.dart';
-import 'package:flutter_nga/ui/page/home/home_page.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -33,36 +33,32 @@ class _AccountManagementState extends State<AccountManagementPage> {
           ),
         ],
       ),
-      body: Observer(
-        builder: (_) {
-          return SmartRefresher(
-            onRefresh: _onRefresh,
-            enablePullUp: false,
-            controller: _refreshController,
-            child: Observer(
-              builder: (_) => ListView.builder(
-                itemCount: _store.list.length,
-                itemBuilder: (context, position) => Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => Fluttertoast.showToast(
-                        msg: _store.list[position].nickname),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Text(_store.list[position].nickname),
-                        ),
-                        Divider(height: 1),
-                      ],
+      body: SmartRefresher(
+        onRefresh: _onRefresh,
+        enablePullUp: false,
+        controller: _refreshController,
+        child: Observer(
+          builder: (_) => ListView.builder(
+            itemCount: _store.list.length,
+            itemBuilder: (context, position) => Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () =>
+                    Fluttertoast.showToast(msg: _store.list[position].nickname),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(_store.list[position].nickname),
                     ),
-                  ),
+                    Divider(height: 1),
+                  ],
                 ),
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: "添加账号",
@@ -84,18 +80,18 @@ class _AccountManagementState extends State<AccountManagementPage> {
   }
 
   _onRefresh() {
-    _store.refresh().whenComplete(() => _refreshController.refreshCompleted());
+    _store
+        .refresh()
+        .whenComplete(() => _refreshController.refreshCompleted())
+        .catchError((_) => _refreshController.refreshCompleted());
   }
 
   _quitAll() {
     _store
         .quitAll()
-        .then((_) => Fluttertoast.showToast(
-              msg: "成功",
-              gravity: ToastGravity.CENTER,
-            ))
-        .whenComplete(() => Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => HomePage(title: 'NGA')),
-            (Route<dynamic> route) => false));
+        .then((_) =>
+            Fluttertoast.showToast(msg: "成功", gravity: ToastGravity.CENTER))
+        .whenComplete(() =>
+            Routes.navigateTo(context, Routes.HOME, clearStack: true));
   }
 }

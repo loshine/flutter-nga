@@ -1,7 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
-import 'package:flutter_nga/ui/page/topic_list/topic_list_page.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class ForumGridItemWidget extends StatelessWidget {
   final Forum forum;
@@ -13,14 +14,8 @@ class ForumGridItemWidget extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-            return TopicListPage(
-              fid: forum.fid,
-              name: forum.name,
-            );
-          }));
-        },
+        onTap: () => Routes.navigateTo(context,
+            "${Routes.TOPIC_LIST}?fid=${forum.fid}&name=${fluroCnParamsEncode(forum.name)}"),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
