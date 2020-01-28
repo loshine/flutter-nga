@@ -10,6 +10,8 @@ import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_item_widget.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -35,7 +37,7 @@ class _TopicListState extends State<TopicListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.name),
+        title: Text(fluroCnParamsDecode(widget.name)),
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -66,10 +68,8 @@ class _TopicListState extends State<TopicListPage> {
       ),
       floatingActionButton: _fabVisible
           ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => PublishPage(fid: widget.fid)));
-              },
+              onPressed: () => Routes.navigateTo(
+                  context, "${Routes.TOPIC_PUBLISH}?fid=${widget.fid}"),
               child: Icon(
                 CommunityMaterialIcons.pencil,
                 color: Colors.white,

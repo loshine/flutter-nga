@@ -3,8 +3,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/input_deletion_status_store.dart';
 import 'package:flutter_nga/store/search_options_store.dart';
+import 'package:flutter_nga/store/search_store.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -13,31 +15,32 @@ class SearchPage extends StatefulWidget {
 
 class _SearchState extends State<SearchPage> {
   final _searchQuery = TextEditingController();
-  final _searchStore = SearchOptionsStore();
-  final _inputDeletionStatuStore = InputDeletionStatusStore();
+  final _searchOptionsStore = SearchOptionsStore();
+  final _searchStore = SearchStore();
+  final _inputDeletionStatusStore = InputDeletionStatusStore();
 
   _SearchState() {
     _searchQuery.addListener(listenQueryChanged);
   }
 
   listenQueryChanged() {
-    _inputDeletionStatuStore.setVisible(_searchQuery.text.isNotEmpty);
+    _inputDeletionStatusStore.setVisible(_searchQuery.text.isNotEmpty);
   }
 
   firstOnChanged(int val) {
-    _searchStore.checkFirstRadio(val);
+    _searchOptionsStore.checkFirstRadio(val);
   }
 
   topicOnChanged(int val) {
-    _searchStore.checkTopicRadio(val);
+    _searchOptionsStore.checkTopicRadio(val);
   }
 
   userOnChanged(int val) {
-    _searchStore.checkUserRadio(val);
+    _searchOptionsStore.checkUserRadio(val);
   }
 
   contentOnChanged(bool val) {
-    _searchStore.checkContent(val);
+    _searchOptionsStore.checkContent(val);
   }
 
   @override
@@ -46,6 +49,8 @@ class _SearchState extends State<SearchPage> {
       appBar: AppBar(
         title: TextField(
           controller: _searchQuery,
+          textInputAction: TextInputAction.search,
+          onSubmitted: _onSearch,
           style: TextStyle(
             color: Colors.white,
           ),
@@ -56,7 +61,7 @@ class _SearchState extends State<SearchPage> {
             hintStyle: TextStyle(color: Palette.colorTextHintWhite),
             suffixIcon: Observer(
               builder: (_) {
-                return _inputDeletionStatuStore.visible
+                return _inputDeletionStatusStore.visible
                     ? IconButton(
                         icon: Icon(
                           Icons.close,
@@ -76,23 +81,24 @@ class _SearchState extends State<SearchPage> {
           final widgets = <Widget>[];
           widgets.add(RadioListTile(
             value: SearchState.FIRST_RADIO_TOPIC,
-            groupValue: _searchStore.state.firstRadio,
+            groupValue: _searchOptionsStore.state.firstRadio,
             onChanged: firstOnChanged,
             title: Text("主题"),
           ));
           widgets.add(RadioListTile(
             value: SearchState.FIRST_RADIO_FORUM,
-            groupValue: _searchStore.state.firstRadio,
+            groupValue: _searchOptionsStore.state.firstRadio,
             onChanged: firstOnChanged,
             title: Text("版块"),
           ));
           widgets.add(RadioListTile(
             value: SearchState.FIRST_RADIO_USER,
-            groupValue: _searchStore.state.firstRadio,
+            groupValue: _searchOptionsStore.state.firstRadio,
             onChanged: firstOnChanged,
             title: Text("用户"),
           ));
-          if (_searchStore.state.firstRadio == SearchState.FIRST_RADIO_TOPIC) {
+          if (_searchOptionsStore.state.firstRadio ==
+              SearchState.FIRST_RADIO_TOPIC) {
             widgets.add(Padding(
               padding: EdgeInsets.only(left: 48),
               child: Column(
@@ -106,13 +112,13 @@ class _SearchState extends State<SearchPage> {
                         color: Palette.colorTextSecondary,
                       ),
                     ),
-                    value: _searchStore.state.content,
+                    value: _searchOptionsStore.state.content,
                     onChanged: contentOnChanged,
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
                   RadioListTile(
                     value: SearchState.TOPIC_RADIO_ALL_FORUM,
-                    groupValue: _searchStore.state.topicRadio,
+                    groupValue: _searchOptionsStore.state.topicRadio,
                     onChanged: topicOnChanged,
                     title: Text(
                       "全部版块",
@@ -124,7 +130,7 @@ class _SearchState extends State<SearchPage> {
                   ),
                   RadioListTile(
                     value: SearchState.TOPIC_RADIO_CURRENT_FORUM,
-                    groupValue: _searchStore.state.topicRadio,
+                    groupValue: _searchOptionsStore.state.topicRadio,
                     onChanged: topicOnChanged,
                     title: Text(
                       "当前版块",
@@ -138,7 +144,8 @@ class _SearchState extends State<SearchPage> {
               ),
             ));
           }
-          if (_searchStore.state.firstRadio == SearchState.FIRST_RADIO_USER) {
+          if (_searchOptionsStore.state.firstRadio ==
+              SearchState.FIRST_RADIO_USER) {
             widgets.add(Padding(
               padding: EdgeInsets.only(left: 48),
               child: Column(
@@ -146,7 +153,7 @@ class _SearchState extends State<SearchPage> {
                 children: [
                   RadioListTile(
                     value: SearchState.USER_RADIO_NAME,
-                    groupValue: _searchStore.state.userRadio,
+                    groupValue: _searchOptionsStore.state.userRadio,
                     onChanged: userOnChanged,
                     title: Text(
                       "用户名",
@@ -158,7 +165,7 @@ class _SearchState extends State<SearchPage> {
                   ),
                   RadioListTile(
                     value: SearchState.USER_RADIO_UID,
-                    groupValue: _searchStore.state.userRadio,
+                    groupValue: _searchOptionsStore.state.userRadio,
                     onChanged: userOnChanged,
                     title: Text(
                       "用户ID",
@@ -182,5 +189,15 @@ class _SearchState extends State<SearchPage> {
   void dispose() {
     _searchQuery.removeListener(listenQueryChanged);
     super.dispose();
+  }
+
+  void _onSearch(text) {
+    if (_searchOptionsStore.state.firstRadio == SearchState.FIRST_RADIO_TOPIC) {
+    } else if (_searchOptionsStore.state.firstRadio ==
+        SearchState.FIRST_RADIO_FORUM) {
+    } else if (_searchOptionsStore.state.firstRadio ==
+        SearchState.FIRST_RADIO_USER) {
+
+    }
   }
 }

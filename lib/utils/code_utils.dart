@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:html_unescape/html_unescape.dart';
 import 'package:intl/intl.dart';
 
@@ -45,4 +47,19 @@ String formatSize(int size) {
 /// 格式化日期
 String formatDate(DateTime dateTime) {
   return _dateTimeFormat.format(dateTime);
+}
+
+/// fluro 传递中文参数前，先转换，fluro 不支持中文传递
+String fluroCnParamsEncode(String originalCn) {
+  return jsonEncode(Utf8Encoder().convert(originalCn));
+}
+
+/// fluro 传递后取出参数，解析
+String fluroCnParamsDecode(String encodedCn) {
+  var list = List<int>();
+
+  ///字符串解码
+  jsonDecode(encodedCn).forEach(list.add);
+  String value = Utf8Decoder().convert(list);
+  return value;
 }

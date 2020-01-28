@@ -34,15 +34,15 @@ abstract class _SearchOptionsStore with Store {
 }
 
 class SearchState {
-  static final int FIRST_RADIO_TOPIC = 1;
-  static final int FIRST_RADIO_FORUM = 2;
-  static final int FIRST_RADIO_USER = 3;
+  static const int FIRST_RADIO_TOPIC = 1;
+  static const int FIRST_RADIO_FORUM = 2;
+  static const int FIRST_RADIO_USER = 3;
 
-  static final int TOPIC_RADIO_ALL_FORUM = 4;
-  static final int TOPIC_RADIO_CURRENT_FORUM = 5;
+  static const int TOPIC_RADIO_ALL_FORUM = 4;
+  static const int TOPIC_RADIO_CURRENT_FORUM = 5;
 
-  static final int USER_RADIO_NAME = 6;
-  static final int USER_RADIO_UID = 7;
+  static const int USER_RADIO_NAME = 6;
+  static const int USER_RADIO_UID = 7;
 
   final int firstRadio;
   final bool content;

@@ -8,14 +8,12 @@ import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/page/forum/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/match/match_tabs.dart';
-import 'package:flutter_nga/ui/page/search/search_page.dart';
-import 'package:flutter_nga/ui/page/settings/settings.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  const HomePage({Key key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -37,8 +35,7 @@ class _HomePageState extends State<HomePage> {
         ? [
             IconButton(
               icon: Icon(Icons.search),
-              onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => SearchPage())),
+              onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
             ),
           ]
         : [];
@@ -112,7 +109,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: _getElevation(),
-        title: Text(widget.title),
+        title: Text('NGA'),
         actions: _getActionsByPage(_index),
       ),
       backgroundColor: Palette.colorBackground,
@@ -208,10 +205,8 @@ class _HomePageState extends State<HomePage> {
                           leading: Icon(Icons.settings),
                           title: Text("设置"),
                         ),
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => SettingsPage()));
-                        },
+                        onTap: () =>
+                            Routes.navigateTo(context, Routes.SETTINGS),
                       ),
                       color: Palette.colorBackground,
                     ),

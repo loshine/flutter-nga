@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/user_info_store.dart';
-import 'package:flutter_nga/ui/page/topic_list/topic_list_page.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class UserInfoPage extends StatefulWidget {
@@ -110,11 +110,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
       widgets.addAll(userInfo.moderatorForums.entries.map(
         (entry) => Builder(
             builder: (context) => GestureDetector(
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => TopicListPage(
-                            fid: entry.key,
-                            name: entry.value,
-                          ))),
+                  onTap: () => Routes.navigateTo(context,
+                      "${Routes.TOPIC_LIST}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                   child: Text(
                     "[${entry.value}]",
                     style: TextStyle(color: Palette.colorTextSubTitle),
@@ -271,11 +268,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   Builder(builder: (context) {
                     final entry = userInfo.personalForum.entries.toList()[0];
                     return GestureDetector(
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => TopicListPage(
-                                fid: entry.key,
-                                name: entry.value,
-                              ))),
+                      onTap: () => Routes.navigateTo(context,
+                          "${Routes.TOPIC_LIST}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                       child: Text(
                         "[${entry.value}]",
                         style: TextStyle(color: Palette.colorTextSubTitle),

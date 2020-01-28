@@ -1,10 +1,10 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
-import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 class TopicListItemWidget extends StatelessWidget {
@@ -156,7 +156,7 @@ class TopicListItemWidget extends StatelessWidget {
   }
 
   _goTopicDetail(BuildContext context, Topic topic) {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => TopicDetailPage(topic)));
+    Routes.navigateTo(context,
+        "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${codeUtils.fluroCnParamsEncode(topic.subject)}");
   }
 }
