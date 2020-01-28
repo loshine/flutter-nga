@@ -5,19 +5,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/store/topic_detail_store.dart';
 import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicDetailPage extends StatefulWidget {
-  const TopicDetailPage(this.topic, {Key key}) : super(key: key);
+  const TopicDetailPage(this.tid, this.fid, {this.subject, Key key})
+      : super(key: key);
 
-  final Topic topic;
+  final int tid;
+  final int fid;
+  final String subject;
 
   @override
   _TopicDetailState createState() => _TopicDetailState();
@@ -32,7 +35,9 @@ class _TopicDetailState extends State<TopicDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(codeUtils.unescapeHtml(widget.topic.subject))),
+      appBar: AppBar(
+          title: Text(codeUtils
+              .unescapeHtml(codeUtils.fluroCnParamsDecode(widget.subject)))),
       body: Observer(
         builder: (_) {
           return SmartRefresher(
@@ -50,10 +55,8 @@ class _TopicDetailState extends State<TopicDetailPage> {
       ),
       floatingActionButton: _fabVisible
           ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => PublishPage(topic: widget.topic)));
-              },
+              onPressed: () => Routes.navigateTo(context,
+                  "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid}"),
               child: Icon(
                 CommunityMaterialIcons.comment,
                 color: Colors.white,
@@ -73,7 +76,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
   }
 
   _onRefresh() {
-    _store.refresh(widget.topic.tid).catchError((err) {
+    _store.refresh(widget.tid).catchError((err) {
       _refreshController.loadFailed();
       Fluttertoast.showToast(
         msg: err.message,
@@ -84,7 +87,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
   }
 
   _onLoading() {
-    _store.loadMore(widget.topic.tid).catchError((err) {
+    _store.loadMore(widget.tid).catchError((err) {
       _refreshController.loadFailed();
       Fluttertoast.showToast(
         msg: err.message,

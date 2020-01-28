@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/utils/custom_time_messages.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 class SplashPage extends StatefulWidget {
@@ -39,8 +39,6 @@ class _SplashState extends State<SplashPage> {
 
   void maybeGoHome() {
     if (!_initFinished || !_delayFinished) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) {
-      return HomePage(title: 'NGA');
-    }));
+    Routes.navigateTo(context, Routes.HOME, replace: true);
   }
 }
