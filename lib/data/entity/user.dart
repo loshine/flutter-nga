@@ -77,6 +77,7 @@ class UserInfo {
       });
     }
     final userForum = map['userForum'];
+    final adminForums = map['adminForums'];
     return UserInfo(
       uid: map['uid'],
       username: map['username'],
@@ -90,7 +91,7 @@ class UserInfo {
       posts: map['posts'],
       fame: map['fame'],
       money: map['money'],
-      adminForums: map['adminForums'],
+      adminForums: adminForums is Map ? adminForums : null,
       userForum: userForum is Map ? userForum : null,
       reputation: reputationList,
     );

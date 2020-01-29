@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/topic_list_store.dart';
-import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
-import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
@@ -16,12 +14,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicListPage extends StatefulWidget {
-  const TopicListPage({this.name, this.fid, Key key})
+  const TopicListPage({this.fid, this.name, Key key})
       : assert(fid != null),
         super(key: key);
 
-  final String name;
   final int fid;
+  final String name;
 
   @override
   _TopicListState createState() => _TopicListState();
@@ -44,8 +42,8 @@ class _TopicListState extends State<TopicListPage> {
               Icons.search,
               color: Colors.white,
             ),
-            onPressed: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => SearchPage())),
+            onPressed: () => Routes.navigateTo(
+                context, "${Routes.SEARCH}?fid=${widget.fid}"),
           ),
           TopicListFavouriteButtonWidget(
             fid: widget.fid,

@@ -13,8 +13,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class UserInfoPage extends StatefulWidget {
   final String username;
+  final String uid;
 
-  const UserInfoPage(this.username, {Key key}) : super(key: key);
+  const UserInfoPage({this.username, this.uid, Key key}) : super(key: key);
 
   @override
   _UserInfoPageState createState() => _UserInfoPageState();
@@ -26,19 +27,35 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   void initState() {
     super.initState();
-    _store.loadByName(widget.username).catchError((err) {
-      if (err is DioError) {
-        Fluttertoast.showToast(
-          msg: err.message,
-          gravity: ToastGravity.CENTER,
-        );
-      } else if (err is Error) {
-        Fluttertoast.showToast(
-          msg: err.toString(),
-          gravity: ToastGravity.CENTER,
-        );
-      }
-    });
+    if (widget.uid != null) {
+      _store.loadByUid(widget.uid).catchError((err) {
+        if (err is DioError) {
+          Fluttertoast.showToast(
+            msg: err.message,
+            gravity: ToastGravity.CENTER,
+          );
+        } else if (err is Error) {
+          Fluttertoast.showToast(
+            msg: err.toString(),
+            gravity: ToastGravity.CENTER,
+          );
+        }
+      });
+    } else if (widget.username != null) {
+      _store.loadByName(widget.username).catchError((err) {
+        if (err is DioError) {
+          Fluttertoast.showToast(
+            msg: err.message,
+            gravity: ToastGravity.CENTER,
+          );
+        } else if (err is Error) {
+          Fluttertoast.showToast(
+            msg: err.toString(),
+            gravity: ToastGravity.CENTER,
+          );
+        }
+      });
+    }
   }
 
   @override

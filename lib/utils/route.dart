@@ -10,6 +10,7 @@ import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/ui/page/topic_list/topic_list_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
 
 class Routes {
   static Router router;
@@ -64,34 +65,45 @@ class Routes {
       Handler(handlerFunc: (context, params) => HomePage());
   static Handler _topicListHandler = Handler(
       handlerFunc: (context, params) => TopicListPage(
-            fid: int.tryParse(params["fid"][0]) ?? 0,
+            fid: int.tryParse(params["fid"][0]),
             name: params["name"][0],
           ));
   static Handler _topicDetailHandler = Handler(
       handlerFunc: (context, params) => TopicDetailPage(
-            int.tryParse(params["tid"][0]) ?? 0,
-            int.tryParse(params["fid"][0]) ?? 0,
+            int.tryParse(params["tid"][0]),
+            int.tryParse(params["fid"][0]),
             subject: params["subject"][0],
           ));
   static Handler _topicPublishHandler = Handler(handlerFunc: (context, params) {
-    List<String> tids = params["tid"];
-    if (tids == null || tids.isEmpty) {
-      return PublishPage(fid: int.tryParse(params["fid"][0]) ?? 0);
+    final List<String> tidParams = params["tid"];
+    if (tidParams == null || tidParams.isEmpty) {
+      return PublishPage(fid: int.tryParse(params["fid"][0]));
     } else {
       return PublishPage(
-        tid: int.tryParse(params["tid"][0]) ?? 0,
-        fid: int.tryParse(params["fid"][0]) ?? 0,
+        tid: int.tryParse(params["tid"][0]),
+        fid: int.tryParse(params["fid"][0]),
       );
     }
   });
-  static Handler _userHandler = Handler(
-      handlerFunc: (context, params) => UserInfoPage(params["name"][0]));
+  static Handler _userHandler = Handler(handlerFunc: (context, params) {
+    if (params["uid"] != null && params["uid"].isNotEmpty) {
+      return UserInfoPage(uid: params["uid"][0]);
+    } else {
+      return UserInfoPage(username: fluroCnParamsDecode(params["name"][0]));
+    }
+  });
   static Handler _settingsHandler =
       Handler(handlerFunc: (context, params) => SettingsPage());
   static Handler _accountManagementHandler =
       Handler(handlerFunc: (context, params) => AccountManagementPage());
-  static Handler _searchHandler =
-      Handler(handlerFunc: (context, params) => SearchPage());
+  static Handler _searchHandler = Handler(handlerFunc: (context, params) {
+    final List<String> fidParams = params["fid"];
+    if (fidParams == null || fidParams.isEmpty) {
+      return SearchPage();
+    } else {
+      return SearchPage(fid: int.tryParse(fidParams[0]));
+    }
+  });
   static Handler _photoPreviewHandler = Handler(
       handlerFunc: (context, params) => PhotoPreviewPage(
             url: params["url"][0],
