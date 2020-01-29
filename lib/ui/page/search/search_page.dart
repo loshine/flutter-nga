@@ -4,11 +4,15 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/input_deletion_status_store.dart';
 import 'package:flutter_nga/store/search_options_store.dart';
 import 'package:flutter_nga/store/search_store.dart';
-import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
-import 'package:progress_dialog/progress_dialog.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class SearchPage extends StatefulWidget {
+  final int fid;
+
+  const SearchPage({this.fid, Key key}) : super(key: key);
+
   @override
   _SearchState createState() => _SearchState();
 }
@@ -20,27 +24,16 @@ class _SearchState extends State<SearchPage> {
   final _inputDeletionStatusStore = InputDeletionStatusStore();
 
   _SearchState() {
-    _searchQuery.addListener(listenQueryChanged);
+    _searchQuery.addListener(_listenQueryChanged);
   }
 
-  listenQueryChanged() {
-    _inputDeletionStatusStore.setVisible(_searchQuery.text.isNotEmpty);
-  }
-
-  firstOnChanged(int val) {
-    _searchOptionsStore.checkFirstRadio(val);
-  }
-
-  topicOnChanged(int val) {
-    _searchOptionsStore.checkTopicRadio(val);
-  }
-
-  userOnChanged(int val) {
-    _searchOptionsStore.checkUserRadio(val);
-  }
-
-  contentOnChanged(bool val) {
-    _searchOptionsStore.checkContent(val);
+  @override
+  void initState() {
+    super.initState();
+    if (widget.fid != null) {
+      _searchOptionsStore
+          .checkTopicRadio(SearchState.TOPIC_RADIO_CURRENT_FORUM);
+    }
   }
 
   @override
@@ -79,104 +72,172 @@ class _SearchState extends State<SearchPage> {
       body: Observer(
         builder: (_) {
           final widgets = <Widget>[];
-          widgets.add(RadioListTile(
-            value: SearchState.FIRST_RADIO_TOPIC,
-            groupValue: _searchOptionsStore.state.firstRadio,
-            onChanged: firstOnChanged,
-            title: Text("主题"),
-          ));
-          widgets.add(RadioListTile(
-            value: SearchState.FIRST_RADIO_FORUM,
-            groupValue: _searchOptionsStore.state.firstRadio,
-            onChanged: firstOnChanged,
-            title: Text("版块"),
-          ));
-          widgets.add(RadioListTile(
-            value: SearchState.FIRST_RADIO_USER,
-            groupValue: _searchOptionsStore.state.firstRadio,
-            onChanged: firstOnChanged,
-            title: Text("用户"),
-          ));
+          final firstWidgets = Row(
+            children: <Widget>[
+              Padding(
+                child: ChoiceChip(
+                  label: Text(
+                    "主题",
+                    style: TextStyle(
+                        color: _searchOptionsStore.state.firstRadio ==
+                                SearchState.FIRST_RADIO_TOPIC
+                            ? Colors.white
+                            : Palette.colorTextPrimary),
+                  ),
+                  selectedColor: Palette.colorPrimary,
+                  selected: _searchOptionsStore.state.firstRadio ==
+                      SearchState.FIRST_RADIO_TOPIC,
+                  onSelected: (selected) => _searchOptionsStore
+                      .checkFirstRadio(SearchState.FIRST_RADIO_TOPIC),
+                ),
+                padding: EdgeInsets.only(left: 16),
+              ),
+              Padding(
+                child: ChoiceChip(
+                  label: Text(
+                    "版块",
+                    style: TextStyle(
+                        color: _searchOptionsStore.state.firstRadio ==
+                                SearchState.FIRST_RADIO_FORUM
+                            ? Colors.white
+                            : Palette.colorTextPrimary),
+                  ),
+                  selectedColor: Palette.colorPrimary,
+                  selected: _searchOptionsStore.state.firstRadio ==
+                      SearchState.FIRST_RADIO_FORUM,
+                  onSelected: (selected) => _searchOptionsStore
+                      .checkFirstRadio(SearchState.FIRST_RADIO_FORUM),
+                ),
+                padding: EdgeInsets.only(left: 16),
+              ),
+              Padding(
+                child: ChoiceChip(
+                  label: Text(
+                    "用户",
+                    style: TextStyle(
+                        color: _searchOptionsStore.state.firstRadio ==
+                                SearchState.FIRST_RADIO_USER
+                            ? Colors.white
+                            : Palette.colorTextPrimary),
+                  ),
+                  selectedColor: Palette.colorPrimary,
+                  selected: _searchOptionsStore.state.firstRadio ==
+                      SearchState.FIRST_RADIO_USER,
+                  onSelected: (selected) => _searchOptionsStore
+                      .checkFirstRadio(SearchState.FIRST_RADIO_USER),
+                ),
+                padding: EdgeInsets.only(left: 16),
+              ),
+            ],
+          );
+          widgets.add(firstWidgets);
           if (_searchOptionsStore.state.firstRadio ==
               SearchState.FIRST_RADIO_TOPIC) {
-            widgets.add(Padding(
-              padding: EdgeInsets.only(left: 48),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CheckboxListTile(
-                    title: Text(
-                      "包括正文",
-                      style: TextStyle(
-                        fontSize: Dimen.button,
-                        color: Palette.colorTextSecondary,
-                      ),
-                    ),
-                    value: _searchOptionsStore.state.content,
-                    onChanged: contentOnChanged,
-                    controlAffinity: ListTileControlAffinity.leading,
+            if (widget.fid != null) {
+              widgets.add(Row(
+                children: <Widget>[
+                  Padding(
+                    child: ChoiceChip(
+                        label: Text(
+                          "当前版块",
+                          style: TextStyle(
+                              color: _searchOptionsStore.state.topicRadio ==
+                                      SearchState.TOPIC_RADIO_CURRENT_FORUM
+                                  ? Colors.white
+                                  : Palette.colorTextPrimary),
+                        ),
+                        selectedColor: Palette.colorPrimary,
+                        selected: _searchOptionsStore.state.topicRadio ==
+                            SearchState.TOPIC_RADIO_CURRENT_FORUM,
+                        onSelected: (selected) =>
+                            _searchOptionsStore.checkTopicRadio(
+                                SearchState.TOPIC_RADIO_CURRENT_FORUM)),
+                    padding: EdgeInsets.only(left: 16),
                   ),
-                  RadioListTile(
-                    value: SearchState.TOPIC_RADIO_ALL_FORUM,
-                    groupValue: _searchOptionsStore.state.topicRadio,
-                    onChanged: topicOnChanged,
-                    title: Text(
-                      "全部版块",
-                      style: TextStyle(
-                        fontSize: Dimen.button,
-                        color: Palette.colorTextSecondary,
+                  Padding(
+                    child: ChoiceChip(
+                      label: Text(
+                        "全部版块",
+                        style: TextStyle(
+                            color: _searchOptionsStore.state.topicRadio ==
+                                    SearchState.TOPIC_RADIO_ALL_FORUM
+                                ? Colors.white
+                                : Palette.colorTextPrimary),
                       ),
+                      selectedColor: Palette.colorPrimary,
+                      selected: _searchOptionsStore.state.topicRadio ==
+                          SearchState.TOPIC_RADIO_ALL_FORUM,
+                      onSelected: (selected) => _searchOptionsStore
+                          .checkTopicRadio(SearchState.TOPIC_RADIO_ALL_FORUM),
                     ),
-                  ),
-                  RadioListTile(
-                    value: SearchState.TOPIC_RADIO_CURRENT_FORUM,
-                    groupValue: _searchOptionsStore.state.topicRadio,
-                    onChanged: topicOnChanged,
-                    title: Text(
-                      "当前版块",
-                      style: TextStyle(
-                        fontSize: Dimen.button,
-                        color: Palette.colorTextSecondary,
-                      ),
-                    ),
+                    padding: EdgeInsets.only(left: 16),
                   ),
                 ],
-              ),
+              ));
+            }
+            widgets.add(Row(
+              children: <Widget>[
+                Padding(
+                  child: FilterChip(
+                    checkmarkColor: Colors.white,
+                    label: Text(
+                      "包括正文",
+                      style: TextStyle(
+                          color: _searchOptionsStore.state.content
+                              ? Colors.white
+                              : Palette.colorTextPrimary),
+                    ),
+                    selectedColor: Palette.colorPrimary,
+                    selected: _searchOptionsStore.state.content,
+                    onSelected: (selected) =>
+                        _searchOptionsStore.checkContent(selected),
+                  ),
+                  padding: EdgeInsets.only(left: 16),
+                ),
+              ],
             ));
           }
           if (_searchOptionsStore.state.firstRadio ==
               SearchState.FIRST_RADIO_USER) {
-            widgets.add(Padding(
-              padding: EdgeInsets.only(left: 48),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RadioListTile(
-                    value: SearchState.USER_RADIO_NAME,
-                    groupValue: _searchOptionsStore.state.userRadio,
-                    onChanged: userOnChanged,
-                    title: Text(
+            widgets.add(Row(
+              children: <Widget>[
+                Padding(
+                  child: ChoiceChip(
+                    label: Text(
                       "用户名",
                       style: TextStyle(
-                        fontSize: Dimen.button,
-                        color: Palette.colorTextSecondary,
-                      ),
+                          color: _searchOptionsStore.state.userRadio ==
+                                  SearchState.USER_RADIO_NAME
+                              ? Colors.white
+                              : Palette.colorTextPrimary),
                     ),
+                    selectedColor: Palette.colorPrimary,
+                    selected: _searchOptionsStore.state.userRadio ==
+                        SearchState.USER_RADIO_NAME,
+                    onSelected: (selected) => _searchOptionsStore
+                        .checkUserRadio(SearchState.USER_RADIO_NAME),
                   ),
-                  RadioListTile(
-                    value: SearchState.USER_RADIO_UID,
-                    groupValue: _searchOptionsStore.state.userRadio,
-                    onChanged: userOnChanged,
-                    title: Text(
+                  padding: EdgeInsets.only(left: 16),
+                ),
+                Padding(
+                  child: ChoiceChip(
+                    label: Text(
                       "用户ID",
                       style: TextStyle(
-                        fontSize: Dimen.button,
-                        color: Palette.colorTextSecondary,
-                      ),
+                          color: _searchOptionsStore.state.userRadio ==
+                                  SearchState.USER_RADIO_UID
+                              ? Colors.white
+                              : Palette.colorTextPrimary),
                     ),
+                    selectedColor: Palette.colorPrimary,
+                    selected: _searchOptionsStore.state.userRadio ==
+                        SearchState.USER_RADIO_UID,
+                    onSelected: (selected) => _searchOptionsStore
+                        .checkUserRadio(SearchState.USER_RADIO_UID),
                   ),
-                ],
-              ),
+                  padding: EdgeInsets.only(left: 16),
+                ),
+              ],
             ));
           }
           return ListView(children: widgets);
@@ -187,17 +248,26 @@ class _SearchState extends State<SearchPage> {
 
   @override
   void dispose() {
-    _searchQuery.removeListener(listenQueryChanged);
+    _searchQuery.removeListener(_listenQueryChanged);
     super.dispose();
   }
 
-  void _onSearch(text) {
+  _listenQueryChanged() {
+    _inputDeletionStatusStore.setVisible(_searchQuery.text.isNotEmpty);
+  }
+
+  _onSearch(text) {
     if (_searchOptionsStore.state.firstRadio == SearchState.FIRST_RADIO_TOPIC) {
     } else if (_searchOptionsStore.state.firstRadio ==
         SearchState.FIRST_RADIO_FORUM) {
     } else if (_searchOptionsStore.state.firstRadio ==
         SearchState.FIRST_RADIO_USER) {
-
+      if (_searchOptionsStore.state.userRadio == SearchState.USER_RADIO_NAME) {
+        Routes.navigateTo(
+            context, "${Routes.USER}?name=${fluroCnParamsEncode(text)}");
+      } else {
+        Routes.navigateTo(context, "${Routes.USER}?uid=$text");
+      }
     }
   }
 }
