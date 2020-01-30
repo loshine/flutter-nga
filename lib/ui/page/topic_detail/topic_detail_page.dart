@@ -35,9 +35,7 @@ class _TopicDetailState extends State<TopicDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: Text(codeUtils
-              .unescapeHtml(codeUtils.fluroCnParamsDecode(widget.subject)))),
+      appBar: AppBar(title: Text(codeUtils.unescapeHtml(widget.subject))),
       body: Observer(
         builder: (_) {
           return SmartRefresher(
