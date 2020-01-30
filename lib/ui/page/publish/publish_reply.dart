@@ -10,6 +10,7 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/ui/widget/forum_tag_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PublishPage extends StatefulWidget {
@@ -333,7 +334,7 @@ class _PublishReplyState extends State<PublishPage> {
                 _tagList.add(tag);
               });
             }
-            Navigator.of(context).pop();
+            Routes.pop(context);
           },
         );
       },
