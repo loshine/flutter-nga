@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
+import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:objectdb/objectdb.dart';
 
 /// 版块相关数据知识库
@@ -15,7 +17,7 @@ abstract class ForumRepository {
 
   Future<List<Forum>> getFavouriteList();
 
-  Future<Forum> getForumByName(String keyword);
+  Future<List<Forum>> getForumByName(String keyword);
 }
 
 class ForumDataRepository implements ForumRepository {
@@ -252,12 +254,16 @@ class ForumDataRepository implements ForumRepository {
   }
 
   @override
-  Future<Forum> getForumByName(String keyword) async {
+  Future<List<Forum>> getForumByName(String keyword) async {
     try {
-      Response<Map<String, dynamic>> response =
-          await Data().dio.get("nuke.php?forum.php?&__output=8&key=$keyword");
-      Map<String, dynamic> map = response.data["data"]["0"];
-      return Forum.fromJson(map);
+      Response<Map<String, dynamic>> response = await Data().dio.get(
+          "forum.php?&__output=8&key=${await AndroidGbk.urlEncode(keyword)}");
+      Map<String, dynamic> map = response.data;
+      List<Forum> forums = [];
+      map.forEach((k, v) {
+        forums.add(Forum.fromJson(v));
+      });
+      return forums;
     } catch (err) {
       rethrow;
     }

@@ -13,9 +13,7 @@ abstract class _AccountListStore with Store {
   @action
   Future refresh() async {
     List<User> accountList = await Data().userRepository.getAllLoginUser();
-    this.list
-      ..clear()
-      ..addAll(accountList);
+    list = accountList;
   }
 
   @action

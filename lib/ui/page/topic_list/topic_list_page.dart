@@ -35,7 +35,7 @@ class _TopicListState extends State<TopicListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(fluroCnParamsDecode(widget.name)),
+        title: Text(widget.name),
         actions: <Widget>[
           IconButton(
             icon: Icon(

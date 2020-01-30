@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
   void _maybeGoLogin(BuildContext context) async {
     User user = await Data().userRepository.getDefaultUser();
     if (user == null) {
-      Navigator.of(context).pop();
+      Routes.pop(context);
       AndroidLogin.startLogin()
           .then((result) => debugPrint("goAndroidLogin result: $result"))
           .catchError((e) => debugPrint(e.toString()));

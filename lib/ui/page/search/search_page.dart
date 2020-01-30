@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/input_deletion_status_store.dart';
 import 'package:flutter_nga/store/search_options_store.dart';
-import 'package:flutter_nga/store/search_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -20,7 +19,6 @@ class SearchPage extends StatefulWidget {
 class _SearchState extends State<SearchPage> {
   final _searchQuery = TextEditingController();
   final _searchOptionsStore = SearchOptionsStore();
-  final _searchStore = SearchStore();
   final _inputDeletionStatusStore = InputDeletionStatusStore();
 
   _SearchState() {
@@ -260,6 +258,8 @@ class _SearchState extends State<SearchPage> {
     if (_searchOptionsStore.state.firstRadio == SearchState.FIRST_RADIO_TOPIC) {
     } else if (_searchOptionsStore.state.firstRadio ==
         SearchState.FIRST_RADIO_FORUM) {
+      Routes.navigateTo(context,
+          "${Routes.SEARCH_FORUM}?keyword=${fluroCnParamsEncode(text)}");
     } else if (_searchOptionsStore.state.firstRadio ==
         SearchState.FIRST_RADIO_USER) {
       if (_searchOptionsStore.state.userRadio == SearchState.USER_RADIO_NAME) {

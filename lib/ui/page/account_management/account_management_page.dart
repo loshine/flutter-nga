@@ -83,7 +83,7 @@ class _AccountManagementState extends State<AccountManagementPage> {
     _store
         .refresh()
         .whenComplete(() => _refreshController.refreshCompleted())
-        .catchError((_) => _refreshController.refreshCompleted());
+        .catchError((_) => _refreshController.refreshFailed());
   }
 
   _quitAll() {
