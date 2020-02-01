@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
@@ -11,16 +10,17 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/ui/widget/forum_tag_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PublishPage extends StatefulWidget {
   const PublishPage({
-    this.topic,
+    this.tid,
     this.fid,
     Key key,
   }) : super(key: key);
 
-  final Topic topic;
+  final int tid;
   final int fid;
 
   @override
@@ -69,7 +69,8 @@ class _PublishReplyState extends State<PublishPage> {
         EmoticonGroupTabsWidget(callback: _inputCallback);
     _fontStyleWidget = FontStyleWidget(callback: _inputCallback);
     _attachmentWidget = AttachmentWidget(
-      topic: widget.topic,
+      tid: widget.tid,
+      fid: widget.fid,
       callback: _inputCallback,
       attachmentCallback: _attachmentCallback,
     );
@@ -98,7 +99,7 @@ class _PublishReplyState extends State<PublishPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.topic != null ? "回帖" : "发帖"),
+          title: Text(widget.tid != null ? "回帖" : "发帖"),
           actions: [
             IconButton(
               icon: Icon(Icons.send),
@@ -326,14 +327,14 @@ class _PublishReplyState extends State<PublishPage> {
       context: context,
       builder: (context) {
         return ForumTagDialog(
-          fid: widget.topic != null ? widget.topic.fid : widget.fid,
+          fid: widget.fid,
           onSelected: (tag) {
             if (!_tagList.contains(tag)) {
               setState(() {
                 _tagList.add(tag);
               });
             }
-            Navigator.of(context).pop();
+            Routes.pop(context);
           },
         );
       },
@@ -341,11 +342,11 @@ class _PublishReplyState extends State<PublishPage> {
   }
 
   void _publish() async {
-    if (widget.topic != null) {
+    if (widget.tid != null) {
       try {
         String message = await Data().topicRepository.createReply(
-            widget.topic.tid,
-            widget.topic.fid,
+            widget.tid,
+            widget.fid,
             _subjectController.text,
             _contentController.text,
             _isAnonymous,
@@ -356,9 +357,9 @@ class _PublishReplyState extends State<PublishPage> {
           gravity: ToastGravity.CENTER,
         );
         Navigator.pop(context);
-      } catch (error) {
+      } catch (err) {
         Fluttertoast.showToast(
-          msg: error.message,
+          msg: err.message,
           gravity: ToastGravity.CENTER,
         );
       }
@@ -376,9 +377,9 @@ class _PublishReplyState extends State<PublishPage> {
           gravity: ToastGravity.CENTER,
         );
         Navigator.pop(context);
-      } catch (error) {
+      } catch (err) {
         Fluttertoast.showToast(
-          msg: error.message,
+          msg: err.message,
           gravity: ToastGravity.CENTER,
         );
       }

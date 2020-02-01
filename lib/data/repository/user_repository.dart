@@ -8,22 +8,26 @@ const TAG_CID = "ngaPassportCid";
 const TAG_UID = "ngaPassportUid";
 const TAG_USER_NAME = "ngaPassportUrlencodedUname";
 
-class UserRepository {
-  static final UserRepository _singleton = UserRepository._internal();
+abstract class UserRepository {
+  Future<User> saveLoginCookies(String cookies);
 
-  ObjectDB _userDb;
+  Future<User> getDefaultUser();
 
-  factory UserRepository() {
-    return _singleton;
-  }
+  Future<List<User>> getAllLoginUser();
 
-  UserRepository._internal();
+  Future<UserInfo> getUserInfoByName(String username);
 
-  void init(ObjectDB db) async {
-    _userDb = db;
-    _userDb.open();
-  }
+  Future<UserInfo> getUserInfoByUid(String uid);
 
+  Future<int> quitAllLoginUser();
+}
+
+class UserDataRepository implements UserRepository {
+  UserDataRepository(this.userDb);
+
+  final ObjectDB userDb;
+
+  @override
   Future<User> saveLoginCookies(String cookies) async {
     String uid;
     String cid;
@@ -47,34 +51,37 @@ class UserRepository {
         username != null &&
         username.isNotEmpty) {
       var user = User(uid, cid, username);
-      List<Map<dynamic, dynamic>> list = await _userDb.find({'uid': uid});
+      List<Map<dynamic, dynamic>> list = await userDb.find({'uid': uid});
       // 有以前登陆过的就把以前登陆过的删除
       if (list.isNotEmpty) {
-        await _userDb.remove({'uid': uid});
+        await userDb.remove({'uid': uid});
       }
-      await _userDb.insert(user.toJson());
+      await userDb.insert(user.toJson());
       return user;
     }
     throw "cookies parse error: cookies = $cookies";
   }
 
+  @override
   Future<User> getDefaultUser() async {
-    final list = await _userDb.find({});
+    final list = await userDb.find({});
     if (list.isNotEmpty) {
-      final map = await _userDb.first({});
+      final map = await userDb.first({});
       return User.fromJson(map);
     } else {
       return null;
     }
   }
 
+  @override
   Future<List<User>> getAllLoginUser() async {
-    final list = await _userDb.find({});
+    final list = await userDb.find({});
     print(list.toString());
     return list.map((m) => User.fromJson(m)).toList();
   }
 
-  Future<UserInfo> getUserInfo(String username) async {
+  @override
+  Future<UserInfo> getUserInfoByName(String username) async {
     try {
       final encodedUsername = await AndroidGbk.urlEncode(username);
       Response<Map<String, dynamic>> response = await Data().dio.get(
@@ -82,12 +89,27 @@ class UserRepository {
       // {"0": { userinfo }};
       Map<String, dynamic> userInfoMap = response.data["0"];
       return UserInfo.fromJson(userInfoMap);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
+  Future<UserInfo> getUserInfoByUid(String uid) async {
+    try {
+      Response<Map<String, dynamic>> response = await Data()
+          .dio
+          .get("nuke.php?__lib=ucp&__act=get&lite=js&noprefix&uid=$uid");
+      // {"0": { userinfo }};
+      Map<String, dynamic> userInfoMap = response.data["0"];
+      return UserInfo.fromJson(userInfoMap);
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<int> quitAllLoginUser() {
-    return _userDb.remove({});
+    return userDb.remove({});
   }
 }
