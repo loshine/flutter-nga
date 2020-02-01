@@ -29,25 +29,15 @@ class Data {
   Dio get dio => _dio;
   PersistCookieJar _cookieJar;
 
-  EmoticonRepository _emoticonRepository;
+  EmoticonRepository get emoticonRepository => EmoticonDataRepository();
 
-  EmoticonRepository get emoticonRepository => _emoticonRepository;
+  ForumRepository get forumRepository => ForumDataRepository(_forumDb);
 
-  ForumRepository _forumRepository;
+  ResourceRepository get resourceRepository => ResourceDataRepository();
 
-  ForumRepository get forumRepository => _forumRepository;
+  TopicRepository get topicRepository => TopicDataRepository();
 
-  ResourceRepository _resourceRepository;
-
-  ResourceRepository get resourceRepository => _resourceRepository;
-
-  TopicRepository _topicRepository;
-
-  TopicRepository get topicRepository => _topicRepository;
-
-  UserRepository _userRepository;
-
-  UserRepository get userRepository => _userRepository;
+  UserRepository get userRepository => UserDataRepository(_userDb);
 
   factory Data() {
     return _singleton;
@@ -59,20 +49,11 @@ class Data {
     // 创建并初始化
     Directory appDocDir = await getApplicationDocumentsDirectory();
 
-    _emoticonRepository = EmoticonRepository();
-
     String forumDbPath = [appDocDir.path, 'forum.db'].join('/');
-    _forumDb = ObjectDB(forumDbPath);
-    _forumRepository = ForumRepository();
-    _forumRepository.init(_forumDb);
-
-    _resourceRepository = ResourceRepository();
-    _topicRepository = TopicRepository();
+    _forumDb = ObjectDB(forumDbPath)..open();
 
     String userDbPath = [appDocDir.path, 'user.db'].join('/');
-    _userDb = ObjectDB(userDbPath);
-    _userRepository = UserRepository();
-    _userRepository.init(_userDb);
+    _userDb = ObjectDB(userDbPath)..open();
 
     _dio = Dio();
 
@@ -102,7 +83,7 @@ class Data {
     _dio.interceptors.add(CookieManager(_cookieJar));
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (RequestOptions options) async {
-        final user = await _userRepository.getDefaultUser();
+        final user = await userRepository.getDefaultUser();
         if (user != null && options.headers["Cookie"] == null) {
           options.headers["Cookie"] =
               "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
@@ -118,68 +99,96 @@ class Data {
         // 这样请求将被中止并触发异常，上层catchError会被调用。
       },
       onResponse: (Response response) async {
-        // 在返回响应数据之前做一些预处理
-        // gbk 编码 json 转 utf8
-        List<int> bytes = response.data;
-        String responseBody = gbk.decode(bytes);
-        // 处理一些可能导致错误的字符串
-        // 直接制表符替换为 \t, \x 替换为 \\x
-        responseBody = responseBody
-            .replaceAll("\t", "\\t")
-            .replaceAll("\\x", "\\\\x")
-            .replaceAll("window.script_muti_get_var_store=", "");
-        debugPrint(
-            "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}\n" +
-                "request data : ${response.request.data.toString()}\n" +
-                "response data : $responseBody");
+        String responseBody = _formatResponseBody(response);
         Map<String, dynamic> map;
         try {
           // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
           responseBody = await AndroidFormatJson.decode(responseBody);
           map = json.decode(responseBody);
-        } catch (error) {
-          debugPrint(error.toString());
+        } catch (err) {
+          debugPrint(err.toString());
           response.data = responseBody;
           return response;
         }
-        // 如果是 api 错误，抛出错误内容
-        if (map["data"] is Map<String, dynamic> &&
-            map["data"].containsKey("__MESSAGE")) {
-          String errorMessage = map["data"]["__MESSAGE"]["1"];
-          throw DioError(
-            response: response,
-            error: errorMessage,
-            type: DioErrorType.RESPONSE,
-          );
-        }
-        // 点赞时的错误
-        if (map["error"] is Map) {
-          Map<String, dynamic> err = map["error"];
-          if (err["0"] is String) {
-            throw DioError(
-              response: response,
-              error: err["0"],
-              type: DioErrorType.RESPONSE,
-            );
-          }
-        }
-        // 上传附件时的错误
-        if (map["error"] is String) {
-          String errorMessage = map["error"];
-          throw DioError(
-            response: response,
-            error: errorMessage,
-            type: DioErrorType.RESPONSE,
-          );
+        DioError dioError = _preHandleServerError(response, map);
+        if (dioError != null) {
+          throw dioError;
         }
         response.data = map["data"];
         return response;
       },
-      onError: (DioError e) {
-        // 当请求失败时做一些预处理
+      onError: (DioError e) async {
+        String responseBody = _formatResponseBody(e.response);
+        Map<String, dynamic> map;
+        try {
+          // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
+          responseBody = await AndroidFormatJson.decode(responseBody);
+          map = json.decode(responseBody);
+        } catch (err) {
+          debugPrint(err.toString());
+          return e;
+        }
+        DioError dioError = _preHandleServerError(e.response, map);
+        if (dioError != null) {
+          return dioError;
+        }
         return e;
       },
     ));
+  }
+
+  /// 格式化响应,处理一些不兼容问题
+  String _formatResponseBody(Response response) {
+    // 在返回响应数据之前做一些预处理
+    // gbk 编码 json 转 utf8
+    List<int> bytes = response.data;
+    String responseBody = gbk.decode(bytes);
+    // 处理一些可能导致错误的字符串
+    // 直接制表符替换为 \t, \x 替换为 \\x
+    responseBody = responseBody
+        .replaceAll("\t", "\\t")
+        .replaceAll("\\x", "\\\\x")
+        .replaceAll("window.script_muti_get_var_store=", "");
+    debugPrint(
+        "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}\n" +
+            "request data : ${response.request.data.toString()}\n" +
+            "response data : $responseBody");
+    return responseBody;
+  }
+
+  /// 预处理服务器业务错误
+  DioError _preHandleServerError(Response response, Map<String, dynamic> map) {
+    // 如果是 api 错误，抛出错误内容
+    if (map["data"] is Map<String, dynamic> &&
+        map["data"].containsKey("__MESSAGE")) {
+      String errorMessage = map["data"]["__MESSAGE"]["1"];
+      return DioError(
+        response: response,
+        error: errorMessage,
+        type: DioErrorType.RESPONSE,
+      );
+    }
+    // 点赞时的错误
+    if (map["error"] is Map) {
+      Map<String, dynamic> err = map["error"];
+      if (err["0"] is String) {
+        return DioError(
+          response: response,
+          error: err["0"],
+          type: DioErrorType.RESPONSE,
+        );
+      }
+    }
+    // 上传附件时的错误
+    if (map["error"] is String) {
+      String errorMessage = map["error"];
+      return DioError(
+        response: response,
+        error: errorMessage,
+        type: DioErrorType.RESPONSE,
+      );
+    }
+    return null;
   }
 
   void close() async {

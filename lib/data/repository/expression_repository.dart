@@ -1,17 +1,15 @@
 import 'package:flutter_nga/data/entity/emoticon.dart';
 
-class EmoticonRepository {
-  static final EmoticonRepository _singleton =
-      EmoticonRepository._internal();
+/// 表情资源库
+abstract class EmoticonRepository {
+  // 获取所有表情组
+  List<EmoticonGroup> getEmoticonGroups();
+}
 
+class EmoticonDataRepository implements EmoticonRepository {
   static final List<EmoticonGroup> expressionGroupList = [];
 
-  factory EmoticonRepository() {
-    return _singleton;
-  }
-
-  EmoticonRepository._internal();
-
+  @override
   List<EmoticonGroup> getEmoticonGroups() {
     if (expressionGroupList.isEmpty) {
       var expressionList = [

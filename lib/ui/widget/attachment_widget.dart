@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,10 +12,11 @@ typedef AttachmentCallback = void Function(
 
 class AttachmentWidget extends StatefulWidget {
   const AttachmentWidget(
-      {this.topic, this.callback, this.attachmentCallback, Key key})
+      {this.tid, this.fid, this.callback, this.attachmentCallback, Key key})
       : super(key: key);
 
-  final Topic topic;
+  final int tid;
+  final int fid;
   final InputCallback callback;
   final AttachmentCallback attachmentCallback;
 
@@ -53,14 +53,15 @@ class _AttachmentState extends State<AttachmentWidget> {
               if (_authCode == null) {
                 _authCode = await Data()
                     .topicRepository
-                    .getAuthCode(widget.topic.fid, widget.topic.tid, "reply");
+                    .getAuthCode(widget.fid, widget.tid, "reply");
               }
               Map<String, dynamic> data = await Data()
                   .topicRepository
-                  .uploadAttachment(widget.topic.fid, _authCode, image);
-              widget.attachmentCallback(data["attachments"], data["attachments_check"]);
+                  .uploadAttachment(widget.fid, _authCode, image);
+              widget.attachmentCallback(
+                  data["attachments"], data["attachments_check"]);
               setState(() => _list.add(data["url"]));
-            } catch (error) {
+            } catch (err) {
               setState(() => _imageFileList.remove(image));
             }
           },
