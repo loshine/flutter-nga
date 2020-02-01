@@ -1,96 +1,106 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_nga/ui/page/topic_list/topic_list_page.dart';
-import 'package:flutter_nga/ui/page/user_info/user_info.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_nga/store/user_info_store.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
-
-import 'user_info_bloc.dart';
+import 'package:flutter_nga/utils/route.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class UserInfoPage extends StatefulWidget {
   final String username;
+  final String uid;
 
-  const UserInfoPage(this.username, {Key key}) : super(key: key);
+  const UserInfoPage({this.username, this.uid, Key key}) : super(key: key);
 
   @override
   _UserInfoPageState createState() => _UserInfoPageState();
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  UserInfoBloc _userInfoBloc = UserInfoBloc();
-
-  @override
-  void dispose() {
-    super.dispose();
-    _userInfoBloc.close();
-  }
+  UserInfoStore _store = UserInfoStore();
 
   @override
   void initState() {
     super.initState();
-    _userInfoBloc.onLoad(widget.username);
+    if (widget.uid != null) {
+      _store.loadByUid(widget.uid).catchError((err) {
+        if (err is DioError) {
+          Fluttertoast.showToast(
+            msg: err.message,
+            gravity: ToastGravity.CENTER,
+          );
+        } else if (err is Error) {
+          Fluttertoast.showToast(
+            msg: err.toString(),
+            gravity: ToastGravity.CENTER,
+          );
+        }
+      });
+    } else if (widget.username != null) {
+      _store.loadByName(widget.username).catchError((err) {
+        if (err is DioError) {
+          Fluttertoast.showToast(
+            msg: err.message,
+            gravity: ToastGravity.CENTER,
+          );
+        } else if (err is Error) {
+          Fluttertoast.showToast(
+            msg: err.toString(),
+            gravity: ToastGravity.CENTER,
+          );
+        }
+      });
+    }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      child: UserInfoWidget(),
-      create: (context) => _userInfoBloc,
-    );
-  }
-}
-
-class UserInfoWidget extends StatelessWidget {
-  const UserInfoWidget({
-    Key key,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder(
-          bloc: BlocProvider.of<UserInfoBloc>(context),
-          builder: (context, UserInfoState state) {
-            return CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  expandedHeight: 200,
-                  floating: false,
-                  pinned: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    title: Text(
-                      state.username,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                      ),
+      body: Observer(
+        builder: (_) {
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                floating: false,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  title: Text(
+                    _store.state.username,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
                     ),
-                    background: Container(
-                        child: codeUtils.isStringEmpty(state.avatar)
-                            ? SizedBox.expand(child: Text(""))
-                            : CachedNetworkImage(
-                                fit: BoxFit.cover,
-                                imageUrl: state.avatar,
-                                placeholder: (context, url) => Image.asset(
-                                    'images/default_forum_icon.png'),
-                                errorWidget: (context, url, err) => Image.asset(
-                                    'images/default_forum_icon.png'),
-                              ),
-                        foregroundDecoration:
-                            BoxDecoration(color: Colors.black38)),
                   ),
+                  background: Container(
+                      child: codeUtils.isStringEmpty(_store.state.avatar)
+                          ? SizedBox.expand(child: Text(""))
+                          : CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl: _store.state.avatar,
+                              placeholder: (context, url) =>
+                                  Image.asset('images/default_forum_icon.png'),
+                              errorWidget: (context, url, err) =>
+                                  Image.asset('images/default_forum_icon.png'),
+                            ),
+                      foregroundDecoration:
+                          BoxDecoration(color: Colors.black38)),
                 ),
-                SliverList(
-                  delegate: SliverChildListDelegate(_getBodyWidgets(state)),
-                ),
-              ],
-            );
-          }),
+              ),
+              SliverList(
+                delegate:
+                    SliverChildListDelegate(_getBodyWidgets(_store.state)),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -117,11 +127,8 @@ class UserInfoWidget extends StatelessWidget {
       widgets.addAll(userInfo.moderatorForums.entries.map(
         (entry) => Builder(
             builder: (context) => GestureDetector(
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => TopicListPage(
-                            fid: entry.key,
-                            name: entry.value,
-                          ))),
+                  onTap: () => Routes.navigateTo(context,
+                      "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                   child: Text(
                     "[${entry.value}]",
                     style: TextStyle(color: Palette.colorTextSubTitle),
@@ -278,11 +285,8 @@ class UserInfoWidget extends StatelessWidget {
                   Builder(builder: (context) {
                     final entry = userInfo.personalForum.entries.toList()[0];
                     return GestureDetector(
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => TopicListPage(
-                                fid: entry.key,
-                                name: entry.value,
-                              ))),
+                      onTap: () => Routes.navigateTo(context,
+                          "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                       child: Text(
                         "[${entry.value}]",
                         style: TextStyle(color: Palette.colorTextSubTitle),

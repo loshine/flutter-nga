@@ -10,39 +10,62 @@ import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:path/path.dart';
 
-class TopicRepository {
-  static final TopicRepository _singleton = TopicRepository._internal();
+abstract class TopicRepository {
+  Future<TopicListData> getTopicList(int fid, int page);
 
+  Future<TopicDetailData> getTopicDetail(int tid, int page);
+
+  Future<List<TopicTag>> getTopicTagList(int fid);
+
+  Future<String> getAuthCode(int fid, int tid, String action);
+
+  Future<Map<String, dynamic>> uploadAttachment(
+      int fid, String authCode, File file);
+
+  Future<String> checkCreateTopic(int fid);
+
+  Future<String> createTopic(int fid, String subject, String content,
+      bool isAnonymous, String attachments, String attachmentsCheck);
+
+  Future<String> createReply(int tid, int fid, String subject, String content,
+      bool isAnonymous, String attachments, String attachmentsCheck);
+
+  Future<ToggleLikeReaction> likeReply(int tid, int pid);
+
+  Future<ToggleLikeReaction> dislikeReply(int tid, int pid);
+
+  Future<TopicListData> searchTopic(
+      String keyword, int fid, bool content, int page);
+}
+
+class TopicDataRepository implements TopicRepository {
   static const _RESULT_START_TAG = "<span style='color:#aaa'>&gt;</span>";
   static const _RESULT_END_TAG = "<br/>";
 
-  factory TopicRepository() {
-    return _singleton;
-  }
-
-  TopicRepository._internal();
-
+  @override
   Future<TopicListData> getTopicList(int fid, int page) async {
     try {
       Response<Map<String, dynamic>> response = await Data()
           .dio
           .get("thread.php?lite=js&noprefix&fid=$fid&page=$page");
       return TopicListData.fromJson(response.data);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<TopicDetailData> getTopicDetail(int tid, int page) async {
     try {
       Response<Map<String, dynamic>> response =
           await Data().dio.get("read.php?lite=js&noprefix&tid=$tid&page=$page");
       return TopicDetailData.fromJson(response.data);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<List<TopicTag>> getTopicTagList(int fid) async {
     try {
       Response<Map<String, dynamic>> response = await Data()
@@ -54,27 +77,26 @@ class TopicRepository {
         list.add(TopicTag(id: int.tryParse(k), content: v["0"]));
       });
       return list;
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<String> getAuthCode(int fid, int tid, String action) async {
     try {
       Response<Map<String, dynamic>> response = await Data().dio.get(
             "post.php?lite=js&noprefix&fid=$fid&tid=$tid&action=$action",
           );
       return response.data["auth"];
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<Map<String, dynamic>> uploadAttachment(
-    int fid,
-    String authCode,
-    File file,
-  ) async {
+      int fid, String authCode, File file) async {
     try {
       final fileName = basename(file.path);
       final formData = FormData.fromMap({
@@ -99,22 +121,24 @@ class TopicRepository {
           .dio
           .post("http://img.nga.178.com:8080/attach.php", data: formData);
       return response.data;
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<String> checkCreateTopic(int fid) async {
     try {
       Response<Map<String, dynamic>> response = await Data()
           .dio
           .get("nuke.php?fid=$fid&__output=8&lite=js&action=new");
       return response.data['auth'];
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<String> createTopic(int fid, String subject, String content,
       bool isAnonymous, String attachments, String attachmentsCheck) async {
     final postData = "step=2"
@@ -139,11 +163,12 @@ class TopicRepository {
       int end = html.indexOf(_RESULT_END_TAG, start);
       if (end < 0) return "发帖失败";
       return html.substring(start, end);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<String> createReply(int tid, int fid, String subject, String content,
       bool isAnonymous, String attachments, String attachmentsCheck) async {
     final postData = "step=2"
@@ -169,11 +194,12 @@ class TopicRepository {
       int end = html.indexOf(_RESULT_END_TAG, start);
       if (end < 0) return "发帖失败";
       return html.substring(start, end);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<ToggleLikeReaction> likeReply(int tid, int pid) async {
     final postData =
         "__output=8&__lib=topic_recommend&__act=add&raw=3&pid=$pid&value=1&tid=$tid";
@@ -186,11 +212,12 @@ class TopicRepository {
             options: options,
           );
       return ToggleLikeReaction.fromJson(response.data);
-    } catch (error) {
+    } catch (err) {
       rethrow;
     }
   }
 
+  @override
   Future<ToggleLikeReaction> dislikeReply(int tid, int pid) async {
     final postData =
         "__output=8&__lib=topic_recommend&__act=add&raw=3&pid=$pid&value=-1&tid=$tid";
@@ -203,7 +230,19 @@ class TopicRepository {
             options: options,
           );
       return ToggleLikeReaction.fromJson(response.data);
-    } catch (error) {
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TopicListData> searchTopic(
+      String keyword, int fid, bool content, int page) async {
+    try {
+      Response<Map<String, dynamic>> response = await Data().dio.get(
+          "thread.php?${fid == null ? "" : "fid=$fid&"}key=$keyword&page=$page${content ? "&content=1" : ""}&lite=js&noprefix");
+      return TopicListData.fromJson(response.data);
+    } catch (err) {
       rethrow;
     }
   }
