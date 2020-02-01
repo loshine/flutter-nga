@@ -34,7 +34,8 @@ abstract class TopicRepository {
 
   Future<ToggleLikeReaction> dislikeReply(int tid, int pid);
 
-  Future<TopicListData> searchTopic(String keyword, int fid, int page);
+  Future<TopicListData> searchTopic(
+      String keyword, int fid, bool content, int page);
 }
 
 class TopicDataRepository implements TopicRepository {
@@ -235,10 +236,11 @@ class TopicDataRepository implements TopicRepository {
   }
 
   @override
-  Future<TopicListData> searchTopic(String keyword, int fid, int page) async {
+  Future<TopicListData> searchTopic(
+      String keyword, int fid, bool content, int page) async {
     try {
       Response<Map<String, dynamic>> response = await Data().dio.get(
-          "thread.php?${fid == null ? "" : "fid=$fid&"}key=$keyword&page=$page&lite=js&noprefix");
+          "thread.php?${fid == null ? "" : "fid=$fid&"}key=$keyword&page=$page${content ? "&content=1" : ""}&lite=js&noprefix");
       return TopicListData.fromJson(response.data);
     } catch (err) {
       rethrow;
