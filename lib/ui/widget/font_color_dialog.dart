@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/constant.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class FontColorDialog extends StatelessWidget {
   const FontColorDialog({this.callback, Key key}) : super(key: key);
@@ -30,7 +31,7 @@ class FontColorDialog extends StatelessWidget {
                 if (callback != null) {
                   callback("[color=${keyList[position]}]", "[/color]", true);
                 }
-                Navigator.of(context).pop();
+                Routes.pop(context);
               },
             );
           },

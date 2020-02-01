@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class FontSizeDialog extends StatelessWidget {
   const FontSizeDialog({this.callback, Key key}) : super(key: key);
@@ -35,7 +36,7 @@ class FontSizeDialog extends StatelessWidget {
                 if (callback != null) {
                   callback("[size=${sizeList[position]}]", "[/size]", true);
                 }
-                Navigator.of(context).pop();
+                Routes.pop(context);
               },
             );
           },
