@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/ui/page/photo_preview/photo_preview_page.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:html/dom.dart' as dom;
 
 Widget ngaRenderer(dom.Node node, List<Widget> children) {
@@ -198,21 +198,16 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
           // XXX: CachedNetworkImage 最新版有 bug，不要急需升级，https://github.com/renefloor/flutter_cached_network_image/issues/128
           return Builder(builder: (context) {
             return InkWell(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => PhotoPreviewPage(
-                          url: node.attributes['src'],
-                          screenWidth: MediaQuery.of(context).size.width,
-                        )));
-              },
+              onTap: () => Routes.navigateTo(context,
+                  "${Routes.PHOTO_PREVIEW}?url=${node.attributes['src']}&screenWidth=${MediaQuery.of(context).size.width}"),
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
                 imageUrl: node.attributes['src'],
                 placeholder: (context, url) => Icon(
-                      Icons.image,
-                      size: 48,
-                      color: Palette.colorIcon,
-                    ),
+                  Icons.image,
+                  size: 48,
+                  color: Palette.colorIcon,
+                ),
               ),
             );
           });
@@ -232,10 +227,10 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
           fit: BoxFit.cover,
           imageUrl: node.attributes['src'],
           placeholder: (context, url) => Icon(
-                Icons.image,
-                size: 48,
-                color: Palette.colorIcon,
-              ),
+            Icons.image,
+            size: 48,
+            color: Palette.colorIcon,
+          ),
         );
       // 引用
       case "blockquote":

@@ -1,6 +1,6 @@
 /// 版块实体类
 class Forum {
-  Forum(this.fid, this.name)
+  const Forum(this.fid, this.name)
       : assert(fid != null),
         assert(name != null);
 
