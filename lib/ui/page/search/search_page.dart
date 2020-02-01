@@ -256,6 +256,13 @@ class _SearchState extends State<SearchPage> {
 
   _onSearch(text) {
     if (_searchOptionsStore.state.firstRadio == SearchState.FIRST_RADIO_TOPIC) {
+      if (widget.fid == null) {
+        Routes.navigateTo(context,
+            "${Routes.SEARCH_TOPIC_LIST}?keyword=${fluroCnParamsEncode(text)}&content=${_searchOptionsStore.state.content ? 1 : 0}");
+      } else {
+        Routes.navigateTo(context,
+            "${Routes.SEARCH_TOPIC_LIST}?keyword=${fluroCnParamsEncode(text)}&fid=${widget.fid}&content=${_searchOptionsStore.state.content ? 1 : 0}");
+      }
     } else if (_searchOptionsStore.state.firstRadio ==
         SearchState.FIRST_RADIO_FORUM) {
       Routes.navigateTo(context,
