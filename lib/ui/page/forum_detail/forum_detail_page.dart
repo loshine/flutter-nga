@@ -5,16 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/topic_list_store.dart';
-import 'package:flutter_nga/ui/page/topic_list/topic_list_favourite_button_widet.dart';
-import 'package:flutter_nga/ui/page/topic_list/topic_list_item_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/store/forum_detail_store.dart';
+import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
+import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class TopicListPage extends StatefulWidget {
-  const TopicListPage({this.fid, this.name, Key key})
+class ForumDetailPage extends StatefulWidget {
+  const ForumDetailPage({this.fid, this.name, Key key})
       : assert(fid != null),
         super(key: key);
 
@@ -22,14 +21,14 @@ class TopicListPage extends StatefulWidget {
   final String name;
 
   @override
-  _TopicListState createState() => _TopicListState();
+  _ForumDetailState createState() => _ForumDetailState();
 }
 
-class _TopicListState extends State<TopicListPage> {
+class _ForumDetailState extends State<ForumDetailPage> {
   bool _fabVisible = true;
   RefreshController _refreshController = RefreshController();
 
-  final _store = TopicListStore();
+  final _store = ForumDetailStore();
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +44,7 @@ class _TopicListState extends State<TopicListPage> {
             onPressed: () => Routes.navigateTo(
                 context, "${Routes.SEARCH}?fid=${widget.fid}"),
           ),
-          TopicListFavouriteButtonWidget(
+          ForumFavouriteButtonWidget(
             fid: widget.fid,
             name: widget.name,
           ),

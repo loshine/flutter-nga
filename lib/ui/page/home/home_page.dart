@@ -6,7 +6,7 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
-import 'package:flutter_nga/ui/page/forum/forum_group_tabs.dart';
+import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/match/match_tabs.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';

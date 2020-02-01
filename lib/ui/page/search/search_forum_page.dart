@@ -68,7 +68,7 @@ class _SearchForumState extends State<SearchForumPage> {
         ],
       ),
       onTap: () => Routes.navigateTo(context,
-          "${Routes.TOPIC_LIST}?fid=${forum.fid}&name=${fluroCnParamsEncode(forum.name)}"),
+          "${Routes.FORUM_DETAIL}?fid=${forum.fid}&name=${fluroCnParamsEncode(forum.name)}"),
     );
   }
 }

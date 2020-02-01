@@ -128,7 +128,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
         (entry) => Builder(
             builder: (context) => GestureDetector(
                   onTap: () => Routes.navigateTo(context,
-                      "${Routes.TOPIC_LIST}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
+                      "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                   child: Text(
                     "[${entry.value}]",
                     style: TextStyle(color: Palette.colorTextSubTitle),
@@ -286,7 +286,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     final entry = userInfo.personalForum.entries.toList()[0];
                     return GestureDetector(
                       onTap: () => Routes.navigateTo(context,
-                          "${Routes.TOPIC_LIST}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
+                          "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                       child: Text(
                         "[${entry.value}]",
                         style: TextStyle(color: Palette.colorTextSubTitle),
