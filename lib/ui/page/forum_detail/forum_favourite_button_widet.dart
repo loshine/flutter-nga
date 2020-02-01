@@ -4,8 +4,8 @@ import 'package:flutter_nga/store/favourite_forum_store.dart';
 import 'package:flutter_nga/store/favourite_forum_list_store.dart';
 import 'package:provider/provider.dart';
 
-class TopicListFavouriteButtonWidget extends StatefulWidget {
-  const TopicListFavouriteButtonWidget({this.name, this.fid, Key key})
+class ForumFavouriteButtonWidget extends StatefulWidget {
+  const ForumFavouriteButtonWidget({this.name, this.fid, Key key})
       : assert(fid != null),
         super(key: key);
 
@@ -13,11 +13,11 @@ class TopicListFavouriteButtonWidget extends StatefulWidget {
   final int fid;
 
   @override
-  State<StatefulWidget> createState() => _TopicListFavouriteButtonState();
+  State<StatefulWidget> createState() => _ForumFavouriteButtonState();
 }
 
-class _TopicListFavouriteButtonState
-    extends State<TopicListFavouriteButtonWidget> {
+class _ForumFavouriteButtonState
+    extends State<ForumFavouriteButtonWidget> {
   final FavouriteForumStore _favouriteForumStore = FavouriteForumStore();
 
   @override

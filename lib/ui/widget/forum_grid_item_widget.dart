@@ -15,7 +15,7 @@ class ForumGridItemWidget extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => Routes.navigateTo(context,
-            "${Routes.TOPIC_LIST}?fid=${forum.fid}&name=${fluroCnParamsEncode(forum.name)}"),
+            "${Routes.FORUM_DETAIL}?fid=${forum.fid}&name=${fluroCnParamsEncode(forum.name)}"),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
