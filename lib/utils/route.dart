@@ -7,6 +7,7 @@ import 'package:flutter_nga/ui/page/photo_preview/photo_preview_page.dart';
 import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/search/search_forum_page.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
+import 'package:flutter_nga/ui/page/search/search_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
@@ -26,6 +27,7 @@ class Routes {
   static const String ACCOUNT_MANAGEMENT = "/account_management";
   static const String SEARCH = "/search";
   static const String SEARCH_FORUM = "/search_forum";
+  static const String SEARCH_TOPIC_LIST = "/search_topic_list";
   static const String PHOTO_PREVIEW = "photo_preview";
 
   /// 初始化路由
@@ -88,6 +90,22 @@ class Routes {
         handler: Handler(
             handlerFunc: (context, params) =>
                 SearchForumPage(fluroCnParamsDecode(params["keyword"][0]))));
+    router.define(SEARCH_TOPIC_LIST,
+        handler: Handler(handlerFunc: (context, params) {
+      final content = params["content"] != null &&
+          params["content"].isNotEmpty &&
+          params["content"][0] == "1";
+      if (params["fid"] == null || params["fid"].isEmpty) {
+        return SearchTopicListPage(fluroCnParamsDecode(params["keyword"][0]),
+            content: content);
+      } else {
+        return SearchTopicListPage(
+          fluroCnParamsDecode(params["keyword"][0]),
+          fid: int.tryParse(params["fid"][0]),
+          content: content,
+        );
+      }
+    }));
     router.define(PHOTO_PREVIEW,
         handler: Handler(
             handlerFunc: (context, params) => PhotoPreviewPage(
