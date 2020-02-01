@@ -6,15 +6,14 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
-import 'package:flutter_nga/ui/page/forum/forum_group_tabs.dart';
+import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/match/match_tabs.dart';
-import 'package:flutter_nga/ui/page/settings/settings.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  const HomePage({Key key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -31,6 +30,17 @@ class _HomePageState extends State<HomePage> {
     MatchTabsPage(),
   ];
 
+  List<Widget> _getActionsByPage(int index) {
+    return index == 0
+        ? [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
+            ),
+          ]
+        : [];
+  }
+
   void _setSelection(int i) {
     Navigator.pop(context);
     setState(() {
@@ -41,7 +51,7 @@ class _HomePageState extends State<HomePage> {
   void _maybeGoLogin(BuildContext context) async {
     User user = await Data().userRepository.getDefaultUser();
     if (user == null) {
-      Navigator.of(context).pop();
+      Routes.pop(context);
       AndroidLogin.startLogin()
           .then((result) => debugPrint("goAndroidLogin result: $result"))
           .catchError((e) => debugPrint(e.toString()));
@@ -59,7 +69,7 @@ class _HomePageState extends State<HomePage> {
       if (user != null) {
         Data()
             .userRepository
-            .getUserInfo(user.nickname)
+            .getUserInfoByName(user.nickname)
             .then((userInfo) => setState(() => _userInfo = userInfo));
         setState(() => _nickname = user.nickname);
       }
@@ -99,7 +109,8 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: _getElevation(),
-        title: Text(widget.title),
+        title: Text('NGA'),
+        actions: _getActionsByPage(_index),
       ),
       backgroundColor: Palette.colorBackground,
       drawer: Drawer(
@@ -194,10 +205,8 @@ class _HomePageState extends State<HomePage> {
                           leading: Icon(Icons.settings),
                           title: Text("设置"),
                         ),
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => SettingsPage()));
-                        },
+                        onTap: () =>
+                            Routes.navigateTo(context, Routes.SETTINGS),
                       ),
                       color: Palette.colorBackground,
                     ),
