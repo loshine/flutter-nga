@@ -2,19 +2,19 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:mobx/mobx.dart';
 
-part 'topic_list_store.g.dart';
+part 'forum_detail_store.g.dart';
 
-class TopicListStore = _TopicListStore with _$TopicListStore;
+class ForumDetailStore = _ForumDetailStore with _$ForumDetailStore;
 
-abstract class _TopicListStore with Store {
+abstract class _ForumDetailStore with Store {
   @observable
-  TopicListState state = TopicListState.initial();
+  ForumDetailState state = ForumDetailState.initial();
 
   @action
-  Future<TopicListState> refresh(int fid) async {
+  Future<ForumDetailState> refresh(int fid) async {
     try {
       TopicListData data = await Data().topicRepository.getTopicList(fid, 1);
-      state = TopicListState(
+      state = ForumDetailState(
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
@@ -27,11 +27,11 @@ abstract class _TopicListStore with Store {
   }
 
   @action
-  Future<TopicListState> loadMore(int fid) async {
+  Future<ForumDetailState> loadMore(int fid) async {
     try {
       TopicListData data =
           await Data().topicRepository.getTopicList(fid, state.page);
-      state = TopicListState(
+      state = ForumDetailState(
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
@@ -44,20 +44,20 @@ abstract class _TopicListStore with Store {
   }
 }
 
-class TopicListState {
+class ForumDetailState {
   final int page;
   final int maxPage;
   final bool enablePullUp;
   final List<Topic> list;
 
-  const TopicListState({
+  const ForumDetailState({
     this.page,
     this.maxPage,
     this.enablePullUp,
     this.list,
   });
 
-  factory TopicListState.initial() => TopicListState(
+  factory ForumDetailState.initial() => ForumDetailState(
         page: 1,
         maxPage: 1,
         enablePullUp: false,

@@ -1,6 +1,7 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
+import 'package:flutter_nga/ui/page/forum_detail/forum_detail_page.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/ui/page/photo_preview/photo_preview_page.dart';
 import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
-import 'package:flutter_nga/ui/page/topic_list/topic_list_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 
@@ -18,7 +18,7 @@ class Routes {
 
   static const String SPLASH = "/";
   static const String HOME = "/home";
-  static const String TOPIC_LIST = "/topic_list";
+  static const String FORUM_DETAIL = "/forum_detail";
   static const String TOPIC_DETAIL = "/topic_detail";
   static const String TOPIC_PUBLISH = "/topic_publish";
   static const String USER = "/user";
@@ -38,8 +38,9 @@ class Routes {
         handler: Handler(handlerFunc: (context, params) => SplashPage()));
     router.define(HOME,
         handler: Handler(handlerFunc: (context, params) => HomePage()));
-    router.define(TOPIC_LIST, handler: Handler(handlerFunc: (context, params) {
-      return TopicListPage(
+    router.define(FORUM_DETAIL,
+        handler: Handler(handlerFunc: (context, params) {
+      return ForumDetailPage(
         fid: int.tryParse(params["fid"][0]),
         name: fluroCnParamsDecode(params["name"][0]),
       );
