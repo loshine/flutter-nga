@@ -16,7 +16,7 @@ class User {
   int replyCount;
   String replyString;
 
-  Map toJson() {
+  Map<String, dynamic> toJson() {
     return {'uid': uid, 'cid': cid, 'nickname': nickname};
   }
 

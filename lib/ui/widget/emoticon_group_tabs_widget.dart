@@ -63,21 +63,21 @@ class _EmoticonGroupWidget extends StatelessWidget {
       children: group.expressionList
           .map(
             (expression) => Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => callback(expression.content, "", false),
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CachedNetworkImage(
-                        imageUrl: expression.url,
-                        placeholder: (context, url) =>
-                            Image.asset('images/default_forum_icon.png'),
-                        errorWidget: (context, url, err) =>
-                            Image.asset('images/default_forum_icon.png'),
-                      ),
-                    ),
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => callback(expression.content, "", false),
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CachedNetworkImage(
+                    imageUrl: expression.url,
+                    placeholder: (context, url) =>
+                        Image.asset('images/default_forum_icon.png'),
+                    errorWidget: (context, url, err) =>
+                        Image.asset('images/default_forum_icon.png'),
                   ),
                 ),
+              ),
+            ),
           )
           .toList(),
     );

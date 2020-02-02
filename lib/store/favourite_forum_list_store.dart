@@ -4,7 +4,8 @@ import 'package:mobx/mobx.dart';
 
 part 'favourite_forum_list_store.g.dart';
 
-class FavouriteForumListStore = _FavouriteForumListStore with _$FavouriteForumListStore;
+class FavouriteForumListStore = _FavouriteForumListStore
+    with _$FavouriteForumListStore;
 
 abstract class _FavouriteForumListStore with Store {
   @observable

@@ -15,29 +15,29 @@ import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/android_format_json.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:gbk2utf8/gbk2utf8.dart';
-import 'package:objectdb/objectdb.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sembast/sembast.dart';
+import 'package:sembast/sembast_io.dart';
 
 class Data {
   static final Data _singleton = Data._internal();
 
   Dio _dio;
 
-  ObjectDB _forumDb;
-  ObjectDB _userDb;
+  Database _database;
 
   Dio get dio => _dio;
   PersistCookieJar _cookieJar;
 
   EmoticonRepository get emoticonRepository => EmoticonDataRepository();
 
-  ForumRepository get forumRepository => ForumDataRepository(_forumDb);
+  ForumRepository get forumRepository => ForumDataRepository(_database);
 
   ResourceRepository get resourceRepository => ResourceDataRepository();
 
-  TopicRepository get topicRepository => TopicDataRepository();
+  TopicRepository get topicRepository => TopicDataRepository(_database);
 
-  UserRepository get userRepository => UserDataRepository(_userDb);
+  UserRepository get userRepository => UserDataRepository(_database);
 
   factory Data() {
     return _singleton;
@@ -48,12 +48,10 @@ class Data {
   Future init() async {
     // 创建并初始化
     Directory appDocDir = await getApplicationDocumentsDirectory();
+    DatabaseFactory dbFactory = databaseFactoryIo;
 
-    String forumDbPath = [appDocDir.path, 'forum.db'].join('/');
-    _forumDb = ObjectDB(forumDbPath)..open();
-
-    String userDbPath = [appDocDir.path, 'user.db'].join('/');
-    _userDb = ObjectDB(userDbPath)..open();
+    String forumDbPath = [appDocDir.path, 'main.db'].join('/');
+    _database = await dbFactory.openDatabase(forumDbPath);
 
     _dio = Dio();
 
@@ -84,6 +82,7 @@ class Data {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (RequestOptions options) async {
         final user = await userRepository.getDefaultUser();
+        debugPrint("user: $user");
         if (user != null && options.headers["Cookie"] == null) {
           options.headers["Cookie"] =
               "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
@@ -195,7 +194,6 @@ class Data {
     // 清除所有网络访问
     _dio.clear();
     // 关闭数据库
-    _forumDb.close();
-    _userDb.close();
+    _database.close();
   }
 }

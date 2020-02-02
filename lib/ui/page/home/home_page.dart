@@ -7,7 +7,7 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
-import 'package:flutter_nga/ui/page/match/match_tabs.dart';
+import 'package:flutter_nga/ui/page/history/history_topic_list_page.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription _subscription;
   final pageList = [
     ForumGroupTabsPage(),
-    MatchTabsPage(),
+    HistoryTopicListPage(),
   ];
 
   List<Widget> _getActionsByPage(int index) {
@@ -172,13 +172,13 @@ class _HomePageState extends State<HomePage> {
                       child: InkWell(
                         child: ListTile(
                           leading: Icon(
-                            CommunityMaterialIcons.medal,
+                            CommunityMaterialIcons.history,
                             size: 24,
                             color: _index == 1
                                 ? Palette.colorPrimary
                                 : Palette.colorIcon,
                           ),
-                          title: Text("赛事"),
+                          title: Text("浏览历史"),
                           selected: _index == 1,
                         ),
                         onTap: () => _setSelection(1),
