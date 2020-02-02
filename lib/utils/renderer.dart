@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
@@ -195,11 +196,10 @@ Widget ngaRenderer(dom.Node node, List<Widget> children) {
             return Image.memory(base64
                 .decode(node.attributes['src'].split("base64,")[1].trim()));
           }
-          // XXX: CachedNetworkImage 最新版有 bug，不要急需升级，https://github.com/renefloor/flutter_cached_network_image/issues/128
           return Builder(builder: (context) {
             return InkWell(
               onTap: () => Routes.navigateTo(context,
-                  "${Routes.PHOTO_PREVIEW}?url=${node.attributes['src']}&screenWidth=${MediaQuery.of(context).size.width}"),
+                  "${Routes.PHOTO_PREVIEW}?url=${fluroCnParamsEncode(node.attributes['src'])}&screenWidth=${MediaQuery.of(context).size.width}"),
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
                 imageUrl: node.attributes['src'],

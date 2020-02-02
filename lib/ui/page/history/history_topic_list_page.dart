@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class MatchTabsPage extends StatelessWidget {
+class HistoryTopicListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text("赛事"),
+      child: Text("浏览历史"),
     );
   }
 }
