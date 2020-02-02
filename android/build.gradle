@@ -3,7 +3,6 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven { url 'https://mirrors.sjtug.sjtu.edu.cn/maven-central/' }
     }
 
     dependencies {
@@ -16,7 +15,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven { url 'https://mirrors.sjtug.sjtu.edu.cn/maven-central/' }
     }
 }
 

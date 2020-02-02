@@ -7,7 +7,7 @@ class Forum {
   final int fid;
   final String name;
 
-  Map toJson() {
+  Map<String, dynamic> toJson() {
     return {'fid': fid, 'name': name};
   }
 

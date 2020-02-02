@@ -91,7 +91,7 @@ class _AccountManagementState extends State<AccountManagementPage> {
         .quitAll()
         .then((_) =>
             Fluttertoast.showToast(msg: "成功", gravity: ToastGravity.CENTER))
-        .whenComplete(() =>
-            Routes.navigateTo(context, Routes.HOME, clearStack: true));
+        .whenComplete(
+            () => Routes.navigateTo(context, Routes.HOME, clearStack: true));
   }
 }

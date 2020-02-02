@@ -1,9 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
-import 'package:objectdb/objectdb.dart';
+import 'package:sembast/sembast.dart';
 
 /// 版块相关数据知识库
 abstract class ForumRepository {
@@ -11,7 +10,7 @@ abstract class ForumRepository {
 
   Future<bool> isFavourite(Forum forum);
 
-  Future<ObjectId> saveFavourite(Forum forum);
+  Future<int> saveFavourite(Forum forum);
 
   Future<int> deleteFavourite(Forum forum);
 
@@ -21,11 +20,20 @@ abstract class ForumRepository {
 }
 
 class ForumDataRepository implements ForumRepository {
-  ForumDataRepository(this.forumDb);
+  ForumDataRepository(this.database);
 
   final List<ForumGroup> forumGroupList = [];
 
-  final ObjectDB forumDb;
+  final Database database;
+
+  StoreRef<int, dynamic> get _store {
+    if (_lateInitStore == null) {
+      _lateInitStore = intMapStoreFactory.store('forums');
+    }
+    return _lateInitStore;
+  }
+
+  StoreRef<int, dynamic> _lateInitStore;
 
   @override
   List<ForumGroup> getForumGroups() {
@@ -233,24 +241,26 @@ class ForumDataRepository implements ForumRepository {
 
   @override
   Future<bool> isFavourite(Forum forum) async {
-    List<Map> list = await forumDb.find(forum.toJson());
-    return list.isNotEmpty;
+    final finder = Finder(filter: Filter.equals('fid', forum.fid));
+    final record = await _store.findFirst(database, finder: finder);
+    return record != null;
   }
 
   @override
-  Future<ObjectId> saveFavourite(Forum forum) {
-    return forumDb.insert(forum.toJson());
+  Future<int> saveFavourite(Forum forum) {
+    return _store.add(database, forum.toJson());
   }
 
   @override
   Future<int> deleteFavourite(Forum forum) {
-    return forumDb.remove(forum.toJson());
+    final finder = Finder(filter: Filter.equals('fid', forum.fid));
+    return _store.delete(database, finder: finder);
   }
 
   @override
   Future<List<Forum>> getFavouriteList() async {
-    List<Map> results = await forumDb.find({});
-    return results.map((map) => Forum.fromJson(map)).toList();
+    List<RecordSnapshot<int, dynamic>> results = await _store.find(database);
+    return results.map((map) => Forum.fromJson(map.value)).toList();
   }
 
   @override

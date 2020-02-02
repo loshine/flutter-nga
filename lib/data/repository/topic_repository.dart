@@ -5,10 +5,12 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/toggle_like_reaction.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:path/path.dart';
+import 'package:sembast/sembast.dart';
 
 abstract class TopicRepository {
   Future<TopicListData> getTopicList(int fid, int page);
@@ -36,11 +38,32 @@ abstract class TopicRepository {
 
   Future<TopicListData> searchTopic(
       String keyword, int fid, bool content, int page);
+
+  Future<int> insertTopicHistory(TopicHistory history);
+
+  Future<List<TopicHistory>> getAllTopicHistory();
+
+  Future<int> deleteTopicHistoryById(int id);
+
+  Future<int> deleteAllTopicHistory();
 }
 
 class TopicDataRepository implements TopicRepository {
   static const _RESULT_START_TAG = "<span style='color:#aaa'>&gt;</span>";
   static const _RESULT_END_TAG = "<br/>";
+
+  TopicDataRepository(this.database);
+
+  final Database database;
+
+  StoreRef<int, dynamic> get _store {
+    if (_lateInitStore == null) {
+      _lateInitStore = intMapStoreFactory.store('topic_histories');
+    }
+    return _lateInitStore;
+  }
+
+  StoreRef<int, dynamic> _lateInitStore;
 
   @override
   Future<TopicListData> getTopicList(int fid, int page) async {
@@ -245,5 +268,28 @@ class TopicDataRepository implements TopicRepository {
     } catch (err) {
       rethrow;
     }
+  }
+
+  @override
+  Future<int> insertTopicHistory(TopicHistory history) {
+    return _store.add(database, history.toJson());
+  }
+
+  @override
+  Future<List<TopicHistory>> getAllTopicHistory() async {
+    List<RecordSnapshot<int, dynamic>> results = await _store.find(database);
+    return results
+        .map((map) => TopicHistory.fromJson(map.value)..id = map.key)
+        .toList();
+  }
+
+  @override
+  Future<int> deleteTopicHistoryById(int id) async {
+    return _store.record(id).delete(database);
+  }
+
+  @override
+  Future<int> deleteAllTopicHistory() {
+    return _store.delete(database);
   }
 }

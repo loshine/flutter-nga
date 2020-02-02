@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/favourite_forum_store.dart';
 import 'package:flutter_nga/store/favourite_forum_list_store.dart';
+import 'package:flutter_nga/store/favourite_forum_store.dart';
 import 'package:provider/provider.dart';
 
 class ForumFavouriteButtonWidget extends StatefulWidget {
@@ -16,8 +16,7 @@ class ForumFavouriteButtonWidget extends StatefulWidget {
   State<StatefulWidget> createState() => _ForumFavouriteButtonState();
 }
 
-class _ForumFavouriteButtonState
-    extends State<ForumFavouriteButtonWidget> {
+class _ForumFavouriteButtonState extends State<ForumFavouriteButtonWidget> {
   final FavouriteForumStore _favouriteForumStore = FavouriteForumStore();
 
   @override
@@ -31,7 +30,8 @@ class _ForumFavouriteButtonState
           ),
           onPressed: () {
             _favouriteForumStore.toggle(widget.fid, widget.name).then((_) {
-              Provider.of<FavouriteForumListStore>(context, listen: false).refresh();
+              Provider.of<FavouriteForumListStore>(context, listen: false)
+                  .refresh();
             });
           },
         );

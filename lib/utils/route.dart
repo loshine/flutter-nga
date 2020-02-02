@@ -28,7 +28,7 @@ class Routes {
   static const String SEARCH = "/search";
   static const String SEARCH_FORUM = "/search_forum";
   static const String SEARCH_TOPIC_LIST = "/search_topic_list";
-  static const String PHOTO_PREVIEW = "photo_preview";
+  static const String PHOTO_PREVIEW = "/photo_preview";
 
   /// 初始化路由
   static void configureRoutes(Router r) {
@@ -109,7 +109,7 @@ class Routes {
     router.define(PHOTO_PREVIEW,
         handler: Handler(
             handlerFunc: (context, params) => PhotoPreviewPage(
-                  url: params["url"][0],
+                  url: fluroCnParamsDecode(params["url"][0]),
                   screenWidth: double.tryParse(params["screenWidth"][0]) ?? 0,
                 )));
   }
