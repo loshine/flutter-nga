@@ -7,12 +7,12 @@ class Forum {
   final int fid;
   final String name;
 
-  Map<String, dynamic> toJson() {
-    return {'fid': fid, 'name': name};
-  }
-
   factory Forum.fromJson(Map map) {
     return Forum(map['fid'], map['name']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'fid': fid, 'name': name};
   }
 
   String getIconUrl() {

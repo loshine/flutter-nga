@@ -29,14 +29,14 @@ mixin _$ForumDetailStore on _ForumDetailStore, Store {
   final _$refreshAsyncAction = AsyncAction('refresh');
 
   @override
-  Future<ForumDetailStoreData> refresh(int fid) {
-    return _$refreshAsyncAction.run(() => super.refresh(fid));
+  Future<ForumDetailStoreData> refresh(int fid, bool recommend) {
+    return _$refreshAsyncAction.run(() => super.refresh(fid, recommend));
   }
 
   final _$loadMoreAsyncAction = AsyncAction('loadMore');
 
   @override
-  Future<ForumDetailStoreData> loadMore(int fid) {
-    return _$loadMoreAsyncAction.run(() => super.loadMore(fid));
+  Future<ForumDetailStoreData> loadMore(int fid, bool recommend) {
+    return _$loadMoreAsyncAction.run(() => super.loadMore(fid, recommend));
   }
 }

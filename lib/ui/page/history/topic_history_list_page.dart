@@ -18,7 +18,7 @@ class TopicHistoryListPage extends StatefulWidget {
 
 class TopicHistoryListState extends State<TopicHistoryListPage> {
   final _store = TopicHistoryListStore();
-  final _refreshController = RefreshController();
+  RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +38,15 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
   @override
   void initState() {
     super.initState();
+    _refreshController = RefreshController();
     Future.delayed(const Duration())
         .then((_) => _refreshController.requestRefresh());
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
   }
 
   _onRefresh() {

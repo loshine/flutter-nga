@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
@@ -18,14 +17,21 @@ class SearchForumPage extends StatefulWidget {
 
 class _SearchForumState extends State<SearchForumPage> {
   final _store = SearchForumStore();
-  final _refreshController = RefreshController();
+  RefreshController _refreshController;
 
   @override
   void initState() {
     super.initState();
+    _refreshController  = RefreshController();
     Future.delayed(const Duration()).then((_) {
       _refreshController.requestRefresh();
     });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
   }
 
   @override
