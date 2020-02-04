@@ -58,6 +58,11 @@ abstract class _TopicHistoryListStore with Store {
     );
     return state;
   }
+
+  @action
+  Future<int> clean() {
+    return Data().topicRepository.deleteAllTopicHistory();
+  }
 }
 
 class TopicHistoryListStoreData {

@@ -4,15 +4,19 @@ import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/store/topic_history_list_store.dart';
 import 'package:flutter_nga/ui/widget/topic_history_list_item_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicHistoryListPage extends StatefulWidget {
+  const TopicHistoryListPage({key: Key}) : super(key: key);
+
   @override
-  _TopicHistoryListState createState() => _TopicHistoryListState();
+  TopicHistoryListState createState() => TopicHistoryListState();
 }
 
-class _TopicHistoryListState extends State<TopicHistoryListPage> {
+class TopicHistoryListState extends State<TopicHistoryListPage> {
   final _store = TopicHistoryListStore();
   final _refreshController = RefreshController();
 
@@ -25,11 +29,7 @@ class _TopicHistoryListState extends State<TopicHistoryListPage> {
           enablePullUp: _store.state.enablePullUp,
           controller: _refreshController,
           onLoading: _onLoading,
-          child: ListView.builder(
-            itemCount: _store.state.list.length,
-            itemBuilder: (context, position) =>
-                _buildListItem(_store.state.list[position]),
-          ),
+          child: _buildChild(),
         );
       },
     );
@@ -72,6 +72,61 @@ class _TopicHistoryListState extends State<TopicHistoryListPage> {
         child: Text(
           itemData ?? "",
           style: TextStyle(fontSize: Dimen.title),
+        ),
+      );
+    }
+  }
+
+  showCleanDialog() {
+    showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text("提示"),
+            content: Text("是否删除所有浏览历史"),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => Routes.pop(context),
+                child: Text("取消"),
+              ),
+              FlatButton(
+                onPressed: () {
+                  Routes.pop(context);
+                  _clean();
+                },
+                child: Text("确认"),
+              ),
+            ],
+          );
+        });
+  }
+
+  _clean() {
+    _store.clean().catchError((err) {
+      Fluttertoast.showToast(
+        msg: err.message,
+        gravity: ToastGravity.CENTER,
+      );
+    }).whenComplete(() {
+      _refreshController.requestRefresh();
+    });
+  }
+
+  Widget _buildChild() {
+    if (_store.state.list != null && _store.state.list.isNotEmpty) {
+      return ListView.builder(
+        itemCount: _store.state.list.length,
+        itemBuilder: (_, position) =>
+            _buildListItem(_store.state.list[position]),
+      );
+    } else {
+      return Center(
+        child: Text(
+          "暂无浏览历史",
+          style: TextStyle(
+            fontSize: Dimen.subheading,
+            color: Palette.colorTextSecondary,
+          ),
         ),
       );
     }

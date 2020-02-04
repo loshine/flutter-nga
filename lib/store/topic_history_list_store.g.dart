@@ -26,24 +26,28 @@ mixin _$TopicHistoryListStore on _TopicHistoryListStore, Store {
     }, _$stateAtom, name: '${_$stateAtom.name}_set');
   }
 
+  final _$refreshAsyncAction = AsyncAction('refresh');
+
+  @override
+  Future<TopicHistoryListStoreData> refresh() {
+    return _$refreshAsyncAction.run(() => super.refresh());
+  }
+
+  final _$loadMoreAsyncAction = AsyncAction('loadMore');
+
+  @override
+  Future<TopicHistoryListStoreData> loadMore() {
+    return _$loadMoreAsyncAction.run(() => super.loadMore());
+  }
+
   final _$_TopicHistoryListStoreActionController =
       ActionController(name: '_TopicHistoryListStore');
 
   @override
-  Future<TopicHistoryListStoreData> refresh() {
+  Future<int> clean() {
     final _$actionInfo = _$_TopicHistoryListStoreActionController.startAction();
     try {
-      return super.refresh();
-    } finally {
-      _$_TopicHistoryListStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  Future<TopicHistoryListStoreData> loadMore() {
-    final _$actionInfo = _$_TopicHistoryListStoreActionController.startAction();
-    try {
-      return super.loadMore();
+      return super.clean();
     } finally {
       _$_TopicHistoryListStoreActionController.endAction(_$actionInfo);
     }
