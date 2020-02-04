@@ -1,6 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/store/topic_history_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
@@ -156,6 +157,8 @@ class TopicListItemWidget extends StatelessWidget {
   }
 
   _goTopicDetail(BuildContext context, Topic topic) {
+    final store = TopicHistoryStore();
+    store.insertHistory(topic.createHistory());
     Routes.navigateTo(context,
         "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${codeUtils.fluroCnParamsEncode(topic.subject)}");
   }

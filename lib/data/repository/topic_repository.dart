@@ -41,7 +41,7 @@ abstract class TopicRepository {
 
   Future<int> insertTopicHistory(TopicHistory history);
 
-  Future<List<TopicHistory>> getAllTopicHistory();
+  Future<List<TopicHistory>> getTopicHistories(int limit, int offset);
 
   Future<int> deleteTopicHistoryById(int id);
 
@@ -276,8 +276,9 @@ class TopicDataRepository implements TopicRepository {
   }
 
   @override
-  Future<List<TopicHistory>> getAllTopicHistory() async {
-    List<RecordSnapshot<int, dynamic>> results = await _store.find(database);
+  Future<List<TopicHistory>> getTopicHistories(int limit, int offset) async {
+    List<RecordSnapshot<int, dynamic>> results = await _store.find(database,
+        finder: Finder(limit: limit, offset: offset));
     return results
         .map((map) => TopicHistory.fromJson(map.value)..id = map.key)
         .toList();

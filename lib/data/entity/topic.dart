@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
@@ -171,6 +172,20 @@ class Topic {
       }
     }
     return 0;
+  }
+
+  /// 点击时生成浏览历史
+  TopicHistory createHistory() {
+    return TopicHistory(
+      tid: tid,
+      fid: fid,
+      subject: subject,
+      author: author,
+      type: type,
+      topicMisc: topicMisc,
+      topicParentName: parent == null ? null : parent.name,
+      time: DateTime.now().millisecondsSinceEpoch,
+    );
   }
 }
 

@@ -205,10 +205,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             ],
           ),
         ),
-        Divider(
-          color: Palette.colorDivider,
-          height: 1,
-        ),
+        Divider(height: 1),
       ],
     );
   }

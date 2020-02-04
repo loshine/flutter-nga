@@ -8,15 +8,15 @@ class SearchTopicListStore = _SearchTopicListStore with _$SearchTopicListStore;
 
 abstract class _SearchTopicListStore with Store {
   @observable
-  SearchTopicListState state = SearchTopicListState.initial();
+  SearchTopicListStoreData state = SearchTopicListStoreData.initial();
 
   @action
-  Future<SearchTopicListState> refresh(
+  Future<SearchTopicListStoreData> refresh(
       String keyword, int fid, bool content) async {
     try {
       TopicListData data =
           await Data().topicRepository.searchTopic(keyword, fid, content, 1);
-      state = SearchTopicListState(
+      state = SearchTopicListStoreData(
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
@@ -29,13 +29,13 @@ abstract class _SearchTopicListStore with Store {
   }
 
   @action
-  Future<SearchTopicListState> loadMore(
+  Future<SearchTopicListStoreData> loadMore(
       String keyword, int fid, bool content) async {
     try {
       TopicListData data = await Data()
           .topicRepository
           .searchTopic(keyword, fid, content, state.page);
-      state = SearchTopicListState(
+      state = SearchTopicListStoreData(
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
@@ -48,20 +48,20 @@ abstract class _SearchTopicListStore with Store {
   }
 }
 
-class SearchTopicListState {
+class SearchTopicListStoreData {
   final int page;
   final int maxPage;
   final bool enablePullUp;
   final List<Topic> list;
 
-  const SearchTopicListState({
+  const SearchTopicListStoreData({
     this.page,
     this.maxPage,
     this.enablePullUp,
     this.list,
   });
 
-  factory SearchTopicListState.initial() => SearchTopicListState(
+  factory SearchTopicListStoreData.initial() => SearchTopicListStoreData(
         page: 1,
         maxPage: 1,
         enablePullUp: false,
