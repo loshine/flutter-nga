@@ -15,7 +15,7 @@ class AccountManagementPage extends StatefulWidget {
 
 class _AccountManagementState extends State<AccountManagementPage> {
   final _store = AccountListStore();
-  final _refreshController = RefreshController();
+  RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
@@ -74,9 +74,16 @@ class _AccountManagementState extends State<AccountManagementPage> {
   @override
   void initState() {
     super.initState();
+    _refreshController = RefreshController();
     Future.delayed(const Duration()).then((_) {
       _refreshController.requestRefresh();
     });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
   }
 
   _onRefresh() {

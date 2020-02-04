@@ -11,14 +11,17 @@ abstract class _ForumDetailStore with Store {
   ForumDetailStoreData state = ForumDetailStoreData.initial();
 
   @action
-  Future<ForumDetailStoreData> refresh(int fid) async {
+  Future<ForumDetailStoreData> refresh(int fid, bool recommend) async {
     try {
-      TopicListData data = await Data().topicRepository.getTopicList(fid, 1);
+      TopicListData data = await Data()
+          .topicRepository
+          .getTopicList(fid, 1, recommend: recommend);
       state = ForumDetailStoreData(
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
         list: data.topicList.values.toList(),
+        info: data.forum,
       );
       return state;
     } catch (err) {
@@ -27,15 +30,17 @@ abstract class _ForumDetailStore with Store {
   }
 
   @action
-  Future<ForumDetailStoreData> loadMore(int fid) async {
+  Future<ForumDetailStoreData> loadMore(int fid, bool recommend) async {
     try {
-      TopicListData data =
-          await Data().topicRepository.getTopicList(fid, state.page);
+      TopicListData data = await Data()
+          .topicRepository
+          .getTopicList(fid, state.page, recommend: recommend);
       state = ForumDetailStoreData(
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
         list: state.list..addAll(data.topicList.values),
+        info: data.forum,
       );
       return state;
     } catch (err) {
@@ -49,12 +54,14 @@ class ForumDetailStoreData {
   final int maxPage;
   final bool enablePullUp;
   final List<Topic> list;
+  final ForumInfo info;
 
   const ForumDetailStoreData({
     this.page,
     this.maxPage,
     this.enablePullUp,
     this.list,
+    this.info,
   });
 
   factory ForumDetailStoreData.initial() => ForumDetailStoreData(

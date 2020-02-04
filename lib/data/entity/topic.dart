@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/palette.dart';
@@ -18,7 +19,7 @@ class TopicListData {
   });
 
   final dynamic global;
-  final dynamic forum;
+  final ForumInfo forum;
   final int rows;
   final Map<String, Topic> topicList;
   final int currentRows;
@@ -33,7 +34,7 @@ class TopicListData {
     }
     return TopicListData(
       global: map["__GLOBAL"],
-      forum: map["__F"],
+      forum: ForumInfo.fromJson(map["__F"]),
       rows: map["__ROWS"],
       topicList: tempMap,
       currentRows: map["__T__ROWS"],
@@ -196,5 +197,38 @@ class TopicParent {
 
   factory TopicParent.fromJson(Map<String, dynamic> map) {
     return TopicParent(map["2"]);
+  }
+}
+
+class ForumInfo {
+  const ForumInfo({this.topForumId, this.subForums});
+
+  final int topForumId;
+  final List<ChildForum> subForums;
+
+  factory ForumInfo.fromJson(Map map) {
+    List<ChildForum> subForums = [];
+    if (map['sub_forums'] != null && map['sub_forums'] is Map) {
+      (map['sub_forums'] as Map<String, dynamic>).forEach((k, v) {
+        String selectedForum = map['__SELECTED_FORUM'];
+        List<int> selectedIds = [];
+        if (selectedForum != null && selectedForum.isNotEmpty) {
+          selectedIds.addAll(selectedForum.split(",").map((s) => int.parse(s)));
+        }
+        String desc = v['2'];
+        int id = v['0'];
+        debugPrint("id=$id, selected:${selectedIds.contains(id)}");
+        subForums.add(ChildForum(
+          id,
+          v['1'],
+          desc: desc != null && desc.isNotEmpty ? desc : null,
+          selected: selectedIds.contains(id),
+        ));
+      });
+    }
+    return ForumInfo(
+      topForumId: map['topped_topic'],
+      subForums: subForums,
+    );
   }
 }

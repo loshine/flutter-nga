@@ -19,7 +19,7 @@ class SearchTopicListPage extends StatefulWidget {
 
 class _SearchTopicListSate extends State<SearchTopicListPage> {
   final _store = SearchTopicListStore();
-  final _refreshController = RefreshController();
+  RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +46,17 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
   @override
   void initState() {
     super.initState();
+    _refreshController = RefreshController();
     Future.delayed(const Duration()).then((_) {
       // 进入的时候自动刷新
       _refreshController.requestRefresh();
     });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
   }
 
   _onRefresh() {

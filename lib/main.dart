@@ -1,5 +1,6 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,8 @@ import 'store/favourite_forum_list_store.dart';
 import 'utils/route.dart';
 
 void main() {
+  // 打开 debug 布局边界
+//  debugPaintSizeEnabled = true;
   runApp(MyApp());
 }
 

@@ -28,8 +28,8 @@ class TopicDetailPage extends StatefulWidget {
 class _TopicDetailState extends State<TopicDetailPage> {
   bool _fabVisible = true;
 
-  final _refreshController = RefreshController();
   final _store = TopicDetailStore();
+  RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
@@ -66,10 +66,17 @@ class _TopicDetailState extends State<TopicDetailPage> {
   @override
   void initState() {
     super.initState();
+    _refreshController = RefreshController();
     Future.delayed(const Duration()).then((_) {
       _refreshController.requestRefresh();
       _refreshController.position.addListener(_scrollListener);
     });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
   }
 
   _onRefresh() {
