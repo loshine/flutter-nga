@@ -6,34 +6,34 @@ class SearchOptionsStore = _SearchOptionsStore with _$SearchOptionsStore;
 
 abstract class _SearchOptionsStore with Store {
   @observable
-  SearchState state = SearchState.allForumTopic();
+  SearchStoreData state = SearchStoreData.allForumTopic();
 
   @action
   void checkFirstRadio(int value) {
     state =
-        SearchState(value, state.content, state.topicRadio, state.userRadio);
+        SearchStoreData(value, state.content, state.topicRadio, state.userRadio);
   }
 
   @action
   void checkTopicRadio(int value) {
     state =
-        SearchState(state.firstRadio, state.content, value, state.userRadio);
+        SearchStoreData(state.firstRadio, state.content, value, state.userRadio);
   }
 
   @action
   void checkUserRadio(int value) {
     state =
-        SearchState(state.firstRadio, state.content, state.topicRadio, value);
+        SearchStoreData(state.firstRadio, state.content, state.topicRadio, value);
   }
 
   @action
   void checkContent(bool value) {
     state =
-        SearchState(state.firstRadio, value, state.topicRadio, state.userRadio);
+        SearchStoreData(state.firstRadio, value, state.topicRadio, state.userRadio);
   }
 }
 
-class SearchState {
+class SearchStoreData {
   static const int FIRST_RADIO_TOPIC = 1;
   static const int FIRST_RADIO_FORUM = 2;
   static const int FIRST_RADIO_USER = 3;
@@ -49,18 +49,18 @@ class SearchState {
   final int topicRadio;
   final int userRadio;
 
-  const SearchState(
+  const SearchStoreData(
       this.firstRadio, this.content, this.topicRadio, this.userRadio);
 
-  factory SearchState.allForumTopic() => SearchState(
+  factory SearchStoreData.allForumTopic() => SearchStoreData(
       FIRST_RADIO_TOPIC, false, TOPIC_RADIO_ALL_FORUM, USER_RADIO_NAME);
 
-  factory SearchState.currentForumTopic() => SearchState(
+  factory SearchStoreData.currentForumTopic() => SearchStoreData(
       FIRST_RADIO_TOPIC, false, TOPIC_RADIO_CURRENT_FORUM, USER_RADIO_NAME);
 
-  factory SearchState.forum() => SearchState(
+  factory SearchStoreData.forum() => SearchStoreData(
       FIRST_RADIO_FORUM, false, TOPIC_RADIO_ALL_FORUM, USER_RADIO_NAME);
 
-  factory SearchState.user() => SearchState(
+  factory SearchStoreData.user() => SearchStoreData(
       FIRST_RADIO_USER, false, TOPIC_RADIO_ALL_FORUM, USER_RADIO_NAME);
 }

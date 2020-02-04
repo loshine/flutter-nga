@@ -10,10 +10,10 @@ class TopicDetailStore = _TopicDetailStore with _$TopicDetailStore;
 
 abstract class _TopicDetailStore with Store {
   @observable
-  TopicDetailState state = TopicDetailState.initial();
+  TopicDetailStoreData state = TopicDetailStoreData.initial();
 
   @action
-  Future<TopicDetailState> refresh(int tid) async {
+  Future<TopicDetailStoreData> refresh(int tid) async {
     try {
       TopicDetailData data =
           await Data().topicRepository.getTopicDetail(tid, 1);
@@ -30,7 +30,7 @@ abstract class _TopicDetailStore with Store {
         replyList.add(reply);
         commentList.addAll(reply.commentList);
       });
-      state = TopicDetailState(
+      state = TopicDetailStoreData(
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
@@ -47,7 +47,7 @@ abstract class _TopicDetailStore with Store {
   }
 
   @action
-  Future<TopicDetailState> loadMore(int tid) async {
+  Future<TopicDetailStoreData> loadMore(int tid) async {
     try {
       TopicDetailData data =
           await Data().topicRepository.getTopicDetail(tid, state.page + 1);
@@ -64,7 +64,7 @@ abstract class _TopicDetailStore with Store {
         replyList.add(reply);
         commentList.addAll(reply.commentList);
       });
-      state = TopicDetailState(
+      state = TopicDetailStoreData(
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
@@ -81,7 +81,7 @@ abstract class _TopicDetailStore with Store {
   }
 }
 
-class TopicDetailState {
+class TopicDetailStoreData {
   final int page;
   final int maxPage;
   final bool enablePullUp;
@@ -91,7 +91,7 @@ class TopicDetailState {
   final Set<Group> groupSet;
   final Set<Medal> medalSet;
 
-  const TopicDetailState({
+  const TopicDetailStoreData({
     this.page,
     this.maxPage,
     this.enablePullUp,
@@ -102,7 +102,7 @@ class TopicDetailState {
     this.medalSet,
   });
 
-  factory TopicDetailState.initial() => TopicDetailState(
+  factory TopicDetailStoreData.initial() => TopicDetailStoreData(
         page: 1,
         maxPage: 1,
         enablePullUp: false,

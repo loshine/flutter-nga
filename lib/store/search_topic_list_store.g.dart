@@ -12,14 +12,14 @@ mixin _$SearchTopicListStore on _SearchTopicListStore, Store {
   final _$stateAtom = Atom(name: '_SearchTopicListStore.state');
 
   @override
-  SearchTopicListState get state {
+  SearchTopicListStoreData get state {
     _$stateAtom.context.enforceReadPolicy(_$stateAtom);
     _$stateAtom.reportObserved();
     return super.state;
   }
 
   @override
-  set state(SearchTopicListState value) {
+  set state(SearchTopicListStoreData value) {
     _$stateAtom.context.conditionallyRunInAction(() {
       super.state = value;
       _$stateAtom.reportChanged();
@@ -29,14 +29,16 @@ mixin _$SearchTopicListStore on _SearchTopicListStore, Store {
   final _$refreshAsyncAction = AsyncAction('refresh');
 
   @override
-  Future<SearchTopicListState> refresh(String keyword, int fid, bool content) {
+  Future<SearchTopicListStoreData> refresh(
+      String keyword, int fid, bool content) {
     return _$refreshAsyncAction.run(() => super.refresh(keyword, fid, content));
   }
 
   final _$loadMoreAsyncAction = AsyncAction('loadMore');
 
   @override
-  Future<SearchTopicListState> loadMore(String keyword, int fid, bool content) {
+  Future<SearchTopicListStoreData> loadMore(
+      String keyword, int fid, bool content) {
     return _$loadMoreAsyncAction
         .run(() => super.loadMore(keyword, fid, content));
   }

@@ -104,7 +104,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     );
   }
 
-  List<Widget> _getAdminForumWidgets(UserInfoState userInfo) {
+  List<Widget> _getAdminForumWidgets(UserInfoStoreData userInfo) {
     List<Widget> widgets = [
       Padding(
         padding: EdgeInsets.only(bottom: 8),
@@ -141,7 +141,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return widgets;
   }
 
-  List<Widget> _getReputationWidgets(UserInfoState userInfo) {
+  List<Widget> _getReputationWidgets(UserInfoStoreData userInfo) {
     List<Widget> widgets = [
       Padding(
         padding: EdgeInsets.only(bottom: 8),
@@ -166,7 +166,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return widgets;
   }
 
-  List<Widget> _getBodyWidgets(UserInfoState userInfo) {
+  List<Widget> _getBodyWidgets(UserInfoStoreData userInfo) {
     List<Widget> basicWidgets = [
       Padding(
         padding: EdgeInsets.only(bottom: 8),

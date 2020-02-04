@@ -30,7 +30,7 @@ class _SearchState extends State<SearchPage> {
     super.initState();
     if (widget.fid != null) {
       _searchOptionsStore
-          .checkTopicRadio(SearchState.TOPIC_RADIO_CURRENT_FORUM);
+          .checkTopicRadio(SearchStoreData.TOPIC_RADIO_CURRENT_FORUM);
     }
   }
 
@@ -78,15 +78,15 @@ class _SearchState extends State<SearchPage> {
                     "主题",
                     style: TextStyle(
                         color: _searchOptionsStore.state.firstRadio ==
-                                SearchState.FIRST_RADIO_TOPIC
+                                SearchStoreData.FIRST_RADIO_TOPIC
                             ? Colors.white
                             : Palette.colorTextPrimary),
                   ),
                   selectedColor: Palette.colorPrimary,
                   selected: _searchOptionsStore.state.firstRadio ==
-                      SearchState.FIRST_RADIO_TOPIC,
+                      SearchStoreData.FIRST_RADIO_TOPIC,
                   onSelected: (selected) => _searchOptionsStore
-                      .checkFirstRadio(SearchState.FIRST_RADIO_TOPIC),
+                      .checkFirstRadio(SearchStoreData.FIRST_RADIO_TOPIC),
                 ),
                 padding: EdgeInsets.only(left: 16),
               ),
@@ -96,15 +96,15 @@ class _SearchState extends State<SearchPage> {
                     "版块",
                     style: TextStyle(
                         color: _searchOptionsStore.state.firstRadio ==
-                                SearchState.FIRST_RADIO_FORUM
+                                SearchStoreData.FIRST_RADIO_FORUM
                             ? Colors.white
                             : Palette.colorTextPrimary),
                   ),
                   selectedColor: Palette.colorPrimary,
                   selected: _searchOptionsStore.state.firstRadio ==
-                      SearchState.FIRST_RADIO_FORUM,
+                      SearchStoreData.FIRST_RADIO_FORUM,
                   onSelected: (selected) => _searchOptionsStore
-                      .checkFirstRadio(SearchState.FIRST_RADIO_FORUM),
+                      .checkFirstRadio(SearchStoreData.FIRST_RADIO_FORUM),
                 ),
                 padding: EdgeInsets.only(left: 16),
               ),
@@ -114,15 +114,15 @@ class _SearchState extends State<SearchPage> {
                     "用户",
                     style: TextStyle(
                         color: _searchOptionsStore.state.firstRadio ==
-                                SearchState.FIRST_RADIO_USER
+                                SearchStoreData.FIRST_RADIO_USER
                             ? Colors.white
                             : Palette.colorTextPrimary),
                   ),
                   selectedColor: Palette.colorPrimary,
                   selected: _searchOptionsStore.state.firstRadio ==
-                      SearchState.FIRST_RADIO_USER,
+                      SearchStoreData.FIRST_RADIO_USER,
                   onSelected: (selected) => _searchOptionsStore
-                      .checkFirstRadio(SearchState.FIRST_RADIO_USER),
+                      .checkFirstRadio(SearchStoreData.FIRST_RADIO_USER),
                 ),
                 padding: EdgeInsets.only(left: 16),
               ),
@@ -130,7 +130,7 @@ class _SearchState extends State<SearchPage> {
           );
           widgets.add(firstWidgets);
           if (_searchOptionsStore.state.firstRadio ==
-              SearchState.FIRST_RADIO_TOPIC) {
+              SearchStoreData.FIRST_RADIO_TOPIC) {
             if (widget.fid != null) {
               widgets.add(Row(
                 children: <Widget>[
@@ -140,16 +140,16 @@ class _SearchState extends State<SearchPage> {
                           "当前版块",
                           style: TextStyle(
                               color: _searchOptionsStore.state.topicRadio ==
-                                      SearchState.TOPIC_RADIO_CURRENT_FORUM
+                                      SearchStoreData.TOPIC_RADIO_CURRENT_FORUM
                                   ? Colors.white
                                   : Palette.colorTextPrimary),
                         ),
                         selectedColor: Palette.colorPrimary,
                         selected: _searchOptionsStore.state.topicRadio ==
-                            SearchState.TOPIC_RADIO_CURRENT_FORUM,
+                            SearchStoreData.TOPIC_RADIO_CURRENT_FORUM,
                         onSelected: (selected) =>
                             _searchOptionsStore.checkTopicRadio(
-                                SearchState.TOPIC_RADIO_CURRENT_FORUM)),
+                                SearchStoreData.TOPIC_RADIO_CURRENT_FORUM)),
                     padding: EdgeInsets.only(left: 16),
                   ),
                   Padding(
@@ -158,15 +158,15 @@ class _SearchState extends State<SearchPage> {
                         "全部版块",
                         style: TextStyle(
                             color: _searchOptionsStore.state.topicRadio ==
-                                    SearchState.TOPIC_RADIO_ALL_FORUM
+                                    SearchStoreData.TOPIC_RADIO_ALL_FORUM
                                 ? Colors.white
                                 : Palette.colorTextPrimary),
                       ),
                       selectedColor: Palette.colorPrimary,
                       selected: _searchOptionsStore.state.topicRadio ==
-                          SearchState.TOPIC_RADIO_ALL_FORUM,
+                          SearchStoreData.TOPIC_RADIO_ALL_FORUM,
                       onSelected: (selected) => _searchOptionsStore
-                          .checkTopicRadio(SearchState.TOPIC_RADIO_ALL_FORUM),
+                          .checkTopicRadio(SearchStoreData.TOPIC_RADIO_ALL_FORUM),
                     ),
                     padding: EdgeInsets.only(left: 16),
                   ),
@@ -196,7 +196,7 @@ class _SearchState extends State<SearchPage> {
             ));
           }
           if (_searchOptionsStore.state.firstRadio ==
-              SearchState.FIRST_RADIO_USER) {
+              SearchStoreData.FIRST_RADIO_USER) {
             widgets.add(Row(
               children: <Widget>[
                 Padding(
@@ -205,15 +205,15 @@ class _SearchState extends State<SearchPage> {
                       "用户名",
                       style: TextStyle(
                           color: _searchOptionsStore.state.userRadio ==
-                                  SearchState.USER_RADIO_NAME
+                                  SearchStoreData.USER_RADIO_NAME
                               ? Colors.white
                               : Palette.colorTextPrimary),
                     ),
                     selectedColor: Palette.colorPrimary,
                     selected: _searchOptionsStore.state.userRadio ==
-                        SearchState.USER_RADIO_NAME,
+                        SearchStoreData.USER_RADIO_NAME,
                     onSelected: (selected) => _searchOptionsStore
-                        .checkUserRadio(SearchState.USER_RADIO_NAME),
+                        .checkUserRadio(SearchStoreData.USER_RADIO_NAME),
                   ),
                   padding: EdgeInsets.only(left: 16),
                 ),
@@ -223,15 +223,15 @@ class _SearchState extends State<SearchPage> {
                       "用户ID",
                       style: TextStyle(
                           color: _searchOptionsStore.state.userRadio ==
-                                  SearchState.USER_RADIO_UID
+                                  SearchStoreData.USER_RADIO_UID
                               ? Colors.white
                               : Palette.colorTextPrimary),
                     ),
                     selectedColor: Palette.colorPrimary,
                     selected: _searchOptionsStore.state.userRadio ==
-                        SearchState.USER_RADIO_UID,
+                        SearchStoreData.USER_RADIO_UID,
                     onSelected: (selected) => _searchOptionsStore
-                        .checkUserRadio(SearchState.USER_RADIO_UID),
+                        .checkUserRadio(SearchStoreData.USER_RADIO_UID),
                   ),
                   padding: EdgeInsets.only(left: 16),
                 ),
@@ -255,7 +255,7 @@ class _SearchState extends State<SearchPage> {
   }
 
   _onSearch(text) {
-    if (_searchOptionsStore.state.firstRadio == SearchState.FIRST_RADIO_TOPIC) {
+    if (_searchOptionsStore.state.firstRadio == SearchStoreData.FIRST_RADIO_TOPIC) {
       if (widget.fid == null) {
         Routes.navigateTo(context,
             "${Routes.SEARCH_TOPIC_LIST}?keyword=${fluroCnParamsEncode(text)}&content=${_searchOptionsStore.state.content ? 1 : 0}");
@@ -264,12 +264,12 @@ class _SearchState extends State<SearchPage> {
             "${Routes.SEARCH_TOPIC_LIST}?keyword=${fluroCnParamsEncode(text)}&fid=${widget.fid}&content=${_searchOptionsStore.state.content ? 1 : 0}");
       }
     } else if (_searchOptionsStore.state.firstRadio ==
-        SearchState.FIRST_RADIO_FORUM) {
+        SearchStoreData.FIRST_RADIO_FORUM) {
       Routes.navigateTo(context,
           "${Routes.SEARCH_FORUM}?keyword=${fluroCnParamsEncode(text)}");
     } else if (_searchOptionsStore.state.firstRadio ==
-        SearchState.FIRST_RADIO_USER) {
-      if (_searchOptionsStore.state.userRadio == SearchState.USER_RADIO_NAME) {
+        SearchStoreData.FIRST_RADIO_USER) {
+      if (_searchOptionsStore.state.userRadio == SearchStoreData.USER_RADIO_NAME) {
         Routes.navigateTo(
             context, "${Routes.USER}?name=${fluroCnParamsEncode(text)}");
       } else {

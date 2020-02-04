@@ -10,10 +10,10 @@ class UserInfoStore = _UserInfoStore with _$UserInfoStore;
 
 abstract class _UserInfoStore with Store {
   @observable
-  UserInfoState state = UserInfoState.initial();
+  UserInfoStoreData state = UserInfoStoreData.initial();
 
   @action
-  Future<UserInfoState> loadByName(String username) async {
+  Future<UserInfoStoreData> loadByName(String username) async {
     try {
       final userInfo = await Data().userRepository.getUserInfoByName(username);
       state = _buildStateByInfo(userInfo);
@@ -24,7 +24,7 @@ abstract class _UserInfoStore with Store {
   }
 
   @action
-  Future<UserInfoState> loadByUid(String uid) async {
+  Future<UserInfoStoreData> loadByUid(String uid) async {
     try {
       final userInfo = await Data().userRepository.getUserInfoByUid(uid);
       state = _buildStateByInfo(userInfo);
@@ -34,7 +34,7 @@ abstract class _UserInfoStore with Store {
     }
   }
 
-  UserInfoState _buildStateByInfo(User.UserInfo userInfo) {
+  UserInfoStoreData _buildStateByInfo(User.UserInfo userInfo) {
     final moderatorForumsMap = <int, String>{};
     if (userInfo != null &&
         userInfo.adminForums != null &&
@@ -58,7 +58,7 @@ abstract class _UserInfoStore with Store {
       personalForumMap[userInfo.userForum['0']] =
           "${codeUtils.unescapeHtml(userInfo.userForum['1'])}";
     }
-    return UserInfoState(
+    return UserInfoStoreData(
       uid: userInfo.uid,
       username: userInfo.username,
       avatar: userInfo.avatar,
@@ -81,7 +81,7 @@ abstract class _UserInfoStore with Store {
   }
 }
 
-class UserInfoState {
+class UserInfoStoreData {
   final int uid;
   final String username;
   final String avatar;
@@ -91,7 +91,7 @@ class UserInfoState {
   final Map<String, String> reputationMap; // 声望
   final Map<int, String> personalForum; // 个人版面
 
-  const UserInfoState({
+  const UserInfoStoreData({
     this.uid,
     this.username,
     this.avatar,
@@ -102,7 +102,7 @@ class UserInfoState {
     this.personalForum,
   });
 
-  factory UserInfoState.initial() => UserInfoState(
+  factory UserInfoStoreData.initial() => UserInfoStoreData(
         uid: 0,
         username: "",
         avatar: "",

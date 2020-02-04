@@ -356,7 +356,7 @@ class _PublishReplyState extends State<PublishPage> {
           msg: message,
           gravity: ToastGravity.CENTER,
         );
-        Navigator.pop(context);
+        Routes.pop(context);
       } catch (err) {
         Fluttertoast.showToast(
           msg: err.message,
@@ -376,7 +376,7 @@ class _PublishReplyState extends State<PublishPage> {
           msg: message,
           gravity: ToastGravity.CENTER,
         );
-        Navigator.pop(context);
+        Routes.pop(context);
       } catch (err) {
         Fluttertoast.showToast(
           msg: err.message,

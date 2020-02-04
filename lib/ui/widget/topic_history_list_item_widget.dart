@@ -1,22 +1,22 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/store/topic_history_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
 
-class TopicListItemWidget extends StatelessWidget {
-  const TopicListItemWidget({Key key, this.topic}) : super(key: key);
+class TopicHistoryListItemWidget extends StatelessWidget {
+  const TopicHistoryListItemWidget({Key key, this.topicHistory})
+      : super(key: key);
 
-  final Topic topic;
+  final TopicHistory topicHistory;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _goTopicDetail(context, topic),
+      onTap: () => _goTopicDetail(context, topicHistory),
       child: Column(
         children: <Widget>[
           Container(
@@ -25,17 +25,16 @@ class TopicListItemWidget extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  child: _getTitleText(topic),
+                  child: _getTitleText(topicHistory),
                   width: double.infinity,
                 ),
                 SizedBox(
-                  child: (topic.parent != null &&
-                          topic.parent.name != null &&
-                          topic.parent.name.isNotEmpty)
+                  child: (topicHistory.topicParentName != null &&
+                          topicHistory.topicParentName.isNotEmpty)
                       ? Padding(
                           padding: EdgeInsets.only(top: 8),
                           child: Text(
-                            "[${topic.parent.name}]",
+                            "[$topicHistory]",
                             textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: Dimen.caption,
@@ -60,51 +59,11 @@ class TopicListItemWidget extends StatelessWidget {
                       ),
                       Expanded(
                         child: Text(
-                          topic.author,
+                          topicHistory.author,
                           style: TextStyle(
                             fontSize: Dimen.caption,
                             color: Palette.colorTextSecondary,
                           ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(right: 16),
-                        child: (topic.hasAttachment()
-                            ? Icon(
-                                Icons.attachment,
-                                size: 12,
-                                color: Palette.colorIcon,
-                              )
-                            : null),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(right: 8),
-                        child: Icon(
-                          CommunityMaterialIcons.comment,
-                          size: 12,
-                          color: Palette.colorIcon,
-                        ),
-                      ),
-                      Text(
-                        "${topic.replies}",
-                        style: TextStyle(
-                          fontSize: Dimen.caption,
-                          color: Palette.colorTextSecondary,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(16, 0, 8, 0),
-                        child: Icon(
-                          CommunityMaterialIcons.clock,
-                          size: 12,
-                          color: Palette.colorIcon,
-                        ),
-                      ),
-                      Text(
-                        "${timeAgo.format(DateTime.fromMillisecondsSinceEpoch(topic.lastPost * 1000))}",
-                        style: TextStyle(
-                          fontSize: Dimen.caption,
-                          color: Palette.colorTextSecondary,
                         ),
                       ),
                     ],
@@ -119,22 +78,25 @@ class TopicListItemWidget extends StatelessWidget {
     );
   }
 
-  _getTitleText(Topic topic) {
+  _getTitleText(TopicHistory topicHistory) {
     return RichText(
       text: TextSpan(
         // Note: Styles for TextSpans must be explicitly defined.
         // Child text spans will inherit styles from parent
-        text: codeUtils.unescapeHtml(topic.subject),
+        text: codeUtils.unescapeHtml(topicHistory.subject),
         style: TextStyle(
           fontSize: Dimen.subheading,
-          color: topic.getSubjectColor(),
-          fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,
-          fontStyle: topic.isItalic() ? FontStyle.italic : FontStyle.normal,
-          decoration: topic.isUnderline() ? TextDecoration.underline : null,
+          color: topicHistory.getSubjectColor(),
+          fontWeight:
+              topicHistory.isBold() ? FontWeight.bold : FontWeight.normal,
+          fontStyle:
+              topicHistory.isItalic() ? FontStyle.italic : FontStyle.normal,
+          decoration:
+              topicHistory.isUnderline() ? TextDecoration.underline : null,
         ),
         children: <TextSpan>[
           TextSpan(
-            text: (topic.locked() ? " [锁定]" : ""),
+            text: (topicHistory.locked() ? " [锁定]" : ""),
             style: TextStyle(
               color: Palette.colorTextLock,
               fontWeight: FontWeight.normal,
@@ -143,7 +105,7 @@ class TopicListItemWidget extends StatelessWidget {
             ),
           ),
           TextSpan(
-            text: (topic.isAssemble() ? " [合集]" : ""),
+            text: (topicHistory.isAssemble() ? " [合集]" : ""),
             style: TextStyle(
               color: Palette.colorTextAssemble,
               fontWeight: FontWeight.normal,
@@ -156,10 +118,10 @@ class TopicListItemWidget extends StatelessWidget {
     );
   }
 
-  _goTopicDetail(BuildContext context, Topic topic) {
+  _goTopicDetail(BuildContext context, TopicHistory topicHistory) {
     final store = TopicHistoryStore();
-    store.insertHistory(topic.createHistory());
+    store.insertHistory(topicHistory.createNewHistory());
     Routes.navigateTo(context,
-        "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${codeUtils.fluroCnParamsEncode(topic.subject)}");
+        "${Routes.TOPIC_DETAIL}?tid=${topicHistory.tid}&fid=${topicHistory.fid}&subject=${codeUtils.fluroCnParamsEncode(topicHistory.subject)}");
   }
 }

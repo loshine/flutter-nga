@@ -7,7 +7,7 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
-import 'package:flutter_nga/ui/page/history/history_topic_list_page.dart';
+import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription _subscription;
   final pageList = [
     ForumGroupTabsPage(),
-    HistoryTopicListPage(),
+    TopicHistoryListPage(),
   ];
 
   List<Widget> _getActionsByPage(int index) {
@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _setSelection(int i) {
-    Navigator.pop(context);
+    Routes.pop(context);
     setState(() {
       _index = i;
     });
