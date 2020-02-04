@@ -11,6 +11,7 @@ import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key key}) : super(key: key);
@@ -21,14 +22,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var _index = 0;
-  User user;
   UserInfo _userInfo;
   String _nickname;
   StreamSubscription _subscription;
-  final pageList = [
-    ForumGroupTabsPage(),
-    TopicHistoryListPage(),
-  ];
+  GlobalKey<TopicHistoryListState> _historyStateKey;
+  List<Widget> pageList;
+
+  _HomePageState() {
+    _historyStateKey = GlobalKey<TopicHistoryListState>();
+    pageList = [
+      ForumGroupTabsPage(),
+      TopicHistoryListPage(key: _historyStateKey),
+    ];
+  }
 
   List<Widget> _getActionsByPage(int index) {
     return index == 0
@@ -38,7 +44,12 @@ class _HomePageState extends State<HomePage> {
               onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
             ),
           ]
-        : [];
+        : [
+            IconButton(
+              icon: Icon(Icons.delete_forever),
+              onPressed: () => _historyStateKey.currentState.showCleanDialog(),
+            ),
+          ];
   }
 
   void _setSelection(int i) {
@@ -65,7 +76,6 @@ class _HomePageState extends State<HomePage> {
 
   void setUser(User user) async {
     if (this.mounted) {
-      setState(() => this.user = user);
       if (user != null) {
         Data()
             .userRepository
@@ -85,7 +95,13 @@ class _HomePageState extends State<HomePage> {
           Data()
               .userRepository
               .saveLoginCookies(cookies)
-              .then((user) => setUser(user));
+              .then((user) => setUser(user))
+              .whenComplete(() {
+            Fluttertoast.showToast(
+              msg: "登录成功",
+              gravity: ToastGravity.CENTER,
+            );
+          });
         }
       },
       onError: (e) => debugPrint(e.toString()),
@@ -109,7 +125,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: _getElevation(),
-        title: Text('NGA'),
+        title: Text(_index == 0 ? 'NGA' : '浏览历史'),
         actions: _getActionsByPage(_index),
       ),
       backgroundColor: Palette.colorBackground,
