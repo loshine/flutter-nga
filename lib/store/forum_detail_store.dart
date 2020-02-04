@@ -8,13 +8,13 @@ class ForumDetailStore = _ForumDetailStore with _$ForumDetailStore;
 
 abstract class _ForumDetailStore with Store {
   @observable
-  ForumDetailState state = ForumDetailState.initial();
+  ForumDetailStoreData state = ForumDetailStoreData.initial();
 
   @action
-  Future<ForumDetailState> refresh(int fid) async {
+  Future<ForumDetailStoreData> refresh(int fid) async {
     try {
       TopicListData data = await Data().topicRepository.getTopicList(fid, 1);
-      state = ForumDetailState(
+      state = ForumDetailStoreData(
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
@@ -27,11 +27,11 @@ abstract class _ForumDetailStore with Store {
   }
 
   @action
-  Future<ForumDetailState> loadMore(int fid) async {
+  Future<ForumDetailStoreData> loadMore(int fid) async {
     try {
       TopicListData data =
           await Data().topicRepository.getTopicList(fid, state.page);
-      state = ForumDetailState(
+      state = ForumDetailStoreData(
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
@@ -44,20 +44,20 @@ abstract class _ForumDetailStore with Store {
   }
 }
 
-class ForumDetailState {
+class ForumDetailStoreData {
   final int page;
   final int maxPage;
   final bool enablePullUp;
   final List<Topic> list;
 
-  const ForumDetailState({
+  const ForumDetailStoreData({
     this.page,
     this.maxPage,
     this.enablePullUp,
     this.list,
   });
 
-  factory ForumDetailState.initial() => ForumDetailState(
+  factory ForumDetailStoreData.initial() => ForumDetailStoreData(
         page: 1,
         maxPage: 1,
         enablePullUp: false,

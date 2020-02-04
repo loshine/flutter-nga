@@ -12,14 +12,14 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
   final _$stateAtom = Atom(name: '_TopicDetailStore.state');
 
   @override
-  TopicDetailState get state {
+  TopicDetailStoreData get state {
     _$stateAtom.context.enforceReadPolicy(_$stateAtom);
     _$stateAtom.reportObserved();
     return super.state;
   }
 
   @override
-  set state(TopicDetailState value) {
+  set state(TopicDetailStoreData value) {
     _$stateAtom.context.conditionallyRunInAction(() {
       super.state = value;
       _$stateAtom.reportChanged();
@@ -29,14 +29,14 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
   final _$refreshAsyncAction = AsyncAction('refresh');
 
   @override
-  Future<TopicDetailState> refresh(int tid) {
+  Future<TopicDetailStoreData> refresh(int tid) {
     return _$refreshAsyncAction.run(() => super.refresh(tid));
   }
 
   final _$loadMoreAsyncAction = AsyncAction('loadMore');
 
   @override
-  Future<TopicDetailState> loadMore(int tid) {
+  Future<TopicDetailStoreData> loadMore(int tid) {
     return _$loadMoreAsyncAction.run(() => super.loadMore(tid));
   }
 }

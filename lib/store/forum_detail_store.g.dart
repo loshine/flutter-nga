@@ -12,14 +12,14 @@ mixin _$ForumDetailStore on _ForumDetailStore, Store {
   final _$stateAtom = Atom(name: '_ForumDetailStore.state');
 
   @override
-  ForumDetailState get state {
+  ForumDetailStoreData get state {
     _$stateAtom.context.enforceReadPolicy(_$stateAtom);
     _$stateAtom.reportObserved();
     return super.state;
   }
 
   @override
-  set state(ForumDetailState value) {
+  set state(ForumDetailStoreData value) {
     _$stateAtom.context.conditionallyRunInAction(() {
       super.state = value;
       _$stateAtom.reportChanged();
@@ -29,14 +29,14 @@ mixin _$ForumDetailStore on _ForumDetailStore, Store {
   final _$refreshAsyncAction = AsyncAction('refresh');
 
   @override
-  Future<ForumDetailState> refresh(int fid) {
+  Future<ForumDetailStoreData> refresh(int fid) {
     return _$refreshAsyncAction.run(() => super.refresh(fid));
   }
 
   final _$loadMoreAsyncAction = AsyncAction('loadMore');
 
   @override
-  Future<ForumDetailState> loadMore(int fid) {
+  Future<ForumDetailStoreData> loadMore(int fid) {
     return _$loadMoreAsyncAction.run(() => super.loadMore(fid));
   }
 }

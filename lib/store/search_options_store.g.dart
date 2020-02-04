@@ -12,14 +12,14 @@ mixin _$SearchOptionsStore on _SearchOptionsStore, Store {
   final _$stateAtom = Atom(name: '_SearchOptionsStore.state');
 
   @override
-  SearchState get state {
+  SearchStoreData get state {
     _$stateAtom.context.enforceReadPolicy(_$stateAtom);
     _$stateAtom.reportObserved();
     return super.state;
   }
 
   @override
-  set state(SearchState value) {
+  set state(SearchStoreData value) {
     _$stateAtom.context.conditionallyRunInAction(() {
       super.state = value;
       _$stateAtom.reportChanged();
