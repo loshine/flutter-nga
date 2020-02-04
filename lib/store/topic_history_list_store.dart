@@ -60,6 +60,30 @@ abstract class _TopicHistoryListStore with Store {
   }
 
   @action
+  Future delete(int id) {
+    return Data().topicRepository.deleteTopicHistoryById(id).whenComplete(() {
+      Map<String, List<TopicHistory>> map = Map();
+      state.dateTopicHistoryMap.forEach((k, v) {
+        int index = v.indexWhere((it) => it.id == id);
+        if (index > -1) {
+          if (v.length > 1) {
+            // 如果该日期里有不止1条历史记录
+            v.removeWhere((it) => it.id == id);
+            map[k] = v;
+          }
+        } else {
+          map[k] = v;
+        }
+      });
+      state = TopicHistoryListStoreData(
+        page: state.page,
+        enablePullUp: state.enablePullUp,
+        dateTopicHistoryMap: map,
+      );
+    });
+  }
+
+  @action
   Future<int> clean() {
     return Data().topicRepository.deleteAllTopicHistory();
   }
