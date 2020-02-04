@@ -65,7 +65,10 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
 
   Widget _buildListItem(dynamic itemData) {
     if (itemData is TopicHistory) {
-      return TopicHistoryListItemWidget(topicHistory: itemData);
+      return TopicHistoryListItemWidget(
+        topicHistory: itemData,
+        onLongPress: () => _showDeleteDialog(itemData.id),
+      );
     } else {
       return Padding(
         padding: EdgeInsets.all(16),
@@ -110,6 +113,30 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
     }).whenComplete(() {
       _refreshController.requestRefresh();
     });
+  }
+
+  _showDeleteDialog(int id) {
+    showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text("提示"),
+            content: Text("是否删除该浏览历史"),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => Routes.pop(context),
+                child: Text("取消"),
+              ),
+              FlatButton(
+                onPressed: () {
+                  Routes.pop(context);
+                  _store.delete(id);
+                },
+                child: Text("确认"),
+              ),
+            ],
+          );
+        });
   }
 
   Widget _buildChild() {
