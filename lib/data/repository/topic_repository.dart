@@ -43,7 +43,7 @@ abstract class TopicRepository {
 
   Future<List<TopicHistory>> getTopicHistories(int limit, int offset);
 
-  Future<int> deleteTopicHistoryById(int id);
+  Future deleteTopicHistoryById(int id);
 
   Future<int> deleteAllTopicHistory();
 }
@@ -285,7 +285,7 @@ class TopicDataRepository implements TopicRepository {
   }
 
   @override
-  Future<int> deleteTopicHistoryById(int id) async {
+  Future deleteTopicHistoryById(int id) async {
     return _store.record(id).delete(database);
   }
 

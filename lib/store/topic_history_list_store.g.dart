@@ -44,6 +44,16 @@ mixin _$TopicHistoryListStore on _TopicHistoryListStore, Store {
       ActionController(name: '_TopicHistoryListStore');
 
   @override
+  Future<dynamic> delete(int id) {
+    final _$actionInfo = _$_TopicHistoryListStoreActionController.startAction();
+    try {
+      return super.delete(id);
+    } finally {
+      _$_TopicHistoryListStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   Future<int> clean() {
     final _$actionInfo = _$_TopicHistoryListStoreActionController.startAction();
     try {

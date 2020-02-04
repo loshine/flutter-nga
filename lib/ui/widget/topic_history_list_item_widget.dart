@@ -8,15 +8,18 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class TopicHistoryListItemWidget extends StatelessWidget {
-  const TopicHistoryListItemWidget({Key key, this.topicHistory})
+  const TopicHistoryListItemWidget(
+      {Key key, this.topicHistory, this.onLongPress})
       : super(key: key);
 
   final TopicHistory topicHistory;
+  final GestureLongPressCallback onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _goTopicDetail(context, topicHistory),
+      onLongPress: onLongPress,
       child: Column(
         children: <Widget>[
           Container(
