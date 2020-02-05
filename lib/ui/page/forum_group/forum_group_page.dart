@@ -3,7 +3,7 @@ import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 
 class ForumGroupPage extends StatefulWidget {
-  const ForumGroupPage({Key key, this.group}) : super(key: key);
+  const ForumGroupPage({this.group, Key key}) : super(key: key);
 
   final ForumGroup group;
 
@@ -11,11 +11,9 @@ class ForumGroupPage extends StatefulWidget {
   State<StatefulWidget> createState() => _ForumGroupState();
 }
 
-class _ForumGroupState extends State<ForumGroupPage>
-    with AutomaticKeepAliveClientMixin {
+class _ForumGroupState extends State<ForumGroupPage> {
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final size = MediaQuery.of(context).size;
 
     /*24 is for notification bar on Android*/
@@ -31,7 +29,4 @@ class _ForumGroupState extends State<ForumGroupPage>
           ForumGridItemWidget(widget.group.forumList[index]),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

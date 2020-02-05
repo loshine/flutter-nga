@@ -8,7 +8,9 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 class ForumRecommendTopicListPage extends StatefulWidget {
   final int fid;
 
-  const ForumRecommendTopicListPage(this.fid) : assert(fid != null);
+  const ForumRecommendTopicListPage(this.fid, {Key key})
+      : assert(fid != null),
+        super(key: key);
 
   @override
   _ForumRecommendTopicListState createState() =>

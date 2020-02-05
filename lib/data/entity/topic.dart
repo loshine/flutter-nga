@@ -201,9 +201,10 @@ class TopicParent {
 }
 
 class ForumInfo {
-  const ForumInfo({this.topForumId, this.subForums});
+  const ForumInfo({this.topForumId, this.fid, this.subForums});
 
   final int topForumId;
+  final int fid;
   final List<ChildForum> subForums;
 
   factory ForumInfo.fromJson(Map map) {
@@ -217,10 +218,10 @@ class ForumInfo {
         }
         String desc = v['2'];
         int id = v['0'];
-        debugPrint("id=$id, selected:${selectedIds.contains(id)}");
         subForums.add(ChildForum(
           id,
           v['1'],
+          parentId: map['fid'],
           desc: desc != null && desc.isNotEmpty ? desc : null,
           selected: selectedIds.contains(id),
         ));
@@ -228,6 +229,7 @@ class ForumInfo {
     }
     return ForumInfo(
       topForumId: map['topped_topic'],
+      fid: map['fid'],
       subForums: subForums,
     );
   }

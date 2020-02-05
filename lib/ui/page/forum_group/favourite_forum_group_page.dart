@@ -9,8 +9,7 @@ class FavouriteForumGroupPage extends StatefulWidget {
   _FavouriteForumGroupState createState() => _FavouriteForumGroupState();
 }
 
-class _FavouriteForumGroupState extends State<FavouriteForumGroupPage>
-    with AutomaticKeepAliveClientMixin {
+class _FavouriteForumGroupState extends State<FavouriteForumGroupPage> {
   FavouriteForumListStore _store;
 
   @override
@@ -23,7 +22,6 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     _store = Provider.of<FavouriteForumListStore>(context);
     final size = MediaQuery.of(context).size;
 
@@ -48,7 +46,4 @@ class _FavouriteForumGroupState extends State<FavouriteForumGroupPage>
     _store.refresh();
     super.deactivate();
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
