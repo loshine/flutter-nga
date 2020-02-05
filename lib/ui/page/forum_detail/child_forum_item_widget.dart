@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
+import 'package:flutter_nga/store/child_forum_subscription_store.dart';
 
 class ChildForumItemWidget extends StatefulWidget {
   final ChildForum childForum;
@@ -13,7 +15,13 @@ class ChildForumItemWidget extends StatefulWidget {
 }
 
 class _ChildForumItemState extends State<ChildForumItemWidget> {
-  bool _selected;
+  final _store = ChildForumSubscriptionStore();
+
+  @override
+  void initState() {
+    super.initState();
+    _store.setSubscribed(widget.childForum.selected);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +41,20 @@ class _ChildForumItemState extends State<ChildForumItemWidget> {
           ),
           title: Text(widget.childForum.name),
           subtitle: Text(widget.childForum.desc ?? ""),
-          trailing: Switch(
-            value: _selected ?? widget.childForum.selected,
-            onChanged: (v) {
-              setState(() {
-                _selected = v;
-              });
+          trailing: Observer(
+            builder: (_) {
+              return Switch(
+                value: _store.subscribed,
+                onChanged: (v) {
+                  if (v) {
+                    _store.addSubscription(
+                        widget.childForum.fid, widget.childForum.parentId);
+                  } else {
+                    _store.deleteSubscription(
+                        widget.childForum.fid, widget.childForum.parentId);
+                  }
+                },
+              );
             },
           ),
         ),

@@ -17,6 +17,10 @@ abstract class ForumRepository {
   Future<List<Forum>> getFavouriteList();
 
   Future<List<Forum>> getForumByName(String keyword);
+
+  Future<String> addChildForumSubscription(int fid, int parentId);
+
+  Future<String> deleteChildForumSubscription(int fid, int parentId);
 }
 
 class ForumDataRepository implements ForumRepository {
@@ -274,6 +278,40 @@ class ForumDataRepository implements ForumRepository {
         forums.add(Forum.fromJson(v));
       });
       return forums;
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> addChildForumSubscription(int fid, int parentId) async {
+    try {
+      final formData = FormData.fromMap({
+        "fid": parentId,
+        "type": 0,
+        "info": "add_to_allow_union_fids",
+      });
+      Response<Map<String, dynamic>> response = await Data().dio.post(
+          "nuke.php?__lib=user_option&__act=set&raw=3&add=$fid",
+          data: formData);
+      return response.data["0"];
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> deleteChildForumSubscription(int fid, int parentId) async {
+    try {
+      final formData = FormData.fromMap({
+        "fid": parentId,
+        "type": 0,
+        "info": "add_to_allow_union_fids",
+      });
+      Response<Map<String, dynamic>> response = await Data().dio.post(
+          "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
+          data: formData);
+      return response.data["0"];
     } catch (err) {
       rethrow;
     }

@@ -68,7 +68,6 @@ class UserDataRepository implements UserRepository {
       if (list.isNotEmpty) {
         await _store.delete(database, finder: finder);
       }
-      debugPrint(user.toString());
       await _store.add(database, user.toJson());
       return user;
     }

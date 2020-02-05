@@ -7,12 +7,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/forum_detail_store.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
+import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-import 'child_forum_item_widget.dart';
+import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
 
 class ForumDetailPage extends StatefulWidget {
@@ -78,28 +79,24 @@ class _ForumDetailState extends State<ForumDetailPage>
             body: TabBarView(
               controller: _tabController,
               children: [
-                SmartRefresher(
-                  onLoading: _onLoading,
-                  controller: _refreshController,
-                  enablePullUp: _store.state.enablePullUp,
-                  onRefresh: _onRefresh,
-                  child: ListView.builder(
-                    itemCount: _store.state.list.length,
-                    itemBuilder: (context, index) =>
-                        TopicListItemWidget(topic: _store.state.list[index]),
+                KeepAliveTabView(
+                  child: SmartRefresher(
+                    onLoading: _onLoading,
+                    controller: _refreshController,
+                    enablePullUp: _store.state.enablePullUp,
+                    onRefresh: _onRefresh,
+                    child: ListView.builder(
+                      itemCount: _store.state.list.length,
+                      itemBuilder: (context, index) =>
+                          TopicListItemWidget(topic: _store.state.list[index]),
+                    ),
                   ),
                 ),
-                ForumRecommendTopicListPage(widget.fid),
-                MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  child: ListView.builder(
-                    itemCount: _store.state.info == null
-                        ? 0
-                        : _store.state.info.subForums.length,
-                    itemBuilder: (_, index) => ChildForumItemWidget(
-                        _store.state.info.subForums[index]),
-                  ),
+                KeepAliveTabView(
+                  child: ForumRecommendTopicListPage(widget.fid),
+                ),
+                KeepAliveTabView(
+                  child: ChildForumListPage(_store.state.info),
                 ),
               ],
             ),
@@ -123,7 +120,7 @@ class _ForumDetailState extends State<ForumDetailPage>
   void initState() {
     super.initState();
     _refreshController = RefreshController();
-    _tabs.add(Tab(text: '主版'));
+    _tabs.add(Tab(text: '最新'));
     _tabs.add(Tab(text: '精华'));
     _tabs.add(Tab(text: '子版'));
     _tabController = TabController(vsync: this, length: _tabs.length);
