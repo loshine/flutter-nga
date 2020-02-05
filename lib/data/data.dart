@@ -72,7 +72,7 @@ class Data {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     // 该特殊 UA 可以让访客访问
     _dio.options.headers["User-Agent"] =
-        "Nga_Official/2102([${androidInfo.brand} ${androidInfo.model}];"
+        "Nga_Official/80030([${androidInfo.brand} ${androidInfo.model}];"
         "Android${androidInfo.version.release})";
     _dio.options.headers["Accept-Encoding"] = "gzip";
     _dio.options.headers["Cache-Control"] = "max-age=0";
@@ -82,7 +82,6 @@ class Data {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (RequestOptions options) async {
         final user = await userRepository.getDefaultUser();
-        debugPrint("user: $user");
         if (user != null && options.headers["Cookie"] == null) {
           options.headers["Cookie"] =
               "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
@@ -147,6 +146,10 @@ class Data {
     responseBody = responseBody
         .replaceAll("\t", "\\t")
         .replaceAll("\\x", "\\\\x")
+        .replaceAll(
+            "<html><head><meta http-equiv='Content-Type' content='text/html; charset=GBK'></head><body><script>",
+            "")
+        .replaceAll("</script></body></html>", "")
         .replaceAll("window.script_muti_get_var_store=", "");
     debugPrint(
         "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}\n" +
