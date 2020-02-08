@@ -18,7 +18,6 @@
         android:name="io.flutter.app.FlutterApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="NationalGayAlliance"
-        android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <meta-data
@@ -27,8 +26,10 @@
 
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,6 +37,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.LoginActivity" />
+        <activity
+            android:name=".ui.LoginActivity"
+            android:theme="@style/AppTheme" />
     </application>
 </manifest>

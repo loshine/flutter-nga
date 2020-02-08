@@ -26,10 +26,11 @@ class TopicListData {
   final int topicRows;
   final int rRows;
 
-  factory TopicListData.fromJson(Map<String, dynamic> map) {
+  factory TopicListData.fromJson(Map<String, dynamic> map, int page) {
     Map<String, dynamic> topicMap = map["__T"];
     Map<String, Topic> tempMap = {};
     for (MapEntry<String, dynamic> entry in topicMap.entries) {
+      entry.value["page"] = page;
       tempMap[entry.key] = Topic.fromJson(entry.value);
     }
     return TopicListData(
@@ -38,7 +39,7 @@ class TopicListData {
       rows: map["__ROWS"],
       topicList: tempMap,
       currentRows: map["__T__ROWS"],
-      topicRows: map["__T__ROWS__PAGE"],
+      topicRows: map["__T__ROWS_PAGE"],
       rRows: map["__R__ROWS_PAGE"],
     );
   }
@@ -65,6 +66,7 @@ class Topic {
     this.type,
     this.replies,
     this.topicMisc,
+    this.page,
     this.parent,
   });
 
@@ -85,6 +87,7 @@ class Topic {
   final int type;
   final int replies;
   final String topicMisc;
+  final int page; // 用于记录是收藏的第几页
 
   final TopicParent parent;
 
@@ -109,6 +112,7 @@ class Topic {
       type: map["type"],
       replies: map["replies"],
       topicMisc: map["topic_misc"],
+      page: map["page"],
       parent: TopicParent.fromJson(map["parent"] == null ? {} : map["parent"]),
     );
   }
@@ -211,10 +215,13 @@ class ForumInfo {
     List<ChildForum> subForums = [];
     if (map['sub_forums'] != null && map['sub_forums'] is Map) {
       (map['sub_forums'] as Map<String, dynamic>).forEach((k, v) {
-        String selectedForum = map['__SELECTED_FORUM'];
+        dynamic selectedForum = map['__SELECTED_FORUM'];
         List<int> selectedIds = [];
-        if (selectedForum != null && selectedForum.isNotEmpty) {
-          selectedIds.addAll(selectedForum.split(",").map((s) => int.parse(s)));
+        if (selectedForum is String) {
+          if (selectedForum != null && selectedForum.isNotEmpty) {
+            selectedIds
+                .addAll(selectedForum.split(",").map((s) => int.parse(s)));
+          }
         }
         String desc = v['2'];
         int id = v['0'];
@@ -227,8 +234,12 @@ class ForumInfo {
         ));
       });
     }
+    dynamic toppedTopic = map['topped_topic'];
+    if (!(toppedTopic is int)) {
+      toppedTopic = int.tryParse(toppedTopic);
+    }
     return ForumInfo(
-      topForumId: map['topped_topic'],
+      topForumId: toppedTopic,
       fid: map['fid'],
       subForums: subForums,
     );
