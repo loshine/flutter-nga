@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/store/child_forum_subscription_store.dart';
+import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class ChildForumItemWidget extends StatefulWidget {
   final ChildForum childForum;
@@ -25,41 +27,45 @@ class _ChildForumItemState extends State<ChildForumItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ListTile(
-          leading: CachedNetworkImage(
-            width: 48,
-            height: 48,
-            imageUrl: widget.childForum.getIconUrl(),
-            placeholder: (context, url) => Image.asset(
-              'images/default_forum_icon.png',
+    return InkWell(
+      onTap: () => Routes.navigateTo(context,
+          "${Routes.FORUM_DETAIL}?fid=${widget.childForum.fid}&name=${fluroCnParamsEncode(widget.childForum.name)}"),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: CachedNetworkImage(
               width: 48,
               height: 48,
+              imageUrl: widget.childForum.getIconUrl(),
+              placeholder: (context, url) => Image.asset(
+                'images/default_forum_icon.png',
+                width: 48,
+                height: 48,
+              ),
+            ),
+            title: Text(widget.childForum.name),
+            subtitle: Text(widget.childForum.desc ?? ""),
+            trailing: Observer(
+              builder: (_) {
+                return Switch(
+                  value: _store.subscribed,
+                  onChanged: (v) {
+                    if (v) {
+                      _store.addSubscription(
+                          widget.childForum.fid, widget.childForum.parentId);
+                    } else {
+                      _store.deleteSubscription(
+                          widget.childForum.fid, widget.childForum.parentId);
+                    }
+                  },
+                );
+              },
             ),
           ),
-          title: Text(widget.childForum.name),
-          subtitle: Text(widget.childForum.desc ?? ""),
-          trailing: Observer(
-            builder: (_) {
-              return Switch(
-                value: _store.subscribed,
-                onChanged: (v) {
-                  if (v) {
-                    _store.addSubscription(
-                        widget.childForum.fid, widget.childForum.parentId);
-                  } else {
-                    _store.deleteSubscription(
-                        widget.childForum.fid, widget.childForum.parentId);
-                  }
-                },
-              );
-            },
-          ),
-        ),
-        Divider(height: 1),
-      ],
+          Divider(height: 1),
+        ],
+      ),
     );
   }
 }

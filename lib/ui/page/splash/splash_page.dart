@@ -1,3 +1,4 @@
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/custom_time_messages.dart';
@@ -38,6 +39,7 @@ class _SplashState extends State<SplashPage> {
 
   void maybeGoHome() {
     if (!_initFinished || !_delayFinished) return;
-    Routes.navigateTo(context, Routes.HOME, replace: true);
+    Routes.navigateTo(context, Routes.HOME,
+        replace: true, transition: TransitionType.fadeIn);
   }
 }

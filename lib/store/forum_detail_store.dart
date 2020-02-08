@@ -34,7 +34,7 @@ abstract class _ForumDetailStore with Store {
     try {
       TopicListData data = await Data()
           .topicRepository
-          .getTopicList(fid, state.page, recommend: recommend);
+          .getTopicList(fid, state.page + 1, recommend: recommend);
       state = ForumDetailStoreData(
         page: state.page + 1,
         maxPage: data.maxPage,

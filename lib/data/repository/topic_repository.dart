@@ -18,6 +18,10 @@ abstract class TopicRepository {
 
   Future<TopicDetailData> getTopicDetail(int tid, int page);
 
+  Future<TopicListData> getFavouriteTopicList(int page);
+
+  Future<String> deleteFavouriteTopic(int tid, int page);
+
   Future<List<TopicTag>> getTopicTagList(int fid);
 
   Future<String> getAuthCode(int fid, int tid, String action);
@@ -72,7 +76,38 @@ class TopicDataRepository implements TopicRepository {
     try {
       Response<Map<String, dynamic>> response = await Data().dio.get(
           "thread.php?lite=js&noprefix&fid=$fid&page=$page${recommend ? "&recommend=1&order_by=postdatedesc&user=1" : ""}");
-      return TopicListData.fromJson(response.data);
+      return TopicListData.fromJson(response.data, page);
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TopicListData> getFavouriteTopicList(int page) async {
+    try {
+      Response<Map<String, dynamic>> response = await Data()
+          .dio
+          .get("thread.php?favor=1&lite=js&noprefix&page=$page");
+      return TopicListData.fromJson(response.data, page);
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> deleteFavouriteTopic(int tid, int page) async {
+    try {
+      final postData = "__output=8"
+          "&__lib=topic_favor"
+          "&__act=topic_favor"
+          "&action=del"
+          "&page=$page"
+          "&tidarray=$tid";
+      final options = Options()
+        ..contentType = "application/x-www-form-urlencoded";
+      Response<Map<String, dynamic>> response =
+          await Data().dio.post("nuke.php", data: postData, options: options);
+      return response.data['0'];
     } catch (err) {
       rethrow;
     }
@@ -173,8 +208,8 @@ class TopicDataRepository implements TopicRepository {
         "${!codeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
         "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
-      final options = Options();
-      options.contentType = "application/x-www-form-urlencoded";
+      final options = Options()
+        ..contentType = "application/x-www-form-urlencoded";
       Response<String> response = await Data().dio.post(
             "post.php",
             data: postData,
@@ -265,7 +300,7 @@ class TopicDataRepository implements TopicRepository {
     try {
       Response<Map<String, dynamic>> response = await Data().dio.get(
           "thread.php?${fid == null ? "" : "fid=$fid&"}key=$keyword&page=$page${content ? "&content=1" : ""}&lite=js&noprefix");
-      return TopicListData.fromJson(response.data);
+      return TopicListData.fromJson(response.data, page);
     } catch (err) {
       rethrow;
     }

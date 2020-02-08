@@ -6,17 +6,19 @@ import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
 
 class TopicListItemWidget extends StatelessWidget {
-  const TopicListItemWidget({Key key, this.topic}) : super(key: key);
+  const TopicListItemWidget({Key key, this.topic, this.onLongPress})
+      : super(key: key);
 
   final Topic topic;
+  final GestureLongPressCallback onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _goTopicDetail(context, topic),
+      onLongPress: onLongPress,
       child: Column(
         children: <Widget>[
           Container(
@@ -35,7 +37,7 @@ class TopicListItemWidget extends StatelessWidget {
                       ? Padding(
                           padding: EdgeInsets.only(top: 8),
                           child: Text(
-                            "[${topic.parent.name}]",
+                            "[${codeUtils.unescapeHtml(topic.parent.name)}]",
                             textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: Dimen.caption,
@@ -101,7 +103,7 @@ class TopicListItemWidget extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "${timeAgo.format(DateTime.fromMillisecondsSinceEpoch(topic.lastPost * 1000))}",
+                        "${codeUtils.formatPostDate(topic.lastPost * 1000)}",
                         style: TextStyle(
                           fontSize: Dimen.caption,
                           color: Palette.colorTextSecondary,

@@ -6,6 +6,7 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
+import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
@@ -32,24 +33,35 @@ class _HomePageState extends State<HomePage> {
     _historyStateKey = GlobalKey<TopicHistoryListState>();
     pageList = [
       ForumGroupTabsPage(),
+      FavouriteTopicListPage(),
       TopicHistoryListPage(key: _historyStateKey),
     ];
   }
 
+  String get _titleText {
+    if (_index == 0) {
+      return 'NGA';
+    } else if (_index == 1) {
+      return '贴子收藏';
+    } else {
+      return '浏览历史';
+    }
+  }
+
   List<Widget> _getActionsByPage(int index) {
-    return index == 0
-        ? [
-            IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
-            ),
-          ]
-        : [
-            IconButton(
-              icon: Icon(Icons.delete_forever),
-              onPressed: () => _historyStateKey.currentState.showCleanDialog(),
-            ),
-          ];
+    List<Widget> actions = [];
+    if (_index == 0) {
+      actions.add(IconButton(
+        icon: Icon(Icons.search),
+        onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
+      ));
+    } else if (_index == 2) {
+      actions.add(IconButton(
+        icon: Icon(Icons.delete_forever),
+        onPressed: () => _historyStateKey.currentState.showCleanDialog(),
+      ));
+    }
+    return actions;
   }
 
   void _setSelection(int i) {
@@ -74,7 +86,7 @@ class _HomePageState extends State<HomePage> {
     return _index == 0 ? 0 : 4;
   }
 
-  void setUser(User user) async {
+  void _setUser(User user) async {
     if (this.mounted) {
       if (user != null) {
         Data()
@@ -88,14 +100,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    Data().userRepository.getDefaultUser().then((user) => setUser(user));
+    Data().userRepository.getDefaultUser().then((user) => _setUser(user));
     _subscription = AndroidLogin.cookieStream.listen(
       (cookies) {
         if (cookies.contains(TAG_CID)) {
           Data()
               .userRepository
               .saveLoginCookies(cookies)
-              .then((user) => setUser(user))
+              .then((user) => _setUser(user))
               .whenComplete(() {
             Fluttertoast.showToast(
               msg: "登录成功",
@@ -125,7 +137,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: _getElevation(),
-        title: Text(_index == 0 ? 'NGA' : '浏览历史'),
+        title: Text(_titleText),
         actions: _getActionsByPage(_index),
       ),
       backgroundColor: Palette.colorBackground,
@@ -187,17 +199,22 @@ class _HomePageState extends State<HomePage> {
                     Material(
                       child: InkWell(
                         child: ListTile(
-                          leading: Icon(
-                            CommunityMaterialIcons.history,
-                            size: 24,
-                            color: _index == 1
-                                ? Palette.colorPrimary
-                                : Palette.colorIcon,
-                          ),
-                          title: Text("浏览历史"),
+                          leading: Icon(CommunityMaterialIcons.archive),
+                          title: Text("贴子收藏"),
                           selected: _index == 1,
                         ),
                         onTap: () => _setSelection(1),
+                      ),
+                      color: Palette.colorBackground,
+                    ),
+                    Material(
+                      child: InkWell(
+                        child: ListTile(
+                          leading: Icon(CommunityMaterialIcons.history),
+                          title: Text("浏览历史"),
+                          selected: _index == 2,
+                        ),
+                        onTap: () => _setSelection(2),
                       ),
                       color: Palette.colorBackground,
                     ),
