@@ -37,7 +37,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                       ? Padding(
                           padding: EdgeInsets.only(top: 8),
                           child: Text(
-                            "[$topicHistory]",
+                            "[${codeUtils.unescapeHtml(topicHistory.topicParentName)}]",
                             textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: Dimen.caption,

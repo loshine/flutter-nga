@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:html_unescape/html_unescape.dart';
 import 'package:intl/intl.dart';
+import 'package:timeago/timeago.dart' as timeAgo;
 
 final _htmlUnescape = HtmlUnescape();
-final _dateTimeFormat = DateFormat('yyyy-MM-dd hh:mm:ss');
+final _dateTimeFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+final _postDateFormat = DateFormat('yyyy-MM-dd');
 
 /// 解码 html 特殊字符
 String unescapeHtml(String data) {
@@ -47,6 +49,17 @@ String formatSize(int size) {
 /// 格式化日期
 String formatDate(DateTime dateTime) {
   return _dateTimeFormat.format(dateTime);
+}
+
+/// 格式化贴子时间
+String formatPostDate(int time) {
+  final date = DateTime.fromMillisecondsSinceEpoch(time);
+  final nowDate = DateTime.now();
+  if (nowDate.difference(date).inDays > 2) {
+    return _postDateFormat.format(date);
+  } else {
+    return timeAgo.format(date);
+  }
 }
 
 /// fluro 传递中文参数前，先转换，fluro 不支持中文传递
