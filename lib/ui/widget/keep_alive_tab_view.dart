@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 class KeepAliveTabView extends StatefulWidget {
   final Widget child;
+  final bool Function() keepAlive;
 
-  const KeepAliveTabView({this.child, Key key}) : super(key: key);
+  const KeepAliveTabView({this.child, this.keepAlive, Key key})
+      : super(key: key);
 
   @override
   _KeepAliveTabState createState() => _KeepAliveTabState();
@@ -18,5 +20,11 @@ class _KeepAliveTabState extends State<KeepAliveTabView>
   }
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive {
+    if (widget.keepAlive != null) {
+      return widget.keepAlive();
+    } else {
+      return true;
+    }
+  }
 }

@@ -9,34 +9,60 @@ part of 'topic_detail_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$TopicDetailStore on _TopicDetailStore, Store {
-  final _$stateAtom = Atom(name: '_TopicDetailStore.state');
+  final _$currentPageAtom = Atom(name: '_TopicDetailStore.currentPage');
 
   @override
-  TopicDetailStoreData get state {
-    _$stateAtom.context.enforceReadPolicy(_$stateAtom);
-    _$stateAtom.reportObserved();
-    return super.state;
+  int get currentPage {
+    _$currentPageAtom.context.enforceReadPolicy(_$currentPageAtom);
+    _$currentPageAtom.reportObserved();
+    return super.currentPage;
   }
 
   @override
-  set state(TopicDetailStoreData value) {
-    _$stateAtom.context.conditionallyRunInAction(() {
-      super.state = value;
-      _$stateAtom.reportChanged();
-    }, _$stateAtom, name: '${_$stateAtom.name}_set');
+  set currentPage(int value) {
+    _$currentPageAtom.context.conditionallyRunInAction(() {
+      super.currentPage = value;
+      _$currentPageAtom.reportChanged();
+    }, _$currentPageAtom, name: '${_$currentPageAtom.name}_set');
   }
 
-  final _$refreshAsyncAction = AsyncAction('refresh');
+  final _$maxPageAtom = Atom(name: '_TopicDetailStore.maxPage');
 
   @override
-  Future<TopicDetailStoreData> refresh(int tid) {
-    return _$refreshAsyncAction.run(() => super.refresh(tid));
+  int get maxPage {
+    _$maxPageAtom.context.enforceReadPolicy(_$maxPageAtom);
+    _$maxPageAtom.reportObserved();
+    return super.maxPage;
   }
 
-  final _$loadMoreAsyncAction = AsyncAction('loadMore');
+  @override
+  set maxPage(int value) {
+    _$maxPageAtom.context.conditionallyRunInAction(() {
+      super.maxPage = value;
+      _$maxPageAtom.reportChanged();
+    }, _$maxPageAtom, name: '${_$maxPageAtom.name}_set');
+  }
+
+  final _$_TopicDetailStoreActionController =
+      ActionController(name: '_TopicDetailStore');
 
   @override
-  Future<TopicDetailStoreData> loadMore(int tid) {
-    return _$loadMoreAsyncAction.run(() => super.loadMore(tid));
+  void setMaxPage(int maxPage) {
+    final _$actionInfo = _$_TopicDetailStoreActionController.startAction();
+    try {
+      return super.setMaxPage(maxPage);
+    } finally {
+      _$_TopicDetailStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setCurrentPage(int currentPage) {
+    final _$actionInfo = _$_TopicDetailStoreActionController.startAction();
+    try {
+      return super.setCurrentPage(currentPage);
+    } finally {
+      _$_TopicDetailStoreActionController.endAction(_$actionInfo);
+    }
   }
 }
