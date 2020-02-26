@@ -105,28 +105,29 @@ class User {
   final String nickname;
   final int bitData;
 
-  User(
-      {this.uid,
-      this.username,
-      this.credit,
-      this.medal,
-      this.reputation,
-      this.groupId,
-      this.memberId,
-      this.avatar,
-      this.avatarList,
-      this.yz,
-      this.site,
-      this.honor,
-      this.regDate,
-      this.muteTime,
-      this.postNum,
-      this.rvrc,
-      this.money,
-      this.thisVisit,
-      this.signature,
-      this.nickname,
-      this.bitData});
+  User({
+    this.uid,
+    this.username,
+    this.credit,
+    this.medal,
+    this.reputation,
+    this.groupId,
+    this.memberId,
+    this.avatar,
+    this.avatarList,
+    this.yz,
+    this.site,
+    this.honor,
+    this.regDate,
+    this.muteTime,
+    this.postNum,
+    this.rvrc,
+    this.money,
+    this.thisVisit,
+    this.signature,
+    this.nickname,
+    this.bitData,
+  });
 
   factory User.fromJson(Map<String, dynamic> map) {
     dynamic avatar = map["avatar"];
@@ -201,6 +202,7 @@ class Reply {
   int contentLength;
   int postDateTimestamp;
   List<Reply> commentList;
+  List<Attachment> attachmentList;
 
   Reply({
     this.content,
@@ -219,6 +221,7 @@ class Reply {
     this.contentLength,
     this.postDateTimestamp,
     this.commentList,
+    this.attachmentList,
   });
 
   factory Reply.fromJson(Map<String, dynamic> map) {
@@ -226,6 +229,12 @@ class Reply {
     List<Reply> commentList = [];
     if (commentMap != null) {
       commentMap.forEach((k, v) => commentList.add(Reply.fromJson(v)));
+    }
+    Map<String, dynamic> attachmentMap = map["attachs"];
+    List<Attachment> attachmentList = [];
+    if (attachmentMap != null) {
+      attachmentMap
+          .forEach((k, v) => attachmentList.add(Attachment.fromJson(v)));
     }
     return Reply(
       content: map["content"] == null ? "" : map["content"].toString(),
@@ -246,11 +255,12 @@ class Reply {
 //      contentLength: int.tryParse(map["content_length"]) ?? 0,
       postDateTimestamp: map["postdatetimestamp"],
       commentList: commentList,
+      attachmentList: attachmentList,
     );
   }
 
   void merge(Reply comment) {
-//    content = comment.content;
+    content = comment.content;
     alterInfo = comment.alterInfo;
     tid = comment.tid;
     score = comment.score;
@@ -294,4 +304,44 @@ class Reputation {
   factory Reputation.fromJson(Map<String, dynamic> map) {
     return Reputation();
   }
+}
+
+class Attachment {
+  const Attachment({
+    this.attachUrl,
+    this.size,
+    this.type,
+    this.urlUtf8OrgName,
+    this.dscp,
+    this.path,
+    this.name,
+    this.ext,
+    this.thumb,
+  });
+
+  factory Attachment.fromJson(Map<String, dynamic> map) {
+    return Attachment(
+      attachUrl: map['attachurl'],
+      size: map['size'],
+      type: map['type'],
+      urlUtf8OrgName: map['url_utf8_org_name'],
+      dscp: map['dscp'],
+      path: map['path'],
+      name: map['name'],
+      ext: map['ext'],
+      thumb: map['thumb'],
+    );
+  }
+
+  final String attachUrl;
+  final int size;
+  final String type;
+  final String urlUtf8OrgName;
+  final String dscp;
+  final String path;
+  final String name;
+  final String ext;
+  final int thumb;
+
+  String get realUrl => "https://img.nga.178.com/attachments/$attachUrl";
 }

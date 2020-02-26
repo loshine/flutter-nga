@@ -61,9 +61,10 @@ class Data {
     _dio.options.baseUrl = DOMAIN;
     _dio.options.connectTimeout = 10000; // 10s
     _dio.options.receiveTimeout = 10000; // 10s
-//    _dio.onHttpClientCreate = (HttpClient client) {
+//    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+//        (HttpClient client) {
 //      client.findProxy = (uri) {
-//        return "PROXY 172.25.108.10:8888";
+//        return "PROXY 192.168.50.88:8899";
 //      };
 //    };
     // 因为需要 gbk -> utf-8, 所以需要流的形式
@@ -116,19 +117,22 @@ class Data {
         return response;
       },
       onError: (DioError e) async {
-        String responseBody = _formatResponseBody(e.response);
-        Map<String, dynamic> map;
-        try {
-          // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
-          responseBody = await AndroidFormatJson.decode(responseBody);
-          map = json.decode(responseBody);
-        } catch (err) {
-          debugPrint(err.toString());
-          return e;
-        }
-        DioError dioError = _preHandleServerError(e.response, map);
-        if (dioError != null) {
-          return dioError;
+        debugPrint(e.toString());
+        if (e.response != null && e.response.data != null) {
+          String responseBody = _formatResponseBody(e.response);
+          Map<String, dynamic> map;
+          try {
+            // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
+            responseBody = await AndroidFormatJson.decode(responseBody);
+            map = json.decode(responseBody);
+          } catch (err) {
+            debugPrint(err.toString());
+            return e;
+          }
+          DioError dioError = _preHandleServerError(e.response, map);
+          if (dioError != null) {
+            return dioError;
+          }
         }
         return e;
       },

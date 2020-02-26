@@ -1,3 +1,4 @@
+import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:mobx/mobx.dart';
 
 part 'topic_detail_store.g.dart';
@@ -10,6 +11,8 @@ abstract class _TopicDetailStore with Store {
   @observable
   int maxPage = 1;
 
+  List<Reply> commentList = [];
+
   @action
   void setMaxPage(int maxPage) {
     this.maxPage = maxPage;
@@ -18,5 +21,16 @@ abstract class _TopicDetailStore with Store {
   @action
   void setCurrentPage(int currentPage) {
     this.currentPage = currentPage;
+  }
+
+  void mergeCommentList(List<Reply> commentList) {
+    commentList.forEach((comment) {
+      if (this
+              .commentList
+              .indexWhere((existComment) => existComment.pid == comment.pid) >
+          0) {
+        this.commentList.add(comment);
+      }
+    });
   }
 }

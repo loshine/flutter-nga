@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/toggle_like_reaction.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
@@ -179,6 +180,7 @@ class TopicDataRepository implements TopicRepository {
       Response<Map<String, dynamic>> response = await Data()
           .dio
           .post("http://img.nga.178.com:8080/attach.php", data: formData);
+      debugPrint(response.toString());
       return response.data;
     } catch (err) {
       rethrow;

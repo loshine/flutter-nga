@@ -62,6 +62,7 @@ class _AttachmentState extends State<AttachmentWidget> {
                   data["attachments"], data["attachments_check"]);
               setState(() => _list.add(data["url"]));
             } catch (err) {
+              debugPrint(err.toString());
               setState(() => _imageFileList.remove(image));
             }
           },

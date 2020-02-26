@@ -3,7 +3,7 @@ class ToggleLikeReaction {
       : assert(message != null),
         assert(countChange != null);
 
-  Map<String, dynamic>  toJson() {
+  Map<String, dynamic> toJson() {
     return {'0': message, '1': countChange};
   }
 

@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:mobx/mobx.dart';
@@ -12,6 +11,8 @@ class TopicSinglePageStore = _TopicSinglePageStore with _$TopicSinglePageStore;
 abstract class _TopicSinglePageStore with Store {
   @observable
   TopicSinglePageStoreData state = TopicSinglePageStoreData.initial();
+
+  List<Reply> totalCommentList = [];
 
   @action
   Future<TopicSinglePageStoreData> refresh(int tid, int page) async {
@@ -30,6 +31,7 @@ abstract class _TopicSinglePageStore with Store {
         }
         replyList.add(reply);
         commentList.addAll(reply.commentList);
+        _mergeCommentList(reply.commentList);
       });
       state = TopicSinglePageStoreData(
         page: 1,
@@ -43,9 +45,19 @@ abstract class _TopicSinglePageStore with Store {
       );
       return state;
     } catch (err) {
-      debugPrint(err.toString());
       rethrow;
     }
+  }
+
+  void _mergeCommentList(List<Reply> commentList) {
+    commentList.forEach((comment) {
+      if (this
+              .totalCommentList
+              .indexWhere((existComment) => existComment.pid == comment.pid) >
+          0) {
+        this.totalCommentList.add(comment);
+      }
+    });
   }
 }
 

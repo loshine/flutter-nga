@@ -22,7 +22,7 @@ class _SearchForumState extends State<SearchForumPage> {
   @override
   void initState() {
     super.initState();
-    _refreshController  = RefreshController();
+    _refreshController = RefreshController();
     Future.delayed(const Duration()).then((_) {
       _refreshController.requestRefresh();
     });
