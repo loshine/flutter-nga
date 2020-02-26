@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
@@ -147,8 +148,42 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             ),
           ),
         ),
+        Offstage(
+          offstage: widget.reply.attachmentList.isEmpty,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Opacity(
+                  opacity: 0.5,
+                  child: Dash(
+                    dashColor: Palette.colorDivider,
+                    length: MediaQuery.of(context).size.width,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  '附件',
+                  style: TextStyle(
+                    color: Palette.colorTextSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 16, right: 16),
+                child: Wrap(
+                  children: _getAttachmentListWidgets(),
+                ),
+              ),
+            ],
+          ),
+        ),
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -297,6 +332,24 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             comment,
             widget.userList.firstWhere((user) => user.uid == comment.authorId,
                 orElse: () => null))));
+    return widgets;
+  }
+
+  _getAttachmentListWidgets() {
+    List<Widget> widgets = [];
+    widgets.addAll(widget.reply.attachmentList.map((attachment) {
+      return Padding(
+        padding: EdgeInsets.only(right: 16),
+        child: CachedNetworkImage(
+          imageUrl: attachment.realUrl,
+          placeholder: (context, url) => Image.asset(
+            'images/default_forum_icon.png',
+            width: 48,
+            height: 48,
+          ),
+        ),
+      );
+    }));
     return widgets;
   }
 }
