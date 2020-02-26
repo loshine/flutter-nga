@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/store/topic_detail_store.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
@@ -31,6 +32,7 @@ class _TopicDetailState extends State<TopicDetailPage>
     final firstPage = TopicSinglePage(
       tid: widget.tid,
       page: 1,
+      totalCommentList: _store.commentList,
       onLoadComplete: _onLoadComplete,
     );
     return Observer(
@@ -51,6 +53,7 @@ class _TopicDetailState extends State<TopicDetailPage>
             widgets.add(TopicSinglePage(
               tid: widget.tid,
               page: i + 1,
+              totalCommentList: _store.commentList,
               onLoadComplete: _onLoadComplete,
             ));
           }
@@ -145,7 +148,8 @@ class _TopicDetailState extends State<TopicDetailPage>
     super.dispose();
   }
 
-  _onLoadComplete(int maxPage) {
+  _onLoadComplete(int maxPage, List<Reply> commentList) {
     _store.setMaxPage(maxPage);
+    _store.mergeCommentList(commentList);
   }
 }

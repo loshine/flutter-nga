@@ -10,26 +10,26 @@ abstract class _SearchOptionsStore with Store {
 
   @action
   void checkFirstRadio(int value) {
-    state =
-        SearchStoreData(value, state.content, state.topicRadio, state.userRadio);
+    state = SearchStoreData(
+        value, state.content, state.topicRadio, state.userRadio);
   }
 
   @action
   void checkTopicRadio(int value) {
-    state =
-        SearchStoreData(state.firstRadio, state.content, value, state.userRadio);
+    state = SearchStoreData(
+        state.firstRadio, state.content, value, state.userRadio);
   }
 
   @action
   void checkUserRadio(int value) {
-    state =
-        SearchStoreData(state.firstRadio, state.content, state.topicRadio, value);
+    state = SearchStoreData(
+        state.firstRadio, state.content, state.topicRadio, value);
   }
 
   @action
   void checkContent(bool value) {
-    state =
-        SearchStoreData(state.firstRadio, value, state.topicRadio, state.userRadio);
+    state = SearchStoreData(
+        state.firstRadio, value, state.topicRadio, state.userRadio);
   }
 }
 

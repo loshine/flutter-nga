@@ -165,8 +165,9 @@ class _SearchState extends State<SearchPage> {
                       selectedColor: Palette.colorPrimary,
                       selected: _searchOptionsStore.state.topicRadio ==
                           SearchStoreData.TOPIC_RADIO_ALL_FORUM,
-                      onSelected: (selected) => _searchOptionsStore
-                          .checkTopicRadio(SearchStoreData.TOPIC_RADIO_ALL_FORUM),
+                      onSelected: (selected) =>
+                          _searchOptionsStore.checkTopicRadio(
+                              SearchStoreData.TOPIC_RADIO_ALL_FORUM),
                     ),
                     padding: EdgeInsets.only(left: 16),
                   ),
@@ -255,7 +256,8 @@ class _SearchState extends State<SearchPage> {
   }
 
   _onSearch(text) {
-    if (_searchOptionsStore.state.firstRadio == SearchStoreData.FIRST_RADIO_TOPIC) {
+    if (_searchOptionsStore.state.firstRadio ==
+        SearchStoreData.FIRST_RADIO_TOPIC) {
       if (widget.fid == null) {
         Routes.navigateTo(context,
             "${Routes.SEARCH_TOPIC_LIST}?keyword=${fluroCnParamsEncode(text)}&content=${_searchOptionsStore.state.content ? 1 : 0}");
@@ -269,7 +271,8 @@ class _SearchState extends State<SearchPage> {
           "${Routes.SEARCH_FORUM}?keyword=${fluroCnParamsEncode(text)}");
     } else if (_searchOptionsStore.state.firstRadio ==
         SearchStoreData.FIRST_RADIO_USER) {
-      if (_searchOptionsStore.state.userRadio == SearchStoreData.USER_RADIO_NAME) {
+      if (_searchOptionsStore.state.userRadio ==
+          SearchStoreData.USER_RADIO_NAME) {
         Routes.navigateTo(
             context, "${Routes.USER}?name=${fluroCnParamsEncode(text)}");
       } else {
