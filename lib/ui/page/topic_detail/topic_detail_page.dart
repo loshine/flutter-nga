@@ -6,15 +6,38 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/store/topic_detail_store.dart';
-import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 
-class TopicDetailPage extends StatefulWidget {
+class TopicDetailPage extends StatelessWidget {
   const TopicDetailPage(this.tid, this.fid, {this.subject, Key key})
+      : super(key: key);
+
+  final int tid;
+  final int fid;
+  final String subject;
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        Provider(create: (_) => TopicDetailStore()),
+      ],
+      child: _TopicDetailPage(
+        tid,
+        fid,
+        subject: subject,
+      ),
+    );
+  }
+}
+
+class _TopicDetailPage extends StatefulWidget {
+  const _TopicDetailPage(this.tid, this.fid, {this.subject, Key key})
       : super(key: key);
 
   final int tid;
@@ -25,39 +48,35 @@ class TopicDetailPage extends StatefulWidget {
   _TopicDetailState createState() => _TopicDetailState();
 }
 
-class _TopicDetailState extends State<TopicDetailPage>
+class _TopicDetailState extends State<_TopicDetailPage>
     with TickerProviderStateMixin {
   TabController _tabController;
-  final _store = TopicDetailStore();
 
   @override
   Widget build(BuildContext context) {
+    final store = Provider.of<TopicDetailStore>(context);
     final firstPage = TopicSinglePage(
       tid: widget.tid,
       page: 1,
-      totalCommentList: _store.commentList,
-      onLoadComplete: _onLoadComplete,
     );
     return Observer(
       builder: (_) {
         List<Widget> widgets = [];
         _tabController = TabController(
           vsync: this,
-          length: _store.maxPage,
-          initialIndex: _store.currentPage - 1,
+          length: store.maxPage,
+          initialIndex: store.currentPage - 1,
         );
         _tabController.addListener(() {
-          _store.setCurrentPage(_tabController.index + 1);
+          store.setCurrentPage(_tabController.index + 1);
         });
-        for (int i = 0; i < _store.maxPage; i++) {
+        for (int i = 0; i < store.maxPage; i++) {
           if (i == 0) {
             widgets.add(firstPage);
           } else {
             widgets.add(TopicSinglePage(
               tid: widget.tid,
               page: i + 1,
-              totalCommentList: _store.commentList,
-              onLoadComplete: _onLoadComplete,
             ));
           }
         }
@@ -75,12 +94,12 @@ class _TopicDetailState extends State<TopicDetailPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Opacity(
-                    opacity: _store.currentPage != 1 ? 1 : 0.3,
+                    opacity: store.currentPage != 1 ? 1 : 0.3,
                     child: IconButton(
                       icon: Icon(Icons.chevron_left),
                       color: Colors.white,
                       onPressed: () {
-                        if (_store.currentPage != 1) {
+                        if (store.currentPage != 1) {
                           _tabController.animateTo(_tabController.index - 1);
                         }
                       },
@@ -105,7 +124,7 @@ class _TopicDetailState extends State<TopicDetailPage>
                           Padding(
                             padding: EdgeInsets.only(left: 8, right: 8),
                             child: Text(
-                              "${_store.currentPage}/${_store.maxPage}",
+                              "${store.currentPage}/${store.maxPage}",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -117,12 +136,12 @@ class _TopicDetailState extends State<TopicDetailPage>
                     ),
                   ),
                   Opacity(
-                    opacity: _store.maxPage != _store.currentPage ? 1 : 0.3,
+                    opacity: store.maxPage != store.currentPage ? 1 : 0.3,
                     child: IconButton(
                       icon: Icon(Icons.chevron_right),
                       color: Colors.white,
                       onPressed: () {
-                        if (_store.maxPage != _store.currentPage) {
+                        if (store.maxPage != store.currentPage) {
                           _tabController.animateTo(_tabController.index + 1);
                         }
                       },
@@ -161,12 +180,14 @@ class _TopicDetailState extends State<TopicDetailPage>
   }
 
   _onLoadComplete(int maxPage, List<Reply> commentList) {
-    _store.setMaxPage(maxPage);
-    _store.mergeCommentList(commentList);
+    final store = Provider.of<TopicDetailStore>(context, listen: false);
+    store.setMaxPage(maxPage);
+    store.mergeCommentList(commentList);
   }
 
   _addFavourite() {
-    _store.addFavourite(widget.tid).then((message) {
+    final store = Provider.of<TopicDetailStore>(context, listen: false);
+    store.addFavourite(widget.tid).then((message) {
       Fluttertoast.showToast(msg: message, gravity: ToastGravity.CENTER);
     }).catchError((e) {
       if (e is DioError) {

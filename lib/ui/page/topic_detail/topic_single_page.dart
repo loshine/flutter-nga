@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/store/topic_detail_store.dart';
 import 'package:flutter_nga/store/topic_single_page_store.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 typedef LoadCompleteCallback = void Function(int, List<Reply>);
@@ -13,8 +15,6 @@ class TopicSinglePage extends StatefulWidget {
   const TopicSinglePage({
     this.tid,
     this.page,
-    this.onLoadComplete,
-    this.totalCommentList,
     Key key,
   })  : assert(tid != null),
         assert(page != null),
@@ -22,8 +22,6 @@ class TopicSinglePage extends StatefulWidget {
 
   final int tid;
   final int page;
-  final LoadCompleteCallback onLoadComplete;
-  final List<Reply> totalCommentList;
 
   @override
   _TopicSingleState createState() => _TopicSingleState();
@@ -36,10 +34,8 @@ class _TopicSingleState extends State<TopicSinglePage> {
   @override
   void initState() {
     super.initState();
-    if (widget.totalCommentList != null) {
-      _store.totalCommentList.addAll(widget.totalCommentList);
-      debugPrint("widget.totalCommentList: ${widget.totalCommentList}");
-    }
+    final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
+    _store.totalCommentList = detailStore.commentList;
     _refreshController = RefreshController();
     Future.delayed(const Duration()).then((_) => _onRefresh());
   }
@@ -67,10 +63,12 @@ class _TopicSingleState extends State<TopicSinglePage> {
   }
 
   _onRefresh() {
+    final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
     _store.refresh(widget.tid, widget.page).then((state) {
-      if (widget.onLoadComplete != null) {
-        widget.onLoadComplete(state.maxPage, state.commentList);
-      }
+//      if (widget.onLoadComplete != null) {
+//        widget.onLoadComplete(state.maxPage, state.commentList);
+//      }
+      detailStore.setMaxPage(state.maxPage);
     }).catchError((err) {
       _refreshController.loadFailed();
       Fluttertoast.showToast(
