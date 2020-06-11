@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:mobx/mobx.dart';
@@ -13,7 +12,7 @@ abstract class _TopicSinglePageStore with Store {
   @observable
   TopicSinglePageStoreData state = TopicSinglePageStoreData.initial();
 
-  List<Reply> totalCommentList = [];
+  List<Reply> totalCommentList;
 
   @action
   Future<TopicSinglePageStoreData> refresh(int tid, int page) async {
@@ -21,17 +20,16 @@ abstract class _TopicSinglePageStore with Store {
       TopicDetailData data =
           await Data().topicRepository.getTopicDetail(tid, page);
       List<Reply> replyList = [];
-      List<Reply> commentList = [];
       data.replyList.values.forEach((reply) {
-        if (reply.tid == null && commentList.isNotEmpty) {
-          Reply comment =
-              commentList.firstWhere((comment) => comment.pid == reply.pid);
+        if (reply.tid == null && totalCommentList.isNotEmpty) {
+          Reply comment = totalCommentList
+              .firstWhere((comment) => comment.pid == reply.pid);
           if (comment != null) {
             reply.merge(comment);
           }
         }
         replyList.add(reply);
-        commentList.addAll(reply.commentList);
+        totalCommentList.addAll(reply.commentList);
         _mergeCommentList(reply.commentList);
       });
       state = TopicSinglePageStoreData(
@@ -40,7 +38,6 @@ abstract class _TopicSinglePageStore with Store {
         enablePullUp: 1 < data.maxPage,
         replyList: replyList,
         userList: data.userList.values.toList(),
-        commentList: commentList,
         groupSet: data.groupList.values.toSet(),
         medalSet: data.medalList.values.toSet(),
       );
@@ -68,7 +65,6 @@ class TopicSinglePageStoreData {
   final bool enablePullUp;
   final List<Reply> replyList;
   final List<User> userList;
-  final List<Reply> commentList;
   final Set<Group> groupSet;
   final Set<Medal> medalSet;
 
@@ -78,7 +74,6 @@ class TopicSinglePageStoreData {
     this.enablePullUp,
     this.replyList,
     this.userList,
-    this.commentList,
     this.groupSet,
     this.medalSet,
   });
@@ -89,7 +84,6 @@ class TopicSinglePageStoreData {
         enablePullUp: false,
         replyList: [],
         userList: [],
-        commentList: [],
         groupSet: HashSet(),
         medalSet: HashSet(),
       );
