@@ -7,8 +7,9 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ForumRecommendTopicListPage extends StatefulWidget {
   final int fid;
+  final int type;
 
-  const ForumRecommendTopicListPage(this.fid, {Key key})
+  const ForumRecommendTopicListPage(this.fid, {this.type, Key key})
       : assert(fid != null),
         super(key: key);
 
@@ -57,7 +58,7 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
   }
 
   _onRefresh() {
-    _store.refresh(widget.fid, true).catchError((err) {
+    _store.refresh(widget.fid, true, widget.type).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.message,
@@ -68,7 +69,7 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
   }
 
   _onLoading() async {
-    _store.loadMore(widget.fid, true).then((state) {
+    _store.loadMore(widget.fid, true, widget.type).then((state) {
       if (state.page + 1 < state.maxPage) {
         _refreshController.loadComplete();
       } else {

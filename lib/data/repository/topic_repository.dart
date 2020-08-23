@@ -15,7 +15,7 @@ import 'package:sembast/sembast.dart';
 
 abstract class TopicRepository {
   Future<TopicListData> getTopicList(int fid, int page,
-      {bool recommend = false});
+      {bool recommend = false, int type = 0});
 
   Future<TopicDetailData> getTopicDetail(int tid, int page);
 
@@ -75,10 +75,13 @@ class TopicDataRepository implements TopicRepository {
 
   @override
   Future<TopicListData> getTopicList(int fid, int page,
-      {bool recommend = false}) async {
+      {bool recommend = false, int type = 0}) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.get(
-          "thread.php?lite=js&noprefix&fid=$fid&page=$page${recommend ? "&recommend=1&order_by=postdatedesc&user=1" : ""}");
+      final fidParam = type == 1 ? "stid=$fid" : "fid=$fid";
+      Response<Map<String, dynamic>> response = await Data()
+          .dio
+          .get("thread.php?lite=js&noprefix&$fidParam&page=$page"
+              "${recommend ? "&recommend=1&order_by=postdatedesc" : ""}");
       return TopicListData.fromJson(response.data, page);
     } catch (err) {
       rethrow;
