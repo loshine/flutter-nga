@@ -1,4 +1,5 @@
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/utils/name_utils.dart' as nameUtils;
 
 class TopicDetailData {
   final Map<String, Reply> replyList;
@@ -102,7 +103,6 @@ class User {
   final int money;
   final int thisVisit;
   final String signature;
-  final String nickname;
   final int bitData;
 
   User({
@@ -125,7 +125,6 @@ class User {
     this.money,
     this.thisVisit,
     this.signature,
-    this.nickname,
     this.bitData,
   });
 
@@ -170,14 +169,12 @@ class User {
       money: map["money"],
       thisVisit: map["thisvisit"],
       signature: map["signature"].toString(),
-      // 可能是int
-      nickname: map["nickname"],
       bitData: map["bit_data"],
     );
   }
 
   String getShowName() {
-    return username ?? nickname ?? "#Anonymous#";
+    return nameUtils.getShowName(username);
   }
 
   String getShowReputation() {

@@ -11,11 +11,15 @@ abstract class _ForumDetailStore with Store {
   ForumDetailStoreData state = ForumDetailStoreData.initial();
 
   @action
-  Future<ForumDetailStoreData> refresh(int fid, bool recommend) async {
+  Future<ForumDetailStoreData> refresh(
+      int fid, bool recommend, int type) async {
     try {
-      TopicListData data = await Data()
-          .topicRepository
-          .getTopicList(fid, 1, recommend: recommend);
+      TopicListData data = await Data().topicRepository.getTopicList(
+            fid,
+            1,
+            recommend: recommend,
+            type: type,
+          );
       state = ForumDetailStoreData(
         page: 1,
         maxPage: data.maxPage,
@@ -30,11 +34,15 @@ abstract class _ForumDetailStore with Store {
   }
 
   @action
-  Future<ForumDetailStoreData> loadMore(int fid, bool recommend) async {
+  Future<ForumDetailStoreData> loadMore(
+      int fid, bool recommend, int type) async {
     try {
-      TopicListData data = await Data()
-          .topicRepository
-          .getTopicList(fid, state.page + 1, recommend: recommend);
+      TopicListData data = await Data().topicRepository.getTopicList(
+            fid,
+            state.page + 1,
+            recommend: recommend,
+            type: type,
+          );
       state = ForumDetailStoreData(
         page: state.page + 1,
         maxPage: data.maxPage,

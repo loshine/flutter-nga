@@ -27,8 +27,12 @@ class _ChildForumItemState extends State<ChildForumItemWidget> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Routes.navigateTo(context,
-          "${Routes.FORUM_DETAIL}?fid=${widget.childForum.fid}&name=${fluroCnParamsEncode(widget.childForum.name)}"),
+      onTap: () => Routes.navigateTo(
+        context,
+        "${Routes.FORUM_DETAIL}?fid=${widget.childForum.fid}"
+        "&name=${fluroCnParamsEncode(widget.childForum.name)}"
+        "&type=${widget.childForum.type}",
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

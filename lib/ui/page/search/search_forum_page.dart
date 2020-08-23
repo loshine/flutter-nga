@@ -73,8 +73,12 @@ class _SearchForumState extends State<SearchForumPage> {
           Divider(height: 1),
         ],
       ),
-      onTap: () => Routes.navigateTo(context,
-          "${Routes.FORUM_DETAIL}?fid=${forum.fid}&name=${fluroCnParamsEncode(forum.name)}"),
+      onTap: () => Routes.navigateTo(
+          context,
+          "${Routes.FORUM_DETAIL}?fid=${forum.fid}"
+          "&name=${fluroCnParamsEncode(forum.name)}"
+//        "&type=${widget.forum.type}",
+          ),
     );
   }
 }

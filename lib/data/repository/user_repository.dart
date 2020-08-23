@@ -11,6 +11,8 @@ const TAG_USER_NAME = "ngaPassportUrlencodedUname";
 abstract class UserRepository {
   Future<User> saveLoginCookies(String cookies);
 
+  Future<User> saveLogin(String uid, String token, String username);
+
   Future<User> getDefaultUser();
 
   Future<List<User>> getAllLoginUser();
@@ -59,18 +61,23 @@ class UserDataRepository implements UserRepository {
         uid.isNotEmpty &&
         username != null &&
         username.isNotEmpty) {
-      final user = User(uid, cid, username);
-      final finder = Finder(filter: Filter.equals('uid', uid));
-      List<RecordSnapshot<int, dynamic>> list =
-          await _store.find(database, finder: finder);
-      // 有以前登陆过的就把以前登陆过的删除
-      if (list.isNotEmpty) {
-        await _store.delete(database, finder: finder);
-      }
-      await _store.add(database, user.toJson());
-      return user;
+      return saveLogin(uid, cid, username);
     }
     throw "cookies parse error: cookies = $cookies";
+  }
+
+  @override
+  Future<User> saveLogin(String uid, String token, String username) async {
+    final user = User(uid, token, username);
+    final finder = Finder(filter: Filter.equals('uid', uid));
+    List<RecordSnapshot<int, dynamic>> list =
+        await _store.find(database, finder: finder);
+    // 有以前登陆过的就把以前登陆过的删除
+    if (list.isNotEmpty) {
+      await _store.delete(database, finder: finder);
+    }
+    await _store.add(database, user.toJson());
+    return user;
   }
 
   @override

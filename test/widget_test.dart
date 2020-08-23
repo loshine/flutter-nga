@@ -40,4 +40,12 @@ void main() {
         "[b]Reply to [tid=16893894]Topic[/tid] Post by [uid]#anony_6b0df884c0e44bf854e195a52cbc3a0e[/uid][color=gray](0楼)[/color] (2019-04-08 14:29)[/b]  哈哈哈哈哈哈";
     expect(content.replaceAll(regExp, ""), "  哈哈哈哈哈哈");
   });
+
+  test('Anony RegExp test', () {
+    RegExp regExp = RegExp(
+        "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid]#anony_([0-9a-zA-Z]*)\\[/uid]\\[color=gray]\\((\\d+)?楼\\)\\[/color] \\(([\\s\\S]*?)\\):\\[/b]");
+    String content =
+        "[pid=445996637,23005426,1]Reply[/pid] [b]Post by [uid]#anony_7dc5258240df2301fdae75153712d174[/uid][color=gray](6楼)[/color] (2020-08-18 15:04):[/b]";
+    expect(content.replaceAll(regExp, ""), "");
+  });
 }

@@ -230,6 +230,7 @@ class ForumInfo {
           v['1'],
           parentId: map['fid'],
           desc: desc != null && desc.isNotEmpty ? desc : null,
+          type: k.startsWith("t") ? 1 : 0,
           selected: selectedIds.contains(id),
         ));
       });
