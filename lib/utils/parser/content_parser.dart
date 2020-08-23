@@ -1,5 +1,6 @@
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/name_utils.dart';
 
 class NgaContentParser {
   static List<Parser> _parserList = [
@@ -84,13 +85,18 @@ class _ReplyParser implements Parser {
             RegExp(
                 "\\[tid=(\\d+)?]Topic\\[/tid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?tid=${match.group(1)}'>Topic</a> Post by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(2)}'>[${match.group(3)}]</a> (${match.group(4)})")
+                "<a href='https://bbs.nga.cn/read.php?tid=${match.group(1)}'>Topic</a> Post by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(2)}'>[${match.group(3)}]</a> <small>(${match.group(4)})</small>")
         // 引用普通回贴
         .replaceAllMapped(
             RegExp(
                 "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(4)}'>[${match.group(5)}]</a> (${match.group(6)}):")
+                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(4)}'>[${match.group(5)}]</a> <small>(${match.group(6)})</small>:")
+        .replaceAllMapped(
+            RegExp(
+                "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid]#anony_([0-9a-zA-Z]*)\\[/uid]\\[color=gray]\\((\\d+)?楼\\)\\[/color] \\(([\\s\\S]*?)\\):\\[/b]"),
+            (match) =>
+                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by ${getShowName(match.group(4))}</a><font color='gray'>(${match.group(5)}楼)</font> <small>(${match.group(6)})</small>:")
         // 评论主贴
         .replaceAllMapped(
             RegExp(
@@ -113,7 +119,7 @@ class _CommentParser implements Parser {
         .replaceAll("[color=gray](楼)[/color]", "")
         .replaceAll(
             RegExp(
-                "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
+                "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid(=\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
             "")
         .replaceAll(
             RegExp(

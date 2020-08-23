@@ -45,6 +45,7 @@ class Routes {
       return ForumDetailPage(
         fid: int.tryParse(params["fid"][0]),
         name: fluroCnParamsDecode(params["name"][0]),
+        type: params["type"] != null ? int.tryParse(params["type"][0]) : 0,
       );
     }));
     router.define(TOPIC_DETAIL,

@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
@@ -13,6 +13,8 @@ import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
+import '../../../data/entity/user.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key key}) : super(key: key);
@@ -103,18 +105,29 @@ class _HomePageState extends State<HomePage> {
     Data().userRepository.getDefaultUser().then((user) => _setUser(user));
     _subscription = AndroidLogin.cookieStream.listen(
       (cookies) {
-        if (cookies.contains(TAG_CID)) {
-          Data()
-              .userRepository
-              .saveLoginCookies(cookies)
-              .then((user) => _setUser(user))
-              .whenComplete(() {
-            Fluttertoast.showToast(
-              msg: "登录成功",
-              gravity: ToastGravity.CENTER,
-            );
-          });
-        }
+//        if (cookies.contains(TAG_CID)) {
+//          Data()
+//              .userRepository
+//              .saveLoginCookies(cookies)
+//              .then((user) => _setUser(user))
+//              .whenComplete(() {
+//            Fluttertoast.showToast(
+//              msg: "登录成功",
+//              gravity: ToastGravity.CENTER,
+//            );
+//          });
+//        }
+        Map map = json.decode(cookies);
+        Data()
+            .userRepository
+            .saveLogin(map['uid'].toString(), map['token'], map['username'])
+            .then((user) => _setUser(user))
+            .whenComplete(() {
+          Fluttertoast.showToast(
+            msg: "登录成功",
+            gravity: ToastGravity.CENTER,
+          );
+        });
       },
       onError: (e) => debugPrint(e.toString()),
     );

@@ -17,12 +17,13 @@ import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
 
 class ForumDetailPage extends StatefulWidget {
-  const ForumDetailPage({this.fid, this.name, Key key})
+  const ForumDetailPage({this.fid, this.name, this.type, Key key})
       : assert(fid != null),
         super(key: key);
 
   final int fid;
   final String name;
+  final int type;
 
   @override
   _ForumDetailState createState() => _ForumDetailState();
@@ -142,7 +143,7 @@ class _ForumDetailState extends State<ForumDetailPage>
   }
 
   _onRefresh() {
-    _store.refresh(widget.fid, false).catchError((err) {
+    _store.refresh(widget.fid, false, widget.type).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.message,
@@ -153,7 +154,7 @@ class _ForumDetailState extends State<ForumDetailPage>
   }
 
   _onLoading() async {
-    _store.loadMore(widget.fid, false).then((state) {
+    _store.loadMore(widget.fid, false, widget.type).then((state) {
       if (state.page + 1 < state.maxPage) {
         _refreshController.loadComplete();
       } else {
