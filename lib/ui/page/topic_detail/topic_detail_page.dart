@@ -179,12 +179,6 @@ class _TopicDetailState extends State<_TopicDetailPage>
     super.dispose();
   }
 
-  _onLoadComplete(int maxPage, List<Reply> commentList) {
-    final store = Provider.of<TopicDetailStore>(context, listen: false);
-    store.setMaxPage(maxPage);
-    store.mergeCommentList(commentList);
-  }
-
   _addFavourite() {
     final store = Provider.of<TopicDetailStore>(context, listen: false);
     store.addFavourite(widget.tid).then((message) {

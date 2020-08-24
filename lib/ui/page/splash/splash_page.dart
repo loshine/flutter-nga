@@ -11,19 +11,12 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashState extends State<SplashPage> {
-  bool _initFinished = false;
-  bool _delayFinished = false;
-
   @override
   void initState() {
     timeAgo.setLocaleMessages('en', CustomTimeMessages());
     Data().init().then((_) {
-      _initFinished = true;
-      maybeGoHome();
-    });
-    Future.delayed(const Duration(seconds: 1)).then((_) {
-      _delayFinished = true;
-      maybeGoHome();
+      Routes.navigateTo(context, Routes.HOME,
+          replace: true, transition: TransitionType.fadeIn);
     });
     super.initState();
   }
@@ -35,11 +28,5 @@ class _SplashState extends State<SplashPage> {
         child: Text("欢迎使用"),
       ),
     );
-  }
-
-  void maybeGoHome() {
-    if (!_initFinished || !_delayFinished) return;
-    Routes.navigateTo(context, Routes.HOME,
-        replace: true, transition: TransitionType.fadeIn);
   }
 }
