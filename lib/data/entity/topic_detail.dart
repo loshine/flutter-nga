@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as nameUtils;
 
@@ -12,7 +14,7 @@ class TopicDetailData {
   final dynamic global;
   final int rows;
   final int currentRows;
-  final int rRows;
+  final int replyPageRows;
 
   final Topic topic;
 
@@ -25,7 +27,7 @@ class TopicDetailData {
     this.reputationList,
     this.rows,
     this.currentRows,
-    this.rRows,
+    this.replyPageRows,
     this.topic,
   });
 
@@ -74,13 +76,13 @@ class TopicDetailData {
       medalList: tempMedalMap,
       reputationList: tempReputationMap,
       currentRows: map["__R__ROWS"],
-      rRows: map["__R__ROWS_PAGE"],
+      replyPageRows: map["__R__ROWS_PAGE"],
       rows: map["__ROWS"],
       topic: Topic.fromJson(map["__T"]),
     );
   }
 
-  int get maxPage => rows ~/ rRows + (rows % rRows != 0 ? 1 : 0);
+  int get maxPage => (rows / replyPageRows.toDouble()).ceil();
 }
 
 class User {

@@ -8,9 +8,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-typedef LoadCompleteCallback = void Function(int, List<Reply>);
-typedef TotalCommentListCallback = List<Reply> Function();
-
 class TopicSinglePage extends StatefulWidget {
   const TopicSinglePage({
     this.tid,
@@ -65,9 +62,6 @@ class _TopicSingleState extends State<TopicSinglePage> {
   _onRefresh() {
     final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
     _store.refresh(widget.tid, widget.page).then((state) {
-//      if (widget.onLoadComplete != null) {
-//        widget.onLoadComplete(state.maxPage, state.commentList);
-//      }
       detailStore.setMaxPage(state.maxPage);
     }).catchError((err) {
       _refreshController.loadFailed();
