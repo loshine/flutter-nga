@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_detail_page.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
+import 'package:flutter_nga/ui/page/login/login_page.dart';
 import 'package:flutter_nga/ui/page/photo_preview/photo_preview_page.dart';
 import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/search/search_forum_page.dart';
@@ -19,6 +20,7 @@ class Routes {
 
   static const String SPLASH = "/";
   static const String HOME = "/home";
+  static const String LOGIN = "/login";
   static const String FORUM_DETAIL = "/forum_detail";
   static const String TOPIC_DETAIL = "/topic_detail";
   static const String TOPIC_PUBLISH = "/topic_publish";
@@ -40,6 +42,8 @@ class Routes {
         handler: Handler(handlerFunc: (context, params) => SplashPage()));
     router.define(HOME,
         handler: Handler(handlerFunc: (context, params) => HomePage()));
+    router.define(LOGIN,
+        handler: Handler(handlerFunc: (context, params) => LoginPage()));
     router.define(FORUM_DETAIL,
         handler: Handler(handlerFunc: (context, params) {
       return ForumDetailPage(
