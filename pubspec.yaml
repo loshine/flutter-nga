@@ -39,6 +39,7 @@ dependencies:
   intl: ^0.16.0
   permission_handler: ^5.0.0+hotfix.8
 
+  flutter_inappwebview: ^4.0.0+4
   image_picker: ^0.6.7
   photo_view: ^0.9.2
   pull_to_refresh: ^1.5.8

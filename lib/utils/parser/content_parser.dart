@@ -96,7 +96,7 @@ class _ReplyParser implements Parser {
             RegExp(
                 "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid]#anony_([0-9a-zA-Z]*)\\[/uid]\\[color=gray]\\((\\d+)?楼\\)\\[/color] \\(([\\s\\S]*?)\\):\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by ${getShowName(match.group(4))}</a><font color='gray'>(${match.group(5)}楼)</font> <small>(${match.group(6)})</small>:")
+                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by ${getShowName("#anony_${match.group(4)}")}</a><font color='gray'>(${match.group(5)}楼)</font> <small>(${match.group(6)})</small>:")
         // 评论主贴
         .replaceAllMapped(
             RegExp(
