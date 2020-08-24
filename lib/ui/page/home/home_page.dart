@@ -1,18 +1,13 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../data/entity/user.dart';
 
@@ -27,7 +22,6 @@ class _HomePageState extends State<HomePage> {
   var _index = 0;
   UserInfo _userInfo;
   String _nickname;
-  StreamSubscription _subscription;
   GlobalKey<TopicHistoryListState> _historyStateKey;
   List<Widget> pageList;
 
@@ -77,10 +71,7 @@ class _HomePageState extends State<HomePage> {
     User user = await Data().userRepository.getDefaultUser();
     if (user == null) {
       Routes.pop(context);
-      AndroidLogin.startLogin()
-          .then((result) => debugPrint("goAndroidLogin result: $result"))
-          .catchError((e) => debugPrint(e.toString()));
-//    Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPage()));
+      Routes.navigateTo(context, Routes.LOGIN);
     }
   }
 
@@ -89,60 +80,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _setUser(User user) async {
-    if (this.mounted) {
-      if (user != null) {
-        Data()
-            .userRepository
-            .getUserInfoByName(user.nickname)
-            .then((userInfo) => setState(() => _userInfo = userInfo));
-        setState(() => _nickname = user.nickname);
-      }
+    if (user != null) {
+      Data()
+          .userRepository
+          .getUserInfoByName(user.nickname)
+          .then((userInfo) => setState(() => _userInfo = userInfo));
+      setState(() => _nickname = user.nickname);
     }
-  }
-
-  @override
-  void initState() {
-    Data().userRepository.getDefaultUser().then((user) => _setUser(user));
-    _subscription = AndroidLogin.cookieStream.listen(
-      (cookies) {
-//        if (cookies.contains(TAG_CID)) {
-//          Data()
-//              .userRepository
-//              .saveLoginCookies(cookies)
-//              .then((user) => _setUser(user))
-//              .whenComplete(() {
-//            Fluttertoast.showToast(
-//              msg: "登录成功",
-//              gravity: ToastGravity.CENTER,
-//            );
-//          });
-//        }
-        Map map = json.decode(cookies);
-        Data()
-            .userRepository
-            .saveLogin(map['uid'].toString(), map['token'], map['username'])
-            .then((user) => _setUser(user))
-            .whenComplete(() {
-          Fluttertoast.showToast(
-            msg: "登录成功",
-            gravity: ToastGravity.CENTER,
-          );
-        });
-      },
-      onError: (e) => debugPrint(e.toString()),
-    );
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    // 关闭数据库
-    Data().close();
-    // 取消监听
-    if (_subscription != null) {
-      _subscription.cancel();
-    }
-    super.dispose();
   }
 
   @override
