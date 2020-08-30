@@ -120,7 +120,7 @@ class _ForumDetailState extends State<ForumDetailPage>
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController();
+    _refreshController = RefreshController(initialRefresh: true);
     _tabs.add(Tab(text: '最新'));
     _tabs.add(Tab(text: '精华'));
     _tabs.add(Tab(text: '子版'));
@@ -128,10 +128,7 @@ class _ForumDetailState extends State<ForumDetailPage>
     _tabController.addListener(
         () => setState(() => _mainPage = _tabController.index == 0));
     Future.delayed(const Duration()).then((_) {
-      // 进入的时候自动刷新
       _refreshController.position.addListener(_scrollListener);
-      // 使用 requestRefresh 会导致第一项位置错误
-      _onRefresh();
     });
   }
 
