@@ -25,11 +25,7 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController();
-    Future.delayed(const Duration()).then((_) {
-      // 使用 requestRefresh 会导致第一项位置错误
-      _onRefresh();
-    });
+    _refreshController = RefreshController(initialRefresh: true);
   }
 
   @override

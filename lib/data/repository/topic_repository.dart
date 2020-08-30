@@ -325,14 +325,35 @@ class TopicDataRepository implements TopicRepository {
   }
 
   @override
-  Future<int> insertTopicHistory(TopicHistory history) {
+  Future<int> insertTopicHistory(TopicHistory history) async {
+    final finder = Finder(
+      limit: 1,
+      offset: 0,
+      filter: Filter.equals('tid', history.tid),
+      sortOrders: [SortOrder('time', false)],
+    );
+    RecordSnapshot<int, dynamic> record =
+        await _store.query(finder: finder).getSnapshot(database);
+    if (record != null) {
+      final latest = TopicHistory.fromJson(record.value)..id = record.key;
+      final latestDate = DateTime.fromMicrosecondsSinceEpoch(latest.time);
+      final historyDate = DateTime.fromMicrosecondsSinceEpoch(history.time);
+      if (latestDate.difference(historyDate).inDays == 0) {
+        history.id = latest.id;
+        return _store.update(database, history.toJson(), finder: finder);
+      }
+    }
     return _store.add(database, history.toJson());
   }
 
   @override
   Future<List<TopicHistory>> getTopicHistories(int limit, int offset) async {
     List<RecordSnapshot<int, dynamic>> results = await _store.find(database,
-        finder: Finder(limit: limit, offset: offset));
+        finder: Finder(
+          limit: limit,
+          offset: offset,
+          sortOrders: [SortOrder('time', false)],
+        ));
     return results
         .map((map) => TopicHistory.fromJson(map.value)..id = map.key)
         .toList();

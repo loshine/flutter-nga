@@ -4,6 +4,7 @@ import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/store/topic_history_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/name_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
@@ -62,7 +63,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                       ),
                       Expanded(
                         child: Text(
-                          topicHistory.author,
+                          getShowName(topicHistory.author),
                           style: TextStyle(
                             fontSize: Dimen.caption,
                             color: Palette.colorTextSecondary,

@@ -74,10 +74,7 @@ class _AccountManagementState extends State<AccountManagementPage> {
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController();
-    Future.delayed(const Duration()).then((_) {
-      _refreshController.requestRefresh();
-    });
+    _refreshController = RefreshController(initialRefresh: true);
   }
 
   @override

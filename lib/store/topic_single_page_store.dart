@@ -12,8 +12,6 @@ abstract class _TopicSinglePageStore with Store {
   @observable
   TopicSinglePageStoreData state = TopicSinglePageStoreData.initial();
 
-  List<Reply> totalCommentList;
-
   @action
   Future<TopicSinglePageStoreData> refresh(int tid, int page) async {
     try {
@@ -21,16 +19,7 @@ abstract class _TopicSinglePageStore with Store {
           await Data().topicRepository.getTopicDetail(tid, page);
       List<Reply> replyList = [];
       data.replyList.values.forEach((reply) {
-        if (reply.tid == null && totalCommentList.isNotEmpty) {
-          Reply comment = totalCommentList
-              .firstWhere((comment) => comment.pid == reply.pid);
-          if (comment != null) {
-            reply.merge(comment);
-          }
-        }
         replyList.add(reply);
-        totalCommentList.addAll(reply.commentList);
-        _mergeCommentList(reply.commentList);
       });
       state = TopicSinglePageStoreData(
         page: 1,
@@ -45,17 +34,6 @@ abstract class _TopicSinglePageStore with Store {
     } catch (err) {
       rethrow;
     }
-  }
-
-  void _mergeCommentList(List<Reply> commentList) {
-    commentList.forEach((comment) {
-      if (this
-              .totalCommentList
-              .indexWhere((existComment) => existComment.pid == comment.pid) >
-          0) {
-        this.totalCommentList.add(comment);
-      }
-    });
   }
 }
 

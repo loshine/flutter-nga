@@ -48,11 +48,7 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController();
-    Future.delayed(const Duration()).then((_) {
-      // 进入的时候自动刷新
-      _refreshController.requestRefresh();
-    });
+    _refreshController = RefreshController(initialRefresh: true,);
   }
 
   @override

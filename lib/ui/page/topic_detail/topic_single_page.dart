@@ -31,10 +31,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
   @override
   void initState() {
     super.initState();
-    final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
-    _store.totalCommentList = detailStore.commentList;
-    _refreshController = RefreshController();
-    Future.delayed(const Duration()).then((_) => _onRefresh());
+    _refreshController = RefreshController(initialRefresh: true);
   }
 
   @override

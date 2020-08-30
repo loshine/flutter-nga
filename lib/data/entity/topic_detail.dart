@@ -17,6 +17,7 @@ class TopicDetailData {
   final int replyPageRows;
 
   final Topic topic;
+  final List<int> hotReplies;
 
   const TopicDetailData({
     this.global,
@@ -29,11 +30,13 @@ class TopicDetailData {
     this.currentRows,
     this.replyPageRows,
     this.topic,
+    this.hotReplies,
   });
 
   factory TopicDetailData.fromJson(Map<String, dynamic> map) {
     Map<String, dynamic> userMap = map["__U"];
     Map<String, dynamic> replyMap = map["__R"];
+    Map<String, dynamic> topicInfoMap = map["__T"];
     Map<String, User> tempUserMap = {};
     Map<String, Group> tempGroupMap = {};
     Map<String, Medal> tempMedalMap = {};
@@ -68,6 +71,16 @@ class TopicDetailData {
     for (MapEntry<String, dynamic> entry in replyMap.entries) {
       tempReplyMap[entry.key] = Reply.fromJson(entry.value);
     }
+    Map<String, dynamic> topicMisc = topicInfoMap["post_misc_var"];
+    List<int> hotReplies = [];
+    if (topicMisc.containsKey("17")) {
+      String hots = topicMisc["17"];
+      hotReplies.addAll(hots
+          .split(",")
+          .where((e) => e.isNotEmpty)
+          .map((e) => int.tryParse(e))
+          .where((e) => e != null));
+    }
     return TopicDetailData(
       global: map["__GLOBAL"],
       userList: tempUserMap,
@@ -79,6 +92,7 @@ class TopicDetailData {
       replyPageRows: map["__R__ROWS_PAGE"],
       rows: map["__ROWS"],
       topic: Topic.fromJson(map["__T"]),
+      hotReplies: hotReplies,
     );
   }
 
