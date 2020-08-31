@@ -49,8 +49,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
         controller: _refreshController,
         child: ListView.builder(
           itemCount: _store.state.replyList.length,
-          itemBuilder: (context, position) =>
-              _buildListItem(context, _store.state.replyList[position]),
+          itemBuilder: (context, position) => _buildListItem(context, position),
         ),
       );
     });
@@ -71,7 +70,24 @@ class _TopicSingleState extends State<TopicSinglePage> {
     });
   }
 
-  Widget _buildListItem(BuildContext context, Reply reply) {
+  Widget _buildListItem(BuildContext context, int position) {
+    final reply = _store.state.replyList[position];
+    if (position == 0 &&
+        _store.state.page == 1 &&
+        _store.state.hotReplyList.isNotEmpty) {
+      // 显示热评
+      return Column(
+        children: [_buildReplyWidget(context, reply)]..addAll(_store
+            .state.hotReplyList
+            .map((e) => _buildReplyWidget(context, e, hot: true))),
+      );
+    } else {
+      return _buildReplyWidget(context, reply);
+    }
+  }
+
+  Widget _buildReplyWidget(BuildContext context, Reply reply,
+      {bool hot = false}) {
     User user;
     for (var u in _store.state.userList) {
       if (u.uid == reply.authorId) {
@@ -122,6 +138,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       group: group,
       medalList: medalList,
       userList: commentUserList,
+      hot: hot,
     );
   }
 }

@@ -18,6 +18,7 @@ class TopicReplyItemWidget extends StatefulWidget {
   final Group group;
   final List<Medal> medalList;
   final List<User> userList;
+  final bool hot;
 
   const TopicReplyItemWidget({
     Key key,
@@ -26,6 +27,7 @@ class TopicReplyItemWidget extends StatefulWidget {
     this.group,
     this.medalList,
     this.userList,
+    this.hot = false,
   }) : super(key: key);
 
   @override
@@ -64,9 +66,11 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           ),
                         ),
                         Text(
-                          "[${widget.reply.lou} 楼]",
+                          widget.hot ? "[热评]" : "[${widget.reply.lou} 楼]",
                           style: TextStyle(
-                            color: Palette.colorTextSecondary,
+                            color: widget.hot
+                                ? Colors.redAccent
+                                : Palette.colorTextSecondary,
                             fontSize: Dimen.caption,
                           ),
                         ),
