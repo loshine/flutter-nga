@@ -21,14 +21,29 @@ abstract class _TopicSinglePageStore with Store {
       data.replyList.values.forEach((reply) {
         replyList.add(reply);
       });
+      List<User> userList = data.userList.values.toList();
+      Set<Group> groups = data.groupList.values.toSet();
+      Set<Medal> medals = data.medalList.values.toSet();
+      List<Reply> hotReplyList = [];
+      if (page == 1 && data.hotReplies.isNotEmpty) {
+        List<TopicDetailData> hots = await Future.wait(data.hotReplies
+            .map((e) => Data().topicRepository.getHotTopicReply(e)));
+        hots.forEach((e) {
+          userList.addAll(e.userList.values);
+          groups.addAll(e.groupList.values);
+          medals.addAll(e.medalList.values);
+          hotReplyList.addAll(e.replyList.values);
+        });
+      }
       state = TopicSinglePageStoreData(
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
         replyList: replyList,
-        userList: data.userList.values.toList(),
-        groupSet: data.groupList.values.toSet(),
-        medalSet: data.medalList.values.toSet(),
+        hotReplyList: hotReplyList,
+        userList: userList,
+        groupSet: groups,
+        medalSet: medals,
       );
       return state;
     } catch (err) {
@@ -42,6 +57,7 @@ class TopicSinglePageStoreData {
   final int maxPage;
   final bool enablePullUp;
   final List<Reply> replyList;
+  final List<Reply> hotReplyList;
   final List<User> userList;
   final Set<Group> groupSet;
   final Set<Medal> medalSet;
@@ -51,6 +67,7 @@ class TopicSinglePageStoreData {
     this.maxPage,
     this.enablePullUp,
     this.replyList,
+    this.hotReplyList,
     this.userList,
     this.groupSet,
     this.medalSet,
@@ -61,6 +78,7 @@ class TopicSinglePageStoreData {
         maxPage: 1,
         enablePullUp: false,
         replyList: [],
+        hotReplyList: [],
         userList: [],
         groupSet: HashSet(),
         medalSet: HashSet(),
