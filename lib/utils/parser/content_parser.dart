@@ -197,7 +197,7 @@ class _ContentParser implements Parser {
     final imgUrl = group.startsWith("./mon_")
         ? "https://img.nga.178.com/attachments${group.substring(1)}"
         : group;
-    return "<a href='$imgUrl'><img src='$imgUrl' ></a>";
+    return "<img src='$imgUrl' />";
   }
 
   String _urlReplaceFunc(Match match) {

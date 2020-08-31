@@ -42,6 +42,19 @@ class NgaHtmlContentWidget extends StatelessWidget {
           padding: EdgeInsets.all(0),
           margin: EdgeInsets.all(0),
         ),
+        'table': Style(
+          margin: EdgeInsets.all(8),
+          border: Border(
+            left: BorderSide(color: Colors.grey.shade300),
+            right: BorderSide(color: Colors.grey.shade300),
+            top: BorderSide(color: Colors.grey.shade300),
+          ),
+        ),
+        'tr': Style(
+          backgroundColor: Colors.white.withAlpha(150),
+          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+        ),
+        'td': Style(padding: EdgeInsets.all(8)),
       },
     );
   }
