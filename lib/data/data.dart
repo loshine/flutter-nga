@@ -13,7 +13,6 @@ import 'package:flutter_nga/data/repository/message_repository.dart';
 import 'package:flutter_nga/data/repository/resource_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
-import 'package:flutter_nga/plugins/android_format_json.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:path_provider/path_provider.dart';
@@ -104,8 +103,8 @@ class Data {
         String responseBody = _formatResponseBody(response);
         Map<String, dynamic> map;
         try {
-          // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
-          responseBody = await AndroidFormatJson.decode(responseBody);
+          // // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
+          // responseBody = await AndroidFormatJson.decode(responseBody);
           map = json.decode(responseBody);
         } catch (err) {
           debugPrint(err.toString());
@@ -126,7 +125,7 @@ class Data {
           Map<String, dynamic> map;
           try {
             // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
-            responseBody = await AndroidFormatJson.decode(responseBody);
+            // responseBody = await AndroidFormatJson.decode(responseBody);
             map = json.decode(responseBody);
           } catch (err) {
             debugPrint(err.toString());

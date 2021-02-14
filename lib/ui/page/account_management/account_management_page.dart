@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/store/account_list_store.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -62,7 +61,7 @@ class _AccountManagementState extends State<AccountManagementPage> {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: "添加账号",
-        onPressed: () => AndroidLogin.startLogin(),
+        onPressed: () => Routes.navigateTo(context, Routes.LOGIN),
         child: Icon(
           Icons.add,
           color: Colors.white,
