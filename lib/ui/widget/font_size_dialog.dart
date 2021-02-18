@@ -29,7 +29,7 @@ class FontSizeDialog extends StatelessWidget {
           itemBuilder: (context, position) {
             return InkWell(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                padding: EdgeInsets.symmetric(vertical: 16),
                 child: Text("${sizeList[position]}"),
               ),
               onTap: () {

@@ -12,13 +12,13 @@ mixin _$AccountListStore on _AccountListStore, Store {
   final _$listAtom = Atom(name: '_AccountListStore.list');
 
   @override
-  List<User> get list {
+  List<CacheUser> get list {
     _$listAtom.reportRead();
     return super.list;
   }
 
   @override
-  set list(List<User> value) {
+  set list(List<CacheUser> value) {
     _$listAtom.reportWrite(value, super.list, () {
       super.list = value;
     });

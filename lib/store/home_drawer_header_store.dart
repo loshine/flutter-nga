@@ -13,7 +13,7 @@ abstract class _HomeDrawerHeaderStore with Store {
   @action
   Future refresh() async {
     try {
-      User user = await Data().userRepository.getDefaultUser();
+      CacheUser user = await Data().userRepository.getDefaultUser();
       if (user != null) {
         userInfo = await Data().userRepository.getUserInfoByUid(user.uid);
       }

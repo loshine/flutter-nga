@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/store/topic_detail_store.dart';
 import 'package:flutter_nga/store/topic_single_page_store.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';

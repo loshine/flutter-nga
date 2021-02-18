@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
@@ -53,7 +54,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 8, 16, 0),
+                padding: EdgeInsets.only(top: 8, right: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -86,7 +87,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                          padding: EdgeInsets.only(left: 16),
                           child: Text(
                             "威望: ${widget.user.getShowReputation()}",
                             style: TextStyle(
@@ -96,7 +97,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                          padding: EdgeInsets.only(left: 16),
                           child: Text(
                             "发帖: ${widget.user.postNum ?? 0}",
                             style: TextStyle(

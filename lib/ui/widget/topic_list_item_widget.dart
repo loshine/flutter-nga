@@ -24,7 +24,7 @@ class TopicListItemWidget extends StatelessWidget {
         children: <Widget>[
           Container(
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+            padding: EdgeInsets.all(16),
             child: Column(
               children: [
                 SizedBox(
@@ -56,7 +56,7 @@ class TopicListItemWidget extends StatelessWidget {
                       Padding(
                         child: Icon(
                           CommunityMaterialIcons.account,
-                          size: 12,
+                          size: Dimen.icon,
                           color: Palette.colorIcon,
                         ),
                         padding: EdgeInsets.only(right: 8),
@@ -75,7 +75,7 @@ class TopicListItemWidget extends StatelessWidget {
                         child: (topic.hasAttachment()
                             ? Icon(
                                 Icons.attachment,
-                                size: 12,
+                                size: Dimen.icon,
                                 color: Palette.colorIcon,
                               )
                             : null),
@@ -84,7 +84,7 @@ class TopicListItemWidget extends StatelessWidget {
                         padding: EdgeInsets.only(right: 8),
                         child: Icon(
                           CommunityMaterialIcons.comment,
-                          size: 12,
+                          size: Dimen.icon,
                           color: Palette.colorIcon,
                         ),
                       ),
@@ -96,10 +96,10 @@ class TopicListItemWidget extends StatelessWidget {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16, 0, 8, 0),
+                        padding: EdgeInsets.only(left:16, right: 8),
                         child: Icon(
                           CommunityMaterialIcons.clock,
-                          size: 12,
+                          size: Dimen.icon,
                           color: Palette.colorIcon,
                         ),
                       ),
