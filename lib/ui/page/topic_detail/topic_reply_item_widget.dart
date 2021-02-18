@@ -33,6 +33,8 @@ class TopicReplyItemWidget extends StatefulWidget {
 }
 
 class _TopicReplyItemState extends State<TopicReplyItemWidget> {
+  bool _attachmentsExpanded = false;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -169,9 +171,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               ),
               Padding(
                 padding: EdgeInsets.only(left: 16, right: 16),
-                child: Wrap(
-                  children: _getAttachmentListWidgets(),
-                ),
+                child: _getAttachments(),
               ),
             ],
           ),
@@ -329,21 +329,38 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     return widgets;
   }
 
-  _getAttachmentListWidgets() {
-    List<Widget> widgets = [];
-    widgets.addAll(widget.reply.attachmentList.map((attachment) {
-      return Padding(
-        padding: EdgeInsets.only(right: 16),
-        child: CachedNetworkImage(
-          imageUrl: attachment.realUrl,
-          placeholder: (context, url) => Image.asset(
-            'images/default_forum_icon.png',
-            width: 48,
-            height: 48,
+  _getAttachments() {
+    List<Widget> columnWidgets = [];
+    final button = RaisedButton(
+      elevation: 0,
+      child: Text(
+        _attachmentsExpanded ? "展开附件" : "收起附件",
+        style: TextStyle(fontSize: Dimen.button),
+      ),
+      onPressed: () =>
+          setState(() => _attachmentsExpanded = !_attachmentsExpanded),
+    );
+    columnWidgets.add(button);
+    if (_attachmentsExpanded) {
+      List<Widget> attachmentWidgets = [];
+      attachmentWidgets.addAll(widget.reply.attachmentList.map((attachment) {
+        return Padding(
+          padding: EdgeInsets.only(right: 16),
+          child: CachedNetworkImage(
+            imageUrl: attachment.realUrl,
+            placeholder: (context, url) => Image.asset(
+              'images/default_forum_icon.png',
+              width: 48,
+              height: 48,
+            ),
           ),
-        ),
-      );
-    }));
-    return widgets;
+        );
+      }));
+      columnWidgets.add(Wrap(children: attachmentWidgets));
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: columnWidgets,
+    );
   }
 }
