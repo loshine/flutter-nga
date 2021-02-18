@@ -8,6 +8,7 @@ import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_pa
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
 import 'package:flutter_nga/ui/page/home/home_drawer.dart';
+import 'package:flutter_nga/ui/page/notification/notification_list_page.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +44,7 @@ class _HomePageState extends State<_HomePage> {
       FavouriteTopicListPage(),
       TopicHistoryListPage(key: _historyStateKey),
       ConversationListPage(),
-      ConversationListPage(),
+      NotificationListPage(),
     ];
   }
 
@@ -59,6 +60,7 @@ class _HomePageState extends State<_HomePage> {
     } else if (_store.index == 4) {
       return '提醒信息';
     }
+    return '';
   }
 
   List<Widget> _getActionsByPage(int index) {
