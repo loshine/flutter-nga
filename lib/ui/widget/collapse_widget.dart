@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class CollapseWidget extends StatefulWidget {
-  const CollapseWidget.fromNodes({this.title, this.children, Key key})
+  const CollapseWidget.fromNodes({this.title, this.child, Key key})
       : super(key: key);
 
   final String title;
-  final List<Widget> children;
+  final Widget child;
 
   @override
   _CollapseState createState() => _CollapseState();
@@ -29,7 +29,7 @@ class _CollapseState extends State<CollapseWidget> {
           ),
           SizedBox(
             height: _collapsed ? 0 : null,
-            child: Wrap(children: widget.children),
+            child: widget.child,
           ),
         ],
       ),
