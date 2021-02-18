@@ -1,4 +1,5 @@
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class TopicDetailPage extends StatefulWidget {
   const TopicDetailPage(this.tid, this.fid, {this.subject, Key key})
@@ -125,7 +127,7 @@ class _TopicDetailState extends State<TopicDetailPage>
                   IconButton(
                     icon: Icon(CommunityMaterialIcons.heart_outline),
                     color: Colors.white,
-                    onPressed: () {},
+                    onPressed: _addFavourite,
                   ),
                   IconButton(
                     icon: Icon(CommunityMaterialIcons.comment_outline),
@@ -151,5 +153,17 @@ class _TopicDetailState extends State<TopicDetailPage>
   _onLoadComplete(int maxPage, List<Reply> commentList) {
     _store.setMaxPage(maxPage);
     _store.mergeCommentList(commentList);
+  }
+
+  _addFavourite() {
+    _store.addFavourite(widget.tid).then((message) {
+      Fluttertoast.showToast(msg: message, gravity: ToastGravity.CENTER);
+    }).catchError((e) {
+      if (e is DioError) {
+        Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);
+      } else {
+        Fluttertoast.showToast(msg: e.toString(), gravity: ToastGravity.CENTER);
+      }
+    });
   }
 }
