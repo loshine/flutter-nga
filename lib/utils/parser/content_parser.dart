@@ -79,16 +79,30 @@ class _ReplyParser implements Parser {
   @override
   String parse(String content) {
     return content
+        // 引用主贴
+        .replaceAllMapped(
+            RegExp(
+                "\\[tid=(\\d+)?]Topic\\[/tid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
+            (match) =>
+                "<a href='https://bbs.nga.cn/read.php?tid=${match.group(1)}'>Topic</a> Post by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(2)}'>[${match.group(3)}]</a> (${match.group(4)})")
+        // 引用普通回贴
         .replaceAllMapped(
             RegExp(
                 "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(4)}'>[${match.group(5)}]</a> (${match.group(6)}):")
+                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(4)}'>[${match.group(5)}]</a> (${match.group(6)}):")
+        // 评论主贴
+        .replaceAllMapped(
+            RegExp(
+                "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
+            (match) =>
+                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(2)} ${match.group(3)}")
+        // 评论普通回贴
         .replaceAllMapped(
             RegExp(
                 "\\[b]Reply to \\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
             (match) =>
-                "<blockquote><a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}</blockquote>");
+                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}");
   }
 }
 
@@ -209,7 +223,7 @@ class _EmoticonParser implements Parser {
     list.forEach((group) {
       group.expressionList.forEach((emoticon) {
         parseContent = parseContent.replaceAll(
-            emoticon.content, "<emoticon src='${emoticon.url}' >");
+            emoticon.content, "<emoticon src='${emoticon.url}' ></emoticon>");
       });
     });
     return parseContent;

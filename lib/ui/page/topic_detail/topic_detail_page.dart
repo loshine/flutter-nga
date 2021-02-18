@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/store/topic_detail_store.dart';
+import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/palette.dart';
@@ -86,7 +87,16 @@ class _TopicDetailState extends State<TopicDetailPage>
                     ),
                   ),
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+//                      showDialog(
+//                          context: context,
+//                          builder: (_) {
+//                            return TopicPageSelectDialog(
+//                              currentPage: _store.currentPage,
+//                              maxPage: _store.maxPage,
+//                            );
+//                          });
+                    },
                     child: SizedBox(
                       height: kToolbarHeight,
                       child: Column(
