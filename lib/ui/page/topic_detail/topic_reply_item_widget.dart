@@ -11,7 +11,6 @@ import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
-import 'package:flutter_nga/utils/renderer.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class TopicReplyItemWidget extends StatefulWidget {
@@ -132,9 +131,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
             child: Html(
-              useRichText: false,
               data: NgaContentParser.parse(widget.reply.content),
-              customRender: ngaRenderer,
             ),
           ),
         ),
