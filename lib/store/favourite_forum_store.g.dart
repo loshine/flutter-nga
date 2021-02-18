@@ -13,30 +13,35 @@ mixin _$FavouriteForumStore on _FavouriteForumStore, Store {
 
   @override
   bool get isFavourite {
-    _$isFavouriteAtom.context.enforceReadPolicy(_$isFavouriteAtom);
-    _$isFavouriteAtom.reportObserved();
+    _$isFavouriteAtom.reportRead();
     return super.isFavourite;
   }
 
   @override
   set isFavourite(bool value) {
-    _$isFavouriteAtom.context.conditionallyRunInAction(() {
+    _$isFavouriteAtom.reportWrite(value, super.isFavourite, () {
       super.isFavourite = value;
-      _$isFavouriteAtom.reportChanged();
-    }, _$isFavouriteAtom, name: '${_$isFavouriteAtom.name}_set');
+    });
   }
 
-  final _$loadAsyncAction = AsyncAction('load');
+  final _$loadAsyncAction = AsyncAction('_FavouriteForumStore.load');
 
   @override
   Future<dynamic> load(int fid, String name) {
     return _$loadAsyncAction.run(() => super.load(fid, name));
   }
 
-  final _$toggleAsyncAction = AsyncAction('toggle');
+  final _$toggleAsyncAction = AsyncAction('_FavouriteForumStore.toggle');
 
   @override
   Future<dynamic> toggle(int fid, String name) {
     return _$toggleAsyncAction.run(() => super.toggle(fid, name));
+  }
+
+  @override
+  String toString() {
+    return '''
+isFavourite: ${isFavourite}
+    ''';
   }
 }

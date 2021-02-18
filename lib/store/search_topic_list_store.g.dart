@@ -13,20 +13,18 @@ mixin _$SearchTopicListStore on _SearchTopicListStore, Store {
 
   @override
   SearchTopicListStoreData get state {
-    _$stateAtom.context.enforceReadPolicy(_$stateAtom);
-    _$stateAtom.reportObserved();
+    _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
   set state(SearchTopicListStoreData value) {
-    _$stateAtom.context.conditionallyRunInAction(() {
+    _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
-      _$stateAtom.reportChanged();
-    }, _$stateAtom, name: '${_$stateAtom.name}_set');
+    });
   }
 
-  final _$refreshAsyncAction = AsyncAction('refresh');
+  final _$refreshAsyncAction = AsyncAction('_SearchTopicListStore.refresh');
 
   @override
   Future<SearchTopicListStoreData> refresh(
@@ -34,12 +32,19 @@ mixin _$SearchTopicListStore on _SearchTopicListStore, Store {
     return _$refreshAsyncAction.run(() => super.refresh(keyword, fid, content));
   }
 
-  final _$loadMoreAsyncAction = AsyncAction('loadMore');
+  final _$loadMoreAsyncAction = AsyncAction('_SearchTopicListStore.loadMore');
 
   @override
   Future<SearchTopicListStoreData> loadMore(
       String keyword, int fid, bool content) {
     return _$loadMoreAsyncAction
         .run(() => super.loadMore(keyword, fid, content));
+  }
+
+  @override
+  String toString() {
+    return '''
+state: ${state}
+    ''';
   }
 }

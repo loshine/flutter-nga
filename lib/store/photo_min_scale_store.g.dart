@@ -13,17 +13,15 @@ mixin _$PhotoMinScaleStore on _PhotoMinScaleStore, Store {
 
   @override
   double get minScale {
-    _$minScaleAtom.context.enforceReadPolicy(_$minScaleAtom);
-    _$minScaleAtom.reportObserved();
+    _$minScaleAtom.reportRead();
     return super.minScale;
   }
 
   @override
   set minScale(double value) {
-    _$minScaleAtom.context.conditionallyRunInAction(() {
+    _$minScaleAtom.reportWrite(value, super.minScale, () {
       super.minScale = value;
-      _$minScaleAtom.reportChanged();
-    }, _$minScaleAtom, name: '${_$minScaleAtom.name}_set');
+    });
   }
 
   final _$_PhotoMinScaleStoreActionController =
@@ -31,11 +29,19 @@ mixin _$PhotoMinScaleStore on _PhotoMinScaleStore, Store {
 
   @override
   void load(String url, double screenWidth) {
-    final _$actionInfo = _$_PhotoMinScaleStoreActionController.startAction();
+    final _$actionInfo = _$_PhotoMinScaleStoreActionController.startAction(
+        name: '_PhotoMinScaleStore.load');
     try {
       return super.load(url, screenWidth);
     } finally {
       _$_PhotoMinScaleStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+minScale: ${minScale}
+    ''';
   }
 }

@@ -13,17 +13,15 @@ mixin _$SearchOptionsStore on _SearchOptionsStore, Store {
 
   @override
   SearchStoreData get state {
-    _$stateAtom.context.enforceReadPolicy(_$stateAtom);
-    _$stateAtom.reportObserved();
+    _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
   set state(SearchStoreData value) {
-    _$stateAtom.context.conditionallyRunInAction(() {
+    _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
-      _$stateAtom.reportChanged();
-    }, _$stateAtom, name: '${_$stateAtom.name}_set');
+    });
   }
 
   final _$_SearchOptionsStoreActionController =
@@ -31,7 +29,8 @@ mixin _$SearchOptionsStore on _SearchOptionsStore, Store {
 
   @override
   void checkFirstRadio(int value) {
-    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction();
+    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction(
+        name: '_SearchOptionsStore.checkFirstRadio');
     try {
       return super.checkFirstRadio(value);
     } finally {
@@ -41,7 +40,8 @@ mixin _$SearchOptionsStore on _SearchOptionsStore, Store {
 
   @override
   void checkTopicRadio(int value) {
-    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction();
+    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction(
+        name: '_SearchOptionsStore.checkTopicRadio');
     try {
       return super.checkTopicRadio(value);
     } finally {
@@ -51,7 +51,8 @@ mixin _$SearchOptionsStore on _SearchOptionsStore, Store {
 
   @override
   void checkUserRadio(int value) {
-    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction();
+    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction(
+        name: '_SearchOptionsStore.checkUserRadio');
     try {
       return super.checkUserRadio(value);
     } finally {
@@ -61,11 +62,19 @@ mixin _$SearchOptionsStore on _SearchOptionsStore, Store {
 
   @override
   void checkContent(bool value) {
-    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction();
+    final _$actionInfo = _$_SearchOptionsStoreActionController.startAction(
+        name: '_SearchOptionsStore.checkContent');
     try {
       return super.checkContent(value);
     } finally {
       _$_SearchOptionsStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+state: ${state}
+    ''';
   }
 }

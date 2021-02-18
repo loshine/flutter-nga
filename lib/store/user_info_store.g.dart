@@ -13,30 +13,35 @@ mixin _$UserInfoStore on _UserInfoStore, Store {
 
   @override
   UserInfoStoreData get state {
-    _$stateAtom.context.enforceReadPolicy(_$stateAtom);
-    _$stateAtom.reportObserved();
+    _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
   set state(UserInfoStoreData value) {
-    _$stateAtom.context.conditionallyRunInAction(() {
+    _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
-      _$stateAtom.reportChanged();
-    }, _$stateAtom, name: '${_$stateAtom.name}_set');
+    });
   }
 
-  final _$loadByNameAsyncAction = AsyncAction('loadByName');
+  final _$loadByNameAsyncAction = AsyncAction('_UserInfoStore.loadByName');
 
   @override
   Future<UserInfoStoreData> loadByName(String username) {
     return _$loadByNameAsyncAction.run(() => super.loadByName(username));
   }
 
-  final _$loadByUidAsyncAction = AsyncAction('loadByUid');
+  final _$loadByUidAsyncAction = AsyncAction('_UserInfoStore.loadByUid');
 
   @override
   Future<UserInfoStoreData> loadByUid(String uid) {
     return _$loadByUidAsyncAction.run(() => super.loadByUid(uid));
+  }
+
+  @override
+  String toString() {
+    return '''
+state: ${state}
+    ''';
   }
 }

@@ -14,11 +14,19 @@ mixin _$TopicHistoryStore on _TopicHistoryStore, Store {
 
   @override
   void insertHistory(TopicHistory history) {
-    final _$actionInfo = _$_TopicHistoryStoreActionController.startAction();
+    final _$actionInfo = _$_TopicHistoryStoreActionController.startAction(
+        name: '_TopicHistoryStore.insertHistory');
     try {
       return super.insertHistory(history);
     } finally {
       _$_TopicHistoryStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+
+    ''';
   }
 }

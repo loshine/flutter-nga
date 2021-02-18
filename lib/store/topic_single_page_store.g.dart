@@ -13,23 +13,28 @@ mixin _$TopicSinglePageStore on _TopicSinglePageStore, Store {
 
   @override
   TopicSinglePageStoreData get state {
-    _$stateAtom.context.enforceReadPolicy(_$stateAtom);
-    _$stateAtom.reportObserved();
+    _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
   set state(TopicSinglePageStoreData value) {
-    _$stateAtom.context.conditionallyRunInAction(() {
+    _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
-      _$stateAtom.reportChanged();
-    }, _$stateAtom, name: '${_$stateAtom.name}_set');
+    });
   }
 
-  final _$refreshAsyncAction = AsyncAction('refresh');
+  final _$refreshAsyncAction = AsyncAction('_TopicSinglePageStore.refresh');
 
   @override
   Future<TopicSinglePageStoreData> refresh(int tid, int page) {
     return _$refreshAsyncAction.run(() => super.refresh(tid, page));
+  }
+
+  @override
+  String toString() {
+    return '''
+state: ${state}
+    ''';
   }
 }
