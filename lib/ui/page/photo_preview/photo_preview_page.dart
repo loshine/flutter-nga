@@ -60,9 +60,8 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
   }
 
   _save() async {
-    Map<PermissionGroup, PermissionStatus> permissions =
-        await PermissionHandler().requestPermissions([PermissionGroup.storage]);
-    if (permissions[PermissionGroup.storage] == PermissionStatus.granted) {
+    var status = await Permission.storage.status;
+    if (status == PermissionStatus.granted) {
       final file = await Data()
           .resourceRepository
           .downloadImage(pictureUtils.getOriginalUrl(widget.url));

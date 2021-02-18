@@ -1,7 +1,6 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
@@ -12,6 +11,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class PublishPage extends StatefulWidget {
   const PublishPage({
@@ -75,15 +75,12 @@ class _PublishReplyState extends State<PublishPage> {
       attachmentCallback: _attachmentCallback,
     );
     _currentBottomPanelChild = _emoticonGroupTabsWidget;
-    KeyboardVisibilityNotification().addNewListener(
-      onChange: (bool visible) {
-        // called when the keyboard visibility changes
-        _keyboardVisible = visible;
-        if (visible && _bottomPanelVisible) {
-          _hideBottomPanel();
-        }
-      },
-    );
+    KeyboardVisibility.onChange.listen((bool visible) {
+      _keyboardVisible = visible;
+      if (visible && _bottomPanelVisible) {
+        _hideBottomPanel();
+      }
+    });
   }
 
   @override
