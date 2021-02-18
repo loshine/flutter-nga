@@ -112,7 +112,8 @@ class _CommentParser implements Parser {
         .replaceAll(
             RegExp(
                 "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid]([\\s\\S]*?)\\[/uid]\\[color=gray]\\(([\\s\\S]*?)\\)\\[/color] \\(([\\s\\S]*?)\\)\\[/b]"),
-            "");
+            "")
+        .replaceAll(RegExp("^(<br/>)+|(<br/>)+\$"), "");
   }
 }
 

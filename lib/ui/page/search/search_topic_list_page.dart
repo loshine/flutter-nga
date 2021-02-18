@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/search_topic_list_store.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SearchTopicListPage extends StatefulWidget {
@@ -63,13 +65,27 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
     _store
         .refresh(widget.keyword, widget.fid, widget.content)
         .whenComplete(() => _refreshController.refreshCompleted())
-        .catchError((_) => _refreshController.refreshFailed());
+        .catchError((e) {
+      if (e is DioError) {
+        Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);
+      } else {
+        Fluttertoast.showToast(msg: e.toString(), gravity: ToastGravity.CENTER);
+      }
+      _refreshController.refreshFailed();
+    });
   }
 
   _onLoadMore() {
     _store
         .loadMore(widget.keyword, widget.fid, widget.content)
         .whenComplete(() => _refreshController.loadComplete())
-        .catchError((_) => _refreshController.loadFailed());
+        .catchError((e) {
+      if (e is DioError) {
+        Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);
+      } else {
+        Fluttertoast.showToast(msg: e.toString(), gravity: ToastGravity.CENTER);
+      }
+      _refreshController.loadFailed();
+    });
   }
 }

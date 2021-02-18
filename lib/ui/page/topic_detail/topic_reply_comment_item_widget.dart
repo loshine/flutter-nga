@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
+import 'package:flutter_nga/ui/widget/nga_html_comment_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
-import 'package:flutter_nga/utils/parser/content_parser.dart';
 
 class TopicReplyCommentItemWidget extends StatelessWidget {
   const TopicReplyCommentItemWidget(this.reply, this.user, {Key key})
@@ -57,7 +56,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
               ),
             ],
           ),
-          Html(data: NgaContentParser.parseComment(reply.content)),
+          NgaHtmlCommentWidget(content: reply.content),
         ],
       ),
     );

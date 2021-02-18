@@ -2,15 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
+import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
-import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class TopicReplyItemWidget extends StatefulWidget {
@@ -130,9 +129,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           height: codeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: Html(
-              data: NgaContentParser.parse(widget.reply.content),
-            ),
+            child: NgaHtmlContentWidget(content: widget.reply.content),
           ),
         ),
         SizedBox(

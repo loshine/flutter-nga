@@ -156,9 +156,9 @@ class Data {
         .replaceAll("</script></body></html>", "")
         .replaceAll("window.script_muti_get_var_store=", "");
     debugPrint(
-        "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}\n" +
-            "request data : ${response.request.data.toString()}\n" +
-            "response data : $responseBody");
+        "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}");
+    debugPrint("request data : ${response.request.data.toString()}");
+    debugPrint("response data : $responseBody");
     return responseBody;
   }
 
