@@ -16,7 +16,7 @@ import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 
 class Routes {
-  static Router router;
+  static FluroRouter router;
 
   static const String SPLASH = "/";
   static const String HOME = "/home";
@@ -33,7 +33,7 @@ class Routes {
   static const String PHOTO_PREVIEW = "/photo_preview";
 
   /// 初始化路由
-  static void configureRoutes(Router r) {
+  static void configureRoutes(FluroRouter r) {
     router = r;
 
     /// 第一个参数是路由地址，第二个参数是页面跳转和传参，第三个参数是默认的转场动画，可以看上图
