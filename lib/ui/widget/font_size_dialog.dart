@@ -25,6 +25,7 @@ class FontSizeDialog extends StatelessWidget {
         width: 0,
         height: 408,
         child: ListView.builder(
+          physics: BouncingScrollPhysics(),
           itemCount: sizeList.length,
           itemBuilder: (context, position) {
             return InkWell(

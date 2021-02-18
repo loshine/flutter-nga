@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/search_topic_list_store.dart';
+import 'package:flutter_nga/store/search/search_topic_list_store.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -39,6 +39,7 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
             itemBuilder: (_, index) =>
                 TopicListItemWidget(topic: _store.state.list[index]),
             itemCount: _store.state.list.length,
+            physics: BouncingScrollPhysics(),
           ),
         ),
       ),

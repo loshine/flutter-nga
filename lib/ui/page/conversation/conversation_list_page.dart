@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/conversation_list_store.dart';
+import 'package:flutter_nga/store/message/conversation_list_store.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -40,6 +40,7 @@ class _ConversationListState extends State<ConversationListPage> {
             itemCount: _store.state.list.length,
             itemBuilder: (context, index) =>
                 ConversationItemWidget(conversation: _store.state.list[index]),
+            physics: BouncingScrollPhysics(),
           ),
         );
       },

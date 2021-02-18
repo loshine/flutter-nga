@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/forum_detail_store.dart';
+import 'package:flutter_nga/store/forum/forum_detail_store.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -44,6 +44,7 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
           enablePullUp: _store.state.enablePullUp,
           onRefresh: _onRefresh,
           child: ListView.builder(
+            physics: BouncingScrollPhysics(),
             itemCount: _store.state.list.length,
             itemBuilder: (context, index) =>
                 TopicListItemWidget(topic: _store.state.list[index]),

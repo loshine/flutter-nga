@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/account_list_store.dart';
+import 'package:flutter_nga/store/user/account_list_store.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -39,6 +39,7 @@ class _AccountManagementState extends State<AccountManagementPage> {
         child: Observer(
           builder: (_) => ListView.builder(
             itemCount: _store.list.length,
+            physics: BouncingScrollPhysics(),
             itemBuilder: (context, position) => Material(
               color: Colors.transparent,
               child: InkWell(

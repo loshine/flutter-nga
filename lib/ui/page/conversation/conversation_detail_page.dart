@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/conversation_detail_store.dart';
+import 'package:flutter_nga/store/message/conversation_detail_store.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -45,12 +46,22 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
             enablePullUp: _store.state.enablePullUp,
             onRefresh: _onRefresh,
             child: ListView.builder(
+              physics: BouncingScrollPhysics(),
               itemCount: _store.state.list.length,
               itemBuilder: (context, index) =>
                   MessageItemWidget(message: _store.state.list[index]),
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: '回复',
+        onPressed: () => Routes.navigateTo(
+            context, "${Routes.SEND_MESSAGE}?mid=${widget.mid}"),
+        child: Icon(
+          Icons.reply,
+          color: Colors.white,
+        ),
       ),
     );
   }

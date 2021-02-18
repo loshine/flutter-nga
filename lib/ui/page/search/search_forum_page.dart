@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
-import 'package:flutter_nga/store/search_forum_store.dart';
+import 'package:flutter_nga/store/search/search_forum_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -43,6 +43,7 @@ class _SearchForumState extends State<SearchForumPage> {
           enablePullUp: false,
           controller: _refreshController,
           child: ListView.builder(
+            physics: BouncingScrollPhysics(),
             itemBuilder: (_, index) => _buildForumWidget(_store.forums[index]),
             itemCount: _store.forums.length,
           ),

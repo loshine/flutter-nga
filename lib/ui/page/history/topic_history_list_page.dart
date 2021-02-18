@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
-import 'package:flutter_nga/store/topic_history_list_store.dart';
+import 'package:flutter_nga/store/topic/topic_history_list_store.dart';
 import 'package:flutter_nga/ui/widget/topic_history_list_item_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
@@ -147,6 +147,7 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
   Widget _buildChild() {
     if (_store.state.list != null && _store.state.list.isNotEmpty) {
       return ListView.builder(
+        physics: BouncingScrollPhysics(),
         itemCount: _store.state.list.length,
         itemBuilder: (_, position) =>
             _buildListItem(_store.state.list[position]),
