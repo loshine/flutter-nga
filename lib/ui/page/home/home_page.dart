@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/home_drawer_header_store.dart';
 import 'package:flutter_nga/store/home_store.dart';
+import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
@@ -41,6 +42,8 @@ class _HomePageState extends State<_HomePage> {
       ForumGroupTabsPage(),
       FavouriteTopicListPage(),
       TopicHistoryListPage(key: _historyStateKey),
+      ConversationListPage(),
+      ConversationListPage(),
     ];
   }
 
@@ -49,8 +52,12 @@ class _HomePageState extends State<_HomePage> {
       return 'NGA';
     } else if (_store.index == 1) {
       return '贴子收藏';
-    } else {
+    } else if (_store.index == 2) {
       return '浏览历史';
+    } else if (_store.index == 3) {
+      return '短消息';
+    } else if (_store.index == 4) {
+      return '提醒信息';
     }
   }
 
@@ -101,7 +108,7 @@ class _HomePageState extends State<_HomePage> {
                       children: [
                         Divider(height: 1),
                         Container(
-                          padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          padding: EdgeInsets.symmetric(vertical: 16),
                           height: 56,
                           child: Align(
                             child: Text(
@@ -116,7 +123,8 @@ class _HomePageState extends State<_HomePage> {
                         Material(
                           child: InkWell(
                             child: ListTile(
-                              leading: Icon(Icons.forum),
+                              leading:
+                                  Icon(CommunityMaterialIcons.view_dashboard),
                               title: Text("论坛"),
                               selected: _store.index == 0,
                             ),
@@ -146,9 +154,31 @@ class _HomePageState extends State<_HomePage> {
                           ),
                           color: Palette.colorBackground,
                         ),
+                        Material(
+                          child: InkWell(
+                            child: ListTile(
+                              leading: Icon(Icons.message),
+                              title: Text("短消息"),
+                              selected: _store.index == 3,
+                            ),
+                            onTap: () => _setSelection(3),
+                          ),
+                          color: Palette.colorBackground,
+                        ),
+                        Material(
+                          child: InkWell(
+                            child: ListTile(
+                              leading: Icon(Icons.notifications_rounded),
+                              title: Text("提醒信息"),
+                              selected: _store.index == 4,
+                            ),
+                            onTap: () => _setSelection(4),
+                          ),
+                          color: Palette.colorBackground,
+                        ),
                         Divider(height: 1),
                         Container(
-                          padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          padding: EdgeInsets.symmetric(vertical: 16),
                           height: 56,
                           child: Align(
                             child: Text(

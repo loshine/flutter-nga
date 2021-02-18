@@ -122,7 +122,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: 8, right: 8),
+                            padding: EdgeInsets.symmetric(horizontal: 8),
                             child: Text(
                               "${store.currentPage}/${store.maxPage}",
                               style: TextStyle(

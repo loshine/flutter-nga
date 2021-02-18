@@ -8,11 +8,11 @@ class AccountListStore = _AccountListStore with _$AccountListStore;
 
 abstract class _AccountListStore with Store {
   @observable
-  List<User> list = [];
+  List<CacheUser> list = [];
 
   @action
   Future refresh() async {
-    List<User> accountList = await Data().userRepository.getAllLoginUser();
+    List<CacheUser> accountList = await Data().userRepository.getAllLoginUser();
     list = accountList;
   }
 

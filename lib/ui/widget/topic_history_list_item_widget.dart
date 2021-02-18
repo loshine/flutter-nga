@@ -25,7 +25,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
         children: <Widget>[
           Container(
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+            padding: EdgeInsets.all(16),
             child: Column(
               children: [
                 SizedBox(
@@ -56,7 +56,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                       Padding(
                         child: Icon(
                           CommunityMaterialIcons.account,
-                          size: 12,
+                          size: Dimen.icon,
                           color: Palette.colorIcon,
                         ),
                         padding: EdgeInsets.only(right: 8),

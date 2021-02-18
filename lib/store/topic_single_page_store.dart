@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/data/entity/user.dart';
 import 'package:mobx/mobx.dart';
 
 part 'topic_single_page_store.g.dart';

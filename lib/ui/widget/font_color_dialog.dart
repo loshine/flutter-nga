@@ -21,7 +21,7 @@ class FontColorDialog extends StatelessWidget {
           itemBuilder: (context, position) {
             return InkWell(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                padding: EdgeInsets.symmetric(vertical: 16),
                 child: Text(
                   "${keyList[position]}",
                   style: TextStyle(color: valueList[position]),
