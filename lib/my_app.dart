@@ -16,7 +16,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  final Router _router = Router();
+  final FluroRouter _router = FluroRouter();
 
   _MyAppState() {
     Routes.configureRoutes(_router);
@@ -44,7 +44,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<Router>(create: (_) => _router),
+        Provider<FluroRouter>(create: (_) => _router),
         Provider<FavouriteForumListStore>(
             create: (_) => FavouriteForumListStore()),
       ],

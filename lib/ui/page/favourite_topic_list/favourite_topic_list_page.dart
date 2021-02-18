@@ -76,7 +76,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
         builder: (_) {
           return AlertDialog(
             title: Text("提示"),
-            content: Text("是否删除该浏览历史"),
+            content: Text("是否删除该收藏"),
             actions: <Widget>[
               FlatButton(
                 onPressed: () => Routes.pop(context),
