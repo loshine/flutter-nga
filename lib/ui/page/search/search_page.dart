@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/input_deletion_status_store.dart';
-import 'package:flutter_nga/store/search_options_store.dart';
+import 'package:flutter_nga/store/search/input_deletion_status_store.dart';
+import 'package:flutter_nga/store/search/search_options_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -239,7 +239,10 @@ class _SearchState extends State<SearchPage> {
               ],
             ));
           }
-          return ListView(children: widgets);
+          return ListView(
+            children: widgets,
+            physics: BouncingScrollPhysics(),
+          );
         },
       ),
     );

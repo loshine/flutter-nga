@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
-import 'package:flutter_nga/store/child_forum_subscription_store.dart';
+import 'package:flutter_nga/store/forum/child_forum_subscription_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/route.dart';
 

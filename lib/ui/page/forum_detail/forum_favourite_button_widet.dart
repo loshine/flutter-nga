@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/favourite_forum_list_store.dart';
-import 'package:flutter_nga/store/favourite_forum_store.dart';
+import 'package:flutter_nga/store/forum/favourite_forum_list_store.dart';
+import 'package:flutter_nga/store/forum/favourite_forum_store.dart';
 import 'package:provider/provider.dart';
 
 class ForumFavouriteButtonWidget extends StatefulWidget {
