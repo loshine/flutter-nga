@@ -157,7 +157,9 @@ class Data {
         .replaceAll("window.script_muti_get_var_store=", "");
     debugPrint(
         "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}");
-    debugPrint("request data : ${response.request.data.toString()}");
+    var requestData = response.request.data;
+    debugPrint(
+        "request data : ${requestData is FormData ? requestData.fields.toString() : requestData.toString()}");
     debugPrint("response data : $responseBody");
     return responseBody;
   }
