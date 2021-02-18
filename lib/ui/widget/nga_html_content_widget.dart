@@ -29,9 +29,10 @@ class NgaHtmlContentWidget extends StatelessWidget {
         'font': _fontColorRender,
         'collapse': _collapseRender,
         'img': _imageRender,
-        'emoticon': _emoticonRender,
+        'nga_emoticon': _emoticonRender,
         'blockquote': _blockquoteRender,
         'album': _albumRender,
+        'nga_hr': _hrRender,
       },
       style: {
         'body': Style(
@@ -184,5 +185,10 @@ class NgaHtmlContentWidget extends StatelessWidget {
       ),
       child: parsedChild,
     );
+  }
+
+  Widget _hrRender(RenderContext context, Widget parsedChild,
+      Map<String, String> attributes, dom.Element element) {
+    return Divider(height: 1);
   }
 }

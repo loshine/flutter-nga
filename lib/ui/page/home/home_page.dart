@@ -110,14 +110,13 @@ class _HomePageState extends State<_HomePage> {
                       children: [
                         Divider(height: 1),
                         Container(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.all(16),
                           height: 56,
                           child: Align(
                             child: Text(
                               "模块",
                               style: TextStyle(color: Colors.black45),
                               textAlign: TextAlign.left,
-                              textDirection: TextDirection.ltr,
                             ),
                             alignment: Alignment.centerLeft,
                           ),
@@ -180,14 +179,13 @@ class _HomePageState extends State<_HomePage> {
                         ),
                         Divider(height: 1),
                         Container(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.all(16),
                           height: 56,
                           child: Align(
                             child: Text(
                               "其它",
                               style: TextStyle(color: Colors.black45),
                               textAlign: TextAlign.left,
-                              textDirection: TextDirection.ltr,
                             ),
                             alignment: Alignment.centerLeft,
                           ),
