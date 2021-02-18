@@ -13,17 +13,15 @@ mixin _$FavouriteForumListStore on _FavouriteForumListStore, Store {
 
   @override
   List<Forum> get list {
-    _$listAtom.context.enforceReadPolicy(_$listAtom);
-    _$listAtom.reportObserved();
+    _$listAtom.reportRead();
     return super.list;
   }
 
   @override
   set list(List<Forum> value) {
-    _$listAtom.context.conditionallyRunInAction(() {
+    _$listAtom.reportWrite(value, super.list, () {
       super.list = value;
-      _$listAtom.reportChanged();
-    }, _$listAtom, name: '${_$listAtom.name}_set');
+    });
   }
 
   final _$_FavouriteForumListStoreActionController =
@@ -31,12 +29,19 @@ mixin _$FavouriteForumListStore on _FavouriteForumListStore, Store {
 
   @override
   void refresh() {
-    final _$actionInfo =
-        _$_FavouriteForumListStoreActionController.startAction();
+    final _$actionInfo = _$_FavouriteForumListStoreActionController.startAction(
+        name: '_FavouriteForumListStore.refresh');
     try {
       return super.refresh();
     } finally {
       _$_FavouriteForumListStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+list: ${list}
+    ''';
   }
 }

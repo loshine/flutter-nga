@@ -14,17 +14,15 @@ mixin _$ChildForumSubscriptionStore on _ChildForumSubscriptionStore, Store {
 
   @override
   bool get subscribed {
-    _$subscribedAtom.context.enforceReadPolicy(_$subscribedAtom);
-    _$subscribedAtom.reportObserved();
+    _$subscribedAtom.reportRead();
     return super.subscribed;
   }
 
   @override
   set subscribed(bool value) {
-    _$subscribedAtom.context.conditionallyRunInAction(() {
+    _$subscribedAtom.reportWrite(value, super.subscribed, () {
       super.subscribed = value;
-      _$subscribedAtom.reportChanged();
-    }, _$subscribedAtom, name: '${_$subscribedAtom.name}_set');
+    });
   }
 
   final _$_ChildForumSubscriptionStoreActionController =
@@ -32,8 +30,8 @@ mixin _$ChildForumSubscriptionStore on _ChildForumSubscriptionStore, Store {
 
   @override
   void setSubscribed(bool subscribed) {
-    final _$actionInfo =
-        _$_ChildForumSubscriptionStoreActionController.startAction();
+    final _$actionInfo = _$_ChildForumSubscriptionStoreActionController
+        .startAction(name: '_ChildForumSubscriptionStore.setSubscribed');
     try {
       return super.setSubscribed(subscribed);
     } finally {
@@ -43,8 +41,8 @@ mixin _$ChildForumSubscriptionStore on _ChildForumSubscriptionStore, Store {
 
   @override
   void addSubscription(int fid, int parentId) {
-    final _$actionInfo =
-        _$_ChildForumSubscriptionStoreActionController.startAction();
+    final _$actionInfo = _$_ChildForumSubscriptionStoreActionController
+        .startAction(name: '_ChildForumSubscriptionStore.addSubscription');
     try {
       return super.addSubscription(fid, parentId);
     } finally {
@@ -54,12 +52,19 @@ mixin _$ChildForumSubscriptionStore on _ChildForumSubscriptionStore, Store {
 
   @override
   void deleteSubscription(int fid, int parentId) {
-    final _$actionInfo =
-        _$_ChildForumSubscriptionStoreActionController.startAction();
+    final _$actionInfo = _$_ChildForumSubscriptionStoreActionController
+        .startAction(name: '_ChildForumSubscriptionStore.deleteSubscription');
     try {
       return super.deleteSubscription(fid, parentId);
     } finally {
       _$_ChildForumSubscriptionStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+subscribed: ${subscribed}
+    ''';
   }
 }
