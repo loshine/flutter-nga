@@ -1,17 +1,18 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/plugins/android_gbk.dart';
+import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
-import 'package:flutter_nga/ui/widget/forum_tag_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class PublishPage extends StatefulWidget {
   const PublishPage({
@@ -39,7 +40,8 @@ class _PublishReplyState extends State<PublishPage> {
   bool _bottomPanelVisible = false;
   bool _isAnonymous = false;
 
-  List<String> _tagList = [];
+  List<String> _selectedTags = [];
+  List<TopicTag> _tagList = [];
 
   final _subjectController = TextEditingController();
   final _contentController = TextEditingController();
@@ -131,7 +133,7 @@ class _PublishReplyState extends State<PublishPage> {
                       child: Wrap(
                         spacing: 8.0, // gap between adjacent chips
                         runSpacing: 4.0, // gap between line
-                        children: _tagList.map((content) {
+                        children: _selectedTags.map((content) {
                           return ActionChip(
                             label: Text(
                               content,
@@ -140,7 +142,7 @@ class _PublishReplyState extends State<PublishPage> {
                             backgroundColor: Palette.colorPrimary,
                             onPressed: () {
                               setState(() {
-                                _tagList.remove(content);
+                                _selectedTags.remove(content);
                               });
                             },
                           );
@@ -325,14 +327,16 @@ class _PublishReplyState extends State<PublishPage> {
       builder: (context) {
         return ForumTagDialog(
           fid: widget.fid,
+          tagList: _tagList,
           onSelected: (tag) {
-            if (!_tagList.contains(tag)) {
+            if (!_selectedTags.contains(tag)) {
               setState(() {
-                _tagList.add(tag);
+                _selectedTags.add(tag);
               });
             }
             Routes.pop(context);
           },
+          onLoadComplete: (list) => _tagList = list,
         );
       },
     );

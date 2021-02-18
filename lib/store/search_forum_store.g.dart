@@ -13,23 +13,28 @@ mixin _$SearchForumStore on _SearchForumStore, Store {
 
   @override
   List<Forum> get forums {
-    _$forumsAtom.context.enforceReadPolicy(_$forumsAtom);
-    _$forumsAtom.reportObserved();
+    _$forumsAtom.reportRead();
     return super.forums;
   }
 
   @override
   set forums(List<Forum> value) {
-    _$forumsAtom.context.conditionallyRunInAction(() {
+    _$forumsAtom.reportWrite(value, super.forums, () {
       super.forums = value;
-      _$forumsAtom.reportChanged();
-    }, _$forumsAtom, name: '${_$forumsAtom.name}_set');
+    });
   }
 
-  final _$searchAsyncAction = AsyncAction('search');
+  final _$searchAsyncAction = AsyncAction('_SearchForumStore.search');
 
   @override
   Future<List<Forum>> search(String keyword) {
     return _$searchAsyncAction.run(() => super.search(keyword));
+  }
+
+  @override
+  String toString() {
+    return '''
+forums: ${forums}
+    ''';
   }
 }

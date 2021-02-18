@@ -13,37 +13,43 @@ mixin _$FavouriteTopicListStore on _FavouriteTopicListStore, Store {
 
   @override
   FavouriteTopicListStoreData get state {
-    _$stateAtom.context.enforceReadPolicy(_$stateAtom);
-    _$stateAtom.reportObserved();
+    _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
   set state(FavouriteTopicListStoreData value) {
-    _$stateAtom.context.conditionallyRunInAction(() {
+    _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
-      _$stateAtom.reportChanged();
-    }, _$stateAtom, name: '${_$stateAtom.name}_set');
+    });
   }
 
-  final _$refreshAsyncAction = AsyncAction('refresh');
+  final _$refreshAsyncAction = AsyncAction('_FavouriteTopicListStore.refresh');
 
   @override
   Future<FavouriteTopicListStoreData> refresh() {
     return _$refreshAsyncAction.run(() => super.refresh());
   }
 
-  final _$loadMoreAsyncAction = AsyncAction('loadMore');
+  final _$loadMoreAsyncAction =
+      AsyncAction('_FavouriteTopicListStore.loadMore');
 
   @override
   Future<FavouriteTopicListStoreData> loadMore() {
     return _$loadMoreAsyncAction.run(() => super.loadMore());
   }
 
-  final _$deleteAsyncAction = AsyncAction('delete');
+  final _$deleteAsyncAction = AsyncAction('_FavouriteTopicListStore.delete');
 
   @override
   Future<String> delete(Topic topic) {
     return _$deleteAsyncAction.run(() => super.delete(topic));
+  }
+
+  @override
+  String toString() {
+    return '''
+state: ${state}
+    ''';
   }
 }

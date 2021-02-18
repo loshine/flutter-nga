@@ -13,20 +13,18 @@ mixin _$AccountListStore on _AccountListStore, Store {
 
   @override
   List<User> get list {
-    _$listAtom.context.enforceReadPolicy(_$listAtom);
-    _$listAtom.reportObserved();
+    _$listAtom.reportRead();
     return super.list;
   }
 
   @override
   set list(List<User> value) {
-    _$listAtom.context.conditionallyRunInAction(() {
+    _$listAtom.reportWrite(value, super.list, () {
       super.list = value;
-      _$listAtom.reportChanged();
-    }, _$listAtom, name: '${_$listAtom.name}_set');
+    });
   }
 
-  final _$refreshAsyncAction = AsyncAction('refresh');
+  final _$refreshAsyncAction = AsyncAction('_AccountListStore.refresh');
 
   @override
   Future<dynamic> refresh() {
@@ -38,11 +36,19 @@ mixin _$AccountListStore on _AccountListStore, Store {
 
   @override
   Future<int> quitAll() {
-    final _$actionInfo = _$_AccountListStoreActionController.startAction();
+    final _$actionInfo = _$_AccountListStoreActionController.startAction(
+        name: '_AccountListStore.quitAll');
     try {
       return super.quitAll();
     } finally {
       _$_AccountListStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+list: ${list}
+    ''';
   }
 }

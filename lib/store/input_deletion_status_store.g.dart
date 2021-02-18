@@ -13,17 +13,15 @@ mixin _$InputDeletionStatusStore on _InputDeletionStatusStore, Store {
 
   @override
   bool get visible {
-    _$visibleAtom.context.enforceReadPolicy(_$visibleAtom);
-    _$visibleAtom.reportObserved();
+    _$visibleAtom.reportRead();
     return super.visible;
   }
 
   @override
   set visible(bool value) {
-    _$visibleAtom.context.conditionallyRunInAction(() {
+    _$visibleAtom.reportWrite(value, super.visible, () {
       super.visible = value;
-      _$visibleAtom.reportChanged();
-    }, _$visibleAtom, name: '${_$visibleAtom.name}_set');
+    });
   }
 
   final _$_InputDeletionStatusStoreActionController =
@@ -31,12 +29,19 @@ mixin _$InputDeletionStatusStore on _InputDeletionStatusStore, Store {
 
   @override
   void setVisible(bool val) {
-    final _$actionInfo =
-        _$_InputDeletionStatusStoreActionController.startAction();
+    final _$actionInfo = _$_InputDeletionStatusStoreActionController
+        .startAction(name: '_InputDeletionStatusStore.setVisible');
     try {
       return super.setVisible(val);
     } finally {
       _$_InputDeletionStatusStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+visible: ${visible}
+    ''';
   }
 }

@@ -13,30 +13,35 @@ mixin _$ForumDetailStore on _ForumDetailStore, Store {
 
   @override
   ForumDetailStoreData get state {
-    _$stateAtom.context.enforceReadPolicy(_$stateAtom);
-    _$stateAtom.reportObserved();
+    _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
   set state(ForumDetailStoreData value) {
-    _$stateAtom.context.conditionallyRunInAction(() {
+    _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
-      _$stateAtom.reportChanged();
-    }, _$stateAtom, name: '${_$stateAtom.name}_set');
+    });
   }
 
-  final _$refreshAsyncAction = AsyncAction('refresh');
+  final _$refreshAsyncAction = AsyncAction('_ForumDetailStore.refresh');
 
   @override
   Future<ForumDetailStoreData> refresh(int fid, bool recommend) {
     return _$refreshAsyncAction.run(() => super.refresh(fid, recommend));
   }
 
-  final _$loadMoreAsyncAction = AsyncAction('loadMore');
+  final _$loadMoreAsyncAction = AsyncAction('_ForumDetailStore.loadMore');
 
   @override
   Future<ForumDetailStoreData> loadMore(int fid, bool recommend) {
     return _$loadMoreAsyncAction.run(() => super.loadMore(fid, recommend));
+  }
+
+  @override
+  String toString() {
+    return '''
+state: ${state}
+    ''';
   }
 }

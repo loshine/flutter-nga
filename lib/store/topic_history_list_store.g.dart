@@ -13,27 +13,25 @@ mixin _$TopicHistoryListStore on _TopicHistoryListStore, Store {
 
   @override
   TopicHistoryListStoreData get state {
-    _$stateAtom.context.enforceReadPolicy(_$stateAtom);
-    _$stateAtom.reportObserved();
+    _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
   set state(TopicHistoryListStoreData value) {
-    _$stateAtom.context.conditionallyRunInAction(() {
+    _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
-      _$stateAtom.reportChanged();
-    }, _$stateAtom, name: '${_$stateAtom.name}_set');
+    });
   }
 
-  final _$refreshAsyncAction = AsyncAction('refresh');
+  final _$refreshAsyncAction = AsyncAction('_TopicHistoryListStore.refresh');
 
   @override
   Future<TopicHistoryListStoreData> refresh() {
     return _$refreshAsyncAction.run(() => super.refresh());
   }
 
-  final _$loadMoreAsyncAction = AsyncAction('loadMore');
+  final _$loadMoreAsyncAction = AsyncAction('_TopicHistoryListStore.loadMore');
 
   @override
   Future<TopicHistoryListStoreData> loadMore() {
@@ -45,7 +43,8 @@ mixin _$TopicHistoryListStore on _TopicHistoryListStore, Store {
 
   @override
   Future<dynamic> delete(int id) {
-    final _$actionInfo = _$_TopicHistoryListStoreActionController.startAction();
+    final _$actionInfo = _$_TopicHistoryListStoreActionController.startAction(
+        name: '_TopicHistoryListStore.delete');
     try {
       return super.delete(id);
     } finally {
@@ -55,11 +54,19 @@ mixin _$TopicHistoryListStore on _TopicHistoryListStore, Store {
 
   @override
   Future<int> clean() {
-    final _$actionInfo = _$_TopicHistoryListStoreActionController.startAction();
+    final _$actionInfo = _$_TopicHistoryListStoreActionController.startAction(
+        name: '_TopicHistoryListStore.clean');
     try {
       return super.clean();
     } finally {
       _$_TopicHistoryListStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+state: ${state}
+    ''';
   }
 }

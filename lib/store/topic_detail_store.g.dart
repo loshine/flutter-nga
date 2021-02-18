@@ -13,34 +13,30 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
 
   @override
   int get currentPage {
-    _$currentPageAtom.context.enforceReadPolicy(_$currentPageAtom);
-    _$currentPageAtom.reportObserved();
+    _$currentPageAtom.reportRead();
     return super.currentPage;
   }
 
   @override
   set currentPage(int value) {
-    _$currentPageAtom.context.conditionallyRunInAction(() {
+    _$currentPageAtom.reportWrite(value, super.currentPage, () {
       super.currentPage = value;
-      _$currentPageAtom.reportChanged();
-    }, _$currentPageAtom, name: '${_$currentPageAtom.name}_set');
+    });
   }
 
   final _$maxPageAtom = Atom(name: '_TopicDetailStore.maxPage');
 
   @override
   int get maxPage {
-    _$maxPageAtom.context.enforceReadPolicy(_$maxPageAtom);
-    _$maxPageAtom.reportObserved();
+    _$maxPageAtom.reportRead();
     return super.maxPage;
   }
 
   @override
   set maxPage(int value) {
-    _$maxPageAtom.context.conditionallyRunInAction(() {
+    _$maxPageAtom.reportWrite(value, super.maxPage, () {
       super.maxPage = value;
-      _$maxPageAtom.reportChanged();
-    }, _$maxPageAtom, name: '${_$maxPageAtom.name}_set');
+    });
   }
 
   final _$_TopicDetailStoreActionController =
@@ -48,7 +44,8 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
 
   @override
   void setMaxPage(int maxPage) {
-    final _$actionInfo = _$_TopicDetailStoreActionController.startAction();
+    final _$actionInfo = _$_TopicDetailStoreActionController.startAction(
+        name: '_TopicDetailStore.setMaxPage');
     try {
       return super.setMaxPage(maxPage);
     } finally {
@@ -58,11 +55,20 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
 
   @override
   void setCurrentPage(int currentPage) {
-    final _$actionInfo = _$_TopicDetailStoreActionController.startAction();
+    final _$actionInfo = _$_TopicDetailStoreActionController.startAction(
+        name: '_TopicDetailStore.setCurrentPage');
     try {
       return super.setCurrentPage(currentPage);
     } finally {
       _$_TopicDetailStoreActionController.endAction(_$actionInfo);
     }
+  }
+
+  @override
+  String toString() {
+    return '''
+currentPage: ${currentPage},
+maxPage: ${maxPage}
+    ''';
   }
 }
