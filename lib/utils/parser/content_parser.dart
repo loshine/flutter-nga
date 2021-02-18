@@ -151,6 +151,7 @@ class _ContentParser implements Parser {
             RegExp("\\[flash]([\\s\\S]*?)?\\[/flash]"),
             (match) =>
                 "<a href='https://bbs.nga.cn${match.group(1)}'>[站外视频]</a>")
+        .replaceAllMapped(RegExp("======"), (match) => "<br/><nga_hr></nga_hr>")
         .replaceAllMapped(RegExp("\\[h]([\\s\\S]*?)?\\[/h]"),
             (match) => "<h3>${match.group(1)}</h3>") // 处理 [h] 标题
         .replaceAllMapped(RegExp("===([\\s\\S]*?)?==="),
@@ -229,7 +230,7 @@ class _EmoticonParser implements Parser {
     list.forEach((group) {
       group.expressionList.forEach((emoticon) {
         parseContent = parseContent.replaceAll(
-            emoticon.content, "<emoticon src='${emoticon.url}' ></emoticon>");
+            emoticon.content, "<nga_emoticon src='${emoticon.url}' ></nga_emoticon>");
       });
     });
     return parseContent;
