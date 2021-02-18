@@ -1,6 +1,7 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
+import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_detail_page.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/ui/page/login/login_page.dart';
@@ -31,6 +32,7 @@ class Routes {
   static const String SEARCH_FORUM = "/search_forum";
   static const String SEARCH_TOPIC_LIST = "/search_topic_list";
   static const String PHOTO_PREVIEW = "/photo_preview";
+  static const String CONVERSATION_DETAIL = "/conversation_detail";
 
   /// 初始化路由
   static void configureRoutes(FluroRouter r) {
@@ -83,40 +85,64 @@ class Routes {
     router.define(ACCOUNT_MANAGEMENT,
         handler:
             Handler(handlerFunc: (context, params) => AccountManagementPage()));
-    router.define(SEARCH, handler: Handler(handlerFunc: (context, params) {
-      final List<String> fidParams = params["fid"];
-      if (fidParams == null || fidParams.isEmpty) {
-        return SearchPage();
-      } else {
-        return SearchPage(fid: int.tryParse(fidParams[0]));
-      }
-    }));
-    router.define(SEARCH_FORUM,
-        handler: Handler(
-            handlerFunc: (context, params) =>
-                SearchForumPage(fluroCnParamsDecode(params["keyword"][0]))));
-    router.define(SEARCH_TOPIC_LIST,
-        handler: Handler(handlerFunc: (context, params) {
-      final content = params["content"] != null &&
-          params["content"].isNotEmpty &&
-          params["content"][0] == "1";
-      if (params["fid"] == null || params["fid"].isEmpty) {
-        return SearchTopicListPage(fluroCnParamsDecode(params["keyword"][0]),
-            content: content);
-      } else {
-        return SearchTopicListPage(
-          fluroCnParamsDecode(params["keyword"][0]),
-          fid: int.tryParse(params["fid"][0]),
-          content: content,
-        );
-      }
-    }));
-    router.define(PHOTO_PREVIEW,
-        handler: Handler(
-            handlerFunc: (context, params) => PhotoPreviewPage(
-                  url: fluroCnParamsDecode(params["url"][0]),
-                  screenWidth: double.tryParse(params["screenWidth"][0]) ?? 0,
-                )));
+    router.define(
+      SEARCH,
+      handler: Handler(
+        handlerFunc: (context, params) {
+          final List<String> fidParams = params["fid"];
+          if (fidParams == null || fidParams.isEmpty) {
+            return SearchPage();
+          } else {
+            return SearchPage(fid: int.tryParse(fidParams[0]));
+          }
+        },
+      ),
+    );
+    router.define(
+      SEARCH_FORUM,
+      handler: Handler(
+        handlerFunc: (context, params) =>
+            SearchForumPage(fluroCnParamsDecode(params["keyword"][0])),
+      ),
+    );
+    router.define(
+      SEARCH_TOPIC_LIST,
+      handler: Handler(
+        handlerFunc: (context, params) {
+          final content = params["content"] != null &&
+              params["content"].isNotEmpty &&
+              params["content"][0] == "1";
+          if (params["fid"] == null || params["fid"].isEmpty) {
+            return SearchTopicListPage(
+                fluroCnParamsDecode(params["keyword"][0]),
+                content: content);
+          } else {
+            return SearchTopicListPage(
+              fluroCnParamsDecode(params["keyword"][0]),
+              fid: int.tryParse(params["fid"][0]),
+              content: content,
+            );
+          }
+        },
+      ),
+    );
+    router.define(
+      PHOTO_PREVIEW,
+      handler: Handler(
+        handlerFunc: (context, params) => PhotoPreviewPage(
+          url: fluroCnParamsDecode(params["url"][0]),
+          screenWidth: double.tryParse(params["screenWidth"][0]) ?? 0,
+        ),
+      ),
+    );
+    router.define(
+      CONVERSATION_DETAIL,
+      handler: Handler(
+        handlerFunc: (context, params) => ConversationDetailPage(
+          mid: int.tryParse(params["mid"][0]),
+        ),
+      ),
+    );
   }
 
   /// 代理 Router 类的 navigateTo 方法

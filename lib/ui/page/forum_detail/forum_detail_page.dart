@@ -42,65 +42,59 @@ class _ForumDetailState extends State<ForumDetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.name),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(56),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: TabBar(
+              controller: _tabController,
+              tabs: _tabs,
+              isScrollable: true,
+            ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.search,
+              color: Colors.white,
+            ),
+            onPressed: () => Routes.navigateTo(
+                context, "${Routes.SEARCH}?fid=${widget.fid}"),
+          ),
+          ForumFavouriteButtonWidget(
+            fid: widget.fid,
+            name: widget.name,
+          ),
+        ],
+      ),
       body: Observer(
         builder: (_) {
-          return NestedScrollView(
-            headerSliverBuilder: (_, scrolled) => [
-              SliverAppBar(
-                pinned: true,
-                floating: false,
-                title: Text(widget.name),
-                bottom: PreferredSize(
-                  preferredSize: Size.fromHeight(56),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: TabBar(
-                      controller: _tabController,
-                      tabs: _tabs,
-                      isScrollable: true,
-                    ),
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              KeepAliveTabView(
+                child: SmartRefresher(
+                  onLoading: _onLoading,
+                  controller: _refreshController,
+                  enablePullUp: _store.state.enablePullUp,
+                  onRefresh: _onRefresh,
+                  child: ListView.builder(
+                    itemCount: _store.state.list.length,
+                    itemBuilder: (context, index) =>
+                        TopicListItemWidget(topic: _store.state.list[index]),
                   ),
                 ),
-                actions: <Widget>[
-                  IconButton(
-                    icon: Icon(
-                      Icons.search,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => Routes.navigateTo(
-                        context, "${Routes.SEARCH}?fid=${widget.fid}"),
-                  ),
-                  ForumFavouriteButtonWidget(
-                    fid: widget.fid,
-                    name: widget.name,
-                  ),
-                ],
+              ),
+              KeepAliveTabView(
+                child: ForumRecommendTopicListPage(widget.fid),
+              ),
+              KeepAliveTabView(
+                child: ChildForumListPage(_store.state.info),
               ),
             ],
-            body: TabBarView(
-              controller: _tabController,
-              children: [
-                KeepAliveTabView(
-                  child: SmartRefresher(
-                    onLoading: _onLoading,
-                    controller: _refreshController,
-                    enablePullUp: _store.state.enablePullUp,
-                    onRefresh: _onRefresh,
-                    child: ListView.builder(
-                      itemCount: _store.state.list.length,
-                      itemBuilder: (context, index) =>
-                          TopicListItemWidget(topic: _store.state.list[index]),
-                    ),
-                  ),
-                ),
-                KeepAliveTabView(
-                  child: ForumRecommendTopicListPage(widget.fid),
-                ),
-                KeepAliveTabView(
-                  child: ChildForumListPage(_store.state.info),
-                ),
-              ],
-            ),
           );
         },
       ),

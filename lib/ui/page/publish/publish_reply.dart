@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +32,7 @@ class PublishPage extends StatefulWidget {
 
 class _PublishReplyState extends State<PublishPage> {
   final _bottomData = [
-    CommunityMaterialIcons.ninja,
+    CommunityMaterialIcons.incognito_off,
     CommunityMaterialIcons.emoticon,
     CommunityMaterialIcons.format_text,
     CommunityMaterialIcons.attachment,
@@ -56,6 +58,8 @@ class _PublishReplyState extends State<PublishPage> {
   StringBuffer _attachments = StringBuffer();
   StringBuffer _attachmentsCheck = StringBuffer();
 
+  StreamSubscription _subscription;
+
   @override
   void initState() {
     super.initState();
@@ -77,12 +81,21 @@ class _PublishReplyState extends State<PublishPage> {
       attachmentCallback: _attachmentCallback,
     );
     _currentBottomPanelChild = _emoticonGroupTabsWidget;
-    KeyboardVisibility.onChange.listen((bool visible) {
+    _subscription =
+        KeyboardVisibilityController().onChange.listen((bool visible) {
       _keyboardVisible = visible;
       if (visible && _bottomPanelVisible) {
         _hideBottomPanel();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    if (_subscription != null) {
+      _subscription.cancel();
+    }
+    super.dispose();
   }
 
   @override
@@ -204,21 +217,22 @@ class _PublishReplyState extends State<PublishPage> {
                   child: Container(
                     height: kToolbarHeight,
                     child: Icon(
-                      iconData,
-                      color: iconData == CommunityMaterialIcons.ninja &&
-                              !_isAnonymous
-                          ? Colors.white30
-                          : Colors.white,
+                      i == 0
+                          ? (_isAnonymous
+                              ? CommunityMaterialIcons.incognito
+                              : iconData)
+                          : iconData,
+                      color: Colors.white,
                     ),
                   ),
-                  onTap: () async {
-                    if (iconData == CommunityMaterialIcons.ninja) {
-                      _ninjaIconClicked();
-                    } else if (iconData == CommunityMaterialIcons.emoticon) {
+                  onTap: () {
+                    if (i == 0) {
+                      _incognitoIconClicked();
+                    } else if (i == 1) {
                       _emoticonIconClicked();
-                    } else if (iconData == CommunityMaterialIcons.format_text) {
+                    } else if (i == 2) {
                       _formatTextIconClicked();
-                    } else if (iconData == CommunityMaterialIcons.attachment) {
+                    } else if (i == 3) {
                       _attachmentIconClicked();
                     }
                   },
@@ -237,7 +251,7 @@ class _PublishReplyState extends State<PublishPage> {
     });
   }
 
-  void _ninjaIconClicked() {
+  void _incognitoIconClicked() {
     Fluttertoast.showToast(
       msg: _isAnonymous ? "关闭匿名" : "开启匿名",
       gravity: ToastGravity.CENTER,

@@ -1,5 +1,5 @@
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/data/entity/message.dart';
+import 'package:flutter_nga/data/entity/conversation.dart';
 import 'package:mobx/mobx.dart';
 
 part 'conversation_list_store.g.dart';
