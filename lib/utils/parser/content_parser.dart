@@ -1,5 +1,6 @@
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/name_utils.dart';
 
 class NgaContentParser {
@@ -85,30 +86,30 @@ class _ReplyParser implements Parser {
             RegExp(
                 "\\[tid=(\\d+)?]Topic\\[/tid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?tid=${match.group(1)}'>Topic</a> Post by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(2)}'>[${match.group(3)}]</a> <small>(${match.group(4)})</small>")
+                "<a href='${DOMAIN}read.php?tid=${match.group(1)}'>Topic</a> Post by <a href='${DOMAIN}nuke.php?func=ucp&uid=${match.group(2)}'>[${match.group(3)}]</a> <small>(${match.group(4)})</small>")
         // 引用普通回贴
         .replaceAllMapped(
             RegExp(
                 "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\):\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by <a href='https://bbs.nga.cn/nuke.php?func=ucp&uid=${match.group(4)}'>[${match.group(5)}]</a> <small>(${match.group(6)})</small>:")
+                "<a href='${DOMAIN}read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by <a href='${DOMAIN}nuke.php?func=ucp&uid=${match.group(4)}'>[${match.group(5)}]</a> <small>(${match.group(6)})</small>:")
         .replaceAllMapped(
             RegExp(
                 "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid]#anony_([0-9a-zA-Z]*)\\[/uid]\\[color=gray]\\((\\d+)?楼\\)\\[/color] \\(([\\s\\S]*?)\\):\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by ${getShowName("#anony_${match.group(4)}")}</a><font color='gray'>(${match.group(5)}楼)</font> <small>(${match.group(6)})</small>:")
+                "<a href='${DOMAIN}read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> Post by ${getShowName("#anony_${match.group(4)}")}</a><font color='gray'>(${match.group(5)}楼)</font> <small>(${match.group(6)})</small>:")
         // 评论主贴
         .replaceAllMapped(
             RegExp(
                 "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(2)} ${match.group(3)}")
+                "<a href='${DOMAIN}read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(2)} ${match.group(3)}")
         // 评论普通回贴
         .replaceAllMapped(
             RegExp(
                 "\\[b]Reply to \\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
             (match) =>
-                "<a href='https://bbs.nga.cn/read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}");
+                "<a href='${DOMAIN}read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}");
   }
 }
 

@@ -31,6 +31,7 @@ class _ChildForumListPage extends State<ChildForumListPage> {
               ),
             )
           : ListView.builder(
+              physics: BouncingScrollPhysics(),
               itemCount: widget.forumInfo == null
                   ? 0
                   : widget.forumInfo.subForums.length,

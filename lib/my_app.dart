@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'data/data.dart';
-import 'store/favourite_forum_list_store.dart';
+import 'store/forum/favourite_forum_list_store.dart';
 import 'utils/route.dart';
 
 class MyApp extends StatefulWidget {

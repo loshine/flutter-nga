@@ -10,6 +10,7 @@ import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
 import 'package:flutter_nga/ui/page/search/search_forum_page.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/search/search_topic_list_page.dart';
+import 'package:flutter_nga/ui/page/send_message/send_message_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings_page.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
@@ -33,6 +34,7 @@ class Routes {
   static const String SEARCH_TOPIC_LIST = "/search_topic_list";
   static const String PHOTO_PREVIEW = "/photo_preview";
   static const String CONVERSATION_DETAIL = "/conversation_detail";
+  static const String SEND_MESSAGE = "/send_message";
 
   /// 初始化路由
   static void configureRoutes(FluroRouter r) {
@@ -139,6 +141,14 @@ class Routes {
       CONVERSATION_DETAIL,
       handler: Handler(
         handlerFunc: (context, params) => ConversationDetailPage(
+          mid: int.tryParse(params["mid"][0]),
+        ),
+      ),
+    );
+    router.define(
+      SEND_MESSAGE,
+      handler: Handler(
+        handlerFunc: (context, params) => SendMessagePage(
           mid: int.tryParse(params["mid"][0]),
         ),
       ),

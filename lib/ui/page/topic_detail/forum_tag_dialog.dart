@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
-import 'package:flutter_nga/store/forum_tag_list_store.dart';
+import 'package:flutter_nga/store/forum/forum_tag_list_store.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -61,6 +61,7 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
         return SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
+            physics: BouncingScrollPhysics(),
             shrinkWrap: true,
             itemCount: _store.tagList.length,
             itemBuilder: (context, position) {

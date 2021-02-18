@@ -1,8 +1,8 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/home_drawer_header_store.dart';
-import 'package:flutter_nga/store/home_store.dart';
+import 'package:flutter_nga/store/home/home_drawer_header_store.dart';
+import 'package:flutter_nga/store/home/home_store.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
@@ -100,129 +100,146 @@ class _HomePageState extends State<_HomePage> {
           ),
           backgroundColor: Palette.colorBackground,
           drawer: Drawer(
+            child: _buildDrawerChild(),
+          ),
+          body: pageList[_store.index],
+          floatingActionButton: _getFloatingActionButton(),
+        );
+      },
+    );
+  }
+
+  FloatingActionButton _getFloatingActionButton() {
+    return _store.index == 3
+        ? FloatingActionButton(
+            tooltip: '新建短消息',
+            onPressed: () =>
+                Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
+            child: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
+          )
+        : null;
+  }
+
+  Widget _buildDrawerChild() {
+    return Column(
+      children: [
+        HomeDrawerHeader(),
+        Expanded(
+          child: Container(
+            color: Palette.colorBackground,
             child: Column(
               children: [
-                HomeDrawerHeader(),
-                Expanded(
-                  child: Container(
-                    color: Palette.colorBackground,
-                    child: Column(
-                      children: [
-                        Divider(height: 1),
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          height: 56,
-                          child: Align(
-                            child: Text(
-                              "模块",
-                              style: TextStyle(color: Colors.black45),
-                              textAlign: TextAlign.left,
-                            ),
-                            alignment: Alignment.centerLeft,
-                          ),
-                        ),
-                        Material(
-                          child: InkWell(
-                            child: ListTile(
-                              leading:
-                                  Icon(CommunityMaterialIcons.view_dashboard),
-                              title: Text("论坛"),
-                              selected: _store.index == 0,
-                            ),
-                            onTap: () => _setSelection(0),
-                          ),
-                          color: Palette.colorBackground,
-                        ),
-                        Material(
-                          child: InkWell(
-                            child: ListTile(
-                              leading: Icon(CommunityMaterialIcons.archive),
-                              title: Text("贴子收藏"),
-                              selected: _store.index == 1,
-                            ),
-                            onTap: () => _setSelection(1),
-                          ),
-                          color: Palette.colorBackground,
-                        ),
-                        Material(
-                          child: InkWell(
-                            child: ListTile(
-                              leading: Icon(CommunityMaterialIcons.history),
-                              title: Text("浏览历史"),
-                              selected: _store.index == 2,
-                            ),
-                            onTap: () => _setSelection(2),
-                          ),
-                          color: Palette.colorBackground,
-                        ),
-                        Material(
-                          child: InkWell(
-                            child: ListTile(
-                              leading: Icon(Icons.message),
-                              title: Text("短消息"),
-                              selected: _store.index == 3,
-                            ),
-                            onTap: () => _setSelection(3),
-                          ),
-                          color: Palette.colorBackground,
-                        ),
-                        Material(
-                          child: InkWell(
-                            child: ListTile(
-                              leading: Icon(Icons.notifications_rounded),
-                              title: Text("提醒信息"),
-                              selected: _store.index == 4,
-                            ),
-                            onTap: () => _setSelection(4),
-                          ),
-                          color: Palette.colorBackground,
-                        ),
-                        Divider(height: 1),
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          height: 56,
-                          child: Align(
-                            child: Text(
-                              "其它",
-                              style: TextStyle(color: Colors.black45),
-                              textAlign: TextAlign.left,
-                            ),
-                            alignment: Alignment.centerLeft,
-                          ),
-                        ),
-                        Material(
-                          child: InkWell(
-                            child: ListTile(
-                              leading: Icon(Icons.settings),
-                              title: Text("设置"),
-                            ),
-                            onTap: () =>
-                                Routes.navigateTo(context, Routes.SETTINGS),
-                          ),
-                          color: Palette.colorBackground,
-                        ),
-                        Material(
-                          child: InkWell(
-                            child: ListTile(
-                              leading: Icon(Icons.info_outline),
-                              title: Text("关于"),
-                            ),
-                            onTap: () {
-                              // TODO: 点击关于
-                            },
-                          ),
-                          color: Palette.colorBackground,
-                        ),
-                      ],
+                Divider(height: 1),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  height: 56,
+                  child: Align(
+                    child: Text(
+                      "模块",
+                      style: TextStyle(color: Colors.black45),
+                      textAlign: TextAlign.left,
                     ),
+                    alignment: Alignment.centerLeft,
                   ),
-                )
+                ),
+                Material(
+                  child: InkWell(
+                    child: ListTile(
+                      leading: Icon(CommunityMaterialIcons.view_dashboard),
+                      title: Text("论坛"),
+                      selected: _store.index == 0,
+                    ),
+                    onTap: () => _setSelection(0),
+                  ),
+                  color: Palette.colorBackground,
+                ),
+                Material(
+                  child: InkWell(
+                    child: ListTile(
+                      leading: Icon(CommunityMaterialIcons.archive),
+                      title: Text("贴子收藏"),
+                      selected: _store.index == 1,
+                    ),
+                    onTap: () => _setSelection(1),
+                  ),
+                  color: Palette.colorBackground,
+                ),
+                Material(
+                  child: InkWell(
+                    child: ListTile(
+                      leading: Icon(CommunityMaterialIcons.history),
+                      title: Text("浏览历史"),
+                      selected: _store.index == 2,
+                    ),
+                    onTap: () => _setSelection(2),
+                  ),
+                  color: Palette.colorBackground,
+                ),
+                Material(
+                  child: InkWell(
+                    child: ListTile(
+                      leading: Icon(Icons.message),
+                      title: Text("短消息"),
+                      selected: _store.index == 3,
+                    ),
+                    onTap: () => _setSelection(3),
+                  ),
+                  color: Palette.colorBackground,
+                ),
+                Material(
+                  child: InkWell(
+                    child: ListTile(
+                      leading: Icon(Icons.notifications_rounded),
+                      title: Text("提醒信息"),
+                      selected: _store.index == 4,
+                    ),
+                    onTap: () => _setSelection(4),
+                  ),
+                  color: Palette.colorBackground,
+                ),
+                Divider(height: 1),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  height: 56,
+                  child: Align(
+                    child: Text(
+                      "其它",
+                      style: TextStyle(color: Colors.black45),
+                      textAlign: TextAlign.left,
+                    ),
+                    alignment: Alignment.centerLeft,
+                  ),
+                ),
+                Material(
+                  child: InkWell(
+                    child: ListTile(
+                      leading: Icon(Icons.settings),
+                      title: Text("设置"),
+                    ),
+                    onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
+                  ),
+                  color: Palette.colorBackground,
+                ),
+                Material(
+                  child: InkWell(
+                    child: ListTile(
+                      leading: Icon(Icons.info_outline),
+                      title: Text("关于"),
+                    ),
+                    onTap: () {
+                      // TODO: 点击关于
+                    },
+                  ),
+                  color: Palette.colorBackground,
+                ),
               ],
             ),
           ),
-          body: pageList[_store.index],
-        );
-      },
+        )
+      ],
     );
   }
 }

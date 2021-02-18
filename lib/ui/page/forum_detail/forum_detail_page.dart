@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/forum_detail_store.dart';
+import 'package:flutter_nga/store/forum/forum_detail_store.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
@@ -82,6 +82,7 @@ class _ForumDetailState extends State<ForumDetailPage>
                   enablePullUp: _store.state.enablePullUp,
                   onRefresh: _onRefresh,
                   child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
                     itemCount: _store.state.list.length,
                     itemBuilder: (context, index) =>
                         TopicListItemWidget(topic: _store.state.list[index]),

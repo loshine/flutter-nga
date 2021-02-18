@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
-import 'package:flutter_nga/store/favourite_topic_list_store.dart';
+import 'package:flutter_nga/store/topic/favourite_topic_list_store.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -38,6 +38,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
           enablePullUp: _store.state.enablePullUp,
           onRefresh: _onRefresh,
           child: ListView.builder(
+            physics: BouncingScrollPhysics(),
             itemCount: _store.state.list.length,
             itemBuilder: (context, index) => TopicListItemWidget(
               topic: _store.state.list[index],

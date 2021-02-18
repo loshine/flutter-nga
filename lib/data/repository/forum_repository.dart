@@ -285,7 +285,6 @@ class ForumDataRepository implements ForumRepository {
 
   @override
   Future<String> addChildForumSubscription(int fid, int parentId) async {
-    // https://bbs.nga.cn/nuke.php?__lib=user_option&__act=set&raw=3&del=21510253
     try {
       final formData = FormData.fromMap({
         "fid": parentId,

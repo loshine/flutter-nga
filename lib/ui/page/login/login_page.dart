@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -20,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: InAppWebView(
         initialUrl:
-            "https://bbs.nga.cn/nuke.php?__lib=login&__act=account&login",
+            "${DOMAIN}nuke.php?__lib=login&__act=account&login",
         onConsoleMessage:
             (InAppWebViewController controller, ConsoleMessage consoleMessage) {
           if (consoleMessage.message.startsWith("loginSuccess :")) {
