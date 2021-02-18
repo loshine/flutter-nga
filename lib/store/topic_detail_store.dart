@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:mobx/mobx.dart';
@@ -27,8 +28,8 @@ abstract class _TopicDetailStore with Store {
   void mergeCommentList(List<Reply> commentList) {
     commentList.forEach((comment) {
       if (this
-          .commentList
-          .indexWhere((existComment) => existComment.pid == comment.pid) >
+              .commentList
+              .indexWhere((existComment) => existComment.pid == comment.pid) <
           0) {
         this.commentList.add(comment);
       }

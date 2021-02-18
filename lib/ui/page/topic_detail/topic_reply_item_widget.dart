@@ -334,7 +334,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     final button = RaisedButton(
       elevation: 0,
       child: Text(
-        _attachmentsExpanded ? "展开附件" : "收起附件",
+        _attachmentsExpanded ? "收起附件" : "展开附件",
         style: TextStyle(fontSize: Dimen.button),
       ),
       onPressed: () =>

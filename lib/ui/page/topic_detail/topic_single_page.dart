@@ -38,6 +38,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
     super.initState();
     if (widget.totalCommentList != null) {
       _store.totalCommentList.addAll(widget.totalCommentList);
+      debugPrint("widget.totalCommentList: ${widget.totalCommentList}");
     }
     _refreshController = RefreshController();
     Future.delayed(const Duration()).then((_) => _onRefresh());

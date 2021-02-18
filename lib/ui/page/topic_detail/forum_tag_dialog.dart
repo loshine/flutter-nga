@@ -56,28 +56,25 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Row(
-        children: [
-          Text("主题分类"),
-          Text(
-            " (下滑有更多标签)",
-            style: TextStyle(
-                fontSize: Dimen.caption, color: Palette.colorTextSecondary),
-          )
-        ],
-      ),
+      title: Text("主题分类"),
       content: Observer(builder: (context) {
         return SizedBox(
-          width: 0,
-          height: 240,
+          width: double.maxFinite,
           child: ListView.builder(
+            shrinkWrap: true,
             itemCount: _store.tagList.length,
             itemBuilder: (context, position) {
               final tag = _store.tagList[position].content;
               return InkWell(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
-                  child: Text("$tag"),
+                  child: Text(
+                    "$tag",
+                    style: TextStyle(
+                      color: Palette.colorTextPrimary,
+                      fontSize: Dimen.subheading,
+                    ),
+                  ),
                 ),
                 onTap: () {
                   if (widget.onSelected != null) {

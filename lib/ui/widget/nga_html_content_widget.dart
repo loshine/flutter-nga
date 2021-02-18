@@ -66,7 +66,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
         ),
       );
     }
-    return null;
+    return parsedChild;
   }
 
   Widget _fontSizeRender(RenderContext context, Widget parsedChild,
@@ -82,7 +82,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
         );
       }
     }
-    return null;
+    return DefaultTextStyle.merge(child: parsedChild);
   }
 
   Widget _fontColorRender(RenderContext context, Widget parsedChild,
