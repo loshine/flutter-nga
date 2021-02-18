@@ -21,6 +21,8 @@ abstract class TopicRepository {
 
   Future<TopicListData> getFavouriteTopicList(int page);
 
+  Future<String> addFavouriteTopic(int tid);
+
   Future<String> deleteFavouriteTopic(int tid, int page);
 
   Future<List<TopicTag>> getTopicTagList(int fid);
@@ -90,6 +92,17 @@ class TopicDataRepository implements TopicRepository {
           .dio
           .get("thread.php?favor=1&lite=js&noprefix&page=$page");
       return TopicListData.fromJson(response.data, page);
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> addFavouriteTopic(int tid) async {
+    try {
+      Response<Map<String, dynamic>> response = await Data().dio.post(
+          "nuke.php?__lib=topic_favor&lite=js&noprefix&__act=topic_favor&action=add&tid=$tid");
+      return response.data['0'];
     } catch (err) {
       rethrow;
     }
