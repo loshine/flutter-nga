@@ -285,14 +285,15 @@ class ForumDataRepository implements ForumRepository {
 
   @override
   Future<String> addChildForumSubscription(int fid, int parentId) async {
+    // https://bbs.nga.cn/nuke.php?__lib=user_option&__act=set&raw=3&del=21510253
     try {
       final formData = FormData.fromMap({
         "fid": parentId,
-        "type": 0,
-        "info": "add_to_allow_union_fids",
+        "type": 1,
+        "info": "add_to_block_tids",
       });
       Response<Map<String, dynamic>> response = await Data().dio.post(
-          "nuke.php?__lib=user_option&__act=set&raw=3&add=$fid",
+          "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
           data: formData);
       return response.data["0"];
     } catch (err) {
@@ -306,7 +307,7 @@ class ForumDataRepository implements ForumRepository {
       final formData = FormData.fromMap({
         "fid": parentId,
         "type": 0,
-        "info": "add_to_allow_union_fids",
+        "info": "add_to_block_tids",
       });
       Response<Map<String, dynamic>> response = await Data().dio.post(
           "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
