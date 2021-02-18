@@ -9,13 +9,13 @@ const TAG_UID = "ngaPassportUid";
 const TAG_USER_NAME = "ngaPassportUrlencodedUname";
 
 abstract class UserRepository {
-  Future<User> saveLoginCookies(String cookies);
+  Future<CacheUser> saveLoginCookies(String cookies);
 
-  Future<User> saveLogin(String uid, String token, String username);
+  Future<CacheUser> saveLogin(String uid, String token, String username);
 
-  Future<User> getDefaultUser();
+  Future<CacheUser> getDefaultUser();
 
-  Future<List<User>> getAllLoginUser();
+  Future<List<CacheUser>> getAllLoginUser();
 
   Future<int> quitAllLoginUser();
 
@@ -39,7 +39,7 @@ class UserDataRepository implements UserRepository {
   StoreRef<int, dynamic> _lateInitStore;
 
   @override
-  Future<User> saveLoginCookies(String cookies) async {
+  Future<CacheUser> saveLoginCookies(String cookies) async {
     String uid;
     String cid;
     String username;
@@ -67,8 +67,8 @@ class UserDataRepository implements UserRepository {
   }
 
   @override
-  Future<User> saveLogin(String uid, String token, String username) async {
-    final user = User(uid, token, username);
+  Future<CacheUser> saveLogin(String uid, String token, String username) async {
+    final user = CacheUser(uid, token, username);
     final finder = Finder(filter: Filter.equals('uid', uid));
     List<RecordSnapshot<int, dynamic>> list =
         await _store.find(database, finder: finder);
@@ -81,19 +81,19 @@ class UserDataRepository implements UserRepository {
   }
 
   @override
-  Future<User> getDefaultUser() async {
+  Future<CacheUser> getDefaultUser() async {
     final record = await _store.findFirst(database);
     if (record != null) {
-      return User.fromJson(record.value);
+      return CacheUser.fromJson(record.value);
     } else {
       return null;
     }
   }
 
   @override
-  Future<List<User>> getAllLoginUser() async {
+  Future<List<CacheUser>> getAllLoginUser() async {
     final list = await _store.find(database);
-    return list.map((m) => User.fromJson(m.value)).toList();
+    return list.map((m) => CacheUser.fromJson(m.value)).toList();
   }
 
   @override

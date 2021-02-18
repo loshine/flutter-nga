@@ -67,7 +67,7 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
               final tag = _store.tagList[position].content;
               return InkWell(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                   child: Text(
                     "$tag",
                     style: TextStyle(

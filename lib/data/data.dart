@@ -9,6 +9,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
+import 'package:flutter_nga/data/repository/message_repository.dart';
 import 'package:flutter_nga/data/repository/resource_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
@@ -32,6 +33,8 @@ class Data {
   EmoticonRepository get emoticonRepository => EmoticonDataRepository();
 
   ForumRepository get forumRepository => ForumDataRepository(_database);
+
+  MessageRepository get messageRepository => MessageDataRepository();
 
   ResourceRepository get resourceRepository => ResourceDataRepository();
 

@@ -13,4 +13,5 @@ class Dimen {
   static final double display4 = 112;
 
   static final double bottomPanelHeight = 240;
+  static final double icon = 12; // 普通 icon
 }

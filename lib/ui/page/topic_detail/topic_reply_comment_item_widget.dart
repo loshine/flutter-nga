@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_comment_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
