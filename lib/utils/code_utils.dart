@@ -79,6 +79,25 @@ String fluroCnParamsDecode(String encodedCn) {
   return value;
 }
 
+/// remove characters with a numerical value < 32 and 127.
+///
+/// If `keep_new_lines` is `true`, newline characters are preserved
+/// `(\n and \r, hex 0xA and 0xD)`.
+String stripLow(String str, [bool keepNewLines = false]) {
+  String chars = keepNewLines == true
+      ? '\x00-\x09\x0B\x0C\x0E-\x1F\x7F'
+      : '\x00-\x1F\x7F';
+  return blacklist(str, chars);
+}
+
+/// remove characters that appear in the blacklist.
+///
+/// The characters are used in a RegExp and so you will need to escape
+/// some chars.
+String blacklist(String str, String chars) {
+  return str.replaceAll(RegExp('[' + chars + ']+'), '');
+}
+
 String urlDecode(String content) {
   return Uri.decodeQueryComponent(content, encoding: gbk);
 }
