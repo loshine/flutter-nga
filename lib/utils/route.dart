@@ -16,6 +16,7 @@ import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
+import 'package:flutter_nga/utils/linkroute/link_route.dart';
 
 class Routes {
   static FluroRouter router;
@@ -60,8 +61,10 @@ class Routes {
         handler: Handler(
             handlerFunc: (context, params) => TopicDetailPage(
                   int.tryParse(params["tid"][0]),
-                  int.tryParse(params["fid"][0]),
-                  subject: fluroCnParamsDecode(params["subject"][0]),
+                  params["fid"] != null ? int.tryParse(params["fid"][0]) : null,
+                  subject: params["subject"] != null
+                      ? fluroCnParamsDecode(params["subject"][0])
+                      : null,
                 )));
     router.define(TOPIC_PUBLISH,
         handler: Handler(handlerFunc: (context, params) {
@@ -174,4 +177,21 @@ class Routes {
   static void pop(BuildContext context) {
     router.pop(context);
   }
+
+  /// 处理 html 控件中超链接点击事件
+  static void onLinkTap(BuildContext context, String link) {
+    debugPrint("User tap link: $link");
+    for (LinkRoute linkRoute in _linkRoutes) {
+      final matches = RegExp(linkRoute.matchRegExp()).allMatches(link);
+      if (matches.isEmpty) continue;
+      matches.forEach((match) => linkRoute.handleMatch(context, match));
+    }
+  }
+
+  /// 提前定义好的超链接对应的路由
+  static final _linkRoutes = [
+    TopicLinkRoute(),
+    UserLinkRoute(),
+    ReplyLinkRoute(),
+  ];
 }

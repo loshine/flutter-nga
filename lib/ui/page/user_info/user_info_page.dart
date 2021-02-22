@@ -22,7 +22,7 @@ class UserInfoPage extends StatefulWidget {
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  UserInfoStore _store = UserInfoStore();
+  final _store = UserInfoStore();
 
   @override
   void initState() {

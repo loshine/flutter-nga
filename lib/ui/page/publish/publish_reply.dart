@@ -6,11 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
-import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -328,11 +328,11 @@ class _PublishReplyState extends State<PublishPage> {
   }
 
   void _attachmentCallback(attachments, attachmentsCheck) async {
-    final tab = await AndroidGbk.urlEncode("\t");
+    final tab = codeUtils.urlEncode("\t");
     _attachments.write(tab);
-    _attachments.write(await AndroidGbk.urlEncode(attachments));
+    _attachments.write(codeUtils.urlEncode(attachments));
     _attachmentsCheck.write(tab);
-    _attachmentsCheck.write(await AndroidGbk.urlEncode(attachmentsCheck));
+    _attachmentsCheck.write(codeUtils.urlEncode(attachmentsCheck));
   }
 
   void _showTagDialog() {
