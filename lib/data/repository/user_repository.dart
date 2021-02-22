@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/plugins/android_gbk.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:sembast/sembast.dart';
 
 const TAG_CID = "ngaPassportCid";
@@ -52,7 +52,7 @@ class UserDataRepository implements UserRepository {
         cid = c.trim().substring(TAG_CID.length + 1);
       } else if (c.contains(TAG_USER_NAME)) {
         username = c.trim().substring(TAG_USER_NAME.length + 1);
-        username = await AndroidGbk.decodeName(username);
+        username = codeUtils.decodeName(username);
       }
     }
     if (cid != null &&
@@ -104,7 +104,7 @@ class UserDataRepository implements UserRepository {
   @override
   Future<UserInfo> getUserInfoByName(String username) async {
     try {
-      final encodedUsername = await AndroidGbk.urlEncode(username);
+      final encodedUsername =  codeUtils.urlEncode(username);
       Response<Map<String, dynamic>> response = await Data().dio.get(
           "nuke.php?__lib=ucp&__act=get&lite=js&noprefix&username=$encodedUsername");
       // {"0": { userinfo }};

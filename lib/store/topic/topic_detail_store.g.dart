@@ -39,6 +39,21 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
     });
   }
 
+  final _$topicAtom = Atom(name: '_TopicDetailStore.topic');
+
+  @override
+  Topic get topic {
+    _$topicAtom.reportRead();
+    return super.topic;
+  }
+
+  @override
+  set topic(Topic value) {
+    _$topicAtom.reportWrite(value, super.topic, () {
+      super.topic = value;
+    });
+  }
+
   final _$_TopicDetailStoreActionController =
       ActionController(name: '_TopicDetailStore');
 
@@ -65,10 +80,22 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
   }
 
   @override
+  void setTopic(Topic topic) {
+    final _$actionInfo = _$_TopicDetailStoreActionController.startAction(
+        name: '_TopicDetailStore.setTopic');
+    try {
+      return super.setTopic(topic);
+    } finally {
+      _$_TopicDetailStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 currentPage: ${currentPage},
-maxPage: ${maxPage}
+maxPage: ${maxPage},
+topic: ${topic}
     ''';
   }
 }

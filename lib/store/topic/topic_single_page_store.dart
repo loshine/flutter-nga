@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:mobx/mobx.dart';
@@ -28,7 +29,7 @@ abstract class _TopicSinglePageStore with Store {
       List<Reply> hotReplyList = [];
       if (page == 1 && data.hotReplies.isNotEmpty) {
         List<TopicDetailData> hots = await Future.wait(data.hotReplies
-            .map((e) => Data().topicRepository.getHotTopicReply(e)));
+            .map((e) => Data().topicRepository.getTopicReply(e)));
         hots.forEach((e) {
           userList.addAll(e.userList.values);
           groups.addAll(e.groupList.values);
@@ -40,6 +41,7 @@ abstract class _TopicSinglePageStore with Store {
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
+        topic: data.topic,
         replyList: replyList,
         hotReplyList: hotReplyList,
         userList: userList,
@@ -57,6 +59,7 @@ class TopicSinglePageStoreData {
   final int page;
   final int maxPage;
   final bool enablePullUp;
+  final Topic topic;
   final List<Reply> replyList;
   final List<Reply> hotReplyList;
   final List<User> userList;
@@ -67,6 +70,7 @@ class TopicSinglePageStoreData {
     this.page,
     this.maxPage,
     this.enablePullUp,
+    this.topic,
     this.replyList,
     this.hotReplyList,
     this.userList,
@@ -78,6 +82,7 @@ class TopicSinglePageStoreData {
         page: 1,
         maxPage: 1,
         enablePullUp: false,
+        topic: null,
         replyList: [],
         hotReplyList: [],
         userList: [],

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
-import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:sembast/sembast.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 
 /// 版块相关数据知识库
 abstract class ForumRepository {
@@ -270,8 +270,9 @@ class ForumDataRepository implements ForumRepository {
   @override
   Future<List<Forum>> getForumByName(String keyword) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.get(
-          "forum.php?&__output=8&key=${await AndroidGbk.urlEncode(keyword)}");
+      Response<Map<String, dynamic>> response = await Data()
+          .dio
+          .get("forum.php?&__output=8&key=${codeUtils.urlEncode(keyword)}");
       Map<String, dynamic> map = response.data;
       List<Forum> forums = [];
       map.forEach((k, v) {

@@ -157,8 +157,10 @@ class _ContentParser implements Parser {
             (match) => "<h3>${match.group(1)}</h3>") // 处理 [h] 标题
         .replaceAllMapped(RegExp("===([\\s\\S]*?)?==="),
             (match) => "<h3>${match.group(1)}</h3>") // 处理 ===标题===
-        .replaceAllMapped(RegExp("\\[(l|r)]([\\s\\S]*?)?\\[/(l|r)]"),
-            (match) => "${match.group(2)}") // 对左右浮动段落不做处理，直接显示（手机屏没那么宽，不适合这种样式）
+        .replaceAllMapped(
+            RegExp("\\[(l|r)]([\\s\\S]*?)?\\[/(l|r)]"),
+            (match) =>
+                "<p style='text-align:${match.group(1) == 'l' ? 'left' : 'right'}'>${match.group(2)}</p>") // 对左右浮动段落不做处理，直接显示（手机屏没那么宽，不适合这种样式）
         .replaceAllMapped(
             RegExp("\\[color=([a-z]+?)]([\\s\\S]*?)\\[/color]"),
             (match) =>
@@ -230,8 +232,8 @@ class _EmoticonParser implements Parser {
     var parseContent = content;
     list.forEach((group) {
       group.expressionList.forEach((emoticon) {
-        parseContent = parseContent.replaceAll(
-            emoticon.content, "<nga_emoticon src='${emoticon.url}' ></nga_emoticon>");
+        parseContent = parseContent.replaceAll(emoticon.content,
+            "<nga_emoticon src='${emoticon.url}' ></nga_emoticon>");
       });
     });
     return parseContent;

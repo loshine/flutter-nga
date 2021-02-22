@@ -1,14 +1,13 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/toggle_like_reaction.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
-import 'package:flutter_nga/plugins/android_gbk.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
@@ -19,7 +18,7 @@ abstract class TopicRepository {
 
   Future<TopicDetailData> getTopicDetail(int tid, int page);
 
-  Future<TopicDetailData> getHotTopicReply(int pid);
+  Future<TopicDetailData> getTopicReply(int pid);
 
   Future<TopicListData> getFavouriteTopicList(int page);
 
@@ -144,7 +143,7 @@ class TopicDataRepository implements TopicRepository {
   }
 
   @override
-  Future<TopicDetailData> getHotTopicReply(int pid) async {
+  Future<TopicDetailData> getTopicReply(int pid) async {
     try {
       Response<Map<String, dynamic>> response =
           await Data().dio.get("read.php?lite=js&noprefix&pid=$pid");
@@ -232,9 +231,9 @@ class TopicDataRepository implements TopicRepository {
   Future<String> createTopic(int fid, String subject, String content,
       bool isAnonymous, String attachments, String attachmentsCheck) async {
     final postData = "step=2"
-        "&post_content=${await AndroidGbk.urlEncode(content)}"
+        "&post_content=${codeUtils.urlEncode(content)}"
         "&action=new"
-        "&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}"
+        "&post_subject=${codeUtils.urlEncode(subject) ?? ""}"
         "&fid=$fid${isAnonymous ? "anony=1" : ""}"
         "${!codeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
         "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
@@ -262,10 +261,10 @@ class TopicDataRepository implements TopicRepository {
   Future<String> createReply(int tid, int fid, String subject, String content,
       bool isAnonymous, String attachments, String attachmentsCheck) async {
     final postData = "step=2"
-        "&post_content=${await AndroidGbk.urlEncode(content)}"
+        "&post_content=${codeUtils.urlEncode(content)}"
         "&tid=$tid"
         "&action=reply"
-        "&post_subject=${await AndroidGbk.urlEncode(subject) ?? ""}"
+        "&post_subject=${codeUtils.urlEncode(subject) ?? ""}"
         "&fid=$fid${isAnonymous ? "anony=1" : ""}"
         "${!codeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
         "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";

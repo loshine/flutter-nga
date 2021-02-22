@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/store/topic/topic_detail_store.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
@@ -81,7 +80,8 @@ class _TopicDetailState extends State<_TopicDetailPage>
           }
         }
         return Scaffold(
-          appBar: AppBar(title: Text(codeUtils.unescapeHtml(widget.subject))),
+          appBar:
+              AppBar(title: Text(codeUtils.unescapeHtml(store.subject))),
           body: TabBarView(
             controller: _tabController,
             children: widgets,
@@ -161,8 +161,11 @@ class _TopicDetailState extends State<_TopicDetailPage>
                   IconButton(
                     icon: Icon(CommunityMaterialIcons.comment_outline),
                     color: Colors.white,
-                    onPressed: () => Routes.navigateTo(context,
-                        "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid}"),
+                    onPressed: () {
+                      if (widget.fid == null && store.topic == null) return;
+                      Routes.navigateTo(context,
+                          "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid != null ? widget.fid : store.topic.fid}");
+                    },
                   ),
                 ],
               ),

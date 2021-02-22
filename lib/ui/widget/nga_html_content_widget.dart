@@ -10,6 +10,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:html/dom.dart' as dom;
 
 import 'collapse_widget.dart';
@@ -57,6 +58,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
         ),
         'td': Style(padding: EdgeInsets.all(8)),
       },
+      onLinkTap: (link) => Routes.onLinkTap(context, link),
     );
   }
 

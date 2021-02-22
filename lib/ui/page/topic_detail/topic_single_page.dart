@@ -61,6 +61,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
     final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
     _store.refresh(widget.tid, widget.page).then((state) {
       detailStore.setMaxPage(state.maxPage);
+      detailStore.setTopic(state.topic);
     }).catchError((err) {
       _refreshController.loadFailed();
       Fluttertoast.showToast(
