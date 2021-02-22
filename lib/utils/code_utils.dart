@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
@@ -10,6 +11,7 @@ final _postDateFormat = DateFormat('yyyy-MM-dd');
 
 /// 解码 html 特殊字符
 String unescapeHtml(String data) {
+  if (isStringEmpty(data)) return "";
   return _htmlUnescape.convert(data);
 }
 
@@ -75,4 +77,16 @@ String fluroCnParamsDecode(String encodedCn) {
   jsonDecode(encodedCn).forEach(list.add);
   String value = Utf8Decoder().convert(list);
   return value;
+}
+
+String urlDecode(String content) {
+  return Uri.decodeQueryComponent(content, encoding: gbk);
+}
+
+String urlEncode(String content) {
+  return Uri.encodeQueryComponent(content, encoding: gbk);
+}
+
+String decodeName(String name) {
+  return urlDecode(urlDecode(name));
 }

@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/entity/conversation.dart';
 import 'package:flutter_nga/data/entity/message.dart';
-import 'package:flutter_nga/plugins/android_gbk.dart';
+import 'package:flutter_nga/data/entity/notification.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 
 import '../data.dart';
 
@@ -12,6 +13,8 @@ abstract class MessageRepository {
 
   Future<void> sendMessage(
       int mid, List<String> sendTo, String subject, String content);
+
+  Future<NotificationInfo> getNotificationInfo();
 }
 
 class MessageDataRepository extends MessageRepository {
@@ -48,15 +51,26 @@ class MessageDataRepository extends MessageRepository {
       final postData = "__lib=message&__act=message"
           "&__output=8"
           "&act=${isNew ? 'new' : 'reply'}"
-          "&to=${await AndroidGbk.urlDecode(sendToValue)}"
+          "&to=${codeUtils.urlDecode(sendToValue)}"
           "&mid=${mid == null ? 0 : mid}"
-          "&subject=${await AndroidGbk.urlEncode(subject)}"
-          "&content=${await AndroidGbk.urlEncode(content)}";
+          "&subject=${codeUtils.urlEncode(subject)}"
+          "&content=${codeUtils.urlEncode(content)}";
       final options = Options()
         ..contentType = "application/x-www-form-urlencoded";
       Response<Map<String, dynamic>> response =
           await Data().dio.post("nuke.php", data: postData, options: options);
       return null;
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<NotificationInfo> getNotificationInfo() async {
+    try {
+      Response<Map<String, dynamic>> response =
+          await Data().dio.get("nuke.php?__output=8&__lib=noti&__act=if");
+      return NotificationInfo.fromJson(response.data['0']);
     } catch (err) {
       rethrow;
     }
