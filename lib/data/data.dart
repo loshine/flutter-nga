@@ -18,6 +18,7 @@ import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 
 class Data {
   static final Data _singleton = Data._internal();
@@ -75,7 +76,7 @@ class Data {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     // 该特殊 UA 可以让访客访问
     _dio.options.headers["User-Agent"] =
-        "Nga_Official/80030([${androidInfo.brand} ${androidInfo.model}];"
+    "Nga_Official/80030([${androidInfo.brand} ${androidInfo.model}];"
         "Android${androidInfo.version.release})";
     _dio.options.headers["Accept-Encoding"] = "gzip";
     _dio.options.headers["Cache-Control"] = "max-age=0";
@@ -87,7 +88,7 @@ class Data {
         final user = await userRepository.getDefaultUser();
         if (user != null && options.headers["Cookie"] == null) {
           options.headers["Cookie"] =
-              "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
+          "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
         }
         debugPrint("request headers:");
         options.headers.forEach((k, v) => debugPrint("$k:$v"));
@@ -103,8 +104,6 @@ class Data {
         String responseBody = _formatResponseBody(response);
         Map<String, dynamic> map;
         try {
-          // // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
-          // responseBody = await AndroidFormatJson.decode(responseBody);
           map = json.decode(responseBody);
         } catch (err) {
           debugPrint(err.toString());
@@ -124,8 +123,6 @@ class Data {
           String responseBody = _formatResponseBody(e.response);
           Map<String, dynamic> map;
           try {
-            // 可能含有特殊字符，dart 的 json 会解析失败，所以先从 Android 走一趟
-            // responseBody = await AndroidFormatJson.decode(responseBody);
             map = json.decode(responseBody);
           } catch (err) {
             debugPrint(err.toString());
@@ -148,20 +145,24 @@ class Data {
     List<int> bytes = response.data;
     String responseBody = gbk.decode(bytes);
     // 处理一些可能导致错误的字符串
+    // 去除 control characters
+    responseBody = codeUtils.stripLow(responseBody);
     // 直接制表符替换为 \t, \x 替换为 \\x
     responseBody = responseBody
         .replaceAll("\t", "\\t")
         .replaceAll("\\x", "\\\\x")
         .replaceAll(
-            "<html><head><meta http-equiv='Content-Type' content='text/html; charset=GBK'></head><body><script>",
-            "")
+        "<html><head><meta http-equiv='Content-Type' content='text/html; charset=GBK'></head><body><script>",
+        "")
         .replaceAll("</script></body></html>", "")
         .replaceAll("window.script_muti_get_var_store=", "");
     debugPrint(
-        "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}");
+        "request url : ${response.request.path.startsWith("http") ? response
+            .request.path : response.request.baseUrl + response.request.path}");
     var requestData = response.request.data;
     debugPrint(
-        "request data : ${requestData is FormData ? requestData.fields.toString() : requestData.toString()}");
+        "request data : ${requestData is FormData ? requestData.fields
+            .toString() : requestData.toString()}");
     debugPrint("response data : $responseBody");
     return responseBody;
   }
