@@ -29,6 +29,9 @@ class ConversationItemWidget extends StatelessWidget {
                     text: TextSpan(
                       text: conversation.subject,
                       style: TextStyle(
+                        fontWeight: conversation.isUnread
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                         fontSize: Dimen.subheading,
                         color: Palette.colorTextPrimary,
                       ),

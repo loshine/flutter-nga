@@ -255,7 +255,7 @@ class Attachment {
   final String path;
   final String name;
   final String ext;
-  final int thumb;
+  final dynamic thumb;
 
   String get realUrl => "https://img.nga.178.com/attachments/$attachUrl";
 }
