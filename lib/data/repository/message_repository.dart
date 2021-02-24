@@ -15,6 +15,8 @@ abstract class MessageRepository {
       int mid, List<String> sendTo, String subject, String content);
 
   Future<NotificationInfo> getNotificationInfo();
+
+  Future<NotificationInfoListData> getNotificationList();
 }
 
 class MessageDataRepository extends MessageRepository {
@@ -71,6 +73,17 @@ class MessageDataRepository extends MessageRepository {
       Response<Map<String, dynamic>> response =
           await Data().dio.get("nuke.php?__output=8&__lib=noti&__act=if");
       return NotificationInfo.fromJson(response.data['0']);
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<NotificationInfoListData> getNotificationList() async {
+    try {
+      Response<Map<String, dynamic>> response =
+          await Data().dio.get("nuke.php?__output=8&__lib=noti&__act=get_all");
+      return NotificationInfoListData.fromJson(response.data['0']);
     } catch (err) {
       rethrow;
     }

@@ -1,4 +1,3 @@
-
 class Conversation {
   final int mid;
   final int lastModify;
@@ -17,19 +16,23 @@ class Conversation {
   String get users =>
       "$realFromUsername${lastFromUsername != '' ? ", $lastFromUsername" : ''}";
 
+  bool get isMultiUser => bit & 1 == 1;
+
+  bool get isUnread => bit & 2 == 2;
+
   Conversation(
-      this.mid,
-      this.lastModify,
-      this.bit,
-      this.subject,
-      this.from,
-      this.time,
-      this.lastFrom,
-      this.posts,
-      this.sbit,
-      this.fromUsername,
-      this.lastFromUsername,
-      );
+    this.mid,
+    this.lastModify,
+    this.bit,
+    this.subject,
+    this.from,
+    this.time,
+    this.lastFrom,
+    this.posts,
+    this.sbit,
+    this.fromUsername,
+    this.lastFromUsername,
+  );
 
 // final String allUser;
 
@@ -58,11 +61,11 @@ class ConversationListData {
   bool get hasNext => nextPage == 1;
 
   ConversationListData(
-      this.nextPage,
-      this.currentPage,
-      this.rowsPerPage,
-      this.conversationList,
-      );
+    this.nextPage,
+    this.currentPage,
+    this.rowsPerPage,
+    this.conversationList,
+  );
 
   factory ConversationListData.fromJson(Map map) {
     Map<String, Conversation> tempMap = {};
