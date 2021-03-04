@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:html/dom.dart' as dom;
 
 import 'collapse_widget.dart';
