@@ -73,3 +73,4 @@ build/
 ios/Flutter/flutter_export_environment.sh
 /android/key.properties
 !/android/flutter_nga_android.iml
+!/pubspec.lock

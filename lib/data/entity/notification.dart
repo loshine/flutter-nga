@@ -40,19 +40,19 @@ class NotificationInfoListData {
   factory NotificationInfoListData.fromJson(Map<String, dynamic> map) {
     final replyNotificationList = <ReplyNotification>[];
     if (map['0'] != null) {
-      (map['0'] as List<Map<String, dynamic>>).forEach((element) {
+      (map['0'] as List<dynamic>).forEach((element) {
         replyNotificationList.add(ReplyNotification.fromJson(element));
       });
     }
     final messageNotificationList = <MessageNotification>[];
     if (map['1'] != null) {
-      (map['1'] as List<Map<String, dynamic>>).forEach((element) {
+      (map['1'] as List<dynamic>).forEach((element) {
         messageNotificationList.add(MessageNotification.fromJson(element));
       });
     }
     final systemNotificationList = <SystemNotification>[];
     if (map['2'] != null) {
-      (map['2'] as List<Map<String, dynamic>>).forEach((element) {
+      (map['2'] as List<dynamic>).forEach((element) {
         systemNotificationList.add(SystemNotification.fromJson(element));
       });
     }
@@ -65,7 +65,17 @@ class NotificationInfoListData {
   }
 }
 
-class ReplyNotification {
+abstract class NgaNotification {
+  int getType();
+
+  int getSourceUid();
+
+  String getSourceUsername();
+
+  int getTime();
+}
+
+class ReplyNotification implements NgaNotification {
   /// 回复主题
   static const TYPE_REPLY_TOPIC = 1;
 
@@ -149,9 +159,21 @@ class ReplyNotification {
       page: map['10'],
     );
   }
+
+  @override
+  int getSourceUid() => sourceUid;
+
+  @override
+  String getSourceUsername() => sourceUsername;
+
+  @override
+  int getTime() => time;
+
+  @override
+  int getType() => type;
 }
 
-class MessageNotification {
+class MessageNotification implements NgaNotification {
   /// 新短消息
   static const TYPE_NEW = 10;
 
@@ -193,9 +215,21 @@ class MessageNotification {
       time: map['9'],
     );
   }
+
+  @override
+  int getSourceUid() => sourceUid;
+
+  @override
+  String getSourceUsername() => sourceUsername;
+
+  @override
+  int getTime() => time;
+
+  @override
+  int getType() => type;
 }
 
-class SystemNotification {
+class SystemNotification implements NgaNotification {
   /// 主题关键词触发，版主功能
   static const TYPE_TOPIC_KEYWORD = 5;
 
@@ -212,7 +246,7 @@ class SystemNotification {
   static const TYPE_REPORT_REPLY = 14;
 
   /// 关键词监视, 版主功能
-  static const TYPE = 16;
+  static const TYPE_SELF_KEYWORD = 16;
 
   /// 0
   final int type;
@@ -260,5 +294,22 @@ class SystemNotification {
       time: map['9'],
       page: map['10'],
     );
+  }
+
+  @override
+  int getSourceUid() => sourceUid;
+
+  @override
+  String getSourceUsername() => sourceUsername;
+
+  @override
+  int getTime() => time;
+
+  @override
+  int getType() => type;
+
+  @override
+  String toString() {
+    return 'SystemNotification{type: $type, sourceUid: $sourceUid, sourceUsername: $sourceUsername, topicSubject: $topicSubject, tid: $tid, pid: $pid, time: $time, page: $page}';
   }
 }
