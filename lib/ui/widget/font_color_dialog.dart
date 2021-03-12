@@ -4,8 +4,8 @@ import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class FontColorDialog extends StatelessWidget {
-  const FontColorDialog({this.callback, Key key}) : super(key: key);
-  final InputCallback callback;
+  const FontColorDialog({this.callback, Key? key}) : super(key: key);
+  final InputCallback? callback;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class FontColorDialog extends StatelessWidget {
               ),
               onTap: () {
                 if (callback != null) {
-                  callback("[color=${keyList[position]}]", "[/color]", true);
+                  callback!("[color=${keyList[position]}]", "[/color]", true);
                 }
                 Routes.pop(context);
               },

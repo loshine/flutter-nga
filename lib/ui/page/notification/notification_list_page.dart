@@ -15,7 +15,7 @@ class NotificationListPage extends StatefulWidget {
 
 class _NotificationListState extends State<NotificationListPage> {
   final _store = NotificationListStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   void initState() {
@@ -61,25 +61,25 @@ class _NotificationListState extends State<NotificationListPage> {
   Widget _itemBuilder(BuildContext context, int index) {
     if (index == 0) {
       return _titleBuilder('回复通知');
-    } else if (index < _store.state.replyNotificationList.length + 1) {
+    } else if (index < _store.state.replyNotificationList!.length + 1) {
       return Text('233');
-    } else if (index == _store.state.replyNotificationList.length + 1) {
+    } else if (index == _store.state.replyNotificationList!.length + 1) {
       return _titleBuilder('消息通知');
     } else if (index <
-        _store.state.replyNotificationList.length +
-            _store.state.messageNotificationList.length +
+        _store.state.replyNotificationList!.length +
+            _store.state.messageNotificationList!.length +
             2) {
       return Text('111');
     } else if (index ==
-        _store.state.replyNotificationList.length +
-            _store.state.messageNotificationList.length +
+        _store.state.replyNotificationList!.length +
+            _store.state.messageNotificationList!.length +
             2) {
       return _titleBuilder('系统通知');
     } else {
       return SystemNotificationItemWidget(
-          notification: _store.state.systemNotificationList[index -
-              _store.state.replyNotificationList.length -
-              _store.state.messageNotificationList.length -
+          notification: _store.state.systemNotificationList![index -
+              _store.state.replyNotificationList!.length -
+              _store.state.messageNotificationList!.length -
               3]);
     }
   }

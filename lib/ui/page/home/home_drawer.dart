@@ -8,14 +8,14 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:provider/provider.dart';
 
 class HomeDrawerHeader extends StatefulWidget {
-  const HomeDrawerHeader({Key key}) : super(key: key);
+  const HomeDrawerHeader({Key? key}) : super(key: key);
 
   @override
   _HomeDrawerHeaderState createState() => _HomeDrawerHeaderState();
 }
 
 class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
-  HomeDrawerHeaderStore _store;
+  late HomeDrawerHeaderStore _store;
 
   @override
   Widget build(BuildContext context) {
@@ -35,14 +35,14 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                 Padding(
                   padding: EdgeInsets.all(16),
                   child: AvatarWidget(
-                    _store.userInfo != null ? _store.userInfo.avatar : "",
+                    _store.userInfo != null ? _store.userInfo!.avatar : "",
                     size: 56,
                     username:
-                        _store.userInfo != null ? _store.userInfo.username : "",
+                        _store.userInfo != null ? _store.userInfo!.username : "",
                   ),
                 ),
                 Text(_store.userInfo != null
-                    ? _store.userInfo.username
+                    ? _store.userInfo!.username!
                     : "点击登陆"),
               ],
             );
@@ -60,11 +60,11 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
 }
 
 class HomeDrawerBody extends StatelessWidget {
-  final int currentSelection;
-  final Function(int) onSelectedCallback;
+  final int? currentSelection;
+  final Function(int)? onSelectedCallback;
 
   const HomeDrawerBody(
-      {Key key, this.currentSelection, this.onSelectedCallback})
+      {Key? key, this.currentSelection, this.onSelectedCallback})
       : super(key: key);
 
   @override
@@ -94,7 +94,7 @@ class HomeDrawerBody extends StatelessWidget {
                   title: Text("论坛"),
                   selected: currentSelection == 0,
                 ),
-                onTap: () => onSelectedCallback(0),
+                onTap: () => onSelectedCallback!(0),
               ),
               color: Palette.colorBackground,
             ),
@@ -105,7 +105,7 @@ class HomeDrawerBody extends StatelessWidget {
                   title: Text("贴子收藏"),
                   selected: currentSelection == 1,
                 ),
-                onTap: () => onSelectedCallback(1),
+                onTap: () => onSelectedCallback!(1),
               ),
               color: Palette.colorBackground,
             ),
@@ -116,7 +116,7 @@ class HomeDrawerBody extends StatelessWidget {
                   title: Text("浏览历史"),
                   selected: currentSelection == 2,
                 ),
-                onTap: () => onSelectedCallback(2),
+                onTap: () => onSelectedCallback!(2),
               ),
               color: Palette.colorBackground,
             ),
@@ -127,7 +127,7 @@ class HomeDrawerBody extends StatelessWidget {
                   title: Text("短消息"),
                   selected: currentSelection == 3,
                 ),
-                onTap: () => onSelectedCallback(3),
+                onTap: () => onSelectedCallback!(3),
               ),
               color: Palette.colorBackground,
             ),
@@ -138,7 +138,7 @@ class HomeDrawerBody extends StatelessWidget {
                   title: Text("提醒信息"),
                   selected: currentSelection == 4,
                 ),
-                onTap: () => onSelectedCallback(4),
+                onTap: () => onSelectedCallback!(4),
               ),
               color: Palette.colorBackground,
             ),

@@ -6,9 +6,9 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class SendMessagePage extends StatefulWidget {
-  final int mid;
+  final int? mid;
 
-  const SendMessagePage({Key key, this.mid}) : super(key: key);
+  const SendMessagePage({Key? key, this.mid}) : super(key: key);
 
   @override
   _SendMessageState createState() => _SendMessageState();

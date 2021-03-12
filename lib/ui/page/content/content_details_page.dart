@@ -4,7 +4,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 class ContentDetailsPage extends StatelessWidget {
   final List<Widget> children;
 
-  const ContentDetailsPage(this.children, {Key key}) : super(key: key);
+  const ContentDetailsPage(this.children, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
@@ -13,34 +11,35 @@ import 'package:flutter_nga/data/repository/message_repository.dart';
 import 'package:flutter_nga/data/repository/resource_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 
 class Data {
   static final Data _singleton = Data._internal();
 
-  Dio _dio;
+  Dio? _dio;
 
-  Database _database;
+  Database? _database;
 
-  Dio get dio => _dio;
-  PersistCookieJar _cookieJar;
+  Dio get dio => _dio!;
+
+  Database get database => _database!;
 
   EmoticonRepository get emoticonRepository => EmoticonDataRepository();
 
-  ForumRepository get forumRepository => ForumDataRepository(_database);
+  ForumRepository get forumRepository => ForumDataRepository(database);
 
   MessageRepository get messageRepository => MessageDataRepository();
 
   ResourceRepository get resourceRepository => ResourceDataRepository();
 
-  TopicRepository get topicRepository => TopicDataRepository(_database);
+  TopicRepository get topicRepository => TopicDataRepository(database);
 
-  UserRepository get userRepository => UserDataRepository(_database);
+  UserRepository get userRepository => UserDataRepository(database);
 
   factory Data() {
     return _singleton;
@@ -58,12 +57,10 @@ class Data {
 
     _dio = Dio();
 
-    _cookieJar = PersistCookieJar(dir: [appDocDir.path, 'cookies'].join('/'));
-
     // 配置dio实例
-    _dio.options.baseUrl = DOMAIN;
-    _dio.options.connectTimeout = 10000; // 10s
-    _dio.options.receiveTimeout = 10000; // 10s
+    dio.options.baseUrl = DOMAIN;
+    dio.options.connectTimeout = 10000; // 10s
+    dio.options.receiveTimeout = 10000; // 10s
 //    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
 //        (HttpClient client) {
 //      client.findProxy = (uri) {
@@ -71,24 +68,23 @@ class Data {
 //      };
 //    };
     // 因为需要 gbk -> utf-8, 所以需要流的形式
-    _dio.options.responseType = ResponseType.bytes;
+    dio.options.responseType = ResponseType.bytes;
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     // 该特殊 UA 可以让访客访问
-    _dio.options.headers["User-Agent"] =
-    "Nga_Official/80030([${androidInfo.brand} ${androidInfo.model}];"
+    dio.options.headers["User-Agent"] =
+        "Nga_Official/80030([${androidInfo.brand} ${androidInfo.model}];"
         "Android${androidInfo.version.release})";
-    _dio.options.headers["Accept-Encoding"] = "gzip";
-    _dio.options.headers["Cache-Control"] = "max-age=0";
-    _dio.options.headers["Connection"] = "Keep-Alive";
+    dio.options.headers["Accept-Encoding"] = "gzip";
+    dio.options.headers["Cache-Control"] = "max-age=0";
+    dio.options.headers["Connection"] = "Keep-Alive";
 
-    _dio.interceptors.add(CookieManager(_cookieJar));
-    _dio.interceptors.add(InterceptorsWrapper(
+    dio.interceptors.add(InterceptorsWrapper(
       onRequest: (RequestOptions options) async {
         final user = await userRepository.getDefaultUser();
         if (user != null && options.headers["Cookie"] == null) {
           options.headers["Cookie"] =
-          "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
+              "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
         }
         debugPrint("request headers:");
         options.headers.forEach((k, v) => debugPrint("$k:$v"));
@@ -102,7 +98,7 @@ class Data {
       },
       onResponse: (Response response) async {
         String responseBody = _formatResponseBody(response);
-        Map<String, dynamic> map;
+        Map<String, dynamic>? map;
         try {
           map = json.decode(responseBody);
         } catch (err) {
@@ -110,7 +106,7 @@ class Data {
           response.data = responseBody;
           return response;
         }
-        DioError dioError = _preHandleServerError(response, map);
+        DioError? dioError = _preHandleServerError(response, map!);
         if (dioError != null) {
           throw dioError;
         }
@@ -119,16 +115,16 @@ class Data {
       },
       onError: (DioError e) async {
         debugPrint(e.toString());
-        if (e.response != null && e.response.data != null) {
-          String responseBody = _formatResponseBody(e.response);
-          Map<String, dynamic> map;
+        if (e.response != null && e.response!.data != null) {
+          String responseBody = _formatResponseBody(e.response!);
+          Map<String, dynamic>? map;
           try {
             map = json.decode(responseBody);
           } catch (err) {
             debugPrint(err.toString());
             return e;
           }
-          DioError dioError = _preHandleServerError(e.response, map);
+          DioError? dioError = _preHandleServerError(e.response, map!);
           if (dioError != null) {
             return dioError;
           }
@@ -152,31 +148,30 @@ class Data {
         .replaceAll("\t", "\\t")
         .replaceAll("\\x", "\\\\x")
         .replaceAll(
-        "<html><head><meta http-equiv='Content-Type' content='text/html; charset=GBK'></head><body><script>",
-        "")
+            "<html><head><meta http-equiv='Content-Type' content='text/html; charset=GBK'></head><body><script>",
+            "")
         .replaceAll("</script></body></html>", "")
         .replaceAll("window.script_muti_get_var_store=", "");
     debugPrint(
-        "request url : ${response.request.path.startsWith("http") ? response
-            .request.path : response.request.baseUrl + response.request.path}");
+        "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}");
     var requestData = response.request.data;
     debugPrint(
-        "request data : ${requestData is FormData ? requestData.fields
-            .toString() : requestData.toString()}");
+        "request data : ${requestData is FormData ? requestData.fields.toString() : requestData.toString()}");
     debugPrint("response data : $responseBody");
     return responseBody;
   }
 
   /// 预处理服务器业务错误
-  DioError _preHandleServerError(Response response, Map<String, dynamic> map) {
+  DioError? _preHandleServerError(
+      Response? response, Map<String, dynamic> map) {
     // 如果是 api 错误，抛出错误内容
     if (map["data"] is Map<String, dynamic> &&
         map["data"].containsKey("__MESSAGE")) {
-      String errorMessage = map["data"]["__MESSAGE"]["1"];
+      String? errorMessage = map["data"]["__MESSAGE"]["1"];
       return DioError(
         response: response,
         error: errorMessage,
-        type: DioErrorType.RESPONSE,
+        type: DioErrorType.other,
       );
     }
     // 点赞时的错误
@@ -186,17 +181,17 @@ class Data {
         return DioError(
           response: response,
           error: err["0"],
-          type: DioErrorType.RESPONSE,
+          type: DioErrorType.other,
         );
       }
     }
     // 上传附件时的错误
     if (map["error"] is String) {
-      String errorMessage = map["error"];
+      String? errorMessage = map["error"];
       return DioError(
         response: response,
         error: errorMessage,
-        type: DioErrorType.RESPONSE,
+        type: DioErrorType.other,
       );
     }
     return null;
@@ -204,8 +199,8 @@ class Data {
 
   void close() async {
     // 清除所有网络访问
-    _dio.clear();
+    _dio?.clear();
     // 关闭数据库
-    _database.close();
+    _database?.close();
   }
 }

@@ -12,7 +12,7 @@ String getShowName(String username) {
     var i = 6;
     for (var j = 0; j <= 5;j++) {
       if (j == 0 || j == 3) {
-        int pos = int.tryParse(username.substring(i + 1, i + 2), radix: 16);
+        int pos = int.tryParse(username.substring(i + 1, i + 2), radix: 16)!;
         if (pos >= prefix.length) {
           pos = prefix.length - 1;
         } else if (pos < 0) {
@@ -20,7 +20,7 @@ String getShowName(String username) {
         }
         buffer.write(prefix[pos]);
       } else {
-        int pos = int.tryParse(username.substring(i, i + 2), radix: 16);
+        int pos = int.tryParse(username.substring(i, i + 2), radix: 16)!;
         if (pos >= suffix.length) {
           pos = suffix.length - 1;
         } else if (pos < 0) {

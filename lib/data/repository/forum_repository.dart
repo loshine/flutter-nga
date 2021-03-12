@@ -18,9 +18,9 @@ abstract class ForumRepository {
 
   Future<List<Forum>> getForumByName(String keyword);
 
-  Future<String> addChildForumSubscription(int fid, int parentId);
+  Future<String?> addChildForumSubscription(int fid, int? parentId);
 
-  Future<String> deleteChildForumSubscription(int fid, int parentId);
+  Future<String?> deleteChildForumSubscription(int fid, int? parentId);
 }
 
 class ForumDataRepository implements ForumRepository {
@@ -30,14 +30,14 @@ class ForumDataRepository implements ForumRepository {
 
   final Database database;
 
-  StoreRef<int, dynamic> get _store {
+  StoreRef<int, dynamic>? get _store {
     if (_lateInitStore == null) {
       _lateInitStore = intMapStoreFactory.store('forums');
     }
     return _lateInitStore;
   }
 
-  StoreRef<int, dynamic> _lateInitStore;
+  StoreRef<int, dynamic>? _lateInitStore;
 
   @override
   List<ForumGroup> getForumGroups() {
@@ -246,24 +246,24 @@ class ForumDataRepository implements ForumRepository {
   @override
   Future<bool> isFavourite(Forum forum) async {
     final finder = Finder(filter: Filter.equals('fid', forum.fid));
-    final record = await _store.findFirst(database, finder: finder);
+    final record = await _store!.findFirst(database, finder: finder);
     return record != null;
   }
 
   @override
   Future<int> saveFavourite(Forum forum) {
-    return _store.add(database, forum.toJson());
+    return _store!.add(database, forum.toJson());
   }
 
   @override
   Future<int> deleteFavourite(Forum forum) {
     final finder = Finder(filter: Filter.equals('fid', forum.fid));
-    return _store.delete(database, finder: finder);
+    return _store!.delete(database, finder: finder);
   }
 
   @override
   Future<List<Forum>> getFavouriteList() async {
-    List<RecordSnapshot<int, dynamic>> results = await _store.find(database);
+    List<RecordSnapshot<int, dynamic>> results = await _store!.find(database);
     return results.map((map) => Forum.fromJson(map.value)).toList();
   }
 
@@ -273,7 +273,7 @@ class ForumDataRepository implements ForumRepository {
       Response<Map<String, dynamic>> response = await Data()
           .dio
           .get("forum.php?&__output=8&key=${codeUtils.urlEncode(keyword)}");
-      Map<String, dynamic> map = response.data;
+      Map<String, dynamic> map = response.data!;
       List<Forum> forums = [];
       map.forEach((k, v) {
         forums.add(Forum.fromJson(v));
@@ -285,7 +285,7 @@ class ForumDataRepository implements ForumRepository {
   }
 
   @override
-  Future<String> addChildForumSubscription(int fid, int parentId) async {
+  Future<String?> addChildForumSubscription(int fid, int? parentId) async {
     try {
       final formData = FormData.fromMap({
         "fid": parentId,
@@ -295,14 +295,14 @@ class ForumDataRepository implements ForumRepository {
       Response<Map<String, dynamic>> response = await Data().dio.post(
           "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
           data: formData);
-      return response.data["0"];
+      return response.data!["0"];
     } catch (err) {
       rethrow;
     }
   }
 
   @override
-  Future<String> deleteChildForumSubscription(int fid, int parentId) async {
+  Future<String?> deleteChildForumSubscription(int fid, int? parentId) async {
     try {
       final formData = FormData.fromMap({
         "fid": parentId,
@@ -312,7 +312,7 @@ class ForumDataRepository implements ForumRepository {
       Response<Map<String, dynamic>> response = await Data().dio.post(
           "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
           data: formData);
-      return response.data["0"];
+      return response.data!["0"];
     } catch (err) {
       rethrow;
     }

@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
 class InfoWidget extends StatelessWidget {
-  const InfoWidget({this.title, this.subTitle, Key key}) : super(key: key);
+  const InfoWidget({this.title, this.subTitle, Key? key}) : super(key: key);
 
-  final String title;
-  final String subTitle;
+  final String? title;
+  final String? subTitle;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Text(
-          title,
+          title!,
           style: TextStyle(fontSize: 14),
         ),
         Text(
-          subTitle,
+          subTitle!,
           style: TextStyle(
             fontSize: 14,
             color: Palette.colorTextSecondary,

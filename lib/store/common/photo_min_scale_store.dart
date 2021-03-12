@@ -12,10 +12,10 @@ abstract class _PhotoMinScaleStore with Store {
   double minScale = 0;
 
   @action
-  void load(String url, double screenWidth) {
+  void load(String url, double? screenWidth) {
     CachedNetworkImageProvider(pictureUtils.getOriginalUrl(url))
         .resolve(ImageConfiguration())
         .addListener(ImageStreamListener(
-            (ImageInfo info, _) => minScale = screenWidth / info.image.width));
+            (ImageInfo info, _) => minScale = screenWidth! / info.image.width));
   }
 }

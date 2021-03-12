@@ -25,15 +25,15 @@ class HomePage extends StatelessWidget {
 }
 
 class _HomePage extends StatefulWidget {
-  const _HomePage({Key key}) : super(key: key);
+  const _HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<_HomePage> {
-  GlobalKey<TopicHistoryListState> _historyStateKey;
-  List<Widget> pageList;
+  GlobalKey<TopicHistoryListState>? _historyStateKey;
+  late List<Widget> pageList;
   final _store = HomeStore();
 
   _HomePageState() {
@@ -72,7 +72,7 @@ class _HomePageState extends State<_HomePage> {
     } else if (_store.index == 2) {
       actions.add(IconButton(
         icon: Icon(Icons.delete_forever),
-        onPressed: () => _historyStateKey.currentState.showCleanDialog(),
+        onPressed: () => _historyStateKey!.currentState!.showCleanDialog(),
       ));
     }
     return actions;
@@ -116,7 +116,7 @@ class _HomePageState extends State<_HomePage> {
             floatingActionButton: _getFloatingActionButton(),
           ),
           onWillPop: () async {
-            if (key.currentState.isDrawerOpen || _store.index == 0) {
+            if (key.currentState!.isDrawerOpen || _store.index == 0) {
               return true;
             } else {
               _store.setIndex(0);
@@ -128,7 +128,7 @@ class _HomePageState extends State<_HomePage> {
     );
   }
 
-  FloatingActionButton _getFloatingActionButton() {
+  FloatingActionButton? _getFloatingActionButton() {
     return _store.index == 3
         ? FloatingActionButton(
             tooltip: '新建短消息',

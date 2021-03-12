@@ -7,10 +7,10 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
 class TopicReplyCommentItemWidget extends StatelessWidget {
-  const TopicReplyCommentItemWidget(this.reply, this.user, {Key key})
+  const TopicReplyCommentItemWidget(this.reply, this.user, {Key? key})
       : super(key: key);
 
-  final User user;
+  final User? user;
   final Reply reply;
 
   @override
@@ -32,9 +32,9 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(right: 8),
                 child: AvatarWidget(
-                  user.avatar,
+                  user!.avatar,
                   size: 36,
-                  username: user.username,
+                  username: user!.username,
                 ),
               ),
               Expanded(
@@ -43,10 +43,10 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                   children: [
                     Padding(
                       padding: EdgeInsets.only(bottom: 4),
-                      child: Text(user.getShowName()),
+                      child: Text(user!.getShowName()),
                     ),
                     Text(
-                      reply.postDate,
+                      reply.postDate!,
                       style: TextStyle(
                         fontSize: Dimen.caption,
                         color: Palette.colorTextSecondary,

@@ -27,7 +27,7 @@ mixin _$ConversationDetailStore on _ConversationDetailStore, Store {
   final _$refreshAsyncAction = AsyncAction('_ConversationDetailStore.refresh');
 
   @override
-  Future<ConversationDetailStoreData> refresh(int mid) {
+  Future<ConversationDetailStoreData> refresh(int? mid) {
     return _$refreshAsyncAction.run(() => super.refresh(mid));
   }
 
@@ -35,7 +35,7 @@ mixin _$ConversationDetailStore on _ConversationDetailStore, Store {
       AsyncAction('_ConversationDetailStore.loadMore');
 
   @override
-  Future<ConversationDetailStoreData> loadMore(int mid) {
+  Future<ConversationDetailStoreData> loadMore(int? mid) {
     return _$loadMoreAsyncAction.run(() => super.loadMore(mid));
   }
 

@@ -6,8 +6,8 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 
 class EmoticonGroupTabsWidget extends StatefulWidget {
-  const EmoticonGroupTabsWidget({this.callback, Key key}) : super(key: key);
-  final InputCallback callback;
+  const EmoticonGroupTabsWidget({this.callback, Key? key}) : super(key: key);
+  final InputCallback? callback;
 
   @override
   _EmoticonGroupTabsState createState() => _EmoticonGroupTabsState();
@@ -51,21 +51,21 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
 }
 
 class _EmoticonGroupWidget extends StatelessWidget {
-  _EmoticonGroupWidget({this.group, this.callback, Key key}) : super(key: key);
+  _EmoticonGroupWidget({this.group, this.callback, Key? key}) : super(key: key);
 
-  final EmoticonGroup group;
-  final InputCallback callback;
+  final EmoticonGroup? group;
+  final InputCallback? callback;
 
   @override
   Widget build(BuildContext context) {
     return GridView.count(
       crossAxisCount: 6,
-      children: group.expressionList
+      children: group!.expressionList
           .map(
             (expression) => Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => callback(expression.content, "", false),
+                onTap: () => callback!(expression.content, "", false),
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: CachedNetworkImage(

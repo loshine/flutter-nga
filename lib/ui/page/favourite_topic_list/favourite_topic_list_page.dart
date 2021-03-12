@@ -14,7 +14,7 @@ class FavouriteTopicListPage extends StatefulWidget {
 
 class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
   final _store = FavouriteTopicListStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   void initState() {
@@ -88,7 +88,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
                   Routes.pop(context);
                   _store.delete(topic).then((message) {
                     Fluttertoast.showToast(
-                      msg: message,
+                      msg: message!,
                       gravity: ToastGravity.CENTER,
                     );
                   });

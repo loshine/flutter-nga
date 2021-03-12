@@ -17,11 +17,11 @@ abstract class _FavouriteTopicListStore with Store {
       TopicListData data =
           await Data().topicRepository.getFavouriteTopicList(1);
       state = FavouriteTopicListStoreData(
-        size: data.topicRows,
+        size: data.topicRows ?? 35,
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
-        list: data.topicList.values.toList(),
+        list: data.topicList!.values.toList(),
       );
       return state;
     } catch (err) {
@@ -35,11 +35,11 @@ abstract class _FavouriteTopicListStore with Store {
       TopicListData data =
           await Data().topicRepository.getFavouriteTopicList(state.page + 1);
       state = FavouriteTopicListStoreData(
-        size: data.topicRows,
+        size: data.topicRows ?? 35,
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
-        list: state.list..addAll(data.topicList.values),
+        list: state.list..addAll(data.topicList!.values),
       );
       return state;
     } catch (err) {
@@ -48,9 +48,9 @@ abstract class _FavouriteTopicListStore with Store {
   }
 
   @action
-  Future<String> delete(Topic topic) async {
+  Future<String?> delete(Topic topic) async {
     try {
-      String message = await Data()
+      String? message = await Data()
           .topicRepository
           .deleteFavouriteTopic(topic.tid, topic.page);
       state = FavouriteTopicListStoreData(
@@ -75,11 +75,11 @@ class FavouriteTopicListStoreData {
   final List<Topic> list;
 
   const FavouriteTopicListStoreData({
-    this.size,
-    this.page,
-    this.maxPage,
-    this.enablePullUp,
-    this.list,
+    this.size = 35,
+    this.page = 1,
+    this.maxPage = 1,
+    this.enablePullUp = false,
+    this.list = const [],
   });
 
   factory FavouriteTopicListStoreData.initial() => FavouriteTopicListStoreData(

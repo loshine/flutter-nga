@@ -19,7 +19,7 @@ import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/linkroute/link_route.dart';
 
 class Routes {
-  static FluroRouter router;
+  static late FluroRouter router;
 
   static const String SPLASH = "/";
   static const String HOME = "/home";
@@ -52,37 +52,39 @@ class Routes {
     router.define(FORUM_DETAIL,
         handler: Handler(handlerFunc: (context, params) {
       return ForumDetailPage(
-        fid: int.tryParse(params["fid"][0]),
-        name: fluroCnParamsDecode(params["name"][0]),
-        type: params["type"] != null ? int.tryParse(params["type"][0]) : 0,
+        fid: int.tryParse(params["fid"]![0])!,
+        name: fluroCnParamsDecode(params["name"]![0]),
+        type: params["type"] != null ? int.tryParse(params["type"]![0]) : 0,
       );
     }));
     router.define(TOPIC_DETAIL,
         handler: Handler(
             handlerFunc: (context, params) => TopicDetailPage(
-                  int.tryParse(params["tid"][0]),
-                  params["fid"] != null ? int.tryParse(params["fid"][0]) : null,
+                  int.tryParse(params["tid"]![0]),
+                  params["fid"] != null
+                      ? int.tryParse(params["fid"]![0])
+                      : null,
                   subject: params["subject"] != null
-                      ? fluroCnParamsDecode(params["subject"][0])
+                      ? fluroCnParamsDecode(params["subject"]![0])
                       : null,
                 )));
     router.define(TOPIC_PUBLISH,
         handler: Handler(handlerFunc: (context, params) {
-      final List<String> tidParams = params["tid"];
+      final List<String>? tidParams = params["tid"];
       if (tidParams == null || tidParams.isEmpty) {
-        return PublishPage(fid: int.tryParse(params["fid"][0]));
+        return PublishPage(fid: int.tryParse(params["fid"]![0]));
       } else {
         return PublishPage(
-          tid: int.tryParse(params["tid"][0]),
-          fid: int.tryParse(params["fid"][0]),
+          tid: int.tryParse(params["tid"]![0]),
+          fid: int.tryParse(params["fid"]![0]),
         );
       }
     }));
     router.define(USER, handler: Handler(handlerFunc: (context, params) {
-      if (params["uid"] != null && params["uid"].isNotEmpty) {
-        return UserInfoPage(uid: params["uid"][0]);
+      if (params["uid"] != null && params["uid"]!.isNotEmpty) {
+        return UserInfoPage(uid: params["uid"]![0]);
       } else {
-        return UserInfoPage(username: fluroCnParamsDecode(params["name"][0]));
+        return UserInfoPage(username: fluroCnParamsDecode(params["name"]![0]));
       }
     }));
     router.define(SETTINGS,
@@ -94,7 +96,7 @@ class Routes {
       SEARCH,
       handler: Handler(
         handlerFunc: (context, params) {
-          final List<String> fidParams = params["fid"];
+          final List<String>? fidParams = params["fid"];
           if (fidParams == null || fidParams.isEmpty) {
             return SearchPage();
           } else {
@@ -107,7 +109,7 @@ class Routes {
       SEARCH_FORUM,
       handler: Handler(
         handlerFunc: (context, params) =>
-            SearchForumPage(fluroCnParamsDecode(params["keyword"][0])),
+            SearchForumPage(fluroCnParamsDecode(params["keyword"]![0])),
       ),
     );
     router.define(
@@ -115,16 +117,16 @@ class Routes {
       handler: Handler(
         handlerFunc: (context, params) {
           final content = params["content"] != null &&
-              params["content"].isNotEmpty &&
-              params["content"][0] == "1";
-          if (params["fid"] == null || params["fid"].isEmpty) {
+              params["content"]!.isNotEmpty &&
+              params["content"]![0] == "1";
+          if (params["fid"] == null || params["fid"]!.isEmpty) {
             return SearchTopicListPage(
-                fluroCnParamsDecode(params["keyword"][0]),
+                fluroCnParamsDecode(params["keyword"]![0]),
                 content: content);
           } else {
             return SearchTopicListPage(
-              fluroCnParamsDecode(params["keyword"][0]),
-              fid: int.tryParse(params["fid"][0]),
+              fluroCnParamsDecode(params["keyword"]![0]),
+              fid: int.tryParse(params["fid"]![0]),
               content: content,
             );
           }
@@ -135,8 +137,8 @@ class Routes {
       PHOTO_PREVIEW,
       handler: Handler(
         handlerFunc: (context, params) => PhotoPreviewPage(
-          url: fluroCnParamsDecode(params["url"][0]),
-          screenWidth: double.tryParse(params["screenWidth"][0]) ?? 0,
+          url: fluroCnParamsDecode(params["url"]![0]),
+          screenWidth: double.tryParse(params["screenWidth"]![0]) ?? 0,
         ),
       ),
     );
@@ -144,7 +146,7 @@ class Routes {
       CONVERSATION_DETAIL,
       handler: Handler(
         handlerFunc: (context, params) => ConversationDetailPage(
-          mid: int.tryParse(params["mid"][0]),
+          mid: int.tryParse(params["mid"]![0]),
         ),
       ),
     );
@@ -152,25 +154,31 @@ class Routes {
       SEND_MESSAGE,
       handler: Handler(
         handlerFunc: (context, params) => SendMessagePage(
-          mid: int.tryParse(params["mid"][0]),
+          mid: int.tryParse(params["mid"]![0]),
         ),
       ),
     );
   }
 
   /// 代理 Router 类的 navigateTo 方法
-  static Future navigateTo(BuildContext context, String path,
-      {bool replace = false,
-      bool clearStack = false,
-      TransitionType transition,
-      Duration transitionDuration = const Duration(milliseconds: 250),
-      RouteTransitionsBuilder transitionBuilder}) {
-    return router.navigateTo(context, path,
-        replace: replace,
-        clearStack: clearStack,
-        transition: transition,
-        transitionDuration: transitionDuration,
-        transitionBuilder: transitionBuilder);
+  static Future navigateTo(
+    BuildContext context,
+    String path, {
+    bool replace = false,
+    bool clearStack = false,
+    TransitionType transition = TransitionType.native,
+    Duration transitionDuration = const Duration(milliseconds: 250),
+    RouteTransitionsBuilder? transitionBuilder,
+  }) {
+    return router.navigateTo(
+      context,
+      path,
+      replace: replace,
+      clearStack: clearStack,
+      transition: transition,
+      transitionDuration: transitionDuration,
+      transitionBuilder: transitionBuilder,
+    );
   }
 
   /// 代理 Router 类的 pop 方法

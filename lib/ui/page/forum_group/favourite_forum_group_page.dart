@@ -10,7 +10,7 @@ class FavouriteForumGroupPage extends StatefulWidget {
 }
 
 class _FavouriteForumGroupState extends State<FavouriteForumGroupPage> {
-  FavouriteForumListStore _store;
+  late FavouriteForumListStore _store;
 
   @override
   void initState() {

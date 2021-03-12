@@ -1,11 +1,11 @@
 import 'package:flutter_nga/data/entity/user.dart';
 
 class Message {
-  final int id;
-  final String subject;
-  final String content;
-  final int from;
-  final int time;
+  final int? id;
+  final String? subject;
+  final String? content;
+  final int? from;
+  final int? time;
   final User user;
   final dynamic data;
 
@@ -33,11 +33,11 @@ class Message {
 }
 
 class MessageListData {
-  final int length;
-  final int nextPage;
-  final int currentPage;
-  final int subjectBit;
-  final int starterUid;
+  final int? length;
+  final int? nextPage;
+  final int? currentPage;
+  final int? subjectBit;
+  final int? starterUid;
   final List<Message> messageList;
   final List<User> userList;
 

@@ -18,7 +18,7 @@ class TopicHistoryListPage extends StatefulWidget {
 
 class TopicHistoryListState extends State<TopicHistoryListPage> {
   final _store = TopicHistoryListStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,7 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
     if (itemData is TopicHistory) {
       return TopicHistoryListItemWidget(
         topicHistory: itemData,
-        onLongPress: () => _showDeleteDialog(itemData.id),
+        onLongPress: () => _showDeleteDialog(itemData.id!),
       );
     } else {
       return Padding(

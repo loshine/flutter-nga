@@ -12,7 +12,7 @@ abstract class _ConversationDetailStore with Store {
   ConversationDetailStoreData state = ConversationDetailStoreData.initial();
 
   @action
-  Future<ConversationDetailStoreData> refresh(int mid) async {
+  Future<ConversationDetailStoreData> refresh(int? mid) async {
     try {
       MessageListData data =
           await Data().messageRepository.getMessageList(mid, 1);
@@ -28,7 +28,7 @@ abstract class _ConversationDetailStore with Store {
   }
 
   @action
-  Future<ConversationDetailStoreData> loadMore(int mid) async {
+  Future<ConversationDetailStoreData> loadMore(int? mid) async {
     try {
       MessageListData data =
           await Data().messageRepository.getMessageList(mid, state.page + 1);
@@ -50,9 +50,9 @@ class ConversationDetailStoreData {
   final List<Message> list;
 
   const ConversationDetailStoreData({
-    this.page,
-    this.enablePullUp,
-    this.list,
+    this.page = 1,
+    this.enablePullUp = false,
+    this.list = const [],
   });
 
   factory ConversationDetailStoreData.initial() => ConversationDetailStoreData(

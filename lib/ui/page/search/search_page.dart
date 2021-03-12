@@ -8,9 +8,9 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class SearchPage extends StatefulWidget {
-  final int fid;
+  final int? fid;
 
-  const SearchPage({this.fid, Key key}) : super(key: key);
+  const SearchPage({this.fid, Key? key}) : super(key: key);
 
   @override
   _SearchState createState() => _SearchState();
@@ -58,7 +58,7 @@ class _SearchState extends State<SearchPage> {
                           Icons.close,
                           color: Colors.white,
                         ),
-                        onPressed: () => WidgetsBinding.instance
+                        onPressed: () => WidgetsBinding.instance!
                             .addPostFrameCallback((_) => _searchQuery.clear()),
                       )
                     : Container(width: 0);

@@ -14,9 +14,9 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ReplyDetailDialog extends StatefulWidget {
-  final int pid;
+  final int? pid;
 
-  const ReplyDetailDialog({Key key, this.pid}) : super(key: key);
+  const ReplyDetailDialog({Key? key, this.pid}) : super(key: key);
 
   @override
   _ReplyDetailState createState() => _ReplyDetailState();
@@ -68,7 +68,11 @@ class _ReplyWidget extends StatefulWidget {
   final Reply reply;
   final User user;
 
-  const _ReplyWidget({Key key, this.reply, this.user}) : super(key: key);
+  const _ReplyWidget({
+    Key? key,
+    required this.reply,
+    required this.user,
+  }) : super(key: key);
 
   @override
   _ReplyWidgetState createState() => _ReplyWidgetState();
@@ -105,7 +109,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Text(
-              codeUtils.unescapeHtml(widget.reply.subject) ?? "",
+              codeUtils.unescapeHtml(widget.reply.subject),
               style: TextStyle(
                 fontSize: Dimen.title,
                 fontWeight: FontWeight.bold,
@@ -169,7 +173,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
               ),
               Spacer(),
               Text(
-                widget.reply.postDate,
+                widget.reply.postDate ?? "",
                 style: TextStyle(
                   fontSize: Dimen.caption,
                   color: Palette.colorTextSecondary,
@@ -195,7 +199,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
     } catch (err) {
       print(err.toString());
       Fluttertoast.showToast(
-        msg: err.message,
+        msg: err.toString(),
         gravity: ToastGravity.CENTER,
       );
     }
@@ -214,7 +218,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
     } catch (err) {
       print(err.toString());
       Fluttertoast.showToast(
-        msg: err.message,
+        msg: err.toString(),
         gravity: ToastGravity.CENTER,
       );
     }

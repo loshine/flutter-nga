@@ -3,12 +3,12 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class TopicPageSelectDialog extends StatefulWidget {
-  final int currentPage;
-  final int maxPage;
-  final int maxFloor;
+  final int? currentPage;
+  final int? maxPage;
+  final int? maxFloor;
 
   const TopicPageSelectDialog(
-      {Key key, this.maxPage, this.maxFloor, this.currentPage})
+      {Key? key, this.maxPage, this.maxFloor, this.currentPage})
       : super(key: key);
 
   @override
@@ -16,7 +16,7 @@ class TopicPageSelectDialog extends StatefulWidget {
 }
 
 class _TopicPageSelectState extends State<TopicPageSelectDialog> {
-  int _currentVal = 1;
+  int? _currentVal = 1;
   bool _isPage = true;
 
   @override
@@ -36,12 +36,12 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
           children: [
             Text("第$_currentVal${_isPage ? "页" : "楼"}"),
             Slider(
-              value: _currentVal.toDouble(),
+              value: _currentVal!.toDouble(),
               min: 1,
               max: _isPage
-                  ? widget.maxPage.toDouble()
-                  : widget.maxPage.toDouble() * 20,
-              divisions: _isPage ? widget.maxPage - 1 : widget.maxPage * 20 - 1,
+                  ? widget.maxPage!.toDouble()
+                  : widget.maxPage!.toDouble() * 20,
+              divisions: _isPage ? widget.maxPage! - 1 : widget.maxPage! * 20 - 1,
               onChanged: (double newValue) {
                 setState(() {
                   _currentVal = newValue.round();

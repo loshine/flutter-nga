@@ -7,7 +7,7 @@ typedef InputCallback = void Function(
     String startTag, String endTag, bool hasEnd);
 
 class FontStyleWidget extends StatelessWidget {
-  const FontStyleWidget({this.callback, Key key}) : super(key: key);
+  const FontStyleWidget({this.callback, Key? key}) : super(key: key);
 
   static const _operationMap = {
     "字号": CommunityMaterialIcons.format_size,
@@ -22,7 +22,7 @@ class FontStyleWidget extends StatelessWidget {
     ">折叠<": CommunityMaterialIcons.arrow_collapse_vertical,
   };
 
-  final InputCallback callback;
+  final InputCallback? callback;
 
   @override
   Widget build(BuildContext context) {
@@ -67,28 +67,28 @@ class FontStyleWidget extends StatelessWidget {
         );
         break;
       case "加粗":
-        callback("[b]", "[/b]", true);
+        callback!("[b]", "[/b]", true);
         break;
       case "斜体":
-        callback("[i]", "[/i]", true);
+        callback!("[i]", "[/i]", true);
         break;
       case "下划线":
-        callback("[u]", "[/u]", true);
+        callback!("[u]", "[/u]", true);
         break;
       case "删除线":
-        callback("[del]", "[/del]", true);
+        callback!("[del]", "[/del]", true);
         break;
       case "[@用户]":
-        callback("[@", "]", true);
+        callback!("[@", "]", true);
         break;
       case "[quote]":
-        callback("[quote]", "[/quote]", true);
+        callback!("[quote]", "[/quote]", true);
         break;
       case "[url]":
-        callback("[url]", "[/url]", true);
+        callback!("[url]", "[/url]", true);
         break;
       case ">折叠<":
-        callback("[collapse]", "[/collapse]", true);
+        callback!("[collapse]", "[/collapse]", true);
         break;
     }
   }

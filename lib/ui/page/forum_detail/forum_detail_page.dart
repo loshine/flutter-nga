@@ -17,13 +17,12 @@ import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
 
 class ForumDetailPage extends StatefulWidget {
-  const ForumDetailPage({this.fid, this.name, this.type, Key key})
-      : assert(fid != null),
-        super(key: key);
+  const ForumDetailPage({required this.fid, this.name, this.type, Key? key})
+      : super(key: key);
 
   final int fid;
-  final String name;
-  final int type;
+  final String? name;
+  final int? type;
 
   @override
   _ForumDetailState createState() => _ForumDetailState();
@@ -33,17 +32,17 @@ class _ForumDetailState extends State<ForumDetailPage>
     with SingleTickerProviderStateMixin {
   bool _fabVisible = true;
   bool _mainPage = true;
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   final _store = ForumDetailStore();
   List<Tab> _tabs = [];
-  TabController _tabController;
+  TabController? _tabController;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.name),
+        title: Text(widget.name!),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(56),
           child: Align(
@@ -120,8 +119,8 @@ class _ForumDetailState extends State<ForumDetailPage>
     _tabs.add(Tab(text: '精华'));
     _tabs.add(Tab(text: '子版'));
     _tabController = TabController(vsync: this, length: _tabs.length);
-    _tabController.addListener(
-        () => setState(() => _mainPage = _tabController.index == 0));
+    _tabController!.addListener(
+        () => setState(() => _mainPage = _tabController!.index == 0));
     Future.delayed(const Duration()).then((_) {
       _refreshController.position.addListener(_scrollListener);
     });
@@ -130,7 +129,7 @@ class _ForumDetailState extends State<ForumDetailPage>
   @override
   void dispose() {
     _refreshController.dispose();
-    _tabController.dispose();
+    _tabController!.dispose();
     super.dispose();
   }
 

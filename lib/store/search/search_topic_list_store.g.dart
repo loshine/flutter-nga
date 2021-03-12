@@ -28,7 +28,7 @@ mixin _$SearchTopicListStore on _SearchTopicListStore, Store {
 
   @override
   Future<SearchTopicListStoreData> refresh(
-      String keyword, int fid, bool content) {
+      String keyword, int? fid, bool content) {
     return _$refreshAsyncAction.run(() => super.refresh(keyword, fid, content));
   }
 
@@ -36,7 +36,7 @@ mixin _$SearchTopicListStore on _SearchTopicListStore, Store {
 
   @override
   Future<SearchTopicListStoreData> loadMore(
-      String keyword, int fid, bool content) {
+      String keyword, int? fid, bool content) {
     return _$loadMoreAsyncAction
         .run(() => super.loadMore(keyword, fid, content));
   }

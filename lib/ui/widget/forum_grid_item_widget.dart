@@ -7,7 +7,7 @@ import 'package:flutter_nga/utils/route.dart';
 class ForumGridItemWidget extends StatelessWidget {
   final Forum forum;
 
-  const ForumGridItemWidget(this.forum, {Key key}) : super(key: key);
+  const ForumGridItemWidget(this.forum, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

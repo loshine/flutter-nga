@@ -40,7 +40,7 @@ mixin _$ChildForumSubscriptionStore on _ChildForumSubscriptionStore, Store {
   }
 
   @override
-  void addSubscription(int fid, int parentId) {
+  void addSubscription(int fid, int? parentId) {
     final _$actionInfo = _$_ChildForumSubscriptionStoreActionController
         .startAction(name: '_ChildForumSubscriptionStore.addSubscription');
     try {
@@ -51,7 +51,7 @@ mixin _$ChildForumSubscriptionStore on _ChildForumSubscriptionStore, Store {
   }
 
   @override
-  void deleteSubscription(int fid, int parentId) {
+  void deleteSubscription(int fid, int? parentId) {
     final _$actionInfo = _$_ChildForumSubscriptionStoreActionController
         .startAction(name: '_ChildForumSubscriptionStore.deleteSubscription');
     try {

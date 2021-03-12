@@ -1,9 +1,9 @@
 class NotificationInfo {
-  final bool hasUnreadMessage;
-  final int lastTime;
-  final int unreadReplyCount;
-  final int unreadMessageCount;
-  final int unreadSystemNotificationCount;
+  final bool? hasUnreadMessage;
+  final int? lastTime;
+  final int? unreadReplyCount;
+  final int? unreadMessageCount;
+  final int? unreadSystemNotificationCount;
 
   NotificationInfo({
     this.hasUnreadMessage,
@@ -15,7 +15,7 @@ class NotificationInfo {
 
   factory NotificationInfo.fromJson(Map<String, dynamic> map) {
     return NotificationInfo(
-      hasUnreadMessage: int.tryParse(map['0']) > 0,
+      hasUnreadMessage: int.tryParse(map['0'])! > 0,
       lastTime: int.tryParse(map['1']),
       unreadReplyCount: int.tryParse(map['2']),
       unreadMessageCount: int.tryParse(map['3']),
@@ -25,10 +25,10 @@ class NotificationInfo {
 }
 
 class NotificationInfoListData {
-  final List<ReplyNotification> replyNotificationList;
-  final List<MessageNotification> messageNotificationList;
-  final List<SystemNotification> systemNotificationList;
-  final int unread;
+  final List<ReplyNotification>? replyNotificationList;
+  final List<MessageNotification>? messageNotificationList;
+  final List<SystemNotification>? systemNotificationList;
+  final int? unread;
 
   NotificationInfoListData({
     this.replyNotificationList,
@@ -66,13 +66,13 @@ class NotificationInfoListData {
 }
 
 abstract class NgaNotification {
-  int getType();
+  int? getType();
 
-  int getSourceUid();
+  int? getSourceUid();
 
-  String getSourceUsername();
+  String? getSourceUsername();
 
-  int getTime();
+  int? getTime();
 }
 
 class ReplyNotification implements NgaNotification {
@@ -98,37 +98,37 @@ class ReplyNotification implements NgaNotification {
   static const TYPE_RATED = 15;
 
   /// 0
-  final int type;
+  final int? type;
 
   /// 1 来源 uid
-  final int sourceUid;
+  final int? sourceUid;
 
   /// 2 来源 username
-  final String sourceUsername;
+  final String? sourceUsername;
 
   /// 3 目标 uid
-  final int targetUid;
+  final int? targetUid;
 
   /// 4 目标 username
-  final String targetUsername;
+  final String? targetUsername;
 
   /// 5 相关主题标题
-  final String topicSubject;
+  final String? topicSubject;
 
   /// 6 相关id1  类别是1 2 3 4 7 8 15时是主题tid
-  final int tid;
+  final int? tid;
 
   /// 7 相关 id2 类别是1 2 4 8 时是回复pid
-  final int pid;
+  final int? pid;
 
   /// 8 相关 id3 类别是2 4 15时是被回复或评论或评价 的 回复pid
-  final int targetReplyPid;
+  final int? targetReplyPid;
 
   /// 9 时间
-  final int time;
+  final int? time;
 
   /// 10 类别是1 2 4 8时是回复所在的页数
-  final int page;
+  final int? page;
 
   ReplyNotification({
     this.type,
@@ -161,16 +161,16 @@ class ReplyNotification implements NgaNotification {
   }
 
   @override
-  int getSourceUid() => sourceUid;
+  int? getSourceUid() => sourceUid;
 
   @override
-  String getSourceUsername() => sourceUsername;
+  String? getSourceUsername() => sourceUsername;
 
   @override
-  int getTime() => time;
+  int? getTime() => time;
 
   @override
-  int getType() => type;
+  int? getType() => type;
 }
 
 class MessageNotification implements NgaNotification {
@@ -184,19 +184,19 @@ class MessageNotification implements NgaNotification {
   static const TYPE_ADDED_MULTI = 12;
 
   /// 0 类型
-  final int type;
+  final int? type;
 
   /// 1 来源 uid
-  final int sourceUid;
+  final int? sourceUid;
 
   /// 2 来源 username
-  final String sourceUsername;
+  final String? sourceUsername;
 
   /// 6 mid
-  final int mid;
+  final int? mid;
 
   /// 9 时间
-  final int time;
+  final int? time;
 
   MessageNotification({
     this.type,
@@ -217,16 +217,16 @@ class MessageNotification implements NgaNotification {
   }
 
   @override
-  int getSourceUid() => sourceUid;
+  int? getSourceUid() => sourceUid;
 
   @override
-  String getSourceUsername() => sourceUsername;
+  String? getSourceUsername() => sourceUsername;
 
   @override
-  int getTime() => time;
+  int? getTime() => time;
 
   @override
-  int getType() => type;
+  int? getType() => type;
 }
 
 class SystemNotification implements NgaNotification {
@@ -249,28 +249,28 @@ class SystemNotification implements NgaNotification {
   static const TYPE_SELF_KEYWORD = 16;
 
   /// 0
-  final int type;
+  final int? type;
 
   /// 1 来源 uid
-  final int sourceUid;
+  final int? sourceUid;
 
   /// 2 来源 username
-  final String sourceUsername;
+  final String? sourceUsername;
 
   /// 5 相关主题标题
-  final String topicSubject;
+  final String? topicSubject;
 
   /// 6 相关id1  类别是1 2 3 4 7 8 15时是主题tid
-  final int tid;
+  final int? tid;
 
   /// 7 相关 id2 类别是1 2 4 8 时是回复pid
-  final int pid;
+  final int? pid;
 
   /// 9 时间
-  final int time;
+  final int? time;
 
   /// 10 类别是1 2 4 8时是回复所在的页数
-  final int page;
+  final int? page;
 
   SystemNotification({
     this.type,
@@ -297,16 +297,16 @@ class SystemNotification implements NgaNotification {
   }
 
   @override
-  int getSourceUid() => sourceUid;
+  int? getSourceUid() => sourceUid;
 
   @override
-  String getSourceUsername() => sourceUsername;
+  String? getSourceUsername() => sourceUsername;
 
   @override
-  int getTime() => time;
+  int? getTime() => time;
 
   @override
-  int getType() => type;
+  int? getType() => type;
 
   @override
   String toString() {

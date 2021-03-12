@@ -16,7 +16,7 @@ abstract class _ForumTagListStore with Store {
   }
 
   @action
-  Future<List<TopicTag>> load(int fid) async {
+  Future<List<TopicTag>?> load(int fid) async {
     try {
       tagList = await Data().topicRepository.getTopicTagList(fid);
       return tagList;

@@ -10,11 +10,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 
 class PhotoPreviewPage extends StatefulWidget {
-  const PhotoPreviewPage({Key key, this.url, this.screenWidth})
+  const PhotoPreviewPage({Key? key, this.url, this.screenWidth})
       : super(key: key);
 
-  final String url;
-  final double screenWidth;
+  final String? url;
+  final double? screenWidth;
 
   @override
   _PhotoPreviewState createState() => _PhotoPreviewState();
@@ -45,7 +45,7 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
               ? Center(child: CircularProgressIndicator())
               : PhotoView(
                   imageProvider: CachedNetworkImageProvider(
-                      pictureUtils.getOriginalUrl(widget.url)),
+                      pictureUtils.getOriginalUrl(widget.url!)),
                   minScale: _store.minScale,
                 );
         },
@@ -56,7 +56,7 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
   @override
   void initState() {
     super.initState();
-    _store.load(widget.url, widget.screenWidth);
+    _store.load(widget.url!, widget.screenWidth);
   }
 
   _save() async {
@@ -64,7 +64,7 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
     if (status == PermissionStatus.granted) {
       final file = await Data()
           .resourceRepository
-          .downloadImage(pictureUtils.getOriginalUrl(widget.url));
+          .downloadImage(pictureUtils.getOriginalUrl(widget.url!));
       Fluttertoast.showToast(
         msg: "保存成功, 路径位于${file.path}",
         gravity: ToastGravity.CENTER,

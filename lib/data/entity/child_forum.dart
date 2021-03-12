@@ -1,9 +1,9 @@
 import 'package:flutter_nga/data/entity/forum.dart';
 
 class ChildForum extends Forum {
-  final String desc;
+  final String? desc;
   final bool selected;
-  final int parentId;
+  final int? parentId;
   final int type;
 
   ChildForum(int fid, String name,

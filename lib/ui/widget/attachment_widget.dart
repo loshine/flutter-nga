@@ -8,45 +8,47 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 typedef AttachmentCallback = void Function(
-    String attachments, String attachmentsCheck);
+    String? attachments, String? attachmentsCheck);
 
 class AttachmentWidget extends StatefulWidget {
   const AttachmentWidget(
-      {this.tid, this.fid, this.callback, this.attachmentCallback, Key key})
+      {this.tid, this.fid, this.callback, this.attachmentCallback, Key? key})
       : super(key: key);
 
-  final int tid;
-  final int fid;
-  final InputCallback callback;
-  final AttachmentCallback attachmentCallback;
+  final int? tid;
+  final int? fid;
+  final InputCallback? callback;
+  final AttachmentCallback? attachmentCallback;
 
   @override
   _AttachmentState createState() => _AttachmentState();
 }
 
 class _AttachmentState extends State<AttachmentWidget> {
-  List<String> _list = [];
-  List<File> _imageFileList = [];
-  String _authCode;
-  Widget _addImageWidget;
+  List<String?> _list = [];
+  List<PickedFile> _imageFileList = [];
+  String? _authCode;
+  Widget? _addImageWidget;
+
+  final _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
     return GridView.count(
       crossAxisCount: 4,
-      children: _getImageWidgetList(),
+      children: _getImageWidgetList() as List<Widget>,
     );
   }
 
-  List<Widget> _getImageWidgetList() {
-    List<Widget> widgets = [];
+  List<Widget?> _getImageWidgetList() {
+    List<Widget?> widgets = [];
     if (_addImageWidget == null) {
       _addImageWidget = Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            File image =
-                await ImagePicker.pickImage(source: ImageSource.gallery);
+            PickedFile? image =
+                await _picker.getImage(source: ImageSource.gallery);
             if (image == null) return;
             setState(() => _imageFileList.add(image));
             try {
@@ -57,8 +59,8 @@ class _AttachmentState extends State<AttachmentWidget> {
               }
               Map<String, dynamic> data = await Data()
                   .topicRepository
-                  .uploadAttachment(widget.fid, _authCode, image);
-              widget.attachmentCallback(
+                  .uploadAttachment(widget.fid, _authCode, image.path);
+              widget.attachmentCallback!(
                   data["attachments"], data["attachments_check"]);
               setState(() => _list.add(data["url"]));
             } catch (err) {
@@ -80,7 +82,7 @@ class _AttachmentState extends State<AttachmentWidget> {
             onTap: () {
               if (widget.callback != null) {
                 if (_list.length > index) {
-                  widget.callback("[img]./${_list[index]}[/img]", "", false);
+                  widget.callback!("[img]./${_list[index]}[/img]", "", false);
                 } else {
                   Fluttertoast.showToast(
                     msg: "上传文件中，请稍候",
@@ -93,7 +95,7 @@ class _AttachmentState extends State<AttachmentWidget> {
               children: [
                 SizedBox.expand(
                   child: Image.file(
-                    image,
+                    File(image.path),
                     fit: BoxFit.cover,
                   ),
                 ),

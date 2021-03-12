@@ -9,7 +9,7 @@ import 'package:flutter_nga/utils/route.dart';
 class ChildForumItemWidget extends StatefulWidget {
   final ChildForum childForum;
 
-  const ChildForumItemWidget(this.childForum, {Key key}) : super(key: key);
+  const ChildForumItemWidget(this.childForum, {Key? key}) : super(key: key);
 
   @override
   _ChildForumItemState createState() => _ChildForumItemState();

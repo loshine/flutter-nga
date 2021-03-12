@@ -50,9 +50,9 @@ class ConversationListStoreData {
   final List<Conversation> list;
 
   const ConversationListStoreData({
-    this.page,
-    this.enablePullUp,
-    this.list,
+    this.page = 1,
+    this.enablePullUp = false,
+    this.list = const [],
   });
 
   factory ConversationListStoreData.initial() => ConversationListStoreData(

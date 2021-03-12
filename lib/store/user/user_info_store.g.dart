@@ -27,14 +27,14 @@ mixin _$UserInfoStore on _UserInfoStore, Store {
   final _$loadByNameAsyncAction = AsyncAction('_UserInfoStore.loadByName');
 
   @override
-  Future<UserInfoStoreData> loadByName(String username) {
+  Future<UserInfoStoreData> loadByName(String? username) {
     return _$loadByNameAsyncAction.run(() => super.loadByName(username));
   }
 
   final _$loadByUidAsyncAction = AsyncAction('_UserInfoStore.loadByUid');
 
   @override
-  Future<UserInfoStoreData> loadByUid(String uid) {
+  Future<UserInfoStoreData> loadByUid(String? uid) {
     return _$loadByUidAsyncAction.run(() => super.loadByUid(uid));
   }
 

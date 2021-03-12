@@ -5,11 +5,10 @@ import 'package:flutter_nga/store/forum/favourite_forum_store.dart';
 import 'package:provider/provider.dart';
 
 class ForumFavouriteButtonWidget extends StatefulWidget {
-  const ForumFavouriteButtonWidget({this.name, this.fid, Key key})
-      : assert(fid != null),
-        super(key: key);
+  const ForumFavouriteButtonWidget({this.name, required this.fid, Key? key})
+      : super(key: key);
 
-  final String name;
+  final String? name;
   final int fid;
 
   @override

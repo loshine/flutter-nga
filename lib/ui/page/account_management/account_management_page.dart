@@ -14,7 +14,7 @@ class AccountManagementPage extends StatefulWidget {
 
 class _AccountManagementState extends State<AccountManagementPage> {
   final _store = AccountListStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
@@ -44,13 +44,13 @@ class _AccountManagementState extends State<AccountManagementPage> {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () =>
-                    Fluttertoast.showToast(msg: _store.list[position].nickname),
+                    Fluttertoast.showToast(msg: _store.list[position].nickname!),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
                       padding: EdgeInsets.all(16),
-                      child: Text(_store.list[position].nickname),
+                      child: Text(_store.list[position].nickname!),
                     ),
                     Divider(height: 1),
                   ],
