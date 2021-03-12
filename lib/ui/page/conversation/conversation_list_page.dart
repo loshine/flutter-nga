@@ -52,7 +52,6 @@ class _ConversationListState extends State<ConversationListPage> {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.toString(),
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));

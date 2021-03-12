@@ -278,13 +278,11 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       setState(() => widget.reply!.score += reaction.countChange);
       Fluttertoast.showToast(
         msg: reaction.message,
-        gravity: ToastGravity.CENTER,
       );
     } catch (err) {
       print(err.toString());
       Fluttertoast.showToast(
         msg: err.toString(),
-        gravity: ToastGravity.CENTER,
       );
     }
   }
@@ -297,13 +295,11 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       setState(() => widget.reply!.score += reaction.countChange);
       Fluttertoast.showToast(
         msg: reaction.message,
-        gravity: ToastGravity.CENTER,
       );
     } catch (err) {
       print(err.toString());
       Fluttertoast.showToast(
         msg: err.toString(),
-        gravity: ToastGravity.CENTER,
       );
     }
   }

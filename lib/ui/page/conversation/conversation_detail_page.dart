@@ -71,7 +71,6 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.toString(),
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));

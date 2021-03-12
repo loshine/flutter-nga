@@ -38,7 +38,6 @@ class _LoginPageState extends State<LoginPage> {
                 .whenComplete(() {
               Fluttertoast.showToast(
                 msg: "登录成功",
-                gravity: ToastGravity.CENTER,
               );
               Routes.pop(context);
             });

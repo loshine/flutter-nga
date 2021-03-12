@@ -138,7 +138,6 @@ class _ForumDetailState extends State<ForumDetailPage>
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.message,
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));

@@ -60,14 +60,13 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
   }
 
   _save() async {
-    var status = await Permission.storage.status;
+    final status = await Permission.storage.status;
     if (status == PermissionStatus.granted) {
       final file = await Data()
           .resourceRepository
           .downloadImage(pictureUtils.getOriginalUrl(widget.url!));
       Fluttertoast.showToast(
         msg: "保存成功, 路径位于${file.path}",
-        gravity: ToastGravity.CENTER,
       );
     }
   }

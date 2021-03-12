@@ -77,9 +77,8 @@ class TopicDataRepository implements TopicRepository {
       {bool recommend = false, int? type = 0}) async {
     try {
       final fidParam = type == 1 ? "stid=$fid" : "fid=$fid";
-      Response<Map<String, dynamic>> response = await Data()
-          .dio
-          .get("thread.php?__output=8&$fidParam&page=$page"
+      Response<Map<String, dynamic>> response =
+          await Data().dio.get("thread.php?__output=8&$fidParam&page=$page"
               "${recommend ? "&recommend=1&order_by=postdatedesc" : ""}");
       return TopicListData.fromJson(response.data!, page);
     } catch (err) {
@@ -90,9 +89,8 @@ class TopicDataRepository implements TopicRepository {
   @override
   Future<TopicListData> getFavouriteTopicList(int page) async {
     try {
-      Response<Map<String, dynamic>> response = await Data()
-          .dio
-          .get("thread.php?favor=1&__output=8&page=$page");
+      Response<Map<String, dynamic>> response =
+          await Data().dio.get("thread.php?favor=1&__output=8&page=$page");
       return TopicListData.fromJson(response.data!, page);
     } catch (err) {
       rethrow;
@@ -132,9 +130,8 @@ class TopicDataRepository implements TopicRepository {
   @override
   Future<TopicDetailData> getTopicDetail(int tid, int page) async {
     try {
-      Response<Map<String, dynamic>> response = await Data()
-          .dio
-          .get("read.php?__output=8&tid=$tid&page=$page");
+      Response<Map<String, dynamic>> response =
+          await Data().dio.get("read.php?__output=8&tid=$tid&page=$page");
       return TopicDetailData.fromJson(response.data!);
     } catch (err) {
       rethrow;
@@ -173,7 +170,7 @@ class TopicDataRepository implements TopicRepository {
   Future<String?> getAuthCode(int? fid, int? tid, String action) async {
     try {
       Response<Map<String, dynamic>> response = await Data().dio.get(
-            "post.php?__output=8&fid=$fid&tid=$tid&action=$action",
+            "post.php?__output=8&fid=$fid${tid != null ? "&tid=$tid" : ""}&action=$action",
           );
       return response.data!["auth"];
     } catch (err) {
@@ -188,13 +185,13 @@ class TopicDataRepository implements TopicRepository {
       final fileName = basename(filePath);
       final formData = FormData.fromMap({
         "attachment_file1":
-            MultipartFile.fromFile(filePath, filename: fileName),
+            await MultipartFile.fromFile(filePath, filename: fileName),
         "attachment_file1_url_utf8_name": fileName,
         "fid": "$fid",
         "auth": authCode,
         "func": "upload",
-        "v2": "1",
-        "lite": "js",
+        // "v2": "1",
+        "__output": "11",
         // 1 是自动缩图
         "attachment_file1_auto_size": "",
         //水印位置tl/tr/bl/br 左上右上左下右下 不设为无水印
@@ -206,7 +203,7 @@ class TopicDataRepository implements TopicRepository {
       });
       Response<Map<String, dynamic>> response = await Data()
           .dio
-          .post("https://img.nga.178.com:8080/attach.php", data: formData);
+          .post("https://img8.nga.cn/attach.php", data: formData);
       debugPrint(response.toString());
       return response.data!;
     } catch (err) {
@@ -219,7 +216,7 @@ class TopicDataRepository implements TopicRepository {
     try {
       Response<Map<String, dynamic>> response = await Data()
           .dio
-          .get("nuke.php?fid=$fid&__output=8&lite=js&action=new");
+          .get("nuke.php?fid=$fid&__output=8&action=new");
       return response.data!['auth'];
     } catch (err) {
       rethrow;
