@@ -20,11 +20,11 @@ class PublishPage extends StatefulWidget {
   const PublishPage({
     this.tid,
     this.fid,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
-  final int tid;
-  final int fid;
+  final int? tid;
+  final int? fid;
 
   @override
   _PublishReplyState createState() => _PublishReplyState();
@@ -48,17 +48,17 @@ class _PublishReplyState extends State<PublishPage> {
   final _subjectController = TextEditingController();
   final _contentController = TextEditingController();
 
-  Widget _emoticonGroupTabsWidget;
-  Widget _fontStyleWidget;
-  Widget _attachmentWidget;
+  Widget? _emoticonGroupTabsWidget;
+  Widget? _fontStyleWidget;
+  Widget? _attachmentWidget;
 
-  Widget _currentBottomPanelChild;
+  Widget? _currentBottomPanelChild;
   final _selectionList = [0, 0];
 
   StringBuffer _attachments = StringBuffer();
   StringBuffer _attachmentsCheck = StringBuffer();
 
-  StreamSubscription _subscription;
+  StreamSubscription? _subscription;
 
   @override
   void initState() {
@@ -93,7 +93,7 @@ class _PublishReplyState extends State<PublishPage> {
   @override
   void dispose() {
     if (_subscription != null) {
-      _subscription.cancel();
+      _subscription!.cancel();
     }
     super.dispose();
   }
@@ -273,7 +273,7 @@ class _PublishReplyState extends State<PublishPage> {
     togglePanel(_attachmentWidget);
   }
 
-  void togglePanel(Widget widget) {
+  void togglePanel(Widget? widget) {
     if (_keyboardVisible) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
     }
@@ -296,7 +296,7 @@ class _PublishReplyState extends State<PublishPage> {
       // 未选中词语
       _contentController.text =
           "$leftPartString$startTag${hasEnd ? endTag : ""}$rightPartString";
-      int position = leftPartString.length + startTag.length;
+      int position = leftPartString.length + startTag.length as int;
       _contentController.selection = TextSelection(
         extentOffset: position,
         baseOffset: position,
@@ -311,14 +311,14 @@ class _PublishReplyState extends State<PublishPage> {
         int position = leftPartString.length +
             startTag.length +
             selectionString.length +
-            endTag.length;
+            endTag.length as int;
         _contentController.selection = TextSelection(
           extentOffset: position,
           baseOffset: position,
         );
       } else {
         _contentController.text = "$leftPartString$startTag$rightPartString";
-        int position = leftPartString.length + startTag.length;
+        int position = leftPartString.length + startTag.length as int;
         _contentController.selection = TextSelection(
           extentOffset: position,
           baseOffset: position,
@@ -340,7 +340,7 @@ class _PublishReplyState extends State<PublishPage> {
       context: context,
       builder: (context) {
         return ForumTagDialog(
-          fid: widget.fid,
+          fid: widget.fid!,
           tagList: _tagList,
           onSelected: (tag) {
             if (!_selectedTags.contains(tag)) {
@@ -374,7 +374,7 @@ class _PublishReplyState extends State<PublishPage> {
         Routes.pop(context);
       } catch (err) {
         Fluttertoast.showToast(
-          msg: err.message,
+          msg: err.toString(),
           gravity: ToastGravity.CENTER,
         );
       }
@@ -394,7 +394,7 @@ class _PublishReplyState extends State<PublishPage> {
         Routes.pop(context);
       } catch (err) {
         Fluttertoast.showToast(
-          msg: err.message,
+          msg: err.toString(),
           gravity: ToastGravity.CENTER,
         );
       }

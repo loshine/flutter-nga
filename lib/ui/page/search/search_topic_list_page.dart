@@ -8,10 +8,10 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SearchTopicListPage extends StatefulWidget {
   const SearchTopicListPage(this.keyword,
-      {this.fid, this.content = false, Key key})
+      {this.fid, this.content = false, Key? key})
       : super(key: key);
 
-  final int fid;
+  final int? fid;
   final String keyword;
   final bool content;
 
@@ -21,7 +21,7 @@ class SearchTopicListPage extends StatefulWidget {
 
 class _SearchTopicListSate extends State<SearchTopicListPage> {
   final _store = SearchTopicListStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {

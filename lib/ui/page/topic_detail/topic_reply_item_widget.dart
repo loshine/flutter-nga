@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
@@ -14,15 +15,15 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class TopicReplyItemWidget extends StatefulWidget {
-  final Reply reply;
-  final User user;
-  final Group group;
-  final List<Medal> medalList;
-  final List<User> userList;
+  final Reply? reply;
+  final User? user;
+  final Group? group;
+  final List<Medal>? medalList;
+  final List<User>? userList;
   final bool hot;
 
   const TopicReplyItemWidget({
-    Key key,
+    Key? key,
     this.reply,
     this.user,
     this.group,
@@ -49,8 +50,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             Padding(
               padding: EdgeInsets.all(16),
               child: AvatarWidget(
-                widget.user.avatar,
-                username: widget.user.username,
+                widget.user!.avatar,
+                username: widget.user!.username,
               ),
             ),
             Expanded(
@@ -63,12 +64,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       children: [
                         Expanded(
                           child: Text(
-                            widget.user.getShowName(),
+                            widget.user!.getShowName(),
                             style: TextStyle(color: Colors.black),
                           ),
                         ),
                         Text(
-                          widget.hot ? "[热评]" : "[${widget.reply.lou} 楼]",
+                          widget.hot ? "[热评]" : "[${widget.reply!.lou} 楼]",
                           style: TextStyle(
                             color: widget.hot
                                 ? Colors.redAccent
@@ -81,7 +82,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                     Row(
                       children: [
                         Text(
-                          "级别: ${widget.group == null ? "" : widget.group.name}",
+                          "级别: ${widget.group == null ? "" : widget.group!.name}",
                           style: TextStyle(
                             color: Palette.colorTextSecondary,
                             fontSize: Dimen.caption,
@@ -90,7 +91,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                         Padding(
                           padding: EdgeInsets.only(left: 16),
                           child: Text(
-                            "威望: ${widget.user.getShowReputation()}",
+                            "威望: ${widget.user!.getShowReputation()}",
                             style: TextStyle(
                               color: Palette.colorTextSecondary,
                               fontSize: Dimen.caption,
@@ -100,7 +101,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                         Padding(
                           padding: EdgeInsets.only(left: 16),
                           child: Text(
-                            "发帖: ${widget.user.postNum ?? 0}",
+                            "发帖: ${widget.user!.postNum ?? 0}",
                             style: TextStyle(
                               color: Palette.colorTextSecondary,
                               fontSize: Dimen.caption,
@@ -120,12 +121,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ],
         ),
         SizedBox(
-          height: codeUtils.isStringEmpty(widget.reply.subject) ? 0 : null,
+          height: codeUtils.isStringEmpty(widget.reply!.subject) ? 0 : null,
           width: double.infinity,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Text(
-              codeUtils.unescapeHtml(widget.reply.subject) ?? "",
+              codeUtils.unescapeHtml(widget.reply!.subject),
               style: TextStyle(
                 fontSize: Dimen.title,
                 fontWeight: FontWeight.bold,
@@ -134,15 +135,15 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         SizedBox(
-          height: codeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
+          height: codeUtils.isStringEmpty(widget.reply!.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: NgaHtmlContentWidget(content: widget.reply.content),
+            child: NgaHtmlContentWidget(content: widget.reply!.content),
           ),
         ),
         SizedBox(
           width: double.infinity,
-          height: widget.reply.commentList.isEmpty ? 0 : null,
+          height: widget.reply!.commentList!.isEmpty ? 0 : null,
           child: Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
@@ -151,7 +152,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         Offstage(
-          offstage: widget.reply.attachmentList.isEmpty,
+          offstage: widget.reply!.attachmentList!.isEmpty,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -207,7 +208,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       Padding(
                         padding: EdgeInsets.only(left: 8),
                         child: Text(
-                          "${widget.reply.score}",
+                          "${widget.reply!.score}",
                           style: TextStyle(
                             fontSize: Dimen.caption,
                             color: Colors.white,
@@ -231,7 +232,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               ),
               Spacer(),
               Text(
-                widget.reply.postDate,
+                widget.reply!.postDate!,
                 style: TextStyle(
                   fontSize: Dimen.caption,
                   color: Palette.colorTextSecondary,
@@ -246,7 +247,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
   }
 
   List<Widget> _getMedalListWidgets() {
-    if (widget.medalList.isEmpty)
+    if (widget.medalList!.isEmpty)
       return [
         Text(
           "-",
@@ -256,7 +257,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         )
       ];
-    return widget.medalList.map((medal) {
+    return widget.medalList!.map((medal) {
       return Padding(
         padding: EdgeInsets.only(right: 4),
         child: CachedNetworkImage(
@@ -273,8 +274,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     try {
       final reaction = await Data()
           .topicRepository
-          .likeReply(widget.reply.tid, widget.reply.pid);
-      setState(() => widget.reply.score += reaction.countChange);
+          .likeReply(widget.reply!.tid, widget.reply!.pid);
+      setState(() => widget.reply!.score += reaction.countChange);
       Fluttertoast.showToast(
         msg: reaction.message,
         gravity: ToastGravity.CENTER,
@@ -282,7 +283,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     } catch (err) {
       print(err.toString());
       Fluttertoast.showToast(
-        msg: err.message,
+        msg: err.toString(),
         gravity: ToastGravity.CENTER,
       );
     }
@@ -292,8 +293,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     try {
       final reaction = await Data()
           .topicRepository
-          .dislikeReply(widget.reply.tid, widget.reply.pid);
-      setState(() => widget.reply.score += reaction.countChange);
+          .dislikeReply(widget.reply!.tid, widget.reply!.pid);
+      setState(() => widget.reply!.score += reaction.countChange);
       Fluttertoast.showToast(
         msg: reaction.message,
         gravity: ToastGravity.CENTER,
@@ -301,7 +302,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     } catch (err) {
       print(err.toString());
       Fluttertoast.showToast(
-        msg: err.message,
+        msg: err.toString(),
         gravity: ToastGravity.CENTER,
       );
     }
@@ -327,11 +328,11 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         ),
       ),
     ));
-    widgets.addAll(widget.reply.commentList.map((comment) =>
+    widgets.addAll(widget.reply!.commentList!.map((comment) =>
         TopicReplyCommentItemWidget(
             comment,
-            widget.userList.firstWhere((user) => user.uid == comment.authorId,
-                orElse: () => null))));
+            widget.userList!
+                .firstWhereOrNull((user) => user.uid == comment.authorId))));
     return widgets;
   }
 
@@ -349,7 +350,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     columnWidgets.add(button);
     if (_attachmentsExpanded) {
       List<Widget> attachmentWidgets = [];
-      attachmentWidgets.addAll(widget.reply.attachmentList.map((attachment) {
+      attachmentWidgets.addAll(widget.reply!.attachmentList!.map((attachment) {
         return Padding(
           padding: EdgeInsets.only(right: 16),
           child: CachedNetworkImage(

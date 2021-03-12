@@ -5,11 +5,11 @@ import 'package:flutter_nga/utils/route.dart';
 typedef EditCallback = void Function(String text);
 
 class ContactEditDialog extends StatelessWidget {
-  final EditCallback callback;
+  final EditCallback? callback;
 
   final _controller = TextEditingController();
 
-  ContactEditDialog({Key key, this.callback}) : super(key: key);
+  ContactEditDialog({Key? key, this.callback}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class ContactEditDialog extends StatelessWidget {
         ),
         FlatButton(
           onPressed: () {
-            callback(_controller.text);
+            callback!(_controller.text);
             Routes.pop(context);
           },
           child: Text(

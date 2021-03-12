@@ -18,7 +18,7 @@ abstract class _ChildForumSubscriptionStore with Store {
   }
 
   @action
-  void addSubscription(int fid, int parentId) {
+  void addSubscription(int fid, int? parentId) {
     Data().forumRepository.addChildForumSubscription(fid, parentId).then((s) {
       Fluttertoast.showToast(msg: "订阅成功");
       subscribed = true;
@@ -32,7 +32,7 @@ abstract class _ChildForumSubscriptionStore with Store {
   }
 
   @action
-  void deleteSubscription(int fid, int parentId) {
+  void deleteSubscription(int fid, int? parentId) {
     Data()
         .forumRepository
         .deleteChildForumSubscription(fid, parentId)

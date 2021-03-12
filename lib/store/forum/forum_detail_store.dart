@@ -12,7 +12,7 @@ abstract class _ForumDetailStore with Store {
 
   @action
   Future<ForumDetailStoreData> refresh(
-      int fid, bool recommend, int type) async {
+      int fid, bool recommend, int? type) async {
     try {
       TopicListData data = await Data().topicRepository.getTopicList(
             fid,
@@ -24,7 +24,7 @@ abstract class _ForumDetailStore with Store {
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
-        list: data.topicList.values.toList(),
+        list: data.topicList!.values.toList(),
         info: data.forum,
       );
       return state;
@@ -35,7 +35,7 @@ abstract class _ForumDetailStore with Store {
 
   @action
   Future<ForumDetailStoreData> loadMore(
-      int fid, bool recommend, int type) async {
+      int fid, bool recommend, int? type) async {
     try {
       TopicListData data = await Data().topicRepository.getTopicList(
             fid,
@@ -47,7 +47,7 @@ abstract class _ForumDetailStore with Store {
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
-        list: state.list..addAll(data.topicList.values),
+        list: state.list..addAll(data.topicList!.values),
         info: data.forum,
       );
       return state;
@@ -62,13 +62,13 @@ class ForumDetailStoreData {
   final int maxPage;
   final bool enablePullUp;
   final List<Topic> list;
-  final ForumInfo info;
+  final ForumInfo? info;
 
   const ForumDetailStoreData({
-    this.page,
-    this.maxPage,
-    this.enablePullUp,
-    this.list,
+    this.page = 1,
+    this.maxPage = 1,
+    this.enablePullUp = false,
+    this.list = const [],
     this.info,
   });
 

@@ -4,12 +4,22 @@ import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/route.dart';
 
 class AvatarWidget extends StatelessWidget {
-  const AvatarWidget(this.avatar, {this.size = 48, this.username, Key key})
+  const AvatarWidget(this.avatar, {this.size = 48, this.username, Key? key})
       : super(key: key);
 
-  final String avatar;
+  final String? avatar;
   final double size;
-  final String username;
+  final String? username;
+
+  String get _realAvatarUrl {
+    if (avatar == null) {
+      return "";
+    } else if (avatar!.startsWith("http://")) {
+      return avatar!.replaceAll("http://", "https://");
+    } else {
+      return avatar!;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +30,7 @@ class AvatarWidget extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => Routes.navigateTo(context,
-                    "${Routes.USER}?name=${codeUtils.fluroCnParamsEncode(username)}"),
+                    "${Routes.USER}?name=${codeUtils.fluroCnParamsEncode(username!)}"),
                 child: _getAvatarImage(),
               ),
             ),
@@ -33,7 +43,7 @@ class AvatarWidget extends StatelessWidget {
             width: size,
             height: size,
             fit: BoxFit.cover,
-            imageUrl: avatar,
+            imageUrl: _realAvatarUrl,
             placeholder: (context, url) => Image.asset(
               'images/default_forum_icon.png',
               width: size,

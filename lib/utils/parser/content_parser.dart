@@ -14,7 +14,7 @@ class NgaContentParser {
   static Parser _replyParser = _ReplyParser();
   static Parser _commentParser = _CommentParser();
 
-  static String parse(String content) {
+  static String? parse(String? content) {
     var parseContent = content;
     parseContent = codeUtils.unescapeHtml(parseContent);
     parseContent = _replyParser.parse(parseContent);
@@ -24,7 +24,7 @@ class NgaContentParser {
     return parseContent;
   }
 
-  static String parseComment(String content) {
+  static String? parseComment(String? content) {
     var parseContent = content;
     parseContent = codeUtils.unescapeHtml(parseContent);
     parseContent = _commentParser.parse(parseContent);
@@ -36,15 +36,15 @@ class NgaContentParser {
 }
 
 abstract class Parser {
-  String parse(String content);
+  String? parse(String? content);
 }
 
 class _AlbumParser implements Parser {
   @override
-  String parse(String content) {
-    return content.replaceAllMapped(
+  String parse(String? content) {
+    return content!.replaceAllMapped(
         RegExp("\\[album(=([\\s\\S]*?)?)?]([\\s\\S]*?)?\\[/album]"), (match) {
-      final value = match.group(3).replaceAllMapped(
+      final value = match.group(3)!.replaceAllMapped(
           RegExp("\\[url]([\\s\\S]*?)?\\[/url]"),
           (m) => "<img src='${m.group(1)}'/>");
       return "<album>${match.group(1) != null ? match.group(2) : "相册"}$value</album>";
@@ -54,8 +54,8 @@ class _AlbumParser implements Parser {
 
 class _TableParser implements Parser {
   @override
-  String parse(String content) {
-    return content
+  String parse(String? content) {
+    return content!
         .replaceAllMapped(RegExp("\\[([/]?(tr|td))]"),
             (match) => "<${match.group(1)}>") // 处理tr, td
         .replaceAll("[table]", "<div><table><tbody>")
@@ -79,8 +79,8 @@ class _TableParser implements Parser {
 
 class _ReplyParser implements Parser {
   @override
-  String parse(String content) {
-    return content
+  String parse(String? content) {
+    return content!
         // 引用主贴
         .replaceAllMapped(
             RegExp(
@@ -115,8 +115,8 @@ class _ReplyParser implements Parser {
 
 class _CommentParser implements Parser {
   @override
-  String parse(String content) {
-    return content
+  String parse(String? content) {
+    return content!
         .replaceAll("[color=gray](楼)[/color]", "")
         .replaceAll(
             RegExp(
@@ -140,8 +140,8 @@ class _CommentParser implements Parser {
 
 class _ContentParser implements Parser {
   @override
-  String parse(String content) {
-    return content
+  String parse(String? content) {
+    return content!
         .replaceAllMapped(
             RegExp("\\[img]([\\s\\S]*?)\\[/img]"), _imgReplaceFunc) // 处理 [img]
         .replaceAllMapped(RegExp("\\[url]([\\s\\S]*?)?\\[/url]"),
@@ -197,15 +197,17 @@ class _ContentParser implements Parser {
   }
 
   String _imgReplaceFunc(Match match) {
-    final group = match.group(1);
+    final group = match.group(1)!;
     final imgUrl = group.startsWith("./mon_")
         ? "https://img.nga.178.com/attachments${group.substring(1)}"
-        : group;
+        : group.startsWith("http://")
+            ? group.replaceAll("http://", "https://")
+            : group;
     return "<img src='$imgUrl' />";
   }
 
   String _urlReplaceFunc(Match match) {
-    final group = match.group(1);
+    final group = match.group(1)!;
     if (group.startsWith("/")) {
       return "<a href='https://bbs.nga.cn$group'>[站内链接]</a>";
     } else {
@@ -214,7 +216,7 @@ class _ContentParser implements Parser {
   }
 
   String _url2ReplaceFunc(Match match) {
-    final group1 = match.group(1);
+    final group1 = match.group(1)!;
     final group2 = match.group(2);
     if (group1.startsWith("/")) {
       return "<a href='https://bbs.nga.cn$group1'>$group2</a>";
@@ -228,11 +230,11 @@ class _EmoticonParser implements Parser {
   static final list = Data().emoticonRepository.getEmoticonGroups();
 
   @override
-  String parse(String content) {
+  String? parse(String? content) {
     var parseContent = content;
     list.forEach((group) {
       group.expressionList.forEach((emoticon) {
-        parseContent = parseContent.replaceAll(emoticon.content,
+        parseContent = parseContent!.replaceAll(emoticon.content,
             "<nga_emoticon src='${emoticon.url}' ></nga_emoticon>");
       });
     });

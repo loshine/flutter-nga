@@ -19,14 +19,14 @@ class TopicListData {
   });
 
   final dynamic global;
-  final ForumInfo forum;
-  final int rows;
-  final Map<String, Topic> topicList;
-  final int currentRows;
-  final int topicRows;
-  final int rRows;
+  final ForumInfo? forum;
+  final int? rows;
+  final Map<String, Topic>? topicList;
+  final int? currentRows;
+  final int? topicRows;
+  final int? rRows;
 
-  factory TopicListData.fromJson(Map<String, dynamic> map, int page) {
+  factory TopicListData.fromJson(Map<String, dynamic> map, int? page) {
     Map<String, dynamic> topicMap = map["__T"];
     Map<String, Topic> tempMap = {};
     for (MapEntry<String, dynamic> entry in topicMap.entries) {
@@ -44,7 +44,7 @@ class TopicListData {
     );
   }
 
-  int get maxPage => rows ~/ rRows + (rows % rRows != 0 ? 1 : 0);
+  int get maxPage => rows! ~/ rRows! + (rows! % rRows! != 0 ? 1 : 0);
 }
 
 class Topic {
@@ -70,26 +70,26 @@ class Topic {
     this.parent,
   });
 
-  final int tid;
-  final int fid;
-  final String tpcurl;
+  final int? tid;
+  final int? fid;
+  final String? tpcurl;
   final dynamic quoteFrom;
-  final String quoteTo;
-  final String author;
+  final String? quoteTo;
+  final String? author;
   final dynamic authorId; // 匿名时为 String，非匿名时为 Int
-  final String subject;
-  final int icon;
-  final int postDate;
+  final String? subject;
+  final int? icon;
+  final int? postDate;
   final dynamic lastPoster; // 也可能匿名
-  final int lastPost;
-  final int lastModify;
-  final int recommend;
-  final int type;
-  final int replies;
-  final String topicMisc;
-  final int page; // 用于记录是收藏的第几页
+  final int? lastPost;
+  final int? lastModify;
+  final int? recommend;
+  final int? type;
+  final int? replies;
+  final String? topicMisc;
+  final int? page; // 用于记录是收藏的第几页
 
-  final TopicParent parent;
+  final TopicParent? parent;
 
   factory Topic.fromJson(Map<String, dynamic> map) {
     return Topic(
@@ -118,15 +118,15 @@ class Topic {
   }
 
   bool hasAttachment() {
-    return type & TOPIC_MASK_TYPE_ATTACHMENT == TOPIC_MASK_TYPE_ATTACHMENT;
+    return type! & TOPIC_MASK_TYPE_ATTACHMENT == TOPIC_MASK_TYPE_ATTACHMENT;
   }
 
   bool isAssemble() {
-    return type & TOPIC_MASK_TYPE_ASSEMBLE == TOPIC_MASK_TYPE_ASSEMBLE;
+    return type! & TOPIC_MASK_TYPE_ASSEMBLE == TOPIC_MASK_TYPE_ASSEMBLE;
   }
 
   bool locked() {
-    return type & TOPIC_MASK_TYPE_LOCK == TOPIC_MASK_TYPE_LOCK;
+    return type! & TOPIC_MASK_TYPE_LOCK == TOPIC_MASK_TYPE_LOCK;
   }
 
   bool isBold() {
@@ -166,8 +166,8 @@ class Topic {
   }
 
   int _getLastMiscByte() {
-    if (topicMisc != null && topicMisc.isNotEmpty) {
-      var misc = topicMisc;
+    if (topicMisc != null && topicMisc!.isNotEmpty) {
+      var misc = topicMisc!;
       while (misc.length * 6 % 8 != 0) {
         misc += "A";
       }
@@ -182,13 +182,13 @@ class Topic {
   /// 点击时生成浏览历史
   TopicHistory createHistory() {
     return TopicHistory(
-      tid: tid,
-      fid: fid,
-      subject: subject,
+      tid: tid!,
+      fid: fid!,
+      subject: subject!,
       author: author,
       type: type,
       topicMisc: topicMisc,
-      topicParentName: parent == null ? null : parent.name,
+      topicParentName: parent == null ? null : parent!.name,
       time: DateTime.now().millisecondsSinceEpoch,
     );
   }
@@ -197,7 +197,7 @@ class Topic {
 class TopicParent {
   const TopicParent(this.name);
 
-  final String name;
+  final String? name;
 
   factory TopicParent.fromJson(Map<String, dynamic> map) {
     return TopicParent(map["2"]);
@@ -207,9 +207,9 @@ class TopicParent {
 class ForumInfo {
   const ForumInfo({this.topForumId, this.fid, this.subForums});
 
-  final int topForumId;
-  final int fid;
-  final List<ChildForum> subForums;
+  final int? topForumId;
+  final int? fid;
+  final List<ChildForum>? subForums;
 
   factory ForumInfo.fromJson(Map map) {
     List<ChildForum> subForums = [];
@@ -223,7 +223,7 @@ class ForumInfo {
                 .addAll(selectedForum.split(",").map((s) => int.parse(s)));
           }
         }
-        String desc = v['2'];
+        String? desc = v['2'];
         int id = v['0'];
         subForums.add(ChildForum(
           id,

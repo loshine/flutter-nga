@@ -1,7 +1,5 @@
 class ToggleLikeReaction {
-  const ToggleLikeReaction(this.message, this.countChange)
-      : assert(message != null),
-        assert(countChange != null);
+  const ToggleLikeReaction(this.message, this.countChange);
 
   Map<String, dynamic> toJson() {
     return {'0': message, '1': countChange};

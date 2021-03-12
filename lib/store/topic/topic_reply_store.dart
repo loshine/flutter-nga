@@ -13,16 +13,16 @@ abstract class _TopicReplyStore with Store {
   @observable
   TopicReplyStoreData state = TopicReplyStoreData.initial();
 
-  Future<TopicReplyStoreData> load(int pid) async {
+  Future<TopicReplyStoreData> load(int? pid) async {
     try {
       TopicDetailData data = await Data().topicRepository.getTopicReply(pid);
       List<Reply> replyList = [];
-      data.replyList.values.forEach((reply) {
+      data.replyList!.values.forEach((reply) {
         replyList.add(reply);
       });
-      List<User> userList = data.userList.values.toList();
-      Set<Group> groups = data.groupList.values.toSet();
-      Set<Medal> medals = data.medalList.values.toSet();
+      List<User> userList = data.userList!.values.toList();
+      Set<Group> groups = data.groupList!.values.toSet();
+      Set<Medal> medals = data.medalList!.values.toSet();
       state = TopicReplyStoreData(
         replyList: replyList,
         userList: userList,
@@ -43,17 +43,17 @@ class TopicReplyStoreData {
   final Set<Medal> medalSet;
 
   TopicReplyStoreData({
-    this.replyList,
-    this.userList,
-    this.groupSet,
-    this.medalSet,
+    this.replyList = const [],
+    this.userList = const [],
+    this.groupSet = const {},
+    this.medalSet = const {},
   });
 
   factory TopicReplyStoreData.initial() {
     return TopicReplyStoreData(
       replyList: [],
       userList: [],
-      groupSet: HashSet(),
+      groupSet: Set(),
       medalSet: HashSet(),
     );
   }

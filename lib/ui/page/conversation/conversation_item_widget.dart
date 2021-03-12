@@ -7,15 +7,15 @@ import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/route.dart';
 
 class ConversationItemWidget extends StatelessWidget {
-  final Conversation conversation;
+  final Conversation? conversation;
 
-  const ConversationItemWidget({Key key, this.conversation}) : super(key: key);
+  const ConversationItemWidget({Key? key, this.conversation}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Routes.navigateTo(
-          context, "${Routes.CONVERSATION_DETAIL}?mid=${conversation.mid}"),
+          context, "${Routes.CONVERSATION_DETAIL}?mid=${conversation!.mid}"),
       child: Column(
         children: [
           Padding(
@@ -27,9 +27,9 @@ class ConversationItemWidget extends StatelessWidget {
                   padding: EdgeInsets.only(bottom: 12),
                   child: RichText(
                     text: TextSpan(
-                      text: conversation.subject,
+                      text: conversation!.subject,
                       style: TextStyle(
-                        fontWeight: conversation.isUnread
+                        fontWeight: conversation!.isUnread
                             ? FontWeight.bold
                             : FontWeight.normal,
                         fontSize: Dimen.subheading,
@@ -37,7 +37,7 @@ class ConversationItemWidget extends StatelessWidget {
                       ),
                       children: [
                         TextSpan(
-                            text: " (${conversation.posts})",
+                            text: " (${conversation!.posts})",
                             style: TextStyle(
                               fontSize: Dimen.subheading,
                               color: Palette.colorTextSecondary,
@@ -59,7 +59,7 @@ class ConversationItemWidget extends StatelessWidget {
                     ),
                     Expanded(
                       child: Text(
-                        conversation.users,
+                        conversation!.users,
                         style: TextStyle(
                           color: Palette.colorTextSecondary,
                           fontSize: Dimen.caption,
@@ -75,7 +75,7 @@ class ConversationItemWidget extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${codeUtils.formatPostDate(conversation.lastModify * 1000)}",
+                      "${codeUtils.formatPostDate(conversation!.lastModify! * 1000)}",
                       style: TextStyle(
                         fontSize: Dimen.caption,
                         color: Palette.colorTextSecondary,

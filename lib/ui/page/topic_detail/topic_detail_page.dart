@@ -13,12 +13,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class TopicDetailPage extends StatelessWidget {
-  const TopicDetailPage(this.tid, this.fid, {this.subject, Key key})
+  const TopicDetailPage(this.tid, this.fid, {this.subject, Key? key})
       : super(key: key);
 
-  final int tid;
-  final int fid;
-  final String subject;
+  final int? tid;
+  final int? fid;
+  final String? subject;
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +36,12 @@ class TopicDetailPage extends StatelessWidget {
 }
 
 class _TopicDetailPage extends StatefulWidget {
-  const _TopicDetailPage(this.tid, this.fid, {this.subject, Key key})
+  const _TopicDetailPage(this.tid, this.fid, {this.subject, Key? key})
       : super(key: key);
 
-  final int tid;
-  final int fid;
-  final String subject;
+  final int? tid;
+  final int? fid;
+  final String? subject;
 
   @override
   _TopicDetailState createState() => _TopicDetailState();
@@ -49,13 +49,13 @@ class _TopicDetailPage extends StatefulWidget {
 
 class _TopicDetailState extends State<_TopicDetailPage>
     with TickerProviderStateMixin {
-  TabController _tabController;
+  TabController? _tabController;
 
   @override
   Widget build(BuildContext context) {
     final store = Provider.of<TopicDetailStore>(context);
     final firstPage = TopicSinglePage(
-      tid: widget.tid,
+      tid: widget.tid!,
       page: 1,
     );
     return Observer(
@@ -63,18 +63,18 @@ class _TopicDetailState extends State<_TopicDetailPage>
         List<Widget> widgets = [];
         _tabController = TabController(
           vsync: this,
-          length: store.maxPage,
+          length: store.maxPage!,
           initialIndex: store.currentPage - 1,
         );
-        _tabController.addListener(() {
-          store.setCurrentPage(_tabController.index + 1);
+        _tabController!.addListener(() {
+          store.setCurrentPage(_tabController!.index + 1);
         });
-        for (int i = 0; i < store.maxPage; i++) {
+        for (int i = 0; i < store.maxPage!; i++) {
           if (i == 0) {
             widgets.add(firstPage);
           } else {
             widgets.add(TopicSinglePage(
-              tid: widget.tid,
+              tid: widget.tid!,
               page: i + 1,
             ));
           }
@@ -100,7 +100,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
                       color: Colors.white,
                       onPressed: () {
                         if (store.currentPage != 1) {
-                          _tabController.animateTo(_tabController.index - 1);
+                          _tabController!.animateTo(_tabController!.index - 1);
                         }
                       },
                     ),
@@ -142,7 +142,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
                       color: Colors.white,
                       onPressed: () {
                         if (store.maxPage != store.currentPage) {
-                          _tabController.animateTo(_tabController.index + 1);
+                          _tabController!.animateTo(_tabController!.index + 1);
                         }
                       },
                     ),
@@ -164,7 +164,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
                     onPressed: () {
                       if (widget.fid == null && store.topic == null) return;
                       Routes.navigateTo(context,
-                          "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid != null ? widget.fid : store.topic.fid}");
+                          "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid != null ? widget.fid : store.topic!.fid}");
                     },
                   ),
                 ],
@@ -178,14 +178,14 @@ class _TopicDetailState extends State<_TopicDetailPage>
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController!.dispose();
     super.dispose();
   }
 
   _addFavourite() {
     final store = Provider.of<TopicDetailStore>(context, listen: false);
     store.addFavourite(widget.tid).then((message) {
-      Fluttertoast.showToast(msg: message, gravity: ToastGravity.CENTER);
+      Fluttertoast.showToast(msg: message!, gravity: ToastGravity.CENTER);
     }).catchError((e) {
       if (e is DioError) {
         Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);

@@ -4,12 +4,12 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 
 class TopicDetailData {
-  final Map<String, Reply> replyList;
-  final Map<String, User> userList;
+  final Map<String, Reply>? replyList;
+  final Map<String, User>? userList;
 
-  final Map<String, Group> groupList;
-  final Map<String, Medal> medalList;
-  final Map<String, Reputation> reputationList;
+  final Map<String, Group>? groupList;
+  final Map<String, Medal>? medalList;
+  final Map<String, Reputation>? reputationList;
 
   final dynamic global;
   final int rows;
@@ -26,11 +26,11 @@ class TopicDetailData {
     this.groupList,
     this.medalList,
     this.reputationList,
-    this.rows,
-    this.currentRows,
-    this.replyPageRows,
-    this.topic,
-    this.hotReplies,
+    required this.rows,
+    required this.currentRows,
+    required this.replyPageRows,
+    required this.topic,
+    required this.hotReplies,
   });
 
   factory TopicDetailData.fromJson(Map<String, dynamic> map) {
@@ -42,7 +42,7 @@ class TopicDetailData {
     Map<String, Medal> tempMedalMap = {};
     Map<String, Reputation> tempReputationMap = {};
     for (MapEntry<String, dynamic> entry in userMap.entries) {
-      int key = int.tryParse(entry.key);
+      int? key = int.tryParse(entry.key);
       if (key == null) {
         // __GROUPS 用户等级
         if ("__GROUPS" == entry.key) {
@@ -62,8 +62,8 @@ class TopicDetailData {
         }
       } else {
         tempUserMap[entry.key] = User.fromJson(entry.value);
-        if (key != tempUserMap[entry.key].uid) {
-          tempUserMap[entry.key].uid = key;
+        if (key != tempUserMap[entry.key]!.uid) {
+          tempUserMap[entry.key]!.uid = key;
         }
       }
     }
@@ -79,7 +79,8 @@ class TopicDetailData {
           .split(",")
           .where((e) => e.isNotEmpty)
           .map((e) => int.tryParse(e))
-          .where((e) => e != null));
+          .where((e) => e != null)
+          .cast());
     }
     return TopicDetailData(
       global: map["__GLOBAL"],
@@ -96,33 +97,33 @@ class TopicDetailData {
     );
   }
 
-  int get maxPage => (rows / replyPageRows.toDouble()).ceil();
+  int get maxPage => (rows/ replyPageRows.toDouble()).ceil();
 }
 
 class Reply {
-  String content;
-  String alterInfo;
-  int tid;
+  String? content;
+  String? alterInfo;
+  int? tid;
   int score;
-  int score2;
-  String postDate;
-  int authorId;
-  String subject;
-  int type;
-  int fid;
-  int pid;
-  int recommend;
-  int lou;
-  int contentLength;
-  int postDateTimestamp;
-  List<Reply> commentList;
-  List<Attachment> attachmentList;
+  int? score2;
+  String? postDate;
+  int? authorId;
+  String? subject;
+  int? type;
+  int? fid;
+  int? pid;
+  int? recommend;
+  int? lou;
+  int? contentLength;
+  int? postDateTimestamp;
+  List<Reply>? commentList;
+  List<Attachment>? attachmentList;
 
   Reply({
     this.content,
     this.alterInfo,
     this.tid,
-    this.score,
+    this.score = 0,
     this.score2,
     this.postDate,
     this.authorId,
@@ -139,12 +140,12 @@ class Reply {
   });
 
   factory Reply.fromJson(Map<String, dynamic> map) {
-    Map<String, dynamic> commentMap = map["comment"];
+    Map<String, dynamic>? commentMap = map["comment"];
     List<Reply> commentList = [];
     if (commentMap != null) {
       commentMap.forEach((k, v) => commentList.add(Reply.fromJson(v)));
     }
-    Map<String, dynamic> attachmentMap = map["attachs"];
+    Map<String, dynamic>? attachmentMap = map["attachs"];
     List<Attachment> attachmentList = [];
     if (attachmentMap != null) {
       attachmentMap
@@ -189,8 +190,8 @@ class Reply {
 }
 
 class Group {
-  final int id;
-  final String name;
+  final int? id;
+  final String? name;
 
   const Group(this.id, this.name);
 
@@ -200,10 +201,10 @@ class Group {
 }
 
 class Medal {
-  final int id;
-  final String name;
-  final String description;
-  final String image;
+  final int? id;
+  final String? name;
+  final String? description;
+  final String? image;
 
   const Medal(this.id, this.name, this.description, this.image);
 
@@ -247,14 +248,14 @@ class Attachment {
     );
   }
 
-  final String attachUrl;
-  final int size;
-  final String type;
-  final String urlUtf8OrgName;
-  final String dscp;
-  final String path;
-  final String name;
-  final String ext;
+  final String? attachUrl;
+  final int? size;
+  final String? type;
+  final String? urlUtf8OrgName;
+  final String? dscp;
+  final String? path;
+  final String? name;
+  final String? ext;
   final dynamic thumb;
 
   String get realUrl => "https://img.nga.178.com/attachments/$attachUrl";

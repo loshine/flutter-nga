@@ -6,9 +6,9 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'child_forum_item_widget.dart';
 
 class ChildForumListPage extends StatefulWidget {
-  final ForumInfo forumInfo;
+  final ForumInfo? forumInfo;
 
-  const ChildForumListPage(this.forumInfo, {Key key}) : super(key: key);
+  const ChildForumListPage(this.forumInfo, {Key? key}) : super(key: key);
 
   @override
   _ChildForumListPage createState() => _ChildForumListPage();
@@ -20,7 +20,7 @@ class _ChildForumListPage extends State<ChildForumListPage> {
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: widget.forumInfo == null || widget.forumInfo.subForums.isEmpty
+      child: widget.forumInfo == null || widget.forumInfo!.subForums!.isEmpty
           ? Center(
               child: Text(
                 "本版暂无子版",
@@ -34,9 +34,9 @@ class _ChildForumListPage extends State<ChildForumListPage> {
               physics: BouncingScrollPhysics(),
               itemCount: widget.forumInfo == null
                   ? 0
-                  : widget.forumInfo.subForums.length,
+                  : widget.forumInfo!.subForums!.length,
               itemBuilder: (_, index) =>
-                  ChildForumItemWidget(widget.forumInfo.subForums[index]),
+                  ChildForumItemWidget(widget.forumInfo!.subForums![index]),
             ),
     );
   }

@@ -12,10 +12,10 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class UserInfoPage extends StatefulWidget {
-  final String username;
-  final String uid;
+  final String? username;
+  final String? uid;
 
-  const UserInfoPage({this.username, this.uid, Key key}) : super(key: key);
+  const UserInfoPage({this.username, this.uid, Key? key}) : super(key: key);
 
   @override
   _UserInfoPageState createState() => _UserInfoPageState();
@@ -72,7 +72,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 flexibleSpace: FlexibleSpaceBar(
                   centerTitle: true,
                   title: Text(
-                    _store.state.username,
+                    _store.state.username!,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16.0,
@@ -83,7 +83,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           ? SizedBox.expand(child: Text(""))
                           : CachedNetworkImage(
                               fit: BoxFit.cover,
-                              imageUrl: _store.state.avatar,
+                              imageUrl: _store.state.avatar!,
                               placeholder: (context, url) =>
                                   Image.asset('images/default_forum_icon.png'),
                               errorWidget: (context, url, err) =>
@@ -123,8 +123,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
       )
     ];
 
-    if (userInfo.moderatorForums.isNotEmpty) {
-      widgets.addAll(userInfo.moderatorForums.entries.map(
+    if (userInfo.moderatorForums!.isNotEmpty) {
+      widgets.addAll(userInfo.moderatorForums!.entries.map(
         (entry) => Builder(
             builder: (context) => GestureDetector(
                   onTap: () => Routes.navigateTo(context,
@@ -159,7 +159,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
         style: TextStyle(color: Palette.colorTextSecondary),
       )
     ];
-    widgets.addAll(userInfo.reputationMap.entries.map((entry) => InfoWidget(
+    widgets.addAll(userInfo.reputationMap!.entries.map((entry) => InfoWidget(
           title: "${entry.key}: ",
           subTitle: entry.value,
         )));
@@ -180,7 +180,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
         ),
       ),
     ];
-    basicWidgets.addAll(userInfo.basicInfoMap.entries.map(
+    basicWidgets.addAll(userInfo.basicInfoMap!.entries.map(
         (entry) => InfoWidget(title: "${entry.key}: ", subTitle: entry.value)));
 
     List<Widget> widgets = [
@@ -219,7 +219,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     ),
                   ),
                 ),
-                Html(data: userInfo.signature)
+                Html(data: userInfo.signature!)
               ],
             ),
           ),
@@ -255,7 +255,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
     ];
 
-    if (userInfo.personalForum.isNotEmpty) {
+    if (userInfo.personalForum!.isNotEmpty) {
       widgets.add(
         Card(
           margin: EdgeInsets.fromLTRB(8, 8, 8, 4),
@@ -283,7 +283,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     style: TextStyle(color: Palette.colorTextSecondary),
                   ),
                   Builder(builder: (context) {
-                    final entry = userInfo.personalForum.entries.toList()[0];
+                    final entry = userInfo.personalForum!.entries.toList()[0];
                     return GestureDetector(
                       onTap: () => Routes.navigateTo(context,
                           "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),

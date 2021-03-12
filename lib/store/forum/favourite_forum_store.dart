@@ -16,11 +16,11 @@ abstract class _FavouriteForumStore with Store {
   }
 
   @action
-  Future toggle(int fid, String name) async {
+  Future toggle(int fid, String? name) async {
     if (isFavourite) {
-      await Data().forumRepository.deleteFavourite(Forum(fid, name));
+      await Data().forumRepository.deleteFavourite(Forum(fid, name!));
     } else {
-      await Data().forumRepository.saveFavourite(Forum(fid, name));
+      await Data().forumRepository.saveFavourite(Forum(fid, name!));
     }
     isFavourite = !isFavourite;
   }

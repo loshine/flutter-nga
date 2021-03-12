@@ -12,7 +12,7 @@ abstract class _SearchTopicListStore with Store {
 
   @action
   Future<SearchTopicListStoreData> refresh(
-      String keyword, int fid, bool content) async {
+      String keyword, int? fid, bool content) async {
     try {
       TopicListData data =
           await Data().topicRepository.searchTopic(keyword, fid, content, 1);
@@ -20,7 +20,7 @@ abstract class _SearchTopicListStore with Store {
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
-        list: data.topicList.values.toList(),
+        list: data.topicList!.values.toList(),
       );
       return state;
     } catch (err) {
@@ -30,7 +30,7 @@ abstract class _SearchTopicListStore with Store {
 
   @action
   Future<SearchTopicListStoreData> loadMore(
-      String keyword, int fid, bool content) async {
+      String keyword, int? fid, bool content) async {
     try {
       TopicListData data = await Data()
           .topicRepository
@@ -39,7 +39,7 @@ abstract class _SearchTopicListStore with Store {
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
-        list: state.list..addAll(data.topicList.values),
+        list: state.list..addAll(data.topicList!.values),
       );
       return state;
     } catch (err) {
@@ -55,10 +55,10 @@ class SearchTopicListStoreData {
   final List<Topic> list;
 
   const SearchTopicListStoreData({
-    this.page,
-    this.maxPage,
-    this.enablePullUp,
-    this.list,
+    this.page = 1,
+    this.maxPage = 1,
+    this.enablePullUp = false,
+    this.list = const [],
   });
 
   factory SearchTopicListStoreData.initial() => SearchTopicListStoreData(

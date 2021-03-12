@@ -12,17 +12,16 @@ typedef TagLoadCompleteCallback = void Function(List<TopicTag> tagList);
 
 class ForumTagDialog extends StatefulWidget {
   const ForumTagDialog({
-    this.fid,
-    this.tagList,
+    required this.fid,
+    this.tagList = const [],
     this.onSelected,
     this.onLoadComplete,
-    Key key,
-  })  : assert(fid != null),
-        super(key: key);
+    Key? key,
+  }) : super(key: key);
   final int fid;
   final List<TopicTag> tagList;
-  final TagSelectedCallback onSelected;
-  final TagLoadCompleteCallback onLoadComplete;
+  final TagSelectedCallback? onSelected;
+  final TagLoadCompleteCallback? onLoadComplete;
 
   @override
   _ForumTagDialogState createState() => _ForumTagDialogState();
@@ -35,11 +34,9 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
   void initState() {
     _store.setList(widget.tagList);
 
-    if (widget.tagList == null || widget.tagList.isEmpty) {
+    if (widget.tagList.isEmpty) {
       _store.load(widget.fid).then((value) {
-        if (widget.onLoadComplete != null) {
-          widget.onLoadComplete.call(value);
-        }
+        widget.onLoadComplete?.call(value);
       }).catchError((err) {
         if (err is DioError) {
           Fluttertoast.showToast(
@@ -79,7 +76,7 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
                 ),
                 onTap: () {
                   if (widget.onSelected != null) {
-                    widget.onSelected(tag);
+                    widget.onSelected!(tag);
                   }
                 },
               );

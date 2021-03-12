@@ -10,13 +10,13 @@ final _dateTimeFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 final _postDateFormat = DateFormat('yyyy-MM-dd');
 
 /// 解码 html 特殊字符
-String unescapeHtml(String data) {
+String unescapeHtml(String? data) {
   if (isStringEmpty(data)) return "";
-  return _htmlUnescape.convert(data);
+  return _htmlUnescape.convert(data!);
 }
 
 /// 判断字符串是否为空
-bool isStringEmpty(String content) {
+bool isStringEmpty(String? content) {
   return content == null || content.isEmpty;
 }
 
@@ -71,7 +71,7 @@ String fluroCnParamsEncode(String originalCn) {
 
 /// fluro 传递后取出参数，解析
 String fluroCnParamsDecode(String encodedCn) {
-  var list = List<int>();
+  var list = <int>[];
 
   ///字符串解码
   jsonDecode(encodedCn).forEach(list.add);
@@ -84,9 +84,8 @@ String fluroCnParamsDecode(String encodedCn) {
 /// If `keep_new_lines` is `true`, newline characters are preserved
 /// `(\n and \r, hex 0xA and 0xD)`.
 String stripLow(String str, [bool keepNewLines = false]) {
-  String chars = keepNewLines == true
-      ? '\x00-\x09\x0B\x0C\x0E-\x1F\x7F'
-      : '\x00-\x1F\x7F';
+  String chars =
+      keepNewLines == true ? '\x00-\x09\x0B\x0C\x0E-\x1F\x7F' : '\x00-\x1F\x7F';
   return blacklist(str, chars);
 }
 

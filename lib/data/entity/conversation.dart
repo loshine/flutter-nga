@@ -1,24 +1,24 @@
 class Conversation {
-  final int mid;
-  final int lastModify;
-  final int bit;
-  final String subject;
-  final int from;
-  final int time;
-  final int lastFrom;
-  final int posts;
-  final int sbit;
-  final String fromUsername;
-  final String lastFromUsername;
+  final int? mid;
+  final int? lastModify;
+  final int? bit;
+  final String? subject;
+  final int? from;
+  final int? time;
+  final int? lastFrom;
+  final int? posts;
+  final int? sbit;
+  final String? fromUsername;
+  final String? lastFromUsername;
 
-  String get realFromUsername => from == 0 ? '#SYSTEM#' : fromUsername;
+  String? get realFromUsername => from == 0 ? '#SYSTEM#' : fromUsername;
 
   String get users =>
       "$realFromUsername${lastFromUsername != '' ? ", $lastFromUsername" : ''}";
 
-  bool get isMultiUser => bit & 1 == 1;
+  bool get isMultiUser => bit! & 1 == 1;
 
-  bool get isUnread => bit & 2 == 2;
+  bool get isUnread => bit! & 2 == 2;
 
   Conversation(
     this.mid,
@@ -53,9 +53,9 @@ class Conversation {
 }
 
 class ConversationListData {
-  final int nextPage;
-  final int currentPage;
-  final int rowsPerPage;
+  final int? nextPage;
+  final int? currentPage;
+  final int? rowsPerPage;
   final List<Conversation> conversationList;
 
   bool get hasNext => nextPage == 1;
@@ -69,7 +69,7 @@ class ConversationListData {
 
   factory ConversationListData.fromJson(Map map) {
     Map<String, Conversation> tempMap = {};
-    for (MapEntry<String, dynamic> entry in map.entries) {
+    for (MapEntry<String, dynamic> entry in map.entries as Iterable<MapEntry<String, dynamic>>) {
       if (entry.key != 'nextPage' &&
           entry.key != 'currentPage' &&
           entry.key != 'rowsPerPage') {

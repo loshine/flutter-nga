@@ -12,13 +12,13 @@ mixin _$HomeDrawerHeaderStore on _HomeDrawerHeaderStore, Store {
   final _$userInfoAtom = Atom(name: '_HomeDrawerHeaderStore.userInfo');
 
   @override
-  UserInfo get userInfo {
+  UserInfo? get userInfo {
     _$userInfoAtom.reportRead();
     return super.userInfo;
   }
 
   @override
-  set userInfo(UserInfo value) {
+  set userInfo(UserInfo? value) {
     _$userInfoAtom.reportWrite(value, super.userInfo, () {
       super.userInfo = value;
     });

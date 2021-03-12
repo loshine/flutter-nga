@@ -23,12 +23,12 @@ abstract class _TopicHistoryListStore with Store {
         await Data().topicRepository.getTopicHistories(_limit, 0);
     Map<String, List<TopicHistory>> map = Map();
     histories.forEach((history) {
-      final date = DateTime.fromMillisecondsSinceEpoch(history.time);
+      final date = DateTime.fromMillisecondsSinceEpoch(history.time!);
       String dateString = _formatter.format(date);
       if (!map.containsKey(dateString)) {
         map[dateString] = [];
       }
-      map[dateString].add(history);
+      map[dateString]!.add(history);
     });
     state = TopicHistoryListStoreData(
       page: 1,
@@ -42,14 +42,14 @@ abstract class _TopicHistoryListStore with Store {
   Future<TopicHistoryListStoreData> loadMore() async {
     List<TopicHistory> histories =
         await Data().topicRepository.getTopicHistories(_limit, _offset);
-    Map<String, List<TopicHistory>> map = state.dateTopicHistoryMap;
+    Map<String, List<TopicHistory>>? map = state.dateTopicHistoryMap;
     histories.forEach((history) {
-      final date = DateTime.fromMicrosecondsSinceEpoch(history.time);
+      final date = DateTime.fromMicrosecondsSinceEpoch(history.time!);
       String dateString = _formatter.format(date);
       if (!map.containsKey(dateString)) {
         map[dateString] = [];
       }
-      map[dateString].add(history);
+      map[dateString]!.add(history);
     });
     state = TopicHistoryListStoreData(
       page: state.page + 1,
@@ -105,9 +105,9 @@ class TopicHistoryListStoreData {
   }
 
   const TopicHistoryListStoreData({
-    this.page,
-    this.enablePullUp,
-    this.dateTopicHistoryMap,
+    this.page = 1,
+    this.enablePullUp = false,
+    this.dateTopicHistoryMap = const {},
   });
 
   factory TopicHistoryListStoreData.initial() => TopicHistoryListStoreData(

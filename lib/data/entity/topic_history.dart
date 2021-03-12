@@ -6,27 +6,25 @@ import 'package:flutter_nga/utils/palette.dart';
 
 class TopicHistory {
   TopicHistory({
-    this.tid,
-    this.fid,
-    this.subject,
+    required this.tid,
+    required this.fid,
+    required this.subject,
     this.author,
     this.type,
     this.topicMisc,
     this.topicParentName,
     this.time,
-  })  : assert(tid != null),
-        assert(fid != null),
-        assert(subject != null);
+  });
 
-  int id;
+  int? id;
   final int tid;
   final int fid;
   final String subject;
-  final String author;
-  final int type;
-  final String topicMisc;
-  final String topicParentName;
-  final int time;
+  final String? author;
+  final int? type;
+  final String? topicMisc;
+  final String? topicParentName;
+  final int? time;
 
   Map<String, dynamic> toJson() {
     return {
@@ -55,15 +53,15 @@ class TopicHistory {
   }
 
   bool hasAttachment() {
-    return type & TOPIC_MASK_TYPE_ATTACHMENT == TOPIC_MASK_TYPE_ATTACHMENT;
+    return type! & TOPIC_MASK_TYPE_ATTACHMENT == TOPIC_MASK_TYPE_ATTACHMENT;
   }
 
   bool isAssemble() {
-    return type & TOPIC_MASK_TYPE_ASSEMBLE == TOPIC_MASK_TYPE_ASSEMBLE;
+    return type! & TOPIC_MASK_TYPE_ASSEMBLE == TOPIC_MASK_TYPE_ASSEMBLE;
   }
 
   bool locked() {
-    return type & TOPIC_MASK_TYPE_LOCK == TOPIC_MASK_TYPE_LOCK;
+    return type! & TOPIC_MASK_TYPE_LOCK == TOPIC_MASK_TYPE_LOCK;
   }
 
   bool isBold() {
@@ -103,13 +101,13 @@ class TopicHistory {
   }
 
   int _getLastMiscByte() {
-    if (topicMisc != null && topicMisc.isNotEmpty) {
-      var misc = topicMisc;
+    if (topicMisc != null && topicMisc!.isNotEmpty) {
+      var misc = topicMisc!;
       while (misc.length * 6 % 8 != 0) {
         misc += "A";
       }
       var bytes = base64.decode(misc);
-      if (bytes != null && bytes.isNotEmpty && bytes[0].toInt() == 1) {
+      if (bytes.isNotEmpty && bytes[0].toInt() == 1) {
         return bytes[4].toInt();
       }
     }

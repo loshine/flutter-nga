@@ -13,7 +13,7 @@ abstract class _UserInfoStore with Store {
   UserInfoStoreData state = UserInfoStoreData.initial();
 
   @action
-  Future<UserInfoStoreData> loadByName(String username) async {
+  Future<UserInfoStoreData> loadByName(String? username) async {
     try {
       final userInfo = await Data().userRepository.getUserInfoByName(username);
       state = _buildStateByInfo(userInfo);
@@ -24,7 +24,7 @@ abstract class _UserInfoStore with Store {
   }
 
   @action
-  Future<UserInfoStoreData> loadByUid(String uid) async {
+  Future<UserInfoStoreData> loadByUid(String? uid) async {
     try {
       final userInfo = await Data().userRepository.getUserInfoByUid(uid);
       state = _buildStateByInfo(userInfo);
@@ -38,25 +38,25 @@ abstract class _UserInfoStore with Store {
     final moderatorForumsMap = <int, String>{};
     if (userInfo != null &&
         userInfo.adminForums != null &&
-        userInfo.adminForums.isNotEmpty) {
-      userInfo.adminForums.entries.forEach((entry) {
+        userInfo.adminForums!.isNotEmpty) {
+      userInfo.adminForums!.entries.forEach((entry) {
         moderatorForumsMap[int.parse(entry.key)] =
             "${codeUtils.unescapeHtml(entry.value)}";
       });
     }
-    final reputationMap = <String, String>{};
-    reputationMap['威望'] = "${userInfo == null ? 0 : userInfo.fame / 10}";
+    final reputationMap = <String?, String>{};
+    reputationMap['威望'] = "${userInfo == null ? 0 : userInfo.fame! / 10}";
     if (userInfo != null &&
         userInfo.reputation != null &&
-        userInfo.reputation.isNotEmpty) {
-      userInfo.reputation.forEach((reputation) {
+        userInfo.reputation!.isNotEmpty) {
+      userInfo.reputation!.forEach((reputation) {
         reputationMap[reputation.name] = "${reputation.value}";
       });
     }
-    final personalForumMap = <int, String>{};
+    final personalForumMap = <int?, String>{};
     if (userInfo != null && userInfo.userForum != null) {
-      personalForumMap[userInfo.userForum['0']] =
-          "${codeUtils.unescapeHtml(userInfo.userForum['1'])}";
+      personalForumMap[userInfo.userForum!['0']] =
+          "${codeUtils.unescapeHtml(userInfo.userForum!['1'])}";
     }
     return UserInfoStoreData(
       uid: userInfo.uid,
@@ -67,9 +67,9 @@ abstract class _UserInfoStore with Store {
         '用户名': '${userInfo.username}',
         '用户组': '${userInfo.group}(${userInfo.groupId})',
         '财富':
-            '${userInfo.money ~/ 10000}金 ${(userInfo.money % 10000) ~/ 100}银 ${userInfo.money % 100}铜',
+            '${userInfo.money! ~/ 10000}金 ${(userInfo.money! % 10000) ~/ 100}银 ${userInfo.money! % 100}铜',
         '注册日期':
-            '${codeUtils.formatDate(DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate * 1000))}'
+            '${codeUtils.formatDate(DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate! * 1000))}'
       },
       signature: codeUtils.isStringEmpty(userInfo.sign)
           ? "暂无签名"
@@ -82,14 +82,14 @@ abstract class _UserInfoStore with Store {
 }
 
 class UserInfoStoreData {
-  final int uid;
-  final String username;
-  final String avatar;
-  final Map<String, String> basicInfoMap;
-  final String signature;
-  final Map<int, String> moderatorForums; // 管理版面
-  final Map<String, String> reputationMap; // 声望
-  final Map<int, String> personalForum; // 个人版面
+  final int? uid;
+  final String? username;
+  final String? avatar;
+  final Map<String, String>? basicInfoMap;
+  final String? signature;
+  final Map<int, String>? moderatorForums; // 管理版面
+  final Map<String?, String>? reputationMap; // 声望
+  final Map<int?, String>? personalForum; // 个人版面
 
   const UserInfoStoreData({
     this.uid,

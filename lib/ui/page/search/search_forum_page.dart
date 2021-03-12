@@ -7,7 +7,7 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SearchForumPage extends StatefulWidget {
-  const SearchForumPage(this.keyword, {Key key}) : super(key: key);
+  const SearchForumPage(this.keyword, {Key? key}) : super(key: key);
 
   final String keyword;
 
@@ -17,7 +17,7 @@ class SearchForumPage extends StatefulWidget {
 
 class _SearchForumState extends State<SearchForumPage> {
   final _store = SearchForumStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   void initState() {
