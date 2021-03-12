@@ -110,7 +110,12 @@ class Data {
         if (dioError != null) {
           throw dioError;
         }
-        response.data = map["data"];
+        // 上传附件的时候没有 data
+        if (map.containsKey("data")) {
+          response.data = map["data"];
+        } else {
+          response.data = map;
+        }
         return response;
       },
       onError: (DioError e) async {

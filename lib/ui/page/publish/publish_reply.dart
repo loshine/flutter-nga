@@ -254,7 +254,6 @@ class _PublishReplyState extends State<PublishPage> {
   void _incognitoIconClicked() {
     Fluttertoast.showToast(
       msg: _isAnonymous ? "关闭匿名" : "开启匿名",
-      gravity: ToastGravity.CENTER,
     );
     setState(() {
       _isAnonymous = !_isAnonymous;
@@ -369,13 +368,11 @@ class _PublishReplyState extends State<PublishPage> {
             _attachmentsCheck.toString());
         Fluttertoast.showToast(
           msg: message,
-          gravity: ToastGravity.CENTER,
         );
         Routes.pop(context);
       } catch (err) {
         Fluttertoast.showToast(
           msg: err.toString(),
-          gravity: ToastGravity.CENTER,
         );
       }
     } else if (widget.fid != null) {
@@ -389,13 +386,11 @@ class _PublishReplyState extends State<PublishPage> {
             _attachmentsCheck.toString());
         Fluttertoast.showToast(
           msg: message,
-          gravity: ToastGravity.CENTER,
         );
         Routes.pop(context);
       } catch (err) {
         Fluttertoast.showToast(
           msg: err.toString(),
-          gravity: ToastGravity.CENTER,
         );
       }
     }

@@ -55,7 +55,6 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.message,
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
@@ -89,7 +88,6 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
                   _store.delete(topic).then((message) {
                     Fluttertoast.showToast(
                       msg: message!,
-                      gravity: ToastGravity.CENTER,
                     );
                   });
                 },
