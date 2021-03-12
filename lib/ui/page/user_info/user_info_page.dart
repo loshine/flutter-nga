@@ -32,12 +32,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
         if (err is DioError) {
           Fluttertoast.showToast(
             msg: err.message,
-            gravity: ToastGravity.CENTER,
           );
         } else if (err is Error) {
           Fluttertoast.showToast(
             msg: err.toString(),
-            gravity: ToastGravity.CENTER,
           );
         }
       });
@@ -46,12 +44,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
         if (err is DioError) {
           Fluttertoast.showToast(
             msg: err.message,
-            gravity: ToastGravity.CENTER,
           );
         } else if (err is Error) {
           Fluttertoast.showToast(
             msg: err.toString(),
-            gravity: ToastGravity.CENTER,
           );
         }
       });

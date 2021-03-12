@@ -58,7 +58,6 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.message,
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));

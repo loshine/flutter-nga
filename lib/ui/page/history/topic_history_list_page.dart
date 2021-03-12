@@ -52,7 +52,6 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
       _refreshController.loadFailed();
       Fluttertoast.showToast(
         msg: err.message,
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
@@ -63,7 +62,6 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
       _refreshController.loadFailed();
       Fluttertoast.showToast(
         msg: err.message,
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(() => _refreshController.loadComplete());
   }
@@ -113,7 +111,6 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
     _store.clean().catchError((err) {
       Fluttertoast.showToast(
         msg: err.message,
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(() {
       _refreshController.requestRefresh();

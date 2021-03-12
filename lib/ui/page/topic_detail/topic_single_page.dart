@@ -14,7 +14,7 @@ class TopicSinglePage extends StatefulWidget {
     required this.tid,
     required this.page,
     Key? key,
-  })  : super(key: key);
+  }) : super(key: key);
 
   final int tid;
   final int page;
@@ -64,7 +64,6 @@ class _TopicSingleState extends State<TopicSinglePage> {
       _refreshController.loadFailed();
       Fluttertoast.showToast(
         msg: err.message,
-        gravity: ToastGravity.CENTER,
       );
     }).whenComplete(() {
       _refreshController.refreshCompleted();
