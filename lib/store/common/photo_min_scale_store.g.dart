@@ -28,7 +28,7 @@ mixin _$PhotoMinScaleStore on _PhotoMinScaleStore, Store {
       ActionController(name: '_PhotoMinScaleStore');
 
   @override
-  void load(String url, double screenWidth) {
+  void load(String url, double? screenWidth) {
     final _$actionInfo = _$_PhotoMinScaleStoreActionController.startAction(
         name: '_PhotoMinScaleStore.load');
     try {

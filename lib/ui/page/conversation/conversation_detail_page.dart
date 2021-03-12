@@ -8,9 +8,9 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'message_item_widget.dart';
 
 class ConversationDetailPage extends StatefulWidget {
-  final int mid;
+  final int? mid;
 
-  const ConversationDetailPage({Key key, this.mid}) : super(key: key);
+  const ConversationDetailPage({Key? key, this.mid}) : super(key: key);
 
   @override
   _ConversationDetailState createState() => _ConversationDetailState();
@@ -18,7 +18,7 @@ class ConversationDetailPage extends StatefulWidget {
 
 class _ConversationDetailState extends State<ConversationDetailPage> {
   final _store = ConversationDetailStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   void initState() {

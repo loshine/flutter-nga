@@ -1,6 +1,7 @@
 import 'dart:ui';
 
-const String DOMAIN = "https://bbs.nga.cn/";
+const String DOMAIN_WITHOUT_HTTPS = "bbs.nga.cn";
+const String DOMAIN = "https://$DOMAIN_WITHOUT_HTTPS/";
 
 const String LOGIN_URL = DOMAIN + "nuke.php?__lib=login&__act=account&login";
 

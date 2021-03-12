@@ -9,10 +9,10 @@ import '../data.dart';
 abstract class MessageRepository {
   Future<ConversationListData> getConversationList(int page);
 
-  Future<MessageListData> getMessageList(int mid, int page);
+  Future<MessageListData> getMessageList(int? mid, int page);
 
   Future<void> sendMessage(
-      int mid, List<String> sendTo, String subject, String content);
+      int? mid, List<String> sendTo, String subject, String content);
 
   Future<NotificationInfo> getNotificationInfo();
 
@@ -25,18 +25,18 @@ class MessageDataRepository extends MessageRepository {
     try {
       Response<Map<String, dynamic>> response = await Data().dio.get(
           "nuke.php?__lib=message&__output=8&act=list&__act=message&page=$page");
-      return ConversationListData.fromJson(response.data['0']);
+      return ConversationListData.fromJson(response.data!['0']);
     } catch (err) {
       rethrow;
     }
   }
 
   @override
-  Future<MessageListData> getMessageList(int mid, int page) async {
+  Future<MessageListData> getMessageList(int? mid, int page) async {
     try {
       Response<Map<String, dynamic>> response = await Data().dio.get(
           "nuke.php?__lib=message&__output=8&act=read&__act=message&mid=$mid&page=$page");
-      return MessageListData.fromJson(response.data['0']);
+      return MessageListData.fromJson(response.data!['0']);
     } catch (err) {
       rethrow;
     }
@@ -44,7 +44,7 @@ class MessageDataRepository extends MessageRepository {
 
   @override
   Future<void> sendMessage(
-      int mid, List<String> sendTo, String subject, String content) async {
+      int? mid, List<String> sendTo, String subject, String content) async {
     try {
       final isNew = mid == null || mid == 0;
       final sendToValue = sendTo != null && sendTo.isNotEmpty
@@ -72,7 +72,7 @@ class MessageDataRepository extends MessageRepository {
     try {
       Response<Map<String, dynamic>> response =
           await Data().dio.get("nuke.php?__output=8&__lib=noti&__act=if");
-      return NotificationInfo.fromJson(response.data['0']);
+      return NotificationInfo.fromJson(response.data!['0']);
     } catch (err) {
       rethrow;
     }
@@ -83,7 +83,7 @@ class MessageDataRepository extends MessageRepository {
     try {
       Response<Map<String, dynamic>> response =
           await Data().dio.get("nuke.php?__output=8&__lib=noti&__act=get_all");
-      return NotificationInfoListData.fromJson(response.data['0']);
+      return NotificationInfoListData.fromJson(response.data!['0']);
     } catch (err) {
       rethrow;
     }

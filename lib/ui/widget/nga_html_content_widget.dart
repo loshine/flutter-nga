@@ -14,14 +14,14 @@ import 'package:html/dom.dart' as dom;
 import 'collapse_widget.dart';
 
 class NgaHtmlContentWidget extends StatelessWidget {
-  final String content;
+  final String? content;
 
-  const NgaHtmlContentWidget({Key key, this.content}) : super(key: key);
+  const NgaHtmlContentWidget({Key? key, this.content}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Html(
-      data: NgaContentParser.parse(content),
+      data: NgaContentParser.parse(content)!,
       customRender: {
         'div': _alignmentRender,
         'span': _fontSizeRender,
@@ -86,7 +86,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   Widget _fontSizeRender(RenderContext context, Widget parsedChild,
       Map<String, String> attributes, dom.Element element) {
     if (attributes['font-size'] != null) {
-      final fontSize = attributes['font-size'];
+      final fontSize = attributes['font-size']!;
       if (fontSize.endsWith("%")) {
         final multiple =
             int.parse(fontSize.substring(0, fontSize.length - 1)) / 100;
@@ -102,11 +102,11 @@ class NgaHtmlContentWidget extends StatelessWidget {
   Widget _fontColorRender(RenderContext context, Widget parsedChild,
       Map<String, String> attributes, dom.Element element) {
     if (attributes['color'] != null) {
-      String color = attributes['color'];
+      String? color = attributes['color'];
       return DefaultTextStyle.merge(
         child: parsedChild,
         style: TextStyle(
-          color: TEXT_COLOR_MAP[color],
+          color: TEXT_COLOR_MAP[color!],
           decorationColor: TEXT_COLOR_MAP[color],
         ),
       );
@@ -132,10 +132,10 @@ class NgaHtmlContentWidget extends StatelessWidget {
     return Builder(builder: (context) {
       return InkWell(
         onTap: () => Routes.navigateTo(context,
-            "${Routes.PHOTO_PREVIEW}?url=${fluroCnParamsEncode(attributes['src'])}&screenWidth=${MediaQuery.of(context).size.width}"),
+            "${Routes.PHOTO_PREVIEW}?url=${fluroCnParamsEncode(attributes['src']!)}&screenWidth=${MediaQuery.of(context).size.width}"),
         child: CachedNetworkImage(
           fit: BoxFit.cover,
-          imageUrl: attributes['src'],
+          imageUrl: attributes['src']!,
           placeholder: (context, url) => Icon(
             Icons.image,
             size: 48,
@@ -150,7 +150,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
       Map<String, String> attributes, dom.Element element) {
     return CachedNetworkImage(
       fit: BoxFit.cover,
-      imageUrl: attributes['src'],
+      imageUrl: attributes['src']!,
       placeholder: (context, url) => Icon(
         Icons.image,
         size: 48,

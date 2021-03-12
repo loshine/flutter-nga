@@ -27,13 +27,13 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
   final _$maxPageAtom = Atom(name: '_TopicDetailStore.maxPage');
 
   @override
-  int get maxPage {
+  int? get maxPage {
     _$maxPageAtom.reportRead();
     return super.maxPage;
   }
 
   @override
-  set maxPage(int value) {
+  set maxPage(int? value) {
     _$maxPageAtom.reportWrite(value, super.maxPage, () {
       super.maxPage = value;
     });
@@ -42,13 +42,13 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
   final _$topicAtom = Atom(name: '_TopicDetailStore.topic');
 
   @override
-  Topic get topic {
+  Topic? get topic {
     _$topicAtom.reportRead();
     return super.topic;
   }
 
   @override
-  set topic(Topic value) {
+  set topic(Topic? value) {
     _$topicAtom.reportWrite(value, super.topic, () {
       super.topic = value;
     });
@@ -58,7 +58,7 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
       ActionController(name: '_TopicDetailStore');
 
   @override
-  void setMaxPage(int maxPage) {
+  void setMaxPage(int? maxPage) {
     final _$actionInfo = _$_TopicDetailStoreActionController.startAction(
         name: '_TopicDetailStore.setMaxPage');
     try {
@@ -80,7 +80,7 @@ mixin _$TopicDetailStore on _TopicDetailStore, Store {
   }
 
   @override
-  void setTopic(Topic topic) {
+  void setTopic(Topic? topic) {
     final _$actionInfo = _$_TopicDetailStoreActionController.startAction(
         name: '_TopicDetailStore.setTopic');
     try {

@@ -8,12 +8,12 @@ class HomeDrawerHeaderStore = _HomeDrawerHeaderStore with _$HomeDrawerHeaderStor
 
 abstract class _HomeDrawerHeaderStore with Store {
   @observable
-  UserInfo userInfo;
+  UserInfo? userInfo;
 
   @action
   Future refresh() async {
     try {
-      CacheUser user = await Data().userRepository.getDefaultUser();
+      CacheUser? user = await Data().userRepository.getDefaultUser();
       if (user != null) {
         userInfo = await Data().userRepository.getUserInfoByUid(user.uid);
       }

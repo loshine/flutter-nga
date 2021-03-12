@@ -3,8 +3,8 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class FontSizeDialog extends StatelessWidget {
-  const FontSizeDialog({this.callback, Key key}) : super(key: key);
-  final InputCallback callback;
+  const FontSizeDialog({this.callback, Key? key}) : super(key: key);
+  final InputCallback? callback;
 
   static const sizeList = [
     "110%",
@@ -35,7 +35,7 @@ class FontSizeDialog extends StatelessWidget {
               ),
               onTap: () {
                 if (callback != null) {
-                  callback("[size=${sizeList[position]}]", "[/size]", true);
+                  callback!("[size=${sizeList[position]}]", "[/size]", true);
                 }
                 Routes.pop(context);
               },

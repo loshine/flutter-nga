@@ -23,7 +23,7 @@ abstract class _SendMessageStore with Store {
     this.contacts = contacts;
   }
 
-  Future<void> send(int mid, String subject, String content) async {
+  Future<void> send(int? mid, String subject, String content) async {
     try {
       return await Data()
           .messageRepository

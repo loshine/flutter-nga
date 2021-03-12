@@ -1,26 +1,26 @@
 import 'package:flutter_nga/utils/name_utils.dart' as nameUtils;
 
 class User {
-  int uid;
-  final String username;
-  final int credit;
-  final String medal;
-  final String reputation;
-  final int groupId;
-  final int memberId;
-  final String avatar; // 可能是 String，也可能是 map
-  final List<String> avatarList; // 当 avatar 是 map 的时候用来替代
-  final int yz;
-  final String site;
-  final String honor;
-  final int regDate;
-  final String muteTime;
-  final int postNum;
-  final int rvrc;
-  final int money;
-  final int thisVisit;
-  final String signature;
-  final int bitData;
+  int? uid;
+  final String? username;
+  final int? credit;
+  final String? medal;
+  final String? reputation;
+  final int? groupId;
+  final int? memberId;
+  final String? avatar; // 可能是 String，也可能是 map
+  final List<String?>? avatarList; // 当 avatar 是 map 的时候用来替代
+  final int? yz;
+  final String? site;
+  final String? honor;
+  final int? regDate;
+  final String? muteTime;
+  final int? postNum;
+  final int? rvrc;
+  final int? money;
+  final int? thisVisit;
+  final String? signature;
+  final int? bitData;
 
   User({
     this.uid,
@@ -47,7 +47,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> map) {
     dynamic avatar = map["avatar"];
-    List<String> avatarList = [];
+    List<String?> avatarList = [];
     if (avatar != null) {
       if (avatar is String) {
         avatarList.add(avatar);
@@ -91,11 +91,11 @@ class User {
   }
 
   String getShowName() {
-    return nameUtils.getShowName(username);
+    return nameUtils.getShowName(username!);
   }
 
   String getShowReputation() {
-    return "${rvrc != null ? rvrc / 10.0 : 0.0}";
+    return "${rvrc != null ? rvrc! / 10.0 : 0.0}";
   }
 }
 
@@ -109,13 +109,13 @@ class CacheUser {
     this.replyString,
   });
 
-  final String uid;
-  final String cid;
-  final String nickname;
-  final String avatarUrl;
+  final String? uid;
+  final String? cid;
+  final String? nickname;
+  final String? avatarUrl;
 
-  int replyCount;
-  String replyString;
+  int? replyCount;
+  String? replyString;
 
   Map<String, dynamic> toJson() {
     return {'uid': uid, 'cid': cid, 'nickname': nickname};
@@ -134,21 +134,21 @@ class CacheUser {
 }
 
 class UserInfo {
-  final int uid;
-  final String username;
-  final int gid;
-  final int groupId;
-  final int memberId;
-  final String group;
-  final int registerDate;
-  final String avatar;
-  final String sign;
-  final int posts;
-  final int fame;
-  final int money;
-  final Map<String, dynamic> adminForums;
-  final Map<String, dynamic> userForum;
-  final List<ForumReputation> reputation;
+  final int? uid;
+  final String? username;
+  final int? gid;
+  final int? groupId;
+  final int? memberId;
+  final String? group;
+  final int? registerDate;
+  final String? avatar;
+  final String? sign;
+  final int? posts;
+  final int? fame;
+  final int? money;
+  final Map<String, dynamic>? adminForums;
+  final Map<String, dynamic>? userForum;
+  final List<ForumReputation>? reputation;
 
   const UserInfo({
     this.uid,
@@ -170,7 +170,7 @@ class UserInfo {
 
   factory UserInfo.fromJson(Map map) {
     List<ForumReputation> reputationList = [];
-    Map<String, dynamic> reputationMap = map['reputation'];
+    Map<String, dynamic>? reputationMap = map['reputation'];
     if (reputationMap != null) {
       reputationMap.forEach((k, v) {
         (v as Map)['id'] = int.parse(k);
@@ -192,8 +192,8 @@ class UserInfo {
       posts: map['posts'],
       fame: map['fame'],
       money: map['money'],
-      adminForums: adminForums is Map ? adminForums : null,
-      userForum: userForum is Map ? userForum : null,
+      adminForums: adminForums is Map ? adminForums as Map<String, dynamic>? : null,
+      userForum: userForum is Map ? userForum as Map<String, dynamic>? : null,
       reputation: reputationList,
     );
   }
@@ -207,10 +207,10 @@ class ForumReputation {
     this.description,
   });
 
-  final int id;
-  final String name;
-  final int value;
-  final String description;
+  final int? id;
+  final String? name;
+  final int? value;
+  final String? description;
 
   factory ForumReputation.fromJson(Map map) {
     return ForumReputation(

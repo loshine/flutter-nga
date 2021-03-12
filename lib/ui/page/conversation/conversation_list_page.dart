@@ -13,7 +13,7 @@ class ConversationListPage extends StatefulWidget {
 
 class _ConversationListState extends State<ConversationListPage> {
   final _store = ConversationListStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   void initState() {

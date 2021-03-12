@@ -1,8 +1,6 @@
 /// 版块实体类
 class Forum {
-  const Forum(this.fid, this.name)
-      : assert(fid != null),
-        assert(name != null);
+  const Forum(this.fid, this.name);
 
   final int fid;
   final String name;
@@ -16,15 +14,13 @@ class Forum {
   }
 
   String getIconUrl() {
-    return "http://img4.nga.178.com/ngabbs/nga_classic/f/app/$fid.png";
+    return "https://img4.nga.178.com/ngabbs/nga_classic/f/app/$fid.png";
   }
 }
 
 /// 版块组实体类
 class ForumGroup {
-  const ForumGroup(this.name, this.forumList)
-      : assert(name != null),
-        assert(forumList != null);
+  const ForumGroup(this.name, this.forumList);
 
   final String name;
   final List<Forum> forumList;

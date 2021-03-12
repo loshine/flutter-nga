@@ -3,9 +3,9 @@ import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 
 class ForumGroupPage extends StatefulWidget {
-  const ForumGroupPage({this.group, Key key}) : super(key: key);
+  const ForumGroupPage({this.group, Key? key}) : super(key: key);
 
-  final ForumGroup group;
+  final ForumGroup? group;
 
   @override
   State<StatefulWidget> createState() => _ForumGroupState();
@@ -24,9 +24,9 @@ class _ForumGroupState extends State<ForumGroupPage> {
         crossAxisCount: 3,
         childAspectRatio: itemWidth / itemHeight,
       ),
-      itemCount: widget.group.forumList.length,
+      itemCount: widget.group!.forumList.length,
       itemBuilder: (_, index) =>
-          ForumGridItemWidget(widget.group.forumList[index]),
+          ForumGridItemWidget(widget.group!.forumList[index]),
     );
   }
 }

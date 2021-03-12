@@ -7,11 +7,10 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ForumRecommendTopicListPage extends StatefulWidget {
   final int fid;
-  final int type;
+  final int? type;
 
-  const ForumRecommendTopicListPage(this.fid, {this.type, Key key})
-      : assert(fid != null),
-        super(key: key);
+  const ForumRecommendTopicListPage(this.fid, {this.type, Key? key})
+      : super(key: key);
 
   @override
   _ForumRecommendTopicListState createState() =>
@@ -20,7 +19,7 @@ class ForumRecommendTopicListPage extends StatefulWidget {
 
 class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
   final _store = ForumDetailStore();
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   @override
   void initState() {

@@ -10,16 +10,16 @@ import 'package:flutter_nga/utils/route.dart';
 
 class TopicHistoryListItemWidget extends StatelessWidget {
   const TopicHistoryListItemWidget(
-      {Key key, this.topicHistory, this.onLongPress})
+      {Key? key, this.topicHistory, this.onLongPress})
       : super(key: key);
 
-  final TopicHistory topicHistory;
-  final GestureLongPressCallback onLongPress;
+  final TopicHistory? topicHistory;
+  final GestureLongPressCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _goTopicDetail(context, topicHistory),
+      onTap: () => _goTopicDetail(context, topicHistory!),
       onLongPress: onLongPress,
       child: Column(
         children: <Widget>[
@@ -29,16 +29,16 @@ class TopicHistoryListItemWidget extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  child: _getTitleText(topicHistory),
+                  child: _getTitleText(topicHistory!),
                   width: double.infinity,
                 ),
                 SizedBox(
-                  child: (topicHistory.topicParentName != null &&
-                          topicHistory.topicParentName.isNotEmpty)
+                  child: (topicHistory!.topicParentName != null &&
+                          topicHistory!.topicParentName!.isNotEmpty)
                       ? Padding(
                           padding: EdgeInsets.only(top: 8),
                           child: Text(
-                            "[${codeUtils.unescapeHtml(topicHistory.topicParentName)}]",
+                            "[${codeUtils.unescapeHtml(topicHistory!.topicParentName)}]",
                             textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: Dimen.caption,
@@ -63,7 +63,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                       ),
                       Expanded(
                         child: Text(
-                          getShowName(topicHistory.author),
+                          getShowName(topicHistory!.author!),
                           style: TextStyle(
                             fontSize: Dimen.caption,
                             color: Palette.colorTextSecondary,

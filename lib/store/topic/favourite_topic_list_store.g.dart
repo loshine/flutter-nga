@@ -42,7 +42,7 @@ mixin _$FavouriteTopicListStore on _FavouriteTopicListStore, Store {
   final _$deleteAsyncAction = AsyncAction('_FavouriteTopicListStore.delete');
 
   @override
-  Future<String> delete(Topic topic) {
+  Future<String?> delete(Topic topic) {
     return _$deleteAsyncAction.run(() => super.delete(topic));
   }
 

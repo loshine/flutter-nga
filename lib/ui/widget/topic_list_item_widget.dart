@@ -9,16 +9,16 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class TopicListItemWidget extends StatelessWidget {
-  const TopicListItemWidget({Key key, this.topic, this.onLongPress})
+  const TopicListItemWidget({Key? key, this.topic, this.onLongPress})
       : super(key: key);
 
-  final Topic topic;
-  final GestureLongPressCallback onLongPress;
+  final Topic? topic;
+  final GestureLongPressCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _goTopicDetail(context, topic),
+      onTap: () => _goTopicDetail(context, topic!),
       onLongPress: onLongPress,
       child: Column(
         children: <Widget>[
@@ -28,17 +28,17 @@ class TopicListItemWidget extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  child: _getTitleText(topic),
+                  child: _getTitleText(topic!),
                   width: double.infinity,
                 ),
                 SizedBox(
-                  child: (topic.parent != null &&
-                          topic.parent.name != null &&
-                          topic.parent.name.isNotEmpty)
+                  child: (topic!.parent != null &&
+                          topic!.parent!.name != null &&
+                          topic!.parent!.name!.isNotEmpty)
                       ? Padding(
                           padding: EdgeInsets.only(top: 8),
                           child: Text(
-                            "[${codeUtils.unescapeHtml(topic.parent.name)}]",
+                            "[${codeUtils.unescapeHtml(topic!.parent!.name)}]",
                             textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: Dimen.caption,
@@ -63,7 +63,7 @@ class TopicListItemWidget extends StatelessWidget {
                       ),
                       Expanded(
                         child: Text(
-                          getShowName(topic.author),
+                          getShowName(topic!.author!),
                           style: TextStyle(
                             fontSize: Dimen.caption,
                             color: Palette.colorTextSecondary,
@@ -72,7 +72,7 @@ class TopicListItemWidget extends StatelessWidget {
                       ),
                       Padding(
                         padding: EdgeInsets.only(right: 16),
-                        child: (topic.hasAttachment()
+                        child: (topic!.hasAttachment()
                             ? Icon(
                                 Icons.attachment,
                                 size: Dimen.icon,
@@ -89,7 +89,7 @@ class TopicListItemWidget extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "${topic.replies}",
+                        "${topic!.replies}",
                         style: TextStyle(
                           fontSize: Dimen.caption,
                           color: Palette.colorTextSecondary,
@@ -104,7 +104,7 @@ class TopicListItemWidget extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "${codeUtils.formatPostDate(topic.lastPost * 1000)}",
+                        "${codeUtils.formatPostDate(topic!.lastPost! * 1000)}",
                         style: TextStyle(
                           fontSize: Dimen.caption,
                           color: Palette.colorTextSecondary,
@@ -163,6 +163,6 @@ class TopicListItemWidget extends StatelessWidget {
     final store = TopicHistoryStore();
     store.insertHistory(topic.createHistory());
     Routes.navigateTo(context,
-        "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${codeUtils.fluroCnParamsEncode(topic.subject)}");
+        "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${codeUtils.fluroCnParamsEncode(topic.subject!)}");
   }
 }

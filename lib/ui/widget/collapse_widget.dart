@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class CollapseWidget extends StatefulWidget {
-  const CollapseWidget.fromNodes({this.title, this.child, Key key})
+  const CollapseWidget.fromNodes({this.title, this.child, Key? key})
       : super(key: key);
 
-  final String title;
-  final Widget child;
+  final String? title;
+  final Widget? child;
 
   @override
   _CollapseState createState() => _CollapseState();

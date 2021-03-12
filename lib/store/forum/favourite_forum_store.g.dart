@@ -27,14 +27,14 @@ mixin _$FavouriteForumStore on _FavouriteForumStore, Store {
   final _$loadAsyncAction = AsyncAction('_FavouriteForumStore.load');
 
   @override
-  Future<dynamic> load(int fid, String name) {
-    return _$loadAsyncAction.run(() => super.load(fid, name));
+  Future<dynamic> load(int fid, String? name) {
+    return _$loadAsyncAction.run(() => super.load(fid, name!));
   }
 
   final _$toggleAsyncAction = AsyncAction('_FavouriteForumStore.toggle');
 
   @override
-  Future<dynamic> toggle(int fid, String name) {
+  Future<dynamic> toggle(int fid, String? name) {
     return _$toggleAsyncAction.run(() => super.toggle(fid, name));
   }
 

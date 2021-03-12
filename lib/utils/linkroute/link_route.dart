@@ -41,7 +41,7 @@ class ReplyLinkRoute extends LinkRoute {
   void handleMatch(BuildContext context, Match match) {
     showDialog(
         context: context,
-        builder: (_) => ReplyDetailDialog(pid: int.tryParse(match.group(1))));
+        builder: (_) => ReplyDetailDialog(pid: int.tryParse(match.group(1)!)));
   }
 
   @override

@@ -18,9 +18,9 @@ abstract class _NotificationListStore with Store {
 
   int get count =>
       3 +
-      state.replyNotificationList.length +
-      state.messageNotificationList.length +
-      state.systemNotificationList.length;
+      state.replyNotificationList!.length +
+      state.messageNotificationList!.length +
+      state.systemNotificationList!.length;
 
   @action
   Future<NotificationInfoListData> refresh() async {
