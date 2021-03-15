@@ -33,14 +33,14 @@ class ConversationItemWidget extends StatelessWidget {
                             ? FontWeight.bold
                             : FontWeight.normal,
                         fontSize: Dimen.subheading,
-                        color: Palette.colorTextPrimary,
+                        color: Theme.of(context).textTheme.bodyText1?.color,
                       ),
                       children: [
                         TextSpan(
                             text: " (${conversation!.posts})",
                             style: TextStyle(
                               fontSize: Dimen.subheading,
-                              color: Palette.colorTextSecondary,
+                              color: Theme.of(context).textTheme.bodyText2?.color,
                             ))
                       ],
                     ),
@@ -53,7 +53,7 @@ class ConversationItemWidget extends StatelessWidget {
                       padding: EdgeInsets.only(right: 4),
                       child: Icon(
                         CommunityMaterialIcons.account_multiple,
-                        color: Palette.colorIcon,
+                        color: Theme.of(context).iconTheme.color,
                         size: Dimen.icon,
                       ),
                     ),
@@ -61,7 +61,7 @@ class ConversationItemWidget extends StatelessWidget {
                       child: Text(
                         conversation!.users,
                         style: TextStyle(
-                          color: Palette.colorTextSecondary,
+                          color: Theme.of(context).textTheme.bodyText2?.color,
                           fontSize: Dimen.caption,
                         ),
                       ),
@@ -71,14 +71,14 @@ class ConversationItemWidget extends StatelessWidget {
                       child: Icon(
                         CommunityMaterialIcons.clock,
                         size: Dimen.icon,
-                        color: Palette.colorIcon,
+                        color: Theme.of(context).iconTheme.color,
                       ),
                     ),
                     Text(
                       "${codeUtils.formatPostDate(conversation!.lastModify! * 1000)}",
                       style: TextStyle(
                         fontSize: Dimen.caption,
-                        color: Palette.colorTextSecondary,
+                        color: Theme.of(context).textTheme.bodyText2?.color,
                       ),
                     ),
                   ],

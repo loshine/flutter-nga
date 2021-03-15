@@ -19,7 +19,7 @@ class InfoWidget extends StatelessWidget {
           subTitle!,
           style: TextStyle(
             fontSize: 14,
-            color: Palette.colorTextSecondary,
+            color: Theme.of(context).textTheme.bodyText2?.color,
           ),
         )
       ],

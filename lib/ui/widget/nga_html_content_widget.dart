@@ -15,8 +15,10 @@ import 'collapse_widget.dart';
 
 class NgaHtmlContentWidget extends StatelessWidget {
   final String? content;
+  final bool isDark;
 
-  const NgaHtmlContentWidget({Key? key, this.content}) : super(key: key);
+  const NgaHtmlContentWidget({Key? key, this.content, this.isDark = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +141,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
           placeholder: (context, url) => Icon(
             Icons.image,
             size: 48,
-            color: Palette.colorIcon,
+            color: Theme.of(context).iconTheme.color,
           ),
         ),
       );
@@ -154,23 +156,25 @@ class NgaHtmlContentWidget extends StatelessWidget {
       placeholder: (context, url) => Icon(
         Icons.image,
         size: 48,
-        color: Palette.colorIcon,
+        color: Theme.of(context).iconTheme.color,
       ),
     );
   }
 
-  Widget _blockquoteRender(RenderContext context, Widget parsedChild,
+  Widget _blockquoteRender(RenderContext renderContext, Widget parsedChild,
       Map<String, String> attributes, dom.Element element) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(16),
-      margin: EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Palette.colorQuoteBackground,
-        border: Border.all(color: Palette.colorDivider),
-      ),
-      child: parsedChild,
-    );
+    return Builder(builder: (context) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(16),
+        margin: EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Palette.getColorQuoteBackground(isDark),
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+        child: parsedChild,
+      );
+    });
   }
 
   Widget _albumRender(RenderContext context, Widget parsedChild,
@@ -180,8 +184,8 @@ class NgaHtmlContentWidget extends StatelessWidget {
       padding: EdgeInsets.all(16),
       margin: EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Palette.colorAlbumBackground,
-        border: Border.all(color: Palette.colorAlbumBorder),
+        color: Palette.getColorAlbumBackground(isDark),
+        border: Border.all(color: Palette.getColorAlbumBorder(isDark)),
       ),
       child: parsedChild,
     );

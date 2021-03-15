@@ -19,9 +19,9 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
       padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border(
-          left: BorderSide(color: Palette.colorDivider),
-          right: BorderSide(color: Palette.colorDivider),
-          bottom: BorderSide(color: Palette.colorDivider),
+          left: BorderSide(color: Theme.of(context).dividerColor),
+          right: BorderSide(color: Theme.of(context).dividerColor),
+          bottom: BorderSide(color: Theme.of(context).dividerColor),
         ),
       ),
       child: Column(
@@ -49,7 +49,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                       reply.postDate!,
                       style: TextStyle(
                         fontSize: Dimen.caption,
-                        color: Palette.colorTextSecondary,
+                        color: Theme.of(context).textTheme.bodyText2?.color,
                       ),
                     ),
                   ],

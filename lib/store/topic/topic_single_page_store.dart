@@ -1,9 +1,11 @@
 import 'dart:collection';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
+import 'package:flutter_nga/utils/palette.dart';
 import 'package:mobx/mobx.dart';
 
 part 'topic_single_page_store.g.dart';
@@ -15,7 +17,8 @@ abstract class _TopicSinglePageStore with Store {
   TopicSinglePageStoreData state = TopicSinglePageStoreData.initial();
 
   @action
-  Future<TopicSinglePageStoreData> refresh(int tid, int page) async {
+  Future<TopicSinglePageStoreData> refresh(
+      BuildContext context, int tid, int page) async {
     try {
       TopicDetailData data =
           await Data().topicRepository.getTopicDetail(tid, page);
@@ -37,6 +40,7 @@ abstract class _TopicSinglePageStore with Store {
           hotReplyList.addAll(e.replyList!.values);
         });
       }
+      final isDark = await Palette.isDark(context);
       state = TopicSinglePageStoreData(
         page: 1,
         maxPage: data.maxPage,
@@ -47,6 +51,7 @@ abstract class _TopicSinglePageStore with Store {
         userList: userList,
         groupSet: groups,
         medalSet: medals,
+        isDark: isDark,
       );
       return state;
     } catch (err) {
@@ -65,6 +70,7 @@ class TopicSinglePageStoreData {
   final List<User>? userList;
   final Set<Group>? groupSet;
   final Set<Medal>? medalSet;
+  final bool isDark;
 
   const TopicSinglePageStoreData({
     this.page,
@@ -76,6 +82,7 @@ class TopicSinglePageStoreData {
     this.userList,
     this.groupSet,
     this.medalSet,
+    this.isDark = false,
   });
 
   factory TopicSinglePageStoreData.initial() => TopicSinglePageStoreData(
@@ -88,5 +95,6 @@ class TopicSinglePageStoreData {
         userList: [],
         groupSet: HashSet(),
         medalSet: HashSet(),
+        isDark: false,
       );
 }

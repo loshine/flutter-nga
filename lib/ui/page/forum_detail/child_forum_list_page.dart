@@ -26,7 +26,7 @@ class _ChildForumListPage extends State<ChildForumListPage> {
                 "本版暂无子版",
                 style: TextStyle(
                   fontSize: Dimen.subheading,
-                  color: Palette.colorTextSecondary,
+                  color: Theme.of(context).textTheme.bodyText2?.color,
                 ),
               ),
             )
