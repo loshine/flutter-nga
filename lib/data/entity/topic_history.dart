@@ -79,7 +79,7 @@ class TopicHistory {
         TOPIC_MASK_FONT_STYLE_UNDERLINE;
   }
 
-  Color getSubjectColor() {
+  Color? getSubjectColor() {
     var byte = _getLastMiscByte();
     if (byte & TOPIC_MASK_FONT_COLOR_RED == TOPIC_MASK_FONT_COLOR_RED) {
       return Colors.red;
@@ -96,7 +96,7 @@ class TopicHistory {
         TOPIC_MASK_FONT_COLOR_SILVER) {
       return Color(0xFFC0C0C0);
     } else {
-      return Palette.colorTextPrimary;
+      return null;
     }
   }
 

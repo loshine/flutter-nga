@@ -91,11 +91,11 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
             title: Text("提示"),
             content: Text("是否删除所有浏览历史"),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 onPressed: () => Routes.pop(context),
                 child: Text("取消"),
               ),
-              FlatButton(
+              TextButton(
                 onPressed: () {
                   Routes.pop(context);
                   _clean();
@@ -125,11 +125,11 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
             title: Text("提示"),
             content: Text("是否删除该浏览历史"),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 onPressed: () => Routes.pop(context),
                 child: Text("取消"),
               ),
-              FlatButton(
+              TextButton(
                 onPressed: () {
                   Routes.pop(context);
                   _store.delete(id);
@@ -155,7 +155,7 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
           "暂无浏览历史",
           style: TextStyle(
             fontSize: Dimen.subheading,
-            color: Palette.colorTextSecondary,
+            color: Theme.of(context).textTheme.bodyText2?.color,
           ),
         ),
       );

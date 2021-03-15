@@ -28,7 +28,7 @@ class TopicListItemWidget extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  child: _getTitleText(topic!),
+                  child: _getTitleText(context, topic!),
                   width: double.infinity,
                 ),
                 SizedBox(
@@ -42,7 +42,7 @@ class TopicListItemWidget extends StatelessWidget {
                             textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: Dimen.caption,
-                              color: Palette.colorTextSecondary,
+                              color: Theme.of(context).textTheme.bodyText2?.color,
                             ),
                           ),
                         )
@@ -57,7 +57,7 @@ class TopicListItemWidget extends StatelessWidget {
                         child: Icon(
                           CommunityMaterialIcons.account,
                           size: Dimen.icon,
-                          color: Palette.colorIcon,
+                          color: Theme.of(context).iconTheme.color,
                         ),
                         padding: EdgeInsets.only(right: 8),
                       ),
@@ -66,7 +66,7 @@ class TopicListItemWidget extends StatelessWidget {
                           getShowName(topic!.author!),
                           style: TextStyle(
                             fontSize: Dimen.caption,
-                            color: Palette.colorTextSecondary,
+                            color: Theme.of(context).textTheme.bodyText2?.color,
                           ),
                         ),
                       ),
@@ -76,7 +76,7 @@ class TopicListItemWidget extends StatelessWidget {
                             ? Icon(
                                 Icons.attachment,
                                 size: Dimen.icon,
-                                color: Palette.colorIcon,
+                                color: Theme.of(context).iconTheme.color,
                               )
                             : null),
                       ),
@@ -85,29 +85,29 @@ class TopicListItemWidget extends StatelessWidget {
                         child: Icon(
                           CommunityMaterialIcons.comment,
                           size: Dimen.icon,
-                          color: Palette.colorIcon,
+                          color: Theme.of(context).iconTheme.color,
                         ),
                       ),
                       Text(
                         "${topic!.replies}",
                         style: TextStyle(
                           fontSize: Dimen.caption,
-                          color: Palette.colorTextSecondary,
+                          color: Theme.of(context).textTheme.bodyText2?.color,
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.only(left:16, right: 8),
+                        padding: EdgeInsets.only(left: 16, right: 8),
                         child: Icon(
                           CommunityMaterialIcons.clock,
                           size: Dimen.icon,
-                          color: Palette.colorIcon,
+                          color: Theme.of(context).iconTheme.color,
                         ),
                       ),
                       Text(
                         "${codeUtils.formatPostDate(topic!.lastPost! * 1000)}",
                         style: TextStyle(
                           fontSize: Dimen.caption,
-                          color: Palette.colorTextSecondary,
+                          color: Theme.of(context).textTheme.bodyText2?.color,
                         ),
                       ),
                     ],
@@ -122,7 +122,7 @@ class TopicListItemWidget extends StatelessWidget {
     );
   }
 
-  _getTitleText(Topic topic) {
+  _getTitleText(BuildContext context, Topic topic) {
     return RichText(
       text: TextSpan(
         // Note: Styles for TextSpans must be explicitly defined.
@@ -130,7 +130,8 @@ class TopicListItemWidget extends StatelessWidget {
         text: codeUtils.unescapeHtml(topic.subject),
         style: TextStyle(
           fontSize: Dimen.subheading,
-          color: topic.getSubjectColor(),
+          color: topic.getSubjectColor() ??
+              Theme.of(context).textTheme.bodyText1?.color,
           fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,
           fontStyle: topic.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration: topic.isUnderline() ? TextDecoration.underline : null,

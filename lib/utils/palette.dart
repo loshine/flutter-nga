@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 
 /// 调色板
@@ -18,9 +19,32 @@ class Palette {
   static final colorTextLock = Color(0xFFC58080);
   static final colorTextAssemble = Color(0xFFA0B4F0);
 
-  static final colorThumbBackground = Color(0xFFE0C19E);
+  static final _colorThumbBackground = Color(0xFFE0C19E);
 
-  static final colorQuoteBackground = Color(0xFFF9EFD6);
-  static final colorAlbumBorder = Color(0xFF91B262);
-  static final colorAlbumBackground = Color(0xFFd6dcae);
+  static final _colorQuoteBackground = Color(0xFFF9EFD6);
+  static final _colorAlbumBorder = Color(0xFF91B262);
+  static final _colorAlbumBackground = Color(0xFFd6dcae);
+
+  static Color getColorThumbBackground(bool isDark) {
+    return isDark ? Colors.white24 : _colorThumbBackground;
+  }
+
+  static Color getColorQuoteBackground(bool isDark) {
+    return isDark ? Colors.white24 : _colorQuoteBackground;
+  }
+
+  static Color getColorAlbumBorder(bool isDark) {
+    return isDark ? Palette.colorDivider : _colorAlbumBorder;
+  }
+
+  static Color getColorAlbumBackground(bool isDark) {
+    return isDark ? Colors.white24 : _colorAlbumBackground;
+  }
+
+  static Future<bool> isDark(BuildContext context) async {
+    final brightness = MediaQuery.of(context).platformBrightness;
+    final theme = await AdaptiveTheme.getThemeMode();
+    return theme == AdaptiveThemeMode.dark ||
+        (theme != AdaptiveThemeMode.light && brightness == Brightness.dark);
+  }
 }

@@ -57,7 +57,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
 
   _onRefresh() {
     final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
-    _store.refresh(widget.tid, widget.page).then((state) {
+    _store.refresh(context, widget.tid, widget.page).then((state) {
       detailStore.setMaxPage(state.maxPage);
       detailStore.setTopic(state.topic);
     }).catchError((err) {
@@ -139,6 +139,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       medalList: medalList,
       userList: commentUserList,
       hot: hot,
+      isDark: _store.state.isDark,
     );
   }
 }
