@@ -8,8 +8,9 @@ import 'package:flutter_nga/utils/palette.dart';
 
 class MessageItemWidget extends StatelessWidget {
   final Message? message;
+  final bool isDark;
 
-  const MessageItemWidget({Key? key, this.message}) : super(key: key);
+  const MessageItemWidget({Key? key, this.message, this.isDark = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,7 @@ class MessageItemWidget extends StatelessWidget {
           Text(
             codeUtils.formatPostDate(message!.time! * 1000),
             style: TextStyle(
-              color: Palette.colorTextSecondary,
+              color: Theme.of(context).textTheme.bodyText2?.color,
               fontSize: Dimen.caption,
             ),
           ),
@@ -58,7 +59,10 @@ class MessageItemWidget extends StatelessWidget {
     }
     children.add(Padding(
       padding: EdgeInsets.all(16),
-      child: NgaHtmlContentWidget(content: message!.content),
+      child: NgaHtmlContentWidget(
+        content: message!.content,
+        isDark: isDark,
+      ),
     ));
     children.add(Divider(height: 1));
     return Column(

@@ -21,6 +21,7 @@ class TopicReplyItemWidget extends StatefulWidget {
   final List<Medal>? medalList;
   final List<User>? userList;
   final bool hot;
+  final bool isDark;
 
   const TopicReplyItemWidget({
     Key? key,
@@ -30,6 +31,7 @@ class TopicReplyItemWidget extends StatefulWidget {
     this.medalList,
     this.userList,
     this.hot = false,
+    this.isDark = false,
   }) : super(key: key);
 
   @override
@@ -73,7 +75,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           style: TextStyle(
                             color: widget.hot
                                 ? Colors.redAccent
-                                : Palette.colorTextSecondary,
+                                : Theme.of(context).textTheme.bodyText2?.color,
                             fontSize: Dimen.caption,
                           ),
                         ),
@@ -84,7 +86,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                         Text(
                           "级别: ${widget.group == null ? "" : widget.group!.name}",
                           style: TextStyle(
-                            color: Palette.colorTextSecondary,
+                            color: Theme.of(context).textTheme.bodyText2?.color,
                             fontSize: Dimen.caption,
                           ),
                         ),
@@ -93,7 +95,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           child: Text(
                             "威望: ${widget.user!.getShowReputation()}",
                             style: TextStyle(
-                              color: Palette.colorTextSecondary,
+                              color:
+                                  Theme.of(context).textTheme.bodyText2?.color,
                               fontSize: Dimen.caption,
                             ),
                           ),
@@ -103,7 +106,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           child: Text(
                             "发帖: ${widget.user!.postNum ?? 0}",
                             style: TextStyle(
-                              color: Palette.colorTextSecondary,
+                              color:
+                                  Theme.of(context).textTheme.bodyText2?.color,
                               fontSize: Dimen.caption,
                             ),
                           ),
@@ -138,7 +142,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           height: codeUtils.isStringEmpty(widget.reply!.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: NgaHtmlContentWidget(content: widget.reply!.content),
+            child: NgaHtmlContentWidget(
+              content: widget.reply!.content,
+              isDark: widget.isDark,
+            ),
           ),
         ),
         SizedBox(
@@ -161,7 +168,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 child: Opacity(
                   opacity: 0.5,
                   child: Dash(
-                    dashColor: Palette.colorDivider,
+                    dashColor: Theme.of(context).dividerColor,
                     length: MediaQuery.of(context).size.width,
                   ),
                 ),
@@ -171,7 +178,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 child: Text(
                   '附件',
                   style: TextStyle(
-                    color: Palette.colorTextSecondary,
+                    color: Theme.of(context).textTheme.bodyText2?.color,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -190,7 +197,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Palette.colorThumbBackground,
+                  color: Palette.getColorThumbBackground(widget.isDark),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(
@@ -235,7 +242,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 widget.reply!.postDate!,
                 style: TextStyle(
                   fontSize: Dimen.caption,
-                  color: Palette.colorTextSecondary,
+                  color: Theme.of(context).textTheme.bodyText2?.color,
                 ),
               ),
             ],
@@ -253,7 +260,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           "-",
           style: TextStyle(
             fontSize: Dimen.caption,
-            color: Palette.colorTextSecondary,
+            color: Theme.of(context).textTheme.bodyText2?.color,
           ),
         )
       ];
@@ -312,7 +319,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Palette.colorDivider,
+            color: Theme.of(context).dividerColor,
           ),
         ),
       ),

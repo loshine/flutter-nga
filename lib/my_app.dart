@@ -1,7 +1,9 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -48,28 +50,76 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         Provider<FavouriteForumListStore>(
             create: (_) => FavouriteForumListStore()),
       ],
-      child: MaterialApp(
-//        showPerformanceOverlay: true,
-        theme: ThemeData(
+      child: AdaptiveTheme(
+        light: ThemeData(
           primarySwatch: Palette.colorPrimary,
           scaffoldBackgroundColor: Palette.colorBackground,
           backgroundColor: Palette.colorBackground,
           dividerColor: Palette.colorDivider,
           splashColor: Palette.colorSplash,
           highlightColor: Palette.colorHighlight,
+          iconTheme: IconThemeData(
+            color: Palette.colorIcon,
+          ),
+          textTheme: TextTheme(
+            bodyText1: TextStyle(
+              color: Palette.colorTextPrimary,
+              fontSize: Dimen.body,
+            ),
+            bodyText2: TextStyle(
+              color: Palette.colorTextSecondary,
+              fontSize: Dimen.body,
+            ),
+            caption: TextStyle(
+              color: Palette.colorTextSecondary,
+              fontSize: Dimen.caption,
+            ),
+          ),
         ),
-        localizationsDelegates: [
-          // 这行是关键
-          RefreshLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate
-        ],
-        supportedLocales: [
-          const Locale('en'),
-          const Locale('zh'),
-        ],
-        onGenerateRoute: _router.generator,
-        localeResolutionCallback: (locale, supportedLocales) => locale,
+        dark: ThemeData(
+          primarySwatch: Palette.colorPrimary,
+          primaryColor: Colors.black,
+          scaffoldBackgroundColor: Colors.grey.shade800,
+          backgroundColor: Colors.grey.shade800,
+          dividerColor: Palette.colorDivider,
+          splashColor: Palette.colorSplash,
+          highlightColor: Palette.colorHighlight,
+          iconTheme: IconThemeData(
+            color: Colors.white,
+          ),
+          textTheme: TextTheme(
+            bodyText1: TextStyle(
+              color: Colors.white,
+              fontSize: Dimen.body,
+            ),
+            bodyText2: TextStyle(
+              color: Colors.white70,
+              fontSize: Dimen.body,
+            ),
+            caption: TextStyle(
+              color: Colors.white70,
+              fontSize: Dimen.caption,
+            ),
+          ),
+        ),
+        initial: AdaptiveThemeMode.light,
+        builder: (theme, darkTheme) => MaterialApp(
+//        showPerformanceOverlay: true,
+          theme: theme,
+          darkTheme: darkTheme,
+          localizationsDelegates: [
+            // 这行是关键
+            RefreshLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate
+          ],
+          supportedLocales: [
+            const Locale('en'),
+            const Locale('zh'),
+          ],
+          onGenerateRoute: _router.generator,
+          localeResolutionCallback: (locale, supportedLocales) => locale,
+        ),
       ),
     );
   }

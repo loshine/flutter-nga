@@ -134,7 +134,7 @@ class _PublishReplyState extends State<PublishPage> {
                         suffixIcon: InkWell(
                           child: Icon(
                             CommunityMaterialIcons.tag_multiple,
-                            color: Palette.colorIcon,
+                            color: Theme.of(context).iconTheme.color,
                           ),
                           onTap: _showTagDialog,
                         ),
@@ -152,7 +152,7 @@ class _PublishReplyState extends State<PublishPage> {
                               content,
                               style: TextStyle(color: Colors.white),
                             ),
-                            backgroundColor: Palette.colorPrimary,
+                            backgroundColor: Theme.of(context).primaryColor,
                             onPressed: () {
                               setState(() {
                                 _selectedTags.remove(content);
@@ -184,13 +184,13 @@ class _PublishReplyState extends State<PublishPage> {
               child: Column(
                 children: [
                   Container(
-                    color: Palette.colorPrimary,
+                    color: Theme.of(context).primaryColor,
                     height: kToolbarHeight,
                     width: double.infinity,
                     child: Row(children: _getBottomBarData()),
                   ),
                   Container(
-                    color: Palette.colorBackground,
+                    color: Theme.of(context).backgroundColor,
                     width: double.infinity,
                     height: _bottomPanelVisible ? Dimen.bottomPanelHeight : 0,
                     child: _currentBottomPanelChild,

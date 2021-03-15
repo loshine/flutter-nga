@@ -41,7 +41,8 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
               max: _isPage
                   ? widget.maxPage!.toDouble()
                   : widget.maxPage!.toDouble() * 20,
-              divisions: _isPage ? widget.maxPage! - 1 : widget.maxPage! * 20 - 1,
+              divisions:
+                  _isPage ? widget.maxPage! - 1 : widget.maxPage! * 20 - 1,
               onChanged: (double newValue) {
                 setState(() {
                   _currentVal = newValue.round();
@@ -59,9 +60,9 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                       style: TextStyle(
                           color: _isPage
                               ? Colors.white
-                              : Palette.colorTextPrimary),
+                              : Theme.of(context).textTheme.bodyText1?.color),
                     ),
-                    selectedColor: Palette.colorPrimary,
+                    selectedColor: Theme.of(context).primaryColor,
                     selected: _isPage,
                     onSelected: (selected) {
                       setState(() {
@@ -75,9 +76,9 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                     "楼层",
                     style: TextStyle(
                         color:
-                            !_isPage ? Colors.white : Palette.colorTextPrimary),
+                            !_isPage ? Colors.white : Theme.of(context).textTheme.bodyText1?.color),
                   ),
-                  selectedColor: Palette.colorPrimary,
+                  selectedColor: Theme.of(context).primaryColor,
                   selected: !_isPage,
                   onSelected: (selected) {
                     setState(() {
@@ -91,14 +92,15 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
         ),
       ),
       actions: [
-        FlatButton(
+        TextButton(
           child: Text("取消"),
-          textColor: Palette.colorTextSecondary,
+          style: TextButton.styleFrom(
+              primary: Theme.of(context).textTheme.bodyText2?.color),
           onPressed: () {
             Routes.pop(context);
           },
         ),
-        FlatButton(
+        TextButton(
           child: Text("确认"),
           onPressed: () {
             Routes.pop(context);

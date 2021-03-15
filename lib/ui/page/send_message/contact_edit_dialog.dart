@@ -24,21 +24,21 @@ class ContactEditDialog extends StatelessWidget {
         keyboardType: TextInputType.text,
       ),
       actions: [
-        FlatButton(
+        TextButton(
           onPressed: () => Routes.pop(context),
           child: Text(
             '取消',
-            style: TextStyle(color: Palette.colorPrimary),
+            style: TextStyle(color: Theme.of(context).primaryColor),
           ),
         ),
-        FlatButton(
+        TextButton(
           onPressed: () {
             callback!(_controller.text);
             Routes.pop(context);
           },
           child: Text(
             '确定',
-            style: TextStyle(color: Palette.colorPrimary),
+            style: TextStyle(color: Theme.of(context).primaryColor),
           ),
         )
       ],

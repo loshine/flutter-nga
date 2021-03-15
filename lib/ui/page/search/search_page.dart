@@ -80,9 +80,9 @@ class _SearchState extends State<SearchPage> {
                         color: _searchOptionsStore.state.firstRadio ==
                                 SearchStoreData.FIRST_RADIO_TOPIC
                             ? Colors.white
-                            : Palette.colorTextPrimary),
+                            : Theme.of(context).primaryColor),
                   ),
-                  selectedColor: Palette.colorPrimary,
+                  selectedColor: Theme.of(context).primaryColor,
                   selected: _searchOptionsStore.state.firstRadio ==
                       SearchStoreData.FIRST_RADIO_TOPIC,
                   onSelected: (selected) => _searchOptionsStore
@@ -98,9 +98,9 @@ class _SearchState extends State<SearchPage> {
                         color: _searchOptionsStore.state.firstRadio ==
                                 SearchStoreData.FIRST_RADIO_FORUM
                             ? Colors.white
-                            : Palette.colorTextPrimary),
+                            : Theme.of(context).textTheme.bodyText1?.color),
                   ),
-                  selectedColor: Palette.colorPrimary,
+                  selectedColor: Theme.of(context).primaryColor,
                   selected: _searchOptionsStore.state.firstRadio ==
                       SearchStoreData.FIRST_RADIO_FORUM,
                   onSelected: (selected) => _searchOptionsStore
@@ -116,9 +116,9 @@ class _SearchState extends State<SearchPage> {
                         color: _searchOptionsStore.state.firstRadio ==
                                 SearchStoreData.FIRST_RADIO_USER
                             ? Colors.white
-                            : Palette.colorTextPrimary),
+                            : Theme.of(context).textTheme.bodyText1?.color),
                   ),
-                  selectedColor: Palette.colorPrimary,
+                  selectedColor: Theme.of(context).primaryColor,
                   selected: _searchOptionsStore.state.firstRadio ==
                       SearchStoreData.FIRST_RADIO_USER,
                   onSelected: (selected) => _searchOptionsStore
@@ -142,9 +142,9 @@ class _SearchState extends State<SearchPage> {
                               color: _searchOptionsStore.state.topicRadio ==
                                       SearchStoreData.TOPIC_RADIO_CURRENT_FORUM
                                   ? Colors.white
-                                  : Palette.colorTextPrimary),
+                                  : Theme.of(context).textTheme.bodyText1?.color),
                         ),
-                        selectedColor: Palette.colorPrimary,
+                        selectedColor: Theme.of(context).primaryColor,
                         selected: _searchOptionsStore.state.topicRadio ==
                             SearchStoreData.TOPIC_RADIO_CURRENT_FORUM,
                         onSelected: (selected) =>
@@ -160,9 +160,9 @@ class _SearchState extends State<SearchPage> {
                             color: _searchOptionsStore.state.topicRadio ==
                                     SearchStoreData.TOPIC_RADIO_ALL_FORUM
                                 ? Colors.white
-                                : Palette.colorTextPrimary),
+                                : Theme.of(context).textTheme.bodyText1?.color),
                       ),
-                      selectedColor: Palette.colorPrimary,
+                      selectedColor: Theme.of(context).primaryColor,
                       selected: _searchOptionsStore.state.topicRadio ==
                           SearchStoreData.TOPIC_RADIO_ALL_FORUM,
                       onSelected: (selected) =>
@@ -184,9 +184,9 @@ class _SearchState extends State<SearchPage> {
                       style: TextStyle(
                           color: _searchOptionsStore.state.content
                               ? Colors.white
-                              : Palette.colorTextPrimary),
+                              : Theme.of(context).textTheme.bodyText1?.color),
                     ),
-                    selectedColor: Palette.colorPrimary,
+                    selectedColor: Theme.of(context).primaryColor,
                     selected: _searchOptionsStore.state.content,
                     onSelected: (selected) =>
                         _searchOptionsStore.checkContent(selected),
@@ -208,9 +208,9 @@ class _SearchState extends State<SearchPage> {
                           color: _searchOptionsStore.state.userRadio ==
                                   SearchStoreData.USER_RADIO_NAME
                               ? Colors.white
-                              : Palette.colorTextPrimary),
+                              : Theme.of(context).textTheme.bodyText1?.color),
                     ),
-                    selectedColor: Palette.colorPrimary,
+                    selectedColor: Theme.of(context).primaryColor,
                     selected: _searchOptionsStore.state.userRadio ==
                         SearchStoreData.USER_RADIO_NAME,
                     onSelected: (selected) => _searchOptionsStore
@@ -226,9 +226,9 @@ class _SearchState extends State<SearchPage> {
                           color: _searchOptionsStore.state.userRadio ==
                                   SearchStoreData.USER_RADIO_UID
                               ? Colors.white
-                              : Palette.colorTextPrimary),
+                              : Theme.of(context).textTheme.bodyText1?.color),
                     ),
-                    selectedColor: Palette.colorPrimary,
+                    selectedColor: Theme.of(context).primaryColor,
                     selected: _searchOptionsStore.state.userRadio ==
                         SearchStoreData.USER_RADIO_UID,
                     onSelected: (selected) => _searchOptionsStore

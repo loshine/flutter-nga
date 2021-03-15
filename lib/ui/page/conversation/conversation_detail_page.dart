@@ -48,8 +48,10 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
             child: ListView.builder(
               physics: BouncingScrollPhysics(),
               itemCount: _store.state.list.length,
-              itemBuilder: (context, index) =>
-                  MessageItemWidget(message: _store.state.list[index]),
+              itemBuilder: (context, index) => MessageItemWidget(
+                message: _store.state.list[index],
+                isDark: true,
+              ),
             ),
           );
         },
@@ -67,7 +69,7 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
   }
 
   _onRefresh() {
-    _store.refresh(widget.mid).catchError((err) {
+    _store.refresh(context, widget.mid).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.toString(),
@@ -77,7 +79,7 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
   }
 
   _onLoading() async {
-    _store.loadMore(widget.mid).then((state) {
+    _store.loadMore(context, widget.mid).then((state) {
       if (state.enablePullUp) {
         _refreshController.loadComplete();
       } else {

@@ -27,7 +27,7 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
 
   @override
   void initState() {
-    _store.load(widget.pid);
+    _store.load(context, widget.pid);
     super.initState();
   }
 
@@ -48,15 +48,16 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
           return _ReplyWidget(
             reply: _store.state.replyList[0],
             user: _store.state.userList[0],
+            isDark: _store.state.isDark,
           );
         }
       }),
       actions: [
-        FlatButton(
+        TextButton(
           onPressed: () => Routes.pop(context),
           child: Text(
             '关闭',
-            style: TextStyle(color: Palette.colorPrimary),
+            style: TextStyle(color: Theme.of(context).primaryColor),
           ),
         )
       ],
@@ -67,11 +68,13 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
 class _ReplyWidget extends StatefulWidget {
   final Reply reply;
   final User user;
+  final bool isDark;
 
   const _ReplyWidget({
     Key? key,
     required this.reply,
     required this.user,
+    this.isDark = false,
   }) : super(key: key);
 
   @override
@@ -121,7 +124,10 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           height: codeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: NgaHtmlContentWidget(content: widget.reply.content),
+            child: NgaHtmlContentWidget(
+              content: widget.reply.content,
+              isDark: widget.isDark,
+            ),
           ),
         ),
         Padding(
@@ -131,7 +137,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Palette.colorThumbBackground,
+                  color: Palette.getColorThumbBackground(widget.isDark),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(
@@ -176,7 +182,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                 widget.reply.postDate ?? "",
                 style: TextStyle(
                   fontSize: Dimen.caption,
-                  color: Palette.colorTextSecondary,
+                  color: Theme.of(context).textTheme.bodyText2?.color,
                 ),
               ),
             ],

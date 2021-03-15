@@ -84,13 +84,13 @@ class _SendMessageState extends State<SendMessagePage> {
             children: [
               Icon(
                 Icons.supervisor_account_rounded,
-                color: Palette.colorIcon,
+                color: Theme.of(context).iconTheme.color,
               ),
               Padding(
                 padding: EdgeInsets.only(left: 8),
                 child: Text(
                   '添加收信人(UID 或 用户名)',
-                  style: TextStyle(color: Palette.colorTextSecondary),
+                  style: TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
                 ),
               ),
             ],
@@ -112,7 +112,7 @@ class _SendMessageState extends State<SendMessagePage> {
                     content,
                     style: TextStyle(color: Colors.white),
                   ),
-                  backgroundColor: Palette.colorPrimary,
+                  backgroundColor: Theme.of(context).primaryColor,
                   onPressed: () => _store.remove(content),
                 );
               }).toList(),

@@ -26,7 +26,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
       child: Container(
         height: 240.0,
         width: double.infinity,
-        color: Palette.colorBackground,
+        color: Theme.of(context).backgroundColor,
         child: Observer(
           builder: (context) {
             return Column(
@@ -71,7 +71,7 @@ class HomeDrawerBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        color: Palette.colorBackground,
+        color: Theme.of(context).backgroundColor,
         child: Column(
           children: [
             Divider(height: 1),
@@ -96,7 +96,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback!(0),
               ),
-              color: Palette.colorBackground,
+              color: Theme.of(context).backgroundColor,
             ),
             Material(
               child: InkWell(
@@ -107,7 +107,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback!(1),
               ),
-              color: Palette.colorBackground,
+              color: Theme.of(context).backgroundColor,
             ),
             Material(
               child: InkWell(
@@ -118,7 +118,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback!(2),
               ),
-              color: Palette.colorBackground,
+              color: Theme.of(context).backgroundColor,
             ),
             Material(
               child: InkWell(
@@ -129,7 +129,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback!(3),
               ),
-              color: Palette.colorBackground,
+              color: Theme.of(context).backgroundColor,
             ),
             Material(
               child: InkWell(
@@ -140,7 +140,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback!(4),
               ),
-              color: Palette.colorBackground,
+              color: Theme.of(context).backgroundColor,
             ),
             Divider(height: 1),
             Container(
@@ -163,7 +163,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
               ),
-              color: Palette.colorBackground,
+              color: Theme.of(context).backgroundColor,
             ),
             Material(
               child: InkWell(
@@ -175,7 +175,7 @@ class HomeDrawerBody extends StatelessWidget {
                   // TODO: 点击关于
                 },
               ),
-              color: Palette.colorBackground,
+              color: Theme.of(context).backgroundColor,
             ),
           ],
         ),

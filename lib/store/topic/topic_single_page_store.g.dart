@@ -27,8 +27,9 @@ mixin _$TopicSinglePageStore on _TopicSinglePageStore, Store {
   final _$refreshAsyncAction = AsyncAction('_TopicSinglePageStore.refresh');
 
   @override
-  Future<TopicSinglePageStoreData> refresh(int tid, int page) {
-    return _$refreshAsyncAction.run(() => super.refresh(tid, page));
+  Future<TopicSinglePageStoreData> refresh(
+      BuildContext context, int tid, int page) {
+    return _$refreshAsyncAction.run(() => super.refresh(context, tid, page));
   }
 
   @override

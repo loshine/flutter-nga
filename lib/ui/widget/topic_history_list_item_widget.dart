@@ -29,7 +29,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  child: _getTitleText(topicHistory!),
+                  child: _getTitleText(context, topicHistory!),
                   width: double.infinity,
                 ),
                 SizedBox(
@@ -42,7 +42,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                             textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: Dimen.caption,
-                              color: Palette.colorTextSecondary,
+                              color: Theme.of(context).textTheme.bodyText2?.color,
                             ),
                           ),
                         )
@@ -57,7 +57,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                         child: Icon(
                           CommunityMaterialIcons.account,
                           size: Dimen.icon,
-                          color: Palette.colorIcon,
+                          color: Theme.of(context).iconTheme.color,
                         ),
                         padding: EdgeInsets.only(right: 8),
                       ),
@@ -66,7 +66,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                           getShowName(topicHistory!.author!),
                           style: TextStyle(
                             fontSize: Dimen.caption,
-                            color: Palette.colorTextSecondary,
+                            color: Theme.of(context).textTheme.bodyText2?.color,
                           ),
                         ),
                       ),
@@ -82,7 +82,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
     );
   }
 
-  _getTitleText(TopicHistory topicHistory) {
+  _getTitleText(BuildContext context, TopicHistory topicHistory) {
     return RichText(
       text: TextSpan(
         // Note: Styles for TextSpans must be explicitly defined.
@@ -90,7 +90,8 @@ class TopicHistoryListItemWidget extends StatelessWidget {
         text: codeUtils.unescapeHtml(topicHistory.subject),
         style: TextStyle(
           fontSize: Dimen.subheading,
-          color: topicHistory.getSubjectColor(),
+          color: topicHistory.getSubjectColor() ??
+              Theme.of(context).textTheme.bodyText1?.color,
           fontWeight:
               topicHistory.isBold() ? FontWeight.bold : FontWeight.normal,
           fontStyle:

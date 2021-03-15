@@ -78,11 +78,11 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
             title: Text("提示"),
             content: Text("是否删除该收藏"),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 onPressed: () => Routes.pop(context),
                 child: Text("取消"),
               ),
-              FlatButton(
+              TextButton(
                 onPressed: () {
                   Routes.pop(context);
                   _store.delete(topic).then((message) {

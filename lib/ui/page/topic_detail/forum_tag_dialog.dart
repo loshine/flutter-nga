@@ -69,7 +69,7 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
                   child: Text(
                     "$tag",
                     style: TextStyle(
-                      color: Palette.colorTextPrimary,
+                      color: Theme.of(context).textTheme.bodyText1?.color,
                       fontSize: Dimen.subheading,
                     ),
                   ),

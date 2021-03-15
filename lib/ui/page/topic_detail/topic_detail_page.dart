@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/topic/topic_detail_store.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
@@ -80,14 +80,13 @@ class _TopicDetailState extends State<_TopicDetailPage>
           }
         }
         return Scaffold(
-          appBar:
-              AppBar(title: Text(codeUtils.unescapeHtml(store.subject))),
+          appBar: AppBar(title: Text(codeUtils.unescapeHtml(store.subject))),
           body: TabBarView(
             controller: _tabController,
             children: widgets,
           ),
           bottomNavigationBar: BottomAppBar(
-            color: Palette.colorPrimary,
+            color: Theme.of(context).primaryColor,
             child: SizedBox(
               height: kToolbarHeight,
               child: Row(
@@ -151,7 +150,19 @@ class _TopicDetailState extends State<_TopicDetailPage>
                   IconButton(
                     icon: Icon(CommunityMaterialIcons.weather_night),
                     color: Colors.white,
-                    onPressed: () {},
+                    onPressed: () async {
+                      AdaptiveTheme.of(context).toggleThemeMode();
+                      final mode = await AdaptiveTheme.getThemeMode();
+                      String modeName;
+                      if (mode == AdaptiveThemeMode.light) {
+                        modeName = "日间模式";
+                      } else if (mode == AdaptiveThemeMode.dark) {
+                        modeName = "黑暗模式";
+                      } else {
+                        modeName = "跟随系统";
+                      }
+                      Fluttertoast.showToast(msg: "已切换到 $modeName");
+                    },
                   ),
                   IconButton(
                     icon: Icon(CommunityMaterialIcons.heart_outline),
