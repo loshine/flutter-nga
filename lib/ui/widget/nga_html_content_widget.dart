@@ -15,10 +15,8 @@ import 'collapse_widget.dart';
 
 class NgaHtmlContentWidget extends StatelessWidget {
   final String? content;
-  final bool isDark;
 
-  const NgaHtmlContentWidget({Key? key, this.content, this.isDark = false})
-      : super(key: key);
+  const NgaHtmlContentWidget({Key? key, this.content}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +32,13 @@ class NgaHtmlContentWidget extends StatelessWidget {
         'blockquote': _blockquoteRender,
         'album': _albumRender,
         'nga_hr': _hrRender,
+        'table': _tableRender,
       },
       style: {
         'body': Style(
           padding: EdgeInsets.all(0),
           margin: EdgeInsets.all(0),
+          color: Theme.of(context).textTheme.bodyText1?.color,
         ),
         'blockquote': Style(
           padding: EdgeInsets.all(0),
@@ -165,29 +165,32 @@ class NgaHtmlContentWidget extends StatelessWidget {
 
   Widget _blockquoteRender(RenderContext renderContext, Widget parsedChild,
       Map<String, String> attributes, dom.Element? element) {
-    return Builder(builder: (context) {
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(16),
-        margin: EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: Palette.getColorQuoteBackground(isDark),
-          border: Border.all(color: Theme.of(context).dividerColor),
-        ),
-        child: parsedChild,
-      );
-    });
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Palette.getColorQuoteBackground(
+            Palette.isDark(renderContext.buildContext)),
+        border: Border.all(
+            color: Theme.of(renderContext.buildContext).dividerColor),
+      ),
+      child: parsedChild,
+    );
   }
 
-  Widget _albumRender(RenderContext context, Widget parsedChild,
+  Widget _albumRender(RenderContext renderContext, Widget parsedChild,
       Map<String, String> attributes, dom.Element? element) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16),
       margin: EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Palette.getColorAlbumBackground(isDark),
-        border: Border.all(color: Palette.getColorAlbumBorder(isDark)),
+        color: Palette.getColorAlbumBackground(
+            Palette.isDark(renderContext.buildContext)),
+        border: Border.all(
+            color: Palette.getColorAlbumBorder(
+                Palette.isDark(renderContext.buildContext))),
       ),
       child: parsedChild,
     );
@@ -196,5 +199,13 @@ class NgaHtmlContentWidget extends StatelessWidget {
   Widget _hrRender(RenderContext context, Widget parsedChild,
       Map<String, String> attributes, dom.Element? element) {
     return Divider(height: 1);
+  }
+
+  Widget _tableRender(RenderContext context, Widget parsedChild,
+      Map<String, String> attributes, dom.Element? element) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: parsedChild,
+    );
   }
 }

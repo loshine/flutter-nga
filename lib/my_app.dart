@@ -52,15 +52,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ],
       child: AdaptiveTheme(
         light: ThemeData(
+          brightness: Brightness.light,
           primarySwatch: Palette.colorPrimary,
           scaffoldBackgroundColor: Palette.colorBackground,
           backgroundColor: Palette.colorBackground,
           dividerColor: Palette.colorDivider,
           splashColor: Palette.colorSplash,
           highlightColor: Palette.colorHighlight,
-          iconTheme: IconThemeData(
-            color: Palette.colorIcon,
-          ),
+          iconTheme: IconThemeData(color: Palette.colorIcon),
           textTheme: TextTheme(
             bodyText1: TextStyle(
               color: Palette.colorTextPrimary,
@@ -77,6 +76,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
         ),
         dark: ThemeData(
+          brightness: Brightness.dark,
           primarySwatch: Palette.colorPrimary,
           primaryColor: Colors.black,
           scaffoldBackgroundColor: Colors.grey.shade800,
@@ -84,9 +84,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           dividerColor: Palette.colorDivider,
           splashColor: Palette.colorSplash,
           highlightColor: Palette.colorHighlight,
-          iconTheme: IconThemeData(
-            color: Colors.white,
-          ),
+          iconTheme: IconThemeData(color: Colors.white),
           textTheme: TextTheme(
             bodyText1: TextStyle(
               color: Colors.white,

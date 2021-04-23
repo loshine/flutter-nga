@@ -42,9 +42,12 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                         : "",
                   ),
                 ),
-                Text(_store.userInfo != null
-                    ? _store.userInfo!.username!
-                    : "点击登陆"),
+                Text(
+                  _store.userInfo != null ? _store.userInfo!.username! : "点击登陆",
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyText1?.color,
+                  ),
+                ),
               ],
             );
           },
@@ -82,7 +85,8 @@ class HomeDrawerBody extends StatelessWidget {
               child: Align(
                 child: Text(
                   "模块",
-                  style: TextStyle(color: Colors.black45),
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyText2?.color),
                   textAlign: TextAlign.left,
                 ),
                 alignment: Alignment.centerLeft,
@@ -150,7 +154,8 @@ class HomeDrawerBody extends StatelessWidget {
               child: Align(
                 child: Text(
                   "其它",
-                  style: TextStyle(color: Colors.black45),
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyText2?.color),
                   textAlign: TextAlign.left,
                 ),
                 alignment: Alignment.centerLeft,
@@ -182,5 +187,13 @@ class HomeDrawerBody extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  _getIconColor(int index) {
+    final selected = currentSelection == index;
+  }
+
+  _getTextColor(int index) {
+    final selected = currentSelection == index;
   }
 }

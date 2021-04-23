@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 
 /// 调色板
@@ -41,10 +40,7 @@ class Palette {
     return isDark ? Colors.white24 : _colorAlbumBackground;
   }
 
-  static Future<bool> isDark(BuildContext context) async {
-    final brightness = MediaQuery.of(context).platformBrightness;
-    final theme = await AdaptiveTheme.getThemeMode();
-    return theme == AdaptiveThemeMode.dark ||
-        (theme != AdaptiveThemeMode.light && brightness == Brightness.dark);
+  static bool isDark(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark;
   }
 }

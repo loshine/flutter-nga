@@ -11,9 +11,9 @@
 
 - [x] 版块列表
 - [x] 收藏版块
-- [ ] 登录
+- [x] 登录 (现统一由第三方 Flutter lib 实现)
     - [x] Android 版登录
-    - [ ] iOS 版登录(因为获取 http-only 的 cookies 需要原生实现，iOS 暂时延后)
+    - [x] iOS 版登录
 - [x] 登出账号
 - [x] 个人详情
 - [x] 贴子列表

@@ -40,7 +40,6 @@ abstract class _TopicSinglePageStore with Store {
           hotReplyList.addAll(e.replyList!.values);
         });
       }
-      final isDark = await Palette.isDark(context);
       state = TopicSinglePageStoreData(
         page: 1,
         maxPage: data.maxPage,
@@ -51,7 +50,6 @@ abstract class _TopicSinglePageStore with Store {
         userList: userList,
         groupSet: groups,
         medalSet: medals,
-        isDark: isDark,
       );
       return state;
     } catch (err) {
@@ -70,7 +68,6 @@ class TopicSinglePageStoreData {
   final List<User>? userList;
   final Set<Group>? groupSet;
   final Set<Medal>? medalSet;
-  final bool isDark;
 
   const TopicSinglePageStoreData({
     this.page,
@@ -82,7 +79,6 @@ class TopicSinglePageStoreData {
     this.userList,
     this.groupSet,
     this.medalSet,
-    this.isDark = false,
   });
 
   factory TopicSinglePageStoreData.initial() => TopicSinglePageStoreData(
@@ -95,6 +91,5 @@ class TopicSinglePageStoreData {
         userList: [],
         groupSet: HashSet(),
         medalSet: HashSet(),
-        isDark: false,
       );
 }
