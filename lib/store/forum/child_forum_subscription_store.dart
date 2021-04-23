@@ -24,9 +24,9 @@ abstract class _ChildForumSubscriptionStore with Store {
       subscribed = true;
     }).catchError((e) {
       if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.message);
       } else {
-        Fluttertoast.showToast(msg: e.toString(), gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.toString());
       }
     });
   }
@@ -41,9 +41,9 @@ abstract class _ChildForumSubscriptionStore with Store {
       subscribed = false;
     }).catchError((e) {
       if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.message);
       } else {
-        Fluttertoast.showToast(msg: e.toString(), gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.toString());
       }
     });
   }

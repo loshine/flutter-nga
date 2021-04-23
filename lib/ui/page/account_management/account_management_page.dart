@@ -43,8 +43,8 @@ class _AccountManagementState extends State<AccountManagementPage> {
             itemBuilder: (context, position) => Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () =>
-                    Fluttertoast.showToast(msg: _store.list[position].nickname!),
+                onTap: () => Fluttertoast.showToast(
+                    msg: _store.list[position].nickname!),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -93,8 +93,7 @@ class _AccountManagementState extends State<AccountManagementPage> {
   _quitAll() {
     _store
         .quitAll()
-        .then((_) =>
-            Fluttertoast.showToast(msg: "成功", gravity: ToastGravity.CENTER))
+        .then((_) => Fluttertoast.showToast(msg: "成功"))
         .whenComplete(
             () => Routes.navigateTo(context, Routes.HOME, clearStack: true));
   }

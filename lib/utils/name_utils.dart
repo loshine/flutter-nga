@@ -10,7 +10,7 @@ String getShowName(String username) {
         "刁沙荣巫寇桑郎甄丛仲虞敖巩明佘池查麻苑迟邝";
     final buffer = new StringBuffer();
     var i = 6;
-    for (var j = 0; j <= 5;j++) {
+    for (var j = 0; j <= 5; j++) {
       if (j == 0 || j == 3) {
         int pos = int.tryParse(username.substring(i + 1, i + 2), radix: 16)!;
         if (pos >= prefix.length) {

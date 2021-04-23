@@ -75,8 +75,9 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                   label: Text(
                     "楼层",
                     style: TextStyle(
-                        color:
-                            !_isPage ? Colors.white : Theme.of(context).textTheme.bodyText1?.color),
+                        color: !_isPage
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyText1?.color),
                   ),
                   selectedColor: Theme.of(context).primaryColor,
                   selected: !_isPage,

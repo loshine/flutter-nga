@@ -142,7 +142,10 @@ class _SearchState extends State<SearchPage> {
                               color: _searchOptionsStore.state.topicRadio ==
                                       SearchStoreData.TOPIC_RADIO_CURRENT_FORUM
                                   ? Colors.white
-                                  : Theme.of(context).textTheme.bodyText1?.color),
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      ?.color),
                         ),
                         selectedColor: Theme.of(context).primaryColor,
                         selected: _searchOptionsStore.state.topicRadio ==

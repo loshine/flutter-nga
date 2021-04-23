@@ -42,7 +42,8 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                             textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: Dimen.caption,
-                              color: Theme.of(context).textTheme.bodyText2?.color,
+                              color:
+                                  Theme.of(context).textTheme.bodyText2?.color,
                             ),
                           ),
                         )

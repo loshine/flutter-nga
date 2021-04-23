@@ -122,7 +122,7 @@ class _ForumDetailState extends State<ForumDetailPage>
     _tabController!.addListener(
         () => setState(() => _mainPage = _tabController!.index == 0));
     Future.delayed(const Duration()).then((_) {
-      _refreshController.position.addListener(_scrollListener);
+      _refreshController.position?.addListener(_scrollListener);
     });
   }
 
@@ -154,11 +154,11 @@ class _ForumDetailState extends State<ForumDetailPage>
   }
 
   void _scrollListener() {
-    if (_refreshController.position.userScrollDirection ==
+    if (_refreshController.position?.userScrollDirection ==
         ScrollDirection.reverse) {
       if (_fabVisible) setState(() => _fabVisible = false);
     }
-    if (_refreshController.position.userScrollDirection ==
+    if (_refreshController.position?.userScrollDirection ==
         ScrollDirection.forward) {
       if (!_fabVisible) setState(() => _fabVisible = true);
     }

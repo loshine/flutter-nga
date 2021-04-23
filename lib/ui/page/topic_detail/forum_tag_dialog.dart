@@ -39,11 +39,9 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
         widget.onLoadComplete?.call(value);
       }).catchError((err) {
         if (err is DioError) {
-          Fluttertoast.showToast(
-              msg: err.message, gravity: ToastGravity.CENTER);
+          Fluttertoast.showToast(msg: err.message);
         } else {
-          Fluttertoast.showToast(
-              msg: err.toString(), gravity: ToastGravity.CENTER);
+          Fluttertoast.showToast(msg: err.toString());
         }
       });
     }

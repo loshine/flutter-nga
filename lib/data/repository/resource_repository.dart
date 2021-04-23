@@ -20,7 +20,8 @@ class ResourceDataRepository implements ResourceRepository {
   @override
   Future<File> downloadImage(String url) async {
     Response<List<int>> bytesResponse = await _dio.get(url);
-    Directory dir = await (getExternalStorageDirectory() as FutureOr<Directory>);
+    Directory dir =
+        await (getExternalStorageDirectory() as FutureOr<Directory>);
     String path = [dir.path, 'NationalGayAlliance', 'Image'].join('/');
     // Save the thumbnail as a PNG.
     return File('$path/${DateTime.now().toUtc().toIso8601String()}.png')

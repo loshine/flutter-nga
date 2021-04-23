@@ -187,10 +187,10 @@ class Routes {
   }
 
   /// 处理 html 控件中超链接点击事件
-  static void onLinkTap(BuildContext context, String link) {
+  static void onLinkTap(BuildContext context, String? link) {
     debugPrint("User tap link: $link");
     for (LinkRoute linkRoute in _linkRoutes) {
-      final matches = RegExp(linkRoute.matchRegExp()).allMatches(link);
+      final matches = RegExp(linkRoute.matchRegExp()).allMatches(link ?? "");
       if (matches.isEmpty) continue;
       matches.forEach((match) => linkRoute.handleMatch(context, match));
     }

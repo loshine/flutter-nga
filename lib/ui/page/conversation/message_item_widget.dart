@@ -10,7 +10,8 @@ class MessageItemWidget extends StatelessWidget {
   final Message? message;
   final bool isDark;
 
-  const MessageItemWidget({Key? key, this.message, this.isDark = false}) : super(key: key);
+  const MessageItemWidget({Key? key, this.message, this.isDark = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

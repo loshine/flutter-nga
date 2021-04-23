@@ -69,7 +69,8 @@ class ConversationListData {
 
   factory ConversationListData.fromJson(Map map) {
     Map<String, Conversation> tempMap = {};
-    for (MapEntry<String, dynamic> entry in map.entries as Iterable<MapEntry<String, dynamic>>) {
+    for (MapEntry<String, dynamic> entry
+        in map.entries as Iterable<MapEntry<String, dynamic>>) {
       if (entry.key != 'nextPage' &&
           entry.key != 'currentPage' &&
           entry.key != 'rowsPerPage') {

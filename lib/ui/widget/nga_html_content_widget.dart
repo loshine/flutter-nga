@@ -58,12 +58,14 @@ class NgaHtmlContentWidget extends StatelessWidget {
         ),
         'td': Style(padding: EdgeInsets.all(8)),
       },
-      onLinkTap: (link) => Routes.onLinkTap(context, link),
+      onLinkTap: (String? url, RenderContext renderContext,
+              Map<String, String> attributes, dom.Element? element) =>
+          Routes.onLinkTap(context, url),
     );
   }
 
   Widget _alignmentRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     if (attributes['align'] != null) {
       final align = attributes['align'];
       var alignment = WrapAlignment.start;
@@ -86,7 +88,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   }
 
   Widget _fontSizeRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     if (attributes['font-size'] != null) {
       final fontSize = attributes['font-size']!;
       if (fontSize.endsWith("%")) {
@@ -102,7 +104,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   }
 
   Widget _fontColorRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     if (attributes['color'] != null) {
       String? color = attributes['color'];
       return DefaultTextStyle.merge(
@@ -118,7 +120,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   }
 
   Widget _collapseRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     if (attributes['title'] != null) {
       return CollapseWidget.fromNodes(
         title: attributes['title'],
@@ -130,7 +132,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   }
 
   Widget _imageRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     return Builder(builder: (context) {
       return InkWell(
         onTap: () => Routes.navigateTo(context,
@@ -149,7 +151,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   }
 
   Widget _emoticonRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     return CachedNetworkImage(
       fit: BoxFit.cover,
       imageUrl: attributes['src']!,
@@ -162,7 +164,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   }
 
   Widget _blockquoteRender(RenderContext renderContext, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     return Builder(builder: (context) {
       return Container(
         width: double.infinity,
@@ -178,7 +180,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   }
 
   Widget _albumRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16),
@@ -192,7 +194,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   }
 
   Widget _hrRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element element) {
+      Map<String, String> attributes, dom.Element? element) {
     return Divider(height: 1);
   }
 }

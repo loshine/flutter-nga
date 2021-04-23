@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/utils/constant.dart';
-import 'package:flutter_nga/utils/palette.dart';
 
 class TopicListData {
   const TopicListData({
@@ -172,7 +171,7 @@ class Topic {
         misc += "A";
       }
       var bytes = base64.decode(misc);
-      if (bytes != null && bytes.isNotEmpty && bytes[0].toInt() == 1) {
+      if (bytes.isNotEmpty && bytes[0].toInt() == 1) {
         return bytes[4].toInt();
       }
     }
@@ -218,7 +217,7 @@ class ForumInfo {
         dynamic selectedForum = map['__SELECTED_FORUM'];
         List<int> selectedIds = [];
         if (selectedForum is String) {
-          if (selectedForum != null && selectedForum.isNotEmpty) {
+          if (selectedForum.isNotEmpty) {
             selectedIds
                 .addAll(selectedForum.split(",").map((s) => int.parse(s)));
           }

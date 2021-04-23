@@ -192,7 +192,8 @@ class UserInfo {
       posts: map['posts'],
       fame: map['fame'],
       money: map['money'],
-      adminForums: adminForums is Map ? adminForums as Map<String, dynamic>? : null,
+      adminForums:
+          adminForums is Map ? adminForums as Map<String, dynamic>? : null,
       userForum: userForum is Map ? userForum as Map<String, dynamic>? : null,
       reputation: reputationList,
     );

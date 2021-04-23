@@ -1,6 +1,7 @@
 /// 表情实体类
 class Emoticon {
   const Emoticon({required this.content, required this.url});
+
   final String content;
   final String url;
 }

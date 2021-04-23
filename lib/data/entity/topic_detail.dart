@@ -97,7 +97,7 @@ class TopicDetailData {
     );
   }
 
-  int get maxPage => (rows/ replyPageRows.toDouble()).ceil();
+  int get maxPage => (rows / replyPageRows.toDouble()).ceil();
 }
 
 class Reply {

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
+import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
@@ -13,7 +14,6 @@ import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/constant.dart';
-import 'package:gbk2utf8/gbk2utf8.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
@@ -80,7 +80,16 @@ class Data {
     dio.options.headers["Connection"] = "Keep-Alive";
 
     dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (RequestOptions options) async {
+      onRequest: (
+        RequestOptions options,
+        RequestInterceptorHandler handler,
+      ) async {
+        // 在请求被发送之前做一些事情
+        // 如果你想完成请求并返回一些自定义数据，可以返回一个`Response`对象或返回`dio.resolve(data)`。
+        // 这样请求将会被终止，上层then会被调用，then中返回的数据将是你的自定义数据data.
+        //
+        // 如果你想终止请求并触发一个错误,你可以返回一个`DioError`对象，或返回`dio.reject(errMsg)`，
+        // 这样请求将被中止并触发异常，上层catchError会被调用。
         final user = await userRepository.getDefaultUser();
         if (user != null && options.headers["Cookie"] == null) {
           options.headers["Cookie"] =
@@ -88,15 +97,12 @@ class Data {
         }
         debugPrint("request headers:");
         options.headers.forEach((k, v) => debugPrint("$k:$v"));
-        // 在请求被发送之前做一些事情
-        return options; //continue
-        // 如果你想完成请求并返回一些自定义数据，可以返回一个`Response`对象或返回`dio.resolve(data)`。
-        // 这样请求将会被终止，上层then会被调用，then中返回的数据将是你的自定义数据data.
-        //
-        // 如果你想终止请求并触发一个错误,你可以返回一个`DioError`对象，或返回`dio.reject(errMsg)`，
-        // 这样请求将被中止并触发异常，上层catchError会被调用。
+        return handler.next(options); //continue
       },
-      onResponse: (Response response) async {
+      onResponse: (
+        Response response,
+        ResponseInterceptorHandler handler,
+      ) async {
         String responseBody = _formatResponseBody(response);
         Map<String, dynamic>? map;
         try {
@@ -104,7 +110,7 @@ class Data {
         } catch (err) {
           debugPrint(err.toString());
           response.data = responseBody;
-          return response;
+          return handler.next(response);
         }
         DioError? dioError = _preHandleServerError(response, map!);
         if (dioError != null) {
@@ -116,9 +122,12 @@ class Data {
         } else {
           response.data = map;
         }
-        return response;
+        return handler.next(response);
       },
-      onError: (DioError e) async {
+      onError: (
+        DioError e,
+        ErrorInterceptorHandler handler,
+      ) async {
         debugPrint(e.toString());
         if (e.response != null && e.response!.data != null) {
           String responseBody = _formatResponseBody(e.response!);
@@ -127,14 +136,14 @@ class Data {
             map = json.decode(responseBody);
           } catch (err) {
             debugPrint(err.toString());
-            return e;
+            return handler.next(e);
           }
           DioError? dioError = _preHandleServerError(e.response, map!);
           if (dioError != null) {
-            return dioError;
+            return handler.next(dioError);
           }
         }
-        return e;
+        return handler.next(e);
       },
     ));
   }
@@ -158,8 +167,8 @@ class Data {
         .replaceAll("</script></body></html>", "")
         .replaceAll("window.script_muti_get_var_store=", "");
     debugPrint(
-        "request url : ${response.request.path.startsWith("http") ? response.request.path : response.request.baseUrl + response.request.path}");
-    var requestData = response.request.data;
+        "request url : ${response.requestOptions.path.startsWith("http") ? response.requestOptions.path : response.requestOptions.baseUrl + response.requestOptions.path}");
+    var requestData = response.requestOptions.data;
     debugPrint(
         "request data : ${requestData is FormData ? requestData.fields.toString() : requestData.toString()}");
     debugPrint("response data : $responseBody");
@@ -169,12 +178,14 @@ class Data {
   /// 预处理服务器业务错误
   DioError? _preHandleServerError(
       Response? response, Map<String, dynamic> map) {
+    if (response == null) return null;
     // 如果是 api 错误，抛出错误内容
     if (map["data"] is Map<String, dynamic> &&
         map["data"].containsKey("__MESSAGE")) {
       String? errorMessage = map["data"]["__MESSAGE"]["1"];
       return DioError(
         response: response,
+        requestOptions: response.requestOptions,
         error: errorMessage,
         type: DioErrorType.other,
       );
@@ -185,6 +196,7 @@ class Data {
       if (err["0"] is String) {
         return DioError(
           response: response,
+          requestOptions: response.requestOptions,
           error: err["0"],
           type: DioErrorType.other,
         );
@@ -195,6 +207,7 @@ class Data {
       String? errorMessage = map["error"];
       return DioError(
         response: response,
+        requestOptions: response.requestOptions,
         error: errorMessage,
         type: DioErrorType.other,
       );
