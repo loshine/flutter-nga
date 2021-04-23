@@ -48,10 +48,8 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
             child: ListView.builder(
               physics: BouncingScrollPhysics(),
               itemCount: _store.state.list.length,
-              itemBuilder: (context, index) => MessageItemWidget(
-                message: _store.state.list[index],
-                isDark: true,
-              ),
+              itemBuilder: (context, index) =>
+                  MessageItemWidget(message: _store.state.list[index]),
             ),
           );
         },
