@@ -37,8 +37,9 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                   child: AvatarWidget(
                     _store.userInfo != null ? _store.userInfo!.avatar : "",
                     size: 56,
-                    username:
-                        _store.userInfo != null ? _store.userInfo!.username : "",
+                    username: _store.userInfo != null
+                        ? _store.userInfo!.username
+                        : "",
                   ),
                 ),
                 Text(_store.userInfo != null

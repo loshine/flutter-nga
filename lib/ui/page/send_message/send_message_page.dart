@@ -90,7 +90,8 @@ class _SendMessageState extends State<SendMessagePage> {
                 padding: EdgeInsets.only(left: 8),
                 child: Text(
                   '添加收信人(UID 或 用户名)',
-                  style: TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyText2?.color),
                 ),
               ),
             ],

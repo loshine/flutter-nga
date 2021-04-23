@@ -40,7 +40,8 @@ class ConversationItemWidget extends StatelessWidget {
                             text: " (${conversation!.posts})",
                             style: TextStyle(
                               fontSize: Dimen.subheading,
-                              color: Theme.of(context).textTheme.bodyText2?.color,
+                              color:
+                                  Theme.of(context).textTheme.bodyText2?.color,
                             ))
                       ],
                     ),

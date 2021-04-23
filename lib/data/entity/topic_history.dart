@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/utils/constant.dart';
-import 'package:flutter_nga/utils/palette.dart';
 
 class TopicHistory {
   TopicHistory({

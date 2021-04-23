@@ -276,7 +276,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   ),
                   Text(
                     "个人版面是由用户自己管理的版面",
-                    style: TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyText2?.color),
                   ),
                   Builder(builder: (context) {
                     final entry = userInfo.personalForum!.entries.toList()[0];

@@ -214,9 +214,8 @@ class TopicDataRepository implements TopicRepository {
   @override
   Future<String?> checkCreateTopic(int fid) async {
     try {
-      Response<Map<String, dynamic>> response = await Data()
-          .dio
-          .get("nuke.php?fid=$fid&__output=8&action=new");
+      Response<Map<String, dynamic>> response =
+          await Data().dio.get("nuke.php?fid=$fid&__output=8&action=new");
       return response.data!['auth'];
     } catch (err) {
       rethrow;

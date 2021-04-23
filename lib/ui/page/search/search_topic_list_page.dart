@@ -49,7 +49,9 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController(initialRefresh: true,);
+    _refreshController = RefreshController(
+      initialRefresh: true,
+    );
   }
 
   @override
@@ -64,9 +66,9 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
         .whenComplete(() => _refreshController.refreshCompleted())
         .catchError((e) {
       if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.message);
       } else {
-        Fluttertoast.showToast(msg: e.toString(), gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.toString());
       }
       _refreshController.refreshFailed();
     });
@@ -78,9 +80,9 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
         .whenComplete(() => _refreshController.loadComplete())
         .catchError((e) {
       if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.message);
       } else {
-        Fluttertoast.showToast(msg: e.toString(), gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.toString());
       }
       _refreshController.loadFailed();
     });

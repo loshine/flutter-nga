@@ -47,9 +47,8 @@ class MessageDataRepository extends MessageRepository {
       int? mid, List<String> sendTo, String subject, String content) async {
     try {
       final isNew = mid == null || mid == 0;
-      final sendToValue = sendTo != null && sendTo.isNotEmpty
-          ? sendTo.reduce((s, e) => "$s,$e")
-          : "";
+      final sendToValue =
+          sendTo.isNotEmpty ? sendTo.reduce((s, e) => "$s,$e") : "";
       final postData = "__lib=message&__act=message"
           "&__output=8"
           "&act=${isNew ? 'new' : 'reply'}"

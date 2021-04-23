@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:gbk2utf8/gbk2utf8.dart';
+import 'package:fast_gbk/fast_gbk.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
