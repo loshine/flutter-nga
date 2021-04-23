@@ -196,12 +196,12 @@ class _TopicDetailState extends State<_TopicDetailPage>
   _addFavourite() {
     final store = Provider.of<TopicDetailStore>(context, listen: false);
     store.addFavourite(widget.tid).then((message) {
-      Fluttertoast.showToast(msg: message!, gravity: ToastGravity.CENTER);
+      Fluttertoast.showToast(msg: message!);
     }).catchError((e) {
       if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message, gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.message);
       } else {
-        Fluttertoast.showToast(msg: e.toString(), gravity: ToastGravity.CENTER);
+        Fluttertoast.showToast(msg: e.toString());
       }
     });
   }
