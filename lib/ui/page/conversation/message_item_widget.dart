@@ -4,14 +4,11 @@ import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/palette.dart';
 
 class MessageItemWidget extends StatelessWidget {
   final Message? message;
-  final bool isDark;
 
-  const MessageItemWidget({Key? key, this.message, this.isDark = false})
-      : super(key: key);
+  const MessageItemWidget({Key? key, this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -54,16 +51,14 @@ class MessageItemWidget extends StatelessWidget {
           style: TextStyle(
             fontSize: Dimen.title,
             fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.bodyText1?.color,
           ),
         ),
       ));
     }
     children.add(Padding(
       padding: EdgeInsets.all(16),
-      child: NgaHtmlContentWidget(
-        content: message!.content,
-        isDark: isDark,
-      ),
+      child: NgaHtmlContentWidget(content: message!.content),
     ));
     children.add(Divider(height: 1));
     return Column(

@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
@@ -27,14 +28,22 @@ class _TopicSingleState extends State<TopicSinglePage> {
   late RefreshController _refreshController;
   final _store = TopicSinglePageStore();
 
+  void _requestRefresh() {
+    // _refreshController.requestRefresh();
+  }
+
   @override
   void initState() {
     super.initState();
+    AdaptiveTheme.of(context).modeChangeNotifier.addListener(_requestRefresh);
     _refreshController = RefreshController(initialRefresh: true);
   }
 
   @override
   void dispose() {
+    AdaptiveTheme.of(context)
+        .modeChangeNotifier
+        .removeListener(_requestRefresh);
     _refreshController.dispose();
     super.dispose();
   }
@@ -138,8 +147,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       group: group,
       medalList: medalList,
       userList: commentUserList,
-      hot: hot,
-      isDark: _store.state.isDark,
+      hot: hot
     );
   }
 }

@@ -21,7 +21,6 @@ class TopicReplyItemWidget extends StatefulWidget {
   final List<Medal>? medalList;
   final List<User>? userList;
   final bool hot;
-  final bool isDark;
 
   const TopicReplyItemWidget({
     Key? key,
@@ -31,7 +30,6 @@ class TopicReplyItemWidget extends StatefulWidget {
     this.medalList,
     this.userList,
     this.hot = false,
-    this.isDark = false,
   }) : super(key: key);
 
   @override
@@ -67,7 +65,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                         Expanded(
                           child: Text(
                             widget.user!.getShowName(),
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodyText1?.color,
+                            ),
                           ),
                         ),
                         Text(
@@ -134,6 +135,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               style: TextStyle(
                 fontSize: Dimen.title,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyText1?.color,
               ),
             ),
           ),
@@ -142,10 +144,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           height: codeUtils.isStringEmpty(widget.reply!.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: NgaHtmlContentWidget(
-              content: widget.reply!.content,
-              isDark: widget.isDark,
-            ),
+            child: NgaHtmlContentWidget(content: widget.reply!.content),
           ),
         ),
         SizedBox(
@@ -197,7 +196,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Palette.getColorThumbBackground(widget.isDark),
+                  color:
+                      Palette.getColorThumbBackground(Palette.isDark(context)),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(

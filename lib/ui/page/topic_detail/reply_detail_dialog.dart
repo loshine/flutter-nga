@@ -48,7 +48,6 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
           return _ReplyWidget(
             reply: _store.state.replyList[0],
             user: _store.state.userList[0],
-            isDark: _store.state.isDark,
           );
         }
       }),
@@ -68,13 +67,11 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
 class _ReplyWidget extends StatefulWidget {
   final Reply reply;
   final User user;
-  final bool isDark;
 
   const _ReplyWidget({
     Key? key,
     required this.reply,
     required this.user,
-    this.isDark = false,
   }) : super(key: key);
 
   @override
@@ -116,6 +113,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
               style: TextStyle(
                 fontSize: Dimen.title,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyText1?.color,
               ),
             ),
           ),
@@ -124,10 +122,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           height: codeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: NgaHtmlContentWidget(
-              content: widget.reply.content,
-              isDark: widget.isDark,
-            ),
+            child: NgaHtmlContentWidget(content: widget.reply.content),
           ),
         ),
         Padding(
@@ -137,7 +132,8 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Palette.getColorThumbBackground(widget.isDark),
+                  color:
+                      Palette.getColorThumbBackground(Palette.isDark(context)),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(
