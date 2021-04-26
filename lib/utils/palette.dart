@@ -24,20 +24,28 @@ class Palette {
   static final _colorAlbumBorder = Color(0xFF91B262);
   static final _colorAlbumBackground = Color(0xFFd6dcae);
 
-  static Color getColorThumbBackground(bool isDark) {
-    return isDark ? Colors.white24 : _colorThumbBackground;
+  static Color getColorThumbBackground(BuildContext context) {
+    return isDark(context) ? Colors.white24 : _colorThumbBackground;
   }
 
-  static Color getColorQuoteBackground(bool isDark) {
-    return isDark ? Colors.white24 : _colorQuoteBackground;
+  static Color getColorQuoteBackground(BuildContext context) {
+    return isDark(context) ? Colors.white24 : _colorQuoteBackground;
   }
 
-  static Color getColorAlbumBorder(bool isDark) {
-    return isDark ? Palette.colorDivider : _colorAlbumBorder;
+  static Color getColorAlbumBorder(BuildContext context) {
+    return isDark(context) ? Palette.colorDivider : _colorAlbumBorder;
   }
 
-  static Color getColorAlbumBackground(bool isDark) {
-    return isDark ? Colors.white24 : _colorAlbumBackground;
+  static Color getColorAlbumBackground(BuildContext context) {
+    return isDark(context) ? Colors.white24 : _colorAlbumBackground;
+  }
+
+  static Color? getColorUserInfoCard(BuildContext context) {
+    return isDark(context) ? null : Color(0xFFF5E8CB);
+  }
+
+  static Color getColorTextSubtitle(BuildContext context) {
+    return isDark(context) ? Colors.white : colorTextSubTitle;
   }
 
   static bool isDark(BuildContext context) {

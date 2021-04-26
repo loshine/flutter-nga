@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -70,8 +71,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   title: Text(
                     _store.state.username!,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).textTheme.bodyText1?.color,
                       fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   background: Container(
@@ -108,7 +110,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
           ":: 管理权限 ::",
           style: TextStyle(
             fontSize: Dimen.subheading,
-            color: Palette.colorTextSubTitle,
+            color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -127,7 +129,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                   child: Text(
                     "[${entry.value}]",
-                    style: TextStyle(color: Palette.colorTextSubTitle),
+                    style:
+                        TextStyle(color: Palette.getColorTextSubtitle(context)),
                   ),
                 )),
       ));
@@ -145,7 +148,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
           ":: 声望 ::",
           style: TextStyle(
             fontSize: Dimen.subheading,
-            color: Palette.colorTextSubTitle,
+            color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -170,7 +173,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
           ":: 基础信息 ::",
           style: TextStyle(
             fontSize: Dimen.subheading,
-            color: Palette.colorTextSubTitle,
+            color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -182,7 +185,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     List<Widget> widgets = [
       Card(
         margin: EdgeInsets.fromLTRB(8, 8, 8, 4),
-        color: Color(0xFFF5E8CB),
+        color: Palette.getColorUserInfoCard(context),
         child: SizedBox(
           width: double.infinity,
           child: Padding(
@@ -196,7 +199,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
       Card(
         margin: EdgeInsets.fromLTRB(8, 8, 8, 4),
-        color: Color(0xFFF5E8CB),
+        color: Palette.getColorUserInfoCard(context),
         child: SizedBox(
           width: double.infinity,
           child: Padding(
@@ -210,7 +213,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     ":: 签名 ::",
                     style: TextStyle(
                       fontSize: Dimen.subheading,
-                      color: Palette.colorTextSubTitle,
+                      color: Palette.getColorTextSubtitle(context),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -223,7 +226,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
       Card(
         margin: EdgeInsets.fromLTRB(8, 8, 8, 4),
-        color: Color(0xFFF5E8CB),
+        color: Palette.getColorUserInfoCard(context),
         child: SizedBox(
           width: double.infinity,
           child: Padding(
@@ -237,7 +240,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
       Card(
         margin: EdgeInsets.fromLTRB(8, 8, 8, 4),
-        color: Color(0xFFF5E8CB),
+        color: Palette.getColorUserInfoCard(context),
         child: SizedBox(
           width: double.infinity,
           child: Padding(
@@ -255,7 +258,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       widgets.add(
         Card(
           margin: EdgeInsets.fromLTRB(8, 8, 8, 4),
-          color: Color(0xFFF5E8CB),
+          color: Palette.getColorUserInfoCard(context),
           child: SizedBox(
             width: double.infinity,
             child: Padding(
@@ -269,7 +272,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       ":: 个人版面 ::",
                       style: TextStyle(
                         fontSize: Dimen.subheading,
-                        color: Palette.colorTextSubTitle,
+                        color: Palette.getColorTextSubtitle(context),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -286,7 +289,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                       child: Text(
                         "[${entry.value}]",
-                        style: TextStyle(color: Palette.colorTextSubTitle),
+                        style: TextStyle(
+                            color: Palette.getColorTextSubtitle(context)),
                       ),
                     );
                   }),
@@ -297,6 +301,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
         ),
       );
     }
+
+    widgets.add(SizedBox.fromSize(
+      size: Size(double.infinity, 40),
+    ));
     return widgets;
   }
 }

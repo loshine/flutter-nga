@@ -28,7 +28,8 @@ class ContactEditDialog extends StatelessWidget {
           onPressed: () => Routes.pop(context),
           child: Text(
             '取消',
-            style: TextStyle(color: Theme.of(context).primaryColor),
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
           ),
         ),
         TextButton(
@@ -36,10 +37,7 @@ class ContactEditDialog extends StatelessWidget {
             callback!(_controller.text);
             Routes.pop(context);
           },
-          child: Text(
-            '确定',
-            style: TextStyle(color: Theme.of(context).primaryColor),
-          ),
+          child: Text('确定'),
         )
       ],
     );

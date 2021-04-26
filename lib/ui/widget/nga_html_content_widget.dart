@@ -170,8 +170,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
       padding: EdgeInsets.all(16),
       margin: EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Palette.getColorQuoteBackground(
-            Palette.isDark(renderContext.buildContext)),
+        color: Palette.getColorQuoteBackground(renderContext.buildContext),
         border: Border.all(
             color: Theme.of(renderContext.buildContext).dividerColor),
       ),
@@ -186,11 +185,9 @@ class NgaHtmlContentWidget extends StatelessWidget {
       padding: EdgeInsets.all(16),
       margin: EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Palette.getColorAlbumBackground(
-            Palette.isDark(renderContext.buildContext)),
+        color: Palette.getColorAlbumBackground(renderContext.buildContext),
         border: Border.all(
-            color: Palette.getColorAlbumBorder(
-                Palette.isDark(renderContext.buildContext))),
+            color: Palette.getColorAlbumBorder(renderContext.buildContext)),
       ),
       child: parsedChild,
     );

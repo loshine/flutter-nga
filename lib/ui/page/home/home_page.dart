@@ -1,3 +1,4 @@
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/home/home_drawer_header_store.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
 import 'package:flutter_nga/ui/page/home/home_drawer.dart';
 import 'package:flutter_nga/ui/page/notification/notification_list_page.dart';
+import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:provider/provider.dart';
@@ -129,16 +131,30 @@ class _HomePageState extends State<_HomePage> {
   }
 
   FloatingActionButton? _getFloatingActionButton() {
-    return _store.index == 3
-        ? FloatingActionButton(
-            tooltip: '新建短消息',
-            onPressed: () =>
-                Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
-            child: Icon(
-              Icons.add,
-              color: Colors.white,
-            ),
-          )
-        : null;
+    FloatingActionButton? fab;
+    if (_store.index == 0) {
+      fab = FloatingActionButton(
+        tooltip: '添加自定义版面',
+        onPressed: () => showDialog(
+          context: context,
+          builder: (_) => CustomForumDialog(),
+        ),
+        child: Icon(
+          CommunityMaterialIcons.plus,
+          color: Colors.white,
+        ),
+      );
+    } else if (_store.index == 3) {
+      fab = FloatingActionButton(
+        tooltip: '新建短消息',
+        onPressed: () =>
+            Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
+        child: Icon(
+          CommunityMaterialIcons.email_plus,
+          color: Colors.white,
+        ),
+      );
+    }
+    return fab;
   }
 }
