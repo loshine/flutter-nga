@@ -113,6 +113,14 @@ class _TopicDetailState extends State<_TopicDetailPage>
                           currentPage: store.currentPage,
                           maxPage: store.maxPage,
                           maxFloor: store.maxFloor,
+                          pageSelectedCallback: (isPage, target) {
+                            if (isPage) {
+                              _tabController!.animateTo(target - 1);
+                            } else {
+                              _tabController!
+                                  .animateTo((target / 20 - 1).ceil());
+                            }
+                          },
                         ),
                       );
                     },
@@ -190,7 +198,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
 
   @override
   void dispose() {
-    _tabController!.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
