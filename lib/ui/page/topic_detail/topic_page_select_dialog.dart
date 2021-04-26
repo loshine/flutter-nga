@@ -3,12 +3,12 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class TopicPageSelectDialog extends StatefulWidget {
-  final int? currentPage;
-  final int? maxPage;
-  final int? maxFloor;
+  final int currentPage;
+  final int maxPage;
+  final int maxFloor;
 
   const TopicPageSelectDialog(
-      {Key? key, this.maxPage, this.maxFloor, this.currentPage})
+      {Key? key, required this.maxPage, required this.maxFloor, required this.currentPage})
       : super(key: key);
 
   @override
@@ -16,7 +16,7 @@ class TopicPageSelectDialog extends StatefulWidget {
 }
 
 class _TopicPageSelectState extends State<TopicPageSelectDialog> {
-  int? _currentVal = 1;
+  int _currentVal = 1;
   bool _isPage = true;
 
   @override
@@ -36,13 +36,12 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
           children: [
             Text("第$_currentVal${_isPage ? "页" : "楼"}"),
             Slider(
-              value: _currentVal!.toDouble(),
+              value: _currentVal.toDouble(),
               min: 1,
               max: _isPage
-                  ? widget.maxPage!.toDouble()
-                  : widget.maxPage!.toDouble() * 20,
-              divisions:
-                  _isPage ? widget.maxPage! - 1 : widget.maxPage! * 20 - 1,
+                  ? widget.maxPage.toDouble()
+                  : widget.maxFloor.toDouble(),
+              divisions: _isPage ? widget.maxPage : widget.maxFloor,
               onChanged: (double newValue) {
                 setState(() {
                   _currentVal = newValue.round();
@@ -60,13 +59,20 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                       style: TextStyle(
                           color: _isPage
                               ? Colors.white
-                              : Theme.of(context).textTheme.bodyText1?.color),
+                              : Theme
+                              .of(context)
+                              .textTheme
+                              .bodyText1
+                              ?.color),
                     ),
-                    selectedColor: Theme.of(context).primaryColor,
+                    selectedColor: Theme
+                        .of(context)
+                        .primaryColor,
                     selected: _isPage,
                     onSelected: (selected) {
                       setState(() {
                         _isPage = selected;
+                        _currentVal = widget.currentPage;
                       });
                     },
                   ),
@@ -77,9 +83,15 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                     style: TextStyle(
                         color: !_isPage
                             ? Colors.white
-                            : Theme.of(context).textTheme.bodyText1?.color),
+                            : Theme
+                            .of(context)
+                            .textTheme
+                            .bodyText1
+                            ?.color),
                   ),
-                  selectedColor: Theme.of(context).primaryColor,
+                  selectedColor: Theme
+                      .of(context)
+                      .primaryColor,
                   selected: !_isPage,
                   onSelected: (selected) {
                     setState(() {
@@ -96,16 +108,16 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
         TextButton(
           child: Text("取消"),
           style: TextButton.styleFrom(
-              primary: Theme.of(context).textTheme.bodyText2?.color),
-          onPressed: () {
-            Routes.pop(context);
-          },
+              primary: Theme
+                  .of(context)
+                  .textTheme
+                  .bodyText2
+                  ?.color),
+          onPressed: () => Routes.pop(context),
         ),
         TextButton(
           child: Text("确认"),
-          onPressed: () {
-            Routes.pop(context);
-          },
+          onPressed: () => Routes.pop(context),
         ),
       ],
     );

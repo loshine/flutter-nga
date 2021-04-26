@@ -41,6 +41,6 @@ class _ForumFavouriteButtonState extends State<ForumFavouriteButtonWidget> {
   @override
   void initState() {
     super.initState();
-    _favouriteForumStore.load(widget.fid, widget.name);
+    _favouriteForumStore.load(widget.fid, widget.name ?? "");
   }
 }

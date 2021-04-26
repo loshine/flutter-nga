@@ -49,6 +49,7 @@ class ConversationItemWidget extends StatelessWidget {
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.ideographic,
                   children: [
                     Padding(
                       padding: EdgeInsets.only(right: 4),

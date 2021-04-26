@@ -6,8 +6,9 @@ import 'package:flutter_nga/utils/route.dart';
 
 class ForumGridItemWidget extends StatelessWidget {
   final Forum forum;
+  final GestureLongPressCallback? onLongPress;
 
-  const ForumGridItemWidget(this.forum, {Key? key}) : super(key: key);
+  const ForumGridItemWidget(this.forum, {Key? key, this.onLongPress}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +17,7 @@ class ForumGridItemWidget extends StatelessWidget {
       child: InkWell(
         onTap: () => Routes.navigateTo(context,
             "${Routes.FORUM_DETAIL}?fid=${forum.fid}&name=${fluroCnParamsEncode(forum.name)}"),
+        onLongPress: onLongPress,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

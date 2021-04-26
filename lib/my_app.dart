@@ -3,6 +3,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_nga/store/settings/theme_store.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,10 @@ import 'store/forum/favourite_forum_list_store.dart';
 import 'utils/route.dart';
 
 class MyApp extends StatefulWidget {
+  final AdaptiveThemeMode? savedThemeMode;
+
+  const MyApp({Key? key, this.savedThemeMode}) : super(key: key);
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -77,14 +82,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
         dark: ThemeData(
           brightness: Brightness.dark,
-          primarySwatch: Palette.colorPrimary,
-          primaryColor: Colors.black,
-          scaffoldBackgroundColor: Colors.grey.shade800,
-          backgroundColor: Colors.grey.shade800,
-          dividerColor: Palette.colorDivider,
-          splashColor: Palette.colorSplash,
-          highlightColor: Palette.colorHighlight,
-          iconTheme: IconThemeData(color: Colors.white),
           textTheme: TextTheme(
             bodyText1: TextStyle(
               color: Colors.white,

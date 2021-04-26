@@ -90,7 +90,7 @@ class _NotificationListState extends State<NotificationListPage> {
         ":: $name ::",
         style: TextStyle(
           fontSize: Dimen.subheading,
-          color: Palette.colorTextSubTitle,
+          color: Palette.getColorTextSubtitle(context),
           fontWeight: FontWeight.bold,
         ),
       ),

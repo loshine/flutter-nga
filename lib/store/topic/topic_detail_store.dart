@@ -10,15 +10,22 @@ abstract class _TopicDetailStore with Store {
   @observable
   int currentPage = 1;
   @observable
-  int? maxPage = 1;
+  int maxPage = 1;
+  @observable
+  int maxFloor = 1;
   @observable
   Topic? topic;
 
   String? get subject => topic != null ? topic!.subject : "";
 
   @action
-  void setMaxPage(int? maxPage) {
+  void setMaxPage(int maxPage) {
     this.maxPage = maxPage;
+  }
+
+  @action
+  void setMaxFloor(int maxFloor) {
+    this.maxFloor = maxFloor;
   }
 
   @action

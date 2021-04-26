@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/topic/topic_detail_store.dart';
+import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/route.dart';
@@ -63,13 +64,13 @@ class _TopicDetailState extends State<_TopicDetailPage>
         List<Widget> widgets = [];
         _tabController = TabController(
           vsync: this,
-          length: store.maxPage!,
+          length: store.maxPage,
           initialIndex: store.currentPage - 1,
         );
         _tabController!.addListener(() {
           store.setCurrentPage(_tabController!.index + 1);
         });
-        for (int i = 0; i < store.maxPage!; i++) {
+        for (int i = 0; i < store.maxPage; i++) {
           if (i == 0) {
             widgets.add(firstPage);
           } else {
@@ -106,14 +107,14 @@ class _TopicDetailState extends State<_TopicDetailPage>
                   ),
                   InkWell(
                     onTap: () {
-//                      showDialog(
-//                          context: context,
-//                          builder: (_) {
-//                            return TopicPageSelectDialog(
-//                              currentPage: _store.currentPage,
-//                              maxPage: _store.maxPage,
-//                            );
-//                          });
+                      showDialog(
+                        context: context,
+                        builder: (_) => TopicPageSelectDialog(
+                          currentPage: store.currentPage,
+                          maxPage: store.maxPage,
+                          maxFloor: store.maxFloor,
+                        ),
+                      );
                     },
                     child: SizedBox(
                       height: kToolbarHeight,
