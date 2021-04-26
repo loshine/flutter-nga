@@ -11,8 +11,9 @@ abstract class _FavouriteForumStore with Store {
   bool isFavourite = false;
 
   @action
-  Future load(int fid, String name) async {
-    isFavourite = await Data().forumRepository.isFavourite(Forum(fid, name));
+  Future load(int fid, String? name) async {
+    isFavourite =
+        await Data().forumRepository.isFavourite(Forum(fid, name ?? ""));
   }
 
   @action

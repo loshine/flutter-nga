@@ -197,7 +197,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               Container(
                 decoration: BoxDecoration(
                   color:
-                      Palette.getColorThumbBackground(Palette.isDark(context)),
+                      Palette.getColorThumbBackground(context),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(

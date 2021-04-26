@@ -68,6 +68,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
     final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
     _store.refresh(context, widget.tid, widget.page).then((state) {
       detailStore.setMaxPage(state.maxPage);
+      detailStore.setMaxFloor(state.maxFloor);
       detailStore.setTopic(state.topic);
     }).catchError((err) {
       _refreshController.loadFailed();

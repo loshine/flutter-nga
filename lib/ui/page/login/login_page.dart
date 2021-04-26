@@ -46,49 +46,6 @@ class _LoginPageState extends State<LoginPage> {
           }
         },
       ),
-      // body: _buildBody(context),
     );
   }
-
-// _buildBody(BuildContext context) {
-//   // This is used in the platform side to register the view.
-//   final String viewType = '<platform-view-type>';
-//
-//   // Pass parameters to the platform side.
-//   final Map<String, dynamic> creationParams = <String, dynamic>{};
-//   switch (defaultTargetPlatform) {
-//     case TargetPlatform.android:
-//       // return widget on Android.
-//       return PlatformViewLink(
-//         viewType: viewType,
-//         surfaceFactory:
-//             (BuildContext context, PlatformViewController controller) {
-//           return PlatformViewSurface(
-//             controller: controller,
-//             gestureRecognizers: const <
-//                 Factory<OneSequenceGestureRecognizer>>{},
-//             hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-//           );
-//         },
-//         onCreatePlatformView: (PlatformViewCreationParams params) {
-//           return PlatformViewsService.initSurfaceAndroidView(
-//             id: params.id,
-//             viewType: viewType,
-//             layoutDirection: TextDirection.ltr,
-//             creationParams: creationParams,
-//             creationParamsCodec: StandardMessageCodec(),
-//           )
-//             ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
-//             ..create();
-//         },
-//       );
-//     case TargetPlatform.iOS:
-//       // return widget on iOS.
-//       return Center(
-//         child: Text('iOS 暂未实现'),
-//       );
-//     default:
-//       throw UnsupportedError("Unsupported platform view");
-//   }
-// }
 }

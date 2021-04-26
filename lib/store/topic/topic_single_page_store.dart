@@ -5,7 +5,6 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:mobx/mobx.dart';
 
 part 'topic_single_page_store.g.dart';
@@ -43,6 +42,7 @@ abstract class _TopicSinglePageStore with Store {
       state = TopicSinglePageStoreData(
         page: 1,
         maxPage: data.maxPage,
+        maxFloor: data.rows,
         enablePullUp: 1 < data.maxPage,
         topic: data.topic,
         replyList: replyList,
@@ -59,9 +59,10 @@ abstract class _TopicSinglePageStore with Store {
 }
 
 class TopicSinglePageStoreData {
-  final int? page;
-  final int? maxPage;
-  final bool? enablePullUp;
+  final int page;
+  final int maxPage;
+  final int maxFloor;
+  final bool enablePullUp;
   final Topic? topic;
   final List<Reply>? replyList;
   final List<Reply>? hotReplyList;
@@ -70,9 +71,10 @@ class TopicSinglePageStoreData {
   final Set<Medal>? medalSet;
 
   const TopicSinglePageStoreData({
-    this.page,
-    this.maxPage,
-    this.enablePullUp,
+    required this.page,
+    required this.maxPage,
+    required this.maxFloor,
+    required this.enablePullUp,
     this.topic,
     this.replyList,
     this.hotReplyList,
@@ -84,6 +86,7 @@ class TopicSinglePageStoreData {
   factory TopicSinglePageStoreData.initial() => TopicSinglePageStoreData(
         page: 1,
         maxPage: 1,
+        maxFloor: 1,
         enablePullUp: false,
         topic: null,
         replyList: [],

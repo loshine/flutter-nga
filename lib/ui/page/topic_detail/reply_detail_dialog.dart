@@ -35,29 +35,28 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       contentPadding: EdgeInsets.all(0),
-      content: Observer(builder: (_) {
-        if (_store.state.replyList.isEmpty) {
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [CircularProgressIndicator()],
-            ),
-          );
-        } else {
-          return _ReplyWidget(
-            reply: _store.state.replyList[0],
-            user: _store.state.userList[0],
-          );
-        }
-      }),
+      content: Observer(
+        builder: (_) {
+          if (_store.state.replyList.isEmpty) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [CircularProgressIndicator()],
+              ),
+            );
+          } else {
+            return _ReplyWidget(
+              reply: _store.state.replyList[0],
+              user: _store.state.userList[0],
+            );
+          }
+        },
+      ),
       actions: [
         TextButton(
           onPressed: () => Routes.pop(context),
-          child: Text(
-            '关闭',
-            style: TextStyle(color: Theme.of(context).primaryColor),
-          ),
+          child: Text('关闭'),
         )
       ],
     );
@@ -132,8 +131,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color:
-                      Palette.getColorThumbBackground(Palette.isDark(context)),
+                  color: Palette.getColorThumbBackground(context),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(
