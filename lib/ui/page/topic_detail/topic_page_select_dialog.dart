@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
+
+typedef PageSelectedCallback = Function(bool, int);
 
 class TopicPageSelectDialog extends StatefulWidget {
   final int currentPage;
   final int maxPage;
   final int maxFloor;
+  final PageSelectedCallback? pageSelectedCallback;
 
   const TopicPageSelectDialog(
-      {Key? key, required this.maxPage, required this.maxFloor, required this.currentPage})
+      {Key? key,
+      required this.maxPage,
+      required this.maxFloor,
+      required this.currentPage,
+      this.pageSelectedCallback})
       : super(key: key);
 
   @override
@@ -41,7 +47,7 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
               max: _isPage
                   ? widget.maxPage.toDouble()
                   : widget.maxFloor.toDouble(),
-              divisions: _isPage ? widget.maxPage : widget.maxFloor,
+              divisions: _calcDivision(),
               onChanged: (double newValue) {
                 setState(() {
                   _currentVal = newValue.round();
@@ -59,15 +65,9 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                       style: TextStyle(
                           color: _isPage
                               ? Colors.white
-                              : Theme
-                              .of(context)
-                              .textTheme
-                              .bodyText1
-                              ?.color),
+                              : Theme.of(context).textTheme.bodyText1?.color),
                     ),
-                    selectedColor: Theme
-                        .of(context)
-                        .primaryColor,
+                    selectedColor: Theme.of(context).primaryColor,
                     selected: _isPage,
                     onSelected: (selected) {
                       setState(() {
@@ -83,15 +83,9 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                     style: TextStyle(
                         color: !_isPage
                             ? Colors.white
-                            : Theme
-                            .of(context)
-                            .textTheme
-                            .bodyText1
-                            ?.color),
+                            : Theme.of(context).textTheme.bodyText1?.color),
                   ),
-                  selectedColor: Theme
-                      .of(context)
-                      .primaryColor,
+                  selectedColor: Theme.of(context).primaryColor,
                   selected: !_isPage,
                   onSelected: (selected) {
                     setState(() {
@@ -108,18 +102,27 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
         TextButton(
           child: Text("取消"),
           style: TextButton.styleFrom(
-              primary: Theme
-                  .of(context)
-                  .textTheme
-                  .bodyText2
-                  ?.color),
+              primary: Theme.of(context).textTheme.bodyText2?.color),
           onPressed: () => Routes.pop(context),
         ),
         TextButton(
           child: Text("确认"),
-          onPressed: () => Routes.pop(context),
+          onPressed: () {
+            if (widget.pageSelectedCallback != null) {
+              widget.pageSelectedCallback!(_isPage, _currentVal);
+            }
+            Routes.pop(context);
+          },
         ),
       ],
     );
+  }
+
+  int _calcDivision() {
+    if (_isPage) {
+      return widget.maxPage > 1 ? widget.maxPage - 1 : 1;
+    } else {
+      return widget.maxFloor > 1 ? widget.maxFloor - 1 : 1;
+    }
   }
 }
