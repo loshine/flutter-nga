@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 /// 调色板
 class Palette {
   static final colorPrimary = Colors.brown;
+  static final colorDarkPrimary = Colors.teal;
   static final colorBackground = Color(0xFFFFF9E3);
   static final colorDivider = Color(0xFFBDBDBD);
   static final colorIcon = Colors.black45;
@@ -46,6 +47,10 @@ class Palette {
 
   static Color getColorTextSubtitle(BuildContext context) {
     return isDark(context) ? Colors.white : colorTextSubTitle;
+  }
+
+  static Color? getColorDrawerListTileBackground(BuildContext context) {
+    return isDark(context) ? Colors.white70 : null;
   }
 
   static bool isDark(BuildContext context) {

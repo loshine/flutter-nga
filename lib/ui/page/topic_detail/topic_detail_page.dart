@@ -1,6 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -207,11 +206,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
     store.addFavourite(widget.tid).then((message) {
       Fluttertoast.showToast(msg: message!);
     }).catchError((e) {
-      if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message);
-      } else {
-        Fluttertoast.showToast(msg: e.toString());
-      }
+      Fluttertoast.showToast(msg: e.toString());
     });
   }
 }
