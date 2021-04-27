@@ -23,6 +23,7 @@ class LoginActivity : AppCompatActivity() {
         viewBinding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
+        setSupportActionBar(viewBinding.toolbar)
         viewBinding.toolbar.setNavigationOnClickListener { finish() }
 
         viewBinding.webView.webChromeClient = LoginWebChromeClient(this)
