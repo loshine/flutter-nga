@@ -114,7 +114,7 @@ class Data {
         }
         DioError? dioError = _preHandleServerError(response, map!);
         if (dioError != null) {
-          throw dioError;
+          handler.reject(dioError);
         }
         // 上传附件的时候没有 data
         if (map.containsKey("data")) {

@@ -156,7 +156,7 @@ class Reply {
       // 这都可能会是 int 我也是服气
       alterInfo: map["alterinfo"],
       tid: map["tid"],
-      score: map["score"],
+      score: map["score"] ?? 0,
       score2: map["score_2"],
       postDate: map["postdate"],
       authorId: map["authorid"],

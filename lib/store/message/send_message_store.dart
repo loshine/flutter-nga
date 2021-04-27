@@ -29,11 +29,7 @@ abstract class _SendMessageStore with Store {
           .messageRepository
           .sendMessage(mid, contacts, subject, content);
     } catch (err) {
-      if (err is DioError) {
-        Fluttertoast.showToast(msg: err.message);
-      } else {
         Fluttertoast.showToast(msg: err.toString());
-      }
     }
   }
 }

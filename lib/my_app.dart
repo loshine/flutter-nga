@@ -3,7 +3,6 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_nga/store/settings/theme_store.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:provider/provider.dart';
@@ -82,6 +81,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
         dark: ThemeData(
           brightness: Brightness.dark,
+          primarySwatch: Palette.colorDarkPrimary,
+          toggleableActiveColor: Palette.colorDarkPrimary[700],
+          accentColor: Palette.colorDarkPrimary[700],
+
           textTheme: TextTheme(
             bodyText1: TextStyle(
               color: Colors.white,
