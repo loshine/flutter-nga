@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
@@ -9,6 +8,7 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class TopicSinglePage extends StatefulWidget {
   const TopicSinglePage({
@@ -25,25 +25,12 @@ class TopicSinglePage extends StatefulWidget {
 }
 
 class _TopicSingleState extends State<TopicSinglePage> {
-  late RefreshController _refreshController;
+  final _refreshController = RefreshController(initialRefresh: true);
+  final _itemScrollController = ItemScrollController();
   final _store = TopicSinglePageStore();
-
-  void _requestRefresh() {
-    // _refreshController.requestRefresh();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    AdaptiveTheme.of(context).modeChangeNotifier.addListener(_requestRefresh);
-    _refreshController = RefreshController(initialRefresh: true);
-  }
 
   @override
   void dispose() {
-    AdaptiveTheme.of(context)
-        .modeChangeNotifier
-        .removeListener(_requestRefresh);
     _refreshController.dispose();
     super.dispose();
   }
@@ -55,7 +42,8 @@ class _TopicSingleState extends State<TopicSinglePage> {
         onRefresh: _onRefresh,
         enablePullUp: false,
         controller: _refreshController,
-        child: ListView.builder(
+        child: ScrollablePositionedList.builder(
+          itemScrollController: _itemScrollController,
           physics: BouncingScrollPhysics(),
           itemCount: _store.state.replyList!.length,
           itemBuilder: (context, position) => _buildListItem(context, position),
@@ -72,9 +60,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       detailStore.setTopic(state.topic);
     }).catchError((err) {
       _refreshController.loadFailed();
-      Fluttertoast.showToast(
-        msg: err.message,
-      );
+      Fluttertoast.showToast(msg: err.toString());
     }).whenComplete(() {
       _refreshController.refreshCompleted();
     });
@@ -148,7 +134,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       group: group,
       medalList: medalList,
       userList: commentUserList,
-      hot: hot
+      hot: hot,
     );
   }
 }

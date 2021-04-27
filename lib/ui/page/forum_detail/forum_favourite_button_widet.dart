@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/forum/favourite_forum_list_store.dart';
 import 'package:flutter_nga/store/forum/favourite_forum_store.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class ForumFavouriteButtonWidget extends StatefulWidget {
@@ -31,6 +32,8 @@ class _ForumFavouriteButtonState extends State<ForumFavouriteButtonWidget> {
             _favouriteForumStore.toggle(widget.fid, widget.name).then((_) {
               Provider.of<FavouriteForumListStore>(context, listen: false)
                   .refresh();
+            }).catchError((err) {
+              Fluttertoast.showToast(msg: err.toString());
             });
           },
         );

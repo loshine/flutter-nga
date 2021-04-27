@@ -1,10 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/store/forum/forum_tag_list_store.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 typedef TagSelectedCallback = void Function(String tag);
@@ -38,11 +36,7 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
       _store.load(widget.fid).then((value) {
         widget.onLoadComplete?.call(value);
       }).catchError((err) {
-        if (err is DioError) {
-          Fluttertoast.showToast(msg: err.message);
-        } else {
-          Fluttertoast.showToast(msg: err.toString());
-        }
+        Fluttertoast.showToast(msg: err.toString());
       });
     }
     super.initState();

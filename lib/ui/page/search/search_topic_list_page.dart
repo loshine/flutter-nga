@@ -65,11 +65,7 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
         .refresh(widget.keyword, widget.fid, widget.content)
         .whenComplete(() => _refreshController.refreshCompleted())
         .catchError((e) {
-      if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message);
-      } else {
-        Fluttertoast.showToast(msg: e.toString());
-      }
+      Fluttertoast.showToast(msg: e.toString());
       _refreshController.refreshFailed();
     });
   }
@@ -79,11 +75,7 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
         .loadMore(widget.keyword, widget.fid, widget.content)
         .whenComplete(() => _refreshController.loadComplete())
         .catchError((e) {
-      if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message);
-      } else {
-        Fluttertoast.showToast(msg: e.toString());
-      }
+      Fluttertoast.showToast(msg: e.toString());
       _refreshController.loadFailed();
     });
   }

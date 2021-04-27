@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';
@@ -23,11 +22,7 @@ abstract class _ChildForumSubscriptionStore with Store {
       Fluttertoast.showToast(msg: "订阅成功");
       subscribed = true;
     }).catchError((e) {
-      if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message);
-      } else {
-        Fluttertoast.showToast(msg: e.toString());
-      }
+      Fluttertoast.showToast(msg: e.toString());
     });
   }
 
@@ -40,11 +35,7 @@ abstract class _ChildForumSubscriptionStore with Store {
       Fluttertoast.showToast(msg: "取消订阅成功");
       subscribed = false;
     }).catchError((e) {
-      if (e is DioError) {
-        Fluttertoast.showToast(msg: e.message);
-      } else {
-        Fluttertoast.showToast(msg: e.toString());
-      }
+      Fluttertoast.showToast(msg: e.toString());
     });
   }
 }
