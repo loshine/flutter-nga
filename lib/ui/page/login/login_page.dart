@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_nga/data/data.dart';
@@ -35,10 +34,17 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("登录"),
-        actions: [
-          IconButton(
-            icon: Icon(CommunityMaterialIcons.android),
-            onPressed: AndroidLogin.startLogin,
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            onSelected: _selectAction,
+            itemBuilder: (BuildContext context) {
+              return ["原生登录", "导入 Cookies"].map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
           )
         ],
       ),
@@ -70,5 +76,13 @@ class _LoginPageState extends State<LoginPage> {
       Fluttertoast.showToast(msg: "登录成功");
       Routes.pop(context);
     });
+  }
+
+  void _selectAction(String value) {
+    if ("原生登录" == value) {
+      AndroidLogin.startLogin();
+    } else {
+      Fluttertoast.showToast(msg: value);
+    }
   }
 }
