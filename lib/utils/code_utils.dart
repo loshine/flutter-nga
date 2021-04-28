@@ -98,13 +98,11 @@ String blacklist(String str, String chars) {
 }
 
 String urlDecode(String content) {
-  return Uri.decodeQueryComponent(content, encoding: gbk);
+  return Uri.decodeQueryComponent(content,
+      encoding: const GbkCodec(allowMalformed: true));
 }
 
 String urlEncode(String content) {
-  return Uri.encodeQueryComponent(content, encoding: gbk);
-}
-
-String decodeName(String name) {
-  return urlDecode(urlDecode(name));
+  return Uri.encodeQueryComponent(content,
+      encoding: const GbkCodec(allowMalformed: true));
 }
