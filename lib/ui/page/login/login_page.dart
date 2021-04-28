@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/plugins/login.dart';
+import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -82,7 +83,22 @@ class _LoginPageState extends State<LoginPage> {
     if ("原生登录" == value) {
       AndroidLogin.startLogin();
     } else {
-      Fluttertoast.showToast(msg: value);
+      showDialog(
+        context: context,
+        builder: (context) {
+          return ImportCookiesDialog(cookiesCallback: _processCookiesString);
+        },
+      );
     }
+  }
+
+  void _processCookiesString(String cookies) {
+    Data().userRepository.saveLoginCookies(cookies).whenComplete(() {
+      Fluttertoast.showToast(msg: "登录成功");
+      Routes.pop(context);
+    }).catchError((e) {
+      debugPrintStack(stackTrace: e.stackTrace);
+      Fluttertoast.showToast(msg: e.toString());
+    });
   }
 }
