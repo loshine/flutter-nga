@@ -41,6 +41,8 @@ class Data {
 
   UserRepository get userRepository => UserDataRepository(database);
 
+  final _gbk = const GbkCodec(allowMalformed: true);
+
   factory Data() {
     return _singleton;
   }
@@ -153,7 +155,7 @@ class Data {
     // 在返回响应数据之前做一些预处理
     // gbk 编码 json 转 utf8
     List<int> bytes = response.data;
-    String responseBody = gbk.decode(bytes);
+    String responseBody = _gbk.decode(bytes);
     // 处理一些可能导致错误的字符串
     // 去除 control characters
     responseBody = codeUtils.stripLow(responseBody);
