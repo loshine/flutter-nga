@@ -13,12 +13,18 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class TopicDetailPage extends StatelessWidget {
-  const TopicDetailPage(this.tid, this.fid, {this.subject, Key? key})
-      : super(key: key);
+  const TopicDetailPage(
+    this.tid,
+    this.fid, {
+    this.subject,
+    this.authorid,
+    Key? key,
+  }) : super(key: key);
 
   final int? tid;
   final int? fid;
   final String? subject;
+  final int? authorid;
 
   @override
   Widget build(BuildContext context) {
@@ -30,18 +36,25 @@ class TopicDetailPage extends StatelessWidget {
         tid,
         fid,
         subject: subject,
+        authorid: authorid,
       ),
     );
   }
 }
 
 class _TopicDetailPage extends StatefulWidget {
-  const _TopicDetailPage(this.tid, this.fid, {this.subject, Key? key})
-      : super(key: key);
+  const _TopicDetailPage(
+    this.tid,
+    this.fid, {
+    this.subject,
+    this.authorid,
+    Key? key,
+  }) : super(key: key);
 
   final int? tid;
   final int? fid;
   final String? subject;
+  final int? authorid;
 
   @override
   _TopicDetailState createState() => _TopicDetailState();
@@ -57,6 +70,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
     final firstPage = TopicSinglePage(
       tid: widget.tid!,
       page: 1,
+      authorid: widget.authorid,
     );
     return Observer(
       builder: (_) {
@@ -76,6 +90,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
             widgets.add(TopicSinglePage(
               tid: widget.tid!,
               page: i + 1,
+              authorid: widget.authorid,
             ));
           }
         }

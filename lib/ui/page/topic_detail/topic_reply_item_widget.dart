@@ -12,10 +12,11 @@ import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class TopicReplyItemWidget extends StatefulWidget {
-  final Reply? reply;
+  final Reply reply;
   final User? user;
   final Group? group;
   final List<Medal>? medalList;
@@ -24,7 +25,7 @@ class TopicReplyItemWidget extends StatefulWidget {
 
   const TopicReplyItemWidget({
     Key? key,
-    this.reply,
+    required this.reply,
     this.user,
     this.group,
     this.medalList,
@@ -38,6 +39,8 @@ class TopicReplyItemWidget extends StatefulWidget {
 
 class _TopicReplyItemState extends State<TopicReplyItemWidget> {
   bool _attachmentsExpanded = false;
+
+  final _actions = const ["引用", "回复", "只看他"];
 
   @override
   Widget build(BuildContext context) {
@@ -71,28 +74,35 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             ),
                           ),
                         ),
-                        Text(
-                          widget.hot ? "[热评]" : "[${widget.reply!.lou} 楼]",
-                          style: TextStyle(
-                            color: widget.hot
-                                ? Colors.redAccent
-                                : Theme.of(context).textTheme.bodyText2?.color,
-                            fontSize: Dimen.caption,
-                          ),
+                        PopupMenuButton(
+                          child: Icon(Icons.more_vert),
+                          onSelected: __onMenuSelected,
+                          itemBuilder: (BuildContext context) {
+                            return _actions.map((String choice) {
+                              return PopupMenuItem<String>(
+                                value: choice,
+                                child: Text(choice),
+                              );
+                            }).toList();
+                          },
                         ),
                       ],
                     ),
-                    Row(
+                    Wrap(
                       children: [
-                        Text(
-                          "级别: ${widget.group == null ? "" : widget.group!.name}",
-                          style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyText2?.color,
-                            fontSize: Dimen.caption,
+                        Padding(
+                          padding: EdgeInsets.only(right: 16),
+                          child: Text(
+                            "级别: ${widget.group == null ? "" : widget.group!.name}",
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodyText2?.color,
+                              fontSize: Dimen.caption,
+                            ),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(left: 16),
+                          padding: EdgeInsets.only(right: 16),
                           child: Text(
                             "威望: ${widget.user!.getShowReputation()}",
                             style: TextStyle(
@@ -103,7 +113,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(left: 16),
+                          padding: EdgeInsets.only(right: 16),
                           child: Text(
                             "发帖: ${widget.user!.postNum ?? 0}",
                             style: TextStyle(
@@ -125,13 +135,29 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             ),
           ],
         ),
+        Row(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 16, bottom: 8),
+              child: Text(
+                widget.hot ? "[热评]" : "[${widget.reply.lou} 楼]",
+                style: TextStyle(
+                  color: widget.hot
+                      ? Colors.redAccent
+                      : Theme.of(context).textTheme.bodyText2?.color,
+                  fontSize: Dimen.caption,
+                ),
+              ),
+            ),
+          ],
+        ),
         SizedBox(
-          height: codeUtils.isStringEmpty(widget.reply!.subject) ? 0 : null,
+          height: codeUtils.isStringEmpty(widget.reply.subject) ? 0 : null,
           width: double.infinity,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Text(
-              codeUtils.unescapeHtml(widget.reply!.subject),
+              codeUtils.unescapeHtml(widget.reply.subject),
               style: TextStyle(
                 fontSize: Dimen.title,
                 fontWeight: FontWeight.bold,
@@ -141,15 +167,15 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         SizedBox(
-          height: codeUtils.isStringEmpty(widget.reply!.content) ? 0 : null,
+          height: codeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: NgaHtmlContentWidget(content: widget.reply!.content),
+            child: NgaHtmlContentWidget(content: widget.reply.content),
           ),
         ),
         SizedBox(
           width: double.infinity,
-          height: widget.reply!.commentList!.isEmpty ? 0 : null,
+          height: widget.reply.commentList!.isEmpty ? 0 : null,
           child: Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
@@ -158,7 +184,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         Offstage(
-          offstage: widget.reply!.attachmentList!.isEmpty,
+          offstage: widget.reply.attachmentList!.isEmpty,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -196,8 +222,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color:
-                      Palette.getColorThumbBackground(context),
+                  color: Palette.getColorThumbBackground(context),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(
@@ -210,12 +235,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           color: Colors.white,
                           size: 14,
                         ),
-                        onTap: toggleLike,
+                        onTap: _toggleLike,
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 8),
                         child: Text(
-                          "${widget.reply!.score}",
+                          "${widget.reply.score}",
                           style: TextStyle(
                             fontSize: Dimen.caption,
                             color: Colors.white,
@@ -225,7 +250,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       Padding(
                         padding: EdgeInsets.only(left: 8),
                         child: GestureDetector(
-                          onTap: toggleDislike,
+                          onTap: _toggleDislike,
                           child: Icon(
                             CommunityMaterialIcons.thumb_down,
                             color: Colors.white,
@@ -239,7 +264,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               ),
               Spacer(),
               Text(
-                widget.reply!.postDate!,
+                widget.reply.postDate!,
                 style: TextStyle(
                   fontSize: Dimen.caption,
                   color: Theme.of(context).textTheme.bodyText2?.color,
@@ -277,12 +302,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     }).toList();
   }
 
-  toggleLike() async {
+  _toggleLike() async {
     try {
       final reaction = await Data()
           .topicRepository
-          .likeReply(widget.reply!.tid, widget.reply!.pid);
-      setState(() => widget.reply!.score += reaction.countChange);
+          .likeReply(widget.reply.tid, widget.reply.pid);
+      setState(() => widget.reply.score += reaction.countChange);
       Fluttertoast.showToast(
         msg: reaction.message,
       );
@@ -294,12 +319,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     }
   }
 
-  toggleDislike() async {
+  _toggleDislike() async {
     try {
       final reaction = await Data()
           .topicRepository
-          .dislikeReply(widget.reply!.tid, widget.reply!.pid);
-      setState(() => widget.reply!.score += reaction.countChange);
+          .dislikeReply(widget.reply.tid, widget.reply.pid);
+      setState(() => widget.reply.score += reaction.countChange);
       Fluttertoast.showToast(
         msg: reaction.message,
       );
@@ -308,6 +333,37 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       Fluttertoast.showToast(
         msg: err.toString(),
       );
+    }
+  }
+
+  __onMenuSelected(String action) {
+    if (action == _actions[0]) {
+      // 引用
+      String quoteContent =
+          "[quote][pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] [b]Post by [uid=${widget.user!.uid}]${widget.user!.getShowName()}[/uid] (${widget.reply.postDate}):[/b]\n\n${widget.reply.content}[/quote]";
+      Routes.navigateTo(
+        context,
+        "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
+        routeSettings: RouteSettings(arguments: quoteContent),
+      );
+    } else if (action == _actions[1]) {
+      // 回复
+      String replyContent =
+          "[b]Reply to [pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] Post by [uid=${widget.user!.uid}]${widget.user!.getShowName()}[/uid] (${widget.reply.postDate})[/b]";
+      Routes.navigateTo(
+        context,
+        "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
+        routeSettings: RouteSettings(arguments: replyContent),
+      );
+    } else if (action == _actions[2]) {
+      Data().userRepository.getDefaultUser().then((user) {
+        // if (user != null) {
+          Routes.navigateTo(context,
+              "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}}&authorid=${widget.reply.authorId}");
+        // } else {
+        //   Fluttertoast.showToast(msg: "请先登录");
+        // }
+      });
     }
   }
 
@@ -331,7 +387,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         ),
       ),
     ));
-    widgets.addAll(widget.reply!.commentList!.map((comment) =>
+    widgets.addAll(widget.reply.commentList!.map((comment) =>
         TopicReplyCommentItemWidget(
             comment,
             widget.userList!
@@ -341,8 +397,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
 
   _getAttachments() {
     List<Widget> columnWidgets = [];
-    final button = RaisedButton(
-      elevation: 0,
+    final button = ElevatedButton(
+      style: ButtonStyle(elevation: MaterialStateProperty.all(0)),
       child: Text(
         _attachmentsExpanded ? "收起附件" : "展开附件",
         style: TextStyle(fontSize: Dimen.button),
@@ -353,7 +409,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     columnWidgets.add(button);
     if (_attachmentsExpanded) {
       List<Widget> attachmentWidgets = [];
-      attachmentWidgets.addAll(widget.reply!.attachmentList!.map((attachment) {
+      attachmentWidgets.addAll(widget.reply.attachmentList!.map((attachment) {
         return Padding(
           padding: EdgeInsets.only(right: 16),
           child: CachedNetworkImage(

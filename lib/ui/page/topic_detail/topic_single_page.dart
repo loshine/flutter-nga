@@ -14,11 +14,13 @@ class TopicSinglePage extends StatefulWidget {
   const TopicSinglePage({
     required this.tid,
     required this.page,
+    this.authorid,
     Key? key,
   }) : super(key: key);
 
   final int tid;
   final int page;
+  final int? authorid;
 
   @override
   _TopicSingleState createState() => _TopicSingleState();
@@ -54,7 +56,9 @@ class _TopicSingleState extends State<TopicSinglePage> {
 
   _onRefresh() {
     final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
-    _store.refresh(context, widget.tid, widget.page).then((state) {
+    _store
+        .refresh(context, widget.tid, widget.page, widget.authorid)
+        .then((state) {
       detailStore.setMaxPage(state.maxPage);
       detailStore.setMaxFloor(state.maxFloor);
       detailStore.setTopic(state.topic);

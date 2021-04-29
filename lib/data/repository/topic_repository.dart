@@ -14,7 +14,7 @@ abstract class TopicRepository {
   Future<TopicListData> getTopicList(int fid, int page,
       {bool recommend = false, int? type = 0});
 
-  Future<TopicDetailData> getTopicDetail(int tid, int page);
+  Future<TopicDetailData> getTopicDetail(int tid, int page, int? authorid);
 
   Future<TopicDetailData> getTopicReply(int? pid);
 
@@ -128,10 +128,11 @@ class TopicDataRepository implements TopicRepository {
   }
 
   @override
-  Future<TopicDetailData> getTopicDetail(int tid, int page) async {
+  Future<TopicDetailData> getTopicDetail(
+      int tid, int page, int? authorid) async {
     try {
-      Response<Map<String, dynamic>> response =
-          await Data().dio.get("read.php?__output=8&tid=$tid&page=$page");
+      Response<Map<String, dynamic>> response = await Data().dio.get(
+          "read.php?__output=8&tid=$tid&page=$page${authorid == null ? "" : "&authorid=$authorid"}");
       return TopicDetailData.fromJson(response.data!);
     } catch (err) {
       rethrow;

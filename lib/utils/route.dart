@@ -6,7 +6,7 @@ import 'package:flutter_nga/ui/page/forum_detail/forum_detail_page.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/ui/page/login/login_page.dart';
 import 'package:flutter_nga/ui/page/photo_preview/photo_preview_page.dart';
-import 'package:flutter_nga/ui/page/publish/publish_reply.dart';
+import 'package:flutter_nga/ui/page/publish/publish_page.dart';
 import 'package:flutter_nga/ui/page/search/search_forum_page.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/search/search_topic_list_page.dart';
@@ -67,6 +67,9 @@ class Routes {
                   subject: params["subject"] != null
                       ? fluroCnParamsDecode(params["subject"]![0])
                       : null,
+                  authorid: params["authorid"] != null
+                      ? int.tryParse(params["authorid"]![0])
+                      : null,
                 )));
     router.define(TOPIC_PUBLISH,
         handler: Handler(handlerFunc: (context, params) {
@@ -74,9 +77,13 @@ class Routes {
       if (tidParams == null || tidParams.isEmpty) {
         return PublishPage(fid: int.tryParse(params["fid"]![0]));
       } else {
+        String content = context?.settings?.arguments != null
+            ? (context!.settings!.arguments as String)
+            : "";
         return PublishPage(
           tid: int.tryParse(params["tid"]![0]),
           fid: int.tryParse(params["fid"]![0]),
+          content: content,
         );
       }
     }));
@@ -166,18 +173,24 @@ class Routes {
     String path, {
     bool replace = false,
     bool clearStack = false,
+    bool maintainState = true,
+    bool rootNavigator = false,
     TransitionType transition = TransitionType.native,
     Duration transitionDuration = const Duration(milliseconds: 250),
     RouteTransitionsBuilder? transitionBuilder,
+    RouteSettings? routeSettings,
   }) {
     return router.navigateTo(
       context,
       path,
       replace: replace,
       clearStack: clearStack,
+      maintainState: maintainState,
+      rootNavigator: rootNavigator,
       transition: transition,
       transitionDuration: transitionDuration,
       transitionBuilder: transitionBuilder,
+      routeSettings: routeSettings,
     );
   }
 
