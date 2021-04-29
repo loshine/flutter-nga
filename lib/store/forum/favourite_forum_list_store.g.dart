@@ -24,6 +24,20 @@ mixin _$FavouriteForumListStore on _FavouriteForumListStore, Store {
     });
   }
 
+  final _$addAsyncAction = AsyncAction('_FavouriteForumListStore.add');
+
+  @override
+  Future<void> add(int fid, String name) {
+    return _$addAsyncAction.run(() => super.add(fid, name));
+  }
+
+  final _$deleteAsyncAction = AsyncAction('_FavouriteForumListStore.delete');
+
+  @override
+  Future<void> delete(int fid) {
+    return _$deleteAsyncAction.run(() => super.delete(fid));
+  }
+
   final _$_FavouriteForumListStoreActionController =
       ActionController(name: '_FavouriteForumListStore');
 

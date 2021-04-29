@@ -12,7 +12,6 @@ import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -20,17 +19,19 @@ class PublishPage extends StatefulWidget {
   const PublishPage({
     this.tid,
     this.fid,
+    this.content,
     Key? key,
   }) : super(key: key);
 
   final int? tid;
   final int? fid;
+  final String? content;
 
   @override
-  _PublishReplyState createState() => _PublishReplyState();
+  _PublishPageState createState() => _PublishPageState();
 }
 
-class _PublishReplyState extends State<PublishPage> {
+class _PublishPageState extends State<PublishPage> {
   final _bottomData = [
     CommunityMaterialIcons.incognito_off,
     CommunityMaterialIcons.emoticon,
@@ -48,11 +49,11 @@ class _PublishReplyState extends State<PublishPage> {
   final _subjectController = TextEditingController();
   final _contentController = TextEditingController();
 
-  Widget? _emoticonGroupTabsWidget;
-  Widget? _fontStyleWidget;
-  Widget? _attachmentWidget;
+  late Widget _emoticonGroupTabsWidget;
+  late Widget _fontStyleWidget;
+  late Widget _attachmentWidget;
 
-  Widget? _currentBottomPanelChild;
+  late Widget _currentBottomPanelChild;
   final _selectionList = [0, 0];
 
   StringBuffer _attachments = StringBuffer();
@@ -63,6 +64,7 @@ class _PublishReplyState extends State<PublishPage> {
   @override
   void initState() {
     super.initState();
+    _contentController.text = widget.content ?? "";
     _contentController.addListener(() {
       if (_contentController.selection.start > -1) {
         _selectionList[0] = _contentController.selection.start;
@@ -92,9 +94,7 @@ class _PublishReplyState extends State<PublishPage> {
 
   @override
   void dispose() {
-    if (_subscription != null) {
-      _subscription!.cancel();
-    }
+    _subscription?.cancel();
     super.dispose();
   }
 
@@ -272,7 +272,7 @@ class _PublishReplyState extends State<PublishPage> {
     togglePanel(_attachmentWidget);
   }
 
-  void togglePanel(Widget? widget) {
+  void togglePanel(Widget widget) {
     if (_keyboardVisible) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
     }

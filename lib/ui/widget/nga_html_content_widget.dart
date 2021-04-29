@@ -36,6 +36,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
       },
       style: {
         'body': Style(
+          lineHeight: LineHeight(1.4),
           padding: EdgeInsets.all(0),
           margin: EdgeInsets.all(0),
           color: Theme.of(context).textTheme.bodyText1?.color,
