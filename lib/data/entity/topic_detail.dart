@@ -174,6 +174,14 @@ class Reply {
     );
   }
 
+  String get quoteContent {
+    var c = content ?? "";
+    if (c.length > 250) {
+      c = c.substring(0, 250);
+    }
+    return c;
+  }
+
   void merge(Reply comment) {
     content = comment.content;
     alterInfo = comment.alterInfo;

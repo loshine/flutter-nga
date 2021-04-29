@@ -340,7 +340,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     if (action == _actions[0]) {
       // 引用
       String quoteContent =
-          "[quote][pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] [b]Post by [uid=${widget.user!.uid}]${widget.user!.getShowName()}[/uid] (${widget.reply.postDate}):[/b]\n\n${widget.reply.content}[/quote]";
+          "[quote][pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] [b]Post by [uid=${widget.user!.uid}]${widget.user!.getShowName()}[/uid] (${widget.reply.postDate}):[/b]\n\n${widget.reply.quoteContent}[/quote]";
       Routes.navigateTo(
         context,
         "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
@@ -356,14 +356,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         routeSettings: RouteSettings(arguments: replyContent),
       );
     } else if (action == _actions[2]) {
-      Data().userRepository.getDefaultUser().then((user) {
-        // if (user != null) {
-          Routes.navigateTo(context,
-              "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}}&authorid=${widget.reply.authorId}");
-        // } else {
-        //   Fluttertoast.showToast(msg: "请先登录");
-        // }
-      });
+      Routes.navigateTo(context,
+          "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}}&authorid=${widget.reply.authorId}");
     }
   }
 
