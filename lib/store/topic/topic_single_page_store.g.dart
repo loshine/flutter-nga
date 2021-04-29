@@ -28,8 +28,9 @@ mixin _$TopicSinglePageStore on _TopicSinglePageStore, Store {
 
   @override
   Future<TopicSinglePageStoreData> refresh(
-      BuildContext context, int tid, int page) {
-    return _$refreshAsyncAction.run(() => super.refresh(context, tid, page));
+      BuildContext context, int tid, int page, int? authorid) {
+    return _$refreshAsyncAction
+        .run(() => super.refresh(context, tid, page, authorid));
   }
 
   @override

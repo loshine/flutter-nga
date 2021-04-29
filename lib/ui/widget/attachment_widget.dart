@@ -37,12 +37,12 @@ class _AttachmentState extends State<AttachmentWidget> {
   Widget build(BuildContext context) {
     return GridView.count(
       crossAxisCount: 4,
-      children: _getImageWidgetList() as List<Widget>,
+      children: _getImageWidgetList(),
     );
   }
 
-  List<Widget?> _getImageWidgetList() {
-    List<Widget?> widgets = [];
+  List<Widget> _getImageWidgetList() {
+    List<Widget> widgets = [];
     if (_addImageWidget == null) {
       _addImageWidget = Material(
         color: Colors.transparent,
@@ -80,7 +80,7 @@ class _AttachmentState extends State<AttachmentWidget> {
         ),
       );
     }
-    widgets.add(_addImageWidget);
+    widgets.add(_addImageWidget!);
     if (_imageFileList.isNotEmpty) {
       widgets.addAll(_imageFileList.map((image) {
         var index = _imageFileList.indexOf(image);

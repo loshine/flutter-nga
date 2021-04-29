@@ -17,10 +17,10 @@ abstract class _TopicSinglePageStore with Store {
 
   @action
   Future<TopicSinglePageStoreData> refresh(
-      BuildContext context, int tid, int page) async {
+      BuildContext context, int tid, int page, int? authorid) async {
     try {
       TopicDetailData data =
-          await Data().topicRepository.getTopicDetail(tid, page);
+          await Data().topicRepository.getTopicDetail(tid, page, authorid);
       List<Reply> replyList = [];
       data.replyList!.values.forEach((reply) {
         replyList.add(reply);
