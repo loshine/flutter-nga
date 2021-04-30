@@ -21,7 +21,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Html(
-      data: NgaContentParser.parse(content)!,
+      data: NgaContentParser.parse(content),
       customRender: {
         'div': _alignmentRender,
         'span': _fontSizeRender,

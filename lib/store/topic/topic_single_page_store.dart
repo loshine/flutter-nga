@@ -29,7 +29,7 @@ abstract class _TopicSinglePageStore with Store {
       Set<Group> groups = data.groupList!.values.toSet();
       Set<Medal> medals = data.medalList!.values.toSet();
       List<Reply> hotReplyList = [];
-      if (page == 1 && data.hotReplies.isNotEmpty) {
+      if (page == 1 && data.hotReplies.isNotEmpty && authorid == null) {
         List<TopicDetailData> hots = await Future.wait(data.hotReplies
             .map((e) => Data().topicRepository.getTopicReply(e)));
         hots.forEach((e) {
