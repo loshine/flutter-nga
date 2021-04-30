@@ -43,7 +43,12 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                   children: [
                     Padding(
                       padding: EdgeInsets.only(bottom: 4),
-                      child: Text(user!.getShowName()),
+                      child: Text(
+                        user!.getShowName(),
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyText1?.color),
+                      ),
                     ),
                     Text(
                       reply.postDate!,
@@ -57,7 +62,10 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
               ),
             ],
           ),
-          NgaHtmlCommentWidget(content: reply.content),
+          Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: NgaHtmlCommentWidget(content: reply.content),
+          ),
         ],
       ),
     );

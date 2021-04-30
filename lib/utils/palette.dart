@@ -19,6 +19,8 @@ class Palette {
   static final colorTextLock = Color(0xFFC58080);
   static final colorTextAssemble = Color(0xFFA0B4F0);
 
+  static final colorWhite = Colors.white;
+
   static final _colorThumbBackground = Color(0xFFE0C19E);
 
   static final _colorQuoteBackground = Color(0xFFF9EFD6);

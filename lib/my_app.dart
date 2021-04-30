@@ -84,7 +84,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           primarySwatch: Palette.colorDarkPrimary,
           toggleableActiveColor: Palette.colorDarkPrimary[700],
           accentColor: Palette.colorDarkPrimary[700],
-
           textTheme: TextTheme(
             bodyText1: TextStyle(
               color: Colors.white,

@@ -55,7 +55,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   title: Text(
                     _store.state.username!,
                     style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyText1?.color,
+                      color: Palette.colorWhite,
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -65,7 +65,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           ? SizedBox.expand(child: Text(""))
                           : CachedNetworkImage(
                               fit: BoxFit.cover,
-                              imageUrl: _store.state.avatar!,
+                              imageUrl: _store.state.realAvatarUrl,
                               placeholder: (context, url) =>
                                   Image.asset('images/default_forum_icon.png'),
                               errorWidget: (context, url, err) =>
@@ -274,7 +274,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       child: Text(
                         "[${entry.value}]",
                         style: TextStyle(
-                            color: Palette.getColorTextSubtitle(context)),
+                          color: Theme.of(context).accentColor,
+                        ),
                       ),
                     );
                   }),
