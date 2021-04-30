@@ -102,6 +102,16 @@ class UserInfoStoreData {
     this.personalForum,
   });
 
+  String get realAvatarUrl {
+    if (avatar == null) {
+      return "";
+    } else if (avatar!.startsWith("http://")) {
+      return avatar!.replaceAll("http://", "https://");
+    } else {
+      return avatar!;
+    }
+  }
+
   factory UserInfoStoreData.initial() => UserInfoStoreData(
         uid: 0,
         username: "",

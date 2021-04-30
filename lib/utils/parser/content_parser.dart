@@ -14,8 +14,8 @@ class NgaContentParser {
   static Parser _replyParser = _ReplyParser();
   static Parser _commentParser = _CommentParser();
 
-  static String? parse(String? content) {
-    var parseContent = content;
+  static String parse(String? content) {
+    var parseContent = content ?? "";
     parseContent = codeUtils.unescapeHtml(parseContent);
     parseContent = _replyParser.parse(parseContent);
     _parserList.forEach((parser) {
@@ -24,8 +24,8 @@ class NgaContentParser {
     return parseContent;
   }
 
-  static String? parseComment(String? content) {
-    var parseContent = content;
+  static String parseComment(String? content) {
+    var parseContent = content ?? "";
     parseContent = codeUtils.unescapeHtml(parseContent);
     parseContent = _commentParser.parse(parseContent);
     _parserList.forEach((parser) {
@@ -36,13 +36,14 @@ class NgaContentParser {
 }
 
 abstract class Parser {
-  String? parse(String? content);
+  String parse(String? content);
 }
 
 class _AlbumParser implements Parser {
   @override
   String parse(String? content) {
-    return content!.replaceAllMapped(
+    final parseContent = content ?? "";
+    return parseContent.replaceAllMapped(
         RegExp("\\[album(=([\\s\\S]*?)?)?]([\\s\\S]*?)?\\[/album]"), (match) {
       final value = match.group(3)!.replaceAllMapped(
           RegExp("\\[url]([\\s\\S]*?)?\\[/url]"),
@@ -55,7 +56,8 @@ class _AlbumParser implements Parser {
 class _TableParser implements Parser {
   @override
   String parse(String? content) {
-    return content!
+    final parseContent = content ?? "";
+    return parseContent
         .replaceAllMapped(RegExp("\\[([/]?(tr|td))]"),
             (match) => "<${match.group(1)}>") // 处理tr, td
         .replaceAll("[table]", "<div><table><tbody>")
@@ -80,7 +82,8 @@ class _TableParser implements Parser {
 class _ReplyParser implements Parser {
   @override
   String parse(String? content) {
-    return content!
+    final parseContent = content ?? "";
+    return parseContent
         // 引用主贴
         .replaceAllMapped(
             RegExp(
@@ -116,7 +119,8 @@ class _ReplyParser implements Parser {
 class _CommentParser implements Parser {
   @override
   String parse(String? content) {
-    return content!
+    final parseContent = content ?? "";
+    return parseContent
         .replaceAll("[color=gray](楼)[/color]", "")
         .replaceAll(
             RegExp(
@@ -141,7 +145,8 @@ class _CommentParser implements Parser {
 class _ContentParser implements Parser {
   @override
   String parse(String? content) {
-    return content!
+    final parseContent = content ?? "";
+    return parseContent
         .replaceAllMapped(
             RegExp("\\[img]([\\s\\S]*?)\\[/img]"), _imgReplaceFunc) // 处理 [img]
         .replaceAllMapped(RegExp("\\[url]([\\s\\S]*?)?\\[/url]"),
@@ -230,11 +235,11 @@ class _EmoticonParser implements Parser {
   static final list = Data().emoticonRepository.getEmoticonGroups();
 
   @override
-  String? parse(String? content) {
-    var parseContent = content;
+  String parse(String? content) {
+    var parseContent = content ?? "";
     list.forEach((group) {
       group.expressionList.forEach((emoticon) {
-        parseContent = parseContent!.replaceAll(emoticon.content,
+        parseContent = parseContent.replaceAll(emoticon.content,
             "<nga_emoticon src='${emoticon.url}' ></nga_emoticon>");
       });
     });
