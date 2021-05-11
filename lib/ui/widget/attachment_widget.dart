@@ -64,8 +64,8 @@ class _AttachmentState extends State<AttachmentWidget> {
                 Map<String, dynamic> data = await Data()
                     .topicRepository
                     .uploadAttachment(widget.fid, _authCode, image.path);
-                widget.attachmentCallback!(
-                    data["attachments"], data["attachments_check"]);
+                widget.attachmentCallback
+                    ?.call(data["attachments"], data["attachments_check"]);
                 setState(() => _list.add(data["url"]));
               } catch (err) {
                 debugPrint(err.toString());
@@ -90,11 +90,10 @@ class _AttachmentState extends State<AttachmentWidget> {
             onTap: () {
               if (widget.callback != null) {
                 if (_list.length > index) {
-                  widget.callback!("[img]./${_list[index]}[/img]", "", false);
+                  widget.callback
+                      ?.call("[img]./${_list[index]}[/img]", "", false);
                 } else {
-                  Fluttertoast.showToast(
-                    msg: "上传文件中，请稍候",
-                  );
+                  Fluttertoast.showToast(msg: "上传文件中，请稍候");
                 }
               }
             },

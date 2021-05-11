@@ -11,12 +11,18 @@ import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
 
 abstract class TopicRepository {
-  Future<TopicListData> getTopicList(int fid, int page,
-      {bool recommend = false, int? type = 0});
+  Future<TopicListData> getTopicList(
+      {int? fid,
+      int? authorid,
+      int? page,
+      bool recommend = false,
+      int? type = 0});
+
+  Future<dynamic> getUserReplies(int authorid, int page);
 
   Future<TopicDetailData> getTopicDetail(int tid, int page, int? authorid);
 
-  Future<TopicDetailData> getTopicReply(int? pid);
+  Future<TopicDetailData> getTopicReplies(int? pid);
 
   Future<TopicListData> getFavouriteTopicList(int page);
 
@@ -73,13 +79,38 @@ class TopicDataRepository implements TopicRepository {
   StoreRef<int, dynamic>? _lateInitStore;
 
   @override
-  Future<TopicListData> getTopicList(int fid, int page,
-      {bool recommend = false, int? type = 0}) async {
+  Future<TopicListData> getTopicList(
+      {int? fid,
+      int? authorid,
+      int? page,
+      bool recommend = false,
+      int? type = 0}) async {
     try {
-      final fidParam = type == 1 ? "stid=$fid" : "fid=$fid";
+      var params = "__output=8";
+      if (fid != null) {
+        params += type == 1 ? "&stid=$fid" : "&fid=$fid";
+      }
+      if (authorid != null) {
+        params += "&authorid=$authorid";
+      }
+      if (page != null) {
+        params += "&page=$page";
+      }
+      if (recommend) {
+        params += "&recommend=1&order_by=postdatedesc";
+      }
       Response<Map<String, dynamic>> response =
-          await Data().dio.get("thread.php?__output=8&$fidParam&page=$page"
-              "${recommend ? "&recommend=1&order_by=postdatedesc" : ""}");
+          await Data().dio.get("thread.php?$params");
+      return TopicListData.fromJson(response.data!, page);
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> getUserReplies(int authorid, int page) async {
+    try {
+      Response<Map<String, dynamic>> response = await Data().dio.get(
+          "thread.php?__output=8&searchpost=1&authorid=$authorid&page=$page");
       return TopicListData.fromJson(response.data!, page);
     } catch (err) {
       rethrow;
@@ -140,7 +171,7 @@ class TopicDataRepository implements TopicRepository {
   }
 
   @override
-  Future<TopicDetailData> getTopicReply(int? pid) async {
+  Future<TopicDetailData> getTopicReplies(int? pid) async {
     try {
       Response<Map<String, dynamic>> response =
           await Data().dio.get("read.php?__output=8&pid=$pid");

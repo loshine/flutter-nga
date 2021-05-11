@@ -108,9 +108,7 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
         TextButton(
           child: Text("确认"),
           onPressed: () {
-            if (widget.pageSelectedCallback != null) {
-              widget.pageSelectedCallback!(_isPage, _currentVal);
-            }
+            widget.pageSelectedCallback?.call(_isPage, _currentVal);
             Routes.pop(context);
           },
         ),

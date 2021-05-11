@@ -76,7 +76,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                         ),
                         PopupMenuButton(
                           child: Icon(Icons.more_vert),
-                          onSelected: __onMenuSelected,
+                          onSelected: _onMenuSelected,
                           itemBuilder: (BuildContext context) {
                             return _actions.map((String choice) {
                               return PopupMenuItem<String>(
@@ -336,7 +336,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     }
   }
 
-  __onMenuSelected(String action) {
+  _onMenuSelected(String action) {
     if (action == _actions[0]) {
       // 引用
       String quoteContent =

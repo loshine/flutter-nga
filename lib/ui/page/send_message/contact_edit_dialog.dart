@@ -34,7 +34,7 @@ class ContactEditDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {
-            callback!(_controller.text);
+            callback?.call(_controller.text);
             Routes.pop(context);
           },
           child: Text('确定'),

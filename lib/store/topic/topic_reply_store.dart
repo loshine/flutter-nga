@@ -17,7 +17,7 @@ abstract class _TopicReplyStore with Store {
 
   Future<TopicReplyStoreData> load(BuildContext context, int? pid) async {
     try {
-      TopicDetailData data = await Data().topicRepository.getTopicReply(pid);
+      TopicDetailData data = await Data().topicRepository.getTopicReplies(pid);
       List<Reply> replyList = [];
       data.replyList!.values.forEach((reply) {
         replyList.add(reply);

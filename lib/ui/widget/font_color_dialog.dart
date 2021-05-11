@@ -29,9 +29,8 @@ class FontColorDialog extends StatelessWidget {
                 ),
               ),
               onTap: () {
-                if (callback != null) {
-                  callback!("[color=${keyList[position]}]", "[/color]", true);
-                }
+                callback?.call(
+                    "[color=${keyList[position]}]", "[/color]", true);
                 Routes.pop(context);
               },
             );

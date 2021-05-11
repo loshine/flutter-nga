@@ -36,8 +36,7 @@ abstract class _UserInfoStore with Store {
 
   UserInfoStoreData _buildStateByInfo(User.UserInfo userInfo) {
     final moderatorForumsMap = <int, String>{};
-    if (userInfo != null &&
-        userInfo.adminForums != null &&
+    if (userInfo.adminForums != null &&
         userInfo.adminForums!.isNotEmpty) {
       userInfo.adminForums!.entries.forEach((entry) {
         moderatorForumsMap[int.parse(entry.key)] =
@@ -45,16 +44,16 @@ abstract class _UserInfoStore with Store {
       });
     }
     final reputationMap = <String?, String>{};
+    // ignore: unnecessary_null_comparison
     reputationMap['威望'] = "${userInfo == null ? 0 : userInfo.fame! / 10}";
-    if (userInfo != null &&
-        userInfo.reputation != null &&
+    if (userInfo.reputation != null &&
         userInfo.reputation!.isNotEmpty) {
       userInfo.reputation!.forEach((reputation) {
         reputationMap[reputation.name] = "${reputation.value}";
       });
     }
     final personalForumMap = <int?, String>{};
-    if (userInfo != null && userInfo.userForum != null) {
+    if (userInfo.userForum != null) {
       personalForumMap[userInfo.userForum!['0']] =
           "${codeUtils.unescapeHtml(userInfo.userForum!['1'])}";
     }

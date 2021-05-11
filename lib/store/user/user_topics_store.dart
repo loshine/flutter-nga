@@ -2,21 +2,22 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:mobx/mobx.dart';
 
-part 'search_topic_list_store.g.dart';
+part 'user_topics_store.g.dart';
 
-class SearchTopicListStore = _SearchTopicListStore with _$SearchTopicListStore;
+class UserTopicsStore = _UserTopicsStore with _$UserTopicsStore;
 
-abstract class _SearchTopicListStore with Store {
+abstract class _UserTopicsStore with Store {
   @observable
-  SearchTopicListStoreData state = SearchTopicListStoreData.initial();
+  UserTopicsStoreData state = UserTopicsStoreData.initial();
 
   @action
-  Future<SearchTopicListStoreData> refresh(
-      String keyword, int? fid, bool content) async {
+  Future<UserTopicsStoreData> refresh(int authorid) async {
     try {
-      TopicListData data =
-          await Data().topicRepository.searchTopic(keyword, fid, content, 1);
-      state = SearchTopicListStoreData(
+      TopicListData data = await Data()
+          .topicRepository
+          .getTopicList(authorid: authorid, page: 1);
+      state = UserTopicsStoreData(
+        size: data.topicRows,
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
@@ -29,13 +30,13 @@ abstract class _SearchTopicListStore with Store {
   }
 
   @action
-  Future<SearchTopicListStoreData> loadMore(
-      String keyword, int? fid, bool content) async {
+  Future<UserTopicsStoreData> loadMore(int authorid) async {
     try {
       TopicListData data = await Data()
           .topicRepository
-          .searchTopic(keyword, fid, content, state.page);
-      state = SearchTopicListStoreData(
+          .getTopicList(authorid: authorid, page: state.page + 1);
+      state = UserTopicsStoreData(
+        size: data.topicRows,
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
@@ -48,20 +49,23 @@ abstract class _SearchTopicListStore with Store {
   }
 }
 
-class SearchTopicListStoreData {
+class UserTopicsStoreData {
+  final int size;
   final int page;
   final int maxPage;
   final bool enablePullUp;
   final List<Topic> list;
 
-  const SearchTopicListStoreData({
+  const UserTopicsStoreData({
+    this.size = 35,
     this.page = 1,
     this.maxPage = 1,
     this.enablePullUp = false,
     this.list = const [],
   });
 
-  factory SearchTopicListStoreData.initial() => SearchTopicListStoreData(
+  factory UserTopicsStoreData.initial() => UserTopicsStoreData(
+        size: 35,
         page: 1,
         maxPage: 1,
         enablePullUp: false,

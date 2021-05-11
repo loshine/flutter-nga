@@ -98,9 +98,10 @@ class HomeDrawerBody extends StatelessWidget {
                   leading: Icon(CommunityMaterialIcons.view_dashboard),
                   title: Text("论坛"),
                   selected: currentSelection == 0,
-                  selectedTileColor: Palette.getColorDrawerListTileBackground(context),
+                  selectedTileColor:
+                      Palette.getColorDrawerListTileBackground(context),
                 ),
-                onTap: () => onSelectedCallback!(0),
+                onTap: () => onSelectedCallback?.call(0),
               ),
               color: Theme.of(context).backgroundColor,
             ),
@@ -110,9 +111,10 @@ class HomeDrawerBody extends StatelessWidget {
                   leading: Icon(CommunityMaterialIcons.archive),
                   title: Text("贴子收藏"),
                   selected: currentSelection == 1,
-                  selectedTileColor: Palette.getColorDrawerListTileBackground(context),
+                  selectedTileColor:
+                      Palette.getColorDrawerListTileBackground(context),
                 ),
-                onTap: () => onSelectedCallback!(1),
+                onTap: () => onSelectedCallback?.call(1),
               ),
               color: Theme.of(context).backgroundColor,
             ),
@@ -122,9 +124,10 @@ class HomeDrawerBody extends StatelessWidget {
                   leading: Icon(CommunityMaterialIcons.history),
                   title: Text("浏览历史"),
                   selected: currentSelection == 2,
-                  selectedTileColor: Palette.getColorDrawerListTileBackground(context),
+                  selectedTileColor:
+                      Palette.getColorDrawerListTileBackground(context),
                 ),
-                onTap: () => onSelectedCallback!(2),
+                onTap: () => onSelectedCallback?.call(2),
               ),
               color: Theme.of(context).backgroundColor,
             ),
@@ -134,9 +137,10 @@ class HomeDrawerBody extends StatelessWidget {
                   leading: Icon(Icons.message),
                   title: Text("短消息"),
                   selected: currentSelection == 3,
-                  selectedTileColor: Palette.getColorDrawerListTileBackground(context),
+                  selectedTileColor:
+                      Palette.getColorDrawerListTileBackground(context),
                 ),
-                onTap: () => onSelectedCallback!(3),
+                onTap: () => onSelectedCallback?.call(3),
               ),
               color: Theme.of(context).backgroundColor,
             ),
@@ -146,9 +150,10 @@ class HomeDrawerBody extends StatelessWidget {
                   leading: Icon(Icons.notifications_rounded),
                   title: Text("提醒信息"),
                   selected: currentSelection == 4,
-                  selectedTileColor: Palette.getColorDrawerListTileBackground(context),
+                  selectedTileColor:
+                      Palette.getColorDrawerListTileBackground(context),
                 ),
-                onTap: () => onSelectedCallback!(4),
+                onTap: () => onSelectedCallback?.call(4),
               ),
               color: Theme.of(context).backgroundColor,
             ),
@@ -192,13 +197,5 @@ class HomeDrawerBody extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  _getIconColor(int index) {
-    final selected = currentSelection == index;
-  }
-
-  _getTextColor(int index) {
-    final selected = currentSelection == index;
   }
 }

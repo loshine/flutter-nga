@@ -67,28 +67,28 @@ class FontStyleWidget extends StatelessWidget {
         );
         break;
       case "加粗":
-        callback!("[b]", "[/b]", true);
+        callback?.call("[b]", "[/b]", true);
         break;
       case "斜体":
-        callback!("[i]", "[/i]", true);
+        callback?.call("[i]", "[/i]", true);
         break;
       case "下划线":
-        callback!("[u]", "[/u]", true);
+        callback?.call("[u]", "[/u]", true);
         break;
       case "删除线":
-        callback!("[del]", "[/del]", true);
+        callback?.call("[del]", "[/del]", true);
         break;
       case "[@用户]":
-        callback!("[@", "]", true);
+        callback?.call("[@", "]", true);
         break;
       case "[quote]":
-        callback!("[quote]", "[/quote]", true);
+        callback?.call("[quote]", "[/quote]", true);
         break;
       case "[url]":
-        callback!("[url]", "[/url]", true);
+        callback?.call("[url]", "[/url]", true);
         break;
       case ">折叠<":
-        callback!("[collapse]", "[/collapse]", true);
+        callback?.call("[collapse]", "[/collapse]", true);
         break;
     }
   }

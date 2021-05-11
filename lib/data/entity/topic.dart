@@ -9,21 +9,21 @@ import 'package:flutter_nga/utils/constant.dart';
 class TopicListData {
   const TopicListData({
     this.global,
-    this.forum,
-    this.rows,
-    this.topicList,
-    this.currentRows,
-    this.topicRows,
-    this.rRows,
+    required this.forum,
+    required this.rows,
+    required this.topicList,
+    required this.currentRows,
+    required this.topicRows,
+    required this.rRows,
   });
 
   final dynamic global;
-  final ForumInfo? forum;
+  final ForumInfo forum;
   final int? rows;
-  final Map<String, Topic>? topicList;
-  final int? currentRows;
-  final int? topicRows;
-  final int? rRows;
+  final Map<String, Topic> topicList;
+  final int currentRows;
+  final int topicRows;
+  final int rRows;
 
   factory TopicListData.fromJson(Map<String, dynamic> map, int? page) {
     Map<String, dynamic> topicMap = map["__T"];
@@ -35,7 +35,7 @@ class TopicListData {
     return TopicListData(
       global: map["__GLOBAL"],
       forum: ForumInfo.fromJson(map["__F"]),
-      rows: map["__ROWS"],
+      rows: map["__ROWS"] != "" ? map["__ROWS"] : null,
       topicList: tempMap,
       currentRows: map["__T__ROWS"],
       topicRows: map["__T__ROWS_PAGE"],
@@ -43,7 +43,7 @@ class TopicListData {
     );
   }
 
-  int get maxPage => rows! ~/ rRows! + (rows! % rRows! != 0 ? 1 : 0);
+  int get maxPage => rows! ~/ rRows + (rows! % rRows != 0 ? 1 : 0);
 }
 
 class Topic {
@@ -67,6 +67,7 @@ class Topic {
     this.topicMisc,
     this.page,
     this.parent,
+    this.reply,
   });
 
   final int? tid;
@@ -89,6 +90,7 @@ class Topic {
   final int? page; // 用于记录是收藏的第几页
 
   final TopicParent? parent;
+  final TopicReply? reply;
 
   factory Topic.fromJson(Map<String, dynamic> map) {
     return Topic(
@@ -113,6 +115,7 @@ class Topic {
       topicMisc: map["topic_misc"],
       page: map["page"],
       parent: TopicParent.fromJson(map["parent"] == null ? {} : map["parent"]),
+      reply: map["__P"] == null ? null : TopicReply.fromJson(map["__P"]),
     );
   }
 
@@ -235,13 +238,47 @@ class ForumInfo {
       });
     }
     dynamic toppedTopic = map['topped_topic'];
-    if (!(toppedTopic is int)) {
+    if (toppedTopic! is int && toppedTopic != "") {
       toppedTopic = int.tryParse(toppedTopic);
+    } else {
+      toppedTopic = null;
     }
     return ForumInfo(
       topForumId: toppedTopic,
       fid: map['fid'],
       subForums: subForums,
+    );
+  }
+}
+
+class TopicReply {
+  final int tid;
+  final int pid;
+  final dynamic authorid;
+  final int type;
+  final dynamic postdate;
+  final String subject;
+  final String content;
+
+  TopicReply(
+    this.tid,
+    this.pid,
+    this.authorid,
+    this.type,
+    this.postdate,
+    this.subject,
+    this.content,
+  );
+
+  factory TopicReply.fromJson(Map<String, dynamic> map) {
+    return TopicReply(
+      map['tid'],
+      map['pid'],
+      map['authorid'],
+      map['type'],
+      map['postdate'],
+      map['subject'],
+      map['content'],
     );
   }
 }
