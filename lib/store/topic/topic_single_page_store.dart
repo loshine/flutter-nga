@@ -31,7 +31,7 @@ abstract class _TopicSinglePageStore with Store {
       List<Reply> hotReplyList = [];
       if (page == 1 && data.hotReplies.isNotEmpty && authorid == null) {
         List<TopicDetailData> hots = await Future.wait(data.hotReplies
-            .map((e) => Data().topicRepository.getTopicReply(e)));
+            .map((e) => Data().topicRepository.getTopicReplies(e)));
         hots.forEach((e) {
           userList.addAll(e.userList!.values);
           groups.addAll(e.groupList!.values);

@@ -65,7 +65,7 @@ class _EmoticonGroupWidget extends StatelessWidget {
             (expression) => Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => callback!(expression.content, "", false),
+                onTap: () => callback?.call(expression.content, "", false),
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: CachedNetworkImage(

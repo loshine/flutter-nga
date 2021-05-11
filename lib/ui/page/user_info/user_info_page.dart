@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -24,6 +23,7 @@ class UserInfoPage extends StatefulWidget {
 
 class _UserInfoPageState extends State<UserInfoPage> {
   final _store = UserInfoStore();
+  final _actions = const ["发布的主题", "发布的回复"];
 
   @override
   void initState() {
@@ -50,6 +50,20 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 expandedHeight: 200,
                 floating: false,
                 pinned: true,
+                actions: [
+                  PopupMenuButton(
+                    child: Icon(Icons.more_vert),
+                    onSelected: _onMenuSelected,
+                    itemBuilder: (BuildContext context) {
+                      return _actions.map((String choice) {
+                        return PopupMenuItem<String>(
+                          value: choice,
+                          child: Text(choice),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ],
                 flexibleSpace: FlexibleSpaceBar(
                   centerTitle: true,
                   title: Text(
@@ -113,8 +127,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
                   child: Text(
                     "[${entry.value}]",
-                    style:
-                        TextStyle(color: Palette.getColorTextSubtitle(context)),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 )),
       ));
@@ -274,7 +289,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       child: Text(
                         "[${entry.value}]",
                         style: TextStyle(
-                          color: Theme.of(context).accentColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     );
@@ -291,5 +306,17 @@ class _UserInfoPageState extends State<UserInfoPage> {
       size: Size(double.infinity, 40),
     ));
     return widgets;
+  }
+
+  _onMenuSelected(String action) {
+    if (action == _actions[0]) {
+      // 跳转某人的主题
+      Routes.navigateTo(context,
+          "${Routes.USER_TOPICS}?uid=${_store.state.uid}&username=${codeUtils.fluroCnParamsEncode(_store.state.username ?? "")}");
+    } else if (action == _actions[1]) {
+      // 跳转某人的回复
+      Routes.navigateTo(context,
+          "${Routes.USER_REPLIES}?uid=${_store.state.uid}&username=${codeUtils.fluroCnParamsEncode(_store.state.username ?? "")}");
+    }
   }
 }
