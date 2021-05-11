@@ -15,6 +15,8 @@ import 'package:flutter_nga/ui/page/settings/settings_page.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
+import 'package:flutter_nga/ui/page/user_info/user_replies_page.dart';
+import 'package:flutter_nga/ui/page/user_info/user_topics_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/linkroute/link_route.dart';
 
@@ -28,6 +30,8 @@ class Routes {
   static const String TOPIC_DETAIL = "/topic_detail";
   static const String TOPIC_PUBLISH = "/topic_publish";
   static const String USER = "/user";
+  static const String USER_TOPICS = "/user/posts";
+  static const String USER_REPLIES = "/user/replies";
   static const String SETTINGS = "/settings";
   static const String ACCOUNT_MANAGEMENT = "/account_management";
   static const String SEARCH = "/search";
@@ -93,6 +97,19 @@ class Routes {
       } else {
         return UserInfoPage(username: fluroCnParamsDecode(params["name"]![0]));
       }
+    }));
+    router.define(USER_TOPICS, handler: Handler(handlerFunc: (context, params) {
+      return UserTopicsPage(
+        uid: int.tryParse(params['uid']![0]) ?? 0,
+        username: fluroCnParamsDecode(params['username']![0]),
+      );
+    }));
+    router.define(USER_REPLIES,
+        handler: Handler(handlerFunc: (context, params) {
+      return UserRepliesPage(
+        uid: int.tryParse(params['uid']![0]) ?? 0,
+        username: fluroCnParamsDecode(params['username']![0]),
+      );
     }));
     router.define(SETTINGS,
         handler: Handler(handlerFunc: (context, params) => SettingsPage()));

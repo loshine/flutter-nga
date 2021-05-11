@@ -53,9 +53,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
   _onRefresh() {
     _store.refresh().catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(
-        msg: err.message,
-      );
+      Fluttertoast.showToast(msg: err.toString());
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }

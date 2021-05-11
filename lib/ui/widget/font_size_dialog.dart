@@ -34,9 +34,7 @@ class FontSizeDialog extends StatelessWidget {
                 child: Text("${sizeList[position]}"),
               ),
               onTap: () {
-                if (callback != null) {
-                  callback!("[size=${sizeList[position]}]", "[/size]", true);
-                }
+                callback?.call("[size=${sizeList[position]}]", "[/size]", true);
                 Routes.pop(context);
               },
             );

@@ -17,11 +17,11 @@ abstract class _FavouriteTopicListStore with Store {
       TopicListData data =
           await Data().topicRepository.getFavouriteTopicList(1);
       state = FavouriteTopicListStoreData(
-        size: data.topicRows ?? 35,
+        size: data.topicRows,
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
-        list: data.topicList!.values.toList(),
+        list: data.topicList.values.toList(),
       );
       return state;
     } catch (err) {
@@ -35,11 +35,11 @@ abstract class _FavouriteTopicListStore with Store {
       TopicListData data =
           await Data().topicRepository.getFavouriteTopicList(state.page + 1);
       state = FavouriteTopicListStoreData(
-        size: data.topicRows ?? 35,
+        size: data.topicRows,
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
-        list: state.list..addAll(data.topicList!.values),
+        list: state.list..addAll(data.topicList.values),
       );
       return state;
     } catch (err) {

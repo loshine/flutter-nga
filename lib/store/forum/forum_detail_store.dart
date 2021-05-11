@@ -15,8 +15,8 @@ abstract class _ForumDetailStore with Store {
       int fid, bool recommend, int? type) async {
     try {
       TopicListData data = await Data().topicRepository.getTopicList(
-            fid,
-            1,
+            fid: fid,
+            page: 1,
             recommend: recommend,
             type: type,
           );
@@ -24,7 +24,7 @@ abstract class _ForumDetailStore with Store {
         page: 1,
         maxPage: data.maxPage,
         enablePullUp: 1 < data.maxPage,
-        list: data.topicList!.values.toList(),
+        list: data.topicList.values.toList(),
         info: data.forum,
       );
       return state;
@@ -38,8 +38,8 @@ abstract class _ForumDetailStore with Store {
       int fid, bool recommend, int? type) async {
     try {
       TopicListData data = await Data().topicRepository.getTopicList(
-            fid,
-            state.page + 1,
+            fid: fid,
+            page: state.page + 1,
             recommend: recommend,
             type: type,
           );
@@ -47,7 +47,7 @@ abstract class _ForumDetailStore with Store {
         page: state.page + 1,
         maxPage: data.maxPage,
         enablePullUp: state.page + 1 < data.maxPage,
-        list: state.list..addAll(data.topicList!.values),
+        list: state.list..addAll(data.topicList.values),
         info: data.forum,
       );
       return state;
