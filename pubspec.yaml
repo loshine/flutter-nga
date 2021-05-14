@@ -29,18 +29,18 @@ dependencies:
   dio: ^4.0.0
   fast_gbk: ^1.0.0-rc
   sembast: ^3.0.2
-  flutter_html: 2.0.0-nullsafety.0
+  flutter_html: ^2.0.0
   html_unescape: ^2.0.0
   timeago: ^3.0.2
   flutter_keyboard_visibility: ^5.0.1
   device_info: ^2.0.0
   intl: ^0.17.0
-  permission_handler: ^7.0.0
+  permission_handler: ^7.1.0
   adaptive_theme: ^2.2.0
   flutter_inappwebview: ^5.3.2
-  image_picker: ^0.7.4
+  image_picker: ^0.7.5
   photo_view: ^0.11.1
-  pull_to_refresh: ^1.6.4-nullsafety.1
+  pull_to_refresh: ^2.0.0
   cached_network_image: ^3.0.0
   fluttertoast: ^8.0.6
   collection: ^1.15.0

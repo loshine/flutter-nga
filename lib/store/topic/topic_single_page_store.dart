@@ -22,21 +22,21 @@ abstract class _TopicSinglePageStore with Store {
       TopicDetailData data =
           await Data().topicRepository.getTopicDetail(tid, page, authorid);
       List<Reply> replyList = [];
-      data.replyList!.values.forEach((reply) {
+      data.replyList.values.forEach((reply) {
         replyList.add(reply);
       });
-      List<User> userList = data.userList!.values.toList();
-      Set<Group> groups = data.groupList!.values.toSet();
-      Set<Medal> medals = data.medalList!.values.toSet();
+      List<User> userList = data.userList.values.toList();
+      Set<Group> groups = data.groupList.values.toSet();
+      Set<Medal> medals = data.medalList.values.toSet();
       List<Reply> hotReplyList = [];
       if (page == 1 && data.hotReplies.isNotEmpty && authorid == null) {
         List<TopicDetailData> hots = await Future.wait(data.hotReplies
             .map((e) => Data().topicRepository.getTopicReplies(e)));
         hots.forEach((e) {
-          userList.addAll(e.userList!.values);
-          groups.addAll(e.groupList!.values);
-          medals.addAll(e.medalList!.values);
-          hotReplyList.addAll(e.replyList!.values);
+          userList.addAll(e.userList.values);
+          groups.addAll(e.groupList.values);
+          medals.addAll(e.medalList.values);
+          hotReplyList.addAll(e.replyList.values);
         });
       }
       state = TopicSinglePageStoreData(
@@ -64,11 +64,11 @@ class TopicSinglePageStoreData {
   final int maxFloor;
   final bool enablePullUp;
   final Topic? topic;
-  final List<Reply>? replyList;
-  final List<Reply>? hotReplyList;
-  final List<User>? userList;
-  final Set<Group>? groupSet;
-  final Set<Medal>? medalSet;
+  final List<Reply> replyList;
+  final List<Reply> hotReplyList;
+  final List<User> userList;
+  final Set<Group> groupSet;
+  final Set<Medal> medalSet;
 
   const TopicSinglePageStoreData({
     required this.page,
@@ -76,11 +76,11 @@ class TopicSinglePageStoreData {
     required this.maxFloor,
     required this.enablePullUp,
     this.topic,
-    this.replyList,
-    this.hotReplyList,
-    this.userList,
-    this.groupSet,
-    this.medalSet,
+    required this.replyList,
+    required this.hotReplyList,
+    required this.userList,
+    required this.groupSet,
+    required this.medalSet,
   });
 
   factory TopicSinglePageStoreData.initial() => TopicSinglePageStoreData(

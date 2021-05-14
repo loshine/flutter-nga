@@ -47,7 +47,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
         child: ScrollablePositionedList.builder(
           itemScrollController: _itemScrollController,
           physics: BouncingScrollPhysics(),
-          itemCount: _store.state.replyList!.length,
+          itemCount: _store.state.replyList.length,
           itemBuilder: (context, position) => _buildListItem(context, position),
         ),
       );
@@ -71,15 +71,14 @@ class _TopicSingleState extends State<TopicSinglePage> {
   }
 
   Widget _buildListItem(BuildContext context, int position) {
-    final reply = _store.state.replyList![position];
+    final reply = _store.state.replyList[position];
     if (position == 0 &&
         _store.state.page == 1 &&
-        _store.state.hotReplyList!.isNotEmpty) {
+        _store.state.hotReplyList.isNotEmpty) {
       // 显示热评
       return Column(
         children: [_buildReplyWidget(context, reply)]..addAll(_store
-            .state.hotReplyList!
-            .map((e) => _buildReplyWidget(context, e, hot: true))),
+            .state.hotReplyList.map((e) => _buildReplyWidget(context, e, hot: true))),
       );
     } else {
       return _buildReplyWidget(context, reply);
@@ -89,7 +88,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
   Widget _buildReplyWidget(BuildContext context, Reply reply,
       {bool hot = false}) {
     User? user;
-    for (var u in _store.state.userList!) {
+    for (var u in _store.state.userList) {
       if (u.uid == reply.authorId) {
         user = u;
         break;
@@ -101,7 +100,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
 
     Group? group;
     if (user.memberId != null) {
-      for (var g in _store.state.groupSet!) {
+      for (var g in _store.state.groupSet) {
         if (g.id == user.memberId) {
           group = g;
           break;
@@ -112,7 +111,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
     List<Medal> medalList = [];
     if (user.medal != null && user.medal!.isNotEmpty) {
       user.medal!.split(",").forEach((id) {
-        for (var m in _store.state.medalSet!) {
+        for (var m in _store.state.medalSet) {
           if (id == m.id.toString()) {
             medalList.add(m);
             break;
@@ -122,9 +121,9 @@ class _TopicSingleState extends State<TopicSinglePage> {
     }
 
     List<User> commentUserList = [];
-    if (reply.commentList != null && reply.commentList!.isNotEmpty) {
-      reply.commentList!.forEach((comment) {
-        for (var user in _store.state.userList!) {
+    if (reply.commentList.isNotEmpty) {
+      reply.commentList.forEach((comment) {
+        for (var user in _store.state.userList) {
           if (user.uid == comment.authorId) {
             commentUserList.add(user);
             break;

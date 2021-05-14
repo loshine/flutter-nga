@@ -4,12 +4,12 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 
 class TopicDetailData {
-  final Map<String, Reply>? replyList;
-  final Map<String, User>? userList;
+  final Map<String, Reply> replyList;
+  final Map<String, User> userList;
 
-  final Map<String, Group>? groupList;
-  final Map<String, Medal>? medalList;
-  final Map<String, Reputation>? reputationList;
+  final Map<String, Group> groupList;
+  final Map<String, Medal> medalList;
+  final Map<String, Reputation> reputationList;
 
   final dynamic global;
   final int rows;
@@ -21,11 +21,11 @@ class TopicDetailData {
 
   const TopicDetailData({
     this.global,
-    this.userList,
-    this.replyList,
-    this.groupList,
-    this.medalList,
-    this.reputationList,
+    required this.userList,
+    required this.replyList,
+    required this.groupList,
+    required this.medalList,
+    required this.reputationList,
     required this.rows,
     required this.currentRows,
     required this.replyPageRows,
@@ -116,8 +116,8 @@ class Reply {
   int? lou;
   int? contentLength;
   int? postDateTimestamp;
-  List<Reply>? commentList;
-  List<Attachment>? attachmentList;
+  List<Reply> commentList;
+  List<Attachment> attachmentList;
 
   Reply({
     this.content,
@@ -135,8 +135,8 @@ class Reply {
     this.lou,
     this.contentLength,
     this.postDateTimestamp,
-    this.commentList,
-    this.attachmentList,
+    required this.commentList,
+    required this.attachmentList,
   });
 
   factory Reply.fromJson(Map<String, dynamic> map) {
