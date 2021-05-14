@@ -48,7 +48,7 @@ class _AttachmentState extends State<AttachmentWidget> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            final storageStatus = await Permission.storage.status;
+            final storageStatus = await Permission.storage.request();
             if (storageStatus == PermissionStatus.granted) {
               PickedFile? image =
                   await _picker.getImage(source: ImageSource.gallery);
