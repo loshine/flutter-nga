@@ -19,12 +19,12 @@ abstract class _TopicReplyStore with Store {
     try {
       TopicDetailData data = await Data().topicRepository.getTopicReplies(pid);
       List<Reply> replyList = [];
-      data.replyList!.values.forEach((reply) {
+      data.replyList.values.forEach((reply) {
         replyList.add(reply);
       });
-      List<User> userList = data.userList!.values.toList();
-      Set<Group> groups = data.groupList!.values.toSet();
-      Set<Medal> medals = data.medalList!.values.toSet();
+      List<User> userList = data.userList.values.toList();
+      Set<Group> groups = data.groupList.values.toSet();
+      Set<Medal> medals = data.medalList.values.toSet();
       state = TopicReplyStoreData(
         replyList: replyList,
         userList: userList,

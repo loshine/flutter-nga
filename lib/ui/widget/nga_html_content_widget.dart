@@ -65,8 +65,8 @@ class NgaHtmlContentWidget extends StatelessWidget {
     );
   }
 
-  Widget _alignmentRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _alignmentRender(RenderContext context, Widget parsedChild) {
+    final attributes = context.tree.attributes;
     if (attributes['align'] != null) {
       final align = attributes['align'];
       var alignment = WrapAlignment.start;
@@ -88,8 +88,8 @@ class NgaHtmlContentWidget extends StatelessWidget {
     return parsedChild;
   }
 
-  Widget _fontSizeRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _fontSizeRender(RenderContext context, Widget parsedChild) {
+    final attributes = context.tree.attributes;
     if (attributes['font-size'] != null) {
       final fontSize = attributes['font-size']!;
       if (fontSize.endsWith("%")) {
@@ -104,8 +104,8 @@ class NgaHtmlContentWidget extends StatelessWidget {
     return DefaultTextStyle.merge(child: parsedChild);
   }
 
-  Widget _fontColorRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _fontColorRender(RenderContext context, Widget parsedChild) {
+    final attributes = context.tree.attributes;
     if (attributes['color'] != null) {
       String? color = attributes['color'];
       return DefaultTextStyle.merge(
@@ -120,8 +120,8 @@ class NgaHtmlContentWidget extends StatelessWidget {
     }
   }
 
-  Widget _collapseRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _collapseRender(RenderContext context, Widget parsedChild) {
+    final attributes = context.tree.attributes;
     if (attributes['title'] != null) {
       return CollapseWidget.fromNodes(
         title: attributes['title'],
@@ -132,8 +132,8 @@ class NgaHtmlContentWidget extends StatelessWidget {
     }
   }
 
-  Widget _imageRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _imageRender(RenderContext context, Widget parsedChild) {
+    final attributes = context.tree.attributes;
     return Builder(builder: (context) {
       return InkWell(
         onTap: () => Routes.navigateTo(context,
@@ -151,8 +151,8 @@ class NgaHtmlContentWidget extends StatelessWidget {
     });
   }
 
-  Widget _emoticonRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _emoticonRender(RenderContext context, Widget parsedChild) {
+    final attributes = context.tree.attributes;
     return CachedNetworkImage(
       fit: BoxFit.cover,
       imageUrl: attributes['src']!,
@@ -164,8 +164,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
     );
   }
 
-  Widget _blockquoteRender(RenderContext renderContext, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _blockquoteRender(RenderContext renderContext, Widget parsedChild) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16),
@@ -179,8 +178,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
     );
   }
 
-  Widget _albumRender(RenderContext renderContext, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _albumRender(RenderContext renderContext, Widget parsedChild) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16),
@@ -194,13 +192,11 @@ class NgaHtmlContentWidget extends StatelessWidget {
     );
   }
 
-  Widget _hrRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _hrRender(RenderContext context, Widget parsedChild) {
     return Divider(height: 1);
   }
 
-  Widget _tableRender(RenderContext context, Widget parsedChild,
-      Map<String, String> attributes, dom.Element? element) {
+  Widget _tableRender(RenderContext context, Widget parsedChild) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: parsedChild,
