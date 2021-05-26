@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';

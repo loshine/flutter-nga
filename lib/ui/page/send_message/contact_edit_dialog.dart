@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 typedef EditCallback = void Function(String text);

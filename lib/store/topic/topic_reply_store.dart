@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:mobx/mobx.dart';
 
 part 'topic_reply_store.g.dart';

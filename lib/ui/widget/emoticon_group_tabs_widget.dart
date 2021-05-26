@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/emoticon.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
-import 'package:flutter_nga/utils/palette.dart';
 
 class EmoticonGroupTabsWidget extends StatefulWidget {
   const EmoticonGroupTabsWidget({this.callback, Key? key}) : super(key: key);

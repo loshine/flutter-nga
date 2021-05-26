@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/palette.dart';
 
 import 'child_forum_item_widget.dart';
 

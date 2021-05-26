@@ -175,7 +175,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         ),
         SizedBox(
           width: double.infinity,
-          height: widget.reply.commentList!.isEmpty ? 0 : null,
+          height: widget.reply.commentList.isEmpty ? 0 : null,
           child: Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
@@ -184,7 +184,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         Offstage(
-          offstage: widget.reply.attachmentList!.isEmpty,
+          offstage: widget.reply.attachmentList.isEmpty,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -381,7 +381,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         ),
       ),
     ));
-    widgets.addAll(widget.reply.commentList!.map((comment) =>
+    widgets.addAll(widget.reply.commentList.map((comment) =>
         TopicReplyCommentItemWidget(
             comment,
             widget.userList!
@@ -403,7 +403,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     columnWidgets.add(button);
     if (_attachmentsExpanded) {
       List<Widget> attachmentWidgets = [];
-      attachmentWidgets.addAll(widget.reply.attachmentList!.map((attachment) {
+      attachmentWidgets.addAll(widget.reply.attachmentList.map((attachment) {
         return Padding(
           padding: EdgeInsets.only(right: 16),
           child: CachedNetworkImage(
