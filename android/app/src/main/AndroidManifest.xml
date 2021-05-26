@@ -18,6 +18,7 @@
         android:name="io.flutter.app.FlutterApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="NationalGayAlliance"
+        android:requestLegacyExternalStorage="true"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <meta-data
@@ -40,6 +41,7 @@
         <activity
             android:name=".ui.LoginActivity"
             android:label="@string/activity_login"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme" />
     </application>
 </manifest>

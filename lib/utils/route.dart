@@ -19,6 +19,7 @@ import 'package:flutter_nga/ui/page/user_info/user_replies_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_topics_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/linkroute/link_route.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Routes {
   static late FluroRouter router;
@@ -219,10 +220,15 @@ class Routes {
   /// 处理 html 控件中超链接点击事件
   static void onLinkTap(BuildContext context, String? link) {
     debugPrint("User tap link: $link");
+    var handled = false;
     for (LinkRoute linkRoute in _linkRoutes) {
       final matches = RegExp(linkRoute.matchRegExp()).allMatches(link ?? "");
       if (matches.isEmpty) continue;
       matches.forEach((match) => linkRoute.handleMatch(context, match));
+      handled = true;
+    }
+    if (!handled) {
+      launch(link ?? "");
     }
   }
 

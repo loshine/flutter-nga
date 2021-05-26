@@ -10,7 +10,6 @@ import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
 import 'package:flutter_nga/ui/page/home/home_drawer.dart';
 import 'package:flutter_nga/ui/page/notification/notification_list_page.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:provider/provider.dart';
 

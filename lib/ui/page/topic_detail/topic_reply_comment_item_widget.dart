@@ -4,7 +4,6 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_comment_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/palette.dart';
 
 class TopicReplyCommentItemWidget extends StatelessWidget {
   const TopicReplyCommentItemWidget(this.reply, this.user, {Key? key})

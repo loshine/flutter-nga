@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/utils/palette.dart';
 
 class InfoWidget extends StatelessWidget {
   const InfoWidget({this.title, this.subTitle, Key? key}) : super(key: key);
