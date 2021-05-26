@@ -60,14 +60,9 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
   }
 
   _save() async {
-    final status = await Permission.storage.request();
-    if (status.isGranted) {
-      final file = await Data()
-          .resourceRepository
-          .downloadImage(pictureUtils.getOriginalUrl(widget.url!));
-      Fluttertoast.showToast(msg: "保存成功, 路径位于${file.path}");
-    } else {
-      Fluttertoast.showToast(msg: "获取存储权限失败");
-    }
+    final success = await Data()
+        .resourceRepository
+        .downloadImage(pictureUtils.getOriginalUrl(widget.url!));
+    Fluttertoast.showToast(msg: success == true ? "保存到相册成功" : "保存到相册失败");
   }
 }

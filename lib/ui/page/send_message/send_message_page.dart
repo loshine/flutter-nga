@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/message/send_message_store.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class SendMessagePage extends StatefulWidget {
