@@ -80,7 +80,7 @@ class LoginActivity : AppCompatActivity() {
                 if (message.startsWith("loginSuccess : ")) {
                     val json = message.substring("loginSuccess : ".length)
                     activityRef.get()?.let { activity ->
-                        CookiesEventHandler.onCookiesChanges(activity, json)
+                        CookiesEventHandler.onCookiesChanges(json)
                         activity.finish()
                     }
                 }

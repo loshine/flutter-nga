@@ -1,17 +1,19 @@
 package io.github.loshine.flutternga.plugins.login
 
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.lifecycleScope
 import io.flutter.plugin.common.EventChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 object CookiesEventHandler {
 
+    private val job = Job()
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + job)
     private val channel = Channel<String>()
 
-    fun init(eventSink: EventChannel.EventSink, coroutineScope: LifecycleCoroutineScope) {
+    fun init(eventSink: EventChannel.EventSink) {
         coroutineScope.launch {
             for (message in channel) {
                 eventSink.success(message)
@@ -21,9 +23,10 @@ object CookiesEventHandler {
 
     fun dispose() {
         channel.cancel()
+        job.cancel()
     }
 
-    fun onCookiesChanges(activity: AppCompatActivity, cookies: String) {
-        activity.lifecycleScope.launch { channel.send(cookies) }
+    fun onCookiesChanges(cookies: String) {
+        coroutineScope.launch { channel.send(cookies) }
     }
 }

@@ -12,7 +12,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
         FlutterLoginPlugin.registerWith(flutterEngine, this)
-        FlutterCookiesPlugin.registerWith(flutterEngine, this)
+        FlutterCookiesPlugin.registerWith(flutterEngine)
         FlutterGallerySaverPlugin.registerWith(flutterEngine)
         FlutterJsonPlugin.registerWith(flutterEngine)
     }

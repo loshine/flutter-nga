@@ -1,30 +1,26 @@
 package io.github.loshine.flutternga.plugins.login
 
 import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 
-class FlutterCookiesPlugin(lifecycleOwner: LifecycleOwner) : FlutterPlugin, EventChannel.StreamHandler {
+class FlutterCookiesPlugin : FlutterPlugin, EventChannel.StreamHandler {
 
     companion object {
         const val CHANNEL = "io.github.loshine.flutternga.cookies/plugin"
-        const val FILTER = "io.github.loshine.flutternga.cookies"
 
-        fun registerWith(flutterEngine: FlutterEngine, lifecycleOwner: LifecycleOwner) {
+        fun registerWith(flutterEngine: FlutterEngine) {
             val channel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
-            val instance = FlutterCookiesPlugin(lifecycleOwner)
+            val instance = FlutterCookiesPlugin()
             channel.setStreamHandler(instance)
         }
     }
 
-    private val coroutineScope = lifecycleOwner.lifecycleScope
     private var channel: EventChannel? = null
 
     override fun onListen(any: Any?, eventSink: EventChannel.EventSink) {
-        CookiesEventHandler.init(eventSink, coroutineScope)
+        CookiesEventHandler.init(eventSink)
     }
 
     override fun onCancel(any: Any?) {

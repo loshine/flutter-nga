@@ -27,6 +27,10 @@ class Palette {
   static final _colorAlbumBorder = Color(0xFF91B262);
   static final _colorAlbumBackground = Color(0xFFd6dcae);
 
+  static Color getColorPrimary(BuildContext context) {
+    return isDark(context) ? colorDarkPrimary : colorPrimary;
+  }
+
   static Color getColorThumbBackground(BuildContext context) {
     return isDark(context) ? Colors.white24 : _colorThumbBackground;
   }

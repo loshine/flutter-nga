@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -15,10 +16,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  StreamSubscription? _subscription;
+
   @override
   void initState() {
     Fluttertoast.showToast(msg: "点击右上角按钮可切换原生 WebView 登录");
-    Login.cookieStream.listen((event) {
+    _subscription = Login.cookieStream.listen((event) {
       _processCookieJson(event);
     });
     super.initState();
@@ -26,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    Login.dispose();
+    _subscription?.cancel();
     super.dispose();
   }
 
