@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+import 'package:flutter_nga/plugins/gallery_saver.dart';
 
 /// 资源资源库
 abstract class ResourceRepository {
@@ -18,6 +18,7 @@ class ResourceDataRepository implements ResourceRepository {
 
   @override
   Future<bool?> downloadImage(String url) async {
-    return GallerySaver.saveImage(url, albumName: "NationalGayAlliance");
+    // return GallerySaver.saveImage(url, albumName: "NationalGayAlliance");
+    return AndroidGallerySaver.save(url);
   }
 }

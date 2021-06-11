@@ -1,7 +1,6 @@
 package io.github.loshine.flutternga.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.webkit.ConsoleMessage
