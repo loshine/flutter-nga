@@ -84,9 +84,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
                 onPressed: () {
                   Routes.pop(context);
                   _store.delete(topic).then((message) {
-                    Fluttertoast.showToast(
-                      msg: message!,
-                    );
+                    Fluttertoast.showToast(msg: message??"");
                   });
                 },
                 child: Text("确认"),

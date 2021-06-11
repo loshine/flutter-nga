@@ -20,4 +20,14 @@ abstract class _AccountListStore with Store {
   Future<int> quitAll() {
     return Data().userRepository.quitAllLoginUser();
   }
+
+  @action
+  Future<bool> setDefault(CacheUser cacheUser) {
+    return Data().userRepository.setDefault(cacheUser);
+  }
+
+  @action
+  Future<bool> delete(CacheUser cacheUser) {
+    return Data().userRepository.deleteCacheUser(cacheUser);
+  }
 }

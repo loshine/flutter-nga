@@ -219,7 +219,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
   _addFavourite() {
     final store = Provider.of<TopicDetailStore>(context, listen: false);
     store.addFavourite(widget.tid).then((message) {
-      Fluttertoast.showToast(msg: message!);
+      Fluttertoast.showToast(msg: message.toString());
     }).catchError((e) {
       Fluttertoast.showToast(msg: e.toString());
     });

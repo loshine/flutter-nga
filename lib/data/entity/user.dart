@@ -100,36 +100,19 @@ class User {
 }
 
 class CacheUser {
-  CacheUser(
-    this.uid,
-    this.cid,
-    this.nickname, {
-    this.avatarUrl,
-    this.replyCount,
-    this.replyString,
-  });
+  CacheUser(this.uid, this.cid, this.nickname, this.enabled);
 
-  final String? uid;
-  final String? cid;
-  final String? nickname;
-  final String? avatarUrl;
-
-  int? replyCount;
-  String? replyString;
+  final String uid;
+  final String cid;
+  final String nickname;
+  final bool enabled;
 
   Map<String, dynamic> toJson() {
-    return {'uid': uid, 'cid': cid, 'nickname': nickname};
+    return {'uid': uid, 'cid': cid, 'nickname': nickname, 'enabled': enabled};
   }
 
   factory CacheUser.fromJson(Map map) {
-    return CacheUser(
-      map['uid'],
-      map['cid'],
-      map['nickname'],
-      avatarUrl: map['avatarUrl'],
-      replyCount: map['replyCount'],
-      replyString: map['replyString'],
-    );
+    return CacheUser(map['uid'], map['cid'], map['nickname'], map['enabled']);
   }
 }
 

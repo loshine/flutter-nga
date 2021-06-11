@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/store/user/account_list_store.dart';
+import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -41,14 +43,25 @@ class _AccountManagementState extends State<AccountManagementPage> {
             itemBuilder: (context, position) => Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => Fluttertoast.showToast(
-                    msg: _store.list[position].nickname!),
+                onTap: () => _setDefault(_store.list[position]),
+                onLongPress: () => _showDeleteDialog(_store.list[position]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(_store.list[position].nickname!),
+                    ListTile(
+                      title: Text(
+                        _store.list[position].nickname,
+                        style: TextStyle(
+                            color: _store.list[position].enabled
+                                ? Palette.getColorPrimary(context)
+                                : Theme.of(context).textTheme.bodyText1?.color),
+                      ),
+                      subtitle: Text(
+                        "UID:${_store.list[position].uid}",
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyText2?.color),
+                      ),
                     ),
                     Divider(height: 1),
                   ],
@@ -94,5 +107,35 @@ class _AccountManagementState extends State<AccountManagementPage> {
         .then((_) => Fluttertoast.showToast(msg: "成功"))
         .whenComplete(
             () => Routes.navigateTo(context, Routes.HOME, clearStack: true));
+  }
+
+  _setDefault(CacheUser user) {
+    _store.setDefault(user).then((_) => _refreshController.requestRefresh());
+  }
+
+  _showDeleteDialog(CacheUser user) {
+    showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text("提示"),
+            content: Text("是否删除该登录用户"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Routes.pop(context),
+                child: Text("取消"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Routes.pop(context);
+                  _store
+                      .delete(user)
+                      .then((_) => _refreshController.requestRefresh());
+                },
+                child: Text("确认"),
+              ),
+            ],
+          );
+        });
   }
 }

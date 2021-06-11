@@ -4,7 +4,8 @@ import 'package:mobx/mobx.dart';
 
 part 'home_drawer_header_store.g.dart';
 
-class HomeDrawerHeaderStore = _HomeDrawerHeaderStore with _$HomeDrawerHeaderStore;
+class HomeDrawerHeaderStore = _HomeDrawerHeaderStore
+    with _$HomeDrawerHeaderStore;
 
 abstract class _HomeDrawerHeaderStore with Store {
   @observable
@@ -16,6 +17,8 @@ abstract class _HomeDrawerHeaderStore with Store {
       CacheUser? user = await Data().userRepository.getDefaultUser();
       if (user != null) {
         userInfo = await Data().userRepository.getUserInfoByUid(user.uid);
+      } else {
+        userInfo = null;
       }
     } catch (err) {
       rethrow;
