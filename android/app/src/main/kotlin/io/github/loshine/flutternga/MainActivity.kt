@@ -5,6 +5,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugins.GeneratedPluginRegistrant
 import io.github.loshine.flutternga.plugins.login.FlutterCookiesPlugin
 import io.github.loshine.flutternga.plugins.login.FlutterGallerySaverPlugin
+import io.github.loshine.flutternga.plugins.login.FlutterJsonPlugin
 import io.github.loshine.flutternga.plugins.login.FlutterLoginPlugin
 
 class MainActivity : FlutterActivity() {
@@ -13,5 +14,6 @@ class MainActivity : FlutterActivity() {
         FlutterLoginPlugin.registerWith(flutterEngine, this)
         FlutterCookiesPlugin.registerWith(flutterEngine, this)
         FlutterGallerySaverPlugin.registerWith(flutterEngine)
+        FlutterJsonPlugin.registerWith(flutterEngine)
     }
 }
