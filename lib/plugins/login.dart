@@ -16,12 +16,6 @@ class Login {
     }
     throw Exception("Not implemented!!!");
   }
-
-  static void dispose() {
-    if (Platform.isAndroid) {
-      return _AndroidLogin.dispose();
-    }
-  }
 }
 
 class _AndroidLogin {
@@ -35,9 +29,5 @@ class _AndroidLogin {
 
   static Future<String> startLogin() async {
     return await loginChannel.invokeMethod('start_login');
-  }
-
-  static void dispose() {
-    loginChannel.setMethodCallHandler(null);
   }
 }

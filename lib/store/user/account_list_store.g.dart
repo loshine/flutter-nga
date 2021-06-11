@@ -46,6 +46,28 @@ mixin _$AccountListStore on _AccountListStore, Store {
   }
 
   @override
+  Future<bool> setDefault(CacheUser cacheUser) {
+    final _$actionInfo = _$_AccountListStoreActionController.startAction(
+        name: '_AccountListStore.setDefault');
+    try {
+      return super.setDefault(cacheUser);
+    } finally {
+      _$_AccountListStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<bool> delete(CacheUser cacheUser) {
+    final _$actionInfo = _$_AccountListStoreActionController.startAction(
+        name: '_AccountListStore.delete');
+    try {
+      return super.delete(cacheUser);
+    } finally {
+      _$_AccountListStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 list: ${list}
