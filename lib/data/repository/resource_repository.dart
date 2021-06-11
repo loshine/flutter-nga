@@ -19,6 +19,6 @@ class ResourceDataRepository implements ResourceRepository {
   @override
   Future<bool?> downloadImage(String url) async {
     // return GallerySaver.saveImage(url, albumName: "NationalGayAlliance");
-    return AndroidGallerySaver.save(url);
+    return GallerySaver.save(url);
   }
 }

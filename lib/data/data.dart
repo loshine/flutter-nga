@@ -12,6 +12,7 @@ import 'package:flutter_nga/data/repository/message_repository.dart';
 import 'package:flutter_nga/data/repository/resource_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
+import 'package:flutter_nga/plugins/json.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:path_provider/path_provider.dart';
@@ -110,9 +111,14 @@ class Data {
         try {
           map = json.decode(responseBody);
         } catch (err) {
-          debugPrint(err.toString());
-          response.data = responseBody;
-          return handler.next(response);
+          // 可能是非标准 json 格式导致，此时从 Java 走一遍，转换为标准格式
+          try {
+            map = json.decode(await Json.fix(responseBody));
+          } catch (e) {
+            debugPrint(e.toString());
+            response.data = responseBody;
+            return handler.next(response);
+          }
         }
         DioError? dioError = _preHandleServerError(response, map!);
         if (dioError != null) {

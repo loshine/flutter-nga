@@ -82,7 +82,12 @@ class MessageDataRepository extends MessageRepository {
     try {
       Response<Map<String, dynamic>> response =
           await Data().dio.get("nuke.php?__output=8&__lib=noti&__act=get_all");
-      return NotificationInfoListData.fromJson(response.data!['0']);
+      final data = response.data!['0'];
+      if (data == "") {
+        return NotificationInfoListData.fromJson({});
+      } else {
+        return NotificationInfoListData.fromJson(response.data!['0']);
+      }
     } catch (err) {
       rethrow;
     }
