@@ -18,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     Fluttertoast.showToast(msg: "点击右上角按钮可切换原生 WebView 登录");
-    AndroidLogin.cookieStream.listen((event) {
+    Login.cookieStream.listen((event) {
       _processCookieJson(event);
     });
     super.initState();
@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    AndroidLogin.dispose();
+    Login.dispose();
     super.dispose();
   }
 
@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _selectAction(String value) {
     if ("原生登录" == value) {
-      AndroidLogin.startLogin();
+      Login.startLogin();
     } else {
       showDialog(
         context: context,
