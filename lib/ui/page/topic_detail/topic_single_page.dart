@@ -27,9 +27,17 @@ class TopicSinglePage extends StatefulWidget {
 }
 
 class _TopicSingleState extends State<TopicSinglePage> {
-  final _refreshController = RefreshController(initialRefresh: true);
+  final _refreshController = RefreshController(initialRefresh: false);
   final _itemScrollController = ItemScrollController();
   final _store = TopicSinglePageStore();
+
+  @override
+  void initState() {
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _refreshController.requestRefresh();
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -55,6 +63,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
   }
 
   _onRefresh() {
+    map.clear();
     final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
     _store
         .refresh(context, widget.tid, widget.page, widget.authorid)
@@ -70,6 +79,8 @@ class _TopicSingleState extends State<TopicSinglePage> {
     });
   }
 
+  final map = <String, Widget>{};
+
   Widget _buildListItem(BuildContext context, int position) {
     final reply = _store.state.replyList[position];
     if (position == 0 &&
@@ -78,7 +89,8 @@ class _TopicSingleState extends State<TopicSinglePage> {
       // 显示热评
       return Column(
         children: [_buildReplyWidget(context, reply)]..addAll(_store
-            .state.hotReplyList.map((e) => _buildReplyWidget(context, e, hot: true))),
+            .state.hotReplyList
+            .map((e) => _buildReplyWidget(context, e, hot: true))),
       );
     } else {
       return _buildReplyWidget(context, reply);
@@ -87,57 +99,65 @@ class _TopicSingleState extends State<TopicSinglePage> {
 
   Widget _buildReplyWidget(BuildContext context, Reply reply,
       {bool hot = false}) {
-    User? user;
-    for (var u in _store.state.userList) {
-      if (u.uid == reply.authorId) {
-        user = u;
-        break;
-      }
-    }
-    if (user == null) {
-      user = User();
-    }
-
-    Group? group;
-    if (user.memberId != null) {
-      for (var g in _store.state.groupSet) {
-        if (g.id == user.memberId) {
-          group = g;
+    final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}";
+    var widget = map[uniqueId];
+    if (widget != null) {
+      return widget;
+    } else {
+      User? user;
+      for (var u in _store.state.userList) {
+        if (u.uid == reply.authorId) {
+          user = u;
           break;
         }
       }
-    }
+      if (user == null) {
+        user = User();
+      }
 
-    List<Medal> medalList = [];
-    if (user.medal != null && user.medal!.isNotEmpty) {
-      user.medal!.split(",").forEach((id) {
-        for (var m in _store.state.medalSet) {
-          if (id == m.id.toString()) {
-            medalList.add(m);
+      Group? group;
+      if (user.memberId != null) {
+        for (var g in _store.state.groupSet) {
+          if (g.id == user.memberId) {
+            group = g;
             break;
           }
         }
-      });
-    }
+      }
 
-    List<User> commentUserList = [];
-    if (reply.commentList.isNotEmpty) {
-      reply.commentList.forEach((comment) {
-        for (var user in _store.state.userList) {
-          if (user.uid == comment.authorId) {
-            commentUserList.add(user);
-            break;
+      List<Medal> medalList = [];
+      if (user.medal != null && user.medal!.isNotEmpty) {
+        user.medal!.split(",").forEach((id) {
+          for (var m in _store.state.medalSet) {
+            if (id == m.id.toString()) {
+              medalList.add(m);
+              break;
+            }
           }
-        }
-      });
+        });
+      }
+
+      List<User> commentUserList = [];
+      if (reply.commentList.isNotEmpty) {
+        reply.commentList.forEach((comment) {
+          for (var user in _store.state.userList) {
+            if (user.uid == comment.authorId) {
+              commentUserList.add(user);
+              break;
+            }
+          }
+        });
+      }
+      widget = TopicReplyItemWidget(
+        reply: reply,
+        user: user,
+        group: group,
+        medalList: medalList,
+        userList: commentUserList,
+        hot: hot,
+      );
+      map[uniqueId] = widget;
+      return widget;
     }
-    return TopicReplyItemWidget(
-      reply: reply,
-      user: user,
-      group: group,
-      medalList: medalList,
-      userList: commentUserList,
-      hot: hot,
-    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_nga/store/settings/display_mode_store.dart';
 import 'package:flutter_nga/store/settings/theme_store.dart';
 import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -11,11 +12,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsState extends State<SettingsPage> {
-  ThemeStore _store = ThemeStore();
+  ThemeStore _themeStore = ThemeStore();
+  DisplayModeStore _displayModeStore = DisplayModeStore();
 
   @override
   void initState() {
-    _store.refresh();
+    _themeStore.refresh();
+    _displayModeStore.refresh();
     super.initState();
   }
 
@@ -38,13 +41,21 @@ class _SettingsState extends State<SettingsPage> {
           ListTile(
             title: Text("外观"),
             subtitle: Observer(
-              builder: (BuildContext context) => Text(
-                "当前外观风格: ${_store.modeName}",
+              builder: (context) => Text(
+                "当前外观风格: ${_themeStore.modeName}",
                 style: TextStyle(fontSize: Dimen.body),
               ),
             ),
             onTap: showThemeSelectionDialog,
-          )
+          ),
+          // ListTile(
+          //   title: Text("显示模式"),
+          //   subtitle: Observer(
+          //     builder: (context) =>
+          //         Text("当前显示模式: ${_displayModeStore.modeName}"),
+          //   ),
+          //   onTap: () => Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
+          // ),
         ],
       ),
     );
@@ -53,9 +64,7 @@ class _SettingsState extends State<SettingsPage> {
   showThemeSelectionDialog() {
     showDialog(
       context: context,
-      builder: (_) => ThemeSelectionDialog(
-        themeStore: _store,
-      ),
+      builder: (_) => ThemeSelectionDialog(themeStore: _themeStore),
     );
   }
 }
