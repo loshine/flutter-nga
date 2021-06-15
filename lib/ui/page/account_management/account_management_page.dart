@@ -1,3 +1,4 @@
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/user.dart';
@@ -61,6 +62,10 @@ class _AccountManagementState extends State<AccountManagementPage> {
                         style: TextStyle(
                             color:
                                 Theme.of(context).textTheme.bodyText2?.color),
+                      ),
+                      trailing: Icon(
+                        CommunityMaterialIcons.check,
+                        color: Palette.getColorPrimary(context),
                       ),
                     ),
                     Divider(height: 1),
