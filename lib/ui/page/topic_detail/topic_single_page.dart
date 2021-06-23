@@ -99,7 +99,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
 
   Widget _buildReplyWidget(BuildContext context, Reply reply,
       {bool hot = false}) {
-    final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}";
+    final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}_$hot";
     var widget = map[uniqueId];
     if (widget != null) {
       return widget;

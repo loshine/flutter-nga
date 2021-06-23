@@ -137,6 +137,14 @@ class Data {
         ErrorInterceptorHandler handler,
       ) async {
         debugPrint(e.toString());
+        if (e.error is IOException) {
+          return handler.next(DioError(
+            response: e.response,
+            requestOptions: e.requestOptions,
+            error: "网络错误，请稍候重试。",
+            type: DioErrorType.other,
+          ));
+        }
         if (e.response != null && e.response!.data != null) {
           String responseBody = _formatResponseBody(e.response!);
           Map<String, dynamic>? map;
