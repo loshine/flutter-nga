@@ -100,23 +100,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
         ),
         initial: AdaptiveThemeMode.light,
-        builder: (theme, darkTheme) => MaterialApp(
-//        showPerformanceOverlay: true,
-          theme: theme,
-          darkTheme: darkTheme,
-          localizationsDelegates: [
-            // 这行是关键
-            RefreshLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate
-          ],
-          supportedLocales: [
-            const Locale('en'),
-            const Locale('zh'),
-          ],
-          onGenerateRoute: _router.generator,
-          localeResolutionCallback: (locale, supportedLocales) => locale,
-        ),
+        builder: (theme, darkTheme) {
+          return RefreshConfiguration(
+            headerBuilder: () => MaterialClassicHeader(
+              distance: 50,
+              height: 70,
+            ),
+            headerTriggerDistance: 50,
+            child: MaterialApp(
+              theme: theme,
+              darkTheme: darkTheme,
+              localizationsDelegates: [
+                // 这行是关键
+                RefreshLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate
+              ],
+              supportedLocales: [
+                const Locale('en'),
+                const Locale('zh'),
+              ],
+              onGenerateRoute: _router.generator,
+              localeResolutionCallback: (locale, supportedLocales) => locale,
+            ),
+          );
+        },
       ),
     );
   }
