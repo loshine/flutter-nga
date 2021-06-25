@@ -4,9 +4,10 @@ import 'package:flutter_html/style.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 
 class NgaHtmlCommentWidget extends StatelessWidget {
-  final String? content;
+  final String content;
 
-  const NgaHtmlCommentWidget({Key? key, this.content}) : super(key: key);
+  const NgaHtmlCommentWidget({Key? key, required this.content})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

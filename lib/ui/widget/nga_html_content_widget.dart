@@ -14,9 +14,10 @@ import 'package:html/dom.dart' as dom;
 import 'collapse_widget.dart';
 
 class NgaHtmlContentWidget extends StatelessWidget {
-  final String? content;
+  final String content;
 
-  const NgaHtmlContentWidget({Key? key, this.content}) : super(key: key);
+  const NgaHtmlContentWidget({Key? key, required this.content})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
