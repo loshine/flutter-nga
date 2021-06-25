@@ -49,22 +49,24 @@ class _ChildForumItemState extends State<ChildForumItemWidget> {
             ),
             title: Text(widget.childForum.name),
             subtitle: Text(widget.childForum.desc ?? ""),
-            trailing: Observer(
-              builder: (_) {
-                return Switch(
-                  value: _store.subscribed,
-                  onChanged: (v) {
-                    if (v) {
-                      _store.addSubscription(
-                          widget.childForum.tid, widget.childForum.parentId);
-                    } else {
-                      _store.deleteSubscription(
-                          widget.childForum.tid, widget.childForum.parentId);
-                    }
-                  },
-                );
-              },
-            ),
+            trailing: widget.childForum.tid != null
+                ? Observer(
+                    builder: (_) {
+                      return Switch(
+                        value: _store.subscribed,
+                        onChanged: (v) {
+                          if (v) {
+                            _store.addSubscription(widget.childForum.tid!,
+                                widget.childForum.parentId);
+                          } else {
+                            _store.deleteSubscription(widget.childForum.tid!,
+                                widget.childForum.parentId);
+                          }
+                        },
+                      );
+                    },
+                  )
+                : null,
           ),
           Divider(height: 1),
         ],

@@ -1,7 +1,7 @@
 import 'package:flutter_nga/data/entity/forum.dart';
 
 class ChildForum extends Forum {
-  final int tid;
+  final int? tid;
   final String? desc;
   final bool selected;
   final int? parentId;
