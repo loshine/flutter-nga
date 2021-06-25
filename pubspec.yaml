@@ -29,7 +29,7 @@ dependencies:
   dio: ^4.0.0
   fast_gbk: ^1.0.0-rc
   sembast: ^3.0.2
-  flutter_html: ^2.0.0
+  flutter_html: ^2.1.0
   html_unescape: ^2.0.0
   timeago: ^3.0.2
   flutter_keyboard_visibility: ^5.0.1

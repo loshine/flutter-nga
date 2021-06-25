@@ -3,7 +3,7 @@ import 'package:flutter_nga/data/entity/user.dart';
 class Message {
   final int? id;
   final String? subject;
-  final String? content;
+  final String content;
   final int? from;
   final int? time;
   final User user;

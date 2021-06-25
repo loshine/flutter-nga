@@ -101,7 +101,7 @@ class TopicDetailData {
 }
 
 class Reply {
-  String? content;
+  String content;
   String? alterInfo;
   int? tid;
   int score;
@@ -120,7 +120,7 @@ class Reply {
   List<Attachment> attachmentList;
 
   Reply({
-    this.content,
+    required this.content,
     this.alterInfo,
     this.tid,
     this.score = 0,
@@ -175,7 +175,7 @@ class Reply {
   }
 
   String get quoteContent {
-    var c = content ?? "";
+    var c = content;
     if (c.length > 250) {
       c = c.substring(0, 250);
     }

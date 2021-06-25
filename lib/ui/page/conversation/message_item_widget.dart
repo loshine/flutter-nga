@@ -6,9 +6,9 @@ import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 
 class MessageItemWidget extends StatelessWidget {
-  final Message? message;
+  final Message message;
 
-  const MessageItemWidget({Key? key, this.message}) : super(key: key);
+  const MessageItemWidget({Key? key, required this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,21 +20,21 @@ class MessageItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AvatarWidget(
-            message!.user.avatar,
+            message.user.avatar,
             size: 24,
-            username: message!.user.username,
+            username: message.user.username,
           ),
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                message!.user.getShowName(),
+                message.user.getShowName(),
                 style: TextStyle(color: Colors.black),
               ),
             ),
           ),
           Text(
-            codeUtils.formatPostDate(message!.time! * 1000),
+            codeUtils.formatPostDate(message.time! * 1000),
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyText2?.color,
               fontSize: Dimen.caption,
@@ -43,11 +43,11 @@ class MessageItemWidget extends StatelessWidget {
         ],
       ),
     ));
-    if (!codeUtils.isStringEmpty(message!.subject)) {
+    if (!codeUtils.isStringEmpty(message.subject)) {
       children.add(Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Text(
-          codeUtils.unescapeHtml(message!.subject),
+          codeUtils.unescapeHtml(message.subject),
           style: TextStyle(
             fontSize: Dimen.title,
             fontWeight: FontWeight.bold,
@@ -58,7 +58,7 @@ class MessageItemWidget extends StatelessWidget {
     }
     children.add(Padding(
       padding: EdgeInsets.all(16),
-      child: NgaHtmlContentWidget(content: message!.content),
+      child: NgaHtmlContentWidget(content: message.content),
     ));
     children.add(Divider(height: 1));
     return Column(
