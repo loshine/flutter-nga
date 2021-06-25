@@ -230,6 +230,7 @@ class ForumInfo {
         subForums.add(ChildForum(
           id,
           v['1'],
+          v['3'],
           parentId: map['fid'],
           desc: desc != null && desc.isNotEmpty ? desc : null,
           type: k.startsWith("t") ? 1 : 0,

@@ -56,10 +56,10 @@ class _ChildForumItemState extends State<ChildForumItemWidget> {
                   onChanged: (v) {
                     if (v) {
                       _store.addSubscription(
-                          widget.childForum.fid, widget.childForum.parentId);
+                          widget.childForum.tid, widget.childForum.parentId);
                     } else {
                       _store.deleteSubscription(
-                          widget.childForum.fid, widget.childForum.parentId);
+                          widget.childForum.tid, widget.childForum.parentId);
                     }
                   },
                 );
