@@ -306,11 +306,11 @@ class ForumDataRepository implements ForumRepository {
     try {
       final formData = FormData.fromMap({
         "fid": parentId,
-        "type": 0,
+        "type": 1,
         "info": "add_to_block_tids",
       });
       Response<Map<String, dynamic>> response = await Data().dio.post(
-          "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
+          "nuke.php?__lib=user_option&__act=set&raw=3&add=$fid",
           data: formData);
       return response.data!["0"];
     } catch (err) {
