@@ -60,6 +60,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
         ),
         'td': Style(padding: EdgeInsets.all(8)),
       },
+      tagsList: Html.tags..addAll(['collapse', 'nga_emoticon', 'nga_hr']),
       onLinkTap: (String? url, RenderContext renderContext,
               Map<String, String> attributes, dom.Element? element) =>
           Routes.onLinkTap(context, url),
