@@ -46,7 +46,6 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
             enablePullUp: _store.state.enablePullUp,
             onRefresh: _onRefresh,
             child: ListView.builder(
-              physics: BouncingScrollPhysics(),
               itemCount: _store.state.list.length,
               itemBuilder: (context, index) =>
                   MessageItemWidget(message: _store.state.list[index]),

@@ -43,7 +43,6 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
           enablePullUp: _store.state.enablePullUp,
           onRefresh: _onRefresh,
           child: ListView.builder(
-            physics: BouncingScrollPhysics(),
             itemCount: _store.state.list.length,
             itemBuilder: (context, index) =>
                 TopicListItemWidget(topic: _store.state.list[index]),

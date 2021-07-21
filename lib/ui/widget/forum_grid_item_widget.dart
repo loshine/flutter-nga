@@ -8,7 +8,8 @@ class ForumGridItemWidget extends StatelessWidget {
   final Forum forum;
   final GestureLongPressCallback? onLongPress;
 
-  const ForumGridItemWidget(this.forum, {Key? key, this.onLongPress}) : super(key: key);
+  const ForumGridItemWidget(this.forum, {Key? key, this.onLongPress})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

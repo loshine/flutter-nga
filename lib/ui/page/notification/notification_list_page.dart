@@ -37,10 +37,10 @@ class _NotificationListState extends State<NotificationListPage> {
           controller: _refreshController,
           enablePullUp: false,
           onRefresh: _onRefresh,
+          physics: ClampingScrollPhysics(),
           child: ListView.builder(
             itemCount: _store.count,
             itemBuilder: _itemBuilder,
-            physics: BouncingScrollPhysics(),
           ),
         );
       },

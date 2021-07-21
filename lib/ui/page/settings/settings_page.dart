@@ -27,7 +27,6 @@ class _SettingsState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(title: Text("设置")),
       body: ListView(
-        physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         children: [
           ListTile(

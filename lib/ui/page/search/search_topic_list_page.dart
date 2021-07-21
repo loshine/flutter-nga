@@ -38,7 +38,6 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
             itemBuilder: (_, index) =>
                 TopicListItemWidget(topic: _store.state.list[index]),
             itemCount: _store.state.list.length,
-            physics: BouncingScrollPhysics(),
           ),
         ),
       ),

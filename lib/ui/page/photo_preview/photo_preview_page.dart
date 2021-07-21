@@ -6,7 +6,6 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/store/common/photo_min_scale_store.dart';
 import 'package:flutter_nga/utils/picture_utils.dart' as pictureUtils;
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 
 class PhotoPreviewPage extends StatefulWidget {
