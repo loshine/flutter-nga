@@ -43,7 +43,6 @@ class _SearchForumState extends State<SearchForumPage> {
           enablePullUp: false,
           controller: _refreshController,
           child: ListView.builder(
-            physics: BouncingScrollPhysics(),
             itemBuilder: (_, index) => _buildForumWidget(_store.forums[index]),
             itemCount: _store.forums.length,
           ),

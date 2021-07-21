@@ -17,7 +17,6 @@ class FontColorDialog extends StatelessWidget {
         width: 0,
         height: 408,
         child: ListView.builder(
-          physics: BouncingScrollPhysics(),
           itemCount: TEXT_COLOR_MAP.length,
           itemBuilder: (context, position) {
             return InkWell(

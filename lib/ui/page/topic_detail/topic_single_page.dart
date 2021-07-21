@@ -52,9 +52,9 @@ class _TopicSingleState extends State<TopicSinglePage> {
         onRefresh: _onRefresh,
         enablePullUp: false,
         controller: _refreshController,
+        physics: ClampingScrollPhysics(),
         child: ScrollablePositionedList.builder(
           itemScrollController: _itemScrollController,
-          physics: BouncingScrollPhysics(),
           itemCount: _store.state.replyList.length,
           itemBuilder: (context, position) => _buildListItem(context, position),
         ),

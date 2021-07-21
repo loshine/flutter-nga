@@ -25,7 +25,6 @@ class _ThemeSelectionDialogState extends State<ThemeSelectionDialog> {
         child: Observer(
           builder: (_) {
             return ListView(
-              physics: BouncingScrollPhysics(),
               shrinkWrap: true,
               children: [
                 RadioListTile(

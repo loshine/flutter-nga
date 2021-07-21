@@ -3,6 +3,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_nga/ui/widget/simple_scroll_behavior.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:provider/provider.dart';
@@ -108,6 +109,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
             headerTriggerDistance: 50,
             child: MaterialApp(
+              builder: (context, c) => ScrollConfiguration(
+                behavior: SimpleScrollBehavior(),
+                child: c!,
+              ),
               theme: theme,
               darkTheme: darkTheme,
               localizationsDelegates: [
