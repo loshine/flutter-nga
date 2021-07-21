@@ -356,13 +356,19 @@ class _PublishPageState extends State<PublishPage> {
   }
 
   void _publish() async {
+    final content = _contentController.text;
+    final len = content.codeUnits.length;
+    if (len < 6 || len > 65530) {
+      Fluttertoast.showToast(msg: "内容过短或过长(6~65530 byte)");
+      return;
+    }
     if (widget.tid != null) {
       try {
         String message = await Data().topicRepository.createReply(
             widget.tid,
             widget.fid,
             _subjectController.text,
-            _contentController.text,
+            content,
             _isAnonymous,
             _attachments.toString(),
             _attachmentsCheck.toString());
@@ -380,7 +386,7 @@ class _PublishPageState extends State<PublishPage> {
         String message = await Data().topicRepository.createTopic(
             widget.fid,
             _subjectController.text,
-            _contentController.text,
+            content,
             _isAnonymous,
             _attachments.toString(),
             _attachmentsCheck.toString());

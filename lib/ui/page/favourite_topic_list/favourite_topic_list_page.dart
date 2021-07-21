@@ -38,7 +38,6 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
           enablePullUp: _store.state.enablePullUp,
           onRefresh: _onRefresh,
           child: ListView.builder(
-            physics: BouncingScrollPhysics(),
             itemCount: _store.state.list.length,
             itemBuilder: (context, index) => TopicListItemWidget(
               topic: _store.state.list[index],
@@ -84,7 +83,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
                 onPressed: () {
                   Routes.pop(context);
                   _store.delete(topic).then((message) {
-                    Fluttertoast.showToast(msg: message??"");
+                    Fluttertoast.showToast(msg: message ?? "");
                   });
                 },
                 child: Text("确认"),

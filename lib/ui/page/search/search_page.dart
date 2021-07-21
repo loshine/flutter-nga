@@ -251,7 +251,6 @@ class _SearchState extends State<SearchPage> {
           }
           return ListView(
             children: widgets,
-            physics: BouncingScrollPhysics(),
           );
         },
       ),

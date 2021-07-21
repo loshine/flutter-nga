@@ -40,7 +40,6 @@ class _ConversationListState extends State<ConversationListPage> {
             itemCount: _store.state.list.length,
             itemBuilder: (context, index) =>
                 ConversationItemWidget(conversation: _store.state.list[index]),
-            physics: BouncingScrollPhysics(),
           ),
         );
       },

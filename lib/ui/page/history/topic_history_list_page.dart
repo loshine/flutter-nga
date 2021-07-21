@@ -137,7 +137,6 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
   Widget _buildChild() {
     if (_store.state.list.isNotEmpty) {
       return ListView.builder(
-        physics: BouncingScrollPhysics(),
         itemCount: _store.state.list.length,
         itemBuilder: (_, position) =>
             _buildListItem(_store.state.list[position]),

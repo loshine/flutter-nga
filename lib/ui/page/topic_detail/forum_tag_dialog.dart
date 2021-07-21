@@ -50,7 +50,6 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
         return SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
-            physics: BouncingScrollPhysics(),
             shrinkWrap: true,
             itemCount: _store.tagList.length,
             itemBuilder: (context, position) {

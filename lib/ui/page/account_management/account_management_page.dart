@@ -40,7 +40,6 @@ class _AccountManagementState extends State<AccountManagementPage> {
         child: Observer(
           builder: (_) => ListView.builder(
             itemCount: _store.list.length,
-            physics: BouncingScrollPhysics(),
             itemBuilder: (context, position) => Material(
               color: Colors.transparent,
               child: InkWell(
