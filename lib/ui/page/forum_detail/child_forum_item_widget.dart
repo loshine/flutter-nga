@@ -46,6 +46,11 @@ class _ChildForumItemState extends State<ChildForumItemWidget> {
                 width: 48,
                 height: 48,
               ),
+              errorWidget: (context, url, err) => Image.asset(
+                'images/default_forum_icon.png',
+                width: 48,
+                height: 48,
+              ),
             ),
             title: Text(widget.childForum.name),
             subtitle: Text(widget.childForum.desc ?? ""),

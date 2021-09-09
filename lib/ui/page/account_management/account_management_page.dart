@@ -7,13 +7,15 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:route_observer_mixin/route_observer_mixin.dart';
 
 class AccountManagementPage extends StatefulWidget {
   @override
   _AccountManagementState createState() => _AccountManagementState();
 }
 
-class _AccountManagementState extends State<AccountManagementPage> {
+class _AccountManagementState extends State<AccountManagementPage>
+    with RouteAware, RouteObserverMixin {
   final _store = AccountListStore();
   late RefreshController _refreshController;
 
@@ -96,6 +98,11 @@ class _AccountManagementState extends State<AccountManagementPage> {
   void dispose() {
     _refreshController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    _refreshController.requestRefresh();
   }
 
   _onRefresh() {
