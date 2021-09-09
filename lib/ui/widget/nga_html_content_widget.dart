@@ -148,6 +148,11 @@ class NgaHtmlContentWidget extends StatelessWidget {
             size: 48,
             color: Theme.of(context).iconTheme.color,
           ),
+          errorWidget: (context, url, err) => Icon(
+            Icons.image,
+            size: 48,
+            color: Theme.of(context).iconTheme.color,
+          ),
         ),
       );
     });
@@ -159,6 +164,11 @@ class NgaHtmlContentWidget extends StatelessWidget {
       fit: BoxFit.cover,
       imageUrl: attributes['src']!,
       placeholder: (context, url) => Icon(
+        Icons.image,
+        size: 48,
+        color: Theme.of(context).iconTheme.color,
+      ),
+      errorWidget: (context, url, err) => Icon(
         Icons.image,
         size: 48,
         color: Theme.of(context).iconTheme.color,

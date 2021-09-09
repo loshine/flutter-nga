@@ -413,6 +413,11 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               width: 48,
               height: 48,
             ),
+            errorWidget: (context, url, err) => Image.asset(
+              'images/default_forum_icon.png',
+              width: 48,
+              height: 48,
+            ),
           ),
         );
       }));

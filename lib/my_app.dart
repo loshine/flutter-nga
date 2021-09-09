@@ -8,6 +8,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:route_observer_mixin/route_observer_mixin.dart';
 
 import 'data/data.dart';
 import 'store/forum/favourite_forum_list_store.dart';
@@ -109,6 +110,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
             headerTriggerDistance: 50,
             child: MaterialApp(
+              navigatorObservers: [RouteObserverProvider.of(context)],
               builder: (context, c) => ScrollConfiguration(
                 behavior: SimpleScrollBehavior(),
                 child: c!,
