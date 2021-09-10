@@ -1,12 +1,14 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/store/common/interface_settings_store.dart';
 import 'package:flutter_nga/store/topic/topic_history_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:provider/provider.dart';
 
 import 'nga_html_content_widget.dart';
 
@@ -140,7 +142,8 @@ class TopicListItemWidget extends StatelessWidget {
         // Child text spans will inherit styles from parent
         text: codeUtils.unescapeHtml(topic.subject),
         style: TextStyle(
-          fontSize: Dimen.subheading,
+          fontSize: Dimen.subheading *
+              Provider.of<InterfaceSettingsStore>(context).titleSizeMultiple,
           color: topic.getSubjectColor() ??
               Theme.of(context).textTheme.bodyText1?.color,
           fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,

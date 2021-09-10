@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_html/style.dart';
+import 'package:flutter_nga/store/common/interface_settings_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:provider/provider.dart';
 
 import 'collapse_widget.dart';
 
@@ -41,6 +43,8 @@ class NgaHtmlContentWidget extends StatelessWidget {
           padding: EdgeInsets.all(0),
           margin: EdgeInsets.all(0),
           color: Theme.of(context).textTheme.bodyText1?.color,
+          fontSize: FontSize(Dimen.body *
+              Provider.of<InterfaceSettingsStore>(context).contentSizeMultiple),
         ),
         'blockquote': Style(
           padding: EdgeInsets.all(0),
