@@ -18,7 +18,7 @@ class _ThemeSelectionDialogState extends State<ThemeSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("选择外观风格"),
+      title: Text("选择主题模式"),
       content: SizedBox(
         width: double.maxFinite,
         // height: double.minPositive,
@@ -37,13 +37,13 @@ class _ThemeSelectionDialogState extends State<ThemeSelectionDialog> {
                   value: AdaptiveThemeMode.light,
                   groupValue: widget.themeStore.mode,
                   onChanged: _onChanged,
-                  title: Text("亮色模式"),
+                  title: Text("亮色主题"),
                 ),
                 RadioListTile(
                   value: AdaptiveThemeMode.dark,
                   groupValue: widget.themeStore.mode,
                   onChanged: _onChanged,
-                  title: Text("暗色模式"),
+                  title: Text("暗色主题"),
                 ),
               ],
             );

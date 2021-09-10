@@ -38,14 +38,22 @@ class _SettingsState extends State<SettingsPage> {
             onTap: () => Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
           ),
           ListTile(
-            title: Text("外观"),
+            title: Text("主题模式"),
             subtitle: Observer(
               builder: (context) => Text(
-                "当前外观风格: ${_themeStore.modeName}",
+                "当前主题模式: ${_themeStore.modeName}",
                 style: TextStyle(fontSize: Dimen.body),
               ),
             ),
             onTap: showThemeSelectionDialog,
+          ),
+          ListTile(
+            title: Text("界面设置"),
+            subtitle: Text(
+              "设置文字大小等界面元素",
+              style: TextStyle(fontSize: Dimen.body),
+            ),
+            onTap: () => Routes.navigateTo(context, Routes.INTERFACE_SETTINGS),
           ),
           // ListTile(
           //   title: Text("显示模式"),
