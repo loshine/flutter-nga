@@ -13,13 +13,13 @@ abstract class _ThemeStore with Store {
   String get modeName {
     switch (mode) {
       case AdaptiveThemeMode.light:
-        return "亮色模式";
+        return "亮色主题";
       case AdaptiveThemeMode.dark:
-        return "暗色模式";
+        return "暗色主题";
       case AdaptiveThemeMode.system:
         return "跟随系统";
       default:
-        return "亮色模式";
+        return "亮色主题";
     }
   }
 
