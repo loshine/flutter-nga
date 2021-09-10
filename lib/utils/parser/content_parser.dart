@@ -106,13 +106,13 @@ class _ReplyParser implements Parser {
             RegExp(
                 "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
             (match) =>
-                "<a href='${DOMAIN}read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(2)} ${match.group(3)}")
+                "Reply to <a href='${DOMAIN}read.php?searchpost=1&pid=${match.group(1)}'>Topic</a> Post by ${match.group(2)} ${match.group(3)}")
         // 评论普通回贴
         .replaceAllMapped(
             RegExp(
                 "\\[b]Reply to \\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] Post by \\[uid=(\\d+)?]([\\s\\S]*?)\\[/uid] \\(([\\s\\S]*?)\\)\\[/b]"),
             (match) =>
-                "<a href='${DOMAIN}read.php?searchpost=1&pid=${match.group(1)}'>Reply</a> by ${match.group(5)} ${match.group(6)}");
+                "Reply to <a href='${DOMAIN}read.php?searchpost=1&pid=${match.group(1)}'>Post</a> by ${match.group(5)} ${match.group(6)}");
   }
 }
 

@@ -1,12 +1,14 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
+import 'package:flutter_nga/store/common/interface_settings_store.dart';
 import 'package:flutter_nga/store/topic/topic_history_store.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:provider/provider.dart';
 
 class TopicHistoryListItemWidget extends StatelessWidget {
   const TopicHistoryListItemWidget(
@@ -90,7 +92,8 @@ class TopicHistoryListItemWidget extends StatelessWidget {
         // Child text spans will inherit styles from parent
         text: codeUtils.unescapeHtml(topicHistory.subject),
         style: TextStyle(
-          fontSize: Dimen.subheading,
+          fontSize: Dimen.subheading *
+              Provider.of<InterfaceSettingsStore>(context).titleSizeMultiple,
           color: topicHistory.getSubjectColor() ??
               Theme.of(context).textTheme.bodyText1?.color,
           fontWeight:
@@ -99,6 +102,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
               topicHistory.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration:
               topicHistory.isUnderline() ? TextDecoration.underline : null,
+          height: Provider.of<InterfaceSettingsStore>(context).lineHeight.size,
         ),
         children: <TextSpan>[
           TextSpan(

@@ -34,6 +34,7 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Palette.colorBackground,
       contentPadding: EdgeInsets.all(0),
       content: Observer(
         builder: (_) {

@@ -149,6 +149,7 @@ class TopicListItemWidget extends StatelessWidget {
           fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,
           fontStyle: topic.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration: topic.isUnderline() ? TextDecoration.underline : null,
+          height: Provider.of<InterfaceSettingsStore>(context).lineHeight.size,
         ),
         children: <TextSpan>[
           TextSpan(
