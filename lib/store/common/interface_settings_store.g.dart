@@ -41,8 +41,34 @@ mixin _$InterfaceSettingsStore on _InterfaceSettingsStore, Store {
     });
   }
 
+  final _$lineHeightAtom = Atom(name: '_InterfaceSettingsStore.lineHeight');
+
+  @override
+  CustomLineHeight get lineHeight {
+    _$lineHeightAtom.reportRead();
+    return super.lineHeight;
+  }
+
+  @override
+  set lineHeight(CustomLineHeight value) {
+    _$lineHeightAtom.reportWrite(value, super.lineHeight, () {
+      super.lineHeight = value;
+    });
+  }
+
   final _$_InterfaceSettingsStoreActionController =
       ActionController(name: '_InterfaceSettingsStore');
+
+  @override
+  void init() {
+    final _$actionInfo = _$_InterfaceSettingsStoreActionController.startAction(
+        name: '_InterfaceSettingsStore.init');
+    try {
+      return super.init();
+    } finally {
+      _$_InterfaceSettingsStoreActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void setContentSizeMultiple(double multiple) {
@@ -67,10 +93,22 @@ mixin _$InterfaceSettingsStore on _InterfaceSettingsStore, Store {
   }
 
   @override
+  void setLineHeight(int index) {
+    final _$actionInfo = _$_InterfaceSettingsStoreActionController.startAction(
+        name: '_InterfaceSettingsStore.setLineHeight');
+    try {
+      return super.setLineHeight(index);
+    } finally {
+      _$_InterfaceSettingsStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 contentSizeMultiple: ${contentSizeMultiple},
-titleSizeMultiple: ${titleSizeMultiple}
+titleSizeMultiple: ${titleSizeMultiple},
+lineHeight: ${lineHeight}
     ''';
   }
 }
