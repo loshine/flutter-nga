@@ -6,20 +6,20 @@ part 'interface_settings_store.g.dart';
 class InterfaceSettingsStore = _InterfaceSettingsStore
     with _$InterfaceSettingsStore;
 
-enum CustomLineHeight { normal, medium, large, xlarge, xxlarge }
+enum CustomLineHeight { NORMAL, MEDIUM, LARGE, XLARGE, XXLARGE }
 
 extension LineHeightExtention on CustomLineHeight {
   double get size {
     switch (this) {
-      case CustomLineHeight.normal:
+      case CustomLineHeight.NORMAL:
         return 1.2;
-      case CustomLineHeight.large:
+      case CustomLineHeight.LARGE:
         return 1.6;
-      case CustomLineHeight.xlarge:
+      case CustomLineHeight.XLARGE:
         return 1.8;
-      case CustomLineHeight.xxlarge:
+      case CustomLineHeight.XXLARGE:
         return 2.0;
-      case CustomLineHeight.medium:
+      case CustomLineHeight.MEDIUM:
       default:
         return 1.4;
     }
@@ -27,15 +27,15 @@ extension LineHeightExtention on CustomLineHeight {
 
   String get name {
     switch (this) {
-      case CustomLineHeight.normal:
+      case CustomLineHeight.NORMAL:
         return "紧凑";
-      case CustomLineHeight.large:
+      case CustomLineHeight.LARGE:
         return "大杯";
-      case CustomLineHeight.xlarge:
+      case CustomLineHeight.XLARGE:
         return "加大杯";
-      case CustomLineHeight.xxlarge:
+      case CustomLineHeight.XXLARGE:
         return "超级加倍";
-      case CustomLineHeight.medium:
+      case CustomLineHeight.MEDIUM:
       default:
         return "Material Design";
     }
@@ -56,7 +56,7 @@ abstract class _InterfaceSettingsStore with Store {
   var titleSizeMultiple = 1.0;
 
   @observable
-  var lineHeight = CustomLineHeight.normal;
+  var lineHeight = CustomLineHeight.NORMAL;
 
   @action
   void init() {
@@ -87,23 +87,23 @@ abstract class _InterfaceSettingsStore with Store {
 
   CustomLineHeight getLineHeight() {
     final i = settings.decodeInt("lineHeight",
-        defaultValue: CustomLineHeight.medium.index);
+        defaultValue: CustomLineHeight.MEDIUM.index);
     return getLineHeightByIndex(i);
   }
 
   CustomLineHeight getLineHeightByIndex(int index) {
     switch (index) {
       case 0:
-        return CustomLineHeight.normal;
+        return CustomLineHeight.NORMAL;
       case 2:
-        return CustomLineHeight.large;
+        return CustomLineHeight.LARGE;
       case 3:
-        return CustomLineHeight.xlarge;
+        return CustomLineHeight.XLARGE;
       case 4:
-        return CustomLineHeight.xxlarge;
+        return CustomLineHeight.XXLARGE;
       case 1:
       default:
-        return CustomLineHeight.medium;
+        return CustomLineHeight.MEDIUM;
     }
   }
 }

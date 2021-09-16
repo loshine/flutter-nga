@@ -1,9 +1,10 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/common/interface_settings_store.dart';
 import 'package:flutter_nga/store/home/home_drawer_header_store.dart';
 import 'package:flutter_nga/store/home/home_store.dart';
+import 'package:flutter_nga/store/settings/blocklist_settings_store.dart';
+import 'package:flutter_nga/store/settings/interface_settings_store.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
@@ -17,6 +18,7 @@ import 'package:provider/provider.dart';
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Provider.of<BlocklistSettingsStore>(context).init();
     Provider.of<InterfaceSettingsStore>(context).init();
     return MultiProvider(
       providers: [

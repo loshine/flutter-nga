@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/data/entity/block.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/constant.dart';
 import 'package:sembast/sembast.dart';
 
 const TAG_CID = "ngaPassportCid";
@@ -26,6 +29,8 @@ abstract class UserRepository {
   Future<bool> setDefault(CacheUser cacheUser);
 
   Future<bool> deleteCacheUser(CacheUser cacheUser);
+
+  Future<BlockInfoData> getBlockInfo();
 }
 
 class UserDataRepository implements UserRepository {
@@ -49,7 +54,7 @@ class UserDataRepository implements UserRepository {
     String? username;
     for (String c in cookies.split(";")) {
       final value = c.trim();
-      print(value);
+      debugPrint(value);
       if (value.contains(TAG_UID)) {
         uid = value.substring(TAG_UID.length + 1);
       } else if (c.contains(TAG_CID)) {
@@ -172,5 +177,23 @@ class UserDataRepository implements UserRepository {
       }
     }
     return count > 0;
+  }
+
+  @override
+  Future<BlockInfoData> getBlockInfo() async {
+    try {
+      final cacheUser = await getDefaultUser();
+      final postData = "__lib=ucp&__act=get_block_word"
+          "&__output=8"
+          "&uid=${cacheUser?.uid}";
+      final options = Options()
+        ..contentType = Headers.formUrlEncodedContentType;
+      options.headers = {"Referer": DOMAIN};
+      Response<Map<String, dynamic>> response =
+          await Data().dio.post("nuke.php", data: postData, options: options);
+      return BlockInfoData.fromJson(response.data!);
+    } catch (err) {
+      rethrow;
+    }
   }
 }
