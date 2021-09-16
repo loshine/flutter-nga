@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/common/interface_settings_store.dart';
+import 'package:flutter_nga/store/settings/interface_settings_store.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class LineHeightSelectionDialog extends StatefulWidget {
@@ -28,11 +28,11 @@ class _LineHeightSelectionDialogState extends State<LineHeightSelectionDialog> {
             return ListView(
               shrinkWrap: true,
               children: [
-                CustomLineHeight.normal,
-                CustomLineHeight.medium,
-                CustomLineHeight.large,
-                CustomLineHeight.xlarge,
-                CustomLineHeight.xxlarge,
+                CustomLineHeight.NORMAL,
+                CustomLineHeight.MEDIUM,
+                CustomLineHeight.LARGE,
+                CustomLineHeight.XLARGE,
+                CustomLineHeight.XXLARGE,
               ].map((e) {
                 return RadioListTile(
                   value: e,

@@ -149,7 +149,7 @@ class TopicDataRepository implements TopicRepository {
           "&page=$page"
           "&tidarray=$tid";
       final options = Options()
-        ..contentType = "application/x-www-form-urlencoded";
+        ..contentType = Headers.formUrlEncodedContentType;
       Response<Map<String, dynamic>> response =
           await Data().dio.post("nuke.php", data: postData, options: options);
       return response.data!['0'];
@@ -266,7 +266,7 @@ class TopicDataRepository implements TopicRepository {
         "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options()
-        ..contentType = "application/x-www-form-urlencoded";
+        ..contentType = Headers.formUrlEncodedContentType;
       Response<String> response = await Data().dio.post(
             "post.php",
             data: postData,
@@ -297,7 +297,7 @@ class TopicDataRepository implements TopicRepository {
         "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options();
-      options.contentType = "application/x-www-form-urlencoded";
+      options.contentType = Headers.formUrlEncodedContentType;
       Response<String> response = await Data().dio.post(
             "post.php",
             data: postData,
@@ -321,7 +321,7 @@ class TopicDataRepository implements TopicRepository {
         "__output=8&__lib=topic_recommend&__act=add&raw=3&pid=$pid&value=1&tid=$tid";
     try {
       final options = Options();
-      options.contentType = "application/x-www-form-urlencoded";
+      options.contentType = Headers.formUrlEncodedContentType;
       Response<Map<String, dynamic>> response = await Data().dio.post(
             "nuke.php",
             data: postData,
@@ -339,7 +339,7 @@ class TopicDataRepository implements TopicRepository {
         "__output=8&__lib=topic_recommend&__act=add&raw=3&pid=$pid&value=-1&tid=$tid";
     try {
       final options = Options();
-      options.contentType = "application/x-www-form-urlencoded";
+      options.contentType = Headers.formUrlEncodedContentType;
       Response<Map<String, dynamic>> response = await Data().dio.post(
             "nuke.php",
             data: postData,

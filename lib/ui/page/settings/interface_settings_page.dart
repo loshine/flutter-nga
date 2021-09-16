@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/common/interface_settings_store.dart';
+import 'package:flutter_nga/store/settings/interface_settings_store.dart';
 import 'package:flutter_nga/ui/widget/line_height_selection_dialog.dart';
 import 'package:provider/provider.dart';
 

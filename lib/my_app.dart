@@ -3,7 +3,8 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_nga/store/common/interface_settings_store.dart';
+import 'package:flutter_nga/store/settings/blocklist_settings_store.dart';
+import 'package:flutter_nga/store/settings/interface_settings_store.dart';
 import 'package:flutter_nga/ui/widget/simple_scroll_behavior.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
@@ -54,6 +55,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MultiProvider(
       providers: [
         Provider<FluroRouter>(create: (_) => _router),
+        Provider<BlocklistSettingsStore>(
+          create: (_) => BlocklistSettingsStore(),
+        ),
         Provider<InterfaceSettingsStore>(
           create: (_) => InterfaceSettingsStore(),
         ),

@@ -49,7 +49,7 @@ abstract class _DisplayModeStore with Store {
       /// #3 1440x3168 @ 60Hz
       /// #4 1080x2376 @ 120Hz
     } on PlatformException catch (e) {
-      print(e);
+      debugPrint(e.toString());
 
       /// e.code =>
       /// noAPI - No API support. Only Marshmallow and above.
