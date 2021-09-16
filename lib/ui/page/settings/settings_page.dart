@@ -31,38 +31,26 @@ class _SettingsState extends State<SettingsPage> {
         children: [
           ListTile(
             title: Text("账号管理"),
-            subtitle: Text(
-              "管理您的账号",
-              style: TextStyle(fontSize: Dimen.body),
-            ),
+            subtitle: Text("管理您的账号"),
             onTap: () => Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
           ),
           ListTile(
             title: Text("主题模式"),
             subtitle: Observer(
-              builder: (context) => Text(
-                "当前主题模式: ${_themeStore.modeName}",
-                style: TextStyle(fontSize: Dimen.body),
-              ),
+              builder: (context) => Text("当前主题模式: ${_themeStore.modeName}"),
             ),
             onTap: showThemeSelectionDialog,
           ),
           ListTile(
             title: Text("界面设置"),
-            subtitle: Text(
-              "设置文字大小等界面元素",
-              style: TextStyle(fontSize: Dimen.body),
-            ),
+            subtitle: Text("设置文字大小等界面元素"),
             onTap: () => Routes.navigateTo(context, Routes.INTERFACE_SETTINGS),
           ),
-          // ListTile(
-          //   title: Text("显示模式"),
-          //   subtitle: Observer(
-          //     builder: (context) =>
-          //         Text("当前显示模式: ${_displayModeStore.modeName}"),
-          //   ),
-          //   onTap: () => Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
-          // ),
+          ListTile(
+            title: Text("屏蔽设置"),
+            subtitle: Text("屏蔽用户、关键词等选项"),
+            onTap: () => Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS),
+          ),
         ],
       ),
     );
