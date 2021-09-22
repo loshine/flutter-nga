@@ -66,6 +66,7 @@ class _ForumDetailState extends State<ForumDetailPage>
           ForumFavouriteButtonWidget(
             fid: widget.fid,
             name: widget.name,
+            type: widget.type,
           ),
         ],
       ),

@@ -9,5 +9,5 @@ class ChildForum extends Forum {
 
   ChildForum(int fid, String name, this.tid,
       {this.parentId, this.desc, this.type = 0, this.selected = false})
-      : super(fid, name);
+      : super(fid, name, type: type);
 }

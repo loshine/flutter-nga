@@ -34,8 +34,8 @@ mixin _$FavouriteForumStore on _FavouriteForumStore, Store {
   final _$toggleAsyncAction = AsyncAction('_FavouriteForumStore.toggle');
 
   @override
-  Future<dynamic> toggle(int fid, String? name) {
-    return _$toggleAsyncAction.run(() => super.toggle(fid, name));
+  Future<dynamic> toggle(int fid, String? name, int? type) {
+    return _$toggleAsyncAction.run(() => super.toggle(fid, name, type));
   }
 
   @override

@@ -1,16 +1,20 @@
+import 'package:flutter/cupertino.dart';
+
 /// 版块实体类
 class Forum {
-  const Forum(this.fid, this.name);
+  const Forum(this.fid, this.name, {this.type = 0});
 
   final int fid;
   final String name;
+  final int type;
 
   factory Forum.fromJson(Map map) {
-    return Forum(map['fid'], map['name']);
+    debugPrint("${map}");
+    return Forum(map['fid'], map['name'], type: map['type'] ?? 0);
   }
 
   Map<String, dynamic> toJson() {
-    return {'fid': fid, 'name': name};
+    return {'fid': fid, 'name': name, 'type': type};
   }
 
   String getIconUrl() {

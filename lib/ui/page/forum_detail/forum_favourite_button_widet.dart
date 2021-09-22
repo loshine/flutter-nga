@@ -6,11 +6,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class ForumFavouriteButtonWidget extends StatefulWidget {
-  const ForumFavouriteButtonWidget({this.name, required this.fid, Key? key})
+  const ForumFavouriteButtonWidget(
+      {this.name, required this.fid, Key? key, this.type})
       : super(key: key);
 
   final String? name;
   final int fid;
+  final int? type;
 
   @override
   State<StatefulWidget> createState() => _ForumFavouriteButtonState();
@@ -29,7 +31,9 @@ class _ForumFavouriteButtonState extends State<ForumFavouriteButtonWidget> {
             color: Colors.white,
           ),
           onPressed: () {
-            _favouriteForumStore.toggle(widget.fid, widget.name).then((_) {
+            _favouriteForumStore
+                .toggle(widget.fid, widget.name, widget.type)
+                .then((_) {
               Provider.of<FavouriteForumListStore>(context, listen: false)
                   .refresh();
             }).catchError((err) {
