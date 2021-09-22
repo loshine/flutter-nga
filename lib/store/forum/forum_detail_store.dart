@@ -1,5 +1,6 @@
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';
 
 part 'forum_detail_store.g.dart';
