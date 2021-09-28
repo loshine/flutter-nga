@@ -31,6 +31,8 @@ abstract class UserRepository {
   Future<bool> deleteCacheUser(CacheUser cacheUser);
 
   Future<BlockInfoData> getBlockInfo();
+
+  Future<String> setBlockInfo(BlockInfoData blockInfo);
 }
 
 class UserDataRepository implements UserRepository {
@@ -192,6 +194,22 @@ class UserDataRepository implements UserRepository {
       Response<Map<String, dynamic>> response =
           await Data().dio.post("nuke.php", data: postData, options: options);
       return BlockInfoData.fromJson(response.data!);
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> setBlockInfo(BlockInfoData blockInfo) async {
+    try {
+      final postData =
+          "__lib=ucp&__act=set_block_word&__output=3&data=${codeUtils.urlEncode(blockInfo.toData())}";
+      final options = Options()
+        ..contentType = Headers.formUrlEncodedContentType;
+      options.headers = {"Referer": DOMAIN};
+      Response<Map<String, dynamic>> response =
+          await Data().dio.post("nuke.php", data: postData, options: options);
+      return response.data!["0"];
     } catch (err) {
       rethrow;
     }

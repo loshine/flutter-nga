@@ -27,7 +27,7 @@ class AttachmentWidget extends StatefulWidget {
 
 class _AttachmentState extends State<AttachmentWidget> {
   List<String?> _list = [];
-  List<PickedFile> _imageFileList = [];
+  List<XFile> _imageFileList = [];
   String? _authCode;
   Widget? _addImageWidget;
 
@@ -50,8 +50,8 @@ class _AttachmentState extends State<AttachmentWidget> {
           onTap: () async {
             final storageStatus = await Permission.storage.request();
             if (storageStatus == PermissionStatus.granted) {
-              PickedFile? image =
-                  await _picker.getImage(source: ImageSource.gallery);
+              XFile? image =
+                  await _picker.pickImage(source: ImageSource.gallery);
               if (image == null) return;
               setState(() => _imageFileList.add(image));
               try {

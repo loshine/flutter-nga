@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+
 
 /// 版块实体类
 class Forum {
@@ -9,7 +9,6 @@ class Forum {
   final int type;
 
   factory Forum.fromJson(Map map) {
-    debugPrint("${map}");
     return Forum(map['fid'], map['name'], type: map['type'] ?? 0);
   }
 

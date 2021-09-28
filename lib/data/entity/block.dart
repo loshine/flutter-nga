@@ -19,11 +19,26 @@ class BlockInfoData {
         wordList.addAll(wordsAndUsers.split(" "));
       } else {
         final words = wordsAndUsers.substring(0, secondGapIndex);
-        final users = wordsAndUsers.substring(secondGapIndex);
+        final users = wordsAndUsers.substring(secondGapIndex + 1);
         wordList.addAll(words.split(" "));
         userList.addAll(users.split(" "));
       }
     }
     return BlockInfoData(userList, wordList);
+  }
+
+  String toData() {
+    final data = StringBuffer();
+    if (blockWordList.isNotEmpty || blockUserList.isNotEmpty) {
+      data.write("1\n");
+      if (blockWordList.isNotEmpty) {
+        data.write(blockWordList.reduce((value, e) => "$value $e"));
+      }
+      if (blockUserList.isNotEmpty) {
+        data.write("\n");
+        data.write(blockUserList.reduce((value, e) => "$value $e"));
+      }
+    }
+    return data.toString();
   }
 }
