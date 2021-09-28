@@ -11,7 +11,9 @@ import 'package:flutter_nga/ui/page/search/search_forum_page.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/search/search_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/send_message/send_message_page.dart';
+import 'package:flutter_nga/ui/page/settings/blocklist_keywords_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_settings_page.dart';
+import 'package:flutter_nga/ui/page/settings/blocklist_users_page.dart';
 import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings_page.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
@@ -38,6 +40,8 @@ class Routes {
   static const String SETTINGS = "/settings";
   static const String INTERFACE_SETTINGS = "/settings/interface";
   static const String BLOCKLIST_SETTINGS = "/settings/blocklist";
+  static const String BLOCKLIST_USERS = "/settings/blocklist/users";
+  static const String BLOCKLIST_KEYWORDS = "/settings/blocklist/keywords";
   static const String ACCOUNT_MANAGEMENT = "/settings/account_management";
   static const String SEARCH = "/search";
   static const String SEARCH_FORUM = "/search_forum";
@@ -124,6 +128,12 @@ class Routes {
     router.define(BLOCKLIST_SETTINGS,
         handler:
             Handler(handlerFunc: (context, params) => BlocklistSettingsPage()));
+    router.define(BLOCKLIST_USERS,
+        handler:
+            Handler(handlerFunc: (context, params) => BlocklistUsersPage()));
+    router.define(BLOCKLIST_KEYWORDS,
+        handler:
+            Handler(handlerFunc: (context, params) => BlocklistKeywordsPage()));
     router.define(ACCOUNT_MANAGEMENT,
         handler:
             Handler(handlerFunc: (context, params) => AccountManagementPage()));

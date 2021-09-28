@@ -89,7 +89,8 @@ class _ForumDetailState extends State<ForumDetailPage>
                 ),
               ),
               KeepAliveTabView(
-                child: ForumRecommendTopicListPage(widget.fid),
+                child:
+                    ForumRecommendTopicListPage(widget.fid, type: widget.type),
               ),
               KeepAliveTabView(
                 child: ChildForumListPage(_store.state.info),
