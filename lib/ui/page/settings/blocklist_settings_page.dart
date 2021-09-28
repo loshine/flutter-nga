@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/settings/blocklist_settings_store.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:provider/provider.dart';
 
 class BlocklistSettingsPage extends StatefulWidget {
@@ -27,35 +28,38 @@ class _BlocklistSettingsState extends State<BlocklistSettingsPage> {
           return ListView(
             children: [
               SwitchListTile(
-                value: store.clientEnabled,
-                onChanged: (v) => store.setClientEnabled(v),
+                value: store.clientBlockEnabled,
+                onChanged: (v) => store.setClientBlockEnabled(v),
                 title: Text("开启客户端屏蔽功能"),
                 subtitle: Text("默认不开启客户端屏蔽功能，开启后会有少许性能下降"),
               ),
               SwitchListTile(
-                value: store.clientEnabled,
-                onChanged: (v) => store.setClientEnabled(v),
+                value: store.listBlockEnabled,
+                onChanged: (v) => store.setListBlockEnabled(v),
                 title: Text("在列表页开启屏蔽功能"),
                 subtitle: Text("会降低列表页加载速度"),
               ),
               SwitchListTile(
-                value: store.clientEnabled,
-                onChanged: (v) => store.setClientEnabled(v),
+                value: store.detailsBlockEnabled,
+                onChanged: (v) => store.setDetailsBlockEnabled(v),
                 title: Text("在详情页开启屏蔽功能"),
                 subtitle: Text("会降详情页加载速度"),
               ),
               ListTile(
                 title: Text("屏蔽模式"),
                 subtitle: Text("选择被屏蔽的用户、词语在客户端内的展示方式"),
-                trailing: Text("折叠"),
+                trailing: Text("${store.blockMode.name}"),
               ),
               ListTile(
                 title: Text("屏蔽用户"),
                 subtitle: Text("已屏蔽 ${store.blockUserList.length} 位用户的发言"),
+                onTap: () => Routes.navigateTo(context, Routes.BLOCKLIST_USERS),
               ),
               ListTile(
                 title: Text("屏蔽关键词"),
                 subtitle: Text("已屏蔽 ${store.blockWordList.length} 条关键词"),
+                onTap: () =>
+                    Routes.navigateTo(context, Routes.BLOCKLIST_KEYWORDS),
               ),
             ],
           );

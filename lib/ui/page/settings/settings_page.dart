@@ -3,7 +3,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/settings/display_mode_store.dart';
 import 'package:flutter_nga/store/settings/theme_store.dart';
 import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
-import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class SettingsPage extends StatefulWidget {
