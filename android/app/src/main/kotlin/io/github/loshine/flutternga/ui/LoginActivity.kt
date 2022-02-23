@@ -1,7 +1,6 @@
 package io.github.loshine.flutternga.ui
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
 import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
@@ -28,14 +27,9 @@ class LoginActivity : AppCompatActivity() {
         viewBinding.webView.webChromeClient = LoginWebChromeClient(this)
         viewBinding.webView.webViewClient = LoginWebViewClient()
         viewBinding.webView.settings.javaScriptEnabled = true
-        viewBinding.webView.settings.javaScriptCanOpenWindowsAutomatically = true
+        viewBinding.webView.settings.javaScriptCanOpenWindowsAutomatically = false
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            CookieManager.getInstance().removeAllCookies(null)
-        } else {
-            @Suppress("DEPRECATION")
-            CookieManager.getInstance().removeAllCookie()
-        }
+        CookieManager.getInstance().removeAllCookies(null)
         viewBinding.webView.loadUrl("https://bbs.nga.cn/nuke.php?__lib=login&__act=account&login")
     }
 
@@ -51,13 +45,9 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        viewBinding.root.removeView(viewBinding.webView)
         viewBinding.webView.destroy()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            CookieManager.getInstance().removeAllCookies(null)
-        } else {
-            @Suppress("DEPRECATION")
-            CookieManager.getInstance().removeAllCookie()
-        }
+        CookieManager.getInstance().removeAllCookies(null)
     }
 
     override fun onBackPressed() {
