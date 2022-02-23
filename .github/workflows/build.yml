@@ -25,6 +25,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '2.10.2'
+        env:
+          run: echo $JKS > ${{ secrets.STORE_FILE }} && echo -e "keyAlias=${{ secrets.KEY_ALIAS }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nstoreFile=${{ secrets.STORE_FILE }}\nstorePassword=${{ secrets.STORE_PASSWORD }}" > android/key.properties
       - run: flutter pub get
       - run: flutter test
       - run: flutter build apk
