@@ -97,6 +97,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
         return Scaffold(
           appBar: AppBar(title: Text(codeUtils.unescapeHtml(store.subject))),
           body: TabBarView(
+            physics: NeverScrollableScrollPhysics(),
             controller: _tabController,
             children: widgets,
           ),
