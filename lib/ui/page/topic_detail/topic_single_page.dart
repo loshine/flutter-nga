@@ -27,17 +27,9 @@ class TopicSinglePage extends StatefulWidget {
 }
 
 class _TopicSingleState extends State<TopicSinglePage> {
-  final _refreshController = RefreshController(initialRefresh: false);
+  final _refreshController = RefreshController(initialRefresh: true);
   final _itemScrollController = ItemScrollController();
   final _store = TopicSinglePageStore();
-
-  @override
-  void initState() {
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _refreshController.requestRefresh();
-    });
-    super.initState();
-  }
 
   @override
   void dispose() {
