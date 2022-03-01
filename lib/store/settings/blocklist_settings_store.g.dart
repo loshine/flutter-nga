@@ -111,6 +111,13 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
     return _$loadAsyncAction.run(() => super.load());
   }
 
+  final _$addUserAsyncAction = AsyncAction('_BlocklistSettingsStore.addUser');
+
+  @override
+  Future<String> addUser(String user) {
+    return _$addUserAsyncAction.run(() => super.addUser(user));
+  }
+
   final _$deleteUserAsyncAction =
       AsyncAction('_BlocklistSettingsStore.deleteUser');
 
@@ -125,6 +132,13 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
   @override
   Future<String> deleteAllUsers() {
     return _$deleteAllUsersAsyncAction.run(() => super.deleteAllUsers());
+  }
+
+  final _$addWordAsyncAction = AsyncAction('_BlocklistSettingsStore.addWord');
+
+  @override
+  Future<String> addWord(String word) {
+    return _$addWordAsyncAction.run(() => super.addWord(word));
   }
 
   final _$deleteWordAsyncAction =
