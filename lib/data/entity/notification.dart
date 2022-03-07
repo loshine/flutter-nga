@@ -1,3 +1,6 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+
 class NotificationInfo {
   final bool? hasUnreadMessage;
   final int? lastTime;
@@ -43,18 +46,21 @@ class NotificationInfoListData {
       (map['0'] as List<dynamic>).forEach((element) {
         replyNotificationList.add(ReplyNotification.fromJson(element));
       });
+      replyNotificationList.sort((a, b) => a.getTime() - b.getTime());
     }
     final messageNotificationList = <MessageNotification>[];
     if (map['1'] != null) {
       (map['1'] as List<dynamic>).forEach((element) {
         messageNotificationList.add(MessageNotification.fromJson(element));
       });
+      messageNotificationList.sort((a, b) => a.getTime() - b.getTime());
     }
     final systemNotificationList = <SystemNotification>[];
     if (map['2'] != null) {
       (map['2'] as List<dynamic>).forEach((element) {
         systemNotificationList.add(SystemNotification.fromJson(element));
       });
+      systemNotificationList.sort((a, b) => a.getTime() - b.getTime());
     }
     return NotificationInfoListData(
       replyNotificationList: replyNotificationList,
@@ -72,7 +78,9 @@ abstract class NgaNotification {
 
   String? getSourceUsername();
 
-  int? getTime();
+  int getTime();
+
+  String getNotificationMessage();
 }
 
 class ReplyNotification implements NgaNotification {
@@ -167,10 +175,42 @@ class ReplyNotification implements NgaNotification {
   String? getSourceUsername() => sourceUsername;
 
   @override
-  int? getTime() => time;
+  int getTime() => time ?? 0;
 
   @override
   int? getType() => type;
+
+  @override
+  String getNotificationMessage() {
+    final time = codeUtils.formatPostDate(getTime() * 1000);
+    if (type == ReplyNotification.TYPE_REPLY_TOPIC) {
+      // 5分钟前 楼上的你妈妈叫你吃饭 回复 了你的主题 测试测试测试测试测试测试
+      return "$time $sourceUsername 回复了你的主题 $topicSubject";
+    } else if (type == ReplyNotification.TYPE_REPLY_REPLY) {
+      // 刚才 楼上的你妈妈叫你吃饭 回复 了你在主题 测试测试测试测试测试测试 中的 回复
+      return "$time $sourceUsername 回复了你在主题 $topicSubject 中的回复";
+    } else if (type == ReplyNotification.TYPE_AT_IN_REPLY) {
+      // 刚才 楼上的你妈妈叫你吃饭 在主题 测试测试 中的 回复 中提到了你
+      return "$time $sourceUsername 在主题 $topicSubject 中的回复中提到了你";
+    } else if (type == ReplyNotification.TYPE_AT_IN_TOPIC) {
+      // 刚才 楼上的你妈妈叫你吃饭 在主题 测试测试 中提到了你
+      return "$time $sourceUsername 在主题 $topicSubject 中提到了你";
+    } else if (type == ReplyNotification.TYPE_COMMENT_TOPIC) {
+      // 5分钟前 楼上的你妈妈叫你吃饭 评论 了你的主题 测试测试测试测试测试测试
+      return "$time $sourceUsername 评论了你的主题 $topicSubject";
+    } else if (type == ReplyNotification.TYPE_COMMENT_REPLY) {
+      // 刚才 楼上的你妈妈叫你吃饭 评论 了你在主题 测试测试测试测试测试测试 中的 回复
+      return "$time $sourceUsername 评论了你在主题 $topicSubject 中的回复";
+    } else if (type == ReplyNotification.TYPE_RATED) {
+      if (targetReplyPid == 0) {
+        return "$time 你在主题 $topicSubject 中的回复被评分";
+      } else {
+        return "$time 你的主题 $topicSubject 被评分";
+      }
+    } else {
+      return "未知回复消息类型";
+    }
+  }
 }
 
 class MessageNotification implements NgaNotification {
@@ -223,10 +263,15 @@ class MessageNotification implements NgaNotification {
   String? getSourceUsername() => sourceUsername;
 
   @override
-  int? getTime() => time;
+  int getTime() => time ?? 0;
 
   @override
   int? getType() => type;
+
+  @override
+  String getNotificationMessage() {
+    return toString();
+  }
 }
 
 class SystemNotification implements NgaNotification {
@@ -303,7 +348,7 @@ class SystemNotification implements NgaNotification {
   String? getSourceUsername() => sourceUsername;
 
   @override
-  int? getTime() => time;
+  int getTime() => time ?? 0;
 
   @override
   int? getType() => type;
@@ -311,5 +356,16 @@ class SystemNotification implements NgaNotification {
   @override
   String toString() {
     return 'SystemNotification{type: $type, sourceUid: $sourceUid, sourceUsername: $sourceUsername, topicSubject: $topicSubject, tid: $tid, pid: $pid, time: $time, page: $page}';
+  }
+
+  @override
+  String getNotificationMessage() {
+    if (type == SystemNotification.TYPE_SELF_KEYWORD) {
+      // pid 是跳转或查询的 reply id
+      // 今天 12:55 FID:-3355501中的发帖触发了关键词监视 查看详细信息
+      return "${codeUtils.formatPostDate(getTime() * 1000)} FID:$tid中的发帖触发了关键词监视";
+    } else {
+      return toString();
+    }
   }
 }
