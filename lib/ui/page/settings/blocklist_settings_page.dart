@@ -26,24 +26,30 @@ class _BlocklistSettingsState extends State<BlocklistSettingsPage> {
       body: Observer(
         builder: (_) {
           return ListView(
+            shrinkWrap: true,
             children: [
-              SwitchListTile(
-                value: store.clientBlockEnabled,
-                onChanged: (v) => store.setClientBlockEnabled(v),
-                title: Text("开启客户端屏蔽功能"),
-                subtitle: Text("默认不开启客户端屏蔽功能，开启后会有少许性能下降"),
+              Padding(
+                padding: EdgeInsets.only(top: 12),
+                child: SwitchListTile(
+                  value: store.clientBlockEnabled,
+                  onChanged: (v) => store.setClientBlockEnabled(v),
+                  title: Text("开启客户端屏蔽功能"),
+                  subtitle: Text("默认不开启客户端屏蔽功能，开启后会有少许性能下降"),
+                ),
               ),
               SwitchListTile(
                 value: store.listBlockEnabled,
-                onChanged: (v) => store.setListBlockEnabled(v),
+                onChanged: store.clientBlockEnabled
+                    ? (v) => store.setListBlockEnabled(v)
+                    : null,
                 title: Text("在列表页开启屏蔽功能"),
-                subtitle: Text("会降低列表页加载速度"),
               ),
               SwitchListTile(
                 value: store.detailsBlockEnabled,
-                onChanged: (v) => store.setDetailsBlockEnabled(v),
+                onChanged: store.clientBlockEnabled
+                    ? (v) => store.setDetailsBlockEnabled(v)
+                    : null,
                 title: Text("在详情页开启屏蔽功能"),
-                subtitle: Text("会降详情页加载速度"),
               ),
               ListTile(
                 title: Text("屏蔽模式"),
