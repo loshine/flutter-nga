@@ -52,6 +52,7 @@ dependencies:
   # fix build problem
   wakelock: ^0.6.1+1
   flutter_js: ^0.5.0+6
+  background_fetch: ^1.0.3
 
 dev_dependencies:
   flutter_test:
