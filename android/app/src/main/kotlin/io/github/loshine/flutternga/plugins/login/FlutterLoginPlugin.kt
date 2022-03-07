@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
@@ -13,7 +12,7 @@ import io.github.loshine.flutternga.ui.LoginActivity
 import java.lang.ref.WeakReference
 
 
-class FlutterLoginPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
+class FlutterLoginPlugin : MethodChannel.MethodCallHandler, ActivityAware {
 
     companion object {
 
@@ -29,7 +28,6 @@ class FlutterLoginPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
     }
 
     private var activityRef: WeakReference<Activity>? = null
-    private var channel: MethodChannel? = null
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         // 通过 MethodCall 可以获取参数和方法名
@@ -46,17 +44,6 @@ class FlutterLoginPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
             }
             else -> result.notImplemented()
         }
-    }
-
-    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(binding.binaryMessenger, CHANNEL)
-        // setMethodCallHandler在此通道上接收方法调用的回调
-        channel?.setMethodCallHandler(this)
-    }
-
-    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel?.setMethodCallHandler(null)
-        channel = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
