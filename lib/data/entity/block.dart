@@ -16,11 +16,11 @@ class BlockInfoData {
       final secondGapIndex = wordsAndUsers.indexOf("\n");
       // 如果没有第二个 \n
       if (secondGapIndex < 0) {
-        wordList.addAll(wordsAndUsers.split(" "));
+        wordList.addAll(wordsAndUsers.split(" ").where((e) => e != ""));
       } else {
         final words = wordsAndUsers.substring(0, secondGapIndex);
         final users = wordsAndUsers.substring(secondGapIndex + 1);
-        wordList.addAll(words.split(" "));
+        wordList.addAll(words.split(" ").where((e) => e != ""));
         userList.addAll(users.split(" "));
       }
     }

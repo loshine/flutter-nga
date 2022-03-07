@@ -45,11 +45,11 @@ class _SettingsState extends State<SettingsPage> {
             subtitle: Text("设置文字大小等界面元素"),
             onTap: () => Routes.navigateTo(context, Routes.INTERFACE_SETTINGS),
           ),
-          // ListTile(
-          //   title: Text("屏蔽设置"),
-          //   subtitle: Text("屏蔽用户、关键词等选项"),
-          //   onTap: () => Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS),
-          // ),
+          ListTile(
+            title: Text("屏蔽设置"),
+            subtitle: Text("屏蔽用户、关键词等选项"),
+            onTap: () => Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS),
+          ),
         ],
       ),
     );
