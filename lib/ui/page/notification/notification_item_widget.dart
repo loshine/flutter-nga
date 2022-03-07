@@ -3,10 +3,10 @@ import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:fluttertoast/fluttertoast.dart';
 
-class SystemNotificationItemWidget extends StatelessWidget {
-  final SystemNotification? notification;
+class ReplyNotificationItemWidget extends StatelessWidget {
+  final ReplyNotification notification;
 
-  const SystemNotificationItemWidget({Key? key, this.notification})
+  const ReplyNotificationItemWidget({Key? key, required this.notification})
       : super(key: key);
 
   @override
@@ -18,7 +18,7 @@ class SystemNotificationItemWidget extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(16),
-            child: Text(_getSubject()),
+            child: Text(notification.getNotificationMessage()),
           ),
           Divider(height: 1),
         ],
@@ -26,18 +26,40 @@ class SystemNotificationItemWidget extends StatelessWidget {
     );
   }
 
-  String _getSubject() {
-    if (notification!.type == SystemNotification.TYPE_SELF_KEYWORD) {
-      // pid 是跳转或查询的 reply id
-      // 今天 12:55 FID:-3355501中的发帖触发了关键词监视 查看详细信息
-      return "${codeUtils.formatPostDate(notification!.time! * 1000)} FID:${notification!.tid}中的发帖触发了关键词监视";
+  _onTap() {
+    if (notification.type == SystemNotification.TYPE_SELF_KEYWORD) {
+      Fluttertoast.showToast(msg: notification.toString());
     } else {
-      return "test";
+      Fluttertoast.showToast(msg: notification.toString());
     }
+  }
+}
+
+class SystemNotificationItemWidget extends StatelessWidget {
+  final SystemNotification notification;
+
+  const SystemNotificationItemWidget({Key? key, required this.notification})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _onTap,
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16),
+            child: Text(notification.getNotificationMessage()),
+          ),
+          Divider(height: 1),
+        ],
+      ),
+    );
   }
 
   _onTap() {
-    if (notification!.type == SystemNotification.TYPE_SELF_KEYWORD) {
+    if (notification.type == SystemNotification.TYPE_SELF_KEYWORD) {
       Fluttertoast.showToast(msg: notification.toString());
     } else {
       Fluttertoast.showToast(msg: notification.toString());

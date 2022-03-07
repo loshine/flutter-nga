@@ -11,7 +11,6 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import com.blankj.utilcode.util.*
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
@@ -20,13 +19,12 @@ import java.io.IOException
 import java.io.OutputStream
 import java.net.URL
 
-class FlutterGallerySaverPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
+class FlutterGallerySaverPlugin : MethodChannel.MethodCallHandler {
 
     private val job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
     companion object {
-
         const val CHANNEL = "io.github.loshine.flutternga.gallery_saver/plugin"
 
         fun registerWith(flutterEngine: FlutterEngine) {
@@ -35,19 +33,6 @@ class FlutterGallerySaverPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
             // setMethodCallHandler在此通道上接收方法调用的回调
             channel.setMethodCallHandler(instance)
         }
-    }
-
-    private var channel: MethodChannel? = null
-
-    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(binding.binaryMessenger, CHANNEL)
-        // setMethodCallHandler在此通道上接收方法调用的回调
-        channel?.setMethodCallHandler(this)
-    }
-
-    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel?.setMethodCallHandler(null)
-        channel = null
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {

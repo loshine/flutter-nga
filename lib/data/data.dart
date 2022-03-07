@@ -6,13 +6,13 @@ import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_js/flutter_js.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
 import 'package:flutter_nga/data/repository/message_repository.dart';
 import 'package:flutter_nga/data/repository/resource_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
-import 'package:flutter_nga/plugins/json.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,6 +29,15 @@ class Data {
   Dio get dio => _dio!;
 
   Database get database => _database!;
+
+  JavascriptRuntime? _jsEngine;
+
+  JavascriptRuntime get jsEngine {
+    if (_jsEngine == null) {
+      _jsEngine = getJavascriptRuntime();
+    }
+    return _jsEngine!;
+  }
 
   EmoticonRepository get emoticonRepository => EmoticonDataRepository();
 
@@ -111,14 +120,9 @@ class Data {
         try {
           map = json.decode(responseBody);
         } catch (err) {
-          // 可能是非标准 json 格式导致，此时从 Java 走一遍，转换为标准格式
-          try {
-            map = json.decode(await Json.fix(responseBody));
-          } catch (e) {
-            debugPrint(e.toString());
-            response.data = responseBody;
-            return handler.next(response);
-          }
+          debugPrint(err.toString());
+          response.data = responseBody;
+          return handler.next(response);
         }
         DioError? dioError = _preHandleServerError(response, map!);
         if (dioError != null) {
@@ -188,6 +192,12 @@ class Data {
     debugPrint(
         "request data : ${requestData is FormData ? requestData.fields.toString() : requestData.toString()}");
     debugPrint("response data : $responseBody");
+    if (response.requestOptions.path.contains("__lib=noti") &&
+        response.requestOptions.path.contains("__act=get_all")) {
+      // js engine 格式化 json
+      responseBody =
+          jsEngine.evaluate('JSON.stringify($responseBody)').stringResult;
+    }
     return responseBody;
   }
 

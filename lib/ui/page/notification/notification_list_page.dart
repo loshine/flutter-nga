@@ -61,7 +61,8 @@ class _NotificationListState extends State<NotificationListPage> {
     if (index == 0) {
       return _titleBuilder('回复通知');
     } else if (index < _store.state.replyNotificationList!.length + 1) {
-      return Text('233');
+      return ReplyNotificationItemWidget(
+          notification: _store.state.replyNotificationList![index - 1]);
     } else if (index == _store.state.replyNotificationList!.length + 1) {
       return _titleBuilder('消息通知');
     } else if (index <
