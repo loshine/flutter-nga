@@ -205,6 +205,17 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
   }
 
   @override
+  dynamic updateBlockMode(BlockMode mode) {
+    final _$actionInfo = _$_BlocklistSettingsStoreActionController.startAction(
+        name: '_BlocklistSettingsStore.updateBlockMode');
+    try {
+      return super.updateBlockMode(mode);
+    } finally {
+      _$_BlocklistSettingsStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 clientBlockEnabled: ${clientBlockEnabled},
