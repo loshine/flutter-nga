@@ -60,7 +60,7 @@ class _UserRepliesPageState extends State<UserRepliesPage> {
   _onRefresh() {
     _store.refresh(widget.uid).catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(msg: err.toString());
+      Fluttertoast.showToast(msg: err.message);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
@@ -73,7 +73,7 @@ class _UserRepliesPageState extends State<UserRepliesPage> {
         _refreshController.loadNoData();
       }
     }).catchError((err) {
-      Fluttertoast.showToast(msg: err.toString());
+      Fluttertoast.showToast(msg: err.message);
       debugPrintStack(stackTrace: err.stackTrace);
       _refreshController.loadFailed();
     });

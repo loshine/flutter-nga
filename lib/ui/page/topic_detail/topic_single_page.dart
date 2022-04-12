@@ -65,7 +65,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       detailStore.setTopic(state.topic);
     }).catchError((err) {
       _refreshController.loadFailed();
-      Fluttertoast.showToast(msg: err.toString());
+      Fluttertoast.showToast(msg: err.message);
     }).whenComplete(() {
       _refreshController.refreshCompleted();
     });

@@ -191,6 +191,12 @@ abstract class _BlocklistSettingsStore with Store {
     return getBlockModeByIndex(i);
   }
 
+  @action
+  updateBlockMode(BlockMode mode) {
+    settings.encodeInt("blockMode", mode.index);
+    blockMode = mode;
+  }
+
   BlockMode getBlockModeByIndex(int index) {
     switch (index) {
       case 0:

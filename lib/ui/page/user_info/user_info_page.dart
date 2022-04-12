@@ -29,11 +29,11 @@ class _UserInfoPageState extends State<UserInfoPage> {
     super.initState();
     if (widget.uid != null) {
       _store.loadByUid(widget.uid).catchError((err) {
-        Fluttertoast.showToast(msg: err.toString());
+        Fluttertoast.showToast(msg: err.message);
       });
     } else if (widget.username != null) {
       _store.loadByName(widget.username).catchError((err) {
-        Fluttertoast.showToast(msg: err.toString());
+        Fluttertoast.showToast(msg: err.message);
       });
     }
   }

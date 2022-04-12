@@ -37,7 +37,7 @@ class _ForumFavouriteButtonState extends State<ForumFavouriteButtonWidget> {
               Provider.of<FavouriteForumListStore>(context, listen: false)
                   .refresh();
             }).catchError((err) {
-              Fluttertoast.showToast(msg: err.toString());
+              Fluttertoast.showToast(msg: err.message);
             });
           },
         );

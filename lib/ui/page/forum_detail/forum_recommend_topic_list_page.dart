@@ -55,7 +55,7 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
   _onRefresh() {
     _store.refresh(widget.fid, true, widget.type).catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(msg: err.toString());
+      Fluttertoast.showToast(msg: err.message);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
