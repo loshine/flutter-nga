@@ -137,8 +137,7 @@ class _ForumDetailState extends State<ForumDetailPage>
   _onRefresh() {
     _store.refresh(widget.fid, false, widget.type).catchError((err) {
       _refreshController.refreshFailed();
-      debugPrintStack(stackTrace: err.stackTrace);
-      Fluttertoast.showToast(msg: err.toString());
+      Fluttertoast.showToast(msg: err.message);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }

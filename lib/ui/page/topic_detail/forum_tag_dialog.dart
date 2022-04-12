@@ -36,7 +36,7 @@ class _ForumTagDialogState extends State<ForumTagDialog> {
       _store.load(widget.fid).then((value) {
         widget.onLoadComplete?.call(value);
       }).catchError((err) {
-        Fluttertoast.showToast(msg: err.toString());
+        Fluttertoast.showToast(msg: err.message);
       });
     }
     super.initState();

@@ -60,7 +60,7 @@ class _UserTopicsPageState extends State<UserTopicsPage> {
   _onRefresh() {
     _store.refresh(widget.uid).catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(msg: err.toString());
+      Fluttertoast.showToast(msg: err.message);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
