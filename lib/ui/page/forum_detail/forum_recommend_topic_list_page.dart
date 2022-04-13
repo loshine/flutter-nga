@@ -44,8 +44,8 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
           onRefresh: _onRefresh,
           child: ListView.builder(
             itemCount: _store.state.list.length,
-            itemBuilder: (context, index) =>
-                TopicListItemWidget(topic: _store.state.list[index]),
+            itemBuilder: (context, index) => TopicListItemWidget(
+              topic: _store.state.list[index],),
           ),
         );
       },

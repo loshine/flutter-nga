@@ -172,6 +172,17 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
   }
 
   @override
+  dynamic loopSyncBlockList() {
+    final _$actionInfo = _$_BlocklistSettingsStoreActionController.startAction(
+        name: '_BlocklistSettingsStore.loopSyncBlockList');
+    try {
+      return super.loopSyncBlockList();
+    } finally {
+      _$_BlocklistSettingsStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setClientBlockEnabled(bool enabled) {
     final _$actionInfo = _$_BlocklistSettingsStoreActionController.startAction(
         name: '_BlocklistSettingsStore.setClientBlockEnabled');

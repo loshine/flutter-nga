@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
 import 'package:mmkv/mmkv.dart';
@@ -58,6 +59,20 @@ abstract class _BlocklistSettingsStore with Store {
     detailsBlockEnabled =
         settings.decodeBool("detailsBlockEnabled", defaultValue: true);
     blockMode = getBlockMode();
+  }
+
+  @action
+  loopSyncBlockList() {
+    Future.delayed(Duration(), () async {
+      debugPrint('定时任务');
+      if (await Data().userRepository.getDefaultUser() != null) {
+        await load();
+      }
+    }).whenComplete(() {
+      Future.delayed(Duration(minutes: 5), () => loopSyncBlockList());
+    }).catchError((err) {
+      debugPrint(err.toString());
+    });
   }
 
   @action

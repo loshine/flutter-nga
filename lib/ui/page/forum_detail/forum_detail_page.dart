@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -83,8 +82,9 @@ class _ForumDetailState extends State<ForumDetailPage>
                   onRefresh: _onRefresh,
                   child: ListView.builder(
                     itemCount: _store.state.list.length,
-                    itemBuilder: (context, index) =>
-                        TopicListItemWidget(topic: _store.state.list[index]),
+                    itemBuilder: (context, index) => TopicListItemWidget(
+                      topic: _store.state.list[index],
+                    ),
                   ),
                 ),
               ),

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
@@ -67,7 +66,6 @@ class Topic {
     this.topicMisc,
     this.page,
     this.parent,
-    this.reply,
   });
 
   final int? tid;
@@ -90,7 +88,6 @@ class Topic {
   final int? page; // 用于记录是收藏的第几页
 
   final TopicParent? parent;
-  final TopicReply? reply;
 
   factory Topic.fromJson(Map<String, dynamic> map) {
     return Topic(
@@ -115,7 +112,6 @@ class Topic {
       topicMisc: map["topic_misc"],
       page: map["page"],
       parent: TopicParent.fromJson(map["parent"] == null ? {} : map["parent"]),
-      reply: map["__P"] == null ? null : TopicReply.fromJson(map["__P"]),
     );
   }
 

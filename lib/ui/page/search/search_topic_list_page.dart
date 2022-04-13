@@ -35,8 +35,9 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
           enablePullUp: _store.state.enablePullUp,
           controller: _refreshController,
           child: ListView.builder(
-            itemBuilder: (_, index) =>
-                TopicListItemWidget(topic: _store.state.list[index]),
+            itemBuilder: (_, index) => TopicListItemWidget(
+              topic: _store.state.list[index],
+            ),
             itemCount: _store.state.list.length,
           ),
         ),

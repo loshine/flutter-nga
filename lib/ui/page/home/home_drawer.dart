@@ -76,11 +76,11 @@ class HomeDrawerBody extends StatelessWidget {
     return Expanded(
       child: Container(
         color: Theme.of(context).backgroundColor,
-        child: Column(
+        child: ListView(
           children: [
             Divider(height: 1),
             Container(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               height: 56,
               child: Align(
                 child: Text(
