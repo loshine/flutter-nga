@@ -236,8 +236,6 @@ class Data {
   }
 
   void close() async {
-    // 清除所有网络访问
-    _dio?.clear();
     // 关闭数据库
     _database?.close();
   }

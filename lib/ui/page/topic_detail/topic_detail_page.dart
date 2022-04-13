@@ -1,8 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/topic/topic_detail_store.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
