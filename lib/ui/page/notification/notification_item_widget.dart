@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ReplyNotificationItemWidget extends StatelessWidget {

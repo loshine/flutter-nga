@@ -18,7 +18,9 @@ import 'package:provider/provider.dart';
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Provider.of<BlocklistSettingsStore>(context).init();
+    Provider.of<BlocklistSettingsStore>(context)
+      ..init()
+      ..loopSyncBlockList();
     Provider.of<InterfaceSettingsStore>(context).init();
     return MultiProvider(
       providers: [

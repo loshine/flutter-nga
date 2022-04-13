@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 
 class NotificationInfo {
