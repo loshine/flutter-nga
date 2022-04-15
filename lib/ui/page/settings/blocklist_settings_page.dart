@@ -46,13 +46,13 @@ class _BlocklistSettingsState extends State<BlocklistSettingsPage> {
                     : null,
                 title: Text("在列表页开启屏蔽功能"),
               ),
-              SwitchListTile(
-                value: _store.detailsBlockEnabled,
-                onChanged: _store.clientBlockEnabled
-                    ? (v) => _store.setDetailsBlockEnabled(v)
-                    : null,
-                title: Text("在详情页开启屏蔽功能"),
-              ),
+              // SwitchListTile(
+              //   value: _store.detailsBlockEnabled,
+              //   onChanged: _store.clientBlockEnabled
+              //       ? (v) => _store.setDetailsBlockEnabled(v)
+              //       : null,
+              //   title: Text("在详情页开启屏蔽功能"),
+              // ),
               ListTile(
                 title: Text("屏蔽模式"),
                 subtitle: Text("选择被屏蔽的用户、词语在客户端内的展示方式"),

@@ -220,7 +220,7 @@ class _TopicDetailState extends State<_TopicDetailPage>
     store.addFavourite(widget.tid).then((message) {
       Fluttertoast.showToast(msg: message.toString());
     }).catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
+      Fluttertoast.showToast(msg: e.message);
     });
   }
 }
