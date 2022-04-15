@@ -114,6 +114,7 @@ class Data {
         Response response,
         ResponseInterceptorHandler handler,
       ) async {
+        response.headers.set('Content-Type', "application/json; charset=GBK");
         String responseBody = _formatResponseBody(response);
         Map<String, dynamic>? map;
         try {

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';
@@ -28,7 +29,11 @@ abstract class _SendMessageStore with Store {
           .messageRepository
           .sendMessage(mid, contacts, subject, content);
     } catch (err) {
+      if (err is DioError) {
+        Fluttertoast.showToast(msg: err.message);
+      } else {
         Fluttertoast.showToast(msg: err.toString());
+      }
     }
   }
 }

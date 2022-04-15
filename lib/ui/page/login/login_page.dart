@@ -102,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
       Routes.pop(context);
     }).catchError((e) {
       debugPrintStack(stackTrace: e.stackTrace);
-      Fluttertoast.showToast(msg: e.toString());
+      Fluttertoast.showToast(msg: e.message);
     });
   }
 }

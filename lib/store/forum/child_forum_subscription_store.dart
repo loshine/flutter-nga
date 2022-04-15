@@ -22,7 +22,7 @@ abstract class _ChildForumSubscriptionStore with Store {
       Fluttertoast.showToast(msg: "订阅成功");
       subscribed = true;
     }).catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
+      Fluttertoast.showToast(msg: e.message);
     });
   }
 
@@ -35,7 +35,7 @@ abstract class _ChildForumSubscriptionStore with Store {
       Fluttertoast.showToast(msg: "取消订阅成功");
       subscribed = false;
     }).catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
+      Fluttertoast.showToast(msg: e.message);
     });
   }
 }

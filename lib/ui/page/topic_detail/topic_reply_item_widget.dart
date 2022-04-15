@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
@@ -325,14 +326,14 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           .topicRepository
           .dislikeReply(widget.reply.tid, widget.reply.pid);
       setState(() => widget.reply.score += reaction.countChange);
-      Fluttertoast.showToast(
-        msg: reaction.message,
-      );
+      Fluttertoast.showToast(msg: reaction.message);
     } catch (err) {
       print(err.toString());
-      Fluttertoast.showToast(
-        msg: err.toString(),
-      );
+      if (err is DioError) {
+        Fluttertoast.showToast(msg: err.message);
+      } else {
+        Fluttertoast.showToast(msg: err.toString());
+      }
     }
   }
 

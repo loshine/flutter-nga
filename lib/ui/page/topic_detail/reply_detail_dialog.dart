@@ -1,4 +1,5 @@
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/data.dart';
@@ -198,9 +199,11 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       );
     } catch (err) {
       print(err.toString());
-      Fluttertoast.showToast(
-        msg: err.toString(),
-      );
+      if (err is DioError) {
+        Fluttertoast.showToast(msg: err.message);
+      } else {
+        Fluttertoast.showToast(msg: err.toString());
+      }
     }
   }
 
@@ -215,9 +218,11 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       );
     } catch (err) {
       print(err.toString());
-      Fluttertoast.showToast(
-        msg: err.toString(),
-      );
+      if (err is DioError) {
+        Fluttertoast.showToast(msg: err.message);
+      } else {
+        Fluttertoast.showToast(msg: err.toString());
+      }
     }
   }
 }
