@@ -8,7 +8,6 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class TopicSinglePage extends StatefulWidget {
   const TopicSinglePage({
@@ -28,7 +27,6 @@ class TopicSinglePage extends StatefulWidget {
 
 class _TopicSingleState extends State<TopicSinglePage> {
   final _refreshController = RefreshController(initialRefresh: true);
-  final _itemScrollController = ItemScrollController();
   final _store = TopicSinglePageStore();
 
   @override
@@ -45,8 +43,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
         enablePullUp: false,
         controller: _refreshController,
         physics: ClampingScrollPhysics(),
-        child: ScrollablePositionedList.builder(
-          itemScrollController: _itemScrollController,
+        child: ListView.builder(
           itemCount: _store.state.replyList.length,
           itemBuilder: (context, position) => _buildListItem(context, position),
         ),
@@ -63,11 +60,11 @@ class _TopicSingleState extends State<TopicSinglePage> {
       detailStore.setMaxPage(state.maxPage);
       detailStore.setMaxFloor(state.maxFloor);
       detailStore.setTopic(state.topic);
+    }).whenComplete(() {
+      _refreshController.refreshCompleted();
     }).catchError((err) {
       _refreshController.loadFailed();
       Fluttertoast.showToast(msg: err.message);
-    }).whenComplete(() {
-      _refreshController.refreshCompleted();
     });
   }
 
