@@ -86,17 +86,15 @@ class Data {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     // 该特殊 UA 可以让访客访问
     dio.options.headers["User-Agent"] =
-        "Nga_Official/80030([${androidInfo.brand} ${androidInfo.model}];"
+        "Nga_Official/90306([${androidInfo.brand} ${androidInfo.model}];"
         "Android${androidInfo.version.release})";
     dio.options.headers["Accept-Encoding"] = "gzip";
     dio.options.headers["Cache-Control"] = "max-age=0";
     dio.options.headers["Connection"] = "Keep-Alive";
 
     dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (
-        RequestOptions options,
-        RequestInterceptorHandler handler,
-      ) async {
+      onRequest:
+          (RequestOptions options, RequestInterceptorHandler handler) async {
         // 在请求被发送之前做一些事情
         // 如果你想完成请求并返回一些自定义数据，可以返回一个`Response`对象或返回`dio.resolve(data)`。
         // 这样请求将会被终止，上层then会被调用，then中返回的数据将是你的自定义数据data.

@@ -57,7 +57,7 @@ class _SearchState extends State<SearchPage> {
                           Icons.close,
                           color: Colors.white,
                         ),
-                        onPressed: () => WidgetsBinding.instance!
+                        onPressed: () => WidgetsBinding.instance
                             .addPostFrameCallback((_) => _searchQuery.clear()),
                       )
                     : Container(width: 0);

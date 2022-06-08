@@ -135,11 +135,14 @@ class _ForumDetailState extends State<ForumDetailPage>
   }
 
   _onRefresh() {
-    _store.refresh(widget.fid, false, widget.type).catchError((err) {
+    _store
+        .refresh(widget.fid, false, widget.type)
+        .then((value) =>
+            _refreshController.refreshCompleted(resetFooterState: true))
+        .catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
-    }).whenComplete(
-        () => _refreshController.refreshCompleted(resetFooterState: true));
+    });
   }
 
   _onLoading() async {
