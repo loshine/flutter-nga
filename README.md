@@ -1,7 +1,6 @@
 # flutter_nga
 
-[![test](https://github.com/loshine/flutter-nga/workflows/test/badge.svg)](https://github.com/loshine/flutter-nga/actions?query=workflow%3Atest)
-[![release](https://img.shields.io/github/v/release/loshine/flutter-nga.svg)](https://github.com/loshine/flutter-nga/releases/)
+现已不再维护。
 
 ## Flutter 开源版 NGA
 
