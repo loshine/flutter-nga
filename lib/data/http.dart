@@ -1,4 +1,4 @@
-import 'package:device_info/device_info.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter_js/flutter_js.dart';
@@ -10,8 +10,8 @@ import 'data.dart';
 
 final httpClient = Dio(BaseOptions(
   baseUrl: DOMAIN,
-  connectTimeout: 30000,
-  receiveTimeout: 30000,
+  connectTimeout: const Duration(milliseconds: 30000),
+  receiveTimeout: const Duration(milliseconds: 30000),
   responseType: ResponseType.bytes,
 ));
 
@@ -47,7 +47,7 @@ final _gbkCodecInterceptor = InterceptorsWrapper(
   String responseBody = _gbk.decode(bytes);
   response.data = responseBody;
   handler.next(response);
-}, onError: (DioError e, ErrorInterceptorHandler handler) {
+}, onError: (DioException e, ErrorInterceptorHandler handler) {
   // gbk 编码转 utf8
   if (e.response != null) {
     List<int> bytes = e.response!.data;

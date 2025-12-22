@@ -114,7 +114,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
       Text(
         "在以下版面担任版主",
-        style: TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
+        style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
       )
     ];
 
@@ -153,7 +153,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
       Text(
         "表示与 论坛/某版面/某用户 的关系",
-        style: TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
+        style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
       )
     ];
     widgets.addAll(userInfo.reputationMap!.entries.map((entry) => InfoWidget(
@@ -278,7 +278,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   Text(
                     "个人版面是由用户自己管理的版面",
                     style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyText2?.color),
+                        color: Theme.of(context).textTheme.bodyMedium?.color),
                   ),
                   Builder(builder: (context) {
                     final entry = userInfo.personalForum!.entries.toList()[0];

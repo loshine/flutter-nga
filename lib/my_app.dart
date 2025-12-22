@@ -67,22 +67,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         light: ThemeData(
           brightness: Brightness.light,
           primarySwatch: Palette.colorPrimary,
-          scaffoldBackgroundColor: Palette.colorBackground,
-          backgroundColor: Palette.colorBackground,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Palette.colorPrimary,
+            background: Palette.colorBackground,
+          ),
           dividerColor: Palette.colorDivider,
           splashColor: Palette.colorSplash,
           highlightColor: Palette.colorHighlight,
           iconTheme: IconThemeData(color: Palette.colorIcon),
           textTheme: TextTheme(
-            bodyText1: TextStyle(
+            bodyLarge: TextStyle(
               color: Palette.colorTextPrimary,
               fontSize: Dimen.body,
             ),
-            bodyText2: TextStyle(
+            bodyMedium: TextStyle(
               color: Palette.colorTextSecondary,
               fontSize: Dimen.body,
             ),
-            caption: TextStyle(
+            bodySmall: TextStyle(
               color: Palette.colorTextSecondary,
               fontSize: Dimen.caption,
             ),
@@ -91,18 +93,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         dark: ThemeData(
           brightness: Brightness.dark,
           primarySwatch: Palette.colorDarkPrimary,
-          toggleableActiveColor: Palette.colorDarkPrimary[700],
-          accentColor: Palette.colorDarkPrimary[700],
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Palette.colorDarkPrimary[700]!,
+            background: Palette.colorBackground,
+            brightness: Brightness.dark,
+          ),
           textTheme: TextTheme(
-            bodyText1: TextStyle(
+            bodyLarge: TextStyle(
               color: Colors.white,
               fontSize: Dimen.body,
             ),
-            bodyText2: TextStyle(
+            bodyMedium: TextStyle(
               color: Colors.white70,
               fontSize: Dimen.body,
             ),
-            caption: TextStyle(
+            bodySmall: TextStyle(
               color: Colors.white70,
               fontSize: Dimen.caption,
             ),

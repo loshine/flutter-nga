@@ -45,7 +45,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                             style: TextStyle(
                               fontSize: Dimen.caption,
                               color:
-                                  Theme.of(context).textTheme.bodyText2?.color,
+                                  Theme.of(context).textTheme.bodyMedium?.color,
                             ),
                           ),
                         )
@@ -69,7 +69,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
                           getShowName(topicHistory!.author!),
                           style: TextStyle(
                             fontSize: Dimen.caption,
-                            color: Theme.of(context).textTheme.bodyText2?.color,
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
                           ),
                         ),
                       ),
@@ -95,7 +95,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
           fontSize: Dimen.subheading *
               Provider.of<InterfaceSettingsStore>(context).titleSizeMultiple,
           color: topicHistory.getSubjectColor() ??
-              Theme.of(context).textTheme.bodyText1?.color,
+              Theme.of(context).textTheme.bodyLarge?.color,
           fontWeight:
               topicHistory.isBold() ? FontWeight.bold : FontWeight.normal,
           fontStyle:

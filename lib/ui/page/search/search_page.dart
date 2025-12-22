@@ -79,7 +79,7 @@ class _SearchState extends State<SearchPage> {
                       color: _searchOptionsStore.state.firstRadio ==
                               SearchStoreData.FIRST_RADIO_TOPIC
                           ? Colors.white
-                          : Theme.of(context).textTheme.bodyText1?.color,
+                          : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   selectedColor: Theme.of(context).primaryColor,
@@ -98,7 +98,7 @@ class _SearchState extends State<SearchPage> {
                       color: _searchOptionsStore.state.firstRadio ==
                               SearchStoreData.FIRST_RADIO_FORUM
                           ? Colors.white
-                          : Theme.of(context).textTheme.bodyText1?.color,
+                          : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   selectedColor: Theme.of(context).primaryColor,
@@ -117,7 +117,7 @@ class _SearchState extends State<SearchPage> {
                       color: _searchOptionsStore.state.firstRadio ==
                               SearchStoreData.FIRST_RADIO_USER
                           ? Colors.white
-                          : Theme.of(context).textTheme.bodyText1?.color,
+                          : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   selectedColor: Theme.of(context).primaryColor,
@@ -146,7 +146,7 @@ class _SearchState extends State<SearchPage> {
                                   ? Colors.white
                                   : Theme.of(context)
                                       .textTheme
-                                      .bodyText1
+                                      .bodyLarge
                                       ?.color),
                         ),
                         selectedColor: Theme.of(context).primaryColor,
@@ -165,7 +165,7 @@ class _SearchState extends State<SearchPage> {
                           color: _searchOptionsStore.state.topicRadio ==
                                   SearchStoreData.TOPIC_RADIO_ALL_FORUM
                               ? Colors.white
-                              : Theme.of(context).textTheme.bodyText1?.color,
+                              : Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       selectedColor: Theme.of(context).primaryColor,
@@ -190,7 +190,7 @@ class _SearchState extends State<SearchPage> {
                       style: TextStyle(
                         color: _searchOptionsStore.state.content
                             ? Colors.white
-                            : Theme.of(context).textTheme.bodyText1?.color,
+                            : Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     selectedColor: Theme.of(context).primaryColor,
@@ -215,7 +215,7 @@ class _SearchState extends State<SearchPage> {
                         color: _searchOptionsStore.state.userRadio ==
                                 SearchStoreData.USER_RADIO_NAME
                             ? Colors.white
-                            : Theme.of(context).textTheme.bodyText1?.color,
+                            : Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     selectedColor: Theme.of(context).primaryColor,
@@ -234,7 +234,7 @@ class _SearchState extends State<SearchPage> {
                         color: _searchOptionsStore.state.userRadio ==
                                 SearchStoreData.USER_RADIO_UID
                             ? Colors.white
-                            : Theme.of(context).textTheme.bodyText1?.color,
+                            : Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     selectedColor: Theme.of(context).primaryColor,

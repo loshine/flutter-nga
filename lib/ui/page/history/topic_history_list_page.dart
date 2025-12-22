@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicHistoryListPage extends StatefulWidget {
-  const TopicHistoryListPage({key: Key}) : super(key: key);
+  const TopicHistoryListPage({super.key});
 
   @override
   TopicHistoryListState createState() => TopicHistoryListState();
@@ -147,7 +147,7 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
           "暂无浏览历史",
           style: TextStyle(
             fontSize: Dimen.subheading,
-            color: Theme.of(context).textTheme.bodyText2?.color,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
         ),
       );

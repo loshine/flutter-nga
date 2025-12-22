@@ -55,11 +55,11 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: InAppWebView(
         initialUrlRequest: URLRequest(
-            url: Uri.https(DOMAIN_WITHOUT_HTTPS, "nuke.php", {
+            url: WebUri.uri(Uri.https(DOMAIN_WITHOUT_HTTPS, "nuke.php", {
           '__lib': 'login',
           '__act': 'account',
           'login': null,
-        })),
+        }))),
         onConsoleMessage:
             (InAppWebViewController controller, ConsoleMessage consoleMessage) {
           if (consoleMessage.message.startsWith("loginSuccess :")) {

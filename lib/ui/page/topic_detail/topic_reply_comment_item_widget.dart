@@ -46,14 +46,14 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                         user!.getShowName(),
                         style: TextStyle(
                             color:
-                                Theme.of(context).textTheme.bodyText1?.color),
+                                Theme.of(context).textTheme.bodyLarge?.color),
                       ),
                     ),
                     Text(
                       reply.postDate!,
                       style: TextStyle(
                         fontSize: Dimen.caption,
-                        color: Theme.of(context).textTheme.bodyText2?.color,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                     ),
                   ],

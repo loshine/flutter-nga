@@ -74,7 +74,7 @@ class TopicListItemWidget extends StatelessWidget {
                           textAlign: TextAlign.end,
                           style: TextStyle(
                             fontSize: Dimen.caption,
-                            color: Theme.of(context).textTheme.bodyText2?.color,
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
                           ),
                         ),
                       )
@@ -102,11 +102,11 @@ class TopicListItemWidget extends StatelessWidget {
                                   isTopicBlocked &&
                                   blockMode == BlockMode.PAINT
                               ? Colors.transparent
-                              : Theme.of(context).textTheme.bodyText2?.color,
+                              : Theme.of(context).textTheme.bodyMedium?.color,
                           backgroundColor: blockEnabled &&
                                   isTopicBlocked &&
                                   blockMode == BlockMode.PAINT
-                              ? Theme.of(context).textTheme.bodyText2?.color
+                              ? Theme.of(context).textTheme.bodyMedium?.color
                               : null,
                         ),
                       ),
@@ -133,7 +133,7 @@ class TopicListItemWidget extends StatelessWidget {
                       "${topic.replies}",
                       style: TextStyle(
                         fontSize: Dimen.caption,
-                        color: Theme.of(context).textTheme.bodyText2?.color,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                     ),
                     Padding(
@@ -148,7 +148,7 @@ class TopicListItemWidget extends StatelessWidget {
                       "${codeUtils.formatPostDate(topic.lastPost! * 1000)}",
                       style: TextStyle(
                         fontSize: Dimen.caption,
-                        color: Theme.of(context).textTheme.bodyText2?.color,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                     ),
                   ],
@@ -188,12 +188,12 @@ class TopicListItemWidget extends StatelessWidget {
           fontSize: Dimen.subheading *
               Provider.of<InterfaceSettingsStore>(context).titleSizeMultiple,
           backgroundColor: isPaintBlockMode
-              ? Theme.of(context).textTheme.bodyText2?.color
+              ? Theme.of(context).textTheme.bodyMedium?.color
               : null,
           color: isPaintBlockMode
               ? Colors.transparent
               : topic.getSubjectColor() ??
-                  Theme.of(context).textTheme.bodyText1?.color,
+                  Theme.of(context).textTheme.bodyLarge?.color,
           fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,
           fontStyle: topic.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration: isDeleteBlockMode
