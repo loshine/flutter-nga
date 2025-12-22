@@ -56,7 +56,9 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
       floatingActionButton: FloatingActionButton(
         tooltip: '回复',
         onPressed: () => Routes.navigateTo(
-            context, "${Routes.SEND_MESSAGE}?mid=${widget.mid}"),
+          context,
+          "${Routes.SEND_MESSAGE}?mid=${widget.mid}",
+        ),
         child: Icon(
           Icons.reply,
           color: Colors.white,

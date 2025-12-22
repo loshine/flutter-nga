@@ -122,8 +122,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
       widgets.addAll(userInfo.moderatorForums!.entries.map(
         (entry) => Builder(
             builder: (context) => GestureDetector(
-                  onTap: () => Routes.navigateTo(context,
-                      "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
+                  onTap: () => Routes.navigateTo(
+                    context,
+                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.encodeParam(entry.value)}",
+                  ),
                   child: Text(
                     "[${entry.value}]",
                     style: TextStyle(
@@ -283,8 +285,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   Builder(builder: (context) {
                     final entry = userInfo.personalForum!.entries.toList()[0];
                     return GestureDetector(
-                      onTap: () => Routes.navigateTo(context,
-                          "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
+                      onTap: () => Routes.navigateTo(
+                        context,
+                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.encodeParam(entry.value)}",
+                      ),
                       child: Text(
                         "[${entry.value}]",
                         style: TextStyle(
@@ -310,12 +314,16 @@ class _UserInfoPageState extends State<UserInfoPage> {
   _onMenuSelected(String action) {
     if (action == _actions[0]) {
       // 跳转某人的主题
-      Routes.navigateTo(context,
-          "${Routes.USER_TOPICS}?uid=${_store.state.uid}&username=${codeUtils.fluroCnParamsEncode(_store.state.username ?? "")}");
+      Routes.navigateTo(
+        context,
+        "${Routes.USER_TOPICS}?uid=${_store.state.uid}&username=${codeUtils.encodeParam(_store.state.username ?? "")}",
+      );
     } else if (action == _actions[1]) {
       // 跳转某人的回复
-      Routes.navigateTo(context,
-          "${Routes.USER_REPLIES}?uid=${_store.state.uid}&username=${codeUtils.fluroCnParamsEncode(_store.state.username ?? "")}");
+      Routes.navigateTo(
+        context,
+        "${Routes.USER_REPLIES}?uid=${_store.state.uid}&username=${codeUtils.encodeParam(_store.state.username ?? "")}",
+      );
     }
   }
 }

@@ -14,7 +14,9 @@ class ConversationItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Routes.navigateTo(
-          context, "${Routes.CONVERSATION_DETAIL}?mid=${conversation!.mid}"),
+        context,
+        "${Routes.CONVERSATION_DETAIL}?mid=${conversation!.mid}",
+      ),
       child: Column(
         children: [
           Padding(

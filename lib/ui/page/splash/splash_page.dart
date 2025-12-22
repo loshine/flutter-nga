@@ -1,4 +1,3 @@
-import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/custom_time_messages.dart';
@@ -15,8 +14,7 @@ class _SplashState extends State<SplashPage> {
   void initState() {
     timeAgo.setLocaleMessages('en', CustomTimeMessages());
     Data().init().then((_) {
-      Routes.navigateTo(context, Routes.HOME,
-          replace: true, transition: TransitionType.fadeIn);
+      Routes.navigateTo(context, Routes.HOME, replace: true);
     });
     super.initState();
   }

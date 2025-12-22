@@ -345,7 +345,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       Routes.navigateTo(
         context,
         "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
-        routeSettings: RouteSettings(arguments: quoteContent),
+        extra: quoteContent,
       );
     } else if (action == _actions[1]) {
       // 回复
@@ -354,11 +354,13 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       Routes.navigateTo(
         context,
         "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
-        routeSettings: RouteSettings(arguments: replyContent),
+        extra: replyContent,
       );
     } else if (action == _actions[2]) {
-      Routes.navigateTo(context,
-          "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}}&authorid=${widget.reply.authorId}");
+      Routes.navigateTo(
+        context,
+        "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}&authorid=${widget.reply.authorId}",
+      );
     }
   }
 

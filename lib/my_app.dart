@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_nga/store/settings/blocklist_settings_store.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_nga/store/settings/interface_settings_store.dart';
 import 'package:flutter_nga/ui/widget/simple_scroll_behavior.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:route_observer_mixin/route_observer_mixin.dart';
@@ -25,11 +25,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  final FluroRouter _router = FluroRouter();
-
-  _MyAppState() {
-    Routes.configureRoutes(_router);
-  }
+  late final GoRouter _router;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -40,6 +36,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _router = GoRouter(
+      routes: buildRoutes(),
+      observers: [RouteObserverProvider.of(context)],
+    );
+    Routes.configureRoutes(_router);
   }
 
   @override
@@ -53,7 +54,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<FluroRouter>(create: (_) => _router),
         Provider<BlocklistSettingsStore>(
           create: (_) => BlocklistSettingsStore(),
         ),
@@ -121,8 +121,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               height: 70,
             ),
             headerTriggerDistance: 50,
-            child: MaterialApp(
-              navigatorObservers: [RouteObserverProvider.of(context)],
+            child: MaterialApp.router(
+              routerConfig: _router,
               builder: (context, c) => ScrollConfiguration(
                 behavior: SimpleScrollBehavior(),
                 child: c!,
@@ -139,7 +139,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 const Locale('en'),
                 const Locale('zh'),
               ],
-              onGenerateRoute: _router.generator,
               localeResolutionCallback: (locale, supportedLocales) => locale,
             ),
           );

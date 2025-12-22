@@ -131,7 +131,9 @@ class TopicHistoryListItemWidget extends StatelessWidget {
   _goTopicDetail(BuildContext context, TopicHistory topicHistory) {
     final store = TopicHistoryStore();
     store.insertHistory(topicHistory.createNewHistory());
-    Routes.navigateTo(context,
-        "${Routes.TOPIC_DETAIL}?tid=${topicHistory.tid}&fid=${topicHistory.fid}&subject=${codeUtils.fluroCnParamsEncode(topicHistory.subject)}");
+    Routes.navigateTo(
+      context,
+      "${Routes.TOPIC_DETAIL}?tid=${topicHistory.tid}&fid=${topicHistory.fid}&subject=${codeUtils.encodeParam(topicHistory.subject)}",
+    );
   }
 }

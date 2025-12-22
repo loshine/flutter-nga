@@ -21,8 +21,8 @@ class NgaHtmlCommentWidget extends StatelessWidget {
               Provider.of<InterfaceSettingsStore>(context).contentSizeMultiple),
           lineHeight: LineHeight(
               Provider.of<InterfaceSettingsStore>(context).lineHeight.size),
-          padding: EdgeInsets.zero,
-          margin: EdgeInsets.zero,
+          padding: HtmlPaddings.zero,
+          margin: Margins.zero,
           color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
       },

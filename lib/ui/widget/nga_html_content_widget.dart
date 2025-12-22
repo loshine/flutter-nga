@@ -21,18 +21,18 @@ class NgaHtmlContentWidget extends StatelessWidget {
         'body': Style(
           lineHeight: LineHeight(
               Provider.of<InterfaceSettingsStore>(context).lineHeight.size),
-          padding: EdgeInsets.zero,
-          margin: EdgeInsets.zero,
+          padding: HtmlPaddings.zero,
+          margin: Margins.zero,
           color: Theme.of(context).textTheme.bodyLarge?.color,
           fontSize: FontSize(Dimen.body *
               Provider.of<InterfaceSettingsStore>(context).contentSizeMultiple),
         ),
         'blockquote': Style(
-          padding: EdgeInsets.zero,
-          margin: EdgeInsets.zero,
+          padding: HtmlPaddings.zero,
+          margin: Margins.zero,
         ),
         'table': Style(
-          margin: const EdgeInsets.all(8),
+          margin: Margins.all(8),
           border: Border(
             left: BorderSide(color: Colors.grey.shade300),
             right: BorderSide(color: Colors.grey.shade300),
@@ -43,7 +43,7 @@ class NgaHtmlContentWidget extends StatelessWidget {
           backgroundColor: Colors.white.withValues(alpha: 0.6),
           border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
         ),
-        'td': Style(padding: EdgeInsets.all(8)),
+        'td': Style(padding: HtmlPaddings.all(8)),
       },
       onLinkTap: (String? url, Map<String, String> attributes, dom.Element? element) {
         Routes.onLinkTap(context, url);

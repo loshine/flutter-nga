@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
@@ -230,7 +228,9 @@ class TopicListItemWidget extends StatelessWidget {
   _goTopicDetail(BuildContext context, Topic topic) {
     final store = TopicHistoryStore();
     store.insertHistory(topic.createHistory());
-    Routes.navigateTo(context,
-        "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${codeUtils.fluroCnParamsEncode(topic.subject!)}");
+    Routes.navigateTo(
+      context,
+      "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${codeUtils.encodeParam(topic.subject!)}",
+    );
   }
 }
