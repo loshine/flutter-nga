@@ -20,12 +20,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    Fluttertoast.showToast(msg: "默认启用原生 WebView 登录");
     _subscription = Login.cookieStream.listen((event) {
       _processCookieJson(event);
     });
     super.initState();
-    Login.startLogin();
   }
 
   @override
