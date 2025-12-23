@@ -90,7 +90,7 @@ class _SendMessageState extends State<SendMessagePage> {
                 child: Text(
                   '添加收信人(UID 或 用户名)',
                   style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyText2?.color),
+                      color: Theme.of(context).textTheme.bodyMedium?.color),
                 ),
               ),
             ],
@@ -112,7 +112,7 @@ class _SendMessageState extends State<SendMessagePage> {
                     content,
                     style: TextStyle(color: Colors.white),
                   ),
-                  backgroundColor: Theme.of(context).primaryColor,
+                  color: WidgetStatePropertyAll(Theme.of(context).primaryColor),
                   onPressed: () => _store.remove(content),
                 );
               }).toList(),

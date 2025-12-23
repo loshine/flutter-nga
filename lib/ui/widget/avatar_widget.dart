@@ -29,8 +29,10 @@ class AvatarWidget extends StatelessWidget {
           : Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => Routes.navigateTo(context,
-                    "${Routes.USER}?name=${codeUtils.fluroCnParamsEncode(username!)}"),
+                onTap: () => Routes.navigateTo(
+                  context,
+                  "${Routes.USER}?name=${codeUtils.encodeParam(username!)}",
+                ),
                 child: _getAvatarImage(),
               ),
             ),

@@ -196,8 +196,10 @@ class _TopicDetailState extends State<_TopicDetailPage>
                     color: Colors.white,
                     onPressed: () {
                       if (widget.fid == null && store.topic == null) return;
-                      Routes.navigateTo(context,
-                          "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid != null ? widget.fid : store.topic!.fid}");
+                      Routes.navigateTo(
+                        context,
+                        "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid != null ? widget.fid : store.topic!.fid}",
+                      );
                     },
                   ),
                 ],

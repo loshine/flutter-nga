@@ -33,7 +33,7 @@ class BlocklistEditDialog extends StatelessWidget {
           child: Text(
             '取消',
             style:
-                TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
+                TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
           ),
         ),
         TextButton(

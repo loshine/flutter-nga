@@ -1,4 +1,3 @@
-import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
@@ -21,12 +20,16 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_replies_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_topics_page.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/linkroute/link_route.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+String _decodeParam(String param) {
+  return Uri.decodeComponent(param);
+}
+
 class Routes {
-  static late FluroRouter router;
+  static late GoRouter router;
 
   static const String SPLASH = "/";
   static const String HOME = "/home";
@@ -51,190 +54,70 @@ class Routes {
   static const String SEND_MESSAGE = "/send_message";
 
   /// 初始化路由
-  static void configureRoutes(FluroRouter r) {
+  static void configureRoutes(GoRouter r) {
     router = r;
-
-    /// 第一个参数是路由地址，第二个参数是页面跳转和传参，第三个参数是默认的转场动画，可以看上图
-    /// 我这边先不设置默认的转场动画，转场动画在下面会讲，可以在另外一个地方设置（可以看NavigatorUtil类）
-    router.define(SPLASH,
-        handler: Handler(handlerFunc: (context, params) => SplashPage()));
-    router.define(HOME,
-        handler: Handler(handlerFunc: (context, params) => HomePage()));
-    router.define(LOGIN,
-        handler: Handler(handlerFunc: (context, params) => LoginPage()));
-    router.define(FORUM_DETAIL,
-        handler: Handler(handlerFunc: (context, params) {
-      return ForumDetailPage(
-        fid: int.tryParse(params["fid"]![0])!,
-        name: fluroCnParamsDecode(params["name"]![0]),
-        type: params["type"] != null ? int.tryParse(params["type"]![0]) : 0,
-      );
-    }));
-    router.define(TOPIC_DETAIL,
-        handler: Handler(
-            handlerFunc: (context, params) => TopicDetailPage(
-                  int.tryParse(params["tid"]![0]),
-                  params["fid"] != null
-                      ? int.tryParse(params["fid"]![0])
-                      : null,
-                  subject: params["subject"] != null
-                      ? fluroCnParamsDecode(params["subject"]![0])
-                      : null,
-                  authorid: params["authorid"] != null
-                      ? int.tryParse(params["authorid"]![0])
-                      : null,
-                )));
-    router.define(TOPIC_PUBLISH,
-        handler: Handler(handlerFunc: (context, params) {
-      final List<String>? tidParams = params["tid"];
-      if (tidParams == null || tidParams.isEmpty) {
-        return PublishPage(fid: int.tryParse(params["fid"]![0]));
-      } else {
-        String content = context?.settings?.arguments != null
-            ? (context!.settings!.arguments as String)
-            : "";
-        return PublishPage(
-          tid: int.tryParse(params["tid"]![0]),
-          fid: int.tryParse(params["fid"]![0]),
-          content: content,
-        );
-      }
-    }));
-    router.define(USER, handler: Handler(handlerFunc: (context, params) {
-      if (params["uid"] != null && params["uid"]!.isNotEmpty) {
-        return UserInfoPage(uid: params["uid"]![0]);
-      } else {
-        return UserInfoPage(username: fluroCnParamsDecode(params["name"]![0]));
-      }
-    }));
-    router.define(USER_TOPICS, handler: Handler(handlerFunc: (context, params) {
-      return UserTopicsPage(
-        uid: int.tryParse(params['uid']![0]) ?? 0,
-        username: fluroCnParamsDecode(params['username']![0]),
-      );
-    }));
-    router.define(USER_REPLIES,
-        handler: Handler(handlerFunc: (context, params) {
-      return UserRepliesPage(
-        uid: int.tryParse(params['uid']![0]) ?? 0,
-        username: fluroCnParamsDecode(params['username']![0]),
-      );
-    }));
-    router.define(SETTINGS,
-        handler: Handler(handlerFunc: (context, params) => SettingsPage()));
-    router.define(INTERFACE_SETTINGS,
-        handler:
-            Handler(handlerFunc: (context, params) => InterfaceSettingsPage()));
-    router.define(BLOCKLIST_SETTINGS,
-        handler:
-            Handler(handlerFunc: (context, params) => BlocklistSettingsPage()));
-    router.define(BLOCKLIST_USERS,
-        handler:
-            Handler(handlerFunc: (context, params) => BlocklistUsersPage()));
-    router.define(BLOCKLIST_KEYWORDS,
-        handler:
-            Handler(handlerFunc: (context, params) => BlocklistKeywordsPage()));
-    router.define(ACCOUNT_MANAGEMENT,
-        handler:
-            Handler(handlerFunc: (context, params) => AccountManagementPage()));
-    router.define(
-      SEARCH,
-      handler: Handler(
-        handlerFunc: (context, params) {
-          final List<String>? fidParams = params["fid"];
-          if (fidParams == null || fidParams.isEmpty) {
-            return SearchPage();
-          } else {
-            return SearchPage(fid: int.tryParse(fidParams[0]));
-          }
-        },
-      ),
-    );
-    router.define(
-      SEARCH_FORUM,
-      handler: Handler(
-        handlerFunc: (context, params) =>
-            SearchForumPage(fluroCnParamsDecode(params["keyword"]![0])),
-      ),
-    );
-    router.define(
-      SEARCH_TOPIC_LIST,
-      handler: Handler(
-        handlerFunc: (context, params) {
-          final content = params["content"] != null &&
-              params["content"]!.isNotEmpty &&
-              params["content"]![0] == "1";
-          if (params["fid"] == null || params["fid"]!.isEmpty) {
-            return SearchTopicListPage(
-                fluroCnParamsDecode(params["keyword"]![0]),
-                content: content);
-          } else {
-            return SearchTopicListPage(
-              fluroCnParamsDecode(params["keyword"]![0]),
-              fid: int.tryParse(params["fid"]![0]),
-              content: content,
-            );
-          }
-        },
-      ),
-    );
-    router.define(
-      PHOTO_PREVIEW,
-      handler: Handler(
-        handlerFunc: (context, params) => PhotoPreviewPage(
-          url: fluroCnParamsDecode(params["url"]![0]),
-          screenWidth: double.tryParse(params["screenWidth"]![0]) ?? 0,
-        ),
-      ),
-    );
-    router.define(
-      CONVERSATION_DETAIL,
-      handler: Handler(
-        handlerFunc: (context, params) => ConversationDetailPage(
-          mid: int.tryParse(params["mid"]![0]),
-        ),
-      ),
-    );
-    router.define(
-      SEND_MESSAGE,
-      handler: Handler(
-        handlerFunc: (context, params) => SendMessagePage(
-          mid: int.tryParse(params["mid"]![0]),
-        ),
-      ),
-    );
   }
 
-  /// 代理 Router 类的 navigateTo 方法
+  /// 页面跳转（支持查询参数）
   static Future navigateTo(
     BuildContext context,
     String path, {
     bool replace = false,
     bool clearStack = false,
-    bool maintainState = true,
-    bool rootNavigator = false,
-    TransitionType transition = TransitionType.native,
-    Duration transitionDuration = const Duration(milliseconds: 250),
-    RouteTransitionsBuilder? transitionBuilder,
-    RouteSettings? routeSettings,
+    Map<String, String>? queryParams,
+    Object? extra,
   }) {
-    return router.navigateTo(
+    final uri = Uri.parse(path);
+    final mergedQueryParams = {
+      ...uri.queryParameters,
+      if (queryParams != null) ...queryParams,
+    };
+    final newUri = uri.replace(queryParameters: mergedQueryParams);
+
+    if (clearStack) {
+      context.pushReplacement(newUri.toString(), extra: extra);
+      return Future.value();
+    } else if (replace) {
+      context.replace(newUri.toString(), extra: extra);
+      return Future.value();
+    } else {
+      return context.push(newUri.toString(), extra: extra);
+    }
+  }
+
+  /// 带参数的页面跳转
+  static Future navigateToWithParams(
+    BuildContext context,
+    String path,
+    Map<String, String> params, {
+    bool replace = false,
+    bool clearStack = false,
+    Object? extra,
+  }) {
+    return navigateTo(
       context,
       path,
       replace: replace,
       clearStack: clearStack,
-      maintainState: maintainState,
-      rootNavigator: rootNavigator,
-      transition: transition,
-      transitionDuration: transitionDuration,
-      transitionBuilder: transitionBuilder,
-      routeSettings: routeSettings,
+      queryParams: params,
+      extra: extra,
     );
   }
 
-  /// 代理 Router 类的 pop 方法
+  /// 简单的页面跳转（无参数）
+  static Future push(BuildContext context, String path, {Object? extra}) {
+    return context.push(path, extra: extra);
+  }
+
+  /// 替换当前页面
+  static Future replace(BuildContext context, String path, {Object? extra}) {
+    context.replace(path, extra: extra);
+    return Future.value();
+  }
+
+  /// 返回上一页
   static void pop(BuildContext context) {
-    router.pop(context);
+    context.pop();
   }
 
   /// 处理 html 控件中超链接点击事件
@@ -248,7 +131,7 @@ class Routes {
       handled = true;
     }
     if (!handled) {
-      launch(link ?? "");
+      launchUrl(Uri.parse(link ?? ""));
     }
   }
 
@@ -257,5 +140,186 @@ class Routes {
     TopicLinkRoute(),
     UserLinkRoute(),
     ReplyLinkRoute(),
+  ];
+}
+
+/// 构建所有路由配置
+List<GoRoute> buildRoutes() {
+  return [
+    GoRoute(
+      path: Routes.SPLASH,
+      name: Routes.SPLASH,
+      builder: (context, state) => SplashPage(),
+    ),
+    GoRoute(
+      path: Routes.HOME,
+      name: Routes.HOME,
+      builder: (context, state) => HomePage(),
+    ),
+    GoRoute(
+      path: Routes.LOGIN,
+      name: Routes.LOGIN,
+      builder: (context, state) => LoginPage(),
+    ),
+    GoRoute(
+      path: Routes.FORUM_DETAIL,
+      name: Routes.FORUM_DETAIL,
+      builder: (context, state) => ForumDetailPage(
+        fid: int.tryParse(state.uri.queryParameters["fid"] ?? "") ?? 0,
+        name: _decodeParam(state.uri.queryParameters["name"] ?? ""),
+        type: int.tryParse(state.uri.queryParameters["type"] ?? "") ?? 0,
+      ),
+    ),
+    GoRoute(
+      path: Routes.TOPIC_DETAIL,
+      name: Routes.TOPIC_DETAIL,
+      builder: (context, state) => TopicDetailPage(
+        int.tryParse(state.uri.queryParameters["tid"] ?? ""),
+        int.tryParse(state.uri.queryParameters["fid"] ?? ""),
+        subject: state.uri.queryParameters["subject"] != null
+            ? _decodeParam(state.uri.queryParameters["subject"]!)
+            : null,
+        authorid: int.tryParse(state.uri.queryParameters["authorid"] ?? ""),
+      ),
+    ),
+    GoRoute(
+      path: Routes.TOPIC_PUBLISH,
+      name: Routes.TOPIC_PUBLISH,
+      builder: (context, state) {
+        final tid = state.uri.queryParameters["tid"];
+        final fid = state.uri.queryParameters["fid"];
+        final content = state.extra as String? ?? "";
+        if (tid != null && tid.isNotEmpty) {
+          return PublishPage(
+            tid: int.tryParse(tid) ?? 0,
+            fid: int.tryParse(fid ?? "") ?? 0,
+            content: content,
+          );
+        } else {
+          return PublishPage(fid: int.tryParse(fid ?? "") ?? 0);
+        }
+      },
+    ),
+    GoRoute(
+      path: Routes.USER,
+      name: Routes.USER,
+      builder: (context, state) {
+        final uid = state.uri.queryParameters["uid"];
+        final name = state.uri.queryParameters["name"];
+        if (uid != null && uid.isNotEmpty) {
+          return UserInfoPage(uid: uid);
+        } else {
+          return UserInfoPage(username: _decodeParam(name ?? ""));
+        }
+      },
+    ),
+    GoRoute(
+      path: Routes.USER_TOPICS,
+      name: Routes.USER_TOPICS,
+      builder: (context, state) => UserTopicsPage(
+        uid: int.tryParse(state.uri.queryParameters["uid"] ?? "") ?? 0,
+        username: _decodeParam(state.uri.queryParameters["username"] ?? ""),
+      ),
+    ),
+    GoRoute(
+      path: Routes.USER_REPLIES,
+      name: Routes.USER_REPLIES,
+      builder: (context, state) => UserRepliesPage(
+        uid: int.tryParse(state.uri.queryParameters["uid"] ?? "") ?? 0,
+        username: _decodeParam(state.uri.queryParameters["username"] ?? ""),
+      ),
+    ),
+    GoRoute(
+      path: Routes.SETTINGS,
+      name: Routes.SETTINGS,
+      builder: (context, state) => SettingsPage(),
+    ),
+    GoRoute(
+      path: Routes.INTERFACE_SETTINGS,
+      name: Routes.INTERFACE_SETTINGS,
+      builder: (context, state) => InterfaceSettingsPage(),
+    ),
+    GoRoute(
+      path: Routes.BLOCKLIST_SETTINGS,
+      name: Routes.BLOCKLIST_SETTINGS,
+      builder: (context, state) => BlocklistSettingsPage(),
+    ),
+    GoRoute(
+      path: Routes.BLOCKLIST_USERS,
+      name: Routes.BLOCKLIST_USERS,
+      builder: (context, state) => BlocklistUsersPage(),
+    ),
+    GoRoute(
+      path: Routes.BLOCKLIST_KEYWORDS,
+      name: Routes.BLOCKLIST_KEYWORDS,
+      builder: (context, state) => BlocklistKeywordsPage(),
+    ),
+    GoRoute(
+      path: Routes.ACCOUNT_MANAGEMENT,
+      name: Routes.ACCOUNT_MANAGEMENT,
+      builder: (context, state) => AccountManagementPage(),
+    ),
+    GoRoute(
+      path: Routes.SEARCH,
+      name: Routes.SEARCH,
+      builder: (context, state) {
+        final fid = state.uri.queryParameters["fid"];
+        if (fid != null && fid.isNotEmpty) {
+          return SearchPage(fid: int.tryParse(fid) ?? 0);
+        } else {
+          return SearchPage();
+        }
+      },
+    ),
+    GoRoute(
+      path: Routes.SEARCH_FORUM,
+      name: Routes.SEARCH_FORUM,
+      builder: (context, state) => SearchForumPage(
+        _decodeParam(state.uri.queryParameters["keyword"] ?? ""),
+      ),
+    ),
+    GoRoute(
+      path: Routes.SEARCH_TOPIC_LIST,
+      name: Routes.SEARCH_TOPIC_LIST,
+      builder: (context, state) {
+        final content = state.uri.queryParameters["content"] == "1";
+        final fid = state.uri.queryParameters["fid"];
+        if (fid != null && fid.isNotEmpty) {
+          return SearchTopicListPage(
+            _decodeParam(state.uri.queryParameters["keyword"] ?? ""),
+            fid: int.tryParse(fid) ?? 0,
+            content: content,
+          );
+        } else {
+          return SearchTopicListPage(
+            _decodeParam(state.uri.queryParameters["keyword"] ?? ""),
+            content: content,
+          );
+        }
+      },
+    ),
+    GoRoute(
+      path: Routes.PHOTO_PREVIEW,
+      name: Routes.PHOTO_PREVIEW,
+      builder: (context, state) => PhotoPreviewPage(
+        url: _decodeParam(state.uri.queryParameters["url"] ?? ""),
+        screenWidth:
+            double.tryParse(state.uri.queryParameters["screenWidth"] ?? "") ?? 0,
+      ),
+    ),
+    GoRoute(
+      path: Routes.CONVERSATION_DETAIL,
+      name: Routes.CONVERSATION_DETAIL,
+      builder: (context, state) => ConversationDetailPage(
+        mid: int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0,
+      ),
+    ),
+    GoRoute(
+      path: Routes.SEND_MESSAGE,
+      name: Routes.SEND_MESSAGE,
+      builder: (context, state) => SendMessagePage(
+        mid: int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0,
+      ),
+    ),
   ];
 }

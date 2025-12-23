@@ -13,12 +13,15 @@ abstract class LinkRoute {
 class TopicLinkRoute extends LinkRoute {
   @override
   void handleMatch(BuildContext context, Match match) {
-    Routes.navigateTo(context, "${Routes.TOPIC_DETAIL}?tid=${match.group(1)}");
+    Routes.navigateTo(
+      context,
+      "${Routes.TOPIC_DETAIL}?tid=${match.group(1)}",
+    );
   }
 
   @override
   String matchRegExp() {
-    return "read\\.php\\?tid=(\\d+)?";
+    return r"read\.php\?tid=(\d+)?";
   }
 }
 
@@ -26,12 +29,15 @@ class TopicLinkRoute extends LinkRoute {
 class UserLinkRoute extends LinkRoute {
   @override
   void handleMatch(BuildContext context, Match match) {
-    Routes.navigateTo(context, "${Routes.USER}?uid=${match.group(1)}");
+    Routes.navigateTo(
+      context,
+      "${Routes.USER}?uid=${match.group(1)}",
+    );
   }
 
   @override
   String matchRegExp() {
-    return "nuke\\.php\\?func=ucp&uid=(\\d+)?";
+    return r"nuke\.php\?func=ucp&uid=(\d+)?";
   }
 }
 
@@ -46,6 +52,6 @@ class ReplyLinkRoute extends LinkRoute {
 
   @override
   String matchRegExp() {
-    return "read\\.php\\?searchpost=1&pid=(\\d+)?";
+    return r"read\.php\?searchpost=1&pid=(\d+)?";
   }
 }

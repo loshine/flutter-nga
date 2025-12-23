@@ -28,8 +28,8 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
           ),
           TabBar(
             isScrollable: true,
-            labelColor: Theme.of(context).textTheme.bodyText1?.color,
-            unselectedLabelColor: Theme.of(context).textTheme.bodyText2?.color,
+            labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+            unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color,
             tabs: _tabs,
           ),
         ],

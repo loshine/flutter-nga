@@ -20,7 +20,6 @@ extension LineHeightExtention on CustomLineHeight {
       case CustomLineHeight.XXLARGE:
         return 2.0;
       case CustomLineHeight.MEDIUM:
-      default:
         return 1.4;
     }
   }
@@ -36,7 +35,6 @@ extension LineHeightExtention on CustomLineHeight {
       case CustomLineHeight.XXLARGE:
         return "超级加倍";
       case CustomLineHeight.MEDIUM:
-      default:
         return "Material Design";
     }
   }

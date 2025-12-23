@@ -56,7 +56,9 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
       floatingActionButton: FloatingActionButton(
         tooltip: '回复',
         onPressed: () => Routes.navigateTo(
-            context, "${Routes.SEND_MESSAGE}?mid=${widget.mid}"),
+          context,
+          "${Routes.SEND_MESSAGE}?mid=${widget.mid}",
+        ),
         child: Icon(
           Icons.reply,
           color: Colors.white,
@@ -71,6 +73,7 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
       Fluttertoast.showToast(
         msg: err.toString(),
       );
+      return _store.state;
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
@@ -82,6 +85,9 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
       } else {
         _refreshController.loadNoData();
       }
-    }).catchError((_) => _refreshController.loadFailed());
+    }).catchError((_) {
+      _refreshController.loadFailed();
+      return null;
+    });
   }
 }

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:device_info/device_info.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/cupertino.dart';
@@ -72,8 +72,8 @@ class Data {
 
     // 配置dio实例
     dio.options.baseUrl = DOMAIN;
-    dio.options.connectTimeout = 10000; // 10s
-    dio.options.receiveTimeout = 10000; // 10s
+    dio.options.connectTimeout = const Duration(milliseconds: 10000); // 10s
+    dio.options.receiveTimeout = const Duration(milliseconds: 10000); // 10s
 //    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
 //        (HttpClient client) {
 //      client.findProxy = (uri) {
@@ -122,7 +122,7 @@ class Data {
           response.data = responseBody;
           return handler.next(response);
         }
-        DioError? dioError = _preHandleServerError(response, map!);
+        DioException? dioError = _preHandleServerError(response, map!);
         if (dioError != null) {
           handler.reject(dioError);
         }
@@ -135,16 +135,15 @@ class Data {
         return handler.next(response);
       },
       onError: (
-        DioError e,
+        DioException e,
         ErrorInterceptorHandler handler,
       ) async {
         debugPrint(e.toString());
         if (e.error is IOException) {
-          return handler.next(DioError(
-            response: e.response,
+          return handler.next(DioException(
             requestOptions: e.requestOptions,
             error: "网络错误，请稍候重试。",
-            type: DioErrorType.other,
+            type: DioExceptionType.unknown,
           ));
         }
         if (e.response != null && e.response!.data != null) {
@@ -156,7 +155,7 @@ class Data {
             debugPrint(err.toString());
             return handler.next(e);
           }
-          DioError? dioError = _preHandleServerError(e.response, map!);
+          DioException? dioError = _preHandleServerError(e.response, map!);
           if (dioError != null) {
             return handler.next(dioError);
           }
@@ -195,40 +194,37 @@ class Data {
   }
 
   /// 预处理服务器业务错误
-  DioError? _preHandleServerError(
+  DioException? _preHandleServerError(
       Response? response, Map<String, dynamic> map) {
     if (response == null) return null;
     // 如果是 api 错误，抛出错误内容
     if (map["data"] is Map<String, dynamic> &&
         map["data"].containsKey("__MESSAGE")) {
       String? errorMessage = map["data"]["__MESSAGE"]["1"];
-      return DioError(
-        response: response,
+      return DioException(
         requestOptions: response.requestOptions,
         error: errorMessage,
-        type: DioErrorType.other,
+        type: DioExceptionType.unknown,
       );
     }
     // 点赞时的错误
     if (map["error"] is Map) {
       Map<String, dynamic> err = map["error"];
       if (err["0"] is String) {
-        return DioError(
-          response: response,
+        return DioException(
           requestOptions: response.requestOptions,
           error: err["0"],
-          type: DioErrorType.other,
+          type: DioExceptionType.unknown,
         );
       }
     }
     // 上传附件时的错误
     if (map["error"] is String) {
       String? errorMessage = map["error"];
-      return DioError(
-        response: response,
+      return DioException(
         requestOptions: response.requestOptions,
         error: errorMessage,
-        type: DioErrorType.other,
+        type: DioExceptionType.unknown,
       );
     }
     return null;
