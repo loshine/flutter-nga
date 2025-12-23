@@ -56,6 +56,7 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
     _store.refresh(widget.fid, true, widget.type).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
+      return _store.state;
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
@@ -67,6 +68,9 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
       } else {
         _refreshController.loadNoData();
       }
-    }).catchError((_) => _refreshController.loadFailed());
+    }).catchError((_) {
+      _refreshController.loadFailed();
+      return null;
+    });
   }
 }

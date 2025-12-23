@@ -26,7 +26,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
       child: Container(
         height: 240.0,
         width: double.infinity,
-        color: Theme.of(context).backgroundColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: Observer(
           builder: (context) {
             return Column(
@@ -45,7 +45,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                 Text(
                   _store.userInfo != null ? _store.userInfo!.username! : "点击登陆",
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyText1?.color,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
               ],
@@ -75,7 +75,7 @@ class HomeDrawerBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        color: Theme.of(context).backgroundColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: ListView(
           children: [
             Divider(height: 1),
@@ -86,7 +86,7 @@ class HomeDrawerBody extends StatelessWidget {
                 child: Text(
                   "模块",
                   style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyText2?.color),
+                      color: Theme.of(context).textTheme.bodyMedium?.color),
                   textAlign: TextAlign.left,
                 ),
                 alignment: Alignment.centerLeft,
@@ -103,7 +103,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback?.call(0),
               ),
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             Material(
               child: InkWell(
@@ -116,7 +116,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback?.call(1),
               ),
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             Material(
               child: InkWell(
@@ -129,7 +129,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback?.call(2),
               ),
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             Material(
               child: InkWell(
@@ -142,7 +142,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback?.call(3),
               ),
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             Material(
               child: InkWell(
@@ -155,7 +155,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => onSelectedCallback?.call(4),
               ),
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             Divider(height: 1),
             Container(
@@ -165,7 +165,7 @@ class HomeDrawerBody extends StatelessWidget {
                 child: Text(
                   "其它",
                   style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyText2?.color),
+                      color: Theme.of(context).textTheme.bodyMedium?.color),
                   textAlign: TextAlign.left,
                 ),
                 alignment: Alignment.centerLeft,
@@ -179,7 +179,7 @@ class HomeDrawerBody extends StatelessWidget {
                 ),
                 onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
               ),
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             Material(
               child: InkWell(
@@ -191,7 +191,7 @@ class HomeDrawerBody extends StatelessWidget {
                   // TODO: 点击关于
                 },
               ),
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
           ],
         ),

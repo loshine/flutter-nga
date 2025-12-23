@@ -36,7 +36,7 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Palette.colorBackground,
-      contentPadding: EdgeInsets.all(0),
+      contentPadding: EdgeInsets.zero,
       content: Observer(
         builder: (_) {
           if (_store.state.replyList.isEmpty) {
@@ -114,7 +114,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
               style: TextStyle(
                 fontSize: Dimen.title,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyText1?.color,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ),
@@ -178,7 +178,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                 widget.reply.postDate ?? "",
                 style: TextStyle(
                   fontSize: Dimen.caption,
-                  color: Theme.of(context).textTheme.bodyText2?.color,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
             ],
@@ -199,8 +199,8 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       );
     } catch (err) {
       print(err.toString());
-      if (err is DioError) {
-        Fluttertoast.showToast(msg: err.message);
+      if (err is DioException) {
+        Fluttertoast.showToast(msg: err.message ?? '');
       } else {
         Fluttertoast.showToast(msg: err.toString());
       }
@@ -218,8 +218,8 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       );
     } catch (err) {
       print(err.toString());
-      if (err is DioError) {
-        Fluttertoast.showToast(msg: err.message);
+      if (err is DioException) {
+        Fluttertoast.showToast(msg: err.message ?? '');
       } else {
         Fluttertoast.showToast(msg: err.toString());
       }

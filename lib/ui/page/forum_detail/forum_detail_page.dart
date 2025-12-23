@@ -142,6 +142,7 @@ class _ForumDetailState extends State<ForumDetailPage>
         .catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
+      return null;
     });
   }
 
@@ -152,7 +153,10 @@ class _ForumDetailState extends State<ForumDetailPage>
       } else {
         _refreshController.loadNoData();
       }
-    }).catchError((_) => _refreshController.loadFailed());
+    }).catchError((_) {
+      _refreshController.loadFailed();
+      return null;
+    });
   }
 
   void _scrollListener() {

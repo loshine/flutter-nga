@@ -20,12 +20,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    Fluttertoast.showToast(msg: "默认启用原生 WebView 登录");
     _subscription = Login.cookieStream.listen((event) {
       _processCookieJson(event);
     });
     super.initState();
-    Login.startLogin();
   }
 
   @override
@@ -55,11 +53,11 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: InAppWebView(
         initialUrlRequest: URLRequest(
-            url: Uri.https(DOMAIN_WITHOUT_HTTPS, "nuke.php", {
+            url: WebUri.uri(Uri.https(DOMAIN_WITHOUT_HTTPS, "nuke.php", {
           '__lib': 'login',
           '__act': 'account',
           'login': null,
-        })),
+        }))),
         onConsoleMessage:
             (InAppWebViewController controller, ConsoleMessage consoleMessage) {
           if (consoleMessage.message.startsWith("loginSuccess :")) {
@@ -103,6 +101,7 @@ class _LoginPageState extends State<LoginPage> {
     }).catchError((e) {
       debugPrintStack(stackTrace: e.stackTrace);
       Fluttertoast.showToast(msg: e.message);
+      throw e;
     });
   }
 }

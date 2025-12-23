@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
@@ -59,8 +56,6 @@ class _PublishPageState extends State<PublishPage> {
   StringBuffer _attachments = StringBuffer();
   StringBuffer _attachmentsCheck = StringBuffer();
 
-  StreamSubscription? _subscription;
-
   @override
   void initState() {
     super.initState();
@@ -83,30 +78,29 @@ class _PublishPageState extends State<PublishPage> {
       attachmentCallback: _attachmentCallback,
     );
     _currentBottomPanelChild = _emoticonGroupTabsWidget;
-    _subscription =
-        KeyboardVisibilityController().onChange.listen((bool visible) {
-      _keyboardVisible = visible;
-      if (visible && _bottomPanelVisible) {
-        _hideBottomPanel();
-      }
-    });
   }
 
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
+  void _onKeyboardVisibilityChanged(bool visible) {
+    setState(() {
+      _keyboardVisible = visible;
+    });
+    if (visible && _bottomPanelVisible) {
+      _hideBottomPanel();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_bottomPanelVisible) {
+    // 使用 MediaQuery 检测键盘
+    final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+    if (keyboardVisible != _keyboardVisible) {
+      _onKeyboardVisibilityChanged(keyboardVisible);
+    }
+    return PopScope(
+      canPop: !_bottomPanelVisible,
+      onPopInvoked: (didPop) {
+        if (!didPop && _bottomPanelVisible) {
           _hideBottomPanel();
-          return false;
-        } else {
-          return true;
         }
       },
       child: Scaffold(
@@ -119,88 +113,92 @@ class _PublishPageState extends State<PublishPage> {
             ),
           ],
         ),
-        body: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Column(
-                  children: [
-                    TextField(
-                      maxLines: 1,
-                      controller: _subjectController,
-                      decoration: InputDecoration(
-                        labelText: "标题(可选)",
-                        suffixIcon: InkWell(
-                          child: Icon(
-                            CommunityMaterialIcons.tag_multiple,
-                            color: Theme.of(context).iconTheme.color,
-                          ),
-                          onTap: _showTagDialog,
-                        ),
-                      ),
-                      keyboardType: TextInputType.text,
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Wrap(
-                        spacing: 8.0, // gap between adjacent chips
-                        runSpacing: 4.0, // gap between line
-                        children: _selectedTags.map((content) {
-                          return ActionChip(
-                            label: Text(
-                              content,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            backgroundColor: Theme.of(context).primaryColor,
-                            onPressed: () {
-                              setState(() {
-                                _selectedTags.remove(content);
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    Expanded(
-                      child: TextField(
-                        maxLines: null,
-                        controller: _contentController,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          labelText: "回复内容",
-                        ),
-                        keyboardType: TextInputType.multiline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              height: _bottomPanelVisible
-                  ? Dimen.bottomPanelHeight + kToolbarHeight
-                  : kToolbarHeight,
-              child: Column(
-                children: [
-                  Container(
-                    color: Theme.of(context).primaryColor,
-                    height: kToolbarHeight,
-                    width: double.infinity,
-                    child: Row(children: _getBottomBarData()),
-                  ),
-                  Container(
-                    color: Theme.of(context).backgroundColor,
-                    width: double.infinity,
-                    height: _bottomPanelVisible ? Dimen.bottomPanelHeight : 0,
-                    child: _currentBottomPanelChild,
-                  )
-                ],
-              ),
-            ),
-          ],
-        ),
+        body: _buildBody(),
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              children: [
+                TextField(
+                  maxLines: 1,
+                  controller: _subjectController,
+                  decoration: InputDecoration(
+                    labelText: "标题(可选)",
+                    suffixIcon: InkWell(
+                      child: Icon(
+                        CommunityMaterialIcons.tag_multiple,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      onTap: _showTagDialog,
+                    ),
+                  ),
+                  keyboardType: TextInputType.text,
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 8.0, // gap between adjacent chips
+                    runSpacing: 4.0, // gap between line
+                    children: _selectedTags.map((content) {
+                      return ActionChip(
+                        label: Text(
+                          content,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        onPressed: () {
+                          setState(() {
+                            _selectedTags.remove(content);
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    maxLines: null,
+                    controller: _contentController,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      labelText: "回复内容",
+                    ),
+                    keyboardType: TextInputType.multiline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(
+          height: _bottomPanelVisible
+              ? Dimen.bottomPanelHeight + kToolbarHeight
+              : kToolbarHeight,
+          child: Column(
+            children: [
+              Container(
+                color: Theme.of(context).primaryColor,
+                height: kToolbarHeight,
+                width: double.infinity,
+                child: Row(children: _getBottomBarData()),
+              ),
+              Container(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                width: double.infinity,
+                height: _bottomPanelVisible ? Dimen.bottomPanelHeight : 0,
+                child: _currentBottomPanelChild,
+              )
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -295,7 +293,7 @@ class _PublishPageState extends State<PublishPage> {
       // 未选中词语
       _contentController.text =
           "$leftPartString$startTag${hasEnd ? endTag : ""}$rightPartString";
-      int position = leftPartString.length + startTag.length as int;
+      int position = leftPartString.length + (startTag.length as int);
       _contentController.selection = TextSelection(
         extentOffset: position,
         baseOffset: position,
@@ -308,16 +306,16 @@ class _PublishPageState extends State<PublishPage> {
         _contentController.text =
             "$leftPartString$startTag$selectionString$endTag$rightPartString";
         int position = leftPartString.length +
-            startTag.length +
+            (startTag.length as int) +
             selectionString.length +
-            endTag.length as int;
+            (endTag.length as int);
         _contentController.selection = TextSelection(
           extentOffset: position,
           baseOffset: position,
         );
       } else {
         _contentController.text = "$leftPartString$startTag$rightPartString";
-        int position = leftPartString.length + startTag.length as int;
+        int position = leftPartString.length + (startTag.length as int);
         _contentController.selection = TextSelection(
           extentOffset: position,
           baseOffset: position,

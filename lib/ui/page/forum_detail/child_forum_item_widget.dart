@@ -30,7 +30,7 @@ class _ChildForumItemState extends State<ChildForumItemWidget> {
       onTap: () => Routes.navigateTo(
         context,
         "${Routes.FORUM_DETAIL}?fid=${widget.childForum.fid}"
-        "&name=${fluroCnParamsEncode(widget.childForum.name)}"
+        "&name=${encodeParam(widget.childForum.name)}"
         "&type=${widget.childForum.type}",
       ),
       child: Column(

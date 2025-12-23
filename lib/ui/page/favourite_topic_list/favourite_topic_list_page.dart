@@ -53,6 +53,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
     _store.refresh().catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
+      return _store.state;
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
@@ -64,7 +65,10 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
       } else {
         _refreshController.loadNoData();
       }
-    }).catchError((_) => _refreshController.loadFailed());
+    }).catchError((_) {
+      _refreshController.loadFailed();
+      return null;
+    });
   }
 
   _showDeleteDialog(Topic topic) {

@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicHistoryListPage extends StatefulWidget {
-  const TopicHistoryListPage({key: Key}) : super(key: key);
+  const TopicHistoryListPage({super.key});
 
   @override
   TopicHistoryListState createState() => TopicHistoryListState();
@@ -50,6 +50,7 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
     _store.refresh().catchError((err) {
       _refreshController.loadFailed();
       Fluttertoast.showToast(msg: err.message);
+      return _store.state;
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
@@ -58,6 +59,7 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
     _store.loadMore().catchError((err) {
       _refreshController.loadFailed();
       Fluttertoast.showToast(msg: err.message);
+      return _store.state;
     }).whenComplete(() => _refreshController.loadComplete());
   }
 
@@ -105,6 +107,7 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
   _clean() {
     _store.clean().catchError((err) {
       Fluttertoast.showToast(msg: err.message);
+      return 0;
     }).whenComplete(() {
       _refreshController.requestRefresh();
     });
@@ -147,7 +150,7 @@ class TopicHistoryListState extends State<TopicHistoryListPage> {
           "暂无浏览历史",
           style: TextStyle(
             fontSize: Dimen.subheading,
-            color: Theme.of(context).textTheme.bodyText2?.color,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
         ),
       );

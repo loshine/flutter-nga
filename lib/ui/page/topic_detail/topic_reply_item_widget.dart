@@ -71,7 +71,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             widget.user!.getShowName(),
                             style: TextStyle(
                               color:
-                                  Theme.of(context).textTheme.bodyText1?.color,
+                                  Theme.of(context).textTheme.bodyLarge?.color,
                             ),
                           ),
                         ),
@@ -97,7 +97,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             "级别: ${widget.group == null ? "" : widget.group!.name}",
                             style: TextStyle(
                               color:
-                                  Theme.of(context).textTheme.bodyText2?.color,
+                                  Theme.of(context).textTheme.bodyMedium?.color,
                               fontSize: Dimen.caption,
                             ),
                           ),
@@ -108,7 +108,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             "威望: ${widget.user!.getShowReputation()}",
                             style: TextStyle(
                               color:
-                                  Theme.of(context).textTheme.bodyText2?.color,
+                                  Theme.of(context).textTheme.bodyMedium?.color,
                               fontSize: Dimen.caption,
                             ),
                           ),
@@ -119,7 +119,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             "发帖: ${widget.user!.postNum ?? 0}",
                             style: TextStyle(
                               color:
-                                  Theme.of(context).textTheme.bodyText2?.color,
+                                  Theme.of(context).textTheme.bodyMedium?.color,
                               fontSize: Dimen.caption,
                             ),
                           ),
@@ -145,7 +145,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 style: TextStyle(
                   color: widget.hot
                       ? Colors.redAccent
-                      : Theme.of(context).textTheme.bodyText2?.color,
+                      : Theme.of(context).textTheme.bodyMedium?.color,
                   fontSize: Dimen.caption,
                 ),
               ),
@@ -162,7 +162,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               style: TextStyle(
                 fontSize: Dimen.title,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyText1?.color,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ),
@@ -204,7 +204,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 child: Text(
                   '附件',
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyText2?.color,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -268,7 +268,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 widget.reply.postDate!,
                 style: TextStyle(
                   fontSize: Dimen.caption,
-                  color: Theme.of(context).textTheme.bodyText2?.color,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
             ],
@@ -286,7 +286,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           "-",
           style: TextStyle(
             fontSize: Dimen.caption,
-            color: Theme.of(context).textTheme.bodyText2?.color,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
         )
       ];
@@ -329,8 +329,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       Fluttertoast.showToast(msg: reaction.message);
     } catch (err) {
       print(err.toString());
-      if (err is DioError) {
-        Fluttertoast.showToast(msg: err.message);
+      if (err is DioException) {
+        Fluttertoast.showToast(msg: err.message ?? '');
       } else {
         Fluttertoast.showToast(msg: err.toString());
       }
@@ -345,7 +345,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       Routes.navigateTo(
         context,
         "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
-        routeSettings: RouteSettings(arguments: quoteContent),
+        extra: quoteContent,
       );
     } else if (action == _actions[1]) {
       // 回复
@@ -354,11 +354,13 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       Routes.navigateTo(
         context,
         "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
-        routeSettings: RouteSettings(arguments: replyContent),
+        extra: replyContent,
       );
     } else if (action == _actions[2]) {
-      Routes.navigateTo(context,
-          "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}}&authorid=${widget.reply.authorId}");
+      Routes.navigateTo(
+        context,
+        "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}&authorid=${widget.reply.authorId}",
+      );
     }
   }
 

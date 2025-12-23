@@ -70,6 +70,7 @@ class _BlocklistKeywordsPageState extends State<BlocklistKeywordsPage> {
         .then((value) => Fluttertoast.showToast(msg: value))
         .catchError((e) {
       Fluttertoast.showToast(msg: e.toString());
+      return false;
     });
   }
 
@@ -79,6 +80,7 @@ class _BlocklistKeywordsPageState extends State<BlocklistKeywordsPage> {
         .then((value) => Fluttertoast.showToast(msg: value))
         .catchError((e) {
       Fluttertoast.showToast(msg: e.toString());
+      return false;
     });
   }
 
@@ -88,6 +90,7 @@ class _BlocklistKeywordsPageState extends State<BlocklistKeywordsPage> {
         .then((value) => Fluttertoast.showToast(msg: value))
         .catchError((e) {
       Fluttertoast.showToast(msg: e.toString());
+      return false;
     });
   }
 

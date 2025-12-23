@@ -65,7 +65,7 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                       style: TextStyle(
                           color: _isPage
                               ? Colors.white
-                              : Theme.of(context).textTheme.bodyText1?.color),
+                              : Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                     selectedColor: Theme.of(context).primaryColor,
                     selected: _isPage,
@@ -83,7 +83,7 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                     style: TextStyle(
                         color: !_isPage
                             ? Colors.white
-                            : Theme.of(context).textTheme.bodyText1?.color),
+                            : Theme.of(context).textTheme.bodyLarge?.color),
                   ),
                   selectedColor: Theme.of(context).primaryColor,
                   selected: !_isPage,
@@ -102,7 +102,7 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
         TextButton(
           child: Text("取消"),
           style: TextButton.styleFrom(
-              primary: Theme.of(context).textTheme.bodyText2?.color),
+              foregroundColor: Theme.of(context).textTheme.bodyMedium?.color),
           onPressed: () => Routes.pop(context),
         ),
         TextButton(

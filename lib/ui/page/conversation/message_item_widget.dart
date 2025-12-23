@@ -36,7 +36,7 @@ class MessageItemWidget extends StatelessWidget {
           Text(
             codeUtils.formatPostDate(message.time! * 1000),
             style: TextStyle(
-              color: Theme.of(context).textTheme.bodyText2?.color,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
               fontSize: Dimen.caption,
             ),
           ),
@@ -51,7 +51,7 @@ class MessageItemWidget extends StatelessWidget {
           style: TextStyle(
             fontSize: Dimen.title,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).textTheme.bodyText1?.color,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
       ));
