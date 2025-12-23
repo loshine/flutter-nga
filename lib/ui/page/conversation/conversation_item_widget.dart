@@ -14,7 +14,9 @@ class ConversationItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Routes.navigateTo(
-          context, "${Routes.CONVERSATION_DETAIL}?mid=${conversation!.mid}"),
+        context,
+        "${Routes.CONVERSATION_DETAIL}?mid=${conversation!.mid}",
+      ),
       child: Column(
         children: [
           Padding(
@@ -32,7 +34,7 @@ class ConversationItemWidget extends StatelessWidget {
                             ? FontWeight.bold
                             : FontWeight.normal,
                         fontSize: Dimen.subheading,
-                        color: Theme.of(context).textTheme.bodyText1?.color,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                       children: [
                         TextSpan(
@@ -40,7 +42,7 @@ class ConversationItemWidget extends StatelessWidget {
                             style: TextStyle(
                               fontSize: Dimen.subheading,
                               color:
-                                  Theme.of(context).textTheme.bodyText2?.color,
+                                  Theme.of(context).textTheme.bodyMedium?.color,
                             ))
                       ],
                     ),
@@ -62,7 +64,7 @@ class ConversationItemWidget extends StatelessWidget {
                       child: Text(
                         conversation!.users,
                         style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyText2?.color,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: Dimen.caption,
                         ),
                       ),
@@ -79,7 +81,7 @@ class ConversationItemWidget extends StatelessWidget {
                       "${codeUtils.formatPostDate(conversation!.lastModify! * 1000)}",
                       style: TextStyle(
                         fontSize: Dimen.caption,
-                        color: Theme.of(context).textTheme.bodyText2?.color,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                     ),
                   ],

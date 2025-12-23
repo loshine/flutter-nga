@@ -56,13 +56,13 @@ class _AccountManagementState extends State<AccountManagementPage>
                         style: TextStyle(
                             color: _store.list[position].enabled
                                 ? Palette.getColorPrimary(context)
-                                : Theme.of(context).textTheme.bodyText1?.color),
+                                : Theme.of(context).textTheme.bodyLarge?.color),
                       ),
                       subtitle: Text(
                         "UID:${_store.list[position].uid}",
                         style: TextStyle(
                             color:
-                                Theme.of(context).textTheme.bodyText2?.color),
+                                Theme.of(context).textTheme.bodyMedium?.color),
                       ),
                       trailing: Icon(
                         CommunityMaterialIcons.check,

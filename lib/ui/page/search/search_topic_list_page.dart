@@ -66,6 +66,7 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
         .catchError((e) {
       Fluttertoast.showToast(msg: e.message);
       _refreshController.refreshFailed();
+      return _store.state;
     });
   }
 
@@ -76,6 +77,7 @@ class _SearchTopicListSate extends State<SearchTopicListPage> {
         .catchError((e) {
       Fluttertoast.showToast(msg: e.message);
       _refreshController.loadFailed();
+      return _store.state;
     });
   }
 }

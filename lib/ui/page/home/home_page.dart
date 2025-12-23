@@ -107,7 +107,7 @@ class _HomePageState extends State<_HomePage> {
               title: Text(_titleText),
               actions: _getActionsByPage(_store.index),
             ),
-            backgroundColor: Theme.of(context).backgroundColor,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             drawer: Drawer(
               child: Column(
                 children: [

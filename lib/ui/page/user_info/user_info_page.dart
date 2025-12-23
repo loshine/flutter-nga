@@ -30,10 +30,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
     if (widget.uid != null) {
       _store.loadByUid(widget.uid).catchError((err) {
         Fluttertoast.showToast(msg: err.message);
+        return _store.state;
       });
     } else if (widget.username != null) {
       _store.loadByName(widget.username).catchError((err) {
         Fluttertoast.showToast(msg: err.message);
+        return _store.state;
       });
     }
   }
@@ -114,7 +116,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
       Text(
         "在以下版面担任版主",
-        style: TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
+        style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
       )
     ];
 
@@ -122,8 +124,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
       widgets.addAll(userInfo.moderatorForums!.entries.map(
         (entry) => Builder(
             builder: (context) => GestureDetector(
-                  onTap: () => Routes.navigateTo(context,
-                      "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
+                  onTap: () => Routes.navigateTo(
+                    context,
+                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.encodeParam(entry.value)}",
+                  ),
                   child: Text(
                     "[${entry.value}]",
                     style: TextStyle(
@@ -153,7 +157,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
       Text(
         "表示与 论坛/某版面/某用户 的关系",
-        style: TextStyle(color: Theme.of(context).textTheme.bodyText2?.color),
+        style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
       )
     ];
     widgets.addAll(userInfo.reputationMap!.entries.map((entry) => InfoWidget(
@@ -278,13 +282,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   Text(
                     "个人版面是由用户自己管理的版面",
                     style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyText2?.color),
+                        color: Theme.of(context).textTheme.bodyMedium?.color),
                   ),
                   Builder(builder: (context) {
                     final entry = userInfo.personalForum!.entries.toList()[0];
                     return GestureDetector(
-                      onTap: () => Routes.navigateTo(context,
-                          "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.fluroCnParamsEncode(entry.value)}"),
+                      onTap: () => Routes.navigateTo(
+                        context,
+                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.encodeParam(entry.value)}",
+                      ),
                       child: Text(
                         "[${entry.value}]",
                         style: TextStyle(
@@ -310,12 +316,16 @@ class _UserInfoPageState extends State<UserInfoPage> {
   _onMenuSelected(String action) {
     if (action == _actions[0]) {
       // 跳转某人的主题
-      Routes.navigateTo(context,
-          "${Routes.USER_TOPICS}?uid=${_store.state.uid}&username=${codeUtils.fluroCnParamsEncode(_store.state.username ?? "")}");
+      Routes.navigateTo(
+        context,
+        "${Routes.USER_TOPICS}?uid=${_store.state.uid}&username=${codeUtils.encodeParam(_store.state.username ?? "")}",
+      );
     } else if (action == _actions[1]) {
       // 跳转某人的回复
-      Routes.navigateTo(context,
-          "${Routes.USER_REPLIES}?uid=${_store.state.uid}&username=${codeUtils.fluroCnParamsEncode(_store.state.username ?? "")}");
+      Routes.navigateTo(
+        context,
+        "${Routes.USER_REPLIES}?uid=${_store.state.uid}&username=${codeUtils.encodeParam(_store.state.username ?? "")}",
+      );
     }
   }
 }
