@@ -101,6 +101,7 @@ class _LoginPageState extends State<LoginPage> {
     }).catchError((e) {
       debugPrintStack(stackTrace: e.stackTrace);
       Fluttertoast.showToast(msg: e.message);
+      throw e;
     });
   }
 }

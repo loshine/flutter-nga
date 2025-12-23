@@ -55,7 +55,10 @@ class _SearchForumState extends State<SearchForumPage> {
     _store
         .search(widget.keyword)
         .whenComplete(() => _refreshController.refreshCompleted())
-        .catchError((_) => _refreshController.refreshFailed());
+        .catchError((_) {
+      _refreshController.refreshFailed();
+      return <Forum>[];
+    });
   }
 
   Widget _buildForumWidget(Forum forum) {

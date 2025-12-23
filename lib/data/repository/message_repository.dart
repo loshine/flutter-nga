@@ -58,9 +58,7 @@ class MessageDataRepository extends MessageRepository {
           "&content=${codeUtils.urlEncode(content)}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
-      Response<Map<String, dynamic>> response =
-          await Data().dio.post("nuke.php", data: postData, options: options);
-      return null;
+      await Data().dio.post("nuke.php", data: postData, options: options);
     } catch (err) {
       rethrow;
     }

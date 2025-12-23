@@ -30,10 +30,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
     if (widget.uid != null) {
       _store.loadByUid(widget.uid).catchError((err) {
         Fluttertoast.showToast(msg: err.message);
+        return _store.state;
       });
     } else if (widget.username != null) {
       _store.loadByName(widget.username).catchError((err) {
         Fluttertoast.showToast(msg: err.message);
+        return _store.state;
       });
     }
   }

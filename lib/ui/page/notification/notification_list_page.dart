@@ -53,6 +53,7 @@ class _NotificationListState extends State<NotificationListPage> {
       Fluttertoast.showToast(
         msg: err.toString(),
       );
+      return _store.state;
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }

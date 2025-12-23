@@ -23,7 +23,6 @@ extension BlockModeExtention on BlockMode {
       case BlockMode.DELETE_LINE:
         return "删除线";
       case BlockMode.GONE:
-      default:
         return "隐藏";
     }
   }

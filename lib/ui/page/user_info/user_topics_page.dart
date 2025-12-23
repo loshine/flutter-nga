@@ -61,6 +61,7 @@ class _UserTopicsPageState extends State<UserTopicsPage> {
     _store.refresh(widget.uid).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
+      return _store.state;
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }

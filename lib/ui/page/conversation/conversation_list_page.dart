@@ -52,6 +52,7 @@ class _ConversationListState extends State<ConversationListPage> {
       Fluttertoast.showToast(
         msg: err.toString(),
       );
+      return _store.state;
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
@@ -63,6 +64,9 @@ class _ConversationListState extends State<ConversationListPage> {
       } else {
         _refreshController.loadNoData();
       }
-    }).catchError((_) => _refreshController.loadFailed());
+    }).catchError((_) {
+      _refreshController.loadFailed();
+      return null;
+    });
   }
 }
