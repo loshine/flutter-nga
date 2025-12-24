@@ -6,11 +6,11 @@ part of 'blocklist_settings_store.dart';
 // StoreGenerator
 // **************************************************************************
 
-// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
-  final _$clientBlockEnabledAtom =
-      Atom(name: '_BlocklistSettingsStore.clientBlockEnabled');
+  late final _$clientBlockEnabledAtom = Atom(
+      name: '_BlocklistSettingsStore.clientBlockEnabled', context: context);
 
   @override
   bool get clientBlockEnabled {
@@ -25,8 +25,8 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
     });
   }
 
-  final _$listBlockEnabledAtom =
-      Atom(name: '_BlocklistSettingsStore.listBlockEnabled');
+  late final _$listBlockEnabledAtom =
+      Atom(name: '_BlocklistSettingsStore.listBlockEnabled', context: context);
 
   @override
   bool get listBlockEnabled {
@@ -41,8 +41,8 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
     });
   }
 
-  final _$detailsBlockEnabledAtom =
-      Atom(name: '_BlocklistSettingsStore.detailsBlockEnabled');
+  late final _$detailsBlockEnabledAtom = Atom(
+      name: '_BlocklistSettingsStore.detailsBlockEnabled', context: context);
 
   @override
   bool get detailsBlockEnabled {
@@ -57,7 +57,8 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
     });
   }
 
-  final _$blockModeAtom = Atom(name: '_BlocklistSettingsStore.blockMode');
+  late final _$blockModeAtom =
+      Atom(name: '_BlocklistSettingsStore.blockMode', context: context);
 
   @override
   BlockMode get blockMode {
@@ -72,8 +73,8 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
     });
   }
 
-  final _$blockUserListAtom =
-      Atom(name: '_BlocklistSettingsStore.blockUserList');
+  late final _$blockUserListAtom =
+      Atom(name: '_BlocklistSettingsStore.blockUserList', context: context);
 
   @override
   List<String> get blockUserList {
@@ -88,8 +89,8 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
     });
   }
 
-  final _$blockWordListAtom =
-      Atom(name: '_BlocklistSettingsStore.blockWordList');
+  late final _$blockWordListAtom =
+      Atom(name: '_BlocklistSettingsStore.blockWordList', context: context);
 
   @override
   List<String> get blockWordList {
@@ -104,72 +105,110 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
     });
   }
 
-  final _$loadAsyncAction = AsyncAction('_BlocklistSettingsStore.load');
+  late final _$initAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.init', context: context);
+
+  @override
+  Future<void> init() {
+    return _$initAsyncAction.run(() => super.init());
+  }
+
+  late final _$setClientBlockEnabledAsyncAction = AsyncAction(
+      '_BlocklistSettingsStore.setClientBlockEnabled',
+      context: context);
+
+  @override
+  Future<void> setClientBlockEnabled(bool enabled) {
+    return _$setClientBlockEnabledAsyncAction
+        .run(() => super.setClientBlockEnabled(enabled));
+  }
+
+  late final _$setListBlockEnabledAsyncAction = AsyncAction(
+      '_BlocklistSettingsStore.setListBlockEnabled',
+      context: context);
+
+  @override
+  Future<void> setListBlockEnabled(bool enabled) {
+    return _$setListBlockEnabledAsyncAction
+        .run(() => super.setListBlockEnabled(enabled));
+  }
+
+  late final _$setDetailsBlockEnabledAsyncAction = AsyncAction(
+      '_BlocklistSettingsStore.setDetailsBlockEnabled',
+      context: context);
+
+  @override
+  Future<void> setDetailsBlockEnabled(bool enabled) {
+    return _$setDetailsBlockEnabledAsyncAction
+        .run(() => super.setDetailsBlockEnabled(enabled));
+  }
+
+  late final _$loadAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.load', context: context);
 
   @override
   Future<void> load() {
     return _$loadAsyncAction.run(() => super.load());
   }
 
-  final _$addUserAsyncAction = AsyncAction('_BlocklistSettingsStore.addUser');
+  late final _$addUserAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.addUser', context: context);
 
   @override
   Future<String> addUser(String user) {
     return _$addUserAsyncAction.run(() => super.addUser(user));
   }
 
-  final _$deleteUserAsyncAction =
-      AsyncAction('_BlocklistSettingsStore.deleteUser');
+  late final _$deleteUserAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.deleteUser', context: context);
 
   @override
   Future<String> deleteUser(String user) {
     return _$deleteUserAsyncAction.run(() => super.deleteUser(user));
   }
 
-  final _$deleteAllUsersAsyncAction =
-      AsyncAction('_BlocklistSettingsStore.deleteAllUsers');
+  late final _$deleteAllUsersAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.deleteAllUsers', context: context);
 
   @override
   Future<String> deleteAllUsers() {
     return _$deleteAllUsersAsyncAction.run(() => super.deleteAllUsers());
   }
 
-  final _$addWordAsyncAction = AsyncAction('_BlocklistSettingsStore.addWord');
+  late final _$addWordAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.addWord', context: context);
 
   @override
   Future<String> addWord(String word) {
     return _$addWordAsyncAction.run(() => super.addWord(word));
   }
 
-  final _$deleteWordAsyncAction =
-      AsyncAction('_BlocklistSettingsStore.deleteWord');
+  late final _$deleteWordAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.deleteWord', context: context);
 
   @override
   Future<String> deleteWord(String word) {
     return _$deleteWordAsyncAction.run(() => super.deleteWord(word));
   }
 
-  final _$deleteAllWordsAsyncAction =
-      AsyncAction('_BlocklistSettingsStore.deleteAllWords');
+  late final _$deleteAllWordsAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.deleteAllWords', context: context);
 
   @override
   Future<String> deleteAllWords() {
     return _$deleteAllWordsAsyncAction.run(() => super.deleteAllWords());
   }
 
-  final _$_BlocklistSettingsStoreActionController =
-      ActionController(name: '_BlocklistSettingsStore');
+  late final _$updateBlockModeAsyncAction =
+      AsyncAction('_BlocklistSettingsStore.updateBlockMode', context: context);
 
   @override
-  void init() {
-    final _$actionInfo = _$_BlocklistSettingsStoreActionController.startAction(
-        name: '_BlocklistSettingsStore.init');
-    try {
-      return super.init();
-    } finally {
-      _$_BlocklistSettingsStoreActionController.endAction(_$actionInfo);
-    }
+  Future<void> updateBlockMode(BlockMode mode) {
+    return _$updateBlockModeAsyncAction.run(() => super.updateBlockMode(mode));
   }
+
+  late final _$_BlocklistSettingsStoreActionController =
+      ActionController(name: '_BlocklistSettingsStore', context: context);
 
   @override
   dynamic loopSyncBlockList() {
@@ -177,50 +216,6 @@ mixin _$BlocklistSettingsStore on _BlocklistSettingsStore, Store {
         name: '_BlocklistSettingsStore.loopSyncBlockList');
     try {
       return super.loopSyncBlockList();
-    } finally {
-      _$_BlocklistSettingsStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void setClientBlockEnabled(bool enabled) {
-    final _$actionInfo = _$_BlocklistSettingsStoreActionController.startAction(
-        name: '_BlocklistSettingsStore.setClientBlockEnabled');
-    try {
-      return super.setClientBlockEnabled(enabled);
-    } finally {
-      _$_BlocklistSettingsStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void setListBlockEnabled(bool enabled) {
-    final _$actionInfo = _$_BlocklistSettingsStoreActionController.startAction(
-        name: '_BlocklistSettingsStore.setListBlockEnabled');
-    try {
-      return super.setListBlockEnabled(enabled);
-    } finally {
-      _$_BlocklistSettingsStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void setDetailsBlockEnabled(bool enabled) {
-    final _$actionInfo = _$_BlocklistSettingsStoreActionController.startAction(
-        name: '_BlocklistSettingsStore.setDetailsBlockEnabled');
-    try {
-      return super.setDetailsBlockEnabled(enabled);
-    } finally {
-      _$_BlocklistSettingsStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  dynamic updateBlockMode(BlockMode mode) {
-    final _$actionInfo = _$_BlocklistSettingsStoreActionController.startAction(
-        name: '_BlocklistSettingsStore.updateBlockMode');
-    try {
-      return super.updateBlockMode(mode);
     } finally {
       _$_BlocklistSettingsStoreActionController.endAction(_$actionInfo);
     }

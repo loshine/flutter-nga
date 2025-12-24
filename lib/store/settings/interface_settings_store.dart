@@ -1,5 +1,5 @@
-import 'package:mmkv/mmkv.dart';
 import 'package:mobx/mobx.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'interface_settings_store.g.dart';
 
@@ -45,7 +45,13 @@ extension LineHeightExtention on CustomLineHeight {
 }
 
 abstract class _InterfaceSettingsStore with Store {
-  final settings = MMKV("ui");
+  static const String _prefsName = 'ui';
+  SharedPreferences? _prefs;
+
+  Future<SharedPreferences> get _settings async {
+    _prefs ??= await SharedPreferences.getInstance();
+    return _prefs!;
+  }
 
   @observable
   var contentSizeMultiple = 1.0;
@@ -57,35 +63,42 @@ abstract class _InterfaceSettingsStore with Store {
   var lineHeight = CustomLineHeight.NORMAL;
 
   @action
-  void init() {
+  Future<void> init() async {
+    final settings = await _settings;
     contentSizeMultiple =
-        settings.decodeDouble("contentSizeMultiple", defaultValue: 1.0);
+        settings.getDouble('${_prefsName}_contentSizeMultiple') ?? 1.0;
     titleSizeMultiple =
-        settings.decodeDouble("titleSizeMultiple", defaultValue: 1.0);
-    lineHeight = getLineHeight();
+        settings.getDouble('${_prefsName}_titleSizeMultiple') ?? 1.0;
+    lineHeight = await getLineHeight();
   }
 
   @action
-  void setContentSizeMultiple(double multiple) {
+  Future<void> setContentSizeMultiple(double multiple) async {
     contentSizeMultiple = multiple;
-    settings.encodeDouble("contentSizeMultiple", contentSizeMultiple);
+    final settings = await _settings;
+    await settings.setDouble(
+        '${_prefsName}_contentSizeMultiple', contentSizeMultiple);
   }
 
   @action
-  void setTitleSizeMultiple(double multiple) {
+  Future<void> setTitleSizeMultiple(double multiple) async {
     titleSizeMultiple = multiple;
-    settings.encodeDouble("titleSizeMultiple", titleSizeMultiple);
+    final settings = await _settings;
+    await settings.setDouble(
+        '${_prefsName}_titleSizeMultiple', titleSizeMultiple);
   }
 
   @action
-  void setLineHeight(int index) {
+  Future<void> setLineHeight(int index) async {
     lineHeight = getLineHeightByIndex(index);
-    settings.encodeInt("lineHeight", index);
+    final settings = await _settings;
+    await settings.setInt('${_prefsName}_lineHeight', index);
   }
 
-  CustomLineHeight getLineHeight() {
-    final i = settings.decodeInt("lineHeight",
-        defaultValue: CustomLineHeight.MEDIUM.index);
+  Future<CustomLineHeight> getLineHeight() async {
+    final settings = await _settings;
+    final i = settings.getInt('${_prefsName}_lineHeight') ??
+        CustomLineHeight.MEDIUM.index;
     return getLineHeightByIndex(i);
   }
 

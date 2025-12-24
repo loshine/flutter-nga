@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/settings/display_mode_store.dart';
 import 'package:flutter_nga/store/settings/theme_store.dart';
 import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -12,12 +11,13 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsState extends State<SettingsPage> {
   ThemeStore _themeStore = ThemeStore();
-  DisplayModeStore _displayModeStore = DisplayModeStore();
+  // TODO: flutter_displaymode 已移除，鸿蒙系统不支持
+  // DisplayModeStore _displayModeStore = DisplayModeStore();
 
   @override
   void initState() {
     _themeStore.refresh();
-    _displayModeStore.refresh();
+    // _displayModeStore.refresh();
     super.initState();
   }
 

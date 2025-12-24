@@ -6,10 +6,11 @@ part of 'favourite_forum_store.dart';
 // StoreGenerator
 // **************************************************************************
 
-// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$FavouriteForumStore on _FavouriteForumStore, Store {
-  final _$isFavouriteAtom = Atom(name: '_FavouriteForumStore.isFavourite');
+  late final _$isFavouriteAtom =
+      Atom(name: '_FavouriteForumStore.isFavourite', context: context);
 
   @override
   bool get isFavourite {
@@ -24,14 +25,16 @@ mixin _$FavouriteForumStore on _FavouriteForumStore, Store {
     });
   }
 
-  final _$loadAsyncAction = AsyncAction('_FavouriteForumStore.load');
+  late final _$loadAsyncAction =
+      AsyncAction('_FavouriteForumStore.load', context: context);
 
   @override
   Future<dynamic> load(int fid, String? name) {
     return _$loadAsyncAction.run(() => super.load(fid, name));
   }
 
-  final _$toggleAsyncAction = AsyncAction('_FavouriteForumStore.toggle');
+  late final _$toggleAsyncAction =
+      AsyncAction('_FavouriteForumStore.toggle', context: context);
 
   @override
   Future<dynamic> toggle(int fid, String? name, int? type) {

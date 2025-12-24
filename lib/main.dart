@@ -1,7 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:mmkv/mmkv.dart';
 import 'package:route_observer_mixin/route_observer_mixin.dart';
 
 import 'my_app.dart';
@@ -10,11 +8,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
-  await FlutterDisplayMode.setHighRefreshRate();
+  // TODO: flutter_displaymode 已移除，鸿蒙系统不支持
+  // await FlutterDisplayMode.setHighRefreshRate();
 
-  // must wait for MMKV to finish initialization
-  final rootDir = await MMKV.initialize();
-  debugPrint('MMKV for flutter with rootDir = $rootDir');
+  // TODO: MMKV 已替换为 shared_preferences，无需初始化
 
   // await setUpHttpClient();
   runApp(RouteObserverProvider(

@@ -6,11 +6,11 @@ part of 'child_forum_subscription_store.dart';
 // StoreGenerator
 // **************************************************************************
 
-// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$ChildForumSubscriptionStore on _ChildForumSubscriptionStore, Store {
-  final _$subscribedAtom =
-      Atom(name: '_ChildForumSubscriptionStore.subscribed');
+  late final _$subscribedAtom =
+      Atom(name: '_ChildForumSubscriptionStore.subscribed', context: context);
 
   @override
   bool get subscribed {
@@ -25,8 +25,8 @@ mixin _$ChildForumSubscriptionStore on _ChildForumSubscriptionStore, Store {
     });
   }
 
-  final _$_ChildForumSubscriptionStoreActionController =
-      ActionController(name: '_ChildForumSubscriptionStore');
+  late final _$_ChildForumSubscriptionStoreActionController =
+      ActionController(name: '_ChildForumSubscriptionStore', context: context);
 
   @override
   void setSubscribed(bool subscribed) {

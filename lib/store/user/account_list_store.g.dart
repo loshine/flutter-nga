@@ -6,10 +6,11 @@ part of 'account_list_store.dart';
 // StoreGenerator
 // **************************************************************************
 
-// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$AccountListStore on _AccountListStore, Store {
-  final _$listAtom = Atom(name: '_AccountListStore.list');
+  late final _$listAtom =
+      Atom(name: '_AccountListStore.list', context: context);
 
   @override
   List<CacheUser> get list {
@@ -24,15 +25,16 @@ mixin _$AccountListStore on _AccountListStore, Store {
     });
   }
 
-  final _$refreshAsyncAction = AsyncAction('_AccountListStore.refresh');
+  late final _$refreshAsyncAction =
+      AsyncAction('_AccountListStore.refresh', context: context);
 
   @override
   Future<dynamic> refresh() {
     return _$refreshAsyncAction.run(() => super.refresh());
   }
 
-  final _$_AccountListStoreActionController =
-      ActionController(name: '_AccountListStore');
+  late final _$_AccountListStoreActionController =
+      ActionController(name: '_AccountListStore', context: context);
 
   @override
   Future<int> quitAll() {

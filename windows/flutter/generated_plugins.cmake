@@ -4,9 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
-  flutter_inappwebview_windows
-  flutter_js
-  mmkv_win32
   permission_handler_windows
   url_launcher_windows
 )

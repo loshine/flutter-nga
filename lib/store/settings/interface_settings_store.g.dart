@@ -6,11 +6,11 @@ part of 'interface_settings_store.dart';
 // StoreGenerator
 // **************************************************************************
 
-// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$InterfaceSettingsStore on _InterfaceSettingsStore, Store {
-  final _$contentSizeMultipleAtom =
-      Atom(name: '_InterfaceSettingsStore.contentSizeMultiple');
+  late final _$contentSizeMultipleAtom = Atom(
+      name: '_InterfaceSettingsStore.contentSizeMultiple', context: context);
 
   @override
   double get contentSizeMultiple {
@@ -25,8 +25,8 @@ mixin _$InterfaceSettingsStore on _InterfaceSettingsStore, Store {
     });
   }
 
-  final _$titleSizeMultipleAtom =
-      Atom(name: '_InterfaceSettingsStore.titleSizeMultiple');
+  late final _$titleSizeMultipleAtom =
+      Atom(name: '_InterfaceSettingsStore.titleSizeMultiple', context: context);
 
   @override
   double get titleSizeMultiple {
@@ -41,7 +41,8 @@ mixin _$InterfaceSettingsStore on _InterfaceSettingsStore, Store {
     });
   }
 
-  final _$lineHeightAtom = Atom(name: '_InterfaceSettingsStore.lineHeight');
+  late final _$lineHeightAtom =
+      Atom(name: '_InterfaceSettingsStore.lineHeight', context: context);
 
   @override
   CustomLineHeight get lineHeight {
@@ -56,51 +57,40 @@ mixin _$InterfaceSettingsStore on _InterfaceSettingsStore, Store {
     });
   }
 
-  final _$_InterfaceSettingsStoreActionController =
-      ActionController(name: '_InterfaceSettingsStore');
+  late final _$initAsyncAction =
+      AsyncAction('_InterfaceSettingsStore.init', context: context);
 
   @override
-  void init() {
-    final _$actionInfo = _$_InterfaceSettingsStoreActionController.startAction(
-        name: '_InterfaceSettingsStore.init');
-    try {
-      return super.init();
-    } finally {
-      _$_InterfaceSettingsStoreActionController.endAction(_$actionInfo);
-    }
+  Future<void> init() {
+    return _$initAsyncAction.run(() => super.init());
   }
 
-  @override
-  void setContentSizeMultiple(double multiple) {
-    final _$actionInfo = _$_InterfaceSettingsStoreActionController.startAction(
-        name: '_InterfaceSettingsStore.setContentSizeMultiple');
-    try {
-      return super.setContentSizeMultiple(multiple);
-    } finally {
-      _$_InterfaceSettingsStoreActionController.endAction(_$actionInfo);
-    }
-  }
+  late final _$setContentSizeMultipleAsyncAction = AsyncAction(
+      '_InterfaceSettingsStore.setContentSizeMultiple',
+      context: context);
 
   @override
-  void setTitleSizeMultiple(double multiple) {
-    final _$actionInfo = _$_InterfaceSettingsStoreActionController.startAction(
-        name: '_InterfaceSettingsStore.setTitleSizeMultiple');
-    try {
-      return super.setTitleSizeMultiple(multiple);
-    } finally {
-      _$_InterfaceSettingsStoreActionController.endAction(_$actionInfo);
-    }
+  Future<void> setContentSizeMultiple(double multiple) {
+    return _$setContentSizeMultipleAsyncAction
+        .run(() => super.setContentSizeMultiple(multiple));
   }
 
+  late final _$setTitleSizeMultipleAsyncAction = AsyncAction(
+      '_InterfaceSettingsStore.setTitleSizeMultiple',
+      context: context);
+
   @override
-  void setLineHeight(int index) {
-    final _$actionInfo = _$_InterfaceSettingsStoreActionController.startAction(
-        name: '_InterfaceSettingsStore.setLineHeight');
-    try {
-      return super.setLineHeight(index);
-    } finally {
-      _$_InterfaceSettingsStoreActionController.endAction(_$actionInfo);
-    }
+  Future<void> setTitleSizeMultiple(double multiple) {
+    return _$setTitleSizeMultipleAsyncAction
+        .run(() => super.setTitleSizeMultiple(multiple));
+  }
+
+  late final _$setLineHeightAsyncAction =
+      AsyncAction('_InterfaceSettingsStore.setLineHeight', context: context);
+
+  @override
+  Future<void> setLineHeight(int index) {
+    return _$setLineHeightAsyncAction.run(() => super.setLineHeight(index));
   }
 
   @override

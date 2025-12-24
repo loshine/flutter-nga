@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
-import 'package:mmkv/mmkv.dart';
 import 'package:mobx/mobx.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'blocklist_settings_store.g.dart';
 
@@ -29,7 +29,13 @@ extension BlockModeExtention on BlockMode {
 }
 
 abstract class _BlocklistSettingsStore with Store {
-  final settings = MMKV("blocklist");
+  static const String _prefsName = 'blocklist';
+  SharedPreferences? _prefs;
+
+  Future<SharedPreferences> get _settings async {
+    _prefs ??= await SharedPreferences.getInstance();
+    return _prefs!;
+  }
 
   @observable
   var clientBlockEnabled = false;
@@ -50,14 +56,15 @@ abstract class _BlocklistSettingsStore with Store {
   var blockWordList = <String>[];
 
   @action
-  void init() {
+  Future<void> init() async {
+    final settings = await _settings;
     clientBlockEnabled =
-        settings.decodeBool("clientBlockEnabled", defaultValue: false);
+        settings.getBool('${_prefsName}_clientBlockEnabled') ?? false;
     listBlockEnabled =
-        settings.decodeBool("listBlockEnabled", defaultValue: true);
+        settings.getBool('${_prefsName}_listBlockEnabled') ?? true;
     detailsBlockEnabled =
-        settings.decodeBool("detailsBlockEnabled", defaultValue: true);
-    blockMode = getBlockMode();
+        settings.getBool('${_prefsName}_detailsBlockEnabled') ?? true;
+    blockMode = await getBlockMode();
   }
 
   @action
@@ -75,21 +82,26 @@ abstract class _BlocklistSettingsStore with Store {
   }
 
   @action
-  void setClientBlockEnabled(bool enabled) {
+  Future<void> setClientBlockEnabled(bool enabled) async {
     clientBlockEnabled = enabled;
-    settings.encodeBool("clientBlockEnabled", clientBlockEnabled);
+    final settings = await _settings;
+    await settings.setBool(
+        '${_prefsName}_clientBlockEnabled', clientBlockEnabled);
   }
 
   @action
-  void setListBlockEnabled(bool enabled) {
+  Future<void> setListBlockEnabled(bool enabled) async {
     listBlockEnabled = enabled;
-    settings.encodeBool("listBlockEnabled", listBlockEnabled);
+    final settings = await _settings;
+    await settings.setBool('${_prefsName}_listBlockEnabled', listBlockEnabled);
   }
 
   @action
-  void setDetailsBlockEnabled(bool enabled) {
+  Future<void> setDetailsBlockEnabled(bool enabled) async {
     detailsBlockEnabled = enabled;
-    settings.encodeBool("detailsBlockEnabled", detailsBlockEnabled);
+    final settings = await _settings;
+    await settings.setBool(
+        '${_prefsName}_detailsBlockEnabled', detailsBlockEnabled);
   }
 
   @action
@@ -199,15 +211,17 @@ abstract class _BlocklistSettingsStore with Store {
     }
   }
 
-  BlockMode getBlockMode() {
+  Future<BlockMode> getBlockMode() async {
+    final settings = await _settings;
     final i =
-        settings.decodeInt("blockMode", defaultValue: BlockMode.COLLAPSE.index);
+        settings.getInt('${_prefsName}_blockMode') ?? BlockMode.COLLAPSE.index;
     return getBlockModeByIndex(i);
   }
 
   @action
-  updateBlockMode(BlockMode mode) {
-    settings.encodeInt("blockMode", mode.index);
+  Future<void> updateBlockMode(BlockMode mode) async {
+    final settings = await _settings;
+    await settings.setInt('${_prefsName}_blockMode', mode.index);
     blockMode = mode;
   }
 

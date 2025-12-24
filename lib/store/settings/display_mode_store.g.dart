@@ -6,10 +6,11 @@ part of 'display_mode_store.dart';
 // StoreGenerator
 // **************************************************************************
 
-// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$DisplayModeStore on _DisplayModeStore, Store {
-  final _$modesAtom = Atom(name: '_DisplayModeStore.modes');
+  late final _$modesAtom =
+      Atom(name: '_DisplayModeStore.modes', context: context);
 
   @override
   List<DisplayMode> get modes {
@@ -24,7 +25,8 @@ mixin _$DisplayModeStore on _DisplayModeStore, Store {
     });
   }
 
-  final _$activeAtom = Atom(name: '_DisplayModeStore.active');
+  late final _$activeAtom =
+      Atom(name: '_DisplayModeStore.active', context: context);
 
   @override
   DisplayMode? get active {
@@ -39,7 +41,8 @@ mixin _$DisplayModeStore on _DisplayModeStore, Store {
     });
   }
 
-  final _$preferredAtom = Atom(name: '_DisplayModeStore.preferred');
+  late final _$preferredAtom =
+      Atom(name: '_DisplayModeStore.preferred', context: context);
 
   @override
   DisplayMode? get preferred {
@@ -54,15 +57,16 @@ mixin _$DisplayModeStore on _DisplayModeStore, Store {
     });
   }
 
-  final _$refreshAsyncAction = AsyncAction('_DisplayModeStore.refresh');
+  late final _$refreshAsyncAction =
+      AsyncAction('_DisplayModeStore.refresh', context: context);
 
   @override
   Future<void> refresh() {
     return _$refreshAsyncAction.run(() => super.refresh());
   }
 
-  final _$setHighRefreshRateAsyncAction =
-      AsyncAction('_DisplayModeStore.setHighRefreshRate');
+  late final _$setHighRefreshRateAsyncAction =
+      AsyncAction('_DisplayModeStore.setHighRefreshRate', context: context);
 
   @override
   Future<void> setHighRefreshRate() {
@@ -70,16 +74,16 @@ mixin _$DisplayModeStore on _DisplayModeStore, Store {
         .run(() => super.setHighRefreshRate());
   }
 
-  final _$setLowRefreshRateAsyncAction =
-      AsyncAction('_DisplayModeStore.setLowRefreshRate');
+  late final _$setLowRefreshRateAsyncAction =
+      AsyncAction('_DisplayModeStore.setLowRefreshRate', context: context);
 
   @override
   Future<void> setLowRefreshRate() {
     return _$setLowRefreshRateAsyncAction.run(() => super.setLowRefreshRate());
   }
 
-  final _$setPreferredModeAsyncAction =
-      AsyncAction('_DisplayModeStore.setPreferredMode');
+  late final _$setPreferredModeAsyncAction =
+      AsyncAction('_DisplayModeStore.setPreferredMode', context: context);
 
   @override
   Future<void> setPreferredMode(DisplayMode mode) {
@@ -87,16 +91,16 @@ mixin _$DisplayModeStore on _DisplayModeStore, Store {
         .run(() => super.setPreferredMode(mode));
   }
 
-  final _$isHighRefreshRateAsyncAction =
-      AsyncAction('_DisplayModeStore.isHighRefreshRate');
+  late final _$isHighRefreshRateAsyncAction =
+      AsyncAction('_DisplayModeStore.isHighRefreshRate', context: context);
 
   @override
   Future<bool> isHighRefreshRate() {
     return _$isHighRefreshRateAsyncAction.run(() => super.isHighRefreshRate());
   }
 
-  final _$isLowRefreshRateAsyncAction =
-      AsyncAction('_DisplayModeStore.isLowRefreshRate');
+  late final _$isLowRefreshRateAsyncAction =
+      AsyncAction('_DisplayModeStore.isLowRefreshRate', context: context);
 
   @override
   Future<bool> isLowRefreshRate() {
