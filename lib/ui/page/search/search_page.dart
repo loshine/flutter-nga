@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/store/search/input_deletion_status_store.dart';
 import 'package:flutter_nga/store/search/search_options_store.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 
@@ -272,19 +271,19 @@ class _SearchState extends State<SearchPage> {
       if (widget.fid == null) {
         Routes.navigateTo(
           context,
-          "${Routes.SEARCH_TOPIC_LIST}?keyword=${codeUtils.encodeParam(text)}&content=${_searchOptionsStore.state.content ? 1 : 0}",
+          "${Routes.SEARCH_TOPIC_LIST}?keyword=$text&content=${_searchOptionsStore.state.content ? 1 : 0}",
         );
       } else {
         Routes.navigateTo(
           context,
-          "${Routes.SEARCH_TOPIC_LIST}?keyword=${codeUtils.encodeParam(text)}&fid=${widget.fid}&content=${_searchOptionsStore.state.content ? 1 : 0}",
+          "${Routes.SEARCH_TOPIC_LIST}?keyword=$text&fid=${widget.fid}&content=${_searchOptionsStore.state.content ? 1 : 0}",
         );
       }
     } else if (_searchOptionsStore.state.firstRadio ==
         SearchStoreData.FIRST_RADIO_FORUM) {
       Routes.navigateTo(
         context,
-        "${Routes.SEARCH_FORUM}?keyword=${codeUtils.encodeParam(text)}",
+        "${Routes.SEARCH_FORUM}?keyword=$text",
       );
     } else if (_searchOptionsStore.state.firstRadio ==
         SearchStoreData.FIRST_RADIO_USER) {
@@ -292,7 +291,7 @@ class _SearchState extends State<SearchPage> {
           SearchStoreData.USER_RADIO_NAME) {
         Routes.navigateTo(
           context,
-          "${Routes.USER}?name=${codeUtils.encodeParam(text)}",
+          "${Routes.USER}?name=$text",
         );
       } else {
         Routes.navigateTo(context, "${Routes.USER}?uid=$text");

@@ -76,7 +76,7 @@ class _SearchForumState extends State<SearchForumPage> {
       onTap: () => Routes.navigateTo(
         context,
         "${Routes.FORUM_DETAIL}?fid=${forum.fid}"
-        "&name=${encodeParam(forum.name)}",
+        "&name=${forum.name}",
       ),
     );
   }
