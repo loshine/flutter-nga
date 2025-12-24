@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
@@ -22,10 +24,20 @@ Future setUpHttpClient() async {
 
 Future setUpDeviceInfoHeader() async {
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-  httpClient.options.headers['User-Agent'] =
-      "Nga_Official/90306([${androidInfo.brand} ${androidInfo.model}];"
-      "Android${androidInfo.version.release})";
+  String userAgent;
+  if (Platform.isAndroid) {
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    userAgent =
+        "Nga_Official/90306([${androidInfo.brand} ${androidInfo.model}];"
+        "Android${androidInfo.version.release})";
+  } else if (Platform.isIOS) {
+    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    userAgent =
+        "NGA_skull/7.3.1(${iosInfo.utsname.machine};iOS ${iosInfo.systemVersion})";
+  } else {
+    userAgent = "Nga_Official/90306";
+  }
+  httpClient.options.headers['User-Agent'] = userAgent;
 }
 
 /// 用户信息请求头拦截器

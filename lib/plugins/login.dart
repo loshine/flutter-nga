@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -7,14 +8,16 @@ class Login {
     if (Platform.isAndroid) {
       return _AndroidLogin.cookieStream;
     }
-    throw Exception("Not implemented!!!");
+    // iOS 不支持原生登录，返回空流
+    return const Stream.empty();
   }
 
   static Future<String> startLogin() async {
     if (Platform.isAndroid) {
       return _AndroidLogin.startLogin();
     }
-    throw Exception("Not implemented!!!");
+    // iOS 不支持原生登录，请使用 WebView 登录
+    throw UnsupportedError("iOS 不支持原生登录，请使用网页登录");
   }
 }
 
