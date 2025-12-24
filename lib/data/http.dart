@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
