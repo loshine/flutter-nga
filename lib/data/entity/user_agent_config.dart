@@ -160,6 +160,11 @@ class UserAgentPresets {
     } else if (Platform.isIOS) {
       final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       return 'NGA_skull/7.3.1(${iosInfo.utsname.machine};iOS ${iosInfo.systemVersion})';
+    } else if (Platform.isOhos) {
+      final deviceInfoData = await deviceInfo.deviceInfo;
+      final brand = deviceInfoData.data['brand'] ?? 'Unknown';
+      final model = deviceInfoData.data['model'] ?? 'Device';
+      return 'Nga_Official/90306([$brand $model];HarmonyOS)';
     } else {
       return 'Nga_Official/90306';
     }
