@@ -31,7 +31,7 @@ class AvatarWidget extends StatelessWidget {
               child: InkWell(
                 onTap: () => Routes.navigateTo(
                   context,
-                  "${Routes.USER}?name=${codeUtils.encodeParam(username!)}",
+                  "${Routes.USER}?name=$username",
                 ),
                 child: _getAvatarImage(),
               ),

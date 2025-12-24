@@ -230,7 +230,7 @@ class TopicListItemWidget extends StatelessWidget {
     store.insertHistory(topic.createHistory());
     Routes.navigateTo(
       context,
-      "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${codeUtils.encodeParam(topic.subject!)}",
+      "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${topic.subject!}",
     );
   }
 }
