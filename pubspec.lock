@@ -859,12 +859,13 @@ packages:
     source: hosted
     version: "1.9.0"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      name: path_provider
-      sha256: "50c5dd5b6e1aaf6fb3a78b33f6aa3afca52bf903a8a5298f53101fdaee55bbcd"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/path_provider/path_provider"
+      ref: "br_path_provider-v2.1.5_ohos"
+      resolved-ref: "049d5c77cacc594aa80f87d988433f2819fea7df"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
     version: "2.1.5"
   path_provider_android:
     dependency: transitive
@@ -891,12 +892,13 @@ packages:
     source: hosted
     version: "2.2.1"
   path_provider_platform_interface:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: path_provider_platform_interface
-      sha256: "88f5779f72ba699763fa3a3b06aa4bf6de76c8e5de842cf6f29e2e06476c2334"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/path_provider/path_provider_platform_interface"
+      ref: "br_path_provider-v2.1.5_ohos"
+      resolved-ref: "049d5c77cacc594aa80f87d988433f2819fea7df"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
     version: "2.1.2"
   path_provider_windows:
     dependency: transitive

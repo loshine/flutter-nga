@@ -42,6 +42,12 @@ dependencies:
   cached_network_image: ^3.2.3
 
   # ====== 鸿蒙适配依赖 (OpenHarmony) ======
+  path_provider:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/path_provider/path_provider
+      ref: br_path_provider-v2.1.5_ohos
+
   # keyboard_detection 替换为 flutter_keyboard_visibility
   flutter_keyboard_visibility:
     git:
@@ -112,6 +118,16 @@ dev_dependencies:
 
 # 强制使用鸿蒙适配版本的依赖
 dependency_overrides:
+  path_provider:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/path_provider/path_provider
+      ref: br_path_provider-v2.1.5_ohos
+  path_provider_platform_interface:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/path_provider/path_provider_platform_interface
+      ref: br_path_provider-v2.1.5_ohos
   shared_preferences:
     git:
       url: https://gitcode.com/openharmony-tpc/flutter_packages.git
