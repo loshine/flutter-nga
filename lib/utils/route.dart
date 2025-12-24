@@ -24,10 +24,6 @@ import 'package:flutter_nga/utils/linkroute/link_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-String _decodeParam(String param) {
-  return Uri.decodeComponent(param);
-}
-
 class Routes {
   static late GoRouter router;
 
@@ -166,7 +162,7 @@ List<GoRoute> buildRoutes() {
       name: Routes.FORUM_DETAIL,
       builder: (context, state) => ForumDetailPage(
         fid: int.tryParse(state.uri.queryParameters["fid"] ?? "") ?? 0,
-        name: _decodeParam(state.uri.queryParameters["name"] ?? ""),
+        name: state.uri.queryParameters["name"] ?? "",
         type: int.tryParse(state.uri.queryParameters["type"] ?? "") ?? 0,
       ),
     ),
@@ -176,9 +172,7 @@ List<GoRoute> buildRoutes() {
       builder: (context, state) => TopicDetailPage(
         int.tryParse(state.uri.queryParameters["tid"] ?? ""),
         int.tryParse(state.uri.queryParameters["fid"] ?? ""),
-        subject: state.uri.queryParameters["subject"] != null
-            ? _decodeParam(state.uri.queryParameters["subject"]!)
-            : null,
+        subject: state.uri.queryParameters["subject"],
         authorid: int.tryParse(state.uri.queryParameters["authorid"] ?? ""),
       ),
     ),
@@ -209,7 +203,7 @@ List<GoRoute> buildRoutes() {
         if (uid != null && uid.isNotEmpty) {
           return UserInfoPage(uid: uid);
         } else {
-          return UserInfoPage(username: _decodeParam(name ?? ""));
+          return UserInfoPage(username: name ?? "");
         }
       },
     ),
@@ -218,7 +212,7 @@ List<GoRoute> buildRoutes() {
       name: Routes.USER_TOPICS,
       builder: (context, state) => UserTopicsPage(
         uid: int.tryParse(state.uri.queryParameters["uid"] ?? "") ?? 0,
-        username: _decodeParam(state.uri.queryParameters["username"] ?? ""),
+        username: state.uri.queryParameters["username"] ?? "",
       ),
     ),
     GoRoute(
@@ -226,7 +220,7 @@ List<GoRoute> buildRoutes() {
       name: Routes.USER_REPLIES,
       builder: (context, state) => UserRepliesPage(
         uid: int.tryParse(state.uri.queryParameters["uid"] ?? "") ?? 0,
-        username: _decodeParam(state.uri.queryParameters["username"] ?? ""),
+        username: state.uri.queryParameters["username"] ?? "",
       ),
     ),
     GoRoute(
@@ -275,7 +269,7 @@ List<GoRoute> buildRoutes() {
       path: Routes.SEARCH_FORUM,
       name: Routes.SEARCH_FORUM,
       builder: (context, state) => SearchForumPage(
-        _decodeParam(state.uri.queryParameters["keyword"] ?? ""),
+        state.uri.queryParameters["keyword"] ?? "",
       ),
     ),
     GoRoute(
@@ -286,13 +280,13 @@ List<GoRoute> buildRoutes() {
         final fid = state.uri.queryParameters["fid"];
         if (fid != null && fid.isNotEmpty) {
           return SearchTopicListPage(
-            _decodeParam(state.uri.queryParameters["keyword"] ?? ""),
+            state.uri.queryParameters["keyword"] ?? "",
             fid: int.tryParse(fid) ?? 0,
             content: content,
           );
         } else {
           return SearchTopicListPage(
-            _decodeParam(state.uri.queryParameters["keyword"] ?? ""),
+            state.uri.queryParameters["keyword"] ?? "",
             content: content,
           );
         }
@@ -302,9 +296,10 @@ List<GoRoute> buildRoutes() {
       path: Routes.PHOTO_PREVIEW,
       name: Routes.PHOTO_PREVIEW,
       builder: (context, state) => PhotoPreviewPage(
-        url: _decodeParam(state.uri.queryParameters["url"] ?? ""),
+        url: state.uri.queryParameters["url"] ?? "",
         screenWidth:
-            double.tryParse(state.uri.queryParameters["screenWidth"] ?? "") ?? 0,
+            double.tryParse(state.uri.queryParameters["screenWidth"] ?? "") ??
+                0,
       ),
     ),
     GoRoute(

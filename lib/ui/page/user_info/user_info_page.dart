@@ -126,7 +126,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
             builder: (context) => GestureDetector(
                   onTap: () => Routes.navigateTo(
                     context,
-                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.encodeParam(entry.value)}",
+                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${entry.value}",
                   ),
                   child: Text(
                     "[${entry.value}]",
@@ -289,7 +289,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     return GestureDetector(
                       onTap: () => Routes.navigateTo(
                         context,
-                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.encodeParam(entry.value)}",
+                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${entry.value}",
                       ),
                       child: Text(
                         "[${entry.value}]",
@@ -318,13 +318,13 @@ class _UserInfoPageState extends State<UserInfoPage> {
       // 跳转某人的主题
       Routes.navigateTo(
         context,
-        "${Routes.USER_TOPICS}?uid=${_store.state.uid}&username=${codeUtils.encodeParam(_store.state.username ?? "")}",
+        "${Routes.USER_TOPICS}?uid=${_store.state.uid}&username=${_store.state.username ?? ""}",
       );
     } else if (action == _actions[1]) {
       // 跳转某人的回复
       Routes.navigateTo(
         context,
-        "${Routes.USER_REPLIES}?uid=${_store.state.uid}&username=${codeUtils.encodeParam(_store.state.username ?? "")}",
+        "${Routes.USER_REPLIES}?uid=${_store.state.uid}&username=${_store.state.username ?? ""}",
       );
     }
   }

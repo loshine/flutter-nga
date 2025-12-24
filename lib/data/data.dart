@@ -83,11 +83,21 @@ class Data {
     // 因为需要 gbk -> utf-8, 所以需要流的形式
     dio.options.responseType = ResponseType.bytes;
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     // 该特殊 UA 可以让访客访问
-    dio.options.headers["User-Agent"] =
-        "Nga_Official/90306([${androidInfo.brand} ${androidInfo.model}];"
-        "Android${androidInfo.version.release})";
+    String userAgent;
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      userAgent =
+          "Nga_Official/90306([${androidInfo.brand} ${androidInfo.model}];"
+          "Android${androidInfo.version.release})";
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      userAgent =
+          "NGA_skull/7.3.1(${iosInfo.utsname.machine};iOS ${iosInfo.systemVersion})";
+    } else {
+      userAgent = "Nga_Official/90306";
+    }
+    dio.options.headers["User-Agent"] = userAgent;
     dio.options.headers["Accept-Encoding"] = "gzip";
     dio.options.headers["Cache-Control"] = "max-age=0";
     dio.options.headers["Connection"] = "Keep-Alive";

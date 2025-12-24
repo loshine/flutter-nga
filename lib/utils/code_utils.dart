@@ -106,8 +106,3 @@ String urlEncode(String content) {
   return Uri.encodeQueryComponent(content,
       encoding: const GbkCodec(allowMalformed: true));
 }
-
-/// URL 编码参数（用于 go_router）
-String encodeParam(String content) {
-  return Uri.encodeComponent(content);
-}
