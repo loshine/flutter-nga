@@ -1,0 +1,52 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/loshine/.ohos/config/default_ohos_XGjwFvU8DmPo2VhvT5O_PI83fAYuGWQm9JyhHjFIUYQ=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BE7A8E909D48223737D02D4416154F3B09D27841418363D197658C6550D84DAF56D81E6B821CBF6",
+          "profile": "/Users/loshine/.ohos/config/default_ohos_XGjwFvU8DmPo2VhvT5O_PI83fAYuGWQm9JyhHjFIUYQ=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/loshine/.ohos/config/default_ohos_XGjwFvU8DmPo2VhvT5O_PI83fAYuGWQm9JyhHjFIUYQ=.p12",
+          "storePassword": "0000001BD15F11958BEBD199B4B2AC7EB2512A86C8BABE03AE6538266F089FF70C7FBD508AB53DEE5820FE"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.0(12)",
+        "runtimeOS": "HarmonyOS",
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug"
+      },
+      {
+        "name": "profile"
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}
