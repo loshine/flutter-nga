@@ -1,53 +1,46 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/settings/theme_store.dart';
+import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ThemeSelectionDialog extends StatefulWidget {
-  final ThemeStore themeStore;
-
-  const ThemeSelectionDialog({Key? key, required this.themeStore})
-      : super(key: key);
+class ThemeSelectionDialog extends ConsumerWidget {
+  const ThemeSelectionDialog({Key? key}) : super(key: key);
 
   @override
-  _ThemeSelectionDialogState createState() => _ThemeSelectionDialogState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(themeProvider);
+    final notifier = ref.read(themeProvider.notifier);
 
-class _ThemeSelectionDialogState extends State<ThemeSelectionDialog> {
-  @override
-  Widget build(BuildContext context) {
     return AlertDialog(
       title: Text("选择主题模式"),
       content: SizedBox(
         width: double.maxFinite,
-        // height: double.minPositive,
-        child: Observer(
-          builder: (_) {
-            return ListView(
-              shrinkWrap: true,
-              children: [
-                RadioListTile(
-                  value: AdaptiveThemeMode.system,
-                  groupValue: widget.themeStore.mode,
-                  onChanged: _onChanged,
-                  title: Text("跟随系统"),
-                ),
-                RadioListTile(
-                  value: AdaptiveThemeMode.light,
-                  groupValue: widget.themeStore.mode,
-                  onChanged: _onChanged,
-                  title: Text("亮色主题"),
-                ),
-                RadioListTile(
-                  value: AdaptiveThemeMode.dark,
-                  groupValue: widget.themeStore.mode,
-                  onChanged: _onChanged,
-                  title: Text("暗色主题"),
-                ),
-              ],
-            );
-          },
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            RadioListTile(
+              value: AdaptiveThemeMode.system,
+              groupValue: state.mode,
+              onChanged: (AdaptiveThemeMode? mode) =>
+                  notifier.update(context, mode ?? AdaptiveThemeMode.light),
+              title: Text("跟随系统"),
+            ),
+            RadioListTile(
+              value: AdaptiveThemeMode.light,
+              groupValue: state.mode,
+              onChanged: (AdaptiveThemeMode? mode) =>
+                  notifier.update(context, mode ?? AdaptiveThemeMode.light),
+              title: Text("亮色主题"),
+            ),
+            RadioListTile(
+              value: AdaptiveThemeMode.dark,
+              groupValue: state.mode,
+              onChanged: (AdaptiveThemeMode? mode) =>
+                  notifier.update(context, mode ?? AdaptiveThemeMode.light),
+              title: Text("暗色主题"),
+            ),
+          ],
         ),
       ),
       actions: [
@@ -57,10 +50,5 @@ class _ThemeSelectionDialogState extends State<ThemeSelectionDialog> {
         )
       ],
     );
-  }
-
-  _onChanged(AdaptiveThemeMode? adaptiveThemeMode) {
-    widget.themeStore
-        .update(context, adaptiveThemeMode ?? AdaptiveThemeMode.light);
   }
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/forum/forum_detail_store.dart';
+import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class ForumRecommendTopicListPage extends StatefulWidget {
+class ForumRecommendTopicListPage extends ConsumerStatefulWidget {
   final int fid;
   final int? type;
 
@@ -13,12 +13,11 @@ class ForumRecommendTopicListPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ForumRecommendTopicListState createState() =>
+  ConsumerState<ForumRecommendTopicListPage> createState() =>
       _ForumRecommendTopicListState();
 }
 
-class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
-  final _store = ForumDetailStore();
+class _ForumRecommendTopicListState extends ConsumerState<ForumRecommendTopicListPage> {
   late RefreshController _refreshController;
 
   @override
@@ -35,34 +34,33 @@ class _ForumRecommendTopicListState extends State<ForumRecommendTopicListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Observer(
-      builder: (_) {
-        return SmartRefresher(
-          onLoading: _onLoading,
-          controller: _refreshController,
-          enablePullUp: _store.state.enablePullUp,
-          onRefresh: _onRefresh,
-          child: ListView.builder(
-            itemCount: _store.state.list.length,
-            itemBuilder: (context, index) => TopicListItemWidget(
-              topic: _store.state.list[index],),
-          ),
-        );
-      },
+    final state = ref.watch(forumRecommendProvider(widget.fid));
+    return SmartRefresher(
+      onLoading: _onLoading,
+      controller: _refreshController,
+      enablePullUp: state.enablePullUp,
+      onRefresh: _onRefresh,
+      child: ListView.builder(
+        itemCount: state.list.length,
+        itemBuilder: (context, index) => TopicListItemWidget(
+          topic: state.list[index],),
+      ),
     );
   }
 
   _onRefresh() {
-    _store.refresh(widget.fid, true, widget.type).catchError((err) {
+    final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
+    notifier.refresh(true, widget.type).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
-      return _store.state;
+      return notifier.state;
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
   _onLoading() async {
-    _store.loadMore(widget.fid, true, widget.type).then((state) {
+    final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
+    notifier.loadMore(true, widget.type).then((state) {
       if (state.page + 1 < state.maxPage) {
         _refreshController.loadComplete();
       } else {

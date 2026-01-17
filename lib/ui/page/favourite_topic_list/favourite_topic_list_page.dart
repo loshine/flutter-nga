@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
-import 'package:flutter_nga/store/topic/favourite_topic_list_store.dart';
+import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class FavouriteTopicListPage extends StatefulWidget {
+class FavouriteTopicListPage extends ConsumerStatefulWidget {
   @override
-  _FavouriteTopicListState createState() => _FavouriteTopicListState();
+  ConsumerState<FavouriteTopicListPage> createState() =>
+      _FavouriteTopicListState();
 }
 
-class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
-  final _store = FavouriteTopicListStore();
+class _FavouriteTopicListState extends ConsumerState<FavouriteTopicListPage> {
   late RefreshController _refreshController;
 
   @override
@@ -30,36 +30,35 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Observer(
-      builder: (_) {
-        return SmartRefresher(
-          onLoading: _onLoading,
-          controller: _refreshController,
-          enablePullUp: _store.state.enablePullUp,
-          onRefresh: _onRefresh,
-          child: ListView.builder(
-            itemCount: _store.state.list.length,
-            itemBuilder: (context, index) => TopicListItemWidget(
-              topic: _store.state.list[index],
-              onLongPress: () => _showDeleteDialog(_store.state.list[index]),
-            ),
-          ),
-        );
-      },
+    final state = ref.watch(favouriteTopicListProvider);
+    final notifier = ref.read(favouriteTopicListProvider.notifier);
+
+    return SmartRefresher(
+      onLoading: () => _onLoading(notifier),
+      controller: _refreshController,
+      enablePullUp: state.enablePullUp,
+      onRefresh: () => _onRefresh(notifier),
+      child: ListView.builder(
+        itemCount: state.list.length,
+        itemBuilder: (context, index) => TopicListItemWidget(
+          topic: state.list[index],
+          onLongPress: () => _showDeleteDialog(notifier, state.list[index]),
+        ),
+      ),
     );
   }
 
-  _onRefresh() {
-    _store.refresh().catchError((err) {
+  void _onRefresh(FavouriteTopicListNotifier notifier) {
+    notifier.refresh().catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
-      return _store.state;
+      return ref.read(favouriteTopicListProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
-  _onLoading() async {
-    _store.loadMore().then((state) {
+  void _onLoading(FavouriteTopicListNotifier notifier) async {
+    notifier.loadMore().then((state) {
       if (state.page + 1 < state.maxPage) {
         _refreshController.loadComplete();
       } else {
@@ -71,7 +70,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
     });
   }
 
-  _showDeleteDialog(Topic topic) {
+  void _showDeleteDialog(FavouriteTopicListNotifier notifier, Topic topic) {
     showDialog(
         context: context,
         builder: (_) {
@@ -86,7 +85,7 @@ class _FavouriteTopicListState extends State<FavouriteTopicListPage> {
               TextButton(
                 onPressed: () {
                   Routes.pop(context);
-                  _store.delete(topic).then((message) {
+                  notifier.delete(topic).then((message) {
                     Fluttertoast.showToast(msg: message ?? "");
                   });
                 },

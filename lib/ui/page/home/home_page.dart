@@ -1,10 +1,8 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/home/home_drawer_header_store.dart';
-import 'package:flutter_nga/store/home/home_store.dart';
-import 'package:flutter_nga/store/settings/blocklist_settings_store.dart';
-import 'package:flutter_nga/store/settings/interface_settings_store.dart';
+import 'package:flutter_nga/providers/home/home_provider.dart';
+import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
@@ -13,39 +11,29 @@ import 'package:flutter_nga/ui/page/home/home_drawer.dart';
 import 'package:flutter_nga/ui/page/notification/notification_list_page.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:provider/provider.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends HookConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    Provider.of<BlocklistSettingsStore>(context)
-      ..init()
-      ..loopSyncBlockList();
-    Provider.of<InterfaceSettingsStore>(context).init();
-    return MultiProvider(
-      providers: [
-        Provider(create: (_) => HomeDrawerHeaderStore()),
-      ],
-      child: _HomePage(),
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Initialize settings on first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(blocklistSettingsProvider.notifier).init();
+      ref.read(blocklistSettingsProvider.notifier).loopSyncBlockList();
+      ref.read(interfaceSettingsProvider.notifier).init();
+    });
+    return _HomePage();
   }
 }
 
-class _HomePage extends StatefulWidget {
-  const _HomePage({Key? key}) : super(key: key);
+class _HomePage extends HookConsumerWidget {
+  _HomePage({Key? key}) : super(key: key);
 
-  @override
-  _HomePageState createState() => _HomePageState();
-}
+  final GlobalKey<TopicHistoryListPageState> _historyStateKey =
+      GlobalKey<TopicHistoryListPageState>();
 
-class _HomePageState extends State<_HomePage> {
-  GlobalKey<TopicHistoryListState>? _historyStateKey;
-  late List<Widget> pageList;
-  final _store = HomeStore();
-
-  _HomePageState() {
-    _historyStateKey = GlobalKey<TopicHistoryListState>();
-    pageList = [
+  List<Widget> _buildPageList() {
+    return [
       ForumGroupTabsPage(),
       FavouriteTopicListPage(),
       TopicHistoryListPage(key: _historyStateKey),
@@ -54,91 +42,46 @@ class _HomePageState extends State<_HomePage> {
     ];
   }
 
-  String get _titleText {
-    if (_store.index == 0) {
-      return 'NGA';
-    } else if (_store.index == 1) {
-      return '贴子收藏';
-    } else if (_store.index == 2) {
-      return '浏览历史';
-    } else if (_store.index == 3) {
-      return '短消息';
-    } else if (_store.index == 4) {
-      return '提醒信息';
+  String _getTitleText(int index) {
+    switch (index) {
+      case 0:
+        return 'NGA';
+      case 1:
+        return '贴子收藏';
+      case 2:
+        return '浏览历史';
+      case 3:
+        return '短消息';
+      case 4:
+        return '提醒信息';
+      default:
+        return '';
     }
-    return '';
   }
 
-  List<Widget> _getActionsByPage(int index) {
+  List<Widget> _getActionsByPage(BuildContext context, int index) {
     List<Widget> actions = [];
-    if (_store.index == 0) {
+    if (index == 0) {
       actions.add(IconButton(
         icon: Icon(Icons.search),
         onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
       ));
-    } else if (_store.index == 2) {
+    } else if (index == 2) {
       actions.add(IconButton(
         icon: Icon(Icons.delete_forever),
-        onPressed: () => _historyStateKey!.currentState!.showCleanDialog(),
+        onPressed: () => _historyStateKey.currentState!.showCleanDialog(),
       ));
     }
     return actions;
   }
 
-  void _setSelection(int i) {
-    Routes.pop(context);
-    _store.setIndex(i);
+  double _getElevation(int index) {
+    return index == 0 ? 0 : 4;
   }
 
-  double _getElevation() {
-    return _store.index == 0 ? 0 : 4;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Observer(
-      builder: (context) {
-        final key = GlobalKey<ScaffoldState>();
-        return WillPopScope(
-          child: Scaffold(
-            key: key,
-            appBar: AppBar(
-              elevation: _getElevation(),
-              title: Text(_titleText),
-              actions: _getActionsByPage(_store.index),
-            ),
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            drawer: Drawer(
-              child: Column(
-                children: [
-                  HomeDrawerHeader(),
-                  HomeDrawerBody(
-                    currentSelection: _store.index,
-                    onSelectedCallback: _setSelection,
-                  )
-                ],
-              ),
-            ),
-            body: pageList[_store.index],
-            floatingActionButton: _getFloatingActionButton(),
-          ),
-          onWillPop: () async {
-            if (key.currentState!.isDrawerOpen || _store.index == 0) {
-              return true;
-            } else {
-              _store.setIndex(0);
-              return false;
-            }
-          },
-        );
-      },
-    );
-  }
-
-  FloatingActionButton? _getFloatingActionButton() {
-    FloatingActionButton? fab;
-    if (_store.index == 0) {
-      fab = FloatingActionButton(
+  FloatingActionButton? _getFloatingActionButton(BuildContext context, int index) {
+    if (index == 0) {
+      return FloatingActionButton(
         tooltip: '添加自定义版面',
         onPressed: () => showDialog(
           context: context,
@@ -149,8 +92,8 @@ class _HomePageState extends State<_HomePage> {
           color: Colors.white,
         ),
       );
-    } else if (_store.index == 3) {
-      fab = FloatingActionButton(
+    } else if (index == 3) {
+      return FloatingActionButton(
         tooltip: '新建短消息',
         onPressed: () =>
             Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
@@ -160,6 +103,49 @@ class _HomePageState extends State<_HomePage> {
         ),
       );
     }
-    return fab;
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final index = ref.watch(homeIndexProvider);
+    final pageList = _buildPageList();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    return WillPopScope(
+      child: Scaffold(
+        key: scaffoldKey,
+        appBar: AppBar(
+          elevation: _getElevation(index),
+          title: Text(_getTitleText(index)),
+          actions: _getActionsByPage(context, index),
+        ),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        drawer: Drawer(
+          child: Column(
+            children: [
+              HomeDrawerHeader(),
+              HomeDrawerBody(
+                currentSelection: index,
+                onSelectedCallback: (i) {
+                  Routes.pop(context);
+                  ref.read(homeIndexProvider.notifier).setIndex(i);
+                },
+              )
+            ],
+          ),
+        ),
+        body: pageList[index],
+        floatingActionButton: _getFloatingActionButton(context, index),
+      ),
+      onWillPop: () async {
+        if (scaffoldKey.currentState!.isDrawerOpen || index == 0) {
+          return true;
+        } else {
+          ref.read(homeIndexProvider.notifier).setIndex(0);
+          return false;
+        }
+      },
+    );
   }
 }
