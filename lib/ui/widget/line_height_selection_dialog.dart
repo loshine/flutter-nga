@@ -1,48 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/settings/interface_settings_store.dart';
+import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class LineHeightSelectionDialog extends StatefulWidget {
-  final InterfaceSettingsStore interfaceSettingsStore;
-
-  const LineHeightSelectionDialog(
-      {Key? key, required this.interfaceSettingsStore})
-      : super(key: key);
+class LineHeightSelectionDialog extends ConsumerWidget {
+  const LineHeightSelectionDialog({Key? key}) : super(key: key);
 
   @override
-  _LineHeightSelectionDialogState createState() =>
-      _LineHeightSelectionDialogState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(interfaceSettingsProvider);
+    final notifier = ref.read(interfaceSettingsProvider.notifier);
 
-class _LineHeightSelectionDialogState extends State<LineHeightSelectionDialog> {
-  @override
-  Widget build(BuildContext context) {
     return AlertDialog(
       title: Text("选择行间距"),
       content: SizedBox(
         width: double.maxFinite,
-        // height: double.minPositive,
-        child: Observer(
-          builder: (_) {
-            return ListView(
-              shrinkWrap: true,
-              children: [
-                CustomLineHeight.NORMAL,
-                CustomLineHeight.MEDIUM,
-                CustomLineHeight.LARGE,
-                CustomLineHeight.XLARGE,
-                CustomLineHeight.XXLARGE,
-              ].map((e) {
-                return RadioListTile(
-                  value: e,
-                  groupValue: widget.interfaceSettingsStore.lineHeight,
-                  onChanged: _onChanged,
-                  title: Text(e.nameWithSize),
-                );
-              }).toList(),
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            CustomLineHeight.NORMAL,
+            CustomLineHeight.MEDIUM,
+            CustomLineHeight.LARGE,
+            CustomLineHeight.XLARGE,
+            CustomLineHeight.XXLARGE,
+          ].map((e) {
+            return RadioListTile(
+              value: e,
+              groupValue: state.lineHeight,
+              onChanged: (CustomLineHeight? customLineHeight) {
+                notifier.setLineHeight(customLineHeight?.index ?? 0);
+              },
+              title: Text(e.nameWithSize),
             );
-          },
+          }).toList(),
         ),
       ),
       actions: [
@@ -52,9 +42,5 @@ class _LineHeightSelectionDialogState extends State<LineHeightSelectionDialog> {
         )
       ],
     );
-  }
-
-  _onChanged(CustomLineHeight? customLineHeight) {
-    widget.interfaceSettingsStore.setLineHeight(customLineHeight?.index ?? 0);
   }
 }

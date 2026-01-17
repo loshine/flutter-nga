@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/message/conversation_detail_store.dart';
+import 'package:flutter_nga/providers/message/conversation_detail_provider.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'message_item_widget.dart';
 
-class ConversationDetailPage extends StatefulWidget {
+class ConversationDetailPage extends ConsumerStatefulWidget {
   final int? mid;
 
   const ConversationDetailPage({Key? key, this.mid}) : super(key: key);
 
   @override
-  _ConversationDetailState createState() => _ConversationDetailState();
+  ConsumerState<ConversationDetailPage> createState() =>
+      _ConversationDetailState();
 }
 
-class _ConversationDetailState extends State<ConversationDetailPage> {
-  final _store = ConversationDetailStore();
+class _ConversationDetailState extends ConsumerState<ConversationDetailPage> {
   late RefreshController _refreshController;
 
   @override
@@ -34,24 +34,23 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(conversationDetailProvider);
+    final notifier = ref.read(conversationDetailProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('消息详情'),
       ),
-      body: Observer(
-        builder: (_) {
-          return SmartRefresher(
-            onLoading: _onLoading,
-            controller: _refreshController,
-            enablePullUp: _store.state.enablePullUp,
-            onRefresh: _onRefresh,
-            child: ListView.builder(
-              itemCount: _store.state.list.length,
-              itemBuilder: (context, index) =>
-                  MessageItemWidget(message: _store.state.list[index]),
-            ),
-          );
-        },
+      body: SmartRefresher(
+        onLoading: () => _onLoading(notifier),
+        controller: _refreshController,
+        enablePullUp: state.enablePullUp,
+        onRefresh: () => _onRefresh(notifier),
+        child: ListView.builder(
+          itemCount: state.list.length,
+          itemBuilder: (context, index) =>
+              MessageItemWidget(message: state.list[index]),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: '回复',
@@ -67,19 +66,19 @@ class _ConversationDetailState extends State<ConversationDetailPage> {
     );
   }
 
-  _onRefresh() {
-    _store.refresh(context, widget.mid).catchError((err) {
+  void _onRefresh(ConversationDetailNotifier notifier) {
+    notifier.refresh(widget.mid).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.toString(),
       );
-      return _store.state;
+      return ref.read(conversationDetailProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
-  _onLoading() async {
-    _store.loadMore(context, widget.mid).then((state) {
+  void _onLoading(ConversationDetailNotifier notifier) async {
+    notifier.loadMore(widget.mid).then((state) {
       if (state.enablePullUp) {
         _refreshController.loadComplete();
       } else {

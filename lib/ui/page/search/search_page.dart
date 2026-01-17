@@ -1,45 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/search/input_deletion_status_store.dart';
-import 'package:flutter_nga/store/search/search_options_store.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_nga/providers/search/input_deletion_status_provider.dart';
+import 'package:flutter_nga/providers/search/search_options_provider.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SearchPage extends StatefulWidget {
+class SearchPage extends HookConsumerWidget {
   final int? fid;
 
   const SearchPage({this.fid, Key? key}) : super(key: key);
 
   @override
-  _SearchState createState() => _SearchState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchQuery = useTextEditingController();
+    final inputVisible = ref.watch(inputDeletionStatusProvider);
+    final searchOptions = ref.watch(searchOptionsProvider);
+    final searchOptionsNotifier = ref.read(searchOptionsProvider.notifier);
 
-class _SearchState extends State<SearchPage> {
-  final _searchQuery = TextEditingController();
-  final _searchOptionsStore = SearchOptionsStore();
-  final _inputDeletionStatusStore = InputDeletionStatusStore();
+    useEffect(() {
+      void listener() {
+        ref
+            .read(inputDeletionStatusProvider.notifier)
+            .setVisible(searchQuery.text.isNotEmpty);
+      }
 
-  _SearchState() {
-    _searchQuery.addListener(_listenQueryChanged);
-  }
+      searchQuery.addListener(listener);
+      if (fid != null) {
+        searchOptionsNotifier.checkTopicRadio(TOPIC_RADIO_CURRENT_FORUM);
+      }
+      return () => searchQuery.removeListener(listener);
+    }, []);
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.fid != null) {
-      _searchOptionsStore
-          .checkTopicRadio(SearchStoreData.TOPIC_RADIO_CURRENT_FORUM);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: TextField(
-          controller: _searchQuery,
+          controller: searchQuery,
           textInputAction: TextInputAction.search,
-          onSubmitted: _onSearch,
+          onSubmitted: (text) =>
+              _onSearch(context, text, searchOptions, fid),
           style: TextStyle(
             color: Colors.white,
           ),
@@ -48,250 +48,216 @@ class _SearchState extends State<SearchPage> {
             hintText: "搜索...",
             border: InputBorder.none,
             hintStyle: TextStyle(color: Palette.colorTextHintWhite),
-            suffixIcon: Observer(
-              builder: (_) {
-                return _inputDeletionStatusStore.visible
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          color: Colors.white,
-                        ),
-                        onPressed: () => WidgetsBinding.instance
-                            .addPostFrameCallback((_) => _searchQuery.clear()),
-                      )
-                    : Container(width: 0);
-              },
-            ),
+            suffixIcon: inputVisible
+                ? IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => WidgetsBinding.instance
+                        .addPostFrameCallback((_) => searchQuery.clear()),
+                  )
+                : Container(width: 0),
           ),
         ),
       ),
-      body: Observer(
-        builder: (_) {
-          final widgets = <Widget>[];
-          final firstWidgets = Row(
-            children: <Widget>[
-              Padding(
-                child: ChoiceChip(
-                  label: Text(
-                    "主题",
-                    style: TextStyle(
-                      color: _searchOptionsStore.state.firstRadio ==
-                              SearchStoreData.FIRST_RADIO_TOPIC
-                          ? Colors.white
-                          : Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  selectedColor: Theme.of(context).primaryColor,
-                  selected: _searchOptionsStore.state.firstRadio ==
-                      SearchStoreData.FIRST_RADIO_TOPIC,
-                  onSelected: (selected) => _searchOptionsStore
-                      .checkFirstRadio(SearchStoreData.FIRST_RADIO_TOPIC),
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-              Padding(
-                child: ChoiceChip(
-                  label: Text(
-                    "版块",
-                    style: TextStyle(
-                      color: _searchOptionsStore.state.firstRadio ==
-                              SearchStoreData.FIRST_RADIO_FORUM
-                          ? Colors.white
-                          : Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  selectedColor: Theme.of(context).primaryColor,
-                  selected: _searchOptionsStore.state.firstRadio ==
-                      SearchStoreData.FIRST_RADIO_FORUM,
-                  onSelected: (selected) => _searchOptionsStore
-                      .checkFirstRadio(SearchStoreData.FIRST_RADIO_FORUM),
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-              Padding(
-                child: ChoiceChip(
-                  label: Text(
-                    "用户",
-                    style: TextStyle(
-                      color: _searchOptionsStore.state.firstRadio ==
-                              SearchStoreData.FIRST_RADIO_USER
-                          ? Colors.white
-                          : Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  selectedColor: Theme.of(context).primaryColor,
-                  selected: _searchOptionsStore.state.firstRadio ==
-                      SearchStoreData.FIRST_RADIO_USER,
-                  onSelected: (selected) => _searchOptionsStore
-                      .checkFirstRadio(SearchStoreData.FIRST_RADIO_USER),
-                ),
-                padding: EdgeInsets.only(left: 16),
-              ),
-            ],
-          );
-          widgets.add(firstWidgets);
-          if (_searchOptionsStore.state.firstRadio ==
-              SearchStoreData.FIRST_RADIO_TOPIC) {
-            if (widget.fid != null) {
-              widgets.add(Row(
-                children: <Widget>[
-                  Padding(
-                    child: ChoiceChip(
-                        label: Text(
-                          "当前版块",
-                          style: TextStyle(
-                              color: _searchOptionsStore.state.topicRadio ==
-                                      SearchStoreData.TOPIC_RADIO_CURRENT_FORUM
-                                  ? Colors.white
-                                  : Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.color),
-                        ),
-                        selectedColor: Theme.of(context).primaryColor,
-                        selected: _searchOptionsStore.state.topicRadio ==
-                            SearchStoreData.TOPIC_RADIO_CURRENT_FORUM,
-                        onSelected: (selected) =>
-                            _searchOptionsStore.checkTopicRadio(
-                                SearchStoreData.TOPIC_RADIO_CURRENT_FORUM)),
-                    padding: EdgeInsets.only(left: 16),
-                  ),
-                  Padding(
-                    child: ChoiceChip(
-                      label: Text(
-                        "全部版块",
-                        style: TextStyle(
-                          color: _searchOptionsStore.state.topicRadio ==
-                                  SearchStoreData.TOPIC_RADIO_ALL_FORUM
-                              ? Colors.white
-                              : Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
-                      ),
-                      selectedColor: Theme.of(context).primaryColor,
-                      selected: _searchOptionsStore.state.topicRadio ==
-                          SearchStoreData.TOPIC_RADIO_ALL_FORUM,
-                      onSelected: (selected) =>
-                          _searchOptionsStore.checkTopicRadio(
-                              SearchStoreData.TOPIC_RADIO_ALL_FORUM),
-                    ),
-                    padding: EdgeInsets.only(left: 16),
-                  ),
-                ],
-              ));
-            }
-            widgets.add(Row(
-              children: <Widget>[
-                Padding(
-                  child: FilterChip(
-                    checkmarkColor: Colors.white,
-                    label: Text(
-                      "包括正文",
-                      style: TextStyle(
-                        color: _searchOptionsStore.state.content
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    selectedColor: Theme.of(context).primaryColor,
-                    selected: _searchOptionsStore.state.content,
-                    onSelected: (selected) =>
-                        _searchOptionsStore.checkContent(selected),
-                  ),
-                  padding: EdgeInsets.only(left: 16),
-                ),
-              ],
-            ));
-          }
-          if (_searchOptionsStore.state.firstRadio ==
-              SearchStoreData.FIRST_RADIO_USER) {
-            widgets.add(Row(
-              children: <Widget>[
-                Padding(
-                  child: ChoiceChip(
-                    label: Text(
-                      "用户名",
-                      style: TextStyle(
-                        color: _searchOptionsStore.state.userRadio ==
-                                SearchStoreData.USER_RADIO_NAME
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    selectedColor: Theme.of(context).primaryColor,
-                    selected: _searchOptionsStore.state.userRadio ==
-                        SearchStoreData.USER_RADIO_NAME,
-                    onSelected: (selected) => _searchOptionsStore
-                        .checkUserRadio(SearchStoreData.USER_RADIO_NAME),
-                  ),
-                  padding: EdgeInsets.only(left: 16),
-                ),
-                Padding(
-                  child: ChoiceChip(
-                    label: Text(
-                      "用户ID",
-                      style: TextStyle(
-                        color: _searchOptionsStore.state.userRadio ==
-                                SearchStoreData.USER_RADIO_UID
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    selectedColor: Theme.of(context).primaryColor,
-                    selected: _searchOptionsStore.state.userRadio ==
-                        SearchStoreData.USER_RADIO_UID,
-                    onSelected: (selected) => _searchOptionsStore
-                        .checkUserRadio(SearchStoreData.USER_RADIO_UID),
-                  ),
-                  padding: EdgeInsets.only(left: 16),
-                ),
-              ],
-            ));
-          }
-          return ListView(
-            children: widgets,
-          );
-        },
-      ),
+      body: _buildBody(context, ref, searchOptions, searchOptionsNotifier),
     );
   }
 
-  @override
-  void dispose() {
-    _searchQuery.removeListener(_listenQueryChanged);
-    super.dispose();
+  Widget _buildBody(
+    BuildContext context,
+    WidgetRef ref,
+    SearchOptionsState state,
+    SearchOptionsNotifier notifier,
+  ) {
+    final widgets = <Widget>[];
+    final firstWidgets = Row(
+      children: <Widget>[
+        Padding(
+          child: ChoiceChip(
+            label: Text(
+              "主题",
+              style: TextStyle(
+                color: state.firstRadio == FIRST_RADIO_TOPIC
+                    ? Colors.white
+                    : Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+            selectedColor: Theme.of(context).primaryColor,
+            selected: state.firstRadio == FIRST_RADIO_TOPIC,
+            onSelected: (selected) =>
+                notifier.checkFirstRadio(FIRST_RADIO_TOPIC),
+          ),
+          padding: EdgeInsets.only(left: 16),
+        ),
+        Padding(
+          child: ChoiceChip(
+            label: Text(
+              "版块",
+              style: TextStyle(
+                color: state.firstRadio == FIRST_RADIO_FORUM
+                    ? Colors.white
+                    : Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+            selectedColor: Theme.of(context).primaryColor,
+            selected: state.firstRadio == FIRST_RADIO_FORUM,
+            onSelected: (selected) =>
+                notifier.checkFirstRadio(FIRST_RADIO_FORUM),
+          ),
+          padding: EdgeInsets.only(left: 16),
+        ),
+        Padding(
+          child: ChoiceChip(
+            label: Text(
+              "用户",
+              style: TextStyle(
+                color: state.firstRadio == FIRST_RADIO_USER
+                    ? Colors.white
+                    : Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+            selectedColor: Theme.of(context).primaryColor,
+            selected: state.firstRadio == FIRST_RADIO_USER,
+            onSelected: (selected) =>
+                notifier.checkFirstRadio(FIRST_RADIO_USER),
+          ),
+          padding: EdgeInsets.only(left: 16),
+        ),
+      ],
+    );
+    widgets.add(firstWidgets);
+    if (state.firstRadio == FIRST_RADIO_TOPIC) {
+      if (fid != null) {
+        widgets.add(Row(
+          children: <Widget>[
+            Padding(
+              child: ChoiceChip(
+                  label: Text(
+                    "当前版块",
+                    style: TextStyle(
+                        color: state.topicRadio == TOPIC_RADIO_CURRENT_FORUM
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyLarge?.color),
+                  ),
+                  selectedColor: Theme.of(context).primaryColor,
+                  selected: state.topicRadio == TOPIC_RADIO_CURRENT_FORUM,
+                  onSelected: (selected) =>
+                      notifier.checkTopicRadio(TOPIC_RADIO_CURRENT_FORUM)),
+              padding: EdgeInsets.only(left: 16),
+            ),
+            Padding(
+              child: ChoiceChip(
+                label: Text(
+                  "全部版块",
+                  style: TextStyle(
+                    color: state.topicRadio == TOPIC_RADIO_ALL_FORUM
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                selectedColor: Theme.of(context).primaryColor,
+                selected: state.topicRadio == TOPIC_RADIO_ALL_FORUM,
+                onSelected: (selected) =>
+                    notifier.checkTopicRadio(TOPIC_RADIO_ALL_FORUM),
+              ),
+              padding: EdgeInsets.only(left: 16),
+            ),
+          ],
+        ));
+      }
+      widgets.add(Row(
+        children: <Widget>[
+          Padding(
+            child: FilterChip(
+              checkmarkColor: Colors.white,
+              label: Text(
+                "包括正文",
+                style: TextStyle(
+                  color: state.content
+                      ? Colors.white
+                      : Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
+              selectedColor: Theme.of(context).primaryColor,
+              selected: state.content,
+              onSelected: (selected) => notifier.checkContent(selected),
+            ),
+            padding: EdgeInsets.only(left: 16),
+          ),
+        ],
+      ));
+    }
+    if (state.firstRadio == FIRST_RADIO_USER) {
+      widgets.add(Row(
+        children: <Widget>[
+          Padding(
+            child: ChoiceChip(
+              label: Text(
+                "用户名",
+                style: TextStyle(
+                  color: state.userRadio == USER_RADIO_NAME
+                      ? Colors.white
+                      : Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
+              selectedColor: Theme.of(context).primaryColor,
+              selected: state.userRadio == USER_RADIO_NAME,
+              onSelected: (selected) =>
+                  notifier.checkUserRadio(USER_RADIO_NAME),
+            ),
+            padding: EdgeInsets.only(left: 16),
+          ),
+          Padding(
+            child: ChoiceChip(
+              label: Text(
+                "用户ID",
+                style: TextStyle(
+                  color: state.userRadio == USER_RADIO_UID
+                      ? Colors.white
+                      : Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
+              selectedColor: Theme.of(context).primaryColor,
+              selected: state.userRadio == USER_RADIO_UID,
+              onSelected: (selected) =>
+                  notifier.checkUserRadio(USER_RADIO_UID),
+            ),
+            padding: EdgeInsets.only(left: 16),
+          ),
+        ],
+      ));
+    }
+    return ListView(
+      children: widgets,
+    );
   }
 
-  _listenQueryChanged() {
-    _inputDeletionStatusStore.setVisible(_searchQuery.text.isNotEmpty);
-  }
-
-  _onSearch(text) {
-    if (_searchOptionsStore.state.firstRadio ==
-        SearchStoreData.FIRST_RADIO_TOPIC) {
-      if (widget.fid == null) {
+  void _onSearch(
+      BuildContext context, String text, SearchOptionsState state, int? fid) {
+    if (state.firstRadio == FIRST_RADIO_TOPIC) {
+      if (fid == null) {
         Routes.navigateTo(
           context,
-          "${Routes.SEARCH_TOPIC_LIST}?keyword=$text&content=${_searchOptionsStore.state.content ? 1 : 0}",
+          "${Routes.SEARCH_TOPIC_LIST}?keyword=${codeUtils.encodeParam(text)}&content=${state.content ? 1 : 0}",
         );
       } else {
         Routes.navigateTo(
           context,
-          "${Routes.SEARCH_TOPIC_LIST}?keyword=$text&fid=${widget.fid}&content=${_searchOptionsStore.state.content ? 1 : 0}",
+          "${Routes.SEARCH_TOPIC_LIST}?keyword=${codeUtils.encodeParam(text)}&fid=$fid&content=${state.content ? 1 : 0}",
         );
       }
-    } else if (_searchOptionsStore.state.firstRadio ==
-        SearchStoreData.FIRST_RADIO_FORUM) {
+    } else if (state.firstRadio == FIRST_RADIO_FORUM) {
       Routes.navigateTo(
         context,
-        "${Routes.SEARCH_FORUM}?keyword=$text",
+        "${Routes.SEARCH_FORUM}?keyword=${codeUtils.encodeParam(text)}",
       );
-    } else if (_searchOptionsStore.state.firstRadio ==
-        SearchStoreData.FIRST_RADIO_USER) {
-      if (_searchOptionsStore.state.userRadio ==
-          SearchStoreData.USER_RADIO_NAME) {
+    } else if (state.firstRadio == FIRST_RADIO_USER) {
+      if (state.userRadio == USER_RADIO_NAME) {
         Routes.navigateTo(
           context,
-          "${Routes.USER}?name=$text",
+          "${Routes.USER}?name=${codeUtils.encodeParam(text)}",
         );
       } else {
         Routes.navigateTo(context, "${Routes.USER}?uid=$text");

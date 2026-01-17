@@ -1,63 +1,57 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/home/home_drawer_header_store.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:provider/provider.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class HomeDrawerHeader extends StatefulWidget {
+class HomeDrawerHeader extends HookConsumerWidget {
   const HomeDrawerHeader({Key? key}) : super(key: key);
 
   @override
-  _HomeDrawerHeaderState createState() => _HomeDrawerHeaderState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userInfo = ref.watch(homeDrawerHeaderProvider);
 
-class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
-  late HomeDrawerHeaderStore _store;
+    useEffect(() {
+      Future.microtask(() {
+        ref.read(homeDrawerHeaderProvider.notifier).refresh();
+      });
+      return null;
+    }, []);
 
-  @override
-  Widget build(BuildContext context) {
-    _store = Provider.of(context);
-    _store.refresh();
     return InkWell(
-      onTap: () => _maybeGoLogin(context),
+      onTap: () => _maybeGoLogin(context, userInfo != null),
       child: Container(
         height: 240.0,
         width: double.infinity,
         color: Theme.of(context).scaffoldBackgroundColor,
-        child: Observer(
-          builder: (context) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: AvatarWidget(
-                    _store.userInfo != null ? _store.userInfo!.avatar : "",
-                    size: 56,
-                    username: _store.userInfo != null
-                        ? _store.userInfo!.username
-                        : "",
-                  ),
-                ),
-                Text(
-                  _store.userInfo != null ? _store.userInfo!.username! : "点击登陆",
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
-                ),
-              ],
-            );
-          },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: AvatarWidget(
+                userInfo != null ? userInfo.avatar : "",
+                size: 56,
+                username: userInfo != null ? userInfo.username : "",
+              ),
+            ),
+            Text(
+              userInfo != null ? userInfo.username! : "点击登陆",
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _maybeGoLogin(BuildContext context) async {
-    if (_store.userInfo != null) return;
+  void _maybeGoLogin(BuildContext context, bool isLoggedIn) async {
+    if (isLoggedIn) return;
     Routes.pop(context);
     Routes.navigateTo(context, Routes.LOGIN);
   }
@@ -187,9 +181,7 @@ class HomeDrawerBody extends StatelessWidget {
                   leading: Icon(Icons.info_outline),
                   title: Text("关于"),
                 ),
-                onTap: () {
-                  // TODO: 点击关于
-                },
+                onTap: () {},
               ),
               color: Theme.of(context).scaffoldBackgroundColor,
             ),
