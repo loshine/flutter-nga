@@ -37,7 +37,17 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
   TopicDetailState build() => const TopicDetailState();
 
   void setMaxPage(int maxPage) {
-    state = state.copyWith(maxPage: maxPage);
+    var safeMaxPage = maxPage < 1 ? 1 : maxPage;
+    var safeCurrentPage = state.currentPage;
+    if (safeCurrentPage < 1) {
+      safeCurrentPage = 1;
+    } else if (safeCurrentPage > safeMaxPage) {
+      safeCurrentPage = safeMaxPage;
+    }
+    state = state.copyWith(
+      maxPage: safeMaxPage,
+      currentPage: safeCurrentPage,
+    );
   }
 
   void setMaxFloor(int maxFloor) {
@@ -45,7 +55,12 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
   }
 
   void setCurrentPage(int currentPage) {
-    state = state.copyWith(currentPage: currentPage);
+    final maxPage = state.maxPage < 1 ? 1 : state.maxPage;
+    var safeCurrentPage = currentPage < 1 ? 1 : currentPage;
+    if (safeCurrentPage > maxPage) {
+      safeCurrentPage = maxPage;
+    }
+    state = state.copyWith(currentPage: safeCurrentPage);
   }
 
   void setTopic(Topic? topic) {
