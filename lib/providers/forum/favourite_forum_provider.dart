@@ -2,8 +2,9 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FavouriteForumNotifier extends StateNotifier<bool> {
-  FavouriteForumNotifier() : super(false);
+class FavouriteForumNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
 
   Future<void> load(int fid, String? name) async {
     state = await Data()
@@ -26,6 +27,4 @@ class FavouriteForumNotifier extends StateNotifier<bool> {
 }
 
 final favouriteForumProvider =
-    StateNotifierProvider<FavouriteForumNotifier, bool>((ref) {
-  return FavouriteForumNotifier();
-});
+    NotifierProvider<FavouriteForumNotifier, bool>(FavouriteForumNotifier.new);

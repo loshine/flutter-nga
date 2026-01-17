@@ -63,8 +63,9 @@ class SearchOptionsState {
   }
 }
 
-class SearchOptionsNotifier extends StateNotifier<SearchOptionsState> {
-  SearchOptionsNotifier() : super(SearchOptionsState.allForumTopic());
+class SearchOptionsNotifier extends Notifier<SearchOptionsState> {
+  @override
+  SearchOptionsState build() => SearchOptionsState.allForumTopic();
 
   void checkFirstRadio(int value) {
     state = state.copyWith(firstRadio: value);
@@ -84,6 +85,4 @@ class SearchOptionsNotifier extends StateNotifier<SearchOptionsState> {
 }
 
 final searchOptionsProvider =
-    StateNotifierProvider<SearchOptionsNotifier, SearchOptionsState>((ref) {
-  return SearchOptionsNotifier();
-});
+    NotifierProvider<SearchOptionsNotifier, SearchOptionsState>(SearchOptionsNotifier.new);

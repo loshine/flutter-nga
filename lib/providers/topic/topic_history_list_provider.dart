@@ -42,11 +42,12 @@ class TopicHistoryListState {
       );
 }
 
-class TopicHistoryListNotifier extends StateNotifier<TopicHistoryListState> {
-  TopicHistoryListNotifier() : super(TopicHistoryListState.initial());
-
+class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
   final _limit = 20;
   final _formatter = DateFormat('yyyy-MM-dd');
+
+  @override
+  TopicHistoryListState build() => TopicHistoryListState.initial();
 
   int get _offset => state.page * 20;
 
@@ -112,7 +113,5 @@ class TopicHistoryListNotifier extends StateNotifier<TopicHistoryListState> {
 }
 
 final topicHistoryListProvider =
-    StateNotifierProvider<TopicHistoryListNotifier, TopicHistoryListState>(
-        (ref) {
-  return TopicHistoryListNotifier();
-});
+    NotifierProvider<TopicHistoryListNotifier, TopicHistoryListState>(
+        TopicHistoryListNotifier.new);

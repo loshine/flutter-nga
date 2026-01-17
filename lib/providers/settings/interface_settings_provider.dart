@@ -61,11 +61,12 @@ class InterfaceSettingsState {
   }
 }
 
-class InterfaceSettingsNotifier extends StateNotifier<InterfaceSettingsState> {
+class InterfaceSettingsNotifier extends Notifier<InterfaceSettingsState> {
   static const String _prefsName = 'ui';
   SharedPreferences? _prefs;
 
-  InterfaceSettingsNotifier() : super(const InterfaceSettingsState());
+  @override
+  InterfaceSettingsState build() => const InterfaceSettingsState();
 
   Future<SharedPreferences> get _settings async {
     _prefs ??= await SharedPreferences.getInstance();
@@ -125,7 +126,5 @@ class InterfaceSettingsNotifier extends StateNotifier<InterfaceSettingsState> {
 }
 
 final interfaceSettingsProvider =
-    StateNotifierProvider<InterfaceSettingsNotifier, InterfaceSettingsState>(
-        (ref) {
-  return InterfaceSettingsNotifier();
-});
+    NotifierProvider<InterfaceSettingsNotifier, InterfaceSettingsState>(
+        InterfaceSettingsNotifier.new);

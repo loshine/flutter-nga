@@ -61,12 +61,18 @@ class BlocklistSettingsState {
   }
 }
 
-class BlocklistSettingsNotifier extends StateNotifier<BlocklistSettingsState> {
+class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   static const String _prefsName = 'blocklist';
   SharedPreferences? _prefs;
   Timer? _syncTimer;
 
-  BlocklistSettingsNotifier() : super(const BlocklistSettingsState());
+  @override
+  BlocklistSettingsState build() {
+    ref.onDispose(() {
+      _syncTimer?.cancel();
+    });
+    return const BlocklistSettingsState();
+  }
 
   Future<SharedPreferences> get _settings async {
     _prefs ??= await SharedPreferences.getInstance();
@@ -104,12 +110,6 @@ class BlocklistSettingsNotifier extends StateNotifier<BlocklistSettingsState> {
     }).catchError((err) {
       debugPrint(err.toString());
     });
-  }
-
-  @override
-  void dispose() {
-    _syncTimer?.cancel();
-    super.dispose();
   }
 
   Future<void> setClientBlockEnabled(bool enabled) async {
@@ -245,9 +245,5 @@ class BlocklistSettingsNotifier extends StateNotifier<BlocklistSettingsState> {
 }
 
 final blocklistSettingsProvider =
-    StateNotifierProvider<BlocklistSettingsNotifier, BlocklistSettingsState>(
-        (ref) {
-  final notifier = BlocklistSettingsNotifier();
-  ref.onDispose(() => notifier.dispose());
-  return notifier;
-});
+    NotifierProvider<BlocklistSettingsNotifier, BlocklistSettingsState>(
+        BlocklistSettingsNotifier.new);

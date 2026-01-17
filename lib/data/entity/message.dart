@@ -1,5 +1,18 @@
 import 'package:flutter_nga/data/entity/user.dart';
 
+int? _parseInt(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+  if (value is String) {
+    return int.tryParse(value);
+  }
+  if (value is num) {
+    return value.toInt();
+  }
+  return null;
+}
+
 class Message {
   final int? id;
   final String? subject;
@@ -21,12 +34,13 @@ class Message {
 
   factory Message.fromJson(Map map, List<User> userList) {
     return Message(
-      map['id'],
-      map['subject'],
+      _parseInt(map['id']),
+      map['subject']?.toString(),
       map['content'],
-      map['from'],
-      map['time'],
-      userList.firstWhere((e) => e.uid == map['from'], orElse: null),
+      _parseInt(map['from']),
+      _parseInt(map['time']),
+      userList.firstWhere((e) => e.uid == _parseInt(map['from']),
+          orElse: null),
       map['data'],
     );
   }
@@ -67,11 +81,11 @@ class MessageListData {
         .map((e) => Message.fromJson(e.value, userList))
         .toList();
     return MessageListData(
-      map['length'],
-      nextPage is int ? nextPage : null,
-      map['currentPage'],
-      map['subjectBit'],
-      map['starterUid'],
+      _parseInt(map['length']),
+      _parseInt(nextPage),
+      _parseInt(map['currentPage']),
+      _parseInt(map['subjectBit']),
+      _parseInt(map['starterUid']),
       messageList,
       userList,
     );

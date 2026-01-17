@@ -58,9 +58,7 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
     map.clear();
     final notifier = ref.read(topicSinglePageProvider(_providerKey).notifier);
     final detailNotifier = ref.read(topicDetailProvider.notifier);
-    notifier
-        .refresh(widget.tid, widget.page, widget.authorid)
-        .then((state) {
+    notifier.refresh().then((state) {
       detailNotifier.setMaxPage(state.maxPage);
       detailNotifier.setMaxFloor(state.maxFloor);
       detailNotifier.setTopic(state.topic);

@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class InputDeletionStatusNotifier extends StateNotifier<bool> {
-  InputDeletionStatusNotifier() : super(false);
+class InputDeletionStatusNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
 
   void setVisible(bool val) {
     state = val;
@@ -9,6 +10,4 @@ class InputDeletionStatusNotifier extends StateNotifier<bool> {
 }
 
 final inputDeletionStatusProvider =
-    StateNotifierProvider<InputDeletionStatusNotifier, bool>((ref) {
-  return InputDeletionStatusNotifier();
-});
+    NotifierProvider<InputDeletionStatusNotifier, bool>(InputDeletionStatusNotifier.new);

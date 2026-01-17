@@ -18,10 +18,9 @@ class AccountListState {
   }
 }
 
-class AccountListNotifier extends StateNotifier<AccountListState> {
-  final Ref ref;
-
-  AccountListNotifier(this.ref) : super(const AccountListState());
+class AccountListNotifier extends Notifier<AccountListState> {
+  @override
+  AccountListState build() => const AccountListState();
 
   Future<void> refresh() async {
     final repository = ref.read(userRepositoryProvider);
@@ -46,6 +45,4 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
 }
 
 final accountListProvider =
-    StateNotifierProvider<AccountListNotifier, AccountListState>((ref) {
-  return AccountListNotifier(ref);
-});
+    NotifierProvider<AccountListNotifier, AccountListState>(AccountListNotifier.new);

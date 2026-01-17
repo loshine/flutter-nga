@@ -46,10 +46,9 @@ class NotificationListState {
   }
 }
 
-class NotificationListNotifier extends StateNotifier<NotificationListState> {
-  final Ref ref;
-
-  NotificationListNotifier(this.ref) : super(NotificationListState.initial());
+class NotificationListNotifier extends Notifier<NotificationListState> {
+  @override
+  NotificationListState build() => NotificationListState.initial();
 
   Future<NotificationListState> refresh() async {
     try {
@@ -69,7 +68,5 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
 }
 
 final notificationListProvider =
-    StateNotifierProvider<NotificationListNotifier, NotificationListState>(
-        (ref) {
-  return NotificationListNotifier(ref);
-});
+    NotifierProvider<NotificationListNotifier, NotificationListState>(
+        NotificationListNotifier.new);

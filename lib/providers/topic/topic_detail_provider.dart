@@ -32,10 +32,9 @@ class TopicDetailState {
   }
 }
 
-class TopicDetailNotifier extends StateNotifier<TopicDetailState> {
-  final Ref ref;
-
-  TopicDetailNotifier(this.ref) : super(const TopicDetailState());
+class TopicDetailNotifier extends Notifier<TopicDetailState> {
+  @override
+  TopicDetailState build() => const TopicDetailState();
 
   void setMaxPage(int maxPage) {
     state = state.copyWith(maxPage: maxPage);
@@ -68,6 +67,4 @@ class TopicDetailNotifier extends StateNotifier<TopicDetailState> {
 }
 
 final topicDetailProvider =
-    StateNotifierProvider<TopicDetailNotifier, TopicDetailState>((ref) {
-  return TopicDetailNotifier(ref);
-});
+    NotifierProvider<TopicDetailNotifier, TopicDetailState>(TopicDetailNotifier.new);

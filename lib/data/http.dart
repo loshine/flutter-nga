@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
-import 'package:flutter_js/flutter_js.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../utils/constant.dart';
@@ -69,22 +69,12 @@ final _gbkCodecInterceptor = InterceptorsWrapper(
   handler.reject(e);
 });
 
-/// 使用 js 引擎修复一些不规范的 json 格式
-JavascriptRuntime? _jsEngine;
-
-JavascriptRuntime get jsEngine {
-  if (_jsEngine == null) {
-    _jsEngine = getJavascriptRuntime();
-  }
-  return _jsEngine!;
-}
-
+/// 使用 Dart 正则修复非标准 JSON 格式
 final _jsFormatJsonInterceptor = InterceptorsWrapper(
     onResponse: (Response response, ResponseInterceptorHandler handler) {
   if (response.requestOptions.path.contains("__lib=noti") &&
       response.requestOptions.path.contains("__act=get_all")) {
-    response.data =
-        jsEngine.evaluate('JSON.stringify(${response.data})').stringResult;
+    response.data = codeUtils.fixUnquotedJsonKeys(response.data);
   }
   handler.next(response);
 });

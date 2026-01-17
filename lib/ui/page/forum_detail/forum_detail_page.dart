@@ -133,7 +133,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
   _onRefresh() {
     final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
     notifier
-        .refresh(widget.fid, false, widget.type)
+        .refresh(false, widget.type)
         .then((value) =>
             _refreshController.refreshCompleted(resetFooterState: true))
         .catchError((err) {
@@ -145,7 +145,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
 
   _onLoading() async {
     final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
-    notifier.loadMore(widget.fid, false, widget.type).then((state) {
+    notifier.loadMore(false, widget.type).then((state) {
       if (state.page + 1 < state.maxPage) {
         _refreshController.loadComplete();
       } else {

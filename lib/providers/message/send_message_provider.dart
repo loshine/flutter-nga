@@ -19,10 +19,9 @@ class SendMessageState {
   }
 }
 
-class SendMessageNotifier extends StateNotifier<SendMessageState> {
-  final Ref ref;
-
-  SendMessageNotifier(this.ref) : super(const SendMessageState());
+class SendMessageNotifier extends Notifier<SendMessageState> {
+  @override
+  SendMessageState build() => const SendMessageState();
 
   void add(String contact) {
     final newContacts = List<String>.from(state.contacts)..add(contact);
@@ -55,6 +54,4 @@ class SendMessageNotifier extends StateNotifier<SendMessageState> {
 }
 
 final sendMessageProvider =
-    StateNotifierProvider<SendMessageNotifier, SendMessageState>((ref) {
-  return SendMessageNotifier(ref);
-});
+    NotifierProvider<SendMessageNotifier, SendMessageState>(SendMessageNotifier.new);

@@ -3,8 +3,9 @@ import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class FavouriteForumListNotifier extends StateNotifier<List<Forum>> {
-  FavouriteForumListNotifier() : super([]);
+class FavouriteForumListNotifier extends Notifier<List<Forum>> {
+  @override
+  List<Forum> build() => [];
 
   void refresh() {
     Data().forumRepository.getFavouriteList().then((list) {
@@ -30,6 +31,4 @@ class FavouriteForumListNotifier extends StateNotifier<List<Forum>> {
 }
 
 final favouriteForumListProvider =
-    StateNotifierProvider<FavouriteForumListNotifier, List<Forum>>((ref) {
-  return FavouriteForumListNotifier();
-});
+    NotifierProvider<FavouriteForumListNotifier, List<Forum>>(FavouriteForumListNotifier.new);

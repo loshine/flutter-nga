@@ -28,7 +28,7 @@ class _ReplyDetailState extends ConsumerState<ReplyDetailDialog> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(topicReplyProvider(widget.pid).notifier).load(widget.pid);
+      ref.read(topicReplyProvider(widget.pid).notifier).load();
     });
   }
 

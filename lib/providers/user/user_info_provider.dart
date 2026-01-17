@@ -55,8 +55,9 @@ class UserInfoState {
       );
 }
 
-class UserInfoNotifier extends StateNotifier<UserInfoState> {
-  UserInfoNotifier() : super(UserInfoState.initial());
+class UserInfoNotifier extends Notifier<UserInfoState> {
+  @override
+  UserInfoState build() => UserInfoState.initial();
 
   Future<UserInfoState> loadByName(String? username) async {
     state = UserInfoState.initial().copyWith(isLoading: true);
@@ -143,6 +144,4 @@ extension UserInfoStateCopyWith on UserInfoState {
 }
 
 final userInfoProvider =
-    StateNotifierProvider<UserInfoNotifier, UserInfoState>((ref) {
-  return UserInfoNotifier();
-});
+    NotifierProvider<UserInfoNotifier, UserInfoState>(UserInfoNotifier.new);

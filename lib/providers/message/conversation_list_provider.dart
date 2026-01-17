@@ -32,8 +32,9 @@ class ConversationListState {
   factory ConversationListState.initial() => const ConversationListState();
 }
 
-class ConversationListNotifier extends StateNotifier<ConversationListState> {
-  ConversationListNotifier() : super(ConversationListState.initial());
+class ConversationListNotifier extends Notifier<ConversationListState> {
+  @override
+  ConversationListState build() => ConversationListState.initial();
 
   Future<ConversationListState> refresh() async {
     state = state.copyWith(isLoading: true);
@@ -74,7 +75,5 @@ class ConversationListNotifier extends StateNotifier<ConversationListState> {
 }
 
 final conversationListProvider =
-    StateNotifierProvider<ConversationListNotifier, ConversationListState>(
-        (ref) {
-  return ConversationListNotifier();
-});
+    NotifierProvider<ConversationListNotifier, ConversationListState>(
+        ConversationListNotifier.new);

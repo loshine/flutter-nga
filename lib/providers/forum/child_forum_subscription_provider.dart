@@ -2,8 +2,9 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class ChildForumSubscriptionNotifier extends StateNotifier<bool> {
-  ChildForumSubscriptionNotifier() : super(false);
+class ChildForumSubscriptionNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
 
   void setSubscribed(bool subscribed) {
     state = subscribed;
@@ -32,6 +33,4 @@ class ChildForumSubscriptionNotifier extends StateNotifier<bool> {
 }
 
 final childForumSubscriptionProvider =
-    StateNotifierProvider<ChildForumSubscriptionNotifier, bool>((ref) {
-  return ChildForumSubscriptionNotifier();
-});
+    NotifierProvider<ChildForumSubscriptionNotifier, bool>(ChildForumSubscriptionNotifier.new);

@@ -32,10 +32,9 @@ class ConversationDetailState {
   }
 }
 
-class ConversationDetailNotifier extends StateNotifier<ConversationDetailState> {
-  final Ref ref;
-
-  ConversationDetailNotifier(this.ref) : super(ConversationDetailState.initial());
+class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
+  @override
+  ConversationDetailState build() => ConversationDetailState.initial();
 
   Future<ConversationDetailState> refresh(int? mid) async {
     try {
@@ -71,7 +70,5 @@ class ConversationDetailNotifier extends StateNotifier<ConversationDetailState> 
 }
 
 final conversationDetailProvider =
-    StateNotifierProvider<ConversationDetailNotifier, ConversationDetailState>(
-        (ref) {
-  return ConversationDetailNotifier(ref);
-});
+    NotifierProvider<ConversationDetailNotifier, ConversationDetailState>(
+        ConversationDetailNotifier.new);

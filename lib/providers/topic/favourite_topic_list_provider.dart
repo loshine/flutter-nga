@@ -40,8 +40,9 @@ class FavouriteTopicListState {
   factory FavouriteTopicListState.initial() => const FavouriteTopicListState();
 }
 
-class FavouriteTopicListNotifier extends StateNotifier<FavouriteTopicListState> {
-  FavouriteTopicListNotifier() : super(FavouriteTopicListState.initial());
+class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
+  @override
+  FavouriteTopicListState build() => FavouriteTopicListState.initial();
 
   Future<FavouriteTopicListState> refresh() async {
     state = state.copyWith(isLoading: true);
@@ -100,7 +101,5 @@ class FavouriteTopicListNotifier extends StateNotifier<FavouriteTopicListState> 
 }
 
 final favouriteTopicListProvider =
-    StateNotifierProvider<FavouriteTopicListNotifier, FavouriteTopicListState>(
-        (ref) {
-  return FavouriteTopicListNotifier();
-});
+    NotifierProvider<FavouriteTopicListNotifier, FavouriteTopicListState>(
+        FavouriteTopicListNotifier.new);

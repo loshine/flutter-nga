@@ -36,8 +36,9 @@ class SearchTopicListState {
   factory SearchTopicListState.initial() => const SearchTopicListState();
 }
 
-class SearchTopicListNotifier extends StateNotifier<SearchTopicListState> {
-  SearchTopicListNotifier() : super(SearchTopicListState.initial());
+class SearchTopicListNotifier extends Notifier<SearchTopicListState> {
+  @override
+  SearchTopicListState build() => SearchTopicListState.initial();
 
   Future<SearchTopicListState> refresh(
       String keyword, int? fid, bool content) async {
@@ -83,6 +84,4 @@ class SearchTopicListNotifier extends StateNotifier<SearchTopicListState> {
 }
 
 final searchTopicListProvider =
-    StateNotifierProvider<SearchTopicListNotifier, SearchTopicListState>((ref) {
-  return SearchTopicListNotifier();
-});
+    NotifierProvider<SearchTopicListNotifier, SearchTopicListState>(SearchTopicListNotifier.new);

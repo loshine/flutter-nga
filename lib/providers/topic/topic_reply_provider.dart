@@ -30,10 +30,14 @@ class TopicReplyState {
   }
 }
 
-class TopicReplyNotifier extends StateNotifier<TopicReplyState> {
-  TopicReplyNotifier() : super(TopicReplyState.initial());
+class TopicReplyNotifier extends Notifier<TopicReplyState> {
+  TopicReplyNotifier(this.pid);
+  final int? pid;
 
-  Future<TopicReplyState> load(int? pid) async {
+  @override
+  TopicReplyState build() => TopicReplyState.initial();
+
+  Future<TopicReplyState> load() async {
     state = TopicReplyState(isLoading: true);
     try {
       TopicDetailData data = await Data().topicRepository.getTopicReplies(pid);
@@ -57,6 +61,4 @@ class TopicReplyNotifier extends StateNotifier<TopicReplyState> {
 }
 
 final topicReplyProvider =
-    StateNotifierProvider.family<TopicReplyNotifier, TopicReplyState, int?>((ref, pid) {
-  return TopicReplyNotifier();
-});
+    NotifierProvider.family<TopicReplyNotifier, TopicReplyState, int?>(TopicReplyNotifier.new);

@@ -42,10 +42,9 @@ class UserTopicsState {
   }
 }
 
-class UserTopicsNotifier extends StateNotifier<UserTopicsState> {
-  final Ref ref;
-
-  UserTopicsNotifier(this.ref) : super(UserTopicsState.initial());
+class UserTopicsNotifier extends Notifier<UserTopicsState> {
+  @override
+  UserTopicsState build() => UserTopicsState.initial();
 
   Future<UserTopicsState> refresh(int authorid) async {
     try {
@@ -87,6 +86,4 @@ class UserTopicsNotifier extends StateNotifier<UserTopicsState> {
 }
 
 final userTopicsProvider =
-    StateNotifierProvider<UserTopicsNotifier, UserTopicsState>((ref) {
-  return UserTopicsNotifier(ref);
-});
+    NotifierProvider<UserTopicsNotifier, UserTopicsState>(UserTopicsNotifier.new);

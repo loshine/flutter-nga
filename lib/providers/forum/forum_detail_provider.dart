@@ -44,10 +44,14 @@ class ForumDetailState {
   factory ForumDetailState.initial() => const ForumDetailState();
 }
 
-class ForumDetailNotifier extends StateNotifier<ForumDetailState> {
-  ForumDetailNotifier() : super(ForumDetailState.initial());
+class ForumDetailNotifier extends Notifier<ForumDetailState> {
+  ForumDetailNotifier(this.fid);
+  final int fid;
 
-  Future<ForumDetailState> refresh(int fid, bool recommend, int? type) async {
+  @override
+  ForumDetailState build() => ForumDetailState.initial();
+
+  Future<ForumDetailState> refresh(bool recommend, int? type) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       TopicListData data = await Data().topicRepository.getTopicList(
@@ -71,7 +75,7 @@ class ForumDetailNotifier extends StateNotifier<ForumDetailState> {
     }
   }
 
-  Future<ForumDetailState> loadMore(int fid, bool recommend, int? type) async {
+  Future<ForumDetailState> loadMore(bool recommend, int? type) async {
     if (state.isLoading) return state;
     state = state.copyWith(isLoading: true);
     try {
@@ -98,14 +102,10 @@ class ForumDetailNotifier extends StateNotifier<ForumDetailState> {
 }
 
 final forumDetailProvider =
-    StateNotifierProvider.family<ForumDetailNotifier, ForumDetailState, int>(
-        (ref, fid) {
-  return ForumDetailNotifier();
-});
+    NotifierProvider.family<ForumDetailNotifier, ForumDetailState, int>(
+        ForumDetailNotifier.new);
 
 /// Provider for forum recommended topics (separate from main forum list)
 final forumRecommendProvider =
-    StateNotifierProvider.family<ForumDetailNotifier, ForumDetailState, int>(
-        (ref, fid) {
-  return ForumDetailNotifier();
-});
+    NotifierProvider.family<ForumDetailNotifier, ForumDetailState, int>(
+        ForumDetailNotifier.new);

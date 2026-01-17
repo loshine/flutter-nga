@@ -50,7 +50,7 @@ class _ForumRecommendTopicListState extends ConsumerState<ForumRecommendTopicLis
 
   _onRefresh() {
     final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
-    notifier.refresh(widget.fid, true, widget.type).catchError((err) {
+    notifier.refresh(true, widget.type).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
       return notifier.state;
@@ -60,7 +60,7 @@ class _ForumRecommendTopicListState extends ConsumerState<ForumRecommendTopicLis
 
   _onLoading() async {
     final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
-    notifier.loadMore(widget.fid, true, widget.type).then((state) {
+    notifier.loadMore(true, widget.type).then((state) {
       if (state.page + 1 < state.maxPage) {
         _refreshController.loadComplete();
       } else {

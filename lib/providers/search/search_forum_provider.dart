@@ -2,8 +2,9 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SearchForumNotifier extends StateNotifier<List<Forum>> {
-  SearchForumNotifier() : super([]);
+class SearchForumNotifier extends Notifier<List<Forum>> {
+  @override
+  List<Forum> build() => [];
 
   Future<List<Forum>> search(String keyword) async {
     List<Forum> results = await Data().forumRepository.getForumByName(keyword);
@@ -13,6 +14,4 @@ class SearchForumNotifier extends StateNotifier<List<Forum>> {
 }
 
 final searchForumProvider =
-    StateNotifierProvider<SearchForumNotifier, List<Forum>>((ref) {
-  return SearchForumNotifier();
-});
+    NotifierProvider<SearchForumNotifier, List<Forum>>(SearchForumNotifier.new);

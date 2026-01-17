@@ -2,8 +2,9 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomeDrawerHeaderNotifier extends StateNotifier<UserInfo?> {
-  HomeDrawerHeaderNotifier() : super(null);
+class HomeDrawerHeaderNotifier extends Notifier<UserInfo?> {
+  @override
+  UserInfo? build() => null;
 
   Future<void> refresh() async {
     try {
@@ -20,6 +21,4 @@ class HomeDrawerHeaderNotifier extends StateNotifier<UserInfo?> {
 }
 
 final homeDrawerHeaderProvider =
-    StateNotifierProvider<HomeDrawerHeaderNotifier, UserInfo?>((ref) {
-  return HomeDrawerHeaderNotifier();
-});
+    NotifierProvider<HomeDrawerHeaderNotifier, UserInfo?>(HomeDrawerHeaderNotifier.new);

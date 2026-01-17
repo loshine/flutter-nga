@@ -6,7 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_js/flutter_js.dart';
+
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
 import 'package:flutter_nga/data/repository/message_repository.dart';
@@ -30,15 +30,6 @@ class Data {
   Dio get dio => _dio!;
 
   Database get database => _database!;
-
-  JavascriptRuntime? _jsEngine;
-
-  JavascriptRuntime get jsEngine {
-    if (_jsEngine == null) {
-      _jsEngine = getJavascriptRuntime();
-    }
-    return _jsEngine!;
-  }
 
   EmoticonRepository get emoticonRepository => EmoticonDataRepository();
 
@@ -196,9 +187,8 @@ class Data {
         .replaceAll("window.script_muti_get_var_store=", "");
     if (response.requestOptions.path.contains("__lib=noti") &&
         response.requestOptions.path.contains("__act=get_all")) {
-      // js engine 格式化 json
-      responseBody =
-          jsEngine.evaluate('JSON.stringify($responseBody)').stringResult;
+      // 使用 Dart 正则修复非标准 JSON 键名
+      responseBody = codeUtils.fixUnquotedJsonKeys(responseBody);
     }
     return responseBody;
   }

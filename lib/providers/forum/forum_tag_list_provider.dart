@@ -2,8 +2,9 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ForumTagListNotifier extends StateNotifier<List<TopicTag>> {
-  ForumTagListNotifier() : super([]);
+class ForumTagListNotifier extends Notifier<List<TopicTag>> {
+  @override
+  List<TopicTag> build() => [];
 
   void setList(List<TopicTag> list) {
     state = list;
@@ -20,6 +21,4 @@ class ForumTagListNotifier extends StateNotifier<List<TopicTag>> {
 }
 
 final forumTagListProvider =
-    StateNotifierProvider<ForumTagListNotifier, List<TopicTag>>((ref) {
-  return ForumTagListNotifier();
-});
+    NotifierProvider<ForumTagListNotifier, List<TopicTag>>(ForumTagListNotifier.new);

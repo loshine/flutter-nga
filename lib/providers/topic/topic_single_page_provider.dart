@@ -71,15 +71,42 @@ class TopicSinglePageState {
   }
 }
 
-class TopicSinglePageNotifier extends StateNotifier<TopicSinglePageState> {
-  final Ref ref;
+/// Key for identifying a specific topic single page
+class TopicSinglePageKey {
+  final int tid;
+  final int page;
+  final int? authorid;
 
-  TopicSinglePageNotifier(this.ref) : super(TopicSinglePageState.initial());
+  const TopicSinglePageKey({
+    required this.tid,
+    required this.page,
+    this.authorid,
+  });
 
-  Future<TopicSinglePageState> refresh(int tid, int page, int? authorid) async {
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TopicSinglePageKey &&
+          runtimeType == other.runtimeType &&
+          tid == other.tid &&
+          page == other.page &&
+          authorid == other.authorid;
+
+  @override
+  int get hashCode => tid.hashCode ^ page.hashCode ^ authorid.hashCode;
+}
+
+class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
+  TopicSinglePageNotifier(this.key);
+  final TopicSinglePageKey key;
+
+  @override
+  TopicSinglePageState build() => TopicSinglePageState.initial();
+
+  Future<TopicSinglePageState> refresh() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
-      final data = await repository.getTopicDetail(tid, page, authorid);
+      final data = await repository.getTopicDetail(key.tid, key.page, key.authorid);
 
       List<Reply> replyList = [];
       data.replyList.values.forEach((reply) {
@@ -91,7 +118,7 @@ class TopicSinglePageNotifier extends StateNotifier<TopicSinglePageState> {
       Set<Medal> medals = data.medalList.values.toSet();
 
       List<Reply> hotReplyList = [];
-      if (page == 1 && data.hotReplies.isNotEmpty && authorid == null) {
+      if (key.page == 1 && data.hotReplies.isNotEmpty && key.authorid == null) {
         List<dynamic> hots = await Future.wait(
             data.hotReplies.map((e) => repository.getTopicReplies(e)));
         hots.forEach((e) {
@@ -121,34 +148,7 @@ class TopicSinglePageNotifier extends StateNotifier<TopicSinglePageState> {
   }
 }
 
-/// Key for identifying a specific topic single page
-class TopicSinglePageKey {
-  final int tid;
-  final int page;
-  final int? authorid;
-
-  const TopicSinglePageKey({
-    required this.tid,
-    required this.page,
-    this.authorid,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TopicSinglePageKey &&
-          runtimeType == other.runtimeType &&
-          tid == other.tid &&
-          page == other.page &&
-          authorid == other.authorid;
-
-  @override
-  int get hashCode => tid.hashCode ^ page.hashCode ^ authorid.hashCode;
-}
-
-final topicSinglePageProvider = StateNotifierProvider.family<
+final topicSinglePageProvider = NotifierProvider.family<
     TopicSinglePageNotifier, TopicSinglePageState, TopicSinglePageKey>(
-  (ref, key) {
-    return TopicSinglePageNotifier(ref);
-  },
+  TopicSinglePageNotifier.new,
 );

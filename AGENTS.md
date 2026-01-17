@@ -19,31 +19,31 @@
 fvm use 3.38.5
 
 # 获取依赖
-flutter pub get
+fvm flutter pub get
 
 # 生成 MobX 代码 (*.g.dart 文件)
-flutter pub run build_runner build --delete-conflicting-outputs
+fvm flutter pub run build_runner build --delete-conflicting-outputs
 
 # 静态分析
-flutter analyze
+fvm flutter analyze
 
 # 运行所有测试
-flutter test
+fvm flutter test
 
 # 运行单个测试文件
-flutter test test/widget_test.dart
+fvm flutter test test/widget_test.dart
 
 # 运行特定测试 (按名称匹配)
-flutter test --name "Substring test"
+fvm flutter test --name "Substring test"
 
 # 构建 APK
-flutter build apk
+fvm flutter build apk
 
 # 构建 App Bundle
-flutter build appbundle
+fvm flutter build appbundle
 
 # iOS 构建 (无签名)
-flutter build ios --no-codesign
+fvm flutter build ios --no-codesign
 ```
 
 ## 项目结构
@@ -73,9 +73,11 @@ lib/
 ## 代码风格规范
 
 ### Lint 配置
+
 使用 `package:flutter_lints/flutter.yaml` 作为基础规则集。
 
 ### 导入顺序
+
 1. Dart SDK 导入 (`dart:`)
 2. Flutter 包 (`package:flutter/`)
 3. 第三方包 (`package:xxx/`)
@@ -94,6 +96,7 @@ import 'package:flutter_nga/utils/route.dart';
 ```
 
 ### 命名规范
+
 - **文件名**: snake_case (`topic_list_item_widget.dart`)
 - **类名**: PascalCase (`TopicListItemWidget`)
 - **变量/方法**: camelCase (`getShowName()`)
@@ -101,12 +104,13 @@ import 'package:flutter_nga/utils/route.dart';
 - **私有成员**: 下划线前缀 (`_store`, `_database`)
 
 ### Widget 结构
+
 ```dart
 class MyWidget extends StatelessWidget {
   const MyWidget({Key? key, required this.param}) : super(key: key);
-  
+
   final String param;
-  
+
   @override
   Widget build(BuildContext context) {
     return Container();
@@ -115,6 +119,7 @@ class MyWidget extends StatelessWidget {
 ```
 
 ### MobX Store 模式
+
 ```dart
 import 'package:mobx/mobx.dart';
 
@@ -125,7 +130,7 @@ class MyStore = _MyStore with _$MyStore;
 abstract class _MyStore with Store {
   @observable
   var value = 0;
-  
+
   @action
   void setValue(int v) {
     value = v;
@@ -136,6 +141,7 @@ abstract class _MyStore with Store {
 修改 Store 后需运行 `build_runner` 重新生成代码。
 
 ### Repository 模式
+
 - 抽象类定义接口
 - 实现类以 `DataRepository` 后缀命名
 - 通过 `Data()` 单例访问
@@ -148,13 +154,14 @@ abstract class ForumRepository {
 class ForumDataRepository implements ForumRepository {
   ForumDataRepository(this.database);
   final Database database;
-  
+
   @override
   Future<List<Forum>> getFavouriteList() async { ... }
 }
 ```
 
 ### Entity 类
+
 - 使用 `factory` 构造函数处理 JSON 解析
 - 提供 `toJson()` 方法用于序列化
 - 字段使用 `final` 声明
@@ -162,15 +169,15 @@ class ForumDataRepository implements ForumRepository {
 ```dart
 class Forum {
   const Forum(this.fid, this.name, {this.type = 0});
-  
+
   final int fid;
   final String name;
   final int type;
-  
+
   factory Forum.fromJson(Map map) {
     return Forum(map['fid'], map['name'], type: map['type'] ?? 0);
   }
-  
+
   Map<String, dynamic> toJson() {
     return {'fid': fid, 'name': name, 'type': type};
   }
@@ -178,6 +185,7 @@ class Forum {
 ```
 
 ### 路由使用
+
 ```dart
 // 定义路由常量
 static const String TOPIC_DETAIL = "/topic_detail";
@@ -193,18 +201,22 @@ Routes.pop(context);
 ```
 
 ### 主题与颜色
+
 - 使用 `Palette` 类获取颜色
 - 支持深色模式：`Palette.isDark(context)`
 - 动态颜色获取：`Palette.getColorPrimary(context)`
 
 ### 尺寸常量
+
 使用 `Dimen` 类定义统一尺寸：
+
 - `Dimen.caption` (12) - 说明文字
 - `Dimen.body` (14) - 正文
 - `Dimen.subheading` (16) - 小标题
 - `Dimen.title` (20) - 标题
 
 ### 错误处理
+
 - 网络错误通过 Dio 拦截器统一处理
 - 使用 `rethrow` 向上传递异常
 - 业务错误通过 `DioException` 包装
@@ -219,11 +231,13 @@ try {
 ```
 
 ### 异步操作
+
 - 使用 `async/await` 语法
 - Store 中的 action 可返回 `Future<void>`
 - 使用 `then()` 链式调用时保持简洁
 
 ### Provider 使用
+
 ```dart
 // 提供 Store
 MultiProvider(

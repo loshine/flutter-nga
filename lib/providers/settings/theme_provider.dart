@@ -25,8 +25,9 @@ class ThemeState {
   }
 }
 
-class ThemeNotifier extends StateNotifier<ThemeState> {
-  ThemeNotifier() : super(ThemeState());
+class ThemeNotifier extends Notifier<ThemeState> {
+  @override
+  ThemeState build() => ThemeState();
 
   Future<void> refresh() async {
     final mode = await AdaptiveTheme.getThemeMode();
@@ -39,6 +40,4 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   }
 }
 
-final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((ref) {
-  return ThemeNotifier();
-});
+final themeProvider = NotifierProvider<ThemeNotifier, ThemeState>(ThemeNotifier.new);

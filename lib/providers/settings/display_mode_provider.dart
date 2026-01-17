@@ -40,8 +40,9 @@ class DisplayModeState {
   }
 }
 
-class DisplayModeNotifier extends StateNotifier<DisplayModeState> {
-  DisplayModeNotifier() : super(DisplayModeState());
+class DisplayModeNotifier extends Notifier<DisplayModeState> {
+  @override
+  DisplayModeState build() => DisplayModeState();
 
   Future<void> refresh() async {
     debugPrint('DisplayModeNotifier.refresh() - 鸿蒙系统待实现');
@@ -65,6 +66,4 @@ class DisplayModeNotifier extends StateNotifier<DisplayModeState> {
 }
 
 final displayModeProvider =
-    StateNotifierProvider<DisplayModeNotifier, DisplayModeState>((ref) {
-  return DisplayModeNotifier();
-});
+    NotifierProvider<DisplayModeNotifier, DisplayModeState>(DisplayModeNotifier.new);
