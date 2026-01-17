@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/forum/favourite_forum_list_store.dart';
-import 'package:flutter_nga/store/forum/favourite_forum_store.dart';
+import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ForumFavouriteButtonWidget extends StatefulWidget {
+class ForumFavouriteButtonWidget extends ConsumerStatefulWidget {
   const ForumFavouriteButtonWidget(
       {this.name, required this.fid, Key? key, this.type})
       : super(key: key);
@@ -15,39 +14,39 @@ class ForumFavouriteButtonWidget extends StatefulWidget {
   final int? type;
 
   @override
-  State<StatefulWidget> createState() => _ForumFavouriteButtonState();
+  ConsumerState<ForumFavouriteButtonWidget> createState() =>
+      _ForumFavouriteButtonState();
 }
 
-class _ForumFavouriteButtonState extends State<ForumFavouriteButtonWidget> {
-  final FavouriteForumStore _favouriteForumStore = FavouriteForumStore();
-
-  @override
-  Widget build(BuildContext context) {
-    return Observer(
-      builder: (_) {
-        return IconButton(
-          icon: Icon(
-            _favouriteForumStore.isFavourite ? Icons.star : Icons.star_border,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            _favouriteForumStore
-                .toggle(widget.fid, widget.name, widget.type)
-                .then((_) {
-              Provider.of<FavouriteForumListStore>(context, listen: false)
-                  .refresh();
-            }).catchError((err) {
-              Fluttertoast.showToast(msg: err.message);
-            });
-          },
-        );
-      },
-    );
-  }
-
+class _ForumFavouriteButtonState
+    extends ConsumerState<ForumFavouriteButtonWidget> {
   @override
   void initState() {
     super.initState();
-    _favouriteForumStore.load(widget.fid, widget.name ?? "");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(favouriteForumProvider.notifier)
+          .load(widget.fid, widget.name ?? "");
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isFavourite = ref.watch(favouriteForumProvider);
+    final notifier = ref.read(favouriteForumProvider.notifier);
+
+    return IconButton(
+      icon: Icon(
+        isFavourite ? Icons.star : Icons.star_border,
+        color: Colors.white,
+      ),
+      onPressed: () {
+        notifier.toggle(widget.fid, widget.name, widget.type).then((_) {
+          ref.read(favouriteForumListProvider.notifier).refresh();
+        }).catchError((err) {
+          Fluttertoast.showToast(msg: err.message);
+        });
+      },
+    );
   }
 }

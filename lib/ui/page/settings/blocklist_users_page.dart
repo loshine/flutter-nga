@@ -1,37 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/settings/blocklist_settings_store.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'blocklist_edit_dialog.dart';
 
-class BlocklistUsersPage extends StatefulWidget {
+class BlocklistUsersPage extends ConsumerStatefulWidget {
   @override
-  State<StatefulWidget> createState() {
-    return _BlocklistUsersPageState();
-  }
+  ConsumerState<BlocklistUsersPage> createState() => _BlocklistUsersPageState();
 }
 
-class _BlocklistUsersPageState extends State<BlocklistUsersPage> {
-  late BlocklistSettingsStore store;
-
+class _BlocklistUsersPageState extends ConsumerState<BlocklistUsersPage> {
   @override
   void initState() {
-    store = Provider.of<BlocklistSettingsStore>(context, listen: false);
-    store.load().then((value) => null);
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(blocklistSettingsProvider.notifier).load();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(blocklistSettingsProvider);
+    final notifier = ref.read(blocklistSettingsProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("屏蔽用户"),
         actions: [
           IconButton(
-            onPressed: _deleteAll,
+            onPressed: () => _deleteAll(notifier),
             icon: Icon(
               Icons.delete_forever,
               color: Colors.white,
@@ -40,22 +39,18 @@ class _BlocklistUsersPageState extends State<BlocklistUsersPage> {
           ),
         ],
       ),
-      body: Observer(
-        builder: (_) {
-          return ListView(
-            children: store.blockUserList
-                .map((e) => ListTile(
-                      title: Text(codeUtils.unescapeHtml(e)),
-                      trailing: Icon(Icons.delete),
-                      onTap: () => _delete(e),
-                    ))
-                .toList(),
-          );
-        },
+      body: ListView(
+        children: state.blockUserList
+            .map((e) => ListTile(
+                  title: Text(codeUtils.unescapeHtml(e)),
+                  trailing: Icon(Icons.delete),
+                  onTap: () => _delete(notifier, e),
+                ))
+            .toList(),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: "添加屏蔽用户",
-        onPressed: _showAddDialog,
+        onPressed: () => _showAddDialog(notifier),
         child: Icon(
           Icons.add,
           color: Colors.white,
@@ -64,8 +59,8 @@ class _BlocklistUsersPageState extends State<BlocklistUsersPage> {
     );
   }
 
-  void _deleteAll() {
-    store
+  void _deleteAll(BlocklistSettingsNotifier notifier) {
+    notifier
         .deleteAllUsers()
         .then((value) => Fluttertoast.showToast(msg: value))
         .catchError((e) {
@@ -74,8 +69,8 @@ class _BlocklistUsersPageState extends State<BlocklistUsersPage> {
     });
   }
 
-  void _delete(String user) {
-    store
+  void _delete(BlocklistSettingsNotifier notifier, String user) {
+    notifier
         .deleteUser(user)
         .then((value) => Fluttertoast.showToast(msg: value))
         .catchError((e) {
@@ -84,8 +79,8 @@ class _BlocklistUsersPageState extends State<BlocklistUsersPage> {
     });
   }
 
-  void _add(String user) {
-    store
+  void _add(BlocklistSettingsNotifier notifier, String user) {
+    notifier
         .addUser(user)
         .then((value) => Fluttertoast.showToast(msg: value))
         .catchError((e) {
@@ -94,14 +89,14 @@ class _BlocklistUsersPageState extends State<BlocklistUsersPage> {
     });
   }
 
-  void _showAddDialog() {
+  void _showAddDialog(BlocklistSettingsNotifier notifier) {
     showDialog(
         context: context,
         builder: (_) {
           return BlocklistEditDialog(
             title: "添加屏蔽用户",
             inputHint: "UID 或 用户名",
-            callback: _add,
+            callback: (user) => _add(notifier, user),
           );
         });
   }

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/store/topic/topic_detail_store.dart';
-import 'package:flutter_nga/store/topic/topic_single_page_store.dart';
+import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
+import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class TopicSinglePage extends StatefulWidget {
+class TopicSinglePage extends ConsumerStatefulWidget {
   const TopicSinglePage({
     required this.tid,
     required this.page,
@@ -22,12 +21,17 @@ class TopicSinglePage extends StatefulWidget {
   final int? authorid;
 
   @override
-  _TopicSingleState createState() => _TopicSingleState();
+  ConsumerState<TopicSinglePage> createState() => _TopicSingleState();
 }
 
-class _TopicSingleState extends State<TopicSinglePage> {
+class _TopicSingleState extends ConsumerState<TopicSinglePage> {
   final _refreshController = RefreshController(initialRefresh: true);
-  final _store = TopicSinglePageStore();
+
+  TopicSinglePageKey get _providerKey => TopicSinglePageKey(
+        tid: widget.tid,
+        page: widget.page,
+        authorid: widget.authorid,
+      );
 
   @override
   void dispose() {
@@ -37,29 +41,27 @@ class _TopicSingleState extends State<TopicSinglePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Observer(builder: (_) {
-      return SmartRefresher(
-        onRefresh: _onRefresh,
-        enablePullUp: false,
-        controller: _refreshController,
-        physics: ClampingScrollPhysics(),
-        child: ListView.builder(
-          itemCount: _store.state.replyList.length,
-          itemBuilder: (context, position) => _buildListItem(context, position),
-        ),
-      );
-    });
+    final state = ref.watch(topicSinglePageProvider(_providerKey));
+    return SmartRefresher(
+      onRefresh: _onRefresh,
+      enablePullUp: false,
+      controller: _refreshController,
+      physics: ClampingScrollPhysics(),
+      child: ListView.builder(
+        itemCount: state.replyList.length,
+        itemBuilder: (context, position) => _buildListItem(context, position, state),
+      ),
+    );
   }
 
   _onRefresh() {
     map.clear();
-    final detailStore = Provider.of<TopicDetailStore>(context, listen: false);
-    _store
-        .refresh(context, widget.tid, widget.page, widget.authorid)
-        .then((state) {
-      detailStore.setMaxPage(state.maxPage);
-      detailStore.setMaxFloor(state.maxFloor);
-      detailStore.setTopic(state.topic);
+    final notifier = ref.read(topicSinglePageProvider(_providerKey).notifier);
+    final detailNotifier = ref.read(topicDetailProvider.notifier);
+    notifier.refresh().then((state) {
+      detailNotifier.setMaxPage(state.maxPage);
+      detailNotifier.setMaxFloor(state.maxFloor);
+      detailNotifier.setTopic(state.topic);
     }).whenComplete(() {
       _refreshController.refreshCompleted();
     }).catchError((err) {
@@ -70,23 +72,23 @@ class _TopicSingleState extends State<TopicSinglePage> {
 
   final map = <String, Widget>{};
 
-  Widget _buildListItem(BuildContext context, int position) {
-    final reply = _store.state.replyList[position];
+  Widget _buildListItem(BuildContext context, int position, TopicSinglePageState state) {
+    final reply = state.replyList[position];
     if (position == 0 &&
-        _store.state.page == 1 &&
-        _store.state.hotReplyList.isNotEmpty) {
+        state.page == 1 &&
+        state.hotReplyList.isNotEmpty) {
       // 显示热评
       return Column(
-        children: [_buildReplyWidget(context, reply)]..addAll(_store
-            .state.hotReplyList
-            .map((e) => _buildReplyWidget(context, e, hot: true))),
+        children: [_buildReplyWidget(context, reply, state)]..addAll(state
+            .hotReplyList
+            .map((e) => _buildReplyWidget(context, e, state, hot: true))),
       );
     } else {
-      return _buildReplyWidget(context, reply);
+      return _buildReplyWidget(context, reply, state);
     }
   }
 
-  Widget _buildReplyWidget(BuildContext context, Reply reply,
+  Widget _buildReplyWidget(BuildContext context, Reply reply, TopicSinglePageState state,
       {bool hot = false}) {
     final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}_$hot";
     var widget = map[uniqueId];
@@ -94,7 +96,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       return widget;
     } else {
       User? user;
-      for (var u in _store.state.userList) {
+      for (var u in state.userList) {
         if (u.uid == reply.authorId) {
           user = u;
           break;
@@ -106,7 +108,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
 
       Group? group;
       if (user.memberId != null) {
-        for (var g in _store.state.groupSet) {
+        for (var g in state.groupSet) {
           if (g.id == user.memberId) {
             group = g;
             break;
@@ -117,7 +119,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       List<Medal> medalList = [];
       if (user.medal != null && user.medal!.isNotEmpty) {
         user.medal!.split(",").forEach((id) {
-          for (var m in _store.state.medalSet) {
+          for (var m in state.medalSet) {
             if (id == m.id.toString()) {
               medalList.add(m);
               break;
@@ -129,7 +131,7 @@ class _TopicSingleState extends State<TopicSinglePage> {
       List<User> commentUserList = [];
       if (reply.commentList.isNotEmpty) {
         reply.commentList.forEach((comment) {
-          for (var user in _store.state.userList) {
+          for (var user in state.userList) {
             if (user.uid == comment.authorId) {
               commentUserList.add(user);
               break;

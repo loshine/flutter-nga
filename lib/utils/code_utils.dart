@@ -106,3 +106,19 @@ String urlEncode(String content) {
   return Uri.encodeQueryComponent(content,
       encoding: const GbkCodec(allowMalformed: true));
 }
+
+/// 路由查询参数编码（UTF-8）
+String encodeParam(String content) {
+  return Uri.encodeQueryComponent(content);
+}
+
+/// 修复非标准 JSON（将无引号的键名转换为带引号的键名）
+/// 例如: {foo: "bar"} -> {"foo": "bar"}
+String fixUnquotedJsonKeys(String input) {
+  // 匹配对象键名：在 { 或 , 后面的标识符，后跟冒号
+  // 这个正则匹配: {key: 或 ,key: 或 { key: 或 , key:
+  final pattern = RegExp(r'([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)(\s*:)');
+  return input.replaceAllMapped(pattern, (match) {
+    return '${match.group(1)}"${match.group(2)}"${match.group(3)}';
+  });
+}

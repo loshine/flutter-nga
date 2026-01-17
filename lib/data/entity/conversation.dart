@@ -37,18 +37,30 @@ class Conversation {
 // final String allUser;
 
   factory Conversation.fromJson(Map map) {
+    int? parseInt(dynamic value) {
+      if (value is int) {
+        return value;
+      }
+      if (value is String) {
+        return int.tryParse(value);
+      }
+      if (value is num) {
+        return value.toInt();
+      }
+      return null;
+    }
     return Conversation(
-        map['mid'],
-        map['last_modify'],
-        map['bit'],
-        map['subject'],
-        map['from'],
-        map['time'],
-        map['last_from'],
-        map['posts'],
-        map['sbit'],
-        map['from_username'],
-        map['last_from_username']);
+        parseInt(map['mid']),
+        parseInt(map['last_modify']),
+        parseInt(map['bit']),
+        map['subject']?.toString(),
+        parseInt(map['from']),
+        parseInt(map['time']),
+        parseInt(map['last_from']),
+        parseInt(map['posts']),
+        parseInt(map['sbit']),
+        map['from_username']?.toString(),
+        map['last_from_username']?.toString());
   }
 }
 
@@ -68,6 +80,18 @@ class ConversationListData {
   );
 
   factory ConversationListData.fromJson(Map map) {
+    int? parseInt(dynamic value) {
+      if (value is int) {
+        return value;
+      }
+      if (value is String) {
+        return int.tryParse(value);
+      }
+      if (value is num) {
+        return value.toInt();
+      }
+      return null;
+    }
     Map<String, Conversation> tempMap = {};
     for (MapEntry<String, dynamic> entry
         in map.entries as Iterable<MapEntry<String, dynamic>>) {
@@ -78,9 +102,9 @@ class ConversationListData {
       }
     }
     return ConversationListData(
-      map['nextPage'],
-      map['currentPage'],
-      map['rowsPerPage'],
+      parseInt(map['nextPage']),
+      parseInt(map['currentPage']),
+      parseInt(map['rowsPerPage']),
       tempMap.values.toList(),
     );
   }

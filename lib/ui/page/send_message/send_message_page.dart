@@ -1,43 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/message/send_message_store.dart';
+import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SendMessagePage extends StatefulWidget {
+class SendMessagePage extends ConsumerStatefulWidget {
   final int? mid;
 
   const SendMessagePage({Key? key, this.mid}) : super(key: key);
 
   @override
-  _SendMessageState createState() => _SendMessageState();
+  ConsumerState<SendMessagePage> createState() => _SendMessageState();
 }
 
-class _SendMessageState extends State<SendMessagePage> {
+class _SendMessageState extends ConsumerState<SendMessagePage> {
   final _subjectController = TextEditingController();
   final _contentController = TextEditingController();
-
-  final _store = SendMessageStore();
 
   bool get isNew => widget.mid == null || widget.mid == 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Clear contacts when starting new message
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(sendMessageProvider.notifier).clear();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final state = ref.watch(sendMessageProvider);
+    final notifier = ref.read(sendMessageProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isNew ? '新建短消息' : '回复消息'),
       ),
       body: Padding(
         padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Observer(
-          builder: (context) => Column(
-            children: _buildColumnChildren(),
-          ),
+        child: Column(
+          children: _buildColumnChildren(state, notifier),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: '发送',
-        onPressed: () => _store
+        onPressed: () => notifier
             .send(
               widget.mid,
               _subjectController.text,
@@ -54,18 +62,19 @@ class _SendMessageState extends State<SendMessagePage> {
     );
   }
 
-  _showDialog() {
+  void _showDialog(SendMessageNotifier notifier) {
     showDialog(
       context: context,
       builder: (_) {
         return ContactEditDialog(
-          callback: (text) => _store.add(text),
+          callback: (text) => notifier.add(text),
         );
       },
     );
   }
 
-  List<Widget> _buildColumnChildren() {
+  List<Widget> _buildColumnChildren(
+      SendMessageState state, SendMessageNotifier notifier) {
     final children = <Widget>[];
     children.add(TextField(
       maxLines: 1,
@@ -96,9 +105,9 @@ class _SendMessageState extends State<SendMessagePage> {
             ],
           ),
         ),
-        onTap: _showDialog,
+        onTap: () => _showDialog(notifier),
       ));
-      if (_store.contacts.isNotEmpty) {
+      if (state.contacts.isNotEmpty) {
         children.add(Padding(
           padding: EdgeInsets.only(bottom: 16),
           child: SizedBox(
@@ -106,14 +115,14 @@ class _SendMessageState extends State<SendMessagePage> {
             child: Wrap(
               spacing: 8.0, // gap between adjacent chips
               runSpacing: 4.0, // gap between line
-              children: _store.contacts.map((content) {
+              children: state.contacts.map((content) {
                 return ActionChip(
                   label: Text(
                     content,
                     style: TextStyle(color: Colors.white),
                   ),
                   color: WidgetStatePropertyAll(Theme.of(context).primaryColor),
-                  onPressed: () => _store.remove(content),
+                  onPressed: () => notifier.remove(content),
                 );
               }).toList(),
             ),

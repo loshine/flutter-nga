@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/store/forum/favourite_forum_list_store.dart';
+import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
 
-class CustomForumDialog extends StatelessWidget {
+class CustomForumDialog extends ConsumerWidget {
   final _fidController = TextEditingController();
   final _nameController = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AlertDialog(
       title: Text("添加自定义版面"),
       content: Column(
@@ -33,7 +33,7 @@ class CustomForumDialog extends StatelessWidget {
         TextButton(
           onPressed: () {
             final fid = int.tryParse(_fidController.text)!;
-            Provider.of<FavouriteForumListStore>(context, listen: false)
+            ref.read(favouriteForumListProvider.notifier)
                 .add(fid, _nameController.text)
                 .catchError((e) {
               debugPrint(e.toString());

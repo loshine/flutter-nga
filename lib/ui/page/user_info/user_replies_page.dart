@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/user/user_replies_store.dart';
+import 'package:flutter_nga/providers/user/user_replies_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class UserRepliesPage extends StatefulWidget {
+class UserRepliesPage extends ConsumerStatefulWidget {
   final int uid;
   final String username;
 
@@ -16,11 +16,10 @@ class UserRepliesPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UserRepliesPageState createState() => _UserRepliesPageState();
+  ConsumerState<UserRepliesPage> createState() => _UserRepliesPageState();
 }
 
-class _UserRepliesPageState extends State<UserRepliesPage> {
-  final _store = UserRepliesStore();
+class _UserRepliesPageState extends ConsumerState<UserRepliesPage> {
   late RefreshController _refreshController;
 
   @override
@@ -37,37 +36,36 @@ class _UserRepliesPageState extends State<UserRepliesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(userRepliesProvider);
+    final notifier = ref.read(userRepliesProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(title: Text("${widget.username}发布的回复")),
-      body: Observer(
-        builder: (_) {
-          return SmartRefresher(
-            onLoading: _onLoading,
-            controller: _refreshController,
-            enablePullUp: _store.state.enablePullUp,
-            onRefresh: _onRefresh,
-            child: ListView.builder(
-              itemCount: _store.state.list.length,
-              itemBuilder: (context, index) =>
-                  TopicListItemWidget(topic: _store.state.list[index]),
-            ),
-          );
-        },
+      body: SmartRefresher(
+        onLoading: () => _onLoading(notifier),
+        controller: _refreshController,
+        enablePullUp: state.enablePullUp,
+        onRefresh: () => _onRefresh(notifier),
+        child: ListView.builder(
+          itemCount: state.list.length,
+          itemBuilder: (context, index) =>
+              TopicListItemWidget(topic: state.list[index]),
+        ),
       ),
     );
   }
 
-  _onRefresh() {
-    _store.refresh(widget.uid).catchError((err) {
+  void _onRefresh(UserRepliesNotifier notifier) {
+    notifier.refresh(widget.uid).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
-      return _store.state;
+      return ref.read(userRepliesProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
-  _onLoading() async {
-    _store.loadMore(widget.uid).then((state) {
+  void _onLoading(UserRepliesNotifier notifier) async {
+    notifier.loadMore(widget.uid).then((state) {
       if (state.list.length == state.page * state.size) {
         _refreshController.loadComplete();
       } else {
