@@ -6,7 +6,7 @@
 
 - **Flutter 版本**: 3.38.5 (通过 FVM 管理)
 - **Dart SDK**: >=3.0.0 <4.0.0
-- **状态管理**: MobX + Provider
+- **状态管理**: Riverpod 3.x + flutter_hooks
 - **路由**: go_router
 - **网络**: Dio
 - **本地存储**: Sembast + MMKV
@@ -20,9 +20,6 @@ fvm use 3.38.5
 
 # 获取依赖
 fvm flutter pub get
-
-# 生成 MobX 代码 (*.g.dart 文件)
-fvm flutter pub run build_runner build --delete-conflicting-outputs
 
 # 静态分析
 fvm flutter analyze
@@ -58,7 +55,7 @@ lib/
 │   ├── entity/            # 数据实体类
 │   ├── repository/        # 数据仓库层
 │   └── usecase/           # 用例层
-├── store/                 # MobX Stores (状态管理)
+├── providers/             # Riverpod Providers (状态管理)
 ├── ui/
 │   ├── page/              # 页面组件
 │   └── widget/            # 可复用组件
@@ -89,7 +86,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:mobx/mobx.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -101,7 +99,8 @@ import 'package:flutter_nga/utils/route.dart';
 - **类名**: PascalCase (`TopicListItemWidget`)
 - **变量/方法**: camelCase (`getShowName()`)
 - **常量**: SCREAMING_SNAKE_CASE 用于路由常量 (`Routes.TOPIC_DETAIL`)
-- **私有成员**: 下划线前缀 (`_store`, `_database`)
+- **私有成员**: 下划线前缀 (`_controller`, `_database`)
+- **Provider 命名**: 小驼峰 + `Provider` 后缀 (`topicDetailProvider`)
 
 ### Widget 结构
 
@@ -118,27 +117,56 @@ class MyWidget extends StatelessWidget {
 }
 ```
 
-### MobX Store 模式
+### Riverpod Provider 模式
 
 ```dart
-import 'package:mobx/mobx.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-part 'my_store.g.dart';  // 生成的代码
+// Notifier 模式 (推荐用于复杂状态)
+class CounterNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
 
-class MyStore = _MyStore with _$MyStore;
+  void increment() => state++;
+  void setValue(int value) => state = value;
+}
 
-abstract class _MyStore with Store {
-  @observable
-  var value = 0;
+final counterProvider = NotifierProvider<CounterNotifier, int>(
+  CounterNotifier.new,
+);
 
-  @action
-  void setValue(int v) {
-    value = v;
+// StateProvider 模式 (适合简单状态)
+final simpleCounterProvider = StateProvider<int>((ref) => 0);
+
+// FutureProvider 模式 (异步数据)
+final userProvider = FutureProvider<User>((ref) async {
+  final repository = ref.watch(userRepositoryProvider);
+  return repository.fetchUser();
+});
+```
+
+### flutter_hooks 使用
+
+```dart
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+class MyHookWidget extends HookConsumerWidget {
+  const MyHookWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 使用 hooks
+    final controller = useTextEditingController();
+    final scrollController = useScrollController();
+
+    // 使用 Riverpod
+    final counter = ref.watch(counterProvider);
+
+    return TextField(controller: controller);
   }
 }
 ```
-
-修改 Store 后需运行 `build_runner` 重新生成代码。
 
 ### Repository 模式
 
@@ -233,22 +261,60 @@ try {
 ### 异步操作
 
 - 使用 `async/await` 语法
-- Store 中的 action 可返回 `Future<void>`
-- 使用 `then()` 链式调用时保持简洁
-
-### Provider 使用
+- Provider 中的方法可返回 `Future<void>`
+- FutureProvider/StreamProvider 处理异步数据流
+- 使用 `AsyncValue` 处理加载、错误、数据状态
 
 ```dart
-// 提供 Store
-MultiProvider(
-  providers: [
-    Provider<MyStore>(create: (_) => MyStore()),
-  ],
-  child: ...
-)
+// AsyncValue 使用示例
+final data = ref.watch(userProvider);
+return data.when(
+  loading: () => CircularProgressIndicator(),
+  error: (err, stack) => Text('Error: $err'),
+  data: (user) => Text(user.name),
+);
+```
 
-// 消费 Store
-final store = Provider.of<MyStore>(context);
+### ConsumerWidget 使用
+
+```dart
+// 无状态 Consumer
+class MyWidget extends ConsumerWidget {
+  const MyWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final counter = ref.watch(counterProvider);
+    return Text('$counter');
+  }
+}
+
+// 有状态 Consumer
+class MyStatefulWidget extends ConsumerStatefulWidget {
+  const MyStatefulWidget({Key? key}) : super(key: key);
+
+  @override
+  ConsumerState<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+}
+
+class _MyStatefulWidgetState extends ConsumerState<MyStatefulWidget> {
+  @override
+  Widget build(BuildContext context) {
+    final counter = ref.watch(counterProvider);
+    return GestureDetector(
+      onTap: () => ref.read(counterProvider.notifier).increment(),
+      child: Text('$counter'),
+    );
+  }
+}
+
+// 使用 Consumer builder
+Consumer(
+  builder: (context, ref, child) {
+    final counter = ref.watch(counterProvider);
+    return Text('$counter');
+  },
+)
 ```
 
 ## 特殊编码处理
@@ -281,8 +347,8 @@ void main() {
 
 ## 注意事项
 
-1. **不要**直接修改 `.g.dart` 文件，这些是自动生成的
-2. 修改 Store 后必须运行 `build_runner`
-3. 网络请求基础 URL 定义在 `utils/constant.dart`
-4. 用户认证通过 Cookie (uid + cid) 管理
-5. 项目使用 FVM 管理 Flutter 版本，确保使用正确版本
+1. 网络请求基础 URL 定义在 `utils/constant.dart`
+2. 用户认证通过 Cookie (uid + cid) 管理
+3. 项目使用 FVM 管理 Flutter 版本，确保使用正确版本
+4. `ref.watch` 用于监听状态变化，`ref.read` 用于一次性读取
+5. `ref.listen` 用于副作用处理（如显示 SnackBar）
