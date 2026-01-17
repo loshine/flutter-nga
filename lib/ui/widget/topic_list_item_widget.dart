@@ -1,17 +1,17 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
-import 'package:flutter_nga/store/settings/blocklist_settings_store.dart';
-import 'package:flutter_nga/store/settings/interface_settings_store.dart';
-import 'package:flutter_nga/store/topic/topic_history_store.dart';
+import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
+import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TopicListItemWidget extends StatelessWidget {
+class TopicListItemWidget extends ConsumerWidget {
   const TopicListItemWidget({
     Key? key,
     required this.topic,
@@ -24,15 +24,16 @@ class TopicListItemWidget extends StatelessWidget {
   final GestureLongPressCallback? onLongPress;
 
   @override
-  Widget build(BuildContext context) {
-    final blockStore = Provider.of<BlocklistSettingsStore>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final blockState = ref.watch(blocklistSettingsProvider);
+    final interfaceState = ref.watch(interfaceSettingsProvider);
     final blockEnabled =
-        blockStore.clientBlockEnabled && blockStore.listBlockEnabled;
-    final blockMode = blockStore.blockMode;
+        blockState.clientBlockEnabled && blockState.listBlockEnabled;
+    final blockMode = blockState.blockMode;
     final topicSubject = codeUtils.unescapeHtml(topic.subject);
-    final isTopicBlocked = blockStore.blockUserList.contains(topic.author) ||
-        blockStore.blockUserList.contains(topic.authorId) ||
-        blockStore.blockWordList
+    final isTopicBlocked = blockState.blockUserList.contains(topic.author) ||
+        blockState.blockUserList.contains(topic.authorId) ||
+        blockState.blockWordList
             .any((blockWord) => topicSubject.contains(blockWord));
     final columnChildren = <Widget>[];
     if (blockEnabled && isTopicBlocked && blockMode == BlockMode.COLLAPSE) {
@@ -58,7 +59,7 @@ class TopicListItemWidget extends StatelessWidget {
             children: [
               SizedBox(
                 child: _getTitleText(context, topic, topicSubject, blockEnabled,
-                    blockMode, isTopicBlocked),
+                    blockMode, isTopicBlocked, interfaceState),
                 width: double.infinity,
               ),
               SizedBox(
@@ -159,7 +160,7 @@ class TopicListItemWidget extends StatelessWidget {
     }
     columnChildren.add(Divider(height: 1));
     return InkWell(
-      onTap: () => _goTopicDetail(context, topic),
+      onTap: () => _goTopicDetail(context, topic, ref),
       onLongPress: onLongPress,
       child: Column(children: columnChildren),
     );
@@ -172,6 +173,7 @@ class TopicListItemWidget extends StatelessWidget {
     bool blockEnabled,
     BlockMode blockMode,
     bool isTopicBlocked,
+    InterfaceSettingsState interfaceState,
   ) {
     final isPaintBlockMode =
         blockEnabled && isTopicBlocked && blockMode == BlockMode.PAINT;
@@ -183,8 +185,7 @@ class TopicListItemWidget extends StatelessWidget {
         // Child text spans will inherit styles from parent
         text: codeUtils.unescapeHtml(topic.subject),
         style: TextStyle(
-          fontSize: Dimen.subheading *
-              Provider.of<InterfaceSettingsStore>(context).titleSizeMultiple,
+          fontSize: Dimen.subheading * interfaceState.titleSizeMultiple,
           backgroundColor: isPaintBlockMode
               ? Theme.of(context).textTheme.bodyMedium?.color
               : null,
@@ -199,7 +200,7 @@ class TopicListItemWidget extends StatelessWidget {
               : topic.isUnderline()
                   ? TextDecoration.underline
                   : null,
-          height: Provider.of<InterfaceSettingsStore>(context).lineHeight.size,
+          height: interfaceState.lineHeight.size,
         ),
         children: <TextSpan>[
           TextSpan(
@@ -225,9 +226,8 @@ class TopicListItemWidget extends StatelessWidget {
     );
   }
 
-  _goTopicDetail(BuildContext context, Topic topic) {
-    final store = TopicHistoryStore();
-    store.insertHistory(topic.createHistory());
+  _goTopicDetail(BuildContext context, Topic topic, WidgetRef ref) {
+    ref.read(topicHistoryProvider.notifier).insertHistory(topic.createHistory());
     Routes.navigateTo(
       context,
       "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${topic.subject!}",

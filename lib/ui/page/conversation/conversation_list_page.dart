@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/message/conversation_list_store.dart';
+import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'conversation_item_widget.dart';
 
-class ConversationListPage extends StatefulWidget {
+class ConversationListPage extends ConsumerStatefulWidget {
   @override
-  _ConversationListState createState() => _ConversationListState();
+  ConsumerState<ConversationListPage> createState() =>
+      _ConversationListState();
 }
 
-class _ConversationListState extends State<ConversationListPage> {
-  final _store = ConversationListStore();
+class _ConversationListState extends ConsumerState<ConversationListPage> {
   late RefreshController _refreshController;
 
   @override
@@ -29,36 +29,35 @@ class _ConversationListState extends State<ConversationListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Observer(
-      builder: (_) {
-        return SmartRefresher(
-          onLoading: _onLoading,
-          controller: _refreshController,
-          enablePullUp: _store.state.enablePullUp,
-          onRefresh: _onRefresh,
-          child: ListView.builder(
-            itemCount: _store.state.list.length,
-            itemBuilder: (context, index) =>
-                ConversationItemWidget(conversation: _store.state.list[index]),
-          ),
-        );
-      },
+    final state = ref.watch(conversationListProvider);
+    final notifier = ref.read(conversationListProvider.notifier);
+
+    return SmartRefresher(
+      onLoading: () => _onLoading(notifier),
+      controller: _refreshController,
+      enablePullUp: state.enablePullUp,
+      onRefresh: () => _onRefresh(notifier),
+      child: ListView.builder(
+        itemCount: state.list.length,
+        itemBuilder: (context, index) =>
+            ConversationItemWidget(conversation: state.list[index]),
+      ),
     );
   }
 
-  _onRefresh() {
-    _store.refresh().catchError((err) {
+  void _onRefresh(ConversationListNotifier notifier) {
+    notifier.refresh().catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(
         msg: err.toString(),
       );
-      return _store.state;
+      return ref.read(conversationListProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
-  _onLoading() async {
-    _store.loadMore().then((state) {
+  void _onLoading(ConversationListNotifier notifier) async {
+    notifier.loadMore().then((state) {
       if (state.enablePullUp) {
         _refreshController.loadComplete();
       } else {

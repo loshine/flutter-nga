@@ -1,60 +1,44 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/store/topic/topic_reply_store.dart';
+import 'package:flutter_nga/providers/topic/topic_reply_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class ReplyDetailDialog extends StatefulWidget {
+class ReplyDetailDialog extends ConsumerStatefulWidget {
   final int? pid;
 
   const ReplyDetailDialog({Key? key, this.pid}) : super(key: key);
 
   @override
-  _ReplyDetailState createState() => _ReplyDetailState();
+  ConsumerState<ReplyDetailDialog> createState() => _ReplyDetailState();
 }
 
-class _ReplyDetailState extends State<ReplyDetailDialog> {
-  final _store = TopicReplyStore();
-
+class _ReplyDetailState extends ConsumerState<ReplyDetailDialog> {
   @override
   void initState() {
-    _store.load(context, widget.pid);
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(topicReplyProvider(widget.pid).notifier).load(widget.pid);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(topicReplyProvider(widget.pid));
     return AlertDialog(
       backgroundColor: Palette.colorBackground,
       contentPadding: EdgeInsets.zero,
-      content: Observer(
-        builder: (_) {
-          if (_store.state.replyList.isEmpty) {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [CircularProgressIndicator()],
-              ),
-            );
-          } else {
-            return _ReplyWidget(
-              reply: _store.state.replyList[0],
-              user: _store.state.userList[0],
-            );
-          }
-        },
-      ),
+      content: _buildContent(state),
       actions: [
         TextButton(
           onPressed: () => Routes.pop(context),
@@ -62,6 +46,23 @@ class _ReplyDetailState extends State<ReplyDetailDialog> {
         )
       ],
     );
+  }
+
+  Widget _buildContent(TopicReplyState state) {
+    if (state.replyList.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [CircularProgressIndicator()],
+        ),
+      );
+    } else {
+      return _ReplyWidget(
+        reply: state.replyList[0],
+        user: state.userList[0],
+      );
+    }
   }
 }
 

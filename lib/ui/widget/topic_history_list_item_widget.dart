@@ -1,16 +1,16 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
-import 'package:flutter_nga/store/settings/interface_settings_store.dart';
-import 'package:flutter_nga/store/topic/topic_history_store.dart';
+import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
+import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TopicHistoryListItemWidget extends StatelessWidget {
+class TopicHistoryListItemWidget extends ConsumerWidget {
   const TopicHistoryListItemWidget(
       {Key? key, this.topicHistory, this.onLongPress})
       : super(key: key);
@@ -19,9 +19,10 @@ class TopicHistoryListItemWidget extends StatelessWidget {
   final GestureLongPressCallback? onLongPress;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final interfaceState = ref.watch(interfaceSettingsProvider);
     return InkWell(
-      onTap: () => _goTopicDetail(context, topicHistory!),
+      onTap: () => _goTopicDetail(context, topicHistory!, ref),
       onLongPress: onLongPress,
       child: Column(
         children: <Widget>[
@@ -31,7 +32,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  child: _getTitleText(context, topicHistory!),
+                  child: _getTitleText(context, topicHistory!, interfaceState),
                   width: double.infinity,
                 ),
                 SizedBox(
@@ -85,15 +86,14 @@ class TopicHistoryListItemWidget extends StatelessWidget {
     );
   }
 
-  _getTitleText(BuildContext context, TopicHistory topicHistory) {
+  _getTitleText(BuildContext context, TopicHistory topicHistory, InterfaceSettingsState interfaceState) {
     return RichText(
       text: TextSpan(
         // Note: Styles for TextSpans must be explicitly defined.
         // Child text spans will inherit styles from parent
         text: codeUtils.unescapeHtml(topicHistory.subject),
         style: TextStyle(
-          fontSize: Dimen.subheading *
-              Provider.of<InterfaceSettingsStore>(context).titleSizeMultiple,
+          fontSize: Dimen.subheading * interfaceState.titleSizeMultiple,
           color: topicHistory.getSubjectColor() ??
               Theme.of(context).textTheme.bodyLarge?.color,
           fontWeight:
@@ -102,7 +102,7 @@ class TopicHistoryListItemWidget extends StatelessWidget {
               topicHistory.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration:
               topicHistory.isUnderline() ? TextDecoration.underline : null,
-          height: Provider.of<InterfaceSettingsStore>(context).lineHeight.size,
+          height: interfaceState.lineHeight.size,
         ),
         children: <TextSpan>[
           TextSpan(
@@ -128,9 +128,8 @@ class TopicHistoryListItemWidget extends StatelessWidget {
     );
   }
 
-  _goTopicDetail(BuildContext context, TopicHistory topicHistory) {
-    final store = TopicHistoryStore();
-    store.insertHistory(topicHistory.createNewHistory());
+  _goTopicDetail(BuildContext context, TopicHistory topicHistory, WidgetRef ref) {
+    ref.read(topicHistoryProvider.notifier).insertHistory(topicHistory.createNewHistory());
     Routes.navigateTo(
       context,
       "${Routes.TOPIC_DETAIL}?tid=${topicHistory.tid}&fid=${topicHistory.fid}&subject=${topicHistory.subject}",

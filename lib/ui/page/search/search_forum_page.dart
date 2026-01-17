@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
-import 'package:flutter_nga/store/search/search_forum_store.dart';
+import 'package:flutter_nga/providers/search/search_forum_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class SearchForumPage extends StatefulWidget {
+class SearchForumPage extends ConsumerStatefulWidget {
   const SearchForumPage(this.keyword, {Key? key}) : super(key: key);
 
   final String keyword;
 
   @override
-  _SearchForumState createState() => _SearchForumState();
+  ConsumerState<SearchForumPage> createState() => _SearchForumState();
 }
 
-class _SearchForumState extends State<SearchForumPage> {
-  final _store = SearchForumStore();
+class _SearchForumState extends ConsumerState<SearchForumPage> {
   late RefreshController _refreshController;
 
   @override
@@ -33,26 +32,27 @@ class _SearchForumState extends State<SearchForumPage> {
 
   @override
   Widget build(BuildContext context) {
+    final forums = ref.watch(searchForumProvider);
+    final notifier = ref.read(searchForumProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("搜索板块:${widget.keyword}"),
       ),
-      body: Observer(
-        builder: (_) => SmartRefresher(
-          onRefresh: _onRefresh,
-          enablePullUp: false,
-          controller: _refreshController,
-          child: ListView.builder(
-            itemBuilder: (_, index) => _buildForumWidget(_store.forums[index]),
-            itemCount: _store.forums.length,
-          ),
+      body: SmartRefresher(
+        onRefresh: () => _onRefresh(notifier),
+        enablePullUp: false,
+        controller: _refreshController,
+        child: ListView.builder(
+          itemBuilder: (_, index) => _buildForumWidget(forums[index]),
+          itemCount: forums.length,
         ),
       ),
     );
   }
 
-  _onRefresh() {
-    _store
+  void _onRefresh(SearchForumNotifier notifier) {
+    notifier
         .search(widget.keyword)
         .whenComplete(() => _refreshController.refreshCompleted())
         .catchError((_) {

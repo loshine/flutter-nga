@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_nga/store/settings/display_mode_store.dart';
-import 'package:flutter_nga/store/settings/theme_store.dart';
+import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   @override
-  _SettingsState createState() => _SettingsState();
+  ConsumerState<SettingsPage> createState() => _SettingsState();
 }
 
-class _SettingsState extends State<SettingsPage> {
-  ThemeStore _themeStore = ThemeStore();
-  DisplayModeStore _displayModeStore = DisplayModeStore();
-
+class _SettingsState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
-    _themeStore.refresh();
-    _displayModeStore.refresh();
     super.initState();
+    // Refresh theme on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(themeProvider.notifier).refresh();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeState = ref.watch(themeProvider);
+
     return Scaffold(
       appBar: AppBar(title: Text("设置")),
       body: ListView(
@@ -35,10 +35,8 @@ class _SettingsState extends State<SettingsPage> {
           ),
           ListTile(
             title: Text("主题模式"),
-            subtitle: Observer(
-              builder: (context) => Text("当前主题模式: ${_themeStore.modeName}"),
-            ),
-            onTap: showThemeSelectionDialog,
+            subtitle: Text("当前主题模式: ${themeState.modeName}"),
+            onTap: _showThemeSelectionDialog,
           ),
           ListTile(
             title: Text("界面设置"),
@@ -55,10 +53,10 @@ class _SettingsState extends State<SettingsPage> {
     );
   }
 
-  showThemeSelectionDialog() {
+  void _showThemeSelectionDialog() {
     showDialog(
       context: context,
-      builder: (_) => ThemeSelectionDialog(themeStore: _themeStore),
+      builder: (_) => ThemeSelectionDialog(),
     );
   }
 }

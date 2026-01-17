@@ -1,14 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/store/common/photo_min_scale_store.dart';
+import 'package:flutter_nga/providers/common/photo_min_scale_provider.dart';
 import 'package:flutter_nga/utils/picture_utils.dart' as pictureUtils;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
 
-class PhotoPreviewPage extends StatefulWidget {
+class PhotoPreviewPage extends HookConsumerWidget {
   const PhotoPreviewPage({Key? key, this.url, this.screenWidth})
       : super(key: key);
 
@@ -16,14 +17,16 @@ class PhotoPreviewPage extends StatefulWidget {
   final double? screenWidth;
 
   @override
-  _PhotoPreviewState createState() => _PhotoPreviewState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final minScale = ref.watch(photoMinScaleProvider);
 
-class _PhotoPreviewState extends State<PhotoPreviewPage> {
-  final _store = PhotoMinScaleStore();
+    useEffect(() {
+      Future.microtask(() {
+        ref.read(photoMinScaleProvider.notifier).load(url!, screenWidth);
+      });
+      return null;
+    }, [url]);
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("查看图片"),
@@ -38,30 +41,20 @@ class _PhotoPreviewState extends State<PhotoPreviewPage> {
           ),
         ],
       ),
-      body: Observer(
-        builder: (_) {
-          return _store.minScale == 0
-              ? Center(child: CircularProgressIndicator())
-              : PhotoView(
-                  imageProvider: CachedNetworkImageProvider(
-                      pictureUtils.getOriginalUrl(widget.url!)),
-                  minScale: _store.minScale,
-                );
-        },
-      ),
+      body: minScale == 0
+          ? Center(child: CircularProgressIndicator())
+          : PhotoView(
+              imageProvider: CachedNetworkImageProvider(
+                  pictureUtils.getOriginalUrl(url!)),
+              minScale: minScale,
+            ),
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _store.load(widget.url!, widget.screenWidth);
-  }
-
-  _save() async {
+  Future<void> _save() async {
     final success = await Data()
         .resourceRepository
-        .downloadImage(pictureUtils.getOriginalUrl(widget.url!));
+        .downloadImage(pictureUtils.getOriginalUrl(url!));
     Fluttertoast.showToast(msg: success == true ? "保存到相册成功" : "保存到相册失败");
   }
 }
