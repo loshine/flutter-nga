@@ -1,13 +1,16 @@
-# Phase 2: 导航组件翻新
+# Phase 2: 导航组件样式翻新
 
 > 目标：将 Drawer、AppBar、FAB 等导航组件升级为 M3 Expressive 风格
 
 ## 概述
 
 本阶段主要完成：
-1. 将传统 Drawer 升级为 NavigationDrawer
+
+1. Drawer 样式翻新为 M3 风格（28dp 圆角导航项、secondaryContainer 选中色）
 2. 更新 AppBar 为 M3 风格
 3. 更新 FloatingActionButton 样式
+
+**注意**：本阶段采用自定义 `_NavigationItem` 组件实现 M3 导航项样式，而非官方 `NavigationDrawer` 组件，以保持更灵活的布局控制。
 
 ## 前置条件
 
@@ -15,14 +18,14 @@
 
 ## 改动文件清单
 
-| 文件 | 改动类型 | 优先级 |
-|------|----------|--------|
-| `lib/ui/page/home/home_page.dart` | 重构 | P0 |
-| `lib/ui/page/home/home_drawer.dart` | 重构 | P0 |
+| 文件                                | 改动类型 | 优先级 |
+| ----------------------------------- | -------- | ------ |
+| `lib/ui/page/home/home_page.dart`   | 重构     | P0     |
+| `lib/ui/page/home/home_drawer.dart` | 重构     | P0     |
 
 ---
 
-## 2.1 Drawer → NavigationDrawer
+## 2.1 Drawer 样式翻新
 
 ### 文件：`lib/ui/page/home/home_drawer.dart`
 
@@ -45,6 +48,8 @@ Material(
 ```
 
 ### 目标代码 - HomeDrawerHeader
+
+使用 `Container` + `MediaQuery.padding.top` 处理安全区，实现更精确的布局控制：
 
 ```dart
 import 'package:flutter/material.dart';
@@ -69,11 +74,14 @@ class HomeDrawerHeader extends HookConsumerWidget {
       return null;
     }, []);
 
-    return DrawerHeader(
+    final paddingTop = MediaQuery.of(context).padding.top;
+
+    return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: colorScheme.primaryContainer,
       ),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: EdgeInsets.fromLTRB(16, 16 + paddingTop, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -86,7 +94,7 @@ class HomeDrawerHeader extends HookConsumerWidget {
               username: userInfo != null ? userInfo.username : "",
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 16),
           Text(
             userInfo != null ? userInfo.username! : "点击登录",
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -121,20 +129,19 @@ class HomeDrawerBody extends StatelessWidget {
   final Function(int)? onSelectedCallback;
 
   const HomeDrawerBody({
-    Key? key, 
-    this.currentSelection, 
+    Key? key,
+    this.currentSelection,
     this.onSelectedCallback,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Expanded(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // 模块分组标题
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 16, 16, 8),
             child: Text(
@@ -144,8 +151,7 @@ class HomeDrawerBody extends StatelessWidget {
               ),
             ),
           ),
-          
-          // 导航项
+
           _NavigationItem(
             icon: Icons.dashboard_outlined,
             selectedIcon: Icons.dashboard,
@@ -168,7 +174,7 @@ class HomeDrawerBody extends StatelessWidget {
             onTap: () => onSelectedCallback?.call(2),
           ),
           _NavigationItem(
-            icon: Icons.mail_outline,
+            icon: Icons.mail_outlined,
             selectedIcon: Icons.mail,
             label: "短消息",
             selected: currentSelection == 3,
@@ -181,10 +187,9 @@ class HomeDrawerBody extends StatelessWidget {
             selected: currentSelection == 4,
             onTap: () => onSelectedCallback?.call(4),
           ),
-          
+
           const Divider(indent: 28, endIndent: 28),
-          
-          // 其它分组标题
+
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 16, 16, 8),
             child: Text(
@@ -194,7 +199,7 @@ class HomeDrawerBody extends StatelessWidget {
               ),
             ),
           ),
-          
+
           _NavigationItem(
             icon: Icons.settings_outlined,
             selectedIcon: Icons.settings,
@@ -215,7 +220,7 @@ class HomeDrawerBody extends StatelessWidget {
   }
 }
 
-/// M3 风格的导航项
+/// M3 风格的导航项（28dp 圆角 pill 形状）
 class _NavigationItem extends StatelessWidget {
   final IconData icon;
   final IconData selectedIcon;
@@ -234,7 +239,7 @@ class _NavigationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Material(
@@ -250,8 +255,8 @@ class _NavigationItem extends StatelessWidget {
               children: [
                 Icon(
                   selected ? selectedIcon : icon,
-                  color: selected 
-                    ? colorScheme.onSecondaryContainer 
+                  color: selected
+                    ? colorScheme.onSecondaryContainer
                     : colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 12),
@@ -259,8 +264,8 @@ class _NavigationItem extends StatelessWidget {
                   child: Text(
                     label,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: selected 
-                        ? colorScheme.onSecondaryContainer 
+                      color: selected
+                        ? colorScheme.onSecondaryContainer
                         : colorScheme.onSurfaceVariant,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                     ),
@@ -279,7 +284,7 @@ class _NavigationItem extends StatelessWidget {
 ### 实施步骤
 
 1. 创建 `_NavigationItem` 私有组件，实现 M3 导航项样式
-2. 使用 `DrawerHeader` 替代自定义 header 容器
+2. 使用 `Container` + `MediaQuery.padding.top` 处理安全区（而非 DrawerHeader）
 3. 使用 Material 图标的 outlined/filled 变体
 4. 应用 `secondaryContainer` 作为选中背景
 5. 使用 28dp 圆角（M3 pill shape）
@@ -314,6 +319,7 @@ AppBar(
 ### 变更说明
 
 M3 AppBar 特性：
+
 - 默认无 elevation，滚动时通过 `scrolledUnderElevation` 显示阴影
 - 背景色自动使用 `colorScheme.surface`
 - 前景色自动使用 `colorScheme.onSurface`
@@ -340,36 +346,42 @@ FloatingActionButton(
 
 ### 目标代码
 
-```dart
-FloatingActionButton(
-  tooltip: '添加自定义版面',
-  onPressed: () => showDialog(
-    context: context,
-    builder: (_) => CustomForumDialog(),
-  ),
-  child: const Icon(Icons.add),
-  // 颜色由 ThemeData.floatingActionButtonTheme 统一控制
-),
+FAB 需要与 `forumGroupFabVisibleProvider` 集成，仅在"我的收藏" tab 显示：
 
-// 或使用 Extended FAB（推荐用于主要操作）
-FloatingActionButton.extended(
-  tooltip: '添加自定义版面',
-  onPressed: () => showDialog(
-    context: context,
-    builder: (_) => CustomForumDialog(),
-  ),
-  icon: const Icon(Icons.add),
-  label: const Text('添加版面'),
-),
+```dart
+Widget? _getFloatingActionButton(
+    BuildContext context, WidgetRef ref, int index) {
+  if (index == 0) {
+    final fabVisible = ref.watch(forumGroupFabVisibleProvider);
+    if (!fabVisible) return null;
+    return FloatingActionButton(
+      tooltip: '添加自定义版面',
+      onPressed: () => showDialog(
+        context: context,
+        builder: (_) => const CustomForumDialog(),
+      ),
+      child: const Icon(Icons.add),
+    );
+  } else if (index == 3) {
+    return FloatingActionButton(
+      tooltip: '新建短消息',
+      onPressed: () =>
+          Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
+      child: const Icon(Icons.edit_outlined),
+    );
+  }
+  return null;
+}
 ```
 
 ### 变更说明
 
 M3 FAB 特性：
+
 - 使用 `primaryContainer` / `onPrimaryContainer` 颜色
 - 圆角 16dp（已在 Phase 1 ThemeData 中配置）
-- 可选使用 `.extended` 变体增加可读性
 - 移除硬编码 `Colors.white`，让主题控制
+- 与 `forumGroupFabVisibleProvider` 集成，仅在正确 tab 显示
 
 ---
 
@@ -400,18 +412,17 @@ return PopScope(
   canPop: false,
   onPopInvokedWithResult: (didPop, result) {
     if (didPop) return;
-    
-    if (scaffoldKey.currentState?.isDrawerOpen == true) {
+
+    if (_scaffoldKey.currentState?.isDrawerOpen == true) {
       Navigator.of(context).pop();
       return;
     }
-    
+
     if (index != 0) {
       ref.read(homeIndexProvider.notifier).setIndex(0);
       return;
     }
-    
-    // 允许退出
+
     Navigator.of(context).pop();
   },
   child: Scaffold(...),
@@ -428,6 +439,24 @@ return PopScope(
 ---
 
 ## 2.5 完整的 home_page.dart 重构
+
+### 关键修复
+
+**GlobalKey 必须声明为类字段**，避免在 build 方法中重建导致状态丢失：
+
+```dart
+class _HomePageContent extends HookConsumerWidget {
+  const _HomePageContent();
+
+  // GlobalKey 声明为 static final，避免重建
+  static final GlobalKey<TopicHistoryListPageState> _historyStateKey =
+      GlobalKey<TopicHistoryListPageState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>();
+
+  // ... 其他代码
+}
+```
 
 ### 目标代码
 
@@ -465,6 +494,8 @@ class _HomePageContent extends HookConsumerWidget {
 
   static final GlobalKey<TopicHistoryListPageState> _historyStateKey =
       GlobalKey<TopicHistoryListPageState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>();
 
   List<Widget> _buildPageList() {
     return [
@@ -499,38 +530,41 @@ class _HomePageContent extends HookConsumerWidget {
     };
   }
 
-  Widget? _getFloatingActionButton(BuildContext context, int index) {
-    return switch (index) {
-      0 => FloatingActionButton(
-          tooltip: '添加自定义版面',
-          onPressed: () => showDialog(
-            context: context,
-            builder: (_) => const CustomForumDialog(),
-          ),
-          child: const Icon(Icons.add),
+  Widget? _getFloatingActionButton(
+      BuildContext context, WidgetRef ref, int index) {
+    if (index == 0) {
+      final fabVisible = ref.watch(forumGroupFabVisibleProvider);
+      if (!fabVisible) return null;
+      return FloatingActionButton(
+        tooltip: '添加自定义版面',
+        onPressed: () => showDialog(
+          context: context,
+          builder: (_) => const CustomForumDialog(),
         ),
-      3 => FloatingActionButton(
-          tooltip: '新建短消息',
-          onPressed: () =>
-              Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
-          child: const Icon(Icons.edit_outlined),
-        ),
-      _ => null,
-    };
+        child: const Icon(Icons.add),
+      );
+    } else if (index == 3) {
+      return FloatingActionButton(
+        tooltip: '新建短消息',
+        onPressed: () =>
+            Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
+        child: const Icon(Icons.edit_outlined),
+      );
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(homeIndexProvider);
     final pageList = _buildPageList();
-    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
-        if (scaffoldKey.currentState?.isDrawerOpen == true) {
+        if (_scaffoldKey.currentState?.isDrawerOpen == true) {
           Navigator.of(context).pop();
           return;
         }
@@ -543,7 +577,7 @@ class _HomePageContent extends HookConsumerWidget {
         Navigator.of(context).pop();
       },
       child: Scaffold(
-        key: scaffoldKey,
+        key: _scaffoldKey,
         appBar: AppBar(
           title: Text(_getTitleText(index)),
           scrolledUnderElevation: index == 0 ? 0 : 2,
@@ -564,7 +598,7 @@ class _HomePageContent extends HookConsumerWidget {
           ),
         ),
         body: pageList[index],
-        floatingActionButton: _getFloatingActionButton(context, index),
+        floatingActionButton: _getFloatingActionButton(context, ref, index),
       ),
     );
   }
@@ -579,14 +613,17 @@ class _HomePageContent extends HookConsumerWidget {
 - [ ] 导航项选中状态正确显示
 - [ ] 导航项点击反馈（ripple）正常
 - [ ] AppBar 滚动时 elevation 变化正确
+- [ ] FAB 仅在"我的收藏" tab 显示（index == 0 且 fabVisible）
 - [ ] FAB 点击和悬停状态正常
 - [ ] 返回键行为正确（先回到首页，再退出）
+- [ ] Tab 切换状态正确保持（GlobalKey 不重建）
 - [ ] 深色主题下颜色正确
 - [ ] `fvm flutter analyze` 无错误
 
 ## 回滚策略
 
 如果出现严重问题：
+
 1. 恢复 `WillPopScope` 使用
 2. 保留旧的 ListTile 实现
 
@@ -596,4 +633,4 @@ class _HomePageContent extends HookConsumerWidget {
 
 ---
 
-*创建日期: 2026-01-18*
+_更新日期: 2026-01-18_

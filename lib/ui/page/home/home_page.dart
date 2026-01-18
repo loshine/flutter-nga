@@ -31,6 +31,8 @@ class _HomePageContent extends HookConsumerWidget {
 
   static final GlobalKey<TopicHistoryListPageState> _historyStateKey =
       GlobalKey<TopicHistoryListPageState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>();
 
   List<Widget> _buildPageList() {
     return [
@@ -65,38 +67,41 @@ class _HomePageContent extends HookConsumerWidget {
     };
   }
 
-  Widget? _getFloatingActionButton(BuildContext context, int index) {
-    return switch (index) {
-      0 => FloatingActionButton(
-          tooltip: '添加自定义版面',
-          onPressed: () => showDialog(
-            context: context,
-            builder: (_) => const CustomForumDialog(),
-          ),
-          child: const Icon(Icons.add),
+  Widget? _getFloatingActionButton(
+      BuildContext context, WidgetRef ref, int index) {
+    if (index == 0) {
+      final fabVisible = ref.watch(forumGroupFabVisibleProvider);
+      if (!fabVisible) return null;
+      return FloatingActionButton(
+        tooltip: '添加自定义版面',
+        onPressed: () => showDialog(
+          context: context,
+          builder: (_) => const CustomForumDialog(),
         ),
-      3 => FloatingActionButton(
-          tooltip: '新建短消息',
-          onPressed: () =>
-              Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
-          child: const Icon(Icons.edit_outlined),
-        ),
-      _ => null,
-    };
+        child: const Icon(Icons.add),
+      );
+    } else if (index == 3) {
+      return FloatingActionButton(
+        tooltip: '新建短消息',
+        onPressed: () =>
+            Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
+        child: const Icon(Icons.edit_outlined),
+      );
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(homeIndexProvider);
     final pageList = _buildPageList();
-    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
-        if (scaffoldKey.currentState?.isDrawerOpen == true) {
+        if (_scaffoldKey.currentState?.isDrawerOpen == true) {
           Navigator.of(context).pop();
           return;
         }
@@ -109,7 +114,7 @@ class _HomePageContent extends HookConsumerWidget {
         Navigator.of(context).pop();
       },
       child: Scaffold(
-        key: scaffoldKey,
+        key: _scaffoldKey,
         appBar: AppBar(
           title: Text(_getTitleText(index)),
           scrolledUnderElevation: index == 0 ? 0 : 2,
@@ -130,7 +135,7 @@ class _HomePageContent extends HookConsumerWidget {
           ),
         ),
         body: pageList[index],
-        floatingActionButton: _getFloatingActionButton(context, index),
+        floatingActionButton: _getFloatingActionButton(context, ref, index),
       ),
     );
   }
