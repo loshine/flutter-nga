@@ -6,6 +6,8 @@ import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'forum_group_page.dart';
 
 class ForumGroupTabsPage extends StatelessWidget {
+  const ForumGroupTabsPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     List<Tab> _tabs = [Tab(text: "我的收藏")];

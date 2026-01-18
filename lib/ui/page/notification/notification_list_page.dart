@@ -9,6 +9,8 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'notification_item_widget.dart';
 
 class NotificationListPage extends ConsumerStatefulWidget {
+  const NotificationListPage({Key? key}) : super(key: key);
+
   @override
   ConsumerState<NotificationListPage> createState() =>
       _NotificationListState();

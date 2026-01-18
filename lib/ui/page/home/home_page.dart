@@ -1,4 +1,3 @@
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/home/home_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
@@ -14,96 +13,76 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class HomePage extends HookConsumerWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Initialize settings on first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(blocklistSettingsProvider.notifier).init();
       ref.read(blocklistSettingsProvider.notifier).loopSyncBlockList();
       ref.read(interfaceSettingsProvider.notifier).init();
     });
-    return _HomePage();
+    return const _HomePageContent();
   }
 }
 
-class _HomePage extends HookConsumerWidget {
-  _HomePage({Key? key}) : super(key: key);
+class _HomePageContent extends HookConsumerWidget {
+  const _HomePageContent();
 
-  final GlobalKey<TopicHistoryListPageState> _historyStateKey =
+  static final GlobalKey<TopicHistoryListPageState> _historyStateKey =
       GlobalKey<TopicHistoryListPageState>();
 
   List<Widget> _buildPageList() {
     return [
-      ForumGroupTabsPage(),
-      FavouriteTopicListPage(),
+      const ForumGroupTabsPage(),
+      const FavouriteTopicListPage(),
       TopicHistoryListPage(key: _historyStateKey),
-      ConversationListPage(),
-      NotificationListPage(),
+      const ConversationListPage(),
+      const NotificationListPage(),
     ];
   }
 
   String _getTitleText(int index) {
-    switch (index) {
-      case 0:
-        return 'NGA';
-      case 1:
-        return '贴子收藏';
-      case 2:
-        return '浏览历史';
-      case 3:
-        return '短消息';
-      case 4:
-        return '提醒信息';
-      default:
-        return '';
-    }
+    const titles = ['NGA', '贴子收藏', '浏览历史', '短消息', '提醒信息'];
+    return titles.elementAtOrNull(index) ?? '';
   }
 
   List<Widget> _getActionsByPage(BuildContext context, int index) {
-    List<Widget> actions = [];
-    if (index == 0) {
-      actions.add(IconButton(
-        icon: Icon(Icons.search),
-        onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
-      ));
-    } else if (index == 2) {
-      actions.add(IconButton(
-        icon: Icon(Icons.delete_forever),
-        onPressed: () => _historyStateKey.currentState!.showCleanDialog(),
-      ));
-    }
-    return actions;
+    return switch (index) {
+      0 => [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
+          ),
+        ],
+      2 => [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _historyStateKey.currentState?.showCleanDialog(),
+          ),
+        ],
+      _ => [],
+    };
   }
 
-  double _getElevation(int index) {
-    return index == 0 ? 0 : 4;
-  }
-
-  FloatingActionButton? _getFloatingActionButton(BuildContext context, int index) {
-    if (index == 0) {
-      return FloatingActionButton(
-        tooltip: '添加自定义版面',
-        onPressed: () => showDialog(
-          context: context,
-          builder: (_) => CustomForumDialog(),
+  Widget? _getFloatingActionButton(BuildContext context, int index) {
+    return switch (index) {
+      0 => FloatingActionButton(
+          tooltip: '添加自定义版面',
+          onPressed: () => showDialog(
+            context: context,
+            builder: (_) => const CustomForumDialog(),
+          ),
+          child: const Icon(Icons.add),
         ),
-        child: Icon(
-          CommunityMaterialIcons.plus,
-          color: Colors.white,
+      3 => FloatingActionButton(
+          tooltip: '新建短消息',
+          onPressed: () =>
+              Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
+          child: const Icon(Icons.edit_outlined),
         ),
-      );
-    } else if (index == 3) {
-      return FloatingActionButton(
-        tooltip: '新建短消息',
-        onPressed: () =>
-            Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
-        child: Icon(
-          CommunityMaterialIcons.email_plus,
-          color: Colors.white,
-        ),
-      );
-    }
-    return null;
+      _ => null,
+    };
   }
 
   @override
@@ -112,40 +91,47 @@ class _HomePage extends HookConsumerWidget {
     final pageList = _buildPageList();
     final scaffoldKey = GlobalKey<ScaffoldState>();
 
-    return WillPopScope(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        if (scaffoldKey.currentState?.isDrawerOpen == true) {
+          Navigator.of(context).pop();
+          return;
+        }
+
+        if (index != 0) {
+          ref.read(homeIndexProvider.notifier).setIndex(0);
+          return;
+        }
+
+        Navigator.of(context).pop();
+      },
       child: Scaffold(
         key: scaffoldKey,
         appBar: AppBar(
-          elevation: _getElevation(index),
           title: Text(_getTitleText(index)),
+          scrolledUnderElevation: index == 0 ? 0 : 2,
           actions: _getActionsByPage(context, index),
         ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         drawer: Drawer(
           child: Column(
             children: [
-              HomeDrawerHeader(),
+              const HomeDrawerHeader(),
               HomeDrawerBody(
                 currentSelection: index,
                 onSelectedCallback: (i) {
                   Routes.pop(context);
                   ref.read(homeIndexProvider.notifier).setIndex(i);
                 },
-              )
+              ),
             ],
           ),
         ),
         body: pageList[index],
         floatingActionButton: _getFloatingActionButton(context, index),
       ),
-      onWillPop: () async {
-        if (scaffoldKey.currentState!.isDrawerOpen || index == 0) {
-          return true;
-        } else {
-          ref.read(homeIndexProvider.notifier).setIndex(0);
-          return false;
-        }
-      },
     );
   }
 }
