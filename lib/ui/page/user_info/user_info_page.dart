@@ -72,7 +72,7 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
               title: Text(
                 userInfo.username ?? "",
                 style: TextStyle(
-                  color: Palette.colorWhite,
+                  color: Colors.white,
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
