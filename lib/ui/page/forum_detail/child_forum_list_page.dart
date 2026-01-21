@@ -21,14 +21,14 @@ class _ChildForumListPage extends State<ChildForumListPage> {
       removeTop: true,
       child: widget.forumInfo == null || widget.forumInfo!.subForums!.isEmpty
           ? Center(
-      child: Text(
-        "子版块",
-        style: TextStyle(
-          fontSize: Dimen.titleMedium,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ));
+              child: Text(
+                "暂无子版块",
+                style: TextStyle(
+                  fontSize: Dimen.titleMedium,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
           : ListView.builder(
               itemCount: widget.forumInfo == null
                   ? 0

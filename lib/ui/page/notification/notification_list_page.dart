@@ -90,13 +90,13 @@ class _NotificationListState extends ConsumerState<NotificationListPage> {
   Widget _titleBuilder(String name) {
     return Padding(
       padding: EdgeInsets.all(16),
-            child: Text(
-              description,
-              style: TextStyle(
-                fontSize: Dimen.titleMedium,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ));    );
+      child: Text(
+        name,
+        style: TextStyle(
+          fontSize: Dimen.titleMedium,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 }
