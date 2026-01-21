@@ -58,7 +58,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
                       state.list[position].nickname,
                       style: TextStyle(
                           color: state.list[position].enabled
-                              ? Palette.getColorPrimary(context)
+                              ? Theme.of(context).colorScheme.primary
                               : Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                     subtitle: Text(
@@ -69,7 +69,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
                     ),
                     trailing: Icon(
                       CommunityMaterialIcons.check,
-                      color: Palette.getColorPrimary(context),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   Divider(height: 1),

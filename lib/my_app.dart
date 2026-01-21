@@ -291,32 +291,37 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       dark: _buildDarkTheme(),
       initial: AdaptiveThemeMode.light,
       builder: (theme, darkTheme) {
-        return RefreshConfiguration(
-          headerBuilder: () => MaterialClassicHeader(
-            distance: 50,
-            height: 70,
-          ),
-          headerTriggerDistance: 50,
-          child: MaterialApp.router(
-            routerConfig: _router,
-            builder: (context, c) => ScrollConfiguration(
-              behavior: SimpleScrollBehavior(),
-              child: c!,
-            ),
-            theme: theme,
-            darkTheme: darkTheme,
-            localizationsDelegates: [
-              RefreshLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: [
-              const Locale('en'),
-              const Locale('zh', 'CN'),
-            ],
-            localeResolutionCallback: (locale, supportedLocales) => locale,
-          ),
+        return MaterialApp.router(
+          routerConfig: _router,
+          builder: (context, c) {
+            final colorScheme = Theme.of(context).colorScheme;
+            return RefreshConfiguration(
+              headerBuilder: () => MaterialClassicHeader(
+                distance: 50,
+                height: 70,
+                color: colorScheme.primary,
+                backgroundColor: colorScheme.surfaceContainerHighest,
+              ),
+              headerTriggerDistance: 50,
+              child: ScrollConfiguration(
+                behavior: SimpleScrollBehavior(),
+                child: c!,
+              ),
+            );
+          },
+          theme: theme,
+          darkTheme: darkTheme,
+          localizationsDelegates: [
+            RefreshLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: [
+            const Locale('en'),
+            const Locale('zh', 'CN'),
+          ],
+          localeResolutionCallback: (locale, supportedLocales) => locale,
         );
       },
     );

@@ -24,7 +24,7 @@ class NgaHtmlContentWidget extends ConsumerWidget {
           padding: HtmlPaddings.zero,
           margin: Margins.zero,
           color: Theme.of(context).textTheme.bodyLarge?.color,
-          fontSize: FontSize(Dimen.body * interfaceState.contentSizeMultiple),
+          fontSize: FontSize(Dimen.bodyMedium * interfaceState.contentSizeMultiple),
         ),
         'blockquote': Style(
           padding: HtmlPaddings.zero,

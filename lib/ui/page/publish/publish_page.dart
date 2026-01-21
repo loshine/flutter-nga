@@ -98,8 +98,9 @@ class _PublishPageState extends State<PublishPage> {
     }
     return PopScope(
       canPop: !_bottomPanelVisible,
-      onPopInvoked: (didPop) {
-        if (!didPop && _bottomPanelVisible) {
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_bottomPanelVisible) {
           _hideBottomPanel();
         }
       },

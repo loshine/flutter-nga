@@ -98,7 +98,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.bodyMedium?.color,
-                              fontSize: Dimen.caption,
+                              fontSize: Dimen.bodySmall,
                             ),
                           ),
                         ),
@@ -109,7 +109,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.bodyMedium?.color,
-                              fontSize: Dimen.caption,
+                              fontSize: Dimen.bodySmall,
                             ),
                           ),
                         ),
@@ -120,7 +120,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.bodyMedium?.color,
-                              fontSize: Dimen.caption,
+                              fontSize: Dimen.bodySmall,
                             ),
                           ),
                         ),
@@ -146,7 +146,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                   color: widget.hot
                       ? Colors.redAccent
                       : Theme.of(context).textTheme.bodyMedium?.color,
-                  fontSize: Dimen.caption,
+                  fontSize: Dimen.bodySmall,
                 ),
               ),
             ),
@@ -160,7 +160,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             child: Text(
               codeUtils.unescapeHtml(widget.reply.subject),
               style: TextStyle(
-                fontSize: Dimen.title,
+                fontSize: Dimen.titleLarge,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
@@ -243,7 +243,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                         child: Text(
                           "${widget.reply.score}",
                           style: TextStyle(
-                            fontSize: Dimen.caption,
+                            fontSize: Dimen.bodySmall,
                             color: Colors.white,
                           ),
                         ),
@@ -267,7 +267,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               Text(
                 widget.reply.postDate!,
                 style: TextStyle(
-                  fontSize: Dimen.caption,
+                  fontSize: Dimen.bodySmall,
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
@@ -285,7 +285,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         Text(
           "-",
           style: TextStyle(
-            fontSize: Dimen.caption,
+            fontSize: Dimen.bodySmall,
             color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
         )
@@ -379,7 +379,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       child: Text(
         "评论",
         style: TextStyle(
-          fontSize: Dimen.subheading,
+          fontSize: Dimen.titleMedium,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -399,7 +399,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           setState(() => _attachmentsExpanded = !_attachmentsExpanded),
       child: Text(
         _attachmentsExpanded ? "收起附件" : "展开附件",
-        style: TextStyle(fontSize: Dimen.button),
+        style: TextStyle(fontSize: Dimen.labelLarge),
       ),
     );
     columnWidgets.add(button);
