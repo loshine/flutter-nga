@@ -23,12 +23,19 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return InkWell(
-      onTap: () => _goTopicDetail(context, topicHistory!, ref),
-      onLongPress: onLongPress,
-      child: Column(
-        children: [
-          Padding(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Card(
+        elevation: 0,
+        color: colorScheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Dimen.radiusM),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _goTopicDetail(context, topicHistory!, ref),
+          onLongPress: onLongPress,
+          child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,12 +88,7 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
               ],
             ),
           ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: colorScheme.outlineVariant.withOpacity(0.2),
-          ),
-        ],
+        ),
       ),
     );
   }

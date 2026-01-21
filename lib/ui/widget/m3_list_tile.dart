@@ -63,7 +63,7 @@ class M3ListTile extends StatelessWidget {
                           subtitle!,
                           style: textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? colorScheme.onSecondaryContainer.withOpacity(0.8)
+                                ? colorScheme.onSecondaryContainer.withValues(alpha: 0.8)
                                 : colorScheme.onSurfaceVariant,
                           ),
                         ),

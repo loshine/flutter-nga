@@ -24,7 +24,6 @@ class _SettingsState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text("设置")),

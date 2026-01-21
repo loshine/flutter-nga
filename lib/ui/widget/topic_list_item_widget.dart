@@ -26,7 +26,7 @@ class TopicListItemWidget extends ConsumerWidget {
     final interfaceState = ref.watch(interfaceSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
+    
     final blockEnabled =
         blockState.clientBlockEnabled && blockState.listBlockEnabled;
     final blockMode = blockState.blockMode;
@@ -35,7 +35,7 @@ class TopicListItemWidget extends ConsumerWidget {
 
     // 折叠模式
     if (blockEnabled && isTopicBlocked && blockMode == BlockMode.COLLAPSE) {
-      return _buildCollapsedItem(context, colorScheme, textTheme);
+      return _buildCollapsedCard(context, colorScheme);
     }
 
     // 隐藏模式
@@ -44,19 +44,25 @@ class TopicListItemWidget extends ConsumerWidget {
     }
 
     // 计算透明度
-    final alpha =
-        (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA)
-            ? 0.38
-            : 1.0;
+    final alpha = (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA) 
+        ? 0.38 
+        : 1.0;
 
-    return InkWell(
-      onTap: () => _goTopicDetail(context, topic, ref),
-      onLongPress: onLongPress,
-      child: Opacity(
-        opacity: alpha,
-        child: Column(
-          children: [
-            Padding(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Card(
+        elevation: 0,
+        color: colorScheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Dimen.radiusM),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _goTopicDetail(context, topic, ref),
+          onLongPress: onLongPress,
+          child: Opacity(
+            opacity: alpha,
+            child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +78,7 @@ class TopicListItemWidget extends ConsumerWidget {
                     interfaceState,
                     textTheme,
                   ),
-
+                  
                   // 父版块标签
                   if (topic.parent?.name?.isNotEmpty == true)
                     Padding(
@@ -94,9 +100,9 @@ class TopicListItemWidget extends ConsumerWidget {
                         ),
                       ),
                     ),
-
+                  
                   const SizedBox(height: 12),
-
+                  
                   // 元信息行
                   _buildMetaRow(
                     context,
@@ -109,12 +115,7 @@ class TopicListItemWidget extends ConsumerWidget {
                 ],
               ),
             ),
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: colorScheme.outlineVariant.withOpacity(0.2),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -127,18 +128,19 @@ class TopicListItemWidget extends ConsumerWidget {
             .any((blockWord) => topicSubject.contains(blockWord));
   }
 
-  Widget _buildCollapsedItem(
-      BuildContext context, ColorScheme colorScheme, TextTheme textTheme) {
-    return Container(
-      width: double.infinity,
-      color: colorScheme.surfaceContainerLow.withOpacity(0.5),
-      padding: const EdgeInsets.all(16),
-      child: Text(
-        "折叠的屏蔽内容",
-        style: textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurfaceVariant,
+  Widget _buildCollapsedCard(BuildContext context, ColorScheme colorScheme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Card(
+        elevation: 0,
+        color: colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Dimen.radiusM),
         ),
-        textAlign: TextAlign.center,
+        child: const Padding(
+          padding: EdgeInsets.all(16),
+          child: Text("折叠的屏蔽内容"),
+        ),
       ),
     );
   }
@@ -163,8 +165,9 @@ class TopicListItemWidget extends ConsumerWidget {
         text: topicSubject,
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
-          backgroundColor:
-              isPaintBlockMode ? textTheme.bodyMedium?.color : null,
+          backgroundColor: isPaintBlockMode
+              ? textTheme.bodyMedium?.color
+              : null,
           color: isPaintBlockMode
               ? Colors.transparent
               : topic.getSubjectColor() ?? textTheme.bodyLarge?.color,
@@ -234,7 +237,7 @@ class TopicListItemWidget extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-
+        
         // 附件图标
         if (topic.hasAttachment()) ...[
           Icon(
@@ -244,7 +247,7 @@ class TopicListItemWidget extends ConsumerWidget {
           ),
           const SizedBox(width: 12),
         ],
-
+        
         // 回复数
         Icon(
           Icons.chat_bubble_outline,
@@ -258,9 +261,9 @@ class TopicListItemWidget extends ConsumerWidget {
             color: colorScheme.onSurfaceVariant,
           ),
         ),
-
+        
         const SizedBox(width: 12),
-
+        
         // 时间
         Icon(
           Icons.access_time,
@@ -279,9 +282,7 @@ class TopicListItemWidget extends ConsumerWidget {
   }
 
   void _goTopicDetail(BuildContext context, Topic topic, WidgetRef ref) {
-    ref
-        .read(topicHistoryProvider.notifier)
-        .insertHistory(topic.createHistory());
+    ref.read(topicHistoryProvider.notifier).insertHistory(topic.createHistory());
     Routes.navigateTo(
       context,
       "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${topic.subject!}",
