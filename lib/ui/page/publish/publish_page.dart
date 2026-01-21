@@ -120,6 +120,7 @@ class _PublishPageState extends State<PublishPage> {
   }
 
   Widget _buildBody() {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Column(
       children: [
         Expanded(
@@ -159,9 +160,12 @@ class _PublishPageState extends State<PublishPage> {
                     }).toList(),
                   ),
                 ),
+                const SizedBox(height: 16),
                 Expanded(
                   child: TextField(
                     maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
                     controller: _contentController,
                     decoration: InputDecoration(
                       labelText: "回复内容",
@@ -175,22 +179,29 @@ class _PublishPageState extends State<PublishPage> {
           ),
         ),
         SizedBox(
-          height: _bottomPanelVisible
-              ? Dimen.bottomPanelHeight + kToolbarHeight
-              : kToolbarHeight,
+          height: (_bottomPanelVisible ? Dimen.bottomPanelHeight : 0) +
+              kToolbarHeight +
+              bottomPadding,
           child: Column(
             children: [
               Container(
                 color: Theme.of(context).primaryColor,
-                height: kToolbarHeight,
+                height:
+                    kToolbarHeight + (_bottomPanelVisible ? 0 : bottomPadding),
                 width: double.infinity,
+                padding: EdgeInsets.only(
+                    bottom: _bottomPanelVisible ? 0 : bottomPadding),
                 child: Row(children: _getBottomBarData()),
               ),
               Container(
                 color: Theme.of(context).colorScheme.surfaceContainer,
                 width: double.infinity,
-                height: _bottomPanelVisible ? Dimen.bottomPanelHeight : 0,
-                child: _currentBottomPanelChild,
+                height: _bottomPanelVisible
+                    ? (Dimen.bottomPanelHeight + bottomPadding)
+                    : 0,
+                padding: EdgeInsets.only(
+                    bottom: _bottomPanelVisible ? bottomPadding : 0),
+                child: _bottomPanelVisible ? _currentBottomPanelChild : null,
               )
             ],
           ),
