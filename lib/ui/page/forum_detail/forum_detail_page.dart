@@ -55,10 +55,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.search,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.search),
             onPressed: () => Routes.navigateTo(
                 context, "${Routes.SEARCH}?fid=${widget.fid}"),
           ),
@@ -99,10 +96,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
           ? FloatingActionButton(
               onPressed: () => Routes.navigateTo(
                   context, "${Routes.TOPIC_PUBLISH}?fid=${widget.fid}"),
-              child: Icon(
-                CommunityMaterialIcons.pencil,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.edit),
             )
           : null,
     );

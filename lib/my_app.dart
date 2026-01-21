@@ -173,11 +173,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             localizationsDelegates: [
               RefreshLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: [
               const Locale('en'),
-              const Locale('zh'),
+              const Locale('zh', 'CN'),
             ],
             localeResolutionCallback: (locale, supportedLocales) => locale,
           ),
