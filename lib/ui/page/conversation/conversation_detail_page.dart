@@ -58,10 +58,7 @@ class _ConversationDetailState extends ConsumerState<ConversationDetailPage> {
           context,
           "${Routes.SEND_MESSAGE}?mid=${widget.mid}",
         ),
-        child: Icon(
-          Icons.reply,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.reply),
       ),
     );
   }

@@ -82,10 +82,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
       floatingActionButton: FloatingActionButton(
         tooltip: "添加账号",
         onPressed: () => Routes.navigateTo(context, Routes.LOGIN),
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.add),
       ),
     );
   }
