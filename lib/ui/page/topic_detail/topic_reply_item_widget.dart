@@ -394,14 +394,13 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
 
   _getAttachments() {
     List<Widget> columnWidgets = [];
-    final button = ElevatedButton(
-      style: ButtonStyle(elevation: MaterialStateProperty.all(0)),
+    final button = FilledButton.tonal(
+      onPressed: () =>
+          setState(() => _attachmentsExpanded = !_attachmentsExpanded),
       child: Text(
         _attachmentsExpanded ? "收起附件" : "展开附件",
         style: TextStyle(fontSize: Dimen.button),
       ),
-      onPressed: () =>
-          setState(() => _attachmentsExpanded = !_attachmentsExpanded),
     );
     columnWidgets.add(button);
     if (_attachmentsExpanded) {

@@ -147,13 +147,9 @@ class _PublishPageState extends State<PublishPage> {
                     spacing: 8.0, // gap between adjacent chips
                     runSpacing: 4.0, // gap between line
                     children: _selectedTags.map((content) {
-                      return ActionChip(
-                        label: Text(
-                          content,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Theme.of(context).primaryColor,
-                        onPressed: () {
+                      return InputChip(
+                        label: Text(content),
+                        onDeleted: () {
                           setState(() {
                             _selectedTags.remove(content);
                           });
@@ -167,8 +163,8 @@ class _PublishPageState extends State<PublishPage> {
                     maxLines: null,
                     controller: _contentController,
                     decoration: InputDecoration(
-                      border: InputBorder.none,
                       labelText: "回复内容",
+                      alignLabelWithHint: true,
                     ),
                     keyboardType: TextInputType.multiline,
                   ),
