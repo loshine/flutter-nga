@@ -52,10 +52,7 @@ class _BlocklistKeywordsPageState extends ConsumerState<BlocklistKeywordsPage> {
       floatingActionButton: FloatingActionButton(
         tooltip: "添加屏蔽关键词",
         onPressed: () => _showAddDialog(notifier),
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.add),
       ),
     );
   }

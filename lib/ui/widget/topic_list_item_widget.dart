@@ -1,4 +1,3 @@
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
@@ -6,8 +5,6 @@ import 'package:flutter_nga/providers/settings/interface_settings_provider.dart'
 import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/name_utils.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,146 +24,111 @@ class TopicListItemWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final blockState = ref.watch(blocklistSettingsProvider);
     final interfaceState = ref.watch(interfaceSettingsProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     final blockEnabled =
         blockState.clientBlockEnabled && blockState.listBlockEnabled;
     final blockMode = blockState.blockMode;
     final topicSubject = codeUtils.unescapeHtml(topic.subject);
-    final isTopicBlocked = blockState.blockUserList.contains(topic.author) ||
-        blockState.blockUserList.contains(topic.authorId) ||
-        blockState.blockWordList
-            .any((blockWord) => topicSubject.contains(blockWord));
-    final columnChildren = <Widget>[];
+    final isTopicBlocked = _isBlocked(blockState, topicSubject);
+
+    // 折叠模式
     if (blockEnabled && isTopicBlocked && blockMode == BlockMode.COLLAPSE) {
-      columnChildren.add(Padding(
-        padding: EdgeInsets.all(16),
-        child: Text("折叠的屏蔽内容"),
-      ));
-    } else {
-      var alpha = 1.0;
-      if (blockEnabled && isTopicBlocked) {
-        if (blockMode == BlockMode.ALPHA) {
-          alpha = 0.38;
-        } else if (blockMode == BlockMode.GONE) {
-          alpha = 0.0;
-        }
-      }
-      columnChildren.add(Opacity(
-        opacity: alpha,
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16),
-          child: Column(
-            children: [
-              SizedBox(
-                child: _getTitleText(context, topic, topicSubject, blockEnabled,
-                    blockMode, isTopicBlocked, interfaceState),
-                width: double.infinity,
+      return _buildCollapsedCard(context, colorScheme);
+    }
+
+    // 隐藏模式
+    if (blockEnabled && isTopicBlocked && blockMode == BlockMode.GONE) {
+      return const SizedBox.shrink();
+    }
+
+    // 计算透明度
+    final alpha = (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA)
+        ? 0.38
+        : 1.0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: () => _goTopicDetail(context, topic, ref),
+          onLongPress: onLongPress,
+          child: Opacity(
+            opacity: alpha,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 标题
+                  _buildTitle(
+                    context,
+                    topic,
+                    topicSubject,
+                    blockEnabled,
+                    blockMode,
+                    isTopicBlocked,
+                    interfaceState,
+                    textTheme,
+                    colorScheme,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // 元信息行
+                  _buildMetaRow(
+                    context,
+                    blockEnabled,
+                    blockMode,
+                    isTopicBlocked,
+                    colorScheme,
+                    textTheme,
+                  ),
+                ],
               ),
-              SizedBox(
-                child: (topic.parent != null &&
-                        topic.parent!.name != null &&
-                        topic.parent!.name!.isNotEmpty)
-                    ? Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: Text(
-                          "[${codeUtils.unescapeHtml(topic.parent!.name)}]",
-                          textAlign: TextAlign.end,
-                          style: TextStyle(
-                            fontSize: Dimen.caption,
-                            color: Theme.of(context).textTheme.bodyMedium?.color,
-                          ),
-                        ),
-                      )
-                    : null,
-                width: double.infinity,
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Row(
-                  children: [
-                    Padding(
-                      child: Icon(
-                        CommunityMaterialIcons.account,
-                        size: Dimen.icon,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                      padding: EdgeInsets.only(right: 8),
-                    ),
-                    Expanded(
-                      child: Text(
-                        getShowName(topic.author!),
-                        style: TextStyle(
-                          fontSize: Dimen.caption,
-                          color: blockEnabled &&
-                                  isTopicBlocked &&
-                                  blockMode == BlockMode.PAINT
-                              ? Colors.transparent
-                              : Theme.of(context).textTheme.bodyMedium?.color,
-                          backgroundColor: blockEnabled &&
-                                  isTopicBlocked &&
-                                  blockMode == BlockMode.PAINT
-                              ? Theme.of(context).textTheme.bodyMedium?.color
-                              : null,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(right: 16),
-                      child: (topic.hasAttachment()
-                          ? Icon(
-                              Icons.attachment,
-                              size: Dimen.icon,
-                              color: Theme.of(context).iconTheme.color,
-                            )
-                          : null),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: Icon(
-                        CommunityMaterialIcons.comment,
-                        size: Dimen.icon,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                    ),
-                    Text(
-                      "${topic.replies}",
-                      style: TextStyle(
-                        fontSize: Dimen.caption,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 16, right: 8),
-                      child: Icon(
-                        CommunityMaterialIcons.clock,
-                        size: Dimen.icon,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                    ),
-                    Text(
-                      "${codeUtils.formatPostDate(topic.lastPost! * 1000)}",
-                      style: TextStyle(
-                        fontSize: Dimen.caption,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-      ));
-    }
-    columnChildren.add(Divider(height: 1));
-    return InkWell(
-      onTap: () => _goTopicDetail(context, topic, ref),
-      onLongPress: onLongPress,
-      child: Column(children: columnChildren),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: colorScheme.surfaceContainerHighest,
+        ),
+      ],
     );
   }
 
-  _getTitleText(
+  bool _isBlocked(BlocklistSettingsState blockState, String topicSubject) {
+    return blockState.blockUserList.contains(topic.author) ||
+        blockState.blockUserList.contains(topic.authorId) ||
+        blockState.blockWordList
+            .any((blockWord) => topicSubject.contains(blockWord));
+  }
+
+  Widget _buildCollapsedCard(BuildContext context, ColorScheme colorScheme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          color: colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+          child: Text(
+            "折叠的屏蔽内容",
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+        ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: colorScheme.surfaceContainerHighest,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitle(
     BuildContext context,
     Topic topic,
     String topicSubject,
@@ -174,25 +136,25 @@ class TopicListItemWidget extends ConsumerWidget {
     BlockMode blockMode,
     bool isTopicBlocked,
     InterfaceSettingsState interfaceState,
+    TextTheme textTheme,
+    ColorScheme colorScheme,
   ) {
     final isPaintBlockMode =
         blockEnabled && isTopicBlocked && blockMode == BlockMode.PAINT;
     final isDeleteBlockMode =
         blockEnabled && isTopicBlocked && blockMode == BlockMode.DELETE_LINE;
+
     return RichText(
       text: TextSpan(
-        // Note: Styles for TextSpans must be explicitly defined.
-        // Child text spans will inherit styles from parent
-        text: codeUtils.unescapeHtml(topic.subject),
-        style: TextStyle(
-          fontSize: Dimen.subheading * interfaceState.titleSizeMultiple,
+        text: topicSubject,
+        style: textTheme.titleMedium?.copyWith(
+          fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
           backgroundColor: isPaintBlockMode
-              ? Theme.of(context).textTheme.bodyMedium?.color
+              ? textTheme.bodyMedium?.color
               : null,
           color: isPaintBlockMode
               ? Colors.transparent
-              : topic.getSubjectColor() ??
-                  Theme.of(context).textTheme.bodyLarge?.color,
+              : topic.getSubjectColor() ?? textTheme.bodyLarge?.color,
           fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,
           fontStyle: topic.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration: isDeleteBlockMode
@@ -202,31 +164,133 @@ class TopicListItemWidget extends ConsumerWidget {
                   : null,
           height: interfaceState.lineHeight.size,
         ),
-        children: <TextSpan>[
-          TextSpan(
-            text: (topic.locked() ? " [锁定]" : ""),
-            style: TextStyle(
-              color: Palette.colorTextLock,
-              fontWeight: FontWeight.normal,
-              fontStyle: FontStyle.normal,
-              decoration: null,
+        children: [
+          if (topic.parent?.name?.isNotEmpty == true)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    codeUtils.unescapeHtml(topic.parent!.name!),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSecondaryContainer,
+                      fontSize: 10,
+                      height: 1,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-          TextSpan(
-            text: (topic.isAssemble() ? " [合集]" : ""),
-            style: TextStyle(
-              color: Palette.colorTextAssemble,
-              fontWeight: FontWeight.normal,
-              fontStyle: FontStyle.normal,
-              decoration: null,
+          if (topic.locked())
+            TextSpan(
+              text: " [锁定]",
+              style: textTheme.labelMedium?.copyWith(
+                color: Colors.red.shade300,
+                fontWeight: FontWeight.normal,
+              ),
             ),
-          ),
+          if (topic.isAssemble())
+            TextSpan(
+              text: " [合集]",
+              style: textTheme.labelMedium?.copyWith(
+                color: Colors.blue.shade300,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
         ],
       ),
     );
   }
 
-  _goTopicDetail(BuildContext context, Topic topic, WidgetRef ref) {
+  Widget _buildMetaRow(
+    BuildContext context,
+    bool blockEnabled,
+    BlockMode blockMode,
+    bool isTopicBlocked,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    final isPaintBlockMode =
+        blockEnabled && isTopicBlocked && blockMode == BlockMode.PAINT;
+
+    return Row(
+      children: [
+        // 作者
+        Icon(
+          Icons.person_outline,
+          size: 14,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            topic.author ?? '',
+            style: textTheme.bodySmall?.copyWith(
+              color: isPaintBlockMode
+                  ? Colors.transparent
+                  : colorScheme.onSurfaceVariant,
+              backgroundColor: isPaintBlockMode
+                  ? colorScheme.onSurfaceVariant
+                  : null,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+
+        // 附件图标
+        if (topic.hasAttachment()) ...[
+          Icon(
+            Icons.attach_file,
+            size: 14,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 12),
+        ],
+
+        // 回复数
+        Icon(
+          Icons.chat_bubble_outline,
+          size: 14,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          "${topic.replies}",
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        // 时间
+        Icon(
+          Icons.access_time,
+          size: 14,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          codeUtils.formatPostDate(topic.lastPost! * 1000),
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _goTopicDetail(BuildContext context, Topic topic, WidgetRef ref) {
     ref.read(topicHistoryProvider.notifier).insertHistory(topic.createHistory());
     Routes.navigateTo(
       context,

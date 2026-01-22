@@ -37,7 +37,7 @@ class MessageItemWidget extends StatelessWidget {
             codeUtils.formatPostDate(message.time! * 1000),
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyMedium?.color,
-              fontSize: Dimen.caption,
+              fontSize: Dimen.bodySmall,
             ),
           ),
         ],
@@ -49,7 +49,7 @@ class MessageItemWidget extends StatelessWidget {
         child: Text(
           codeUtils.unescapeHtml(message.subject),
           style: TextStyle(
-            fontSize: Dimen.title,
+            fontSize: Dimen.titleLarge,
             fontWeight: FontWeight.bold,
             color: Theme.of(context).textTheme.bodyLarge?.color,
           ),

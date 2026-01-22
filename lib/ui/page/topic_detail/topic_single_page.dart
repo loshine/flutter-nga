@@ -7,6 +7,7 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:dio/dio.dart';
 
 class TopicSinglePage extends ConsumerStatefulWidget {
   const TopicSinglePage({
@@ -66,7 +67,10 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
       _refreshController.refreshCompleted();
     }).catchError((err) {
       _refreshController.loadFailed();
-      Fluttertoast.showToast(msg: err.message);
+      final errorMsg = err is DioException
+          ? (err.message ?? err.toString())
+          : err.toString();
+      Fluttertoast.showToast(msg: errorMsg);
     });
   }
 

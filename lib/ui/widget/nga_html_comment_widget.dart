@@ -18,7 +18,7 @@ class NgaHtmlCommentWidget extends ConsumerWidget {
       data: NgaContentParser.parseComment(content),
       style: {
         'body': Style(
-          fontSize: FontSize(Dimen.body * interfaceState.contentSizeMultiple),
+          fontSize: FontSize(Dimen.bodyMedium * interfaceState.contentSizeMultiple),
           lineHeight: LineHeight(interfaceState.lineHeight.size),
           padding: HtmlPaddings.zero,
           margin: Margins.zero,

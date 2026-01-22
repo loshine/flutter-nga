@@ -8,6 +8,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class FavouriteTopicListPage extends ConsumerStatefulWidget {
+  const FavouriteTopicListPage({Key? key}) : super(key: key);
+
   @override
   ConsumerState<FavouriteTopicListPage> createState() =>
       _FavouriteTopicListState();

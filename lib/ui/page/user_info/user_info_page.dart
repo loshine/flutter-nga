@@ -53,6 +53,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             expandedHeight: 200,
             floating: false,
             pinned: true,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
             actions: [
               PopupMenuButton(
                 child: Icon(Icons.more_vert),
@@ -72,7 +74,6 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
               title: Text(
                 userInfo.username ?? "",
                 style: TextStyle(
-                  color: Palette.colorWhite,
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -106,11 +107,10 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
         child: Text(
           ":: 管理权限 ::",
           style: TextStyle(
-            fontSize: Dimen.subheading,
+            fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),
-        ),
+          ),        ),
       ),
       Text(
         "在以下版面担任版主",
@@ -147,11 +147,10 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
         child: Text(
           ":: 声望 ::",
           style: TextStyle(
-            fontSize: Dimen.subheading,
+            fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),
-        ),
+          ),        ),
       ),
       Text(
         "表示与 论坛/某版面/某用户 的关系",
@@ -174,11 +173,10 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
         child: Text(
           ":: 基础信息 ::",
           style: TextStyle(
-            fontSize: Dimen.subheading,
+            fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),
-        ),
+          ),        ),
       ),
     ];
     if (userInfo.basicInfoMap != null) {
@@ -216,11 +214,10 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                   child: Text(
                     ":: 签名 ::",
                     style: TextStyle(
-                      fontSize: Dimen.subheading,
+                      fontSize: Dimen.titleMedium,
                       color: Palette.getColorTextSubtitle(context),
                       fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                    ),                  ),
                 ),
                 Html(data: userInfo.signature ?? "")
               ],
@@ -275,11 +272,10 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                     child: Text(
                       ":: 个人版面 ::",
                       style: TextStyle(
-                        fontSize: Dimen.subheading,
+                        fontSize: Dimen.titleMedium,
                         color: Palette.getColorTextSubtitle(context),
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                      ),                    ),
                   ),
                   Text(
                     "个人版面是由用户自己管理的版面",

@@ -64,8 +64,17 @@ class SearchOptionsState {
 }
 
 class SearchOptionsNotifier extends Notifier<SearchOptionsState> {
+  SearchOptionsNotifier(this.fid);
+  final int? fid;
+
   @override
-  SearchOptionsState build() => SearchOptionsState.allForumTopic();
+  SearchOptionsState build() {
+    // 根据 fid 返回不同的初始状态
+    if (fid != null) {
+      return SearchOptionsState.currentForumTopic();
+    }
+    return SearchOptionsState.allForumTopic();
+  }
 
   void checkFirstRadio(int value) {
     state = state.copyWith(firstRadio: value);
@@ -85,4 +94,4 @@ class SearchOptionsNotifier extends Notifier<SearchOptionsState> {
 }
 
 final searchOptionsProvider =
-    NotifierProvider<SearchOptionsNotifier, SearchOptionsState>(SearchOptionsNotifier.new);
+    NotifierProvider.family<SearchOptionsNotifier, SearchOptionsState, int?>(SearchOptionsNotifier.new);
