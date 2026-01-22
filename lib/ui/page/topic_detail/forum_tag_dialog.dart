@@ -63,7 +63,7 @@ class _ForumTagDialogState extends ConsumerState<ForumTagDialog> {
                   "$tag",
                   style: TextStyle(
                     color: Theme.of(context).textTheme.bodyLarge?.color,
-                    fontSize: Dimen.subheading,
+                    fontSize: Dimen.titleMedium,
                   ),
                 ),
               ),

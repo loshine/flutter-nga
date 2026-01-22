@@ -140,15 +140,15 @@ class Reply {
   });
 
   factory Reply.fromJson(Map<String, dynamic> map) {
-    Map<String, dynamic>? commentMap = map["comment"];
+    dynamic commentData = map["comment"];
     List<Reply> commentList = [];
-    if (commentMap != null) {
-      commentMap.forEach((k, v) => commentList.add(Reply.fromJson(v)));
+    if (commentData is Map<String, dynamic>) {
+      commentData.forEach((k, v) => commentList.add(Reply.fromJson(v)));
     }
-    Map<String, dynamic>? attachmentMap = map["attachs"];
+    dynamic attachmentData = map["attachs"];
     List<Attachment> attachmentList = [];
-    if (attachmentMap != null) {
-      attachmentMap
+    if (attachmentData is Map<String, dynamic>) {
+      attachmentData
           .forEach((k, v) => attachmentList.add(Attachment.fromJson(v)));
     }
     return Reply(

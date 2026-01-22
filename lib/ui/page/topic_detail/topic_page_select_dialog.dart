@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 typedef PageSelectedCallback = Function(bool, int);
@@ -33,14 +34,36 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text("跳转"),
-      content: SizedBox(
-        width: double.maxFinite,
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Dimen.radiusXL),
+      ),
+      backgroundColor: colorScheme.surfaceContainerHigh,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("第$_currentVal${_isPage ? "页" : "楼"}"),
+            Text(
+              "跳转",
+              style: textTheme.headlineSmall?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                "第 $_currentVal ${_isPage ? "页" : "楼"}",
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
             Slider(
               value: _currentVal.toDouble(),
               min: 1,
@@ -54,43 +77,52 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                 });
               },
             ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment<bool>(
+                      value: true,
+                      label: Text('页码'),
+                      icon: Icon(Icons.pages),
+                    ),
+                    ButtonSegment<bool>(
+                      value: false,
+                      label: Text('楼层'),
+                      icon: Icon(Icons.layers),
+                    ),
+                  ],
+                  selected: {_isPage},
+                  onSelectionChanged: (Set<bool> newSelection) {
+                    setState(() {
+                      _isPage = newSelection.first;
+                      // Reset value when switching mode to avoid out of bounds or confusion
+                      if (_isPage) {
+                         _currentVal = widget.currentPage;
+                      } else {
+                         _currentVal = 1; 
+                      }
+                    });
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(
-                      "页码",
-                      style: TextStyle(
-                          color: _isPage
-                              ? Colors.white
-                              : Theme.of(context).textTheme.bodyLarge?.color),
-                    ),
-                    selectedColor: Theme.of(context).primaryColor,
-                    selected: _isPage,
-                    onSelected: (selected) {
-                      setState(() {
-                        _isPage = selected;
-                        _currentVal = widget.currentPage;
-                      });
-                    },
-                  ),
+                TextButton(
+                  child: const Text("取消"),
+                  onPressed: () => Routes.pop(context),
                 ),
-                ChoiceChip(
-                  label: Text(
-                    "楼层",
-                    style: TextStyle(
-                        color: !_isPage
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyLarge?.color),
-                  ),
-                  selectedColor: Theme.of(context).primaryColor,
-                  selected: !_isPage,
-                  onSelected: (selected) {
-                    setState(() {
-                      _isPage = !selected;
-                    });
+                const SizedBox(width: 8),
+                FilledButton(
+                  child: const Text("确认"),
+                  onPressed: () {
+                    widget.pageSelectedCallback?.call(_isPage, _currentVal);
+                    Routes.pop(context);
                   },
                 ),
               ],
@@ -98,21 +130,6 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          child: Text("取消"),
-          style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).textTheme.bodyMedium?.color),
-          onPressed: () => Routes.pop(context),
-        ),
-        TextButton(
-          child: Text("确认"),
-          onPressed: () {
-            widget.pageSelectedCallback?.call(_isPage, _currentVal);
-            Routes.pop(context);
-          },
-        ),
-      ],
     );
   }
 

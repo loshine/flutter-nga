@@ -113,7 +113,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
             child: Text(
               codeUtils.unescapeHtml(widget.reply.subject),
               style: TextStyle(
-                fontSize: Dimen.title,
+                fontSize: Dimen.titleLarge,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
@@ -154,7 +154,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                         child: Text(
                           "${widget.reply.score}",
                           style: TextStyle(
-                            fontSize: Dimen.caption,
+                            fontSize: Dimen.bodySmall,
                             color: Colors.white,
                           ),
                         ),
@@ -178,7 +178,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
               Text(
                 widget.reply.postDate ?? "",
                 style: TextStyle(
-                  fontSize: Dimen.caption,
+                  fontSize: Dimen.bodySmall,
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),

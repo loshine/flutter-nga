@@ -52,7 +52,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                     Text(
                       reply.postDate!,
                       style: TextStyle(
-                        fontSize: Dimen.caption,
+                        fontSize: Dimen.bodySmall,
                         color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                     ),

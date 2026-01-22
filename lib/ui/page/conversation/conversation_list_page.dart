@@ -7,6 +7,8 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'conversation_item_widget.dart';
 
 class ConversationListPage extends ConsumerStatefulWidget {
+  const ConversationListPage({Key? key}) : super(key: key);
+
   @override
   ConsumerState<ConversationListPage> createState() =>
       _ConversationListState();

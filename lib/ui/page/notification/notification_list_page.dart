@@ -9,6 +9,8 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'notification_item_widget.dart';
 
 class NotificationListPage extends ConsumerStatefulWidget {
+  const NotificationListPage({Key? key}) : super(key: key);
+
   @override
   ConsumerState<NotificationListPage> createState() =>
       _NotificationListState();
@@ -89,10 +91,9 @@ class _NotificationListState extends ConsumerState<NotificationListPage> {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Text(
-        ":: $name ::",
+        name,
         style: TextStyle(
-          fontSize: Dimen.subheading,
-          color: Palette.getColorTextSubtitle(context),
+          fontSize: Dimen.titleMedium,
           fontWeight: FontWeight.bold,
         ),
       ),

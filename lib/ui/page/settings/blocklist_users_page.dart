@@ -51,10 +51,7 @@ class _BlocklistUsersPageState extends ConsumerState<BlocklistUsersPage> {
       floatingActionButton: FloatingActionButton(
         tooltip: "添加屏蔽用户",
         onPressed: () => _showAddDialog(notifier),
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.add),
       ),
     );
   }

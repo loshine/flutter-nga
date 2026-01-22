@@ -54,10 +54,7 @@ class _SendMessageState extends ConsumerState<SendMessagePage> {
             .then(
               (value) => Routes.pop(context),
             ),
-        child: Icon(
-          Icons.send,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.send),
       ),
     );
   }

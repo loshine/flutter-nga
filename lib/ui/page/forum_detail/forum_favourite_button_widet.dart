@@ -38,7 +38,6 @@ class _ForumFavouriteButtonState
     return IconButton(
       icon: Icon(
         isFavourite ? Icons.star : Icons.star_border,
-        color: Colors.white,
       ),
       onPressed: () {
         notifier.toggle(widget.fid, widget.name, widget.type).then((_) {

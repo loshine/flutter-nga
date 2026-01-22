@@ -9,4 +9,17 @@ class HomeIndexNotifier extends Notifier<int> {
   }
 }
 
-final homeIndexProvider = NotifierProvider<HomeIndexNotifier, int>(HomeIndexNotifier.new);
+final homeIndexProvider =
+    NotifierProvider<HomeIndexNotifier, int>(HomeIndexNotifier.new);
+
+class ForumGroupFabVisibleNotifier extends Notifier<bool> {
+  @override
+  bool build() => true;
+
+  void setVisible(bool visible) {
+    state = visible;
+  }
+}
+
+final forumGroupFabVisibleProvider =
+    NotifierProvider<ForumGroupFabVisibleNotifier, bool>(ForumGroupFabVisibleNotifier.new);

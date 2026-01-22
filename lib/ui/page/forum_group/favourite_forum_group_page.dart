@@ -26,7 +26,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
     final size = MediaQuery.of(context).size;
 
     /*24 is for notification bar on Android*/
-    final double itemHeight = 96;
+    final double itemHeight = 108;
     final double itemWidth = size.width / 3;
 
     return GridView.builder(
