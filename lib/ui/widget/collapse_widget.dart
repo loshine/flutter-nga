@@ -22,8 +22,7 @@ class _CollapseState extends State<CollapseWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ElevatedButton(
-            style: ButtonStyle(elevation: MaterialStateProperty.all(0)),
+          FilledButton.tonal(
             onPressed: () => setState(() => _collapsed = !_collapsed),
             child:
                 Text("${_collapsed ? "点击展开" : "点击收起"}:${widget.title ?? ""}"),

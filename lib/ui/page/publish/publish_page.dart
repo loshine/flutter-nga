@@ -98,8 +98,9 @@ class _PublishPageState extends State<PublishPage> {
     }
     return PopScope(
       canPop: !_bottomPanelVisible,
-      onPopInvoked: (didPop) {
-        if (!didPop && _bottomPanelVisible) {
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_bottomPanelVisible) {
           _hideBottomPanel();
         }
       },
@@ -119,6 +120,7 @@ class _PublishPageState extends State<PublishPage> {
   }
 
   Widget _buildBody() {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Column(
       children: [
         Expanded(
@@ -147,13 +149,9 @@ class _PublishPageState extends State<PublishPage> {
                     spacing: 8.0, // gap between adjacent chips
                     runSpacing: 4.0, // gap between line
                     children: _selectedTags.map((content) {
-                      return ActionChip(
-                        label: Text(
-                          content,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Theme.of(context).primaryColor,
-                        onPressed: () {
+                      return InputChip(
+                        label: Text(content),
+                        onDeleted: () {
                           setState(() {
                             _selectedTags.remove(content);
                           });
@@ -162,13 +160,16 @@ class _PublishPageState extends State<PublishPage> {
                     }).toList(),
                   ),
                 ),
+                const SizedBox(height: 16),
                 Expanded(
                   child: TextField(
                     maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
                     controller: _contentController,
                     decoration: InputDecoration(
-                      border: InputBorder.none,
                       labelText: "回复内容",
+                      alignLabelWithHint: true,
                     ),
                     keyboardType: TextInputType.multiline,
                   ),
@@ -178,22 +179,29 @@ class _PublishPageState extends State<PublishPage> {
           ),
         ),
         SizedBox(
-          height: _bottomPanelVisible
-              ? Dimen.bottomPanelHeight + kToolbarHeight
-              : kToolbarHeight,
+          height: (_bottomPanelVisible ? Dimen.bottomPanelHeight : 0) +
+              kToolbarHeight +
+              bottomPadding,
           child: Column(
             children: [
               Container(
                 color: Theme.of(context).primaryColor,
-                height: kToolbarHeight,
+                height:
+                    kToolbarHeight + (_bottomPanelVisible ? 0 : bottomPadding),
                 width: double.infinity,
+                padding: EdgeInsets.only(
+                    bottom: _bottomPanelVisible ? 0 : bottomPadding),
                 child: Row(children: _getBottomBarData()),
               ),
               Container(
                 color: Theme.of(context).colorScheme.surfaceContainer,
                 width: double.infinity,
-                height: _bottomPanelVisible ? Dimen.bottomPanelHeight : 0,
-                child: _currentBottomPanelChild,
+                height: _bottomPanelVisible
+                    ? (Dimen.bottomPanelHeight + bottomPadding)
+                    : 0,
+                padding: EdgeInsets.only(
+                    bottom: _bottomPanelVisible ? bottomPadding : 0),
+                child: _bottomPanelVisible ? _currentBottomPanelChild : null,
               )
             ],
           ),

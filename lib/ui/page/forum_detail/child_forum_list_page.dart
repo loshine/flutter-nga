@@ -22,10 +22,10 @@ class _ChildForumListPage extends State<ChildForumListPage> {
       child: widget.forumInfo == null || widget.forumInfo!.subForums!.isEmpty
           ? Center(
               child: Text(
-                "本版暂无子版",
+                "暂无子版块",
                 style: TextStyle(
-                  fontSize: Dimen.subheading,
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                  fontSize: Dimen.titleMedium,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             )

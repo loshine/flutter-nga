@@ -16,8 +16,8 @@ class SearchPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = useTextEditingController();
     final inputVisible = ref.watch(inputDeletionStatusProvider);
-    final searchOptions = ref.watch(searchOptionsProvider);
-    final searchOptionsNotifier = ref.read(searchOptionsProvider.notifier);
+    final searchOptions = ref.watch(searchOptionsProvider(fid));
+    final searchOptionsNotifier = ref.read(searchOptionsProvider(fid).notifier);
 
     useEffect(() {
       void listener() {
@@ -27,9 +27,6 @@ class SearchPage extends HookConsumerWidget {
       }
 
       searchQuery.addListener(listener);
-      if (fid != null) {
-        searchOptionsNotifier.checkTopicRadio(TOPIC_RADIO_CURRENT_FORUM);
-      }
       return () => searchQuery.removeListener(listener);
     }, []);
 
@@ -40,19 +37,14 @@ class SearchPage extends HookConsumerWidget {
           textInputAction: TextInputAction.search,
           onSubmitted: (text) =>
               _onSearch(context, text, searchOptions, fid),
-          style: TextStyle(
-            color: Colors.white,
-          ),
           maxLines: 1,
           decoration: InputDecoration(
             hintText: "搜索...",
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Palette.colorTextHintWhite),
             suffixIcon: inputVisible
                 ? IconButton(
                     icon: Icon(
                       Icons.close,
-                      color: Colors.white,
                     ),
                     onPressed: () => WidgetsBinding.instance
                         .addPostFrameCallback((_) => searchQuery.clear()),

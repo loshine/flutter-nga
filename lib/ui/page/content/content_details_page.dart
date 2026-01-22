@@ -15,7 +15,7 @@ class ContentDetailsPage extends StatelessWidget {
           child: DefaultTextStyle.merge(
             child: Wrap(children: children),
             style: TextStyle(
-              fontSize: Dimen.display1.toDouble(),
+              fontSize: Dimen.displaySmall.toDouble(),
             ),
           ),
         ),

@@ -74,7 +74,7 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
         padding: EdgeInsets.all(16),
         child: Text(
           itemData ?? "",
-          style: TextStyle(fontSize: Dimen.title),
+          style: TextStyle(fontSize: Dimen.titleLarge),
         ),
       );
     }
@@ -151,7 +151,7 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
         child: Text(
           "暂无浏览历史",
           style: TextStyle(
-            fontSize: Dimen.subheading,
+            fontSize: Dimen.titleMedium,
             color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
         ),
