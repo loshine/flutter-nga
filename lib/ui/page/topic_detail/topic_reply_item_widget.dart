@@ -397,6 +397,11 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     final button = FilledButton.tonal(
       onPressed: () =>
           setState(() => _attachmentsExpanded = !_attachmentsExpanded),
+      style: FilledButton.styleFrom(
+        minimumSize: Size(0, 32),
+        padding: EdgeInsets.all(16),
+        visualDensity: VisualDensity.compact,
+      ),
       child: Text(
         _attachmentsExpanded ? "收起附件" : "展开附件",
         style: TextStyle(fontSize: Dimen.labelLarge),

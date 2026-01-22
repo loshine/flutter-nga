@@ -34,7 +34,6 @@ class PhotoPreviewPage extends HookConsumerWidget {
           IconButton(
             icon: Icon(
               CommunityMaterialIcons.content_save,
-              color: Colors.white,
             ),
             onPressed: () => _save(),
             tooltip: "保存",

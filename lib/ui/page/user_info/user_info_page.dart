@@ -53,6 +53,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             expandedHeight: 200,
             floating: false,
             pinned: true,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
             actions: [
               PopupMenuButton(
                 child: Icon(Icons.more_vert),
@@ -72,7 +74,6 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
               title: Text(
                 userInfo.username ?? "",
                 style: TextStyle(
-                  color: Colors.white,
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),

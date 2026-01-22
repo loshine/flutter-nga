@@ -164,6 +164,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
+      bottomAppBarTheme: BottomAppBarThemeData(
+        color: colorScheme.surfaceContainer,
+        elevation: 0,
+        height: 80,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+      ),
     );
   }
 
@@ -280,6 +286,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      bottomAppBarTheme: BottomAppBarThemeData(
+        color: colorScheme.surfaceContainer,
+        elevation: 0,
+        height: 80,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
       ),
     );
   }

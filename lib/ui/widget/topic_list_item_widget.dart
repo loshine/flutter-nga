@@ -26,7 +26,7 @@ class TopicListItemWidget extends ConsumerWidget {
     final interfaceState = ref.watch(interfaceSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    
+
     final blockEnabled =
         blockState.clientBlockEnabled && blockState.listBlockEnabled;
     final blockMode = blockState.blockMode;
@@ -44,26 +44,20 @@ class TopicListItemWidget extends ConsumerWidget {
     }
 
     // 计算透明度
-    final alpha = (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA) 
-        ? 0.38 
+    final alpha = (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA)
+        ? 0.38
         : 1.0;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Card(
-        elevation: 0,
-        color: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Dimen.radiusM),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
           onTap: () => _goTopicDetail(context, topic, ref),
           onLongPress: onLongPress,
           child: Opacity(
             opacity: alpha,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -77,32 +71,11 @@ class TopicListItemWidget extends ConsumerWidget {
                     isTopicBlocked,
                     interfaceState,
                     textTheme,
+                    colorScheme,
                   ),
-                  
-                  // 父版块标签
-                  if (topic.parent?.name?.isNotEmpty == true)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colorScheme.secondaryContainer,
-                          borderRadius: BorderRadius.circular(Dimen.radiusFull),
-                        ),
-                        child: Text(
-                          codeUtils.unescapeHtml(topic.parent!.name!),
-                          style: textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSecondaryContainer,
-                          ),
-                        ),
-                      ),
-                    ),
-                  
-                  const SizedBox(height: 12),
-                  
+
+                  const SizedBox(height: 8),
+
                   // 元信息行
                   _buildMetaRow(
                     context,
@@ -117,7 +90,12 @@ class TopicListItemWidget extends ConsumerWidget {
             ),
           ),
         ),
-      ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: colorScheme.surfaceContainerHighest,
+        ),
+      ],
     );
   }
 
@@ -129,19 +107,24 @@ class TopicListItemWidget extends ConsumerWidget {
   }
 
   Widget _buildCollapsedCard(BuildContext context, ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Card(
-        elevation: 0,
-        color: colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Dimen.radiusM),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          color: colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+          child: Text(
+            "折叠的屏蔽内容",
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
         ),
-        child: const Padding(
-          padding: EdgeInsets.all(16),
-          child: Text("折叠的屏蔽内容"),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: colorScheme.surfaceContainerHighest,
         ),
-      ),
+      ],
     );
   }
 
@@ -154,6 +137,7 @@ class TopicListItemWidget extends ConsumerWidget {
     bool isTopicBlocked,
     InterfaceSettingsState interfaceState,
     TextTheme textTheme,
+    ColorScheme colorScheme,
   ) {
     final isPaintBlockMode =
         blockEnabled && isTopicBlocked && blockMode == BlockMode.PAINT;
@@ -181,6 +165,31 @@ class TopicListItemWidget extends ConsumerWidget {
           height: interfaceState.lineHeight.size,
         ),
         children: [
+          if (topic.parent?.name?.isNotEmpty == true)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    codeUtils.unescapeHtml(topic.parent!.name!),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSecondaryContainer,
+                      fontSize: 10,
+                      height: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (topic.locked())
             TextSpan(
               text: " [锁定]",
@@ -237,7 +246,7 @@ class TopicListItemWidget extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        
+
         // 附件图标
         if (topic.hasAttachment()) ...[
           Icon(
@@ -247,7 +256,7 @@ class TopicListItemWidget extends ConsumerWidget {
           ),
           const SizedBox(width: 12),
         ],
-        
+
         // 回复数
         Icon(
           Icons.chat_bubble_outline,
@@ -261,9 +270,9 @@ class TopicListItemWidget extends ConsumerWidget {
             color: colorScheme.onSurfaceVariant,
           ),
         ),
-        
+
         const SizedBox(width: 12),
-        
+
         // 时间
         Icon(
           Icons.access_time,

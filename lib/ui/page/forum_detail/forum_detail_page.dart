@@ -54,15 +54,15 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => Routes.navigateTo(
-                context, "${Routes.SEARCH}?fid=${widget.fid}"),
-          ),
           ForumFavouriteButtonWidget(
             fid: widget.fid,
             name: widget.name,
             type: widget.type,
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => Routes.navigateTo(
+                context, "${Routes.SEARCH}?fid=${widget.fid}"),
           ),
         ],
       ),

@@ -69,110 +69,94 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
         children: widgets,
       ),
       bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).primaryColor,
-        child: SizedBox(
-          height: kToolbarHeight,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Opacity(
-                opacity: state.currentPage != 1 ? 1 : 0.3,
-                child: IconButton(
-                  icon: Icon(Icons.chevron_left),
-                  color: Colors.white,
-                  onPressed: () {
-                    if (state.currentPage != 1) {
-                      _tabController!.animateTo(_tabController!.index - 1);
-                    }
-                  },
-                ),
-              ),
-              InkWell(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => TopicPageSelectDialog(
-                      currentPage: state.currentPage,
-                      maxPage: state.maxPage,
-                      maxFloor: state.maxFloor,
-                      pageSelectedCallback: (isPage, target) {
-                        if (isPage) {
-                          _tabController!.animateTo(target - 1);
-                        } else {
-                          _tabController!
-                              .animateTo((target / 20 - 1).ceil());
-                        }
-                      },
-                    ),
-                  );
-                },
-                child: SizedBox(
-                  height: kToolbarHeight,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          "${state.currentPage}/${state.maxPage}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Opacity(
-                opacity: state.maxPage != state.currentPage ? 1 : 0.3,
-                child: IconButton(
-                  icon: Icon(Icons.chevron_right),
-                  color: Colors.white,
-                  onPressed: () {
-                    if (state.maxPage != state.currentPage) {
-                      _tabController!.animateTo(_tabController!.index + 1);
-                    }
-                  },
-                ),
-              ),
-              Spacer(flex: 1),
-              IconButton(
-                icon: Icon(CommunityMaterialIcons.weather_night),
-                color: Colors.white,
-                onPressed: () async {
-                  AdaptiveTheme.of(context).toggleThemeMode();
-                  final mode = await AdaptiveTheme.getThemeMode();
-                  String modeName;
-                  if (mode == AdaptiveThemeMode.light) {
-                    modeName = "日间模式";
-                  } else if (mode == AdaptiveThemeMode.dark) {
-                    modeName = "黑暗模式";
-                  } else {
-                    modeName = "跟随系统";
-                  }
-                  Fluttertoast.showToast(msg: "已切换到 $modeName");
-                },
-              ),
-              IconButton(
-                icon: Icon(CommunityMaterialIcons.heart_outline),
-                color: Colors.white,
-                onPressed: _addFavourite,
-              ),
-              IconButton(
-                icon: Icon(CommunityMaterialIcons.comment_outline),
-                color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Opacity(
+              opacity: state.currentPage != 1 ? 1 : 0.3,
+              child: IconButton(
+                icon: Icon(Icons.chevron_left),
                 onPressed: () {
-                  if (widget.fid == null && state.topic == null) return;
-                  Routes.navigateTo(
-                    context,
-                    "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid != null ? widget.fid : state.topic!.fid}",
-                  );
+                  if (state.currentPage != 1) {
+                    _tabController!.animateTo(_tabController!.index - 1);
+                  }
                 },
               ),
-            ],
-          ),
+            ),
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => TopicPageSelectDialog(
+                    currentPage: state.currentPage,
+                    maxPage: state.maxPage,
+                    maxFloor: state.maxFloor,
+                    pageSelectedCallback: (isPage, target) {
+                      if (isPage) {
+                        _tabController!.animateTo(target - 1);
+                      } else {
+                        _tabController!
+                            .animateTo((target / 20 - 1).ceil());
+                      }
+                    },
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Text(
+                  "${state.currentPage}/${state.maxPage}",
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                ),
+              ),
+            ),
+            Opacity(
+              opacity: state.maxPage != state.currentPage ? 1 : 0.3,
+              child: IconButton(
+                icon: Icon(Icons.chevron_right),
+                onPressed: () {
+                  if (state.maxPage != state.currentPage) {
+                    _tabController!.animateTo(_tabController!.index + 1);
+                  }
+                },
+              ),
+            ),
+            Spacer(flex: 1),
+            IconButton(
+              icon: Icon(CommunityMaterialIcons.weather_night),
+              onPressed: () async {
+                AdaptiveTheme.of(context).toggleThemeMode();
+                final mode = await AdaptiveTheme.getThemeMode();
+                String modeName;
+                if (mode == AdaptiveThemeMode.light) {
+                  modeName = "日间模式";
+                } else if (mode == AdaptiveThemeMode.dark) {
+                  modeName = "黑暗模式";
+                } else {
+                  modeName = "跟随系统";
+                }
+                Fluttertoast.showToast(msg: "已切换到 $modeName");
+              },
+            ),
+            IconButton(
+              icon: Icon(CommunityMaterialIcons.heart_outline),
+              onPressed: _addFavourite,
+            ),
+            IconButton(
+              icon: Icon(CommunityMaterialIcons.comment_outline),
+              onPressed: () {
+                if (widget.fid == null && state.topic == null) return;
+                Routes.navigateTo(
+                  context,
+                  "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid != null ? widget.fid : state.topic!.fid}",
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
