@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/providers/user/user_info_provider.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -14,7 +14,7 @@ class UserInfoPage extends ConsumerStatefulWidget {
   final String? username;
   final String? uid;
 
-  const UserInfoPage({this.username, this.uid, Key? key}) : super(key: key);
+  const UserInfoPage({this.username, this.uid, super.key});
 
   @override
   ConsumerState<UserInfoPage> createState() => _UserInfoPageState();
@@ -79,7 +79,7 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                 ),
               ),
               background: Container(
-                  child: codeUtils.isStringEmpty(userInfo.avatar)
+                  child: code_utils.isStringEmpty(userInfo.avatar)
                       ? SizedBox.expand(child: Text(""))
                       : CachedNetworkImage(
                           fit: BoxFit.cover,
@@ -110,7 +110,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),        ),
+          ),
+        ),
       ),
       Text(
         "在以下版面担任版主",
@@ -118,13 +119,14 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
       )
     ];
 
-    if (userInfo.moderatorForums != null && userInfo.moderatorForums!.isNotEmpty) {
+    if (userInfo.moderatorForums != null &&
+        userInfo.moderatorForums!.isNotEmpty) {
       widgets.addAll(userInfo.moderatorForums!.entries.map(
         (entry) => Builder(
             builder: (context) => GestureDetector(
                   onTap: () => Routes.navigateTo(
                     context,
-                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.encodeParam(entry.value)}",
+                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
                   ),
                   child: Text(
                     "[${entry.value}]",
@@ -150,7 +152,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),        ),
+          ),
+        ),
       ),
       Text(
         "表示与 论坛/某版面/某用户 的关系",
@@ -176,12 +179,13 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),        ),
+          ),
+        ),
       ),
     ];
     if (userInfo.basicInfoMap != null) {
-      basicWidgets.addAll(userInfo.basicInfoMap!.entries.map(
-          (entry) => InfoWidget(title: "${entry.key}: ", subTitle: entry.value)));
+      basicWidgets.addAll(userInfo.basicInfoMap!.entries.map((entry) =>
+          InfoWidget(title: "${entry.key}: ", subTitle: entry.value)));
     }
 
     List<Widget> widgets = [
@@ -217,7 +221,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                       fontSize: Dimen.titleMedium,
                       color: Palette.getColorTextSubtitle(context),
                       fontWeight: FontWeight.bold,
-                    ),                  ),
+                    ),
+                  ),
                 ),
                 Html(data: userInfo.signature ?? "")
               ],
@@ -275,7 +280,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                         fontSize: Dimen.titleMedium,
                         color: Palette.getColorTextSubtitle(context),
                         fontWeight: FontWeight.bold,
-                      ),                    ),
+                      ),
+                    ),
                   ),
                   Text(
                     "个人版面是由用户自己管理的版面",
@@ -287,7 +293,7 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                     return GestureDetector(
                       onTap: () => Routes.navigateTo(
                         context,
-                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${codeUtils.encodeParam(entry.value)}",
+                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
                       ),
                       child: Text(
                         "[${entry.value}]",
@@ -316,13 +322,13 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
       // 跳转某人的主题
       Routes.navigateTo(
         context,
-        "${Routes.USER_TOPICS}?uid=${userInfo.uid}&username=${codeUtils.encodeParam(userInfo.username ?? "")}",
+        "${Routes.USER_TOPICS}?uid=${userInfo.uid}&username=${code_utils.encodeParam(userInfo.username ?? "")}",
       );
     } else if (action == _actions[1]) {
       // 跳转某人的回复
       Routes.navigateTo(
         context,
-        "${Routes.USER_REPLIES}?uid=${userInfo.uid}&username=${codeUtils.encodeParam(userInfo.username ?? "")}",
+        "${Routes.USER_REPLIES}?uid=${userInfo.uid}&username=${code_utils.encodeParam(userInfo.username ?? "")}",
       );
     }
   }

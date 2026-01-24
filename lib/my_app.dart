@@ -13,7 +13,7 @@ import 'utils/route.dart';
 class MyApp extends StatefulWidget {
   final AdaptiveThemeMode? savedThemeMode;
 
-  const MyApp({Key? key, this.savedThemeMode}) : super(key: key);
+  const MyApp({super.key, this.savedThemeMode});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -162,7 +162,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             width: 2,
           ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       bottomAppBarTheme: BottomAppBarThemeData(
         color: colorScheme.surfaceContainer,
@@ -285,7 +286,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             width: 2,
           ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       bottomAppBarTheme: BottomAppBarThemeData(
         color: colorScheme.surfaceContainer,

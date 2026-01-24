@@ -23,9 +23,9 @@ class Login {
 
 class _AndroidLogin {
   static const loginChannel =
-      const MethodChannel('io.github.loshine.flutternga.login/plugin');
+      MethodChannel('io.github.loshine.flutternga.login/plugin');
   static const cookieChannel =
-      const EventChannel('io.github.loshine.flutternga.cookies/plugin');
+      EventChannel('io.github.loshine.flutternga.cookies/plugin');
 
   static Stream<dynamic> get cookieStream =>
       cookieChannel.receiveBroadcastStream();

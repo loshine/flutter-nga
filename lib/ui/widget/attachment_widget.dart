@@ -13,8 +13,7 @@ typedef AttachmentCallback = void Function(
 
 class AttachmentWidget extends StatefulWidget {
   const AttachmentWidget(
-      {this.tid, this.fid, this.callback, this.attachmentCallback, Key? key})
-      : super(key: key);
+      {this.tid, this.fid, this.callback, this.attachmentCallback, super.key});
 
   final int? tid;
   final int? fid;

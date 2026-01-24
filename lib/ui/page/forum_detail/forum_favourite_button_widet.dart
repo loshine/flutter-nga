@@ -6,8 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ForumFavouriteButtonWidget extends ConsumerStatefulWidget {
   const ForumFavouriteButtonWidget(
-      {this.name, required this.fid, Key? key, this.type})
-      : super(key: key);
+      {super.key, this.name, required this.fid, this.type});
 
   final String? name;
   final int fid;

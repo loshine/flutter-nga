@@ -10,7 +10,7 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/dash.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -25,14 +25,14 @@ class TopicReplyItemWidget extends StatefulWidget {
   final bool hot;
 
   const TopicReplyItemWidget({
-    Key? key,
+    super.key,
     required this.reply,
     this.user,
     this.group,
     this.medalList,
     this.userList,
     this.hot = false,
-  }) : super(key: key);
+  });
 
   @override
   _TopicReplyItemState createState() => _TopicReplyItemState();
@@ -153,12 +153,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ],
         ),
         SizedBox(
-          height: codeUtils.isStringEmpty(widget.reply.subject) ? 0 : null,
+          height: code_utils.isStringEmpty(widget.reply.subject) ? 0 : null,
           width: double.infinity,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Text(
-              codeUtils.unescapeHtml(widget.reply.subject),
+              code_utils.unescapeHtml(widget.reply.subject),
               style: TextStyle(
                 fontSize: Dimen.titleLarge,
                 fontWeight: FontWeight.bold,
@@ -168,7 +168,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         SizedBox(
-          height: codeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
+          height: code_utils.isStringEmpty(widget.reply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
             child: NgaHtmlContentWidget(content: widget.reply.content),

@@ -4,7 +4,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class FontSizeDialog extends StatelessWidget {
-  const FontSizeDialog({this.callback, Key? key}) : super(key: key);
+  const FontSizeDialog({this.callback, super.key});
   final InputCallback? callback;
 
   static const sizeList = [

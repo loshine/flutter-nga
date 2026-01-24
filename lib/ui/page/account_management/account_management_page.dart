@@ -2,7 +2,6 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/user/account_list_provider.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -10,6 +9,8 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:route_observer_mixin/route_observer_mixin.dart';
 
 class AccountManagementPage extends ConsumerStatefulWidget {
+  const AccountManagementPage({super.key});
+
   @override
   ConsumerState<AccountManagementPage> createState() =>
       _AccountManagementState();
@@ -64,8 +65,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
                     subtitle: Text(
                       "UID:${state.list[position].uid}",
                       style: TextStyle(
-                          color:
-                              Theme.of(context).textTheme.bodyMedium?.color),
+                          color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
                     trailing: Icon(
                       CommunityMaterialIcons.check,
@@ -111,12 +111,12 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
         .catchError((_) => _refreshController.refreshFailed());
   }
 
-  void _quitAll(AccountListNotifier notifier) {
-    notifier
-        .quitAll()
-        .then((_) => Fluttertoast.showToast(msg: "成功"))
-        .whenComplete(
-            () => Routes.navigateTo(context, Routes.HOME, clearStack: true));
+  void _quitAll(AccountListNotifier notifier) async {
+    await notifier.quitAll();
+    Fluttertoast.showToast(msg: "成功");
+    if (mounted) {
+      Routes.navigateTo(context, Routes.HOME, clearStack: true);
+    }
   }
 
   void _setDefault(AccountListNotifier notifier, CacheUser user) {

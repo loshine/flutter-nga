@@ -1,11 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 
 class AvatarWidget extends StatelessWidget {
-  const AvatarWidget(this.avatar, {this.size = 48, this.username, Key? key})
-      : super(key: key);
+  const AvatarWidget(this.avatar, {this.size = 48, this.username, super.key});
 
   final String? avatar;
   final double size;
@@ -24,7 +23,7 @@ class AvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipOval(
-      child: codeUtils.isStringEmpty(username)
+      child: code_utils.isStringEmpty(username)
           ? _getAvatarImage()
           : Material(
               color: Colors.transparent,

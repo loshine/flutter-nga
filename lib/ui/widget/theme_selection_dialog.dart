@@ -6,7 +6,7 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ThemeSelectionDialog extends ConsumerWidget {
-  const ThemeSelectionDialog({Key? key}) : super(key: key);
+  const ThemeSelectionDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

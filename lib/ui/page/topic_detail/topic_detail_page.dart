@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -13,10 +13,10 @@ class TopicDetailPage extends ConsumerStatefulWidget {
   const TopicDetailPage(
     this.tid,
     this.fid, {
+    super.key,
     this.subject,
     this.authorid,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final int? tid;
   final int? fid;
@@ -62,7 +62,7 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
       }
     }
     return Scaffold(
-      appBar: AppBar(title: Text(codeUtils.unescapeHtml(state.subject ?? ""))),
+      appBar: AppBar(title: Text(code_utils.unescapeHtml(state.subject ?? ""))),
       body: TabBarView(
         physics: NeverScrollableScrollPhysics(),
         controller: _tabController,
@@ -96,15 +96,15 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
                       if (isPage) {
                         _tabController!.animateTo(target - 1);
                       } else {
-                        _tabController!
-                            .animateTo((target / 20 - 1).ceil());
+                        _tabController!.animateTo((target / 20 - 1).ceil());
                       }
                     },
                   ),
                 );
               },
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Text(
                   "${state.currentPage}/${state.maxPage}",
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(

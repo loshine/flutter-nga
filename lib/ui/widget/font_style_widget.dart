@@ -7,7 +7,7 @@ typedef InputCallback = void Function(
     String startTag, String endTag, bool hasEnd);
 
 class FontStyleWidget extends StatelessWidget {
-  const FontStyleWidget({this.callback, Key? key}) : super(key: key);
+  const FontStyleWidget({this.callback, super.key});
 
   static const _operationMap = {
     "字号": CommunityMaterialIcons.format_size,

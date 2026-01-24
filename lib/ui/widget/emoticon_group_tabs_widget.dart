@@ -5,7 +5,7 @@ import 'package:flutter_nga/data/entity/emoticon.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 
 class EmoticonGroupTabsWidget extends StatefulWidget {
-  const EmoticonGroupTabsWidget({this.callback, Key? key}) : super(key: key);
+  const EmoticonGroupTabsWidget({this.callback, super.key});
   final InputCallback? callback;
 
   @override
@@ -13,8 +13,8 @@ class EmoticonGroupTabsWidget extends StatefulWidget {
 }
 
 class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
-  List<Tab> _tabs = [];
-  List<Widget> _tabBarViews = [];
+  final List<Tab> _tabs = [];
+  final List<Widget> _tabBarViews = [];
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
 }
 
 class _EmoticonGroupWidget extends StatelessWidget {
-  _EmoticonGroupWidget({this.group, this.callback, Key? key}) : super(key: key);
+  _EmoticonGroupWidget({this.group, this.callback, super.key});
 
   final EmoticonGroup? group;
   final InputCallback? callback;

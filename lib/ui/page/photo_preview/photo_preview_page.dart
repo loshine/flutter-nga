@@ -4,14 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/common/photo_min_scale_provider.dart';
-import 'package:flutter_nga/utils/picture_utils.dart' as pictureUtils;
+import 'package:flutter_nga/utils/picture_utils.dart' as picture_utils;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
 
 class PhotoPreviewPage extends HookConsumerWidget {
-  const PhotoPreviewPage({Key? key, this.url, this.screenWidth})
-      : super(key: key);
+  const PhotoPreviewPage({super.key, this.url, this.screenWidth});
 
   final String? url;
   final double? screenWidth;
@@ -44,7 +43,7 @@ class PhotoPreviewPage extends HookConsumerWidget {
           ? Center(child: CircularProgressIndicator())
           : PhotoView(
               imageProvider: CachedNetworkImageProvider(
-                  pictureUtils.getOriginalUrl(url!)),
+                  picture_utils.getOriginalUrl(url!)),
               minScale: minScale,
             ),
     );
@@ -53,7 +52,7 @@ class PhotoPreviewPage extends HookConsumerWidget {
   Future<void> _save() async {
     final success = await Data()
         .resourceRepository
-        .downloadImage(pictureUtils.getOriginalUrl(url!));
+        .downloadImage(picture_utils.getOriginalUrl(url!));
     Fluttertoast.showToast(msg: success == true ? "保存到相册成功" : "保存到相册失败");
   }
 }
