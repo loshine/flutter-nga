@@ -11,12 +11,11 @@ class TopicPageSelectDialog extends StatefulWidget {
   final PageSelectedCallback? pageSelectedCallback;
 
   const TopicPageSelectDialog(
-      {Key? key,
+      {super.key,
       required this.maxPage,
       required this.maxFloor,
       required this.currentPage,
-      this.pageSelectedCallback})
-      : super(key: key);
+      this.pageSelectedCallback});
 
   @override
   _TopicPageSelectState createState() => _TopicPageSelectState();
@@ -100,9 +99,9 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
                       _isPage = newSelection.first;
                       // Reset value when switching mode to avoid out of bounds or confusion
                       if (_isPage) {
-                         _currentVal = widget.currentPage;
+                        _currentVal = widget.currentPage;
                       } else {
-                         _currentVal = 1; 
+                        _currentVal = 1;
                       }
                     });
                   },

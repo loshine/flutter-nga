@@ -6,7 +6,7 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class HomeDrawerHeader extends HookConsumerWidget {
-  const HomeDrawerHeader({Key? key}) : super(key: key);
+  const HomeDrawerHeader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,15 +44,16 @@ class HomeDrawerHeader extends HookConsumerWidget {
           Text(
             userInfo != null ? userInfo.username! : "点击登录",
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: colorScheme.onPrimaryContainer,
-            ),
+                  color: colorScheme.onPrimaryContainer,
+                ),
           ),
           if (userInfo != null)
             Text(
               "UID: ${userInfo.uid}",
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
-              ),
+                    color:
+                        colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+                  ),
             ),
         ],
       ),
@@ -71,10 +72,10 @@ class HomeDrawerBody extends StatelessWidget {
   final Function(int)? onSelectedCallback;
 
   const HomeDrawerBody({
-    Key? key,
+    super.key,
     this.currentSelection,
     this.onSelectedCallback,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +91,8 @@ class HomeDrawerBody extends StatelessWidget {
             child: Text(
               "模块",
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
             ),
           ),
 
@@ -140,8 +141,8 @@ class HomeDrawerBody extends StatelessWidget {
             child: Text(
               "其它",
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
             ),
           ),
 
@@ -157,7 +158,7 @@ class HomeDrawerBody extends StatelessWidget {
             selectedIcon: Icons.info,
             label: "关于",
             selected: false,
-            onTap: () {},
+            onTap: () => Routes.navigateTo(context, Routes.ABOUT),
           ),
         ],
       ),
@@ -209,11 +210,12 @@ class _NavigationItem extends StatelessWidget {
                   child: Text(
                     label,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: selected
-                          ? colorScheme.onSecondaryContainer
-                          : colorScheme.onSurfaceVariant,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                    ),
+                          color: selected
+                              ? colorScheme.onSecondaryContainer
+                              : colorScheme.onSurfaceVariant,
+                          fontWeight:
+                              selected ? FontWeight.w600 : FontWeight.w500,
+                        ),
                   ),
                 ),
               ],

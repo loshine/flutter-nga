@@ -9,7 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'forum_group_page.dart';
 
 class ForumGroupTabsPage extends HookConsumerWidget {
-  const ForumGroupTabsPage({Key? key}) : super(key: key);
+  const ForumGroupTabsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

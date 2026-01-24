@@ -4,7 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../utils/constant.dart';
@@ -74,7 +74,7 @@ final _jsFormatJsonInterceptor = InterceptorsWrapper(
     onResponse: (Response response, ResponseInterceptorHandler handler) {
   if (response.requestOptions.path.contains("__lib=noti") &&
       response.requestOptions.path.contains("__act=get_all")) {
-    response.data = codeUtils.fixUnquotedJsonKeys(response.data);
+    response.data = code_utils.fixUnquotedJsonKeys(response.data);
   }
   handler.next(response);
 });

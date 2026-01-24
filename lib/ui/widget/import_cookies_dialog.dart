@@ -6,8 +6,7 @@ class ImportCookiesDialog extends StatelessWidget {
   final Function(String) cookiesCallback;
   final _controller = TextEditingController();
 
-  ImportCookiesDialog({Key? key, required this.cookiesCallback})
-      : super(key: key);
+  ImportCookiesDialog({super.key, required this.cookiesCallback});
 
   @override
   Widget build(BuildContext context) {

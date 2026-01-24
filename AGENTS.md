@@ -106,7 +106,7 @@ import 'package:flutter_nga/utils/route.dart';
 
 ```dart
 class MyWidget extends StatelessWidget {
-  const MyWidget({Key? key, required this.param}) : super(key: key);
+  const MyWidget({super.key, required this.param});
 
   final String param;
 
@@ -152,7 +152,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class MyHookWidget extends HookConsumerWidget {
-  const MyHookWidget({Key? key}) : super(key: key);
+  const MyHookWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -280,7 +280,7 @@ return data.when(
 ```dart
 // 无状态 Consumer
 class MyWidget extends ConsumerWidget {
-  const MyWidget({Key? key}) : super(key: key);
+  const MyWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -291,7 +291,7 @@ class MyWidget extends ConsumerWidget {
 
 // 有状态 Consumer
 class MyStatefulWidget extends ConsumerStatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   ConsumerState<MyStatefulWidget> createState() => _MyStatefulWidgetState();

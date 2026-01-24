@@ -5,7 +5,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class FontColorDialog extends StatelessWidget {
-  const FontColorDialog({this.callback, Key? key}) : super(key: key);
+  const FontColorDialog({this.callback, super.key});
   final InputCallback? callback;
 
   @override

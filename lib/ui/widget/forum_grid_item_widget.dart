@@ -8,8 +8,7 @@ class ForumGridItemWidget extends StatelessWidget {
   final Forum forum;
   final GestureLongPressCallback? onLongPress;
 
-  const ForumGridItemWidget(this.forum, {Key? key, this.onLongPress})
-      : super(key: key);
+  const ForumGridItemWidget(this.forum, {super.key, this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +53,8 @@ class ForumGridItemWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               forum.name,
-              style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurface),
+              style:
+                  textTheme.titleSmall?.copyWith(color: colorScheme.onSurface),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,

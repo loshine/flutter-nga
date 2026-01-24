@@ -10,10 +10,10 @@ class UserTopicsPage extends ConsumerStatefulWidget {
   final String username;
 
   const UserTopicsPage({
-    Key? key,
+    super.key,
     required this.uid,
     required this.username,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<UserTopicsPage> createState() => _UserTopicsPageState();

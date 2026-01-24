@@ -1,60 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/conversation.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
-import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 
 class ConversationItemWidget extends StatelessWidget {
   final Conversation? conversation;
 
-  const ConversationItemWidget({Key? key, this.conversation}) : super(key: key);
+  const ConversationItemWidget({super.key, this.conversation});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Card(
-        elevation: 0,
-        color: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Dimen.radiusM),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
           onTap: () => Routes.navigateTo(
             context,
             "${Routes.CONVERSATION_DETAIL}?mid=${conversation!.mid}",
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: RichText(
-                    text: TextSpan(
-                      text: conversation!.subject,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: conversation!.isUnread
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: colorScheme.onSurface,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: " (${conversation!.posts})",
-                          style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        )
-                      ],
+                // 标题
+                RichText(
+                  text: TextSpan(
+                    text: conversation!.subject,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: conversation!.isUnread
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: colorScheme.onSurface,
                     ),
+                    children: [
+                      TextSpan(
+                        text: " (${conversation!.posts})",
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      )
+                    ],
                   ),
                 ),
+                const SizedBox(height: 8),
+                // 元信息行
                 Row(
                   children: [
                     Icon(
@@ -81,8 +74,8 @@ class ConversationItemWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      codeUtils.formatPostDate(
-                          conversation!.lastModify! * 1000),
+                      code_utils
+                          .formatPostDate(conversation!.lastModify! * 1000),
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -93,7 +86,12 @@ class ConversationItemWidget extends StatelessWidget {
             ),
           ),
         ),
-      ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: colorScheme.surfaceContainerHighest,
+        ),
+      ],
     );
   }
 }

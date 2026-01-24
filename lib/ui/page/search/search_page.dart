@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/providers/search/input_deletion_status_provider.dart';
 import 'package:flutter_nga/providers/search/search_options_provider.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
-import 'package:flutter_nga/utils/palette.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SearchPage extends HookConsumerWidget {
   final int? fid;
 
-  const SearchPage({this.fid, Key? key}) : super(key: key);
+  const SearchPage({this.fid, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,8 +34,7 @@ class SearchPage extends HookConsumerWidget {
         title: TextField(
           controller: searchQuery,
           textInputAction: TextInputAction.search,
-          onSubmitted: (text) =>
-              _onSearch(context, text, searchOptions, fid),
+          onSubmitted: (text) => _onSearch(context, text, searchOptions, fid),
           maxLines: 1,
           decoration: InputDecoration(
             hintText: "搜索...",
@@ -213,8 +211,7 @@ class SearchPage extends HookConsumerWidget {
               ),
               selectedColor: Theme.of(context).primaryColor,
               selected: state.userRadio == USER_RADIO_UID,
-              onSelected: (selected) =>
-                  notifier.checkUserRadio(USER_RADIO_UID),
+              onSelected: (selected) => notifier.checkUserRadio(USER_RADIO_UID),
             ),
             padding: EdgeInsets.only(left: 16),
           ),
@@ -232,24 +229,24 @@ class SearchPage extends HookConsumerWidget {
       if (fid == null) {
         Routes.navigateTo(
           context,
-          "${Routes.SEARCH_TOPIC_LIST}?keyword=${codeUtils.encodeParam(text)}&content=${state.content ? 1 : 0}",
+          "${Routes.SEARCH_TOPIC_LIST}?keyword=${code_utils.encodeParam(text)}&content=${state.content ? 1 : 0}",
         );
       } else {
         Routes.navigateTo(
           context,
-          "${Routes.SEARCH_TOPIC_LIST}?keyword=${codeUtils.encodeParam(text)}&fid=$fid&content=${state.content ? 1 : 0}",
+          "${Routes.SEARCH_TOPIC_LIST}?keyword=${code_utils.encodeParam(text)}&fid=$fid&content=${state.content ? 1 : 0}",
         );
       }
     } else if (state.firstRadio == FIRST_RADIO_FORUM) {
       Routes.navigateTo(
         context,
-        "${Routes.SEARCH_FORUM}?keyword=${codeUtils.encodeParam(text)}",
+        "${Routes.SEARCH_FORUM}?keyword=${code_utils.encodeParam(text)}",
       );
     } else if (state.firstRadio == FIRST_RADIO_USER) {
       if (state.userRadio == USER_RADIO_NAME) {
         Routes.navigateTo(
           context,
-          "${Routes.USER}?name=${codeUtils.encodeParam(text)}",
+          "${Routes.USER}?name=${code_utils.encodeParam(text)}",
         );
       } else {
         Routes.navigateTo(context, "${Routes.USER}?uid=$text");

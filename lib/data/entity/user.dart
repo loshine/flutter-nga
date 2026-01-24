@@ -1,4 +1,4 @@
-import 'package:flutter_nga/utils/name_utils.dart' as nameUtils;
+import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 
 class User {
   int? uid;
@@ -91,7 +91,7 @@ class User {
   }
 
   String getShowName() {
-    return nameUtils.getShowName(username!);
+    return name_utils.getShowName(username!);
   }
 
   String getShowReputation() {

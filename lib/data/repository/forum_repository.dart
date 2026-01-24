@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:sembast/sembast.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 
 /// 版块相关数据知识库
 abstract class ForumRepository {
@@ -272,7 +272,7 @@ class ForumDataRepository implements ForumRepository {
     try {
       Response<Map<String, dynamic>> response = await Data()
           .dio
-          .get("forum.php?&__output=8&key=${codeUtils.urlEncode(keyword)}");
+          .get("forum.php?&__output=8&key=${code_utils.urlEncode(keyword)}");
       Map<String, dynamic> map = response.data!;
       List<Forum> forums = [];
       map.forEach((k, v) {

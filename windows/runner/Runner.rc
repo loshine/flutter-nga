@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "io.github.loshine" "\0"
-            VALUE "FileDescription", "flutter_nga" "\0"
+            VALUE "FileDescription", "NationalGayAlliance" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutter_nga" "\0"
+            VALUE "InternalName", "NationalGayAlliance" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 io.github.loshine. All rights reserved." "\0"
-            VALUE "OriginalFilename", "flutter_nga.exe" "\0"
-            VALUE "ProductName", "flutter_nga" "\0"
+            VALUE "OriginalFilename", "NationalGayAlliance.exe" "\0"
+            VALUE "ProductName", "NationalGayAlliance" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

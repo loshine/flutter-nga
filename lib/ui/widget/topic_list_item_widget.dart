@@ -3,18 +3,18 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TopicListItemWidget extends ConsumerWidget {
   const TopicListItemWidget({
-    Key? key,
+    super.key,
     required this.topic,
     this.needBlock = true,
     this.onLongPress,
-  }) : super(key: key);
+  });
 
   final Topic topic;
   final bool needBlock;
@@ -30,7 +30,7 @@ class TopicListItemWidget extends ConsumerWidget {
     final blockEnabled =
         blockState.clientBlockEnabled && blockState.listBlockEnabled;
     final blockMode = blockState.blockMode;
-    final topicSubject = codeUtils.unescapeHtml(topic.subject);
+    final topicSubject = code_utils.unescapeHtml(topic.subject);
     final isTopicBlocked = _isBlocked(blockState, topicSubject);
 
     // 折叠模式
@@ -44,9 +44,10 @@ class TopicListItemWidget extends ConsumerWidget {
     }
 
     // 计算透明度
-    final alpha = (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA)
-        ? 0.38
-        : 1.0;
+    final alpha =
+        (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA)
+            ? 0.38
+            : 1.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -149,9 +150,8 @@ class TopicListItemWidget extends ConsumerWidget {
         text: topicSubject,
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
-          backgroundColor: isPaintBlockMode
-              ? textTheme.bodyMedium?.color
-              : null,
+          backgroundColor:
+              isPaintBlockMode ? textTheme.bodyMedium?.color : null,
           color: isPaintBlockMode
               ? Colors.transparent
               : topic.getSubjectColor() ?? textTheme.bodyLarge?.color,
@@ -180,7 +180,7 @@ class TopicListItemWidget extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    codeUtils.unescapeHtml(topic.parent!.name!),
+                    code_utils.unescapeHtml(topic.parent!.name!),
                     style: textTheme.labelSmall?.copyWith(
                       color: colorScheme.onSecondaryContainer,
                       fontSize: 10,
@@ -238,9 +238,8 @@ class TopicListItemWidget extends ConsumerWidget {
               color: isPaintBlockMode
                   ? Colors.transparent
                   : colorScheme.onSurfaceVariant,
-              backgroundColor: isPaintBlockMode
-                  ? colorScheme.onSurfaceVariant
-                  : null,
+              backgroundColor:
+                  isPaintBlockMode ? colorScheme.onSurfaceVariant : null,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -281,7 +280,7 @@ class TopicListItemWidget extends ConsumerWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          codeUtils.formatPostDate(topic.lastPost! * 1000),
+          code_utils.formatPostDate(topic.lastPost! * 1000),
           style: textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -291,7 +290,9 @@ class TopicListItemWidget extends ConsumerWidget {
   }
 
   void _goTopicDetail(BuildContext context, Topic topic, WidgetRef ref) {
-    ref.read(topicHistoryProvider.notifier).insertHistory(topic.createHistory());
+    ref
+        .read(topicHistoryProvider.notifier)
+        .insertHistory(topic.createHistory());
     Routes.navigateTo(
       context,
       "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${topic.subject!}",

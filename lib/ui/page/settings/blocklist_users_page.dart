@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -42,7 +42,7 @@ class _BlocklistUsersPageState extends ConsumerState<BlocklistUsersPage> {
       body: ListView(
         children: state.blockUserList
             .map((e) => ListTile(
-                  title: Text(codeUtils.unescapeHtml(e)),
+                  title: Text(code_utils.unescapeHtml(e)),
                   trailing: Icon(Icons.delete),
                   onTap: () => _delete(notifier, e),
                 ))

@@ -6,9 +6,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SearchTopicListPage extends ConsumerStatefulWidget {
-  const SearchTopicListPage(this.keyword,
-      {this.fid, this.content = false, Key? key})
-      : super(key: key);
+  const SearchTopicListPage(
+    this.keyword, {
+    super.key,
+    this.fid,
+    this.content = false,
+  });
 
   final int? fid;
   final String keyword;
