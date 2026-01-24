@@ -14,28 +14,30 @@ class ReplyNotificationItemWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Card(
-        elevation: 0,
-        color: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Dimen.radiusM),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
           onTap: _onTap,
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              notification.getNotificationMessage(),
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                notification.getNotificationMessage(),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
           ),
         ),
-      ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: colorScheme.surfaceContainerHighest,
+        ),
+      ],
     );
   }
 
@@ -56,28 +58,30 @@ class SystemNotificationItemWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Card(
-        elevation: 0,
-        color: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Dimen.radiusM),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
           onTap: _onTap,
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              notification.getNotificationMessage(),
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                notification.getNotificationMessage(),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
           ),
         ),
-      ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: colorScheme.surfaceContainerHighest,
+        ),
+      ],
     );
   }
 

@@ -35,8 +35,7 @@ class SearchPage extends HookConsumerWidget {
         title: TextField(
           controller: searchQuery,
           textInputAction: TextInputAction.search,
-          onSubmitted: (text) =>
-              _onSearch(context, text, searchOptions, fid),
+          onSubmitted: (text) => _onSearch(context, text, searchOptions, fid),
           maxLines: 1,
           decoration: InputDecoration(
             hintText: "搜索...",
@@ -213,8 +212,7 @@ class SearchPage extends HookConsumerWidget {
               ),
               selectedColor: Theme.of(context).primaryColor,
               selected: state.userRadio == USER_RADIO_UID,
-              onSelected: (selected) =>
-                  notifier.checkUserRadio(USER_RADIO_UID),
+              onSelected: (selected) => notifier.checkUserRadio(USER_RADIO_UID),
             ),
             padding: EdgeInsets.only(left: 16),
           ),

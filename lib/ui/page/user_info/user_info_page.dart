@@ -110,7 +110,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),        ),
+          ),
+        ),
       ),
       Text(
         "在以下版面担任版主",
@@ -118,7 +119,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
       )
     ];
 
-    if (userInfo.moderatorForums != null && userInfo.moderatorForums!.isNotEmpty) {
+    if (userInfo.moderatorForums != null &&
+        userInfo.moderatorForums!.isNotEmpty) {
       widgets.addAll(userInfo.moderatorForums!.entries.map(
         (entry) => Builder(
             builder: (context) => GestureDetector(
@@ -150,7 +152,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),        ),
+          ),
+        ),
       ),
       Text(
         "表示与 论坛/某版面/某用户 的关系",
@@ -176,12 +179,13 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             fontSize: Dimen.titleMedium,
             color: Palette.getColorTextSubtitle(context),
             fontWeight: FontWeight.bold,
-          ),        ),
+          ),
+        ),
       ),
     ];
     if (userInfo.basicInfoMap != null) {
-      basicWidgets.addAll(userInfo.basicInfoMap!.entries.map(
-          (entry) => InfoWidget(title: "${entry.key}: ", subTitle: entry.value)));
+      basicWidgets.addAll(userInfo.basicInfoMap!.entries.map((entry) =>
+          InfoWidget(title: "${entry.key}: ", subTitle: entry.value)));
     }
 
     List<Widget> widgets = [
@@ -217,7 +221,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                       fontSize: Dimen.titleMedium,
                       color: Palette.getColorTextSubtitle(context),
                       fontWeight: FontWeight.bold,
-                    ),                  ),
+                    ),
+                  ),
                 ),
                 Html(data: userInfo.signature ?? "")
               ],
@@ -275,7 +280,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                         fontSize: Dimen.titleMedium,
                         color: Palette.getColorTextSubtitle(context),
                         fontWeight: FontWeight.bold,
-                      ),                    ),
+                      ),
+                    ),
                   ),
                   Text(
                     "个人版面是由用户自己管理的版面",

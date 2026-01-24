@@ -44,9 +44,10 @@ class TopicListItemWidget extends ConsumerWidget {
     }
 
     // 计算透明度
-    final alpha = (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA)
-        ? 0.38
-        : 1.0;
+    final alpha =
+        (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA)
+            ? 0.38
+            : 1.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -149,9 +150,8 @@ class TopicListItemWidget extends ConsumerWidget {
         text: topicSubject,
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
-          backgroundColor: isPaintBlockMode
-              ? textTheme.bodyMedium?.color
-              : null,
+          backgroundColor:
+              isPaintBlockMode ? textTheme.bodyMedium?.color : null,
           color: isPaintBlockMode
               ? Colors.transparent
               : topic.getSubjectColor() ?? textTheme.bodyLarge?.color,
@@ -238,9 +238,8 @@ class TopicListItemWidget extends ConsumerWidget {
               color: isPaintBlockMode
                   ? Colors.transparent
                   : colorScheme.onSurfaceVariant,
-              backgroundColor: isPaintBlockMode
-                  ? colorScheme.onSurfaceVariant
-                  : null,
+              backgroundColor:
+                  isPaintBlockMode ? colorScheme.onSurfaceVariant : null,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -291,7 +290,9 @@ class TopicListItemWidget extends ConsumerWidget {
   }
 
   void _goTopicDetail(BuildContext context, Topic topic, WidgetRef ref) {
-    ref.read(topicHistoryProvider.notifier).insertHistory(topic.createHistory());
+    ref
+        .read(topicHistoryProvider.notifier)
+        .insertHistory(topic.createHistory());
     Routes.navigateTo(
       context,
       "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${topic.subject!}",

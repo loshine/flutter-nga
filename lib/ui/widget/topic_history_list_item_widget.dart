@@ -23,48 +23,22 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Card(
-        elevation: 0,
-        color: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Dimen.radiusM),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
           onTap: () => _goTopicDetail(context, topicHistory!, ref),
           onLongPress: onLongPress,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTitle(context, topicHistory!, interfaceState, textTheme),
-                
-                if (topicHistory?.topicParentName?.isNotEmpty == true)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(Dimen.radiusFull),
-                      ),
-                      child: Text(
-                        codeUtils.unescapeHtml(topicHistory!.topicParentName!),
-                        style: textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSecondaryContainer,
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                const SizedBox(height: 12),
-                
+                // 标题
+                _buildTitle(context, topicHistory!, interfaceState, textTheme,
+                    colorScheme),
+                const SizedBox(height: 8),
+                // 元信息行
                 Row(
                   children: [
                     Icon(
@@ -89,7 +63,12 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
             ),
           ),
         ),
-      ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: colorScheme.surfaceContainerHighest,
+        ),
+      ],
     );
   }
 
@@ -98,6 +77,7 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     TopicHistory topicHistory,
     InterfaceSettingsState interfaceState,
     TextTheme textTheme,
+    ColorScheme colorScheme,
   ) {
     return RichText(
       text: TextSpan(
@@ -105,12 +85,40 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
           color: topicHistory.getSubjectColor() ?? textTheme.bodyLarge?.color,
-          fontWeight: topicHistory.isBold() ? FontWeight.bold : FontWeight.normal,
-          fontStyle: topicHistory.isItalic() ? FontStyle.italic : FontStyle.normal,
-          decoration: topicHistory.isUnderline() ? TextDecoration.underline : null,
+          fontWeight:
+              topicHistory.isBold() ? FontWeight.bold : FontWeight.normal,
+          fontStyle:
+              topicHistory.isItalic() ? FontStyle.italic : FontStyle.normal,
+          decoration:
+              topicHistory.isUnderline() ? TextDecoration.underline : null,
           height: interfaceState.lineHeight.size,
         ),
         children: [
+          if (topicHistory?.topicParentName?.isNotEmpty == true)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    codeUtils.unescapeHtml(topicHistory.topicParentName!),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSecondaryContainer,
+                      fontSize: 10,
+                      height: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (topicHistory.locked())
             TextSpan(
               text: " [锁定]",
@@ -132,8 +140,11 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     );
   }
 
-  void _goTopicDetail(BuildContext context, TopicHistory topicHistory, WidgetRef ref) {
-    ref.read(topicHistoryProvider.notifier).insertHistory(topicHistory.createNewHistory());
+  void _goTopicDetail(
+      BuildContext context, TopicHistory topicHistory, WidgetRef ref) {
+    ref
+        .read(topicHistoryProvider.notifier)
+        .insertHistory(topicHistory.createNewHistory());
     Routes.navigateTo(
       context,
       "${Routes.TOPIC_DETAIL}?tid=${topicHistory.tid}&fid=${topicHistory.fid}&subject=${topicHistory.subject}",
