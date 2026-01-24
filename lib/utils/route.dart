@@ -15,6 +15,7 @@ import 'package:flutter_nga/ui/page/settings/blocklist_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_users_page.dart';
 import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings_page.dart';
+import 'package:flutter_nga/ui/page/settings/about_page.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
@@ -42,6 +43,7 @@ class Routes {
   static const String BLOCKLIST_USERS = "/settings/blocklist/users";
   static const String BLOCKLIST_KEYWORDS = "/settings/blocklist/keywords";
   static const String ACCOUNT_MANAGEMENT = "/settings/account_management";
+  static const String ABOUT = "/about";
   static const String SEARCH = "/search";
   static const String SEARCH_FORUM = "/search_forum";
   static const String SEARCH_TOPIC_LIST = "/search_topic_list";
@@ -315,6 +317,11 @@ List<GoRoute> buildRoutes() {
       builder: (context, state) => SendMessagePage(
         mid: int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0,
       ),
+    ),
+    GoRoute(
+      path: Routes.ABOUT,
+      name: Routes.ABOUT,
+      builder: (context, state) => const AboutPage(),
     ),
   ];
 }

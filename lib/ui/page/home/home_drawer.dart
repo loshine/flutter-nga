@@ -158,7 +158,7 @@ class HomeDrawerBody extends StatelessWidget {
             selectedIcon: Icons.info,
             label: "关于",
             selected: false,
-            onTap: () {},
+            onTap: () => Routes.navigateTo(context, Routes.ABOUT),
           ),
         ],
       ),
