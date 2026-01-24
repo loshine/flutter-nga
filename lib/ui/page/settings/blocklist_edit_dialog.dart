@@ -12,8 +12,7 @@ class BlocklistEditDialog extends StatelessWidget {
   final _controller = TextEditingController();
 
   BlocklistEditDialog(
-      {Key? key, this.callback, required this.title, required this.inputHint})
-      : super(key: key);
+      {super.key, this.callback, required this.title, required this.inputHint});
 
   @override
   Widget build(BuildContext context) {

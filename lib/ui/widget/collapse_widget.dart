@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CollapseWidget extends StatefulWidget {
-  const CollapseWidget.fromNodes({this.title, this.child, Key? key})
-      : super(key: key);
+  const CollapseWidget.fromNodes({this.title, this.child, super.key});
 
   final String? title;
   final Widget? child;

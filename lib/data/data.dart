@@ -13,11 +13,10 @@ import 'package:flutter_nga/data/repository/message_repository.dart';
 import 'package:flutter_nga/data/repository/resource_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 
 class Data {
@@ -175,7 +174,7 @@ class Data {
     String responseBody = _gbk.decode(bytes);
     // 处理一些可能导致错误的字符串
     // 去除 control characters
-    responseBody = codeUtils.stripLow(responseBody);
+    responseBody = code_utils.stripLow(responseBody);
     // 直接制表符替换为 \t, \x 替换为 \\x
     responseBody = responseBody
         .replaceAll("\t", "\\t")
@@ -188,7 +187,7 @@ class Data {
     if (response.requestOptions.path.contains("__lib=noti") &&
         response.requestOptions.path.contains("__act=get_all")) {
       // 使用 Dart 正则修复非标准 JSON 键名
-      responseBody = codeUtils.fixUnquotedJsonKeys(responseBody);
+      responseBody = code_utils.fixUnquotedJsonKeys(responseBody);
     }
     return responseBody;
   }

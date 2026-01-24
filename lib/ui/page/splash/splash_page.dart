@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/custom_time_messages.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
+import 'package:timeago/timeago.dart' as time_ago;
 
 class SplashPage extends StatefulWidget {
   @override
@@ -12,7 +12,7 @@ class SplashPage extends StatefulWidget {
 class _SplashState extends State<SplashPage> {
   @override
   void initState() {
-    timeAgo.setLocaleMessages('en', CustomTimeMessages());
+    time_ago.setLocaleMessages('en', CustomTimeMessages());
     Data().init().then((_) {
       Routes.navigateTo(context, Routes.HOME, replace: true);
     });

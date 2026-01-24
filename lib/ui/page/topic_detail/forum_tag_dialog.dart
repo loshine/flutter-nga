@@ -11,11 +11,11 @@ typedef TagLoadCompleteCallback = void Function(List<TopicTag> tagList);
 class ForumTagDialog extends ConsumerStatefulWidget {
   const ForumTagDialog({
     required this.fid,
+    super.key,
     this.tagList = const [],
     this.onSelected,
     this.onLoadComplete,
-    Key? key,
-  }) : super(key: key);
+  });
   final int fid;
   final List<TopicTag> tagList;
   final TagSelectedCallback? onSelected;

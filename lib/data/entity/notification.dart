@@ -1,4 +1,4 @@
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 
 class NotificationInfo {
   final bool? hasUnreadMessage;
@@ -181,7 +181,7 @@ class ReplyNotification implements NgaNotification {
 
   @override
   String getNotificationMessage() {
-    final time = codeUtils.formatPostDate(getTime() * 1000);
+    final time = code_utils.formatPostDate(getTime() * 1000);
     if (type == ReplyNotification.TYPE_REPLY_TOPIC) {
       // 5分钟前 楼上的你妈妈叫你吃饭 回复 了你的主题 测试测试测试测试测试测试
       return "$time $sourceUsername 回复了你的主题 $topicSubject";
@@ -362,7 +362,7 @@ class SystemNotification implements NgaNotification {
     if (type == SystemNotification.TYPE_SELF_KEYWORD) {
       // pid 是跳转或查询的 reply id
       // 今天 12:55 FID:-3355501中的发帖触发了关键词监视 查看详细信息
-      return "${codeUtils.formatPostDate(getTime() * 1000)} FID:$tid中的发帖触发了关键词监视";
+      return "${code_utils.formatPostDate(getTime() * 1000)} FID:$tid中的发帖触发了关键词监视";
     } else {
       return toString();
     }

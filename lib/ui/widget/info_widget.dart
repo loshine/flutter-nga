@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class InfoWidget extends StatelessWidget {
-  const InfoWidget({this.title, this.subTitle, Key? key}) : super(key: key);
+  const InfoWidget({this.title, this.subTitle, super.key});
 
   final String? title;
   final String? subTitle;

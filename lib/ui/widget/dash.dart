@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 
 class Dash extends StatelessWidget {
   const Dash(
-      {Key? key,
+      {super.key,
       this.direction = Axis.horizontal,
       this.dashColor = Colors.black,
       this.length = 200,
       this.dashGap = 3,
       this.dashLength = 6,
       this.dashThickness = 1,
-      this.dashBorderRadius = 0})
-      : super(key: key);
+      this.dashBorderRadius = 0});
 
   final Axis direction;
   final Color dashColor;

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:intl/intl.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
+import 'package:timeago/timeago.dart' as time_ago;
 
 final _htmlUnescape = HtmlUnescape();
 final _dateTimeFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
@@ -60,7 +60,7 @@ String formatPostDate(int time) {
   if (nowDate.difference(date).inDays > 2) {
     return _postDateFormat.format(date);
   } else {
-    return timeAgo.format(date);
+    return time_ago.format(date);
   }
 }
 

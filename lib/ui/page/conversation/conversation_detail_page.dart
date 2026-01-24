@@ -10,7 +10,7 @@ import 'message_item_widget.dart';
 class ConversationDetailPage extends ConsumerStatefulWidget {
   final int? mid;
 
-  const ConversationDetailPage({Key? key, this.mid}) : super(key: key);
+  const ConversationDetailPage({super.key, this.mid});
 
   @override
   ConsumerState<ConversationDetailPage> createState() =>

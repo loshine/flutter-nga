@@ -11,11 +11,11 @@ import 'package:dio/dio.dart';
 
 class TopicSinglePage extends ConsumerStatefulWidget {
   const TopicSinglePage({
+    super.key,
     required this.tid,
     required this.page,
     this.authorid,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final int tid;
   final int page;
@@ -50,7 +50,8 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
       physics: ClampingScrollPhysics(),
       child: ListView.builder(
         itemCount: state.replyList.length,
-        itemBuilder: (context, position) => _buildListItem(context, position, state),
+        itemBuilder: (context, position) =>
+            _buildListItem(context, position, state),
       ),
     );
   }
@@ -76,11 +77,10 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
 
   final map = <String, Widget>{};
 
-  Widget _buildListItem(BuildContext context, int position, TopicSinglePageState state) {
+  Widget _buildListItem(
+      BuildContext context, int position, TopicSinglePageState state) {
     final reply = state.replyList[position];
-    if (position == 0 &&
-        state.page == 1 &&
-        state.hotReplyList.isNotEmpty) {
+    if (position == 0 && state.page == 1 && state.hotReplyList.isNotEmpty) {
       // 显示热评
       return Column(
         children: [_buildReplyWidget(context, reply, state)]..addAll(state
@@ -92,7 +92,8 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
     }
   }
 
-  Widget _buildReplyWidget(BuildContext context, Reply reply, TopicSinglePageState state,
+  Widget _buildReplyWidget(
+      BuildContext context, Reply reply, TopicSinglePageState state,
       {bool hot = false}) {
     final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}_$hot";
     var widget = map[uniqueId];

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -9,11 +8,10 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'notification_item_widget.dart';
 
 class NotificationListPage extends ConsumerStatefulWidget {
-  const NotificationListPage({Key? key}) : super(key: key);
+  const NotificationListPage({super.key});
 
   @override
-  ConsumerState<NotificationListPage> createState() =>
-      _NotificationListState();
+  ConsumerState<NotificationListPage> createState() => _NotificationListState();
 }
 
 class _NotificationListState extends ConsumerState<NotificationListPage> {

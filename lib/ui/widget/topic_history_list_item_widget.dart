@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TopicHistoryListItemWidget extends ConsumerWidget {
   const TopicHistoryListItemWidget({
-    Key? key,
+    super.key,
     this.topicHistory,
     this.onLongPress,
-  }) : super(key: key);
+  });
 
   final TopicHistory? topicHistory;
   final GestureLongPressCallback? onLongPress;
@@ -81,7 +81,7 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
   ) {
     return RichText(
       text: TextSpan(
-        text: codeUtils.unescapeHtml(topicHistory.subject),
+        text: code_utils.unescapeHtml(topicHistory.subject),
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
           color: topicHistory.getSubjectColor() ?? textTheme.bodyLarge?.color,
@@ -94,7 +94,7 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
           height: interfaceState.lineHeight.size,
         ),
         children: [
-          if (topicHistory?.topicParentName?.isNotEmpty == true)
+          if (topicHistory.topicParentName?.isNotEmpty == true)
             WidgetSpan(
               alignment: PlaceholderAlignment.middle,
               child: Padding(
@@ -109,7 +109,7 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    codeUtils.unescapeHtml(topicHistory.topicParentName!),
+                    code_utils.unescapeHtml(topicHistory.topicParentName!),
                     style: textTheme.labelSmall?.copyWith(
                       color: colorScheme.onSecondaryContainer,
                       fontSize: 10,

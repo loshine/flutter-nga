@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 
 class MessageItemWidget extends StatelessWidget {
   final Message message;
 
-  const MessageItemWidget({Key? key, required this.message}) : super(key: key);
+  const MessageItemWidget({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class MessageItemWidget extends StatelessWidget {
             ),
           ),
           Text(
-            codeUtils.formatPostDate(message.time! * 1000),
+            code_utils.formatPostDate(message.time! * 1000),
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyMedium?.color,
               fontSize: Dimen.bodySmall,
@@ -43,11 +43,11 @@ class MessageItemWidget extends StatelessWidget {
         ],
       ),
     ));
-    if (!codeUtils.isStringEmpty(message.subject)) {
+    if (!code_utils.isStringEmpty(message.subject)) {
       children.add(Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Text(
-          codeUtils.unescapeHtml(message.subject),
+          code_utils.unescapeHtml(message.subject),
           style: TextStyle(
             fontSize: Dimen.titleLarge,
             fontWeight: FontWeight.bold,

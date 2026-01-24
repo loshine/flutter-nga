@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/conversation.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
-import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 
 class ConversationItemWidget extends StatelessWidget {
   final Conversation? conversation;
 
-  const ConversationItemWidget({Key? key, this.conversation}) : super(key: key);
+  const ConversationItemWidget({super.key, this.conversation});
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +74,7 @@ class ConversationItemWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      codeUtils
+                      code_utils
                           .formatPostDate(conversation!.lastModify! * 1000),
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,

@@ -5,7 +5,7 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class BlockModeSelectionDialog extends ConsumerWidget {
-  const BlockModeSelectionDialog({Key? key}) : super(key: key);
+  const BlockModeSelectionDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,7 +41,8 @@ class BlockModeSelectionDialog extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: BlockMode.values.map((mode) {
                     return _BlockModeOption(
-                      title: mode.name, // You might want to map this to a friendly name
+                      title: mode
+                          .name, // You might want to map this to a friendly name
                       selected: state.blockMode == mode,
                       onTap: () {
                         notifier.updateBlockMode(mode);

@@ -5,7 +5,7 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class LineHeightSelectionDialog extends ConsumerWidget {
-  const LineHeightSelectionDialog({Key? key}) : super(key: key);
+  const LineHeightSelectionDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

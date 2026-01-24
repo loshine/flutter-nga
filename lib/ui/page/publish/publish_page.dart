@@ -7,18 +7,18 @@ import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PublishPage extends StatefulWidget {
   const PublishPage({
+    super.key,
     this.tid,
     this.fid,
     this.content,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final int? tid;
   final int? fid;
@@ -333,11 +333,11 @@ class _PublishPageState extends State<PublishPage> {
   }
 
   void _attachmentCallback(attachments, attachmentsCheck) async {
-    final tab = codeUtils.urlEncode("\t");
+    final tab = code_utils.urlEncode("\t");
     _attachments.write(tab);
-    _attachments.write(codeUtils.urlEncode(attachments));
+    _attachments.write(code_utils.urlEncode(attachments));
     _attachmentsCheck.write(tab);
-    _attachmentsCheck.write(codeUtils.urlEncode(attachmentsCheck));
+    _attachmentsCheck.write(code_utils.urlEncode(attachmentsCheck));
   }
 
   void _showTagDialog() {

@@ -6,7 +6,7 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
 
@@ -258,12 +258,12 @@ class TopicDataRepository implements TopicRepository {
   Future<String> createTopic(int? fid, String subject, String content,
       bool isAnonymous, String attachments, String attachmentsCheck) async {
     final postData = "step=2"
-        "&post_content=${codeUtils.urlEncode(content)}"
+        "&post_content=${code_utils.urlEncode(content)}"
         "&action=new"
-        "&post_subject=${codeUtils.urlEncode(subject)}"
+        "&post_subject=${code_utils.urlEncode(subject)}"
         "&fid=$fid${isAnonymous ? "anony=1" : ""}"
-        "${!codeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
-        "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
+        "${!code_utils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
+        "${!code_utils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
@@ -288,13 +288,13 @@ class TopicDataRepository implements TopicRepository {
   Future<String> createReply(int? tid, int? fid, String subject, String content,
       bool isAnonymous, String attachments, String attachmentsCheck) async {
     final postData = "step=2"
-        "&post_content=${codeUtils.urlEncode(content)}"
+        "&post_content=${code_utils.urlEncode(content)}"
         "&tid=$tid"
         "&action=reply"
-        "&post_subject=${codeUtils.urlEncode(subject)}"
+        "&post_subject=${code_utils.urlEncode(subject)}"
         "&fid=$fid${isAnonymous ? "anony=1" : ""}"
-        "${!codeUtils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
-        "${!codeUtils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
+        "${!code_utils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
+        "${!code_utils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
     try {
       final options = Options();
       options.contentType = Headers.formUrlEncodedContentType;

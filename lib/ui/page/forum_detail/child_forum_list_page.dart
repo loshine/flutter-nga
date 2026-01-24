@@ -7,7 +7,7 @@ import 'child_forum_item_widget.dart';
 class ChildForumListPage extends StatefulWidget {
   final ForumInfo? forumInfo;
 
-  const ChildForumListPage(this.forumInfo, {Key? key}) : super(key: key);
+  const ChildForumListPage(this.forumInfo, {super.key});
 
   @override
   _ChildForumListPage createState() => _ChildForumListPage();

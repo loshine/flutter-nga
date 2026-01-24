@@ -10,10 +10,10 @@ class UserRepliesPage extends ConsumerStatefulWidget {
   final String username;
 
   const UserRepliesPage({
-    Key? key,
+    super.key,
     required this.uid,
     required this.username,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<UserRepliesPage> createState() => _UserRepliesPageState();

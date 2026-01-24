@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class SendMessagePage extends ConsumerStatefulWidget {
   final int? mid;
 
-  const SendMessagePage({Key? key, this.mid}) : super(key: key);
+  const SendMessagePage({super.key, this.mid});
 
   @override
   ConsumerState<SendMessagePage> createState() => _SendMessageState();

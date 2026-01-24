@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
@@ -16,8 +15,7 @@ import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
 
 class ForumDetailPage extends ConsumerStatefulWidget {
-  const ForumDetailPage({required this.fid, this.name, this.type, Key? key})
-      : super(key: key);
+  const ForumDetailPage({required this.fid, this.name, this.type, super.key});
 
   final int fid;
   final String? name;
@@ -33,7 +31,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
   bool _mainPage = true;
   late RefreshController _refreshController;
 
-  List<Tab> _tabs = [];
+  final List<Tab> _tabs = [];
   TabController? _tabController;
 
   @override
@@ -84,8 +82,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
             ),
           ),
           KeepAliveTabView(
-            child:
-                ForumRecommendTopicListPage(widget.fid, type: widget.type),
+            child: ForumRecommendTopicListPage(widget.fid, type: widget.type),
           ),
           KeepAliveTabView(
             child: ChildForumListPage(state.info),
@@ -124,7 +121,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
     super.dispose();
   }
 
-  _onRefresh() {
+  void _onRefresh() {
     final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
     notifier
         .refresh(false, widget.type)
@@ -137,7 +134,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
     });
   }
 
-  _onLoading() async {
+  void _onLoading() async {
     final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
     notifier.loadMore(false, widget.type).then((state) {
       if (state.page + 1 < state.maxPage) {

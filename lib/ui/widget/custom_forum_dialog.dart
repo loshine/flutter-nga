@@ -7,7 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class CustomForumDialog extends HookConsumerWidget {
-  const CustomForumDialog({Key? key}) : super(key: key);
+  const CustomForumDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,7 +35,7 @@ class CustomForumDialog extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // FID 输入框
             TextField(
               controller: fidController,
@@ -63,7 +63,7 @@ class CustomForumDialog extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // 名称输入框
             TextField(
               controller: nameController,
@@ -91,7 +91,7 @@ class CustomForumDialog extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // 操作按钮
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -134,16 +134,12 @@ class CustomForumDialog extends HookConsumerWidget {
       return;
     }
 
-    ref
-        .read(favouriteForumListProvider.notifier)
-        .add(fid, name)
-        .then((_) {
-          Fluttertoast.showToast(msg: "添加成功");
-          Routes.pop(context);
-        })
-        .catchError((e) {
-          debugPrint(e.toString());
-          Fluttertoast.showToast(msg: "添加自定义板块失败");
-        });
+    ref.read(favouriteForumListProvider.notifier).add(fid, name).then((_) {
+      Fluttertoast.showToast(msg: "添加成功");
+      Routes.pop(context);
+    }).catchError((e) {
+      debugPrint(e.toString());
+      Fluttertoast.showToast(msg: "添加自定义板块失败");
+    });
   }
 }

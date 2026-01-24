@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
 import 'package:flutter_nga/data/entity/user.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/constant.dart';
 import 'package:sembast/sembast.dart';
 
@@ -63,7 +63,7 @@ class UserDataRepository implements UserRepository {
         cid = value.substring(TAG_CID.length + 1);
       } else if (c.contains(TAG_USER_NAME)) {
         username = value.substring(TAG_USER_NAME.length + 1);
-        username = codeUtils.urlDecode(username);
+        username = code_utils.urlDecode(username);
       }
     }
     if (cid != null &&
@@ -112,7 +112,7 @@ class UserDataRepository implements UserRepository {
   @override
   Future<UserInfo> getUserInfoByName(String? username) async {
     try {
-      final encodedUsername = codeUtils.urlEncode(username!);
+      final encodedUsername = code_utils.urlEncode(username!);
       Response<Map<String, dynamic>> response = await Data().dio.get(
           "nuke.php?__lib=ucp&__act=get&__output=8&username=$encodedUsername");
       // {"0": { userinfo }};
@@ -203,7 +203,7 @@ class UserDataRepository implements UserRepository {
   Future<String> setBlockInfo(BlockInfoData blockInfo) async {
     try {
       final postData =
-          "__lib=ucp&__act=set_block_word&__output=3&data=${codeUtils.urlEncode(blockInfo.toData())}";
+          "__lib=ucp&__act=set_block_word&__output=3&data=${code_utils.urlEncode(blockInfo.toData())}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
       options.headers = {"Referer": DOMAIN};

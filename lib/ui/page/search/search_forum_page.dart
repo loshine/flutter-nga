@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/search/search_forum_provider.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SearchForumPage extends ConsumerStatefulWidget {
-  const SearchForumPage(this.keyword, {Key? key}) : super(key: key);
+  const SearchForumPage(this.keyword, {super.key});
 
   final String keyword;
 

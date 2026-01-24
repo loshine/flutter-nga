@@ -2,18 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/providers/forum/child_forum_subscription_provider.dart';
-import 'package:flutter_nga/utils/code_utils.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ChildForumItemWidget extends ConsumerStatefulWidget {
   final ChildForum childForum;
 
-  const ChildForumItemWidget(this.childForum, {Key? key}) : super(key: key);
+  const ChildForumItemWidget(this.childForum, {super.key});
 
   @override
-  ConsumerState<ChildForumItemWidget> createState() =>
-      _ChildForumItemState();
+  ConsumerState<ChildForumItemWidget> createState() => _ChildForumItemState();
 }
 
 class _ChildForumItemState extends ConsumerState<ChildForumItemWidget> {
