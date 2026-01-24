@@ -71,12 +71,14 @@ class MessageListData {
 
   factory MessageListData.fromJson(Map map) {
     dynamic nextPage = map['nextPage'];
-    Map userMap = map['userInfo'];
+    Map userMap = map['userInfo'] ?? {};
     List<User> userList = userMap.entries
         .where((e) => int.tryParse(e.key) != null)
         .map((e) => User.fromJson(e.value))
         .toList();
-    List<Message> messageList = map.entries
+    // 消息数据在 allmsgs 字段中
+    Map allMsgsMap = map['allmsgs'] ?? {};
+    List<Message> messageList = allMsgsMap.entries
         .where((e) => int.tryParse(e.key) != null)
         .map((e) => Message.fromJson(e.value, userList))
         .toList();
