@@ -8,8 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class NgaHtmlCommentWidget extends ConsumerWidget {
   final String content;
 
-  const NgaHtmlCommentWidget({Key? key, required this.content})
-      : super(key: key);
+  const NgaHtmlCommentWidget({super.key, required this.content});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

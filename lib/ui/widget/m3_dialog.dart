@@ -10,12 +10,12 @@ class M3Dialog extends StatelessWidget {
   final bool scrollable;
 
   const M3Dialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     this.actions,
     this.scrollable = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,14 +75,14 @@ class M3ConfirmDialog extends StatelessWidget {
   final bool destructive;
 
   const M3ConfirmDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     this.confirmText = "确定",
     this.cancelText = "取消",
     this.onConfirm,
     this.destructive = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

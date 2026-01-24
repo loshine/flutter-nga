@@ -10,8 +10,7 @@ import 'package:html/dom.dart' as dom;
 class NgaHtmlContentWidget extends ConsumerWidget {
   final String content;
 
-  const NgaHtmlContentWidget({Key? key, required this.content})
-      : super(key: key);
+  const NgaHtmlContentWidget({super.key, required this.content});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

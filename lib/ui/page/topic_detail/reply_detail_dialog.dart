@@ -7,7 +7,7 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/topic/topic_reply_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -17,7 +17,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 class ReplyDetailDialog extends ConsumerStatefulWidget {
   final int? pid;
 
-  const ReplyDetailDialog({Key? key, this.pid}) : super(key: key);
+  const ReplyDetailDialog({super.key, this.pid});
 
   @override
   ConsumerState<ReplyDetailDialog> createState() => _ReplyDetailState();
@@ -71,10 +71,10 @@ class _ReplyWidget extends StatefulWidget {
   final User user;
 
   const _ReplyWidget({
-    Key? key,
+    super.key,
     required this.reply,
     required this.user,
-  }) : super(key: key);
+  });
 
   @override
   _ReplyWidgetState createState() => _ReplyWidgetState();
@@ -106,12 +106,12 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           ],
         ),
         SizedBox(
-          height: codeUtils.isStringEmpty(widget.reply.subject) ? 0 : null,
+          height: code_utils.isStringEmpty(widget.reply.subject) ? 0 : null,
           width: double.infinity,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Text(
-              codeUtils.unescapeHtml(widget.reply.subject),
+              code_utils.unescapeHtml(widget.reply.subject),
               style: TextStyle(
                 fontSize: Dimen.titleLarge,
                 fontWeight: FontWeight.bold,
@@ -121,7 +121,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           ),
         ),
         SizedBox(
-          height: codeUtils.isStringEmpty(widget.reply.content) ? 0 : null,
+          height: code_utils.isStringEmpty(widget.reply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
             child: NgaHtmlContentWidget(content: widget.reply.content),

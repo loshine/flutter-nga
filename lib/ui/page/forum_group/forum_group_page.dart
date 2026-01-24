@@ -3,7 +3,7 @@ import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 
 class ForumGroupPage extends StatefulWidget {
-  const ForumGroupPage({this.group, Key? key}) : super(key: key);
+  const ForumGroupPage({this.group, super.key});
 
   final ForumGroup? group;
 

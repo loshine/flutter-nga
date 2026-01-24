@@ -9,15 +9,19 @@ class ForumRecommendTopicListPage extends ConsumerStatefulWidget {
   final int fid;
   final int? type;
 
-  const ForumRecommendTopicListPage(this.fid, {this.type, Key? key})
-      : super(key: key);
+  const ForumRecommendTopicListPage(
+    this.fid, {
+    super.key,
+    this.type,
+  });
 
   @override
   ConsumerState<ForumRecommendTopicListPage> createState() =>
       _ForumRecommendTopicListState();
 }
 
-class _ForumRecommendTopicListState extends ConsumerState<ForumRecommendTopicListPage> {
+class _ForumRecommendTopicListState
+    extends ConsumerState<ForumRecommendTopicListPage> {
   late RefreshController _refreshController;
 
   @override
@@ -43,22 +47,23 @@ class _ForumRecommendTopicListState extends ConsumerState<ForumRecommendTopicLis
       child: ListView.builder(
         itemCount: state.list.length,
         itemBuilder: (context, index) => TopicListItemWidget(
-          topic: state.list[index],),
+          topic: state.list[index],
+        ),
       ),
     );
   }
 
-  _onRefresh() {
+  void _onRefresh() {
     final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
     notifier.refresh(true, widget.type).catchError((err) {
       _refreshController.refreshFailed();
       Fluttertoast.showToast(msg: err.message);
-      return notifier.state;
+      return ref.read(forumRecommendProvider(widget.fid));
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
   }
 
-  _onLoading() async {
+  void _onLoading() async {
     final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
     notifier.loadMore(true, widget.type).then((state) {
       if (state.page + 1 < state.maxPage) {

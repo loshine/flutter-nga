@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_nga/data/entity/conversation.dart';
 import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 
 import '../data.dart';
 
@@ -52,10 +52,10 @@ class MessageDataRepository extends MessageRepository {
       final postData = "__lib=message&__act=message"
           "&__output=8"
           "&act=${isNew ? 'new' : 'reply'}"
-          "&to=${codeUtils.urlDecode(sendToValue)}"
+          "&to=${code_utils.urlDecode(sendToValue)}"
           "&mid=${mid == null ? 0 : mid}"
-          "&subject=${codeUtils.urlEncode(subject)}"
-          "&content=${codeUtils.urlEncode(content)}";
+          "&subject=${code_utils.urlEncode(subject)}"
+          "&content=${code_utils.urlEncode(content)}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
       await Data().dio.post("nuke.php", data: postData, options: options);

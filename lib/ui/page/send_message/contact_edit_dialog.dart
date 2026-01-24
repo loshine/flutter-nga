@@ -8,7 +8,7 @@ class ContactEditDialog extends StatelessWidget {
 
   final _controller = TextEditingController();
 
-  ContactEditDialog({Key? key, this.callback}) : super(key: key);
+  ContactEditDialog({super.key, this.callback});
 
   @override
   Widget build(BuildContext context) {

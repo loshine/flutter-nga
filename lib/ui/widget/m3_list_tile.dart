@@ -12,7 +12,7 @@ class M3ListTile extends StatelessWidget {
   final bool selected;
 
   const M3ListTile({
-    Key? key,
+    super.key,
     this.leading,
     required this.title,
     this.subtitle,
@@ -20,7 +20,7 @@ class M3ListTile extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.selected = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

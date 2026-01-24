@@ -6,7 +6,7 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   ConsumerState<SettingsPage> createState() => _SettingsState();
@@ -37,7 +37,8 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                 icon: Icons.person_outline,
                 title: "账号管理",
                 subtitle: "管理您的账号",
-                onTap: () => Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
+                onTap: () =>
+                    Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
               ),
             ],
           ),
@@ -54,7 +55,8 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                 icon: Icons.text_fields,
                 title: "界面设置",
                 subtitle: "文字大小等界面元素",
-                onTap: () => Routes.navigateTo(context, Routes.INTERFACE_SETTINGS),
+                onTap: () =>
+                    Routes.navigateTo(context, Routes.INTERFACE_SETTINGS),
               ),
             ],
           ),
@@ -65,7 +67,8 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                 icon: Icons.block_outlined,
                 title: "屏蔽设置",
                 subtitle: "屏蔽用户、关键词",
-                onTap: () => Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS),
+                onTap: () =>
+                    Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS),
               ),
             ],
           ),
@@ -129,8 +132,7 @@ class _SettingsTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.onTap,
-    this.trailing,
-  });
+  }) : trailing = null;
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,6 @@
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/data/entity/user.dart' as User;
-import 'package:flutter_nga/utils/code_utils.dart' as codeUtils;
+import 'package:flutter_nga/data/entity/user.dart' as user;
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,12 +83,12 @@ class UserInfoNotifier extends Notifier<UserInfoState> {
     }
   }
 
-  UserInfoState _buildStateByInfo(User.UserInfo userInfo) {
+  UserInfoState _buildStateByInfo(user.UserInfo userInfo) {
     final moderatorForumsMap = <int, String>{};
     if (userInfo.adminForums != null && userInfo.adminForums!.isNotEmpty) {
       userInfo.adminForums!.entries.forEach((entry) {
         moderatorForumsMap[int.parse(entry.key)] =
-            "${codeUtils.unescapeHtml(entry.value)}";
+            "${code_utils.unescapeHtml(entry.value)}";
       });
     }
     final reputationMap = <String?, String>{};
@@ -101,7 +101,7 @@ class UserInfoNotifier extends Notifier<UserInfoState> {
     final personalForumMap = <int?, String>{};
     if (userInfo.userForum != null) {
       personalForumMap[userInfo.userForum!['0']] =
-          "${codeUtils.unescapeHtml(userInfo.userForum!['1'])}";
+          "${code_utils.unescapeHtml(userInfo.userForum!['1'])}";
     }
     return UserInfoState(
       uid: userInfo.uid,
@@ -114,9 +114,9 @@ class UserInfoNotifier extends Notifier<UserInfoState> {
         '财富':
             '${userInfo.money! ~/ 10000}金 ${(userInfo.money! % 10000) ~/ 100}银 ${userInfo.money! % 100}铜',
         '注册日期':
-            '${codeUtils.formatDate(DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate! * 1000))}'
+            '${code_utils.formatDate(DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate! * 1000))}'
       },
-      signature: codeUtils.isStringEmpty(userInfo.sign)
+      signature: code_utils.isStringEmpty(userInfo.sign)
           ? "暂无签名"
           : "${NgaContentParser.parse(userInfo.sign)}",
       moderatorForums: moderatorForumsMap,
