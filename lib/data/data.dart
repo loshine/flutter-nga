@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/cupertino.dart';
 
+import 'package:flutter_nga/data/entity/base_url_config.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
 import 'package:flutter_nga/data/repository/message_repository.dart';
@@ -14,10 +15,10 @@ import 'package:flutter_nga/data/repository/resource_repository.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
-import 'package:flutter_nga/utils/constant.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:sembast/sembast_io.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Data {
   static final Data _singleton = Data._internal();
@@ -44,6 +45,14 @@ class Data {
 
   final _gbk = const GbkCodec(allowMalformed: true);
 
+  /// 当前使用的 baseUrl 配置
+  BaseUrlConfig _currentBaseUrlConfig = BaseUrlPresets.defaultConfig;
+
+  BaseUrlConfig get currentBaseUrlConfig => _currentBaseUrlConfig;
+
+  /// baseUrl 变更监听器
+  final List<void Function(BaseUrlConfig)> _baseUrlChangeListeners = [];
+
   factory Data() {
     return _singleton;
   }
@@ -58,10 +67,13 @@ class Data {
     String forumDbPath = [appDocDir.path, 'main.db'].join('/');
     _database = await dbFactory.openDatabase(forumDbPath);
 
+    // 加载保存的 baseUrl 配置
+    await _loadBaseUrlConfig();
+
     _dio = Dio();
 
     // 配置dio实例
-    dio.options.baseUrl = DOMAIN;
+    _updateDioBaseUrl();
     dio.options.connectTimeout = const Duration(milliseconds: 10000); // 10s
     dio.options.receiveTimeout = const Duration(milliseconds: 10000); // 10s
 //    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
@@ -228,6 +240,76 @@ class Data {
     }
     return null;
   }
+
+  /// 加载保存的 baseUrl 配置
+  Future<void> _loadBaseUrlConfig() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedKey = prefs.getString(_baseUrlPrefsKey);
+
+      if (savedKey != null) {
+        final config = BaseUrlPresets.getByKey(savedKey);
+        if (config != null) {
+          _currentBaseUrlConfig = config;
+          debugPrint('Data: 加载 baseUrl 配置: ${config.url}');
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('加载 baseUrl 配置失败: $e');
+    }
+    _currentBaseUrlConfig = BaseUrlPresets.defaultConfig;
+  }
+
+  static const String _baseUrlPrefsKey = 'base_url_config_key';
+
+  /// 更新 Dio 的 baseUrl
+  void _updateDioBaseUrl() {
+    if (_dio != null) {
+      _dio!.options.baseUrl = _currentBaseUrlConfig.url;
+    }
+  }
+
+  /// 切换 baseUrl 配置
+  Future<void> switchBaseUrl(BaseUrlConfig config) async {
+    if (_currentBaseUrlConfig.key == config.key) return;
+
+    _currentBaseUrlConfig = config;
+    _updateDioBaseUrl();
+
+    // 保存到本地存储
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_baseUrlPrefsKey, config.key);
+    } catch (e) {
+      debugPrint('保存 baseUrl 配置失败: $e');
+    }
+
+    // 通知监听器
+    for (final listener in _baseUrlChangeListeners) {
+      listener(config);
+    }
+
+    debugPrint('Data: BaseUrl 已切换至: ${config.url}');
+  }
+
+  /// 添加 baseUrl 变更监听器
+  void addBaseUrlChangeListener(void Function(BaseUrlConfig) listener) {
+    _baseUrlChangeListeners.add(listener);
+  }
+
+  /// 移除 baseUrl 变更监听器
+  void removeBaseUrlChangeListener(void Function(BaseUrlConfig) listener) {
+    _baseUrlChangeListeners.remove(listener);
+  }
+
+  /// 获取当前 baseUrl
+  String get baseUrl => _currentBaseUrlConfig.url;
+
+  /// 获取当前域名 (不含 https:// 和末尾斜杠)
+  String get domain => _currentBaseUrlConfig.url
+      .replaceAll(RegExp(r'^https?://'), '')
+      .replaceAll(RegExp(r'/$'), '');
 
   void close() async {
     // 关闭数据库

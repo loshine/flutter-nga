@@ -10,7 +10,13 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../utils/constant.dart';
 import 'data.dart';
 
-final httpClient = Dio(BaseOptions(
+/// 获取当前 httpClient 实例，使用 Data 中的动态 baseUrl
+Dio get httpClient {
+  _httpClient.options.baseUrl = Data().baseUrl;
+  return _httpClient;
+}
+
+late final Dio _httpClient = Dio(BaseOptions(
   baseUrl: DOMAIN,
   connectTimeout: const Duration(milliseconds: 30000),
   receiveTimeout: const Duration(milliseconds: 30000),

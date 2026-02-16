@@ -4,7 +4,6 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
-import 'package:flutter_nga/utils/constant.dart';
 import 'package:sembast/sembast.dart';
 
 const TAG_CID = "ngaPassportCid";
@@ -190,7 +189,7 @@ class UserDataRepository implements UserRepository {
           "&uid=${cacheUser?.uid}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
-      options.headers = {"Referer": DOMAIN};
+      options.headers = {"Referer": Data().baseUrl};
       Response<Map<String, dynamic>> response =
           await Data().dio.post("nuke.php", data: postData, options: options);
       return BlockInfoData.fromJson(response.data!);
@@ -206,7 +205,7 @@ class UserDataRepository implements UserRepository {
           "__lib=ucp&__act=set_block_word&__output=3&data=${code_utils.urlEncode(blockInfo.toData())}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
-      options.headers = {"Referer": DOMAIN};
+      options.headers = {"Referer": Data().baseUrl};
       Response<Map<String, dynamic>> response =
           await Data().dio.post("nuke.php", data: postData, options: options);
       return response.data!["0"];

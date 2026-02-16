@@ -1,9 +1,11 @@
 import 'dart:ui';
 
-const String DOMAIN_WITHOUT_HTTPS = "bbs.nga.cn";
+/// 默认域名配置 (向后兼容，实际使用 Data().domain 获取动态配置)
+const String DOMAIN_WITHOUT_HTTPS = "nga.178.com";
 const String DOMAIN = "https://$DOMAIN_WITHOUT_HTTPS/";
 
-const String LOGIN_URL = DOMAIN + "nuke.php?__lib=login&__act=account&login";
+/// 登录 URL 基础路径 (使用时需要拼接当前 baseUrl)
+const String LOGIN_URL_PATH = "nuke.php?__lib=login&__act=account&login";
 
 const int TOPIC_MASK_FONT_COLOR_DEFAULT = 0;
 const int TOPIC_MASK_FONT_COLOR_RED = 1;

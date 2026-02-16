@@ -6,7 +6,6 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
-import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -53,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: InAppWebView(
         initialUrlRequest: URLRequest(
-            url: WebUri.uri(Uri.https(DOMAIN_WITHOUT_HTTPS, "nuke.php", {
+            url: WebUri.uri(Uri.https(Data().domain, "nuke.php", {
           '__lib': 'login',
           '__act': 'account',
           'login': null,
