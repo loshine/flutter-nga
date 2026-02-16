@@ -19,6 +19,20 @@ class BaseUrlConfig {
   /// 是否为默认配置
   final bool isDefault;
 
+  BaseUrlConfig copyWith({
+    String? key,
+    String? name,
+    String? url,
+    bool? isDefault,
+  }) {
+    return BaseUrlConfig(
+      key: key ?? this.key,
+      name: name ?? this.name,
+      url: url ?? this.url,
+      isDefault: isDefault ?? this.isDefault,
+    );
+  }
+
   factory BaseUrlConfig.fromJson(Map<String, dynamic> json) {
     return BaseUrlConfig(
       key: json['key'] as String,
@@ -78,11 +92,19 @@ class BaseUrlPresets {
     url: 'https://ngabbs.cn/',
   );
 
+  /// 自定义地址（仅支持单条）
+  static const BaseUrlConfig custom = BaseUrlConfig(
+    key: 'custom',
+    name: '自定义',
+    url: '',
+  );
+
   /// 所有可用配置列表
   static const List<BaseUrlConfig> all = [
     nga178,
     ngaOfficial,
     ngaBbs,
+    custom,
   ];
 
   /// 获取默认配置

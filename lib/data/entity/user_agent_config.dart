@@ -27,6 +27,22 @@ class UserAgentConfig {
   /// 是否根据设备自动选择（自动模式）
   final bool isDeviceSpecific;
 
+  UserAgentConfig copyWith({
+    String? key,
+    String? name,
+    String? userAgent,
+    bool? isDefault,
+    bool? isDeviceSpecific,
+  }) {
+    return UserAgentConfig(
+      key: key ?? this.key,
+      name: name ?? this.name,
+      userAgent: userAgent ?? this.userAgent,
+      isDefault: isDefault ?? this.isDefault,
+      isDeviceSpecific: isDeviceSpecific ?? this.isDeviceSpecific,
+    );
+  }
+
   factory UserAgentConfig.fromJson(Map<String, dynamic> json) {
     return UserAgentConfig(
       key: json['key'] as String,
@@ -93,7 +109,8 @@ class UserAgentPresets {
   static const UserAgentConfig desktop = UserAgentConfig(
     key: 'desktop',
     name: '桌面浏览器',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36',
+    userAgent:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36',
   );
 
   /// Windows Phone 客户端
@@ -103,6 +120,13 @@ class UserAgentPresets {
     userAgent: 'NGA_WP_JW/(;WINDOWS)',
   );
 
+  /// 自定义 User-Agent（仅支持单条）
+  static const UserAgentConfig custom = UserAgentConfig(
+    key: 'custom',
+    name: '自定义',
+    userAgent: '',
+  );
+
   /// 所有可用配置列表
   static const List<UserAgentConfig> all = [
     auto,
@@ -110,6 +134,7 @@ class UserAgentPresets {
     android,
     desktop,
     windowsPhone,
+    custom,
   ];
 
   /// 获取默认配置

@@ -35,6 +35,9 @@ class UserAgentSettingsNotifier extends Notifier<UserAgentSettingsState> {
   UserAgentSettingsState build() {
     // 监听 Data 中的 UserAgent 变更
     Data().addUserAgentChangeListener(_onUserAgentChanged);
+    ref.onDispose(() {
+      Data().removeUserAgentChangeListener(_onUserAgentChanged);
+    });
 
     return UserAgentSettingsState(
       currentConfig: Data().currentUserAgentConfig,
@@ -45,7 +48,8 @@ class UserAgentSettingsNotifier extends Notifier<UserAgentSettingsState> {
 
   /// 初始化，从 Data 同步配置
   Future<void> init() async {
-    final userAgent = await UserAgentPresets.resolveUserAgent(Data().currentUserAgentConfig);
+    final userAgent =
+        await UserAgentPresets.resolveUserAgent(Data().currentUserAgentConfig);
     state = state.copyWith(
       currentConfig: Data().currentUserAgentConfig,
       resolvedUserAgent: userAgent,
@@ -55,7 +59,9 @@ class UserAgentSettingsNotifier extends Notifier<UserAgentSettingsState> {
 
   /// Data 中 UserAgent 变更的回调
   void _onUserAgentChanged(UserAgentConfig config, String resolvedUserAgent) {
-    if (state.currentConfig.key != config.key) {
+    if (state.currentConfig.key != config.key ||
+        state.currentConfig.userAgent != config.userAgent ||
+        state.resolvedUserAgent != resolvedUserAgent) {
       state = state.copyWith(
         currentConfig: config,
         resolvedUserAgent: resolvedUserAgent,
@@ -65,7 +71,10 @@ class UserAgentSettingsNotifier extends Notifier<UserAgentSettingsState> {
 
   /// 切换 UserAgent 配置
   Future<void> setUserAgentConfig(UserAgentConfig config) async {
-    if (state.currentConfig.key == config.key) return;
+    if (state.currentConfig.key == config.key &&
+        state.currentConfig.userAgent == config.userAgent) {
+      return;
+    }
 
     state = state.copyWith(isLoading: true);
 

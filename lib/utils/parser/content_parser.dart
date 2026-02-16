@@ -235,19 +235,26 @@ class _ContentParser implements Parser {
     final href = m.group(1)!;
     final text = m.group(2) ?? '';
     return href.startsWith('/')
-        ? "<a href='https://bbs.nga.cn$href'>$text</a>"
+        ? "<a href='${_resolveInternalUrl(href)}'>$text</a>"
         : "<a href='$href'>$text</a>";
   }
 
   static String _urlReplacer(Match m) {
     final url = m.group(1)!;
     return url.startsWith('/')
-        ? "<a href='https://bbs.nga.cn$url'>[站内链接]</a>"
+        ? "<a href='${_resolveInternalUrl(url)}'>[站内链接]</a>"
         : "<a href='$url'>$url</a>";
   }
 
   static String _flashReplacer(Match m) =>
-      "<a href='https://bbs.nga.cn${m.group(1)}'>[站外视频]</a>";
+      "<a href='${_resolveInternalUrl(m.group(1) ?? '')}'>[站外视频]</a>";
+
+  static String _resolveInternalUrl(String path) {
+    final baseUrl = Data().baseUrl.endsWith('/')
+        ? Data().baseUrl.substring(0, Data().baseUrl.length - 1)
+        : Data().baseUrl;
+    return '$baseUrl$path';
+  }
 
   static String _collapseWithTitleReplacer(Match m) =>
       "<collapse title='${m.group(1)}'>${m.group(2) ?? ''}</collapse>";

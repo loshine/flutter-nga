@@ -65,7 +65,8 @@ class Data {
   String get currentUserAgent => _currentUserAgent;
 
   /// UserAgent 变更监听器
-  final List<void Function(UserAgentConfig, String)> _userAgentChangeListeners = [];
+  final List<void Function(UserAgentConfig, String)> _userAgentChangeListeners =
+      [];
 
   factory Data() {
     return _singleton;
@@ -103,7 +104,8 @@ class Data {
     dio.options.responseType = ResponseType.bytes;
 
     // 设置 User-Agent
-    _currentUserAgent = await UserAgentPresets.resolveUserAgent(_currentUserAgentConfig);
+    _currentUserAgent =
+        await UserAgentPresets.resolveUserAgent(_currentUserAgentConfig);
     _updateDioUserAgent();
 
     dio.options.headers["Accept-Encoding"] = "gzip";
@@ -256,8 +258,18 @@ class Data {
       if (savedKey != null) {
         final config = BaseUrlPresets.getByKey(savedKey);
         if (config != null) {
-          _currentBaseUrlConfig = config;
-          debugPrint('Data: 加载 baseUrl 配置: ${config.url}');
+          if (config.key == BaseUrlPresets.custom.key) {
+            final customUrl = prefs.getString(_customBaseUrlPrefsKey) ?? '';
+            final normalizedUrl = _normalizeBaseUrl(customUrl);
+            if (normalizedUrl.isNotEmpty) {
+              _currentBaseUrlConfig = config.copyWith(url: normalizedUrl);
+            } else {
+              _currentBaseUrlConfig = BaseUrlPresets.defaultConfig;
+            }
+          } else {
+            _currentBaseUrlConfig = config;
+          }
+          debugPrint('Data: 加载 baseUrl 配置: ${_currentBaseUrlConfig.url}');
           return;
         }
       }
@@ -268,6 +280,7 @@ class Data {
   }
 
   static const String _baseUrlPrefsKey = 'base_url_config_key';
+  static const String _customBaseUrlPrefsKey = 'custom_base_url_value';
 
   /// 更新 Dio 的 baseUrl
   void _updateDioBaseUrl() {
@@ -278,25 +291,37 @@ class Data {
 
   /// 切换 baseUrl 配置
   Future<void> switchBaseUrl(BaseUrlConfig config) async {
-    if (_currentBaseUrlConfig.key == config.key) return;
+    var targetConfig = config;
+    if (config.key == BaseUrlPresets.custom.key) {
+      final normalizedUrl = _normalizeBaseUrl(config.url);
+      if (normalizedUrl.isEmpty) return;
+      targetConfig = config.copyWith(url: normalizedUrl);
+    }
+    if (_currentBaseUrlConfig.key == targetConfig.key &&
+        _currentBaseUrlConfig.url == targetConfig.url) {
+      return;
+    }
 
-    _currentBaseUrlConfig = config;
+    _currentBaseUrlConfig = targetConfig;
     _updateDioBaseUrl();
 
     // 保存到本地存储
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_baseUrlPrefsKey, config.key);
+      await prefs.setString(_baseUrlPrefsKey, targetConfig.key);
+      if (targetConfig.key == BaseUrlPresets.custom.key) {
+        await prefs.setString(_customBaseUrlPrefsKey, targetConfig.url);
+      }
     } catch (e) {
       debugPrint('保存 baseUrl 配置失败: $e');
     }
 
     // 通知监听器
     for (final listener in _baseUrlChangeListeners) {
-      listener(config);
+      listener(targetConfig);
     }
 
-    debugPrint('Data: BaseUrl 已切换至: ${config.url}');
+    debugPrint('Data: BaseUrl 已切换至: ${targetConfig.url}');
   }
 
   /// 添加 baseUrl 变更监听器
@@ -318,6 +343,7 @@ class Data {
       .replaceAll(RegExp(r'/$'), '');
 
   static const String _userAgentPrefsKey = 'user_agent_config_key';
+  static const String _customUserAgentPrefsKey = 'custom_user_agent_value';
 
   /// 加载保存的 UserAgent 配置
   Future<void> _loadUserAgentConfig() async {
@@ -328,8 +354,19 @@ class Data {
       if (savedKey != null) {
         final config = UserAgentPresets.getByKey(savedKey);
         if (config != null) {
-          _currentUserAgentConfig = config;
-          debugPrint('Data: 加载 UserAgent 配置: ${config.name}');
+          if (config.key == UserAgentPresets.custom.key) {
+            final customUserAgent =
+                (prefs.getString(_customUserAgentPrefsKey) ?? '').trim();
+            if (customUserAgent.isNotEmpty) {
+              _currentUserAgentConfig =
+                  config.copyWith(userAgent: customUserAgent);
+            } else {
+              _currentUserAgentConfig = UserAgentPresets.defaultConfig;
+            }
+          } else {
+            _currentUserAgentConfig = config;
+          }
+          debugPrint('Data: 加载 UserAgent 配置: ${_currentUserAgentConfig.name}');
           return;
         }
       }
@@ -348,36 +385,62 @@ class Data {
 
   /// 切换 UserAgent 配置
   Future<void> switchUserAgent(UserAgentConfig config) async {
-    if (_currentUserAgentConfig.key == config.key) return;
+    var targetConfig = config;
+    if (targetConfig.key == UserAgentPresets.custom.key) {
+      final customUserAgent = targetConfig.userAgent.trim();
+      if (customUserAgent.isEmpty) return;
+      targetConfig = targetConfig.copyWith(userAgent: customUserAgent);
+    }
+    if (_currentUserAgentConfig.key == targetConfig.key &&
+        _currentUserAgentConfig.userAgent == targetConfig.userAgent) {
+      return;
+    }
 
-    _currentUserAgentConfig = config;
-    _currentUserAgent = await UserAgentPresets.resolveUserAgent(config);
+    _currentUserAgentConfig = targetConfig;
+    _currentUserAgent = await UserAgentPresets.resolveUserAgent(targetConfig);
     _updateDioUserAgent();
 
     // 保存到本地存储
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_userAgentPrefsKey, config.key);
+      await prefs.setString(_userAgentPrefsKey, targetConfig.key);
+      if (targetConfig.key == UserAgentPresets.custom.key) {
+        await prefs.setString(_customUserAgentPrefsKey, targetConfig.userAgent);
+      }
     } catch (e) {
       debugPrint('保存 UserAgent 配置失败: $e');
     }
 
     // 通知监听器
     for (final listener in _userAgentChangeListeners) {
-      listener(config, _currentUserAgent);
+      listener(targetConfig, _currentUserAgent);
     }
 
-    debugPrint('Data: UserAgent 已切换至: ${config.name}');
+    debugPrint('Data: UserAgent 已切换至: ${targetConfig.name}');
   }
 
   /// 添加 UserAgent 变更监听器
-  void addUserAgentChangeListener(void Function(UserAgentConfig, String) listener) {
+  void addUserAgentChangeListener(
+      void Function(UserAgentConfig, String) listener) {
     _userAgentChangeListeners.add(listener);
   }
 
   /// 移除 UserAgent 变更监听器
-  void removeUserAgentChangeListener(void Function(UserAgentConfig, String) listener) {
+  void removeUserAgentChangeListener(
+      void Function(UserAgentConfig, String) listener) {
     _userAgentChangeListeners.remove(listener);
+  }
+
+  String _normalizeBaseUrl(String url) {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return '';
+    final parsed = Uri.tryParse(trimmed);
+    if (parsed == null ||
+        !parsed.hasScheme ||
+        !(parsed.scheme == 'http' || parsed.scheme == 'https')) {
+      return '';
+    }
+    return trimmed.endsWith('/') ? trimmed : '$trimmed/';
   }
 
   void close() async {

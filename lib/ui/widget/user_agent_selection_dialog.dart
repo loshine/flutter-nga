@@ -12,6 +12,12 @@ class UserAgentSelectionDialog extends ConsumerWidget {
     final state = ref.watch(userAgentSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final options = UserAgentPresets.all
+        .map((config) => config.key == UserAgentPresets.custom.key &&
+                state.currentConfig.key == UserAgentPresets.custom.key
+            ? state.currentConfig
+            : config)
+        .toList();
 
     return AlertDialog(
       title: const Text('选择 User-Agent'),
@@ -19,9 +25,9 @@ class UserAgentSelectionDialog extends ConsumerWidget {
         width: double.maxFinite,
         child: ListView.builder(
           shrinkWrap: true,
-          itemCount: UserAgentPresets.all.length,
+          itemCount: options.length,
           itemBuilder: (context, index) {
-            final config = UserAgentPresets.all[index];
+            final config = options[index];
 
             return RadioListTile<UserAgentConfig>(
               title: Text(
@@ -38,7 +44,9 @@ class UserAgentSelectionDialog extends ConsumerWidget {
                       ),
                     )
                   : Text(
-                      config.userAgent,
+                      config.userAgent.isEmpty
+                          ? '点击后输入自定义 User-Agent'
+                          : config.userAgent,
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         fontSize: 11,
@@ -52,12 +60,7 @@ class UserAgentSelectionDialog extends ConsumerWidget {
                   ? null
                   : (value) async {
                       if (value != null) {
-                        await ref
-                            .read(userAgentSettingsProvider.notifier)
-                            .setUserAgentConfig(value);
-                        if (context.mounted) {
-                          Navigator.of(context).pop();
-                        }
+                        await _onSelectConfig(context, ref, state, value);
                       }
                     },
               activeColor: colorScheme.primary,
@@ -74,5 +77,74 @@ class UserAgentSelectionDialog extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _onSelectConfig(
+    BuildContext context,
+    WidgetRef ref,
+    UserAgentSettingsState state,
+    UserAgentConfig config,
+  ) async {
+    var selected = config;
+    if (config.key == UserAgentPresets.custom.key) {
+      final customUserAgent = await _showCustomUserAgentInput(
+        context,
+        initialValue: state.currentConfig.key == UserAgentPresets.custom.key
+            ? state.currentConfig.userAgent
+            : '',
+      );
+      if (customUserAgent == null) return;
+      selected = UserAgentPresets.custom.copyWith(userAgent: customUserAgent);
+    }
+    await ref
+        .read(userAgentSettingsProvider.notifier)
+        .setUserAgentConfig(selected);
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<String?> _showCustomUserAgentInput(
+    BuildContext context, {
+    required String initialValue,
+  }) async {
+    final controller = TextEditingController(text: initialValue);
+    final value = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('自定义 User-Agent'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              hintText: 'Mozilla/5.0 ...',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+    final trimmed = (value ?? '').trim();
+    if (trimmed.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User-Agent 不能为空')),
+        );
+      }
+      return null;
+    }
+    return trimmed;
   }
 }

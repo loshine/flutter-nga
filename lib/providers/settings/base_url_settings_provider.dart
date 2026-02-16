@@ -31,7 +31,10 @@ class BaseUrlSettingsNotifier extends Notifier<BaseUrlSettingsState> {
   BaseUrlSettingsState build() {
     // 监听 Data 中的 baseUrl 变更
     Data().addBaseUrlChangeListener(_onBaseUrlChanged);
-    
+    ref.onDispose(() {
+      Data().removeBaseUrlChangeListener(_onBaseUrlChanged);
+    });
+
     return BaseUrlSettingsState(
       currentConfig: Data().currentBaseUrlConfig,
       isLoading: true,
@@ -48,14 +51,18 @@ class BaseUrlSettingsNotifier extends Notifier<BaseUrlSettingsState> {
 
   /// Data 中 baseUrl 变更的回调
   void _onBaseUrlChanged(BaseUrlConfig config) {
-    if (state.currentConfig.key != config.key) {
+    if (state.currentConfig.key != config.key ||
+        state.currentConfig.url != config.url) {
       state = state.copyWith(currentConfig: config);
     }
   }
 
   /// 切换 BaseUrl 配置
   Future<void> setBaseUrlConfig(BaseUrlConfig config) async {
-    if (state.currentConfig.key == config.key) return;
+    if (state.currentConfig.key == config.key &&
+        state.currentConfig.url == config.url) {
+      return;
+    }
 
     state = state.copyWith(isLoading: true);
 
@@ -85,7 +92,9 @@ class BaseUrlSettingsNotifier extends Notifier<BaseUrlSettingsState> {
   /// 获取当前域名 (不含 https://)
   String get domain {
     final url = state.currentConfig.url;
-    return url.replaceAll(RegExp(r'^https?://'), '').replaceAll(RegExp(r'/$'), '');
+    return url
+        .replaceAll(RegExp(r'^https?://'), '')
+        .replaceAll(RegExp(r'/$'), '');
   }
 }
 
