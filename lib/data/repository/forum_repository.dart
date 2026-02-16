@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:sembast/sembast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
@@ -24,11 +23,12 @@ abstract class ForumRepository {
 }
 
 class ForumDataRepository implements ForumRepository {
-  ForumDataRepository(this.database);
+  ForumDataRepository(this.database, this._dio);
 
   final List<ForumGroup> forumGroupList = [];
 
   final Database database;
+  final Dio _dio;
 
   StoreRef<int, dynamic>? get _store {
     if (_lateInitStore == null) {
@@ -270,8 +270,7 @@ class ForumDataRepository implements ForumRepository {
   @override
   Future<List<Forum>> getForumByName(String keyword) async {
     try {
-      Response<Map<String, dynamic>> response = await Data()
-          .dio
+      Response<Map<String, dynamic>> response = await _dio
           .get("forum.php?&__output=8&key=${code_utils.urlEncode(keyword)}");
       Map<String, dynamic> map = response.data!;
       List<Forum> forums = [];
@@ -292,7 +291,7 @@ class ForumDataRepository implements ForumRepository {
         "type": 1,
         "info": "add_to_block_tids",
       });
-      Response<Map<String, dynamic>> response = await Data().dio.post(
+      Response<Map<String, dynamic>> response = await _dio.post(
           "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
           data: formData);
       return response.data!["0"];
@@ -309,7 +308,7 @@ class ForumDataRepository implements ForumRepository {
         "type": 1,
         "info": "add_to_block_tids",
       });
-      Response<Map<String, dynamic>> response = await Data().dio.post(
+      Response<Map<String, dynamic>> response = await _dio.post(
           "nuke.php?__lib=user_option&__act=set&raw=3&add=$fid",
           data: formData);
       return response.data!["0"];

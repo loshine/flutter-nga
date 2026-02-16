@@ -10,7 +10,16 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../utils/constant.dart';
 import 'data.dart';
 
-final httpClient = Dio(BaseOptions(
+/// 获取当前 httpClient 实例，使用 Data 中的动态 baseUrl 和 UserAgent
+Dio get httpClient {
+  _httpClient.options.baseUrl = Data().baseUrl;
+  if (Data().currentUserAgent.isNotEmpty) {
+    _httpClient.options.headers['User-Agent'] = Data().currentUserAgent;
+  }
+  return _httpClient;
+}
+
+late final Dio _httpClient = Dio(BaseOptions(
   baseUrl: DOMAIN,
   connectTimeout: const Duration(milliseconds: 30000),
   receiveTimeout: const Duration(milliseconds: 30000),
@@ -18,26 +27,7 @@ final httpClient = Dio(BaseOptions(
 ));
 
 Future setUpHttpClient() async {
-  await setUpDeviceInfoHeader();
   await setUpInterceptors();
-}
-
-Future setUpDeviceInfoHeader() async {
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  String userAgent;
-  if (Platform.isAndroid) {
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    userAgent =
-        "Nga_Official/90306([${androidInfo.brand} ${androidInfo.model}];"
-        "Android${androidInfo.version.release})";
-  } else if (Platform.isIOS) {
-    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-    userAgent =
-        "NGA_skull/7.3.1(${iosInfo.utsname.machine};iOS ${iosInfo.systemVersion})";
-  } else {
-    userAgent = "Nga_Official/90306";
-  }
-  httpClient.options.headers['User-Agent'] = userAgent;
 }
 
 /// 用户信息请求头拦截器

@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/toggle_like_reaction.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
@@ -65,9 +64,10 @@ class TopicDataRepository implements TopicRepository {
   static const _RESULT_START_TAG = "<span style='color:#aaa'>&gt;</span>";
   static const _RESULT_END_TAG = "<br/>";
 
-  TopicDataRepository(this.database);
+  TopicDataRepository(this.database, this._dio);
 
   final Database database;
+  final Dio _dio;
 
   StoreRef<int, dynamic> get _store {
     if (_lateInitStore == null) {
@@ -100,7 +100,7 @@ class TopicDataRepository implements TopicRepository {
         params += "&recommend=1&order_by=postdatedesc";
       }
       Response<Map<String, dynamic>> response =
-          await Data().dio.get("thread.php?$params");
+          await _dio.get("thread.php?$params");
       return TopicListData.fromJson(response.data!, page);
     } catch (err) {
       rethrow;
@@ -109,7 +109,7 @@ class TopicDataRepository implements TopicRepository {
 
   Future<dynamic> getUserReplies(int authorid, int page) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.get(
+      Response<Map<String, dynamic>> response = await _dio.get(
           "thread.php?__output=8&searchpost=1&authorid=$authorid&page=$page");
       return TopicListData.fromJson(response.data!, page);
     } catch (err) {
@@ -121,7 +121,7 @@ class TopicDataRepository implements TopicRepository {
   Future<TopicListData> getFavouriteTopicList(int page) async {
     try {
       Response<Map<String, dynamic>> response =
-          await Data().dio.get("thread.php?favor=1&__output=8&page=$page");
+          await _dio.get("thread.php?favor=1&__output=8&page=$page");
       return TopicListData.fromJson(response.data!, page);
     } catch (err) {
       rethrow;
@@ -131,7 +131,7 @@ class TopicDataRepository implements TopicRepository {
   @override
   Future<String?> addFavouriteTopic(int? tid) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.post(
+      Response<Map<String, dynamic>> response = await _dio.post(
           "nuke.php?__lib=topic_favor&__output=8&__act=topic_favor&action=add&tid=$tid");
       return response.data!['0'];
     } catch (err) {
@@ -151,7 +151,7 @@ class TopicDataRepository implements TopicRepository {
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
       Response<Map<String, dynamic>> response =
-          await Data().dio.post("nuke.php", data: postData, options: options);
+          await _dio.post("nuke.php", data: postData, options: options);
       return response.data!['0'];
     } catch (err) {
       rethrow;
@@ -162,7 +162,7 @@ class TopicDataRepository implements TopicRepository {
   Future<TopicDetailData> getTopicDetail(
       int tid, int page, int? authorid) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.get(
+      Response<Map<String, dynamic>> response = await _dio.get(
           "read.php?__output=8&tid=$tid&page=$page${authorid == null ? "" : "&authorid=$authorid"}");
       return TopicDetailData.fromJson(response.data!);
     } catch (err) {
@@ -174,7 +174,7 @@ class TopicDataRepository implements TopicRepository {
   Future<TopicDetailData> getTopicReplies(int? pid) async {
     try {
       Response<Map<String, dynamic>> response =
-          await Data().dio.get("read.php?__output=8&pid=$pid");
+          await _dio.get("read.php?__output=8&pid=$pid");
       return TopicDetailData.fromJson(response.data!);
     } catch (err) {
       rethrow;
@@ -184,8 +184,7 @@ class TopicDataRepository implements TopicRepository {
   @override
   Future<List<TopicTag>> getTopicTagList(int fid) async {
     try {
-      Response<Map<String, dynamic>> response = await Data()
-          .dio
+      Response<Map<String, dynamic>> response = await _dio
           .get("nuke.php?fid=$fid&__output=8&__lib=topic_key&__act=get");
       List<TopicTag> list = [];
       Map<String, dynamic> tagMap = response.data!["0"];
@@ -201,9 +200,9 @@ class TopicDataRepository implements TopicRepository {
   @override
   Future<String?> getAuthCode(int? fid, int? tid, String action) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.get(
-            "post.php?__output=8&fid=$fid${tid != null ? "&tid=$tid" : ""}&action=$action",
-          );
+      Response<Map<String, dynamic>> response = await _dio.get(
+        "post.php?__output=8&fid=$fid${tid != null ? "&tid=$tid" : ""}&action=$action",
+      );
       return response.data!["auth"];
     } catch (err) {
       rethrow;
@@ -233,9 +232,8 @@ class TopicDataRepository implements TopicRepository {
         "origin_domain": "bbs.ngacn.cc",
         "noprefix": "",
       });
-      Response<Map<String, dynamic>> response = await Data()
-          .dio
-          .post("https://img8.nga.cn/attach.php", data: formData);
+      Response<Map<String, dynamic>> response =
+          await _dio.post("https://img8.nga.cn/attach.php", data: formData);
       debugPrint(response.toString());
       return response.data!;
     } catch (err) {
@@ -247,7 +245,7 @@ class TopicDataRepository implements TopicRepository {
   Future<String?> checkCreateTopic(int fid) async {
     try {
       Response<Map<String, dynamic>> response =
-          await Data().dio.get("nuke.php?fid=$fid&__output=8&action=new");
+          await _dio.get("nuke.php?fid=$fid&__output=8&action=new");
       return response.data!['auth'];
     } catch (err) {
       rethrow;
@@ -267,11 +265,11 @@ class TopicDataRepository implements TopicRepository {
     try {
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
-      Response<String> response = await Data().dio.post(
-            "post.php",
-            data: postData,
-            options: options,
-          );
+      Response<String> response = await _dio.post(
+        "post.php",
+        data: postData,
+        options: options,
+      );
       final html = response.data!;
       int start = html.indexOf(_RESULT_START_TAG);
       if (start == -1) return "发帖失败";
@@ -298,11 +296,11 @@ class TopicDataRepository implements TopicRepository {
     try {
       final options = Options();
       options.contentType = Headers.formUrlEncodedContentType;
-      Response<String> response = await Data().dio.post(
-            "post.php",
-            data: postData,
-            options: options,
-          );
+      Response<String> response = await _dio.post(
+        "post.php",
+        data: postData,
+        options: options,
+      );
       final html = response.data!;
       int start = html.indexOf(_RESULT_START_TAG);
       if (start == -1) return "发帖失败";
@@ -322,11 +320,11 @@ class TopicDataRepository implements TopicRepository {
     try {
       final options = Options();
       options.contentType = Headers.formUrlEncodedContentType;
-      Response<Map<String, dynamic>> response = await Data().dio.post(
-            "nuke.php",
-            data: postData,
-            options: options,
-          );
+      Response<Map<String, dynamic>> response = await _dio.post(
+        "nuke.php",
+        data: postData,
+        options: options,
+      );
       return ToggleLikeReaction.fromJson(response.data!);
     } catch (err) {
       rethrow;
@@ -340,11 +338,11 @@ class TopicDataRepository implements TopicRepository {
     try {
       final options = Options();
       options.contentType = Headers.formUrlEncodedContentType;
-      Response<Map<String, dynamic>> response = await Data().dio.post(
-            "nuke.php",
-            data: postData,
-            options: options,
-          );
+      Response<Map<String, dynamic>> response = await _dio.post(
+        "nuke.php",
+        data: postData,
+        options: options,
+      );
       return ToggleLikeReaction.fromJson(response.data!);
     } catch (err) {
       rethrow;
@@ -355,7 +353,7 @@ class TopicDataRepository implements TopicRepository {
   Future<TopicListData> searchTopic(
       String keyword, int? fid, bool content, int? page) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.get(
+      Response<Map<String, dynamic>> response = await _dio.get(
           "thread.php?${fid == null ? "" : "fid=$fid&"}key=$keyword&page=$page${content ? "&content=1" : ""}&__output=8");
       return TopicListData.fromJson(response.data!, page);
     } catch (err) {
