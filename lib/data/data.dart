@@ -8,6 +8,7 @@ import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_nga/data/entity/base_url_config.dart';
+import 'package:flutter_nga/data/entity/user_agent_config.dart';
 import 'package:flutter_nga/data/repository/expression_repository.dart';
 import 'package:flutter_nga/data/repository/forum_repository.dart';
 import 'package:flutter_nga/data/repository/message_repository.dart';
@@ -53,6 +54,19 @@ class Data {
   /// baseUrl 变更监听器
   final List<void Function(BaseUrlConfig)> _baseUrlChangeListeners = [];
 
+  /// 当前使用的 UserAgent 配置
+  UserAgentConfig _currentUserAgentConfig = UserAgentPresets.defaultConfig;
+
+  UserAgentConfig get currentUserAgentConfig => _currentUserAgentConfig;
+
+  /// 当前解析后的 UserAgent 字符串
+  String _currentUserAgent = '';
+
+  String get currentUserAgent => _currentUserAgent;
+
+  /// UserAgent 变更监听器
+  final List<void Function(UserAgentConfig, String)> _userAgentChangeListeners = [];
+
   factory Data() {
     return _singleton;
   }
@@ -70,6 +84,9 @@ class Data {
     // 加载保存的 baseUrl 配置
     await _loadBaseUrlConfig();
 
+    // 加载保存的 UserAgent 配置
+    await _loadUserAgentConfig();
+
     _dio = Dio();
 
     // 配置dio实例
@@ -84,22 +101,11 @@ class Data {
 //    };
     // 因为需要 gbk -> utf-8, 所以需要流的形式
     dio.options.responseType = ResponseType.bytes;
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    // 该特殊 UA 可以让访客访问
-    String userAgent;
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      userAgent =
-          "Nga_Official/90306([${androidInfo.brand} ${androidInfo.model}];"
-          "Android${androidInfo.version.release})";
-    } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      userAgent =
-          "NGA_skull/7.3.1(${iosInfo.utsname.machine};iOS ${iosInfo.systemVersion})";
-    } else {
-      userAgent = "Nga_Official/90306";
-    }
-    dio.options.headers["User-Agent"] = userAgent;
+
+    // 设置 User-Agent
+    _currentUserAgent = await UserAgentPresets.resolveUserAgent(_currentUserAgentConfig);
+    _updateDioUserAgent();
+
     dio.options.headers["Accept-Encoding"] = "gzip";
     dio.options.headers["Cache-Control"] = "max-age=0";
     dio.options.headers["Connection"] = "Keep-Alive";
@@ -310,6 +316,69 @@ class Data {
   String get domain => _currentBaseUrlConfig.url
       .replaceAll(RegExp(r'^https?://'), '')
       .replaceAll(RegExp(r'/$'), '');
+
+  static const String _userAgentPrefsKey = 'user_agent_config_key';
+
+  /// 加载保存的 UserAgent 配置
+  Future<void> _loadUserAgentConfig() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedKey = prefs.getString(_userAgentPrefsKey);
+
+      if (savedKey != null) {
+        final config = UserAgentPresets.getByKey(savedKey);
+        if (config != null) {
+          _currentUserAgentConfig = config;
+          debugPrint('Data: 加载 UserAgent 配置: ${config.name}');
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('加载 UserAgent 配置失败: $e');
+    }
+    _currentUserAgentConfig = UserAgentPresets.defaultConfig;
+  }
+
+  /// 更新 Dio 的 UserAgent
+  void _updateDioUserAgent() {
+    if (_dio != null && _currentUserAgent.isNotEmpty) {
+      _dio!.options.headers["User-Agent"] = _currentUserAgent;
+    }
+  }
+
+  /// 切换 UserAgent 配置
+  Future<void> switchUserAgent(UserAgentConfig config) async {
+    if (_currentUserAgentConfig.key == config.key) return;
+
+    _currentUserAgentConfig = config;
+    _currentUserAgent = await UserAgentPresets.resolveUserAgent(config);
+    _updateDioUserAgent();
+
+    // 保存到本地存储
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_userAgentPrefsKey, config.key);
+    } catch (e) {
+      debugPrint('保存 UserAgent 配置失败: $e');
+    }
+
+    // 通知监听器
+    for (final listener in _userAgentChangeListeners) {
+      listener(config, _currentUserAgent);
+    }
+
+    debugPrint('Data: UserAgent 已切换至: ${config.name}');
+  }
+
+  /// 添加 UserAgent 变更监听器
+  void addUserAgentChangeListener(void Function(UserAgentConfig, String) listener) {
+    _userAgentChangeListeners.add(listener);
+  }
+
+  /// 移除 UserAgent 变更监听器
+  void removeUserAgentChangeListener(void Function(UserAgentConfig, String) listener) {
+    _userAgentChangeListeners.remove(listener);
+  }
 
   void close() async {
     // 关闭数据库
