@@ -1,6 +1,5 @@
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
-import 'package:flutter_nga/utils/constant.dart';
 import 'package:flutter_nga/utils/name_utils.dart';
 
 class NgaContentParser {
@@ -134,17 +133,19 @@ class _ReplyParser implements Parser {
   @override
   String parse(String? content) {
     if (content == null || content.isEmpty) return '';
+    // 使用 Data 中的动态 baseUrl
+    final baseUrl = Data().baseUrl;
     return content
         .replaceAllMapped(_topicRegex, (m) =>
-            "<a href='${DOMAIN}read.php?tid=${m.group(1)}'>Topic</a> Post by <a href='${DOMAIN}nuke.php?func=ucp&uid=${m.group(2)}'>[${m.group(3)}]</a> <small>(${m.group(4)})</small>")
+            "<a href='${baseUrl}read.php?tid=${m.group(1)}'>Topic</a> Post by <a href='${baseUrl}nuke.php?func=ucp&uid=${m.group(2)}'>[${m.group(3)}]</a> <small>(${m.group(4)})</small>")
         .replaceAllMapped(_replyRegex, (m) =>
-            "<a href='${DOMAIN}read.php?searchpost=1&pid=${m.group(1)}'>Reply</a> Post by <a href='${DOMAIN}nuke.php?func=ucp&uid=${m.group(4)}'>[${m.group(5)}]</a> <small>(${m.group(6)})</small>:")
+            "<a href='${baseUrl}read.php?searchpost=1&pid=${m.group(1)}'>Reply</a> Post by <a href='${baseUrl}nuke.php?func=ucp&uid=${m.group(4)}'>[${m.group(5)}]</a> <small>(${m.group(6)})</small>:")
         .replaceAllMapped(_anonyRegex, (m) =>
-            "<a href='${DOMAIN}read.php?searchpost=1&pid=${m.group(1)}'>Reply</a> Post by ${getShowName("#anony_${m.group(4)}")}</a><font color='gray'>(${m.group(5)}楼)</font> <small>(${m.group(6)})</small>:")
+            "<a href='${baseUrl}read.php?searchpost=1&pid=${m.group(1)}'>Reply</a> Post by ${getShowName("#anony_${m.group(4)}")}</a><font color='gray'>(${m.group(5)}楼)</font> <small>(${m.group(6)})</small>:")
         .replaceAllMapped(_replyTopicRegex, (m) =>
-            "Reply to <a href='${DOMAIN}read.php?searchpost=1&pid=${m.group(1)}'>Topic</a> Post by ${m.group(2)} ${m.group(3)}")
+            "Reply to <a href='${baseUrl}read.php?searchpost=1&pid=${m.group(1)}'>Topic</a> Post by ${m.group(2)} ${m.group(3)}")
         .replaceAllMapped(_replyPostRegex, (m) =>
-            "Reply to <a href='${DOMAIN}read.php?searchpost=1&pid=${m.group(1)}'>Post</a> by ${m.group(5)} ${m.group(6)}");
+            "Reply to <a href='${baseUrl}read.php?searchpost=1&pid=${m.group(1)}'>Post</a> by ${m.group(5)} ${m.group(6)}");
   }
 }
 
@@ -234,19 +235,26 @@ class _ContentParser implements Parser {
     final href = m.group(1)!;
     final text = m.group(2) ?? '';
     return href.startsWith('/')
-        ? "<a href='https://bbs.nga.cn$href'>$text</a>"
+        ? "<a href='${_resolveInternalUrl(href)}'>$text</a>"
         : "<a href='$href'>$text</a>";
   }
 
   static String _urlReplacer(Match m) {
     final url = m.group(1)!;
     return url.startsWith('/')
-        ? "<a href='https://bbs.nga.cn$url'>[站内链接]</a>"
+        ? "<a href='${_resolveInternalUrl(url)}'>[站内链接]</a>"
         : "<a href='$url'>$url</a>";
   }
 
   static String _flashReplacer(Match m) =>
-      "<a href='https://bbs.nga.cn${m.group(1)}'>[站外视频]</a>";
+      "<a href='${_resolveInternalUrl(m.group(1) ?? '')}'>[站外视频]</a>";
+
+  static String _resolveInternalUrl(String path) {
+    final baseUrl = Data().baseUrl.endsWith('/')
+        ? Data().baseUrl.substring(0, Data().baseUrl.length - 1)
+        : Data().baseUrl;
+    return '$baseUrl$path';
+  }
 
   static String _collapseWithTitleReplacer(Match m) =>
       "<collapse title='${m.group(1)}'>${m.group(2) ?? ''}</collapse>";
