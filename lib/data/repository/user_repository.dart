@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
-import 'package:flutter_nga/utils/constant.dart';
 import 'package:sembast/sembast.dart';
 
 const TAG_CID = "ngaPassportCid";
@@ -36,9 +34,10 @@ abstract class UserRepository {
 }
 
 class UserDataRepository implements UserRepository {
-  UserDataRepository(this.database);
+  UserDataRepository(this.database, this._dio);
 
   final Database database;
+  final Dio _dio;
 
   StoreRef<int, dynamic> get _store {
     if (_lateInitStore == null) {
@@ -113,7 +112,7 @@ class UserDataRepository implements UserRepository {
   Future<UserInfo> getUserInfoByName(String? username) async {
     try {
       final encodedUsername = code_utils.urlEncode(username!);
-      Response<Map<String, dynamic>> response = await Data().dio.get(
+      Response<Map<String, dynamic>> response = await _dio.get(
           "nuke.php?__lib=ucp&__act=get&__output=8&username=$encodedUsername");
       // {"0": { userinfo }};
       Map<String, dynamic> userInfoMap = response.data!["0"];
@@ -126,9 +125,8 @@ class UserDataRepository implements UserRepository {
   @override
   Future<UserInfo> getUserInfoByUid(String? uid) async {
     try {
-      Response<Map<String, dynamic>> response = await Data()
-          .dio
-          .get("nuke.php?__lib=ucp&__act=get&__output=8&uid=$uid");
+      Response<Map<String, dynamic>> response =
+          await _dio.get("nuke.php?__lib=ucp&__act=get&__output=8&uid=$uid");
       // {"0": { userinfo }};
       Map<String, dynamic> userInfoMap = response.data!["0"];
       return UserInfo.fromJson(userInfoMap);
@@ -190,9 +188,9 @@ class UserDataRepository implements UserRepository {
           "&uid=${cacheUser?.uid}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
-      options.headers = {"Referer": DOMAIN};
+      options.headers = {"Referer": _dio.options.baseUrl};
       Response<Map<String, dynamic>> response =
-          await Data().dio.post("nuke.php", data: postData, options: options);
+          await _dio.post("nuke.php", data: postData, options: options);
       return BlockInfoData.fromJson(response.data!);
     } catch (err) {
       rethrow;
@@ -206,9 +204,9 @@ class UserDataRepository implements UserRepository {
           "__lib=ucp&__act=set_block_word&__output=3&data=${code_utils.urlEncode(blockInfo.toData())}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
-      options.headers = {"Referer": DOMAIN};
+      options.headers = {"Referer": _dio.options.baseUrl};
       Response<Map<String, dynamic>> response =
-          await Data().dio.post("nuke.php", data: postData, options: options);
+          await _dio.post("nuke.php", data: postData, options: options);
       return response.data!["0"];
     } catch (err) {
       rethrow;

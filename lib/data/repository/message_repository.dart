@@ -4,8 +4,6 @@ import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 
-import '../data.dart';
-
 abstract class MessageRepository {
   Future<ConversationListData> getConversationList(int page);
 
@@ -20,10 +18,14 @@ abstract class MessageRepository {
 }
 
 class MessageDataRepository extends MessageRepository {
+  MessageDataRepository(this._dio);
+
+  final Dio _dio;
+
   @override
   Future<ConversationListData> getConversationList(int page) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.get(
+      Response<Map<String, dynamic>> response = await _dio.get(
           "nuke.php?__lib=message&__output=8&act=list&__act=message&page=$page");
       return ConversationListData.fromJson(response.data!['0']);
     } catch (err) {
@@ -34,7 +36,7 @@ class MessageDataRepository extends MessageRepository {
   @override
   Future<MessageListData> getMessageList(int? mid, int page) async {
     try {
-      Response<Map<String, dynamic>> response = await Data().dio.get(
+      Response<Map<String, dynamic>> response = await _dio.get(
           "nuke.php?__lib=message&__output=8&act=read&__act=message&mid=$mid&page=$page");
       return MessageListData.fromJson(response.data!['0']);
     } catch (err) {
@@ -58,7 +60,7 @@ class MessageDataRepository extends MessageRepository {
           "&content=${code_utils.urlEncode(content)}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
-      await Data().dio.post("nuke.php", data: postData, options: options);
+      await _dio.post("nuke.php", data: postData, options: options);
     } catch (err) {
       rethrow;
     }
@@ -68,7 +70,7 @@ class MessageDataRepository extends MessageRepository {
   Future<NotificationInfo> getNotificationInfo() async {
     try {
       Response<Map<String, dynamic>> response =
-          await Data().dio.get("nuke.php?__output=8&__lib=noti&__act=if");
+          await _dio.get("nuke.php?__output=8&__lib=noti&__act=if");
       return NotificationInfo.fromJson(response.data!['0']);
     } catch (err) {
       rethrow;
@@ -79,7 +81,7 @@ class MessageDataRepository extends MessageRepository {
   Future<NotificationInfoListData> getNotificationList() async {
     try {
       Response<Map<String, dynamic>> response =
-          await Data().dio.get("nuke.php?__output=8&__lib=noti&__act=get_all");
+          await _dio.get("nuke.php?__output=8&__lib=noti&__act=get_all");
       final data = response.data!['0'];
       if (data == "") {
         return NotificationInfoListData.fromJson({});

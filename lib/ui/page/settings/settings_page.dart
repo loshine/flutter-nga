@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/providers/settings/base_url_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
+import 'package:flutter_nga/providers/settings/user_agent_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/base_url_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
+import 'package:flutter_nga/ui/widget/user_agent_selection_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,12 +22,16 @@ class _SettingsState extends ConsumerState<SettingsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(themeProvider.notifier).refresh();
+      ref.read(baseUrlSettingsProvider.notifier).init();
+      ref.read(userAgentSettingsProvider.notifier).init();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
+    final baseUrlState = ref.watch(baseUrlSettingsProvider);
+    final userAgentState = ref.watch(userAgentSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text("设置")),
@@ -39,6 +47,23 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                 subtitle: "管理您的账号",
                 onTap: () =>
                     Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
+              ),
+            ],
+          ),
+          _SettingsGroup(
+            title: "网络",
+            children: [
+              _SettingsTile(
+                icon: Icons.dns_outlined,
+                title: "服务器设置",
+                subtitle: "当前: ${baseUrlState.currentConfig.name}",
+                onTap: _showBaseUrlSelectionDialog,
+              ),
+              _SettingsTile(
+                icon: Icons.devices_outlined,
+                title: "User-Agent 设置",
+                subtitle: "当前: ${userAgentState.currentConfig.name}",
+                onTap: _showUserAgentSelectionDialog,
               ),
             ],
           ),
@@ -81,6 +106,20 @@ class _SettingsState extends ConsumerState<SettingsPage> {
     showDialog(
       context: context,
       builder: (_) => const ThemeSelectionDialog(),
+    );
+  }
+
+  void _showBaseUrlSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => const BaseUrlSelectionDialog(),
+    );
+  }
+
+  void _showUserAgentSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => const UserAgentSelectionDialog(),
     );
   }
 }
