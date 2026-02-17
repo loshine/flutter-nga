@@ -176,6 +176,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               authorId: widget.reply.authorId,
               tid: widget.reply.tid,
               pid: widget.reply.pid,
+              postDateTimestamp: widget.reply.postDateTimestamp,
             ),
           ),
         ),

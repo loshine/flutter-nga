@@ -67,6 +67,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
               authorId: reply.authorId,
               tid: reply.tid,
               pid: reply.pid,
+              postDateTimestamp: reply.postDateTimestamp,
             ),
           ),
         ],
