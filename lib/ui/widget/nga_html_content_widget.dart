@@ -9,14 +9,23 @@ import 'package:html/dom.dart' as dom;
 
 class NgaHtmlContentWidget extends ConsumerWidget {
   final String content;
+  final int? authorId;
+  final int? tid;
+  final int? pid;
 
-  const NgaHtmlContentWidget({super.key, required this.content});
+  const NgaHtmlContentWidget({
+    super.key,
+    required this.content,
+    this.authorId,
+    this.tid,
+    this.pid,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final interfaceState = ref.watch(interfaceSettingsProvider);
     return Html(
-      data: NgaContentParser.parse(content),
+      data: NgaContentParser.parse(content, authorId: authorId, tid: tid, pid: pid),
       style: {
         'body': Style(
           lineHeight: LineHeight(interfaceState.lineHeight.size),

@@ -171,7 +171,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           height: code_utils.isStringEmpty(widget.reply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: NgaHtmlContentWidget(content: widget.reply.content),
+            child: NgaHtmlContentWidget(
+              content: widget.reply.content,
+              authorId: widget.reply.authorId,
+              tid: widget.reply.tid,
+              pid: widget.reply.pid,
+            ),
           ),
         ),
         SizedBox(

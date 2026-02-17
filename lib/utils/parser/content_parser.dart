@@ -1,5 +1,6 @@
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
+import 'package:flutter_nga/utils/dice_roller.dart';
 import 'package:flutter_nga/utils/name_utils.dart';
 
 class NgaContentParser {
@@ -18,23 +19,25 @@ class NgaContentParser {
   static final _cacheKeys = <String>[];
   static const _maxCacheSize = 256;
 
-  static String parse(String? content) {
+  static String parse(String? content, {int? authorId, int? tid, int? pid}) {
     if (content == null || content.isEmpty) return '';
 
-    // 缓存命中
-    if (_parseCache.containsKey(content)) {
-      return _parseCache[content]!;
+    final cacheKey = authorId != null ? '__dice_${authorId}_${tid}_${pid}__$content' : content;
+    if (_parseCache.containsKey(cacheKey)) {
+      return _parseCache[cacheKey]!;
     }
 
     var parseContent = code_utils.unescapeHtml(content);
     parseContent = _replyParser.parse(parseContent);
+    if (authorId != null && tid != null && pid != null) {
+      parseContent = _DiceParser(authorId: authorId, tid: tid, pid: pid).parse(parseContent);
+    }
     for (final parser in _parserList) {
       parseContent = parser.parse(parseContent);
     }
 
-    // 写入缓存（LRU 淘汰）
-    _cacheKeys.add(content);
-    _parseCache[content] = parseContent;
+    _cacheKeys.add(cacheKey);
+    _parseCache[cacheKey] = parseContent;
     if (_cacheKeys.length > _maxCacheSize) {
       _parseCache.remove(_cacheKeys.removeAt(0));
     }
@@ -42,16 +45,19 @@ class NgaContentParser {
     return parseContent;
   }
 
-  static String parseComment(String? content) {
+  static String parseComment(String? content, {int? authorId, int? tid, int? pid}) {
     if (content == null || content.isEmpty) return '';
 
-    final cacheKey = '__comment__$content';
+    final cacheKey = authorId != null ? '__comment_dice_${authorId}_${tid}_${pid}__$content' : '__comment__$content';
     if (_parseCache.containsKey(cacheKey)) {
       return _parseCache[cacheKey]!;
     }
 
     var parseContent = code_utils.unescapeHtml(content);
     parseContent = _commentParser.parse(parseContent);
+    if (authorId != null && tid != null && pid != null) {
+      parseContent = _DiceParser(authorId: authorId, tid: tid, pid: pid).parse(parseContent);
+    }
     for (final parser in _parserList) {
       parseContent = parser.parse(parseContent);
     }
@@ -286,6 +292,29 @@ class _ContentParser implements Parser {
   static String _listItemReplacer(Match m) => '<li>${m.group(1)}</li>';
 
   static String _dashReplacer(Match m) => '<h5></h5>';
+}
+
+class _DiceParser implements Parser {
+  static final _diceRegex = RegExp(r'\[dice\](.*?)\[/dice\]', caseSensitive: false);
+
+  final int authorId;
+  final int tid;
+  final int pid;
+
+  _DiceParser({required this.authorId, required this.tid, required this.pid});
+
+  @override
+  String parse(String? content) {
+    if (content == null || content.isEmpty) return '';
+    final context = DiceContext(authorId: authorId, topicId: tid, postId: pid);
+    return content.replaceAllMapped(_diceRegex, (m) {
+      final expr = m.group(1) ?? '';
+      final result = DiceRoller.roll(expr, context);
+      return "<span style='background-color:rgba(0,122,255,0.15);"
+          "font-family:monospace;padding:2px 6px;border-radius:4px;'>"
+          "&#x1F3B2; ${result.original} &#x2192; ${result.total}</span>";
+    });
+  }
 }
 
 // 优化 4: 表情解析优化（构建映射表）
