@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/providers/search/input_deletion_status_provider.dart';
 import 'package:flutter_nga/providers/search/search_options_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
+import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -11,47 +12,158 @@ class SearchPage extends HookConsumerWidget {
 
   const SearchPage({this.fid, super.key});
 
+  /// M3 SearchBar 推荐高度
+  static const double _searchBarHeight = 56.0;
+
+  /// M3 SearchBar 推荐圆角
+  static const double _searchBarRadius = 28.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = useTextEditingController();
+    final focusNode = useFocusNode();
+    final isFocused = useState(false);
     final inputVisible = ref.watch(inputDeletionStatusProvider);
     final searchOptions = ref.watch(searchOptionsProvider(fid));
     final searchOptionsNotifier = ref.read(searchOptionsProvider(fid).notifier);
+    final colorScheme = Theme.of(context).colorScheme;
 
     useEffect(() {
-      void listener() {
+      void textListener() {
         ref
             .read(inputDeletionStatusProvider.notifier)
             .setVisible(searchQuery.text.isNotEmpty);
       }
 
-      searchQuery.addListener(listener);
-      return () => searchQuery.removeListener(listener);
+      void focusListener() {
+        isFocused.value = focusNode.hasFocus;
+      }
+
+      searchQuery.addListener(textListener);
+      focusNode.addListener(focusListener);
+      return () {
+        searchQuery.removeListener(textListener);
+        focusNode.removeListener(focusListener);
+      };
     }, []);
 
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
+        titleSpacing: 0,
+        title: _buildSearchBar(
+          context: context,
           controller: searchQuery,
-          textInputAction: TextInputAction.search,
-          onSubmitted: (text) => _onSearch(context, text, searchOptions, fid),
-          maxLines: 1,
-          decoration: InputDecoration(
-            hintText: "搜索...",
-            border: InputBorder.none,
-            suffixIcon: inputVisible
-                ? IconButton(
-                    icon: Icon(
-                      Icons.close,
-                    ),
-                    onPressed: () => WidgetsBinding.instance
-                        .addPostFrameCallback((_) => searchQuery.clear()),
-                  )
-                : Container(width: 0),
-          ),
+          focusNode: focusNode,
+          isFocused: isFocused.value,
+          inputVisible: inputVisible,
+          colorScheme: colorScheme,
+          searchOptions: searchOptions,
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: '搜索',
+            onPressed: () =>
+                _onSearch(context, searchQuery.text, searchOptions, fid),
+          ),
+        ],
       ),
       body: _buildBody(context, ref, searchOptions, searchOptionsNotifier),
+    );
+  }
+
+  /// M3 风格的搜索输入框
+  Widget _buildSearchBar({
+    required BuildContext context,
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required bool isFocused,
+    required bool inputVisible,
+    required ColorScheme colorScheme,
+    required SearchOptionsState searchOptions,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      height: _searchBarHeight,
+      margin: const EdgeInsets.only(right: Dimen.spacingS),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(_searchBarRadius),
+        // 焦点状态边框
+        border: isFocused
+            ? Border.all(
+                color: colorScheme.primary,
+                width: 2,
+              )
+            : null,
+      ),
+      child: Row(
+        children: [
+          // 搜索图标
+          Padding(
+            padding: const EdgeInsets.only(left: Dimen.spacingL),
+            child: Icon(
+              Icons.search,
+              size: Dimen.iconMedium,
+              color: isFocused
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+            ),
+          ),
+          // 输入框
+          Expanded(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (text) =>
+                  _onSearch(context, text, searchOptions, fid),
+              maxLines: 1,
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+              cursorColor: colorScheme.primary,
+              decoration: InputDecoration(
+                hintText: '搜索...',
+                hintStyle: textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: Dimen.spacingM,
+                  vertical: Dimen.spacingL,
+                ),
+                isDense: true,
+              ),
+            ),
+          ),
+          // 清除按钮
+          if (inputVisible)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => WidgetsBinding.instance
+                    .addPostFrameCallback((_) => controller.clear()),
+                borderRadius: BorderRadius.circular(_searchBarRadius),
+                child: Padding(
+                  padding: const EdgeInsets.all(Dimen.spacingM),
+                  child: Icon(
+                    Icons.close,
+                    size: Dimen.iconMedium,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            )
+          else
+            const SizedBox(width: Dimen.spacingL),
+        ],
+      ),
     );
   }
 
@@ -61,165 +173,141 @@ class SearchPage extends HookConsumerWidget {
     SearchOptionsState state,
     SearchOptionsNotifier notifier,
   ) {
-    final widgets = <Widget>[];
-    final firstWidgets = Row(
-      children: <Widget>[
-        Padding(
-          child: ChoiceChip(
-            label: Text(
-              "主题",
-              style: TextStyle(
-                color: state.firstRadio == FIRST_RADIO_TOPIC
-                    ? Colors.white
-                    : Theme.of(context).textTheme.bodyLarge?.color,
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return ListView(
+      padding: const EdgeInsets.all(Dimen.spacingL),
+      children: [
+        // 搜索类型分组
+        _buildOptionSection(
+          context: context,
+          title: '搜索类型',
+          colorScheme: colorScheme,
+          textTheme: textTheme,
+          child: Wrap(
+            spacing: Dimen.spacingS,
+            runSpacing: Dimen.spacingS,
+            children: [
+              ChoiceChip(
+                label: const Text('主题'),
+                selected: state.firstRadio == FIRST_RADIO_TOPIC,
+                onSelected: (_) => notifier.checkFirstRadio(FIRST_RADIO_TOPIC),
+              ),
+              ChoiceChip(
+                label: const Text('版块'),
+                selected: state.firstRadio == FIRST_RADIO_FORUM,
+                onSelected: (_) => notifier.checkFirstRadio(FIRST_RADIO_FORUM),
+              ),
+              ChoiceChip(
+                label: const Text('用户'),
+                selected: state.firstRadio == FIRST_RADIO_USER,
+                onSelected: (_) => notifier.checkFirstRadio(FIRST_RADIO_USER),
+              ),
+            ],
+          ),
+        ),
+
+        // 主题搜索选项
+        if (state.firstRadio == FIRST_RADIO_TOPIC) ...[
+          if (fid != null)
+            _buildOptionSection(
+              context: context,
+              title: '搜索范围',
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+              child: Wrap(
+                spacing: Dimen.spacingS,
+                runSpacing: Dimen.spacingS,
+                children: [
+                  ChoiceChip(
+                    label: const Text('当前版块'),
+                    selected: state.topicRadio == TOPIC_RADIO_CURRENT_FORUM,
+                    onSelected: (_) =>
+                        notifier.checkTopicRadio(TOPIC_RADIO_CURRENT_FORUM),
+                  ),
+                  ChoiceChip(
+                    label: const Text('全部版块'),
+                    selected: state.topicRadio == TOPIC_RADIO_ALL_FORUM,
+                    onSelected: (_) =>
+                        notifier.checkTopicRadio(TOPIC_RADIO_ALL_FORUM),
+                  ),
+                ],
               ),
             ),
-            selectedColor: Theme.of(context).primaryColor,
-            selected: state.firstRadio == FIRST_RADIO_TOPIC,
-            onSelected: (selected) =>
-                notifier.checkFirstRadio(FIRST_RADIO_TOPIC),
-          ),
-          padding: EdgeInsets.only(left: 16),
-        ),
-        Padding(
-          child: ChoiceChip(
-            label: Text(
-              "版块",
-              style: TextStyle(
-                color: state.firstRadio == FIRST_RADIO_FORUM
-                    ? Colors.white
-                    : Theme.of(context).textTheme.bodyLarge?.color,
-              ),
+          _buildOptionSection(
+            context: context,
+            title: '搜索选项',
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+            child: Wrap(
+              spacing: Dimen.spacingS,
+              runSpacing: Dimen.spacingS,
+              children: [
+                FilterChip(
+                  label: const Text('包括正文'),
+                  selected: state.content,
+                  onSelected: (selected) => notifier.checkContent(selected),
+                ),
+              ],
             ),
-            selectedColor: Theme.of(context).primaryColor,
-            selected: state.firstRadio == FIRST_RADIO_FORUM,
-            onSelected: (selected) =>
-                notifier.checkFirstRadio(FIRST_RADIO_FORUM),
           ),
-          padding: EdgeInsets.only(left: 16),
-        ),
-        Padding(
-          child: ChoiceChip(
-            label: Text(
-              "用户",
-              style: TextStyle(
-                color: state.firstRadio == FIRST_RADIO_USER
-                    ? Colors.white
-                    : Theme.of(context).textTheme.bodyLarge?.color,
-              ),
+        ],
+
+        // 用户搜索选项
+        if (state.firstRadio == FIRST_RADIO_USER)
+          _buildOptionSection(
+            context: context,
+            title: '搜索方式',
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+            child: Wrap(
+              spacing: Dimen.spacingS,
+              runSpacing: Dimen.spacingS,
+              children: [
+                ChoiceChip(
+                  label: const Text('用户名'),
+                  selected: state.userRadio == USER_RADIO_NAME,
+                  onSelected: (_) => notifier.checkUserRadio(USER_RADIO_NAME),
+                ),
+                ChoiceChip(
+                  label: const Text('用户ID'),
+                  selected: state.userRadio == USER_RADIO_UID,
+                  onSelected: (_) => notifier.checkUserRadio(USER_RADIO_UID),
+                ),
+              ],
             ),
-            selectedColor: Theme.of(context).primaryColor,
-            selected: state.firstRadio == FIRST_RADIO_USER,
-            onSelected: (selected) =>
-                notifier.checkFirstRadio(FIRST_RADIO_USER),
           ),
-          padding: EdgeInsets.only(left: 16),
-        ),
       ],
     );
-    widgets.add(firstWidgets);
-    if (state.firstRadio == FIRST_RADIO_TOPIC) {
-      if (fid != null) {
-        widgets.add(Row(
-          children: <Widget>[
-            Padding(
-              child: ChoiceChip(
-                  label: Text(
-                    "当前版块",
-                    style: TextStyle(
-                        color: state.topicRadio == TOPIC_RADIO_CURRENT_FORUM
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyLarge?.color),
-                  ),
-                  selectedColor: Theme.of(context).primaryColor,
-                  selected: state.topicRadio == TOPIC_RADIO_CURRENT_FORUM,
-                  onSelected: (selected) =>
-                      notifier.checkTopicRadio(TOPIC_RADIO_CURRENT_FORUM)),
-              padding: EdgeInsets.only(left: 16),
-            ),
-            Padding(
-              child: ChoiceChip(
-                label: Text(
-                  "全部版块",
-                  style: TextStyle(
-                    color: state.topicRadio == TOPIC_RADIO_ALL_FORUM
-                        ? Colors.white
-                        : Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
-                ),
-                selectedColor: Theme.of(context).primaryColor,
-                selected: state.topicRadio == TOPIC_RADIO_ALL_FORUM,
-                onSelected: (selected) =>
-                    notifier.checkTopicRadio(TOPIC_RADIO_ALL_FORUM),
+  }
+
+  /// 构建搜索选项分组卡片
+  Widget _buildOptionSection({
+    required BuildContext context,
+    required String title,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+    required Widget child,
+  }) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: Dimen.spacingM),
+      child: Padding(
+        padding: const EdgeInsets.all(Dimen.spacingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: textTheme.titleSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
-              padding: EdgeInsets.only(left: 16),
             ),
+            const SizedBox(height: Dimen.spacingM),
+            child,
           ],
-        ));
-      }
-      widgets.add(Row(
-        children: <Widget>[
-          Padding(
-            child: FilterChip(
-              checkmarkColor: Colors.white,
-              label: Text(
-                "包括正文",
-                style: TextStyle(
-                  color: state.content
-                      ? Colors.white
-                      : Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-              ),
-              selectedColor: Theme.of(context).primaryColor,
-              selected: state.content,
-              onSelected: (selected) => notifier.checkContent(selected),
-            ),
-            padding: EdgeInsets.only(left: 16),
-          ),
-        ],
-      ));
-    }
-    if (state.firstRadio == FIRST_RADIO_USER) {
-      widgets.add(Row(
-        children: <Widget>[
-          Padding(
-            child: ChoiceChip(
-              label: Text(
-                "用户名",
-                style: TextStyle(
-                  color: state.userRadio == USER_RADIO_NAME
-                      ? Colors.white
-                      : Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-              ),
-              selectedColor: Theme.of(context).primaryColor,
-              selected: state.userRadio == USER_RADIO_NAME,
-              onSelected: (selected) =>
-                  notifier.checkUserRadio(USER_RADIO_NAME),
-            ),
-            padding: EdgeInsets.only(left: 16),
-          ),
-          Padding(
-            child: ChoiceChip(
-              label: Text(
-                "用户ID",
-                style: TextStyle(
-                  color: state.userRadio == USER_RADIO_UID
-                      ? Colors.white
-                      : Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-              ),
-              selectedColor: Theme.of(context).primaryColor,
-              selected: state.userRadio == USER_RADIO_UID,
-              onSelected: (selected) => notifier.checkUserRadio(USER_RADIO_UID),
-            ),
-            padding: EdgeInsets.only(left: 16),
-          ),
-        ],
-      ));
-    }
-    return ListView(
-      children: widgets,
+        ),
+      ),
     );
   }
 

@@ -125,6 +125,29 @@ class ThemeBuilder {
         height: 80,
         padding: const EdgeInsets.symmetric(horizontal: 16),
       ),
+      // M3 NavigationBar Theme
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: colorScheme.surface,
+        indicatorColor: colorScheme.secondaryContainer,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        height: 80,
+      ),
+      // M3 NavigationRail Theme
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: colorScheme.surface,
+        indicatorColor: colorScheme.secondaryContainer,
+        selectedIconTheme:
+            IconThemeData(color: colorScheme.onSecondaryContainer),
+        unselectedIconTheme:
+            IconThemeData(color: colorScheme.onSurfaceVariant),
+        selectedLabelTextStyle: TextStyle(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
     );
   }
 
