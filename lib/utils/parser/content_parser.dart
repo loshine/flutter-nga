@@ -7,6 +7,10 @@ import 'package:flutter_nga/utils/name_utils.dart';
 class NgaContentParser {
   static final Parser _replyParser = _ReplyParser();
   static final Parser _commentParser = _CommentParser();
+  static final Parser _albumParser = _AlbumParser();
+  static final Parser _tableParser = _TableParser();
+  static final Parser _emoticonParser = _EmoticonParser();
+  static final Parser _fallbackParser = _UnsupportedTagFallbackParser();
 
   // 优化 3: LRU 缓存（最多缓存 256 条）
   static final _parseCache = <String, String>{};
@@ -15,11 +19,11 @@ class NgaContentParser {
 
   static List<Parser> _buildParserList({int? postDateTimestamp}) {
     return [
-      _AlbumParser(),
-      _TableParser(),
+      _albumParser,
+      _tableParser,
       _ContentParser(postDateTimestamp: postDateTimestamp),
-      _EmoticonParser(),
-      _UnsupportedTagFallbackParser(),
+      _emoticonParser,
+      _fallbackParser,
     ];
   }
 
