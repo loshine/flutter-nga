@@ -86,4 +86,41 @@ void main() {
         true);
     expect(parsed.contains("class='ubb-unknown'"), true);
   });
+
+  test('P1 parser: table span + width', () {
+    final parsed = NgaContentParser.parse(
+      '[table][tr][td rowspan=2 colspan=3]A[/td][td20]B[/td][/tr][/table]',
+    );
+    expect(parsed.contains("<td rowspan='2' colspan='3'>A</td>"), true);
+    expect(parsed.contains("<td style='width:20%;'>B</td>"), true);
+  });
+
+  test('P1 parser: style tags normalization', () {
+    final parsed = NgaContentParser.parse(
+      '[color=#FF00AA]c[/color] [size=120%]s1[/size] [size=16]s2[/size] [font=宋体]f[/font]',
+    );
+    expect(parsed.contains("style='color:#FF00AA;'"), true);
+    expect(parsed.contains("style='font-size:120%;'"), true);
+    expect(parsed.contains("style='font-size:16px;'"), true);
+    expect(parsed.contains('Times New Roman, SimSun, serif'), true);
+  });
+
+  test('P1 parser: list nested stability', () {
+    final parsed = NgaContentParser.parse(
+      '[list][*]a[list][*]b[/list][*]c[/list]',
+    );
+    expect(parsed.contains('<ul><li>a<ul><li>b</li></ul></li><li>c</li></ul>'),
+        true);
+  });
+
+  test('P1 parser: album + flash media semantic', () {
+    final parsed = NgaContentParser.parse(
+      '[album=图集][url]https://img.nga.178.com/attachments/mon_202402/17/a.jpg[/url][/album] '
+      '[flash]https://cdn.example.com/a.mp3[/flash] [flash]https://cdn.example.com/v.mp4[/flash]',
+    );
+    expect(parsed.contains("<album title='图集'>"), true);
+    expect(parsed.contains('<img src='), true);
+    expect(parsed.contains('[站外音频]'), true);
+    expect(parsed.contains('[站外视频]'), true);
+  });
 }

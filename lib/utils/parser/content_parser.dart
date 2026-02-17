@@ -110,48 +110,85 @@ abstract class Parser {
 class _AlbumParser implements Parser {
   static final _albumRegex =
       RegExp(r'\[album(=([\s\S]*?)?)?\]([\s\S]*?)?\[/album\]');
-  static final _urlRegex = RegExp(r'\[url\]([\s\S]*?)?\[/url\]');
+  static final _urlRegex =
+      RegExp(r'\[url\]([\s\S]*?)?\[/url\]', caseSensitive: false);
 
   @override
   String parse(String? content) {
     if (content == null || content.isEmpty) return '';
     return content.replaceAllMapped(_albumRegex, (match) {
+      final title = (match.group(2) ?? '').trim();
+      final safeTitle = title.isEmpty ? '相册' : title;
       final value = (match.group(3) ?? '').replaceAllMapped(
         _urlRegex,
-        (m) => "<img src='${m.group(1)}'/>",
+        (m) => "[img]${m.group(1) ?? ''}[/img]<br/>",
       );
-      return "<album>${match.group(1) != null ? match.group(2) : "相册"}$value</album>";
+      return "<album title='${_escapeHtmlAttribute(safeTitle)}'>$value</album>";
     });
   }
 }
 
 class _TableParser implements Parser {
-  static final _trTdRegex = RegExp(r'\[([/]?(tr|td))\]');
-  static final _tdNumRegex = RegExp(r'\[td([\d]{1,3})+\]');
-  static final _tdSpanRegex = RegExp(r'\[td (rowspan|colspan)=([\d]+?)\]');
-  static final _tdDoubleSpanRegex =
-      RegExp(r'\[td (rowspan|colspan)=([\d]+?) (rowspan|colspan)=([\d]+?)\]');
+  static final _tableOpenRegex = RegExp(r'\[table\]', caseSensitive: false);
+  static final _tableCloseRegex = RegExp(r'\[/table\]', caseSensitive: false);
+  static final _trRegex = RegExp(r'\[([/]?tr)\]', caseSensitive: false);
+  static final _tdOpenRegex = RegExp(r'\[td([^\]]*)\]', caseSensitive: false);
+  static final _tdCloseRegex = RegExp(r'\[/td\]', caseSensitive: false);
+  static final _tdWidthRegex = RegExp(r'^\s*(\d{1,3})\b');
+  static final _tdSpanAttrRegex =
+      RegExp(r'(rowspan|colspan)\s*=\s*(\d+)', caseSensitive: false);
   static final _tagBrRegex = RegExp(r'<([/]?(table|tbody|tr|td))><br/>');
-  static final _brTagRegex = RegExp(r'[ ]?<br/><[/]?(table|tbody|tr|td)>');
+  static final _brTagRegex = RegExp(r'[ ]?<br/><([/]?(table|tbody|tr|td))>');
 
   @override
   String parse(String? content) {
     if (content == null || content.isEmpty) return '';
     return content
-        .replaceAllMapped(_trTdRegex, (match) => '<${match.group(1)}>')
-        .replaceAll('[table]', '<div><table><tbody>')
-        .replaceAll('[/table]', '</tbody></table></div>')
+        .replaceAllMapped(_tableOpenRegex, (_) => '<div><table><tbody>')
+        .replaceAllMapped(_tableCloseRegex, (_) => '</tbody></table></div>')
         .replaceAllMapped(
-            _tdNumRegex, (match) => "<td style='width:${match.group(1)}%;'>")
-        .replaceAllMapped(_tdSpanRegex,
-            (match) => "<td ${match.group(1)}='${match.group(2)}'")
-        .replaceAllMapped(
-            _tdDoubleSpanRegex,
-            (match) =>
-                "<td ${match.group(1)}='${match.group(2)}' ${match.group(3)}='${match.group(4)}'")
+            _trRegex, (match) => '<${match.group(1)!.toLowerCase()}>')
+        .replaceAllMapped(_tdOpenRegex, _tdOpenReplacer)
+        .replaceAllMapped(_tdCloseRegex, (_) => '</td>')
         .replaceAllMapped(_tagBrRegex, (match) => '<${match.group(1)}>')
         .replaceAllMapped(_brTagRegex, (match) => '<${match.group(1)}>')
         .replaceAll('</table>', '</table><br/><br/>');
+  }
+
+  static String _tdOpenReplacer(Match match) {
+    final raw = (match.group(1) ?? '').trim();
+    if (raw.isEmpty) return '<td>';
+
+    var rest = raw;
+    int? widthPercent;
+    final widthMatch = _tdWidthRegex.firstMatch(raw);
+    if (widthMatch != null) {
+      widthPercent = int.tryParse(widthMatch.group(1)!);
+      rest = raw.substring(widthMatch.end).trim();
+    }
+
+    final attrs = <String, String>{};
+    for (final spanMatch in _tdSpanAttrRegex.allMatches(rest)) {
+      final key = spanMatch.group(1)!.toLowerCase();
+      final value = spanMatch.group(2)!;
+      if (int.tryParse(value) != null) {
+        attrs[key] = value;
+      }
+    }
+
+    final buffer = StringBuffer('<td');
+    if (widthPercent != null && widthPercent > 0) {
+      final clamped = widthPercent.clamp(1, 100);
+      buffer.write(" style='width:$clamped%;'");
+    }
+    if (attrs.containsKey('rowspan')) {
+      buffer.write(" rowspan='${attrs['rowspan']}'");
+    }
+    if (attrs.containsKey('colspan')) {
+      buffer.write(" colspan='${attrs['colspan']}'");
+    }
+    buffer.write('>');
+    return buffer.toString();
   }
 }
 
@@ -231,8 +268,6 @@ class _ContentParser implements Parser {
   static const _simpleReplacements = {
     '[/size]': '</span>',
     '[/font]': '</span>',
-    '[list]': '<ul>',
-    '[/list]': '</ul>',
     '[quote]': '<blockquote>',
     '[/quote]': '</blockquote>',
     '======': '<br/><nga_hr></nga_hr>',
@@ -259,15 +294,24 @@ class _ContentParser implements Parser {
   static final _collapseWithTitleRegex =
       RegExp(r'\[collapse=([\s\S]*?)\]([\s\S]*?)\[/collapse\]');
   static final _collapseRegex = RegExp(r'\[collapse\]([\s\S]*?)\[/collapse\]');
-  static final _colorRegex = RegExp(r'\[color=([a-z]+?)\]([\s\S]*?)\[/color\]');
+  static final _colorRegex =
+      RegExp(r'\[color=([^\]]+?)\]([\s\S]*?)\[/color\]', caseSensitive: false);
   static final _alignRegex = RegExp(r'\[align=([a-z]+?)\]([\s\S]*?)\[/align\]');
   static final _lrRegex = RegExp(r'\[(l|r)\]([\s\S]*?)\[/\1\]');
   static final _hRegex = RegExp(r'\[h\]([\s\S]*?)\[/h\]');
   static final _h2Regex = RegExp(r'===([^\n]*?)===');
-  static final _sizeRegex = RegExp(r'\[size=(\d+)%\]');
-  static final _fontRegex = RegExp(r'\[font=([^\[\]]+)\]');
+  static final _sizeRegex = RegExp(r'\[size=([^\]]+)\]', caseSensitive: false);
+  static final _fontRegex =
+      RegExp(r'\[font=([^\[\]]+)\]', caseSensitive: false);
   static final _formatRegex = RegExp(r'\[([/]?(?:b|u|i|del))\]');
-  static final _listItemRegex = RegExp(r'\[\*\](.+?)(?=<br/>|\[|$)');
+  static final _namedColorRegex = RegExp(r'^[a-zA-Z]+$');
+  static final _hexColorRegex =
+      RegExp(r'^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$');
+  static final _rgbColorRegex = RegExp(
+      r'^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|0?\.\d+|1(?:\.0+)?)\s*)?\)$',
+      caseSensitive: false);
+  static final _listTokenRegex =
+      RegExp(r'\[list(?:=[^\]]*)?\]|\[/list\]|\[\*\]', caseSensitive: false);
   static final _dashRegex = RegExp(r'[-]{6,}');
 
   @override
@@ -280,6 +324,7 @@ class _ContentParser implements Parser {
     _simpleReplacements.forEach((key, value) {
       result = result.replaceAll(key, value);
     });
+    result = _rewriteListSyntax(result);
 
     result = result.replaceAllMapped(_noImgRegex, _noImgReplacer);
     result = result.replaceAllMapped(_imgRegex, _imgReplacer);
@@ -306,7 +351,6 @@ class _ContentParser implements Parser {
     result = result.replaceAllMapped(_sizeRegex, _sizeReplacer);
     result = result.replaceAllMapped(_fontRegex, _fontReplacer);
     result = result.replaceAllMapped(_formatRegex, _formatReplacer);
-    result = result.replaceAllMapped(_listItemRegex, _listItemReplacer);
     result = result.replaceAllMapped(_dashRegex, _dashReplacer);
 
     return result;
@@ -386,7 +430,8 @@ class _ContentParser implements Parser {
     final flashType = (m.group(1) ?? '').toLowerCase();
     final raw = m.group(2) ?? '';
     final url = _normalizeGeneralUrl(raw);
-    final label = flashType == 'audio' ? '[站外音频]' : '[站外视频]';
+    final mediaType = _resolveFlashMediaType(flashType: flashType, url: url);
+    final label = mediaType == _FlashMediaType.audio ? '[站外音频]' : '[站外视频]';
     if (url.isEmpty) return label;
     return "<a href='${_escapeHtmlAttribute(url)}'>$label</a>";
   }
@@ -394,8 +439,10 @@ class _ContentParser implements Parser {
   static String _flashReplacer(Match m) {
     final raw = m.group(1) ?? '';
     final url = _normalizeGeneralUrl(raw);
-    if (url.isEmpty) return '[站外视频]';
-    return "<a href='${_escapeHtmlAttribute(url)}'>[站外视频]</a>";
+    final mediaType = _resolveFlashMediaType(url: url);
+    final label = mediaType == _FlashMediaType.audio ? '[站外音频]' : '[站外视频]';
+    if (url.isEmpty) return label;
+    return "<a href='${_escapeHtmlAttribute(url)}'>$label</a>";
   }
 
   static String _codeReplacer(Match m) {
@@ -494,6 +541,27 @@ class _ContentParser implements Parser {
         normalized.endsWith('.m4v');
   }
 
+  static bool _isAudioUrl(String url) {
+    final normalized = url.toLowerCase().split('#').first.split('?').first;
+    return normalized.endsWith('.mp3') ||
+        normalized.endsWith('.wav') ||
+        normalized.endsWith('.aac') ||
+        normalized.endsWith('.m4a') ||
+        normalized.endsWith('.flac') ||
+        normalized.endsWith('.ogg');
+  }
+
+  static _FlashMediaType _resolveFlashMediaType({
+    String? flashType,
+    required String url,
+  }) {
+    final normalizedType = (flashType ?? '').trim().toLowerCase();
+    if (normalizedType == 'audio') return _FlashMediaType.audio;
+    if (normalizedType == 'video') return _FlashMediaType.video;
+    if (_isAudioUrl(url)) return _FlashMediaType.audio;
+    return _FlashMediaType.video;
+  }
+
   static String _buildUserLink(String identity, String displayText) {
     if (_isDigits(identity)) {
       final href = _resolveInternalUrl('/nuke.php?func=ucp&uid=$identity');
@@ -518,8 +586,12 @@ class _ContentParser implements Parser {
   static String _collapseReplacer(Match m) =>
       "<collapse>${m.group(1)}</collapse>";
 
-  static String _colorReplacer(Match m) =>
-      "<font color='${m.group(1)}'>${m.group(2) ?? ''}</font>";
+  static String _colorReplacer(Match m) {
+    final colorValue = _normalizeColorValue(m.group(1) ?? '');
+    final content = m.group(2) ?? '';
+    if (colorValue == null) return content;
+    return "<span style='color:$colorValue;'>$content</span>";
+  }
 
   static String _alignReplacer(Match m) =>
       "<div align='${m.group(1)}'>${m.group(2) ?? ''}</div>";
@@ -533,16 +605,140 @@ class _ContentParser implements Parser {
 
   static String _h2Replacer(Match m) => '<h3>${m.group(1)}</h3>';
 
-  static String _sizeReplacer(Match m) => "<span font-size='${m.group(1)}%'>";
+  static String _sizeReplacer(Match m) {
+    final raw = (m.group(1) ?? '').trim().toLowerCase();
+    final cssValue = _normalizeFontSize(raw);
+    if (cssValue == null) return '<span>';
+    return "<span style='font-size:$cssValue;'>";
+  }
 
-  static String _fontReplacer(Match m) =>
-      "<span style='font-family:${m.group(1)}'>";
+  static String _fontReplacer(Match m) {
+    final family = _resolveFontFamily(m.group(1) ?? '');
+    return "<span style='font-family:$family;'>";
+  }
 
   static String _formatReplacer(Match m) => '<${m.group(1)}>';
 
-  static String _listItemReplacer(Match m) => '<li>${m.group(1)}</li>';
-
   static String _dashReplacer(Match m) => '<h5></h5>';
+
+  static String _rewriteListSyntax(String input) {
+    final matches = _listTokenRegex.allMatches(input).toList();
+    if (matches.isEmpty) return input;
+
+    final output = StringBuffer();
+    final listStack = <bool>[];
+    var cursor = 0;
+
+    void writeSegment(String segment) {
+      if (segment.isEmpty) return;
+      if (listStack.isNotEmpty &&
+          !listStack.last &&
+          segment.trim().isNotEmpty) {
+        output.write('<li>');
+        listStack[listStack.length - 1] = true;
+      }
+      output.write(segment);
+    }
+
+    for (final match in matches) {
+      writeSegment(input.substring(cursor, match.start));
+      final token = (match.group(0) ?? '').toLowerCase();
+
+      if (token.startsWith('[list')) {
+        if (listStack.isNotEmpty && !listStack.last) {
+          output.write('<li>');
+          listStack[listStack.length - 1] = true;
+        }
+        output.write('<ul>');
+        listStack.add(false);
+      } else if (token == '[*]') {
+        if (listStack.isEmpty) {
+          output.write('[*]');
+        } else {
+          if (listStack.last) output.write('</li>');
+          output.write('<li>');
+          listStack[listStack.length - 1] = true;
+        }
+      } else {
+        if (listStack.isEmpty) {
+          output.write('[/list]');
+        } else {
+          if (listStack.last) output.write('</li>');
+          output.write('</ul>');
+          listStack.removeLast();
+        }
+      }
+      cursor = match.end;
+    }
+
+    writeSegment(input.substring(cursor));
+
+    while (listStack.isNotEmpty) {
+      if (listStack.last) output.write('</li>');
+      output.write('</ul>');
+      listStack.removeLast();
+    }
+
+    return output.toString();
+  }
+
+  static String? _normalizeColorValue(String raw) {
+    final value = raw.trim();
+    if (value.isEmpty) return null;
+    if (_namedColorRegex.hasMatch(value)) return value.toLowerCase();
+    if (_hexColorRegex.hasMatch(value)) return value;
+    if (_rgbColorRegex.hasMatch(value)) return value;
+    return null;
+  }
+
+  static String? _normalizeFontSize(String raw) {
+    if (raw.isEmpty) return null;
+    if (raw.endsWith('%')) {
+      final number = int.tryParse(raw.substring(0, raw.length - 1).trim());
+      if (number == null || number <= 0) return null;
+      return '${number.clamp(1, 400)}%';
+    }
+    if (raw.endsWith('px')) {
+      final number = int.tryParse(raw.substring(0, raw.length - 2).trim());
+      if (number == null || number <= 0) return null;
+      return '${number.clamp(8, 64)}px';
+    }
+    final number = int.tryParse(raw);
+    if (number == null || number <= 0) return null;
+    return '${number.clamp(8, 64)}px';
+  }
+
+  static String _resolveFontFamily(String raw) {
+    final value = raw.trim().toLowerCase();
+    if (value.contains('mono') || value.contains('courier')) {
+      return 'monospace';
+    }
+    if (value.contains('song') ||
+        value.contains('simsun') ||
+        value.contains('times') ||
+        value.contains('georgia') ||
+        value.contains('宋体')) {
+      return 'Times New Roman, SimSun, serif';
+    }
+    if (value.contains('kai') || value.contains('楷体')) {
+      return 'Kaiti SC, STKaiti, serif';
+    }
+    if (value.contains('hei') ||
+        value.contains('yahei') ||
+        value.contains('arial') ||
+        value.contains('verdana') ||
+        value.contains('tahoma') ||
+        value.contains('黑体') ||
+        value.contains('微软雅黑')) {
+      return 'PingFang SC, Microsoft YaHei, Arial, sans-serif';
+    }
+    return 'PingFang SC, Microsoft YaHei, sans-serif';
+  }
+}
+
+enum _FlashMediaType {
+  audio,
+  video,
 }
 
 class _DiceParser implements Parser {

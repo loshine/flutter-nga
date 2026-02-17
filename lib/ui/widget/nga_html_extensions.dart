@@ -5,6 +5,47 @@ import 'package:flutter_nga/ui/widget/collapse_widget.dart';
 List<HtmlExtension> buildNgaHtmlExtensions(BuildContext context) {
   return [
     TagExtension(
+      tagsToExtend: {'album'},
+      builder: (extensionContext) {
+        final title = (extensionContext.attributes['title'] ?? '相册').trim();
+        final children =
+            extensionContext.inlineSpanChildren ?? const <InlineSpan>[];
+        final style =
+            (extensionContext.styledElement?.style ?? Style()).copyWith(
+          display: Display.block,
+          margin: Margins.zero,
+          padding: HtmlPaddings.zero,
+        );
+        final body = CssBoxWidget.withInlineSpanChildren(
+          style: style,
+          children: children,
+        );
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.8),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title.isEmpty ? '相册' : title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              body,
+            ],
+          ),
+        );
+      },
+    ),
+    TagExtension(
       tagsToExtend: {'collapse'},
       builder: (extensionContext) {
         final title = extensionContext.attributes['title'];
