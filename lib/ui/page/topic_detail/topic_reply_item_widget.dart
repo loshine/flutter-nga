@@ -419,17 +419,22 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       attachmentWidgets.addAll(widget.reply.attachmentList.map((attachment) {
         return Padding(
           padding: EdgeInsets.only(right: 16),
-          child: CachedNetworkImage(
-            imageUrl: attachment.realUrl,
-            placeholder: (context, url) => Image.asset(
-              'images/default_forum_icon.png',
-              width: 48,
-              height: 48,
-            ),
-            errorWidget: (context, url, err) => Image.asset(
-              'images/default_forum_icon.png',
-              width: 48,
-              height: 48,
+          child: SizedBox(
+            width: 120,
+            height: 120,
+            child: CachedNetworkImage(
+              imageUrl: attachment.realUrl,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Image.asset(
+                'images/default_forum_icon.png',
+                width: 48,
+                height: 48,
+              ),
+              errorWidget: (context, url, err) => Image.asset(
+                'images/default_forum_icon.png',
+                width: 48,
+                height: 48,
+              ),
             ),
           ),
         );
