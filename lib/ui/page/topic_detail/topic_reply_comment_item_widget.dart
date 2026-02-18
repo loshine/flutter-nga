@@ -62,7 +62,13 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(top: 8),
-            child: NgaHtmlCommentWidget(content: reply.content),
+            child: NgaHtmlCommentWidget(
+              content: reply.content,
+              authorId: reply.authorId,
+              tid: reply.tid,
+              pid: reply.pid,
+              postDateTimestamp: reply.postDateTimestamp,
+            ),
           ),
         ],
       ),

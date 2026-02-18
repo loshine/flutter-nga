@@ -1,27 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NgaHtmlCommentWidget extends ConsumerWidget {
   final String content;
+  final int? authorId;
+  final int? tid;
+  final int? pid;
+  final int? postDateTimestamp;
 
-  const NgaHtmlCommentWidget({super.key, required this.content});
+  const NgaHtmlCommentWidget({
+    super.key,
+    required this.content,
+    this.authorId,
+    this.tid,
+    this.pid,
+    this.postDateTimestamp,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final interfaceState = ref.watch(interfaceSettingsProvider);
     return Html(
-      data: NgaContentParser.parseComment(content),
+      data: NgaContentParser.parseComment(
+        content,
+        authorId: authorId,
+        tid: tid,
+        pid: pid,
+        postDateTimestamp: postDateTimestamp,
+      ),
+      extensions: buildNgaHtmlExtensions(context),
       style: {
         'body': Style(
-          fontSize: FontSize(Dimen.bodyMedium * interfaceState.contentSizeMultiple),
+          fontSize:
+              FontSize(Dimen.bodyMedium * interfaceState.contentSizeMultiple),
           lineHeight: LineHeight(interfaceState.lineHeight.size),
           padding: HtmlPaddings.zero,
           margin: Margins.zero,
           color: Theme.of(context).textTheme.bodyLarge?.color,
+        ),
+        'pre': Style(
+          margin: Margins.symmetric(vertical: 8),
+          padding: HtmlPaddings.all(8),
+          backgroundColor:
+              Theme.of(context).dividerColor.withValues(alpha: 0.15),
+          fontFamily: 'monospace',
+          whiteSpace: WhiteSpace.pre,
+        ),
+        'code': Style(fontFamily: 'monospace'),
+        '.ubb-unknown': Style(
+          fontFamily: 'monospace',
+          color: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.color
+              ?.withValues(alpha: 0.75),
         ),
       },
     );
