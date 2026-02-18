@@ -29,15 +29,28 @@ class TopicLinkRoute extends LinkRoute {
 class UserLinkRoute extends LinkRoute {
   @override
   void handleMatch(BuildContext context, Match match) {
-    Routes.navigateTo(
-      context,
-      "${Routes.USER}?uid=${match.group(1)}",
-    );
+    final uid = match.group(1);
+    final username = match.group(2);
+    if (uid != null && uid.isNotEmpty) {
+      Routes.navigateTo(
+        context,
+        "${Routes.USER}?uid=$uid",
+      );
+      return;
+    }
+    if (username != null && username.isNotEmpty) {
+      final encoded =
+          Uri.encodeQueryComponent(Uri.decodeQueryComponent(username));
+      Routes.navigateTo(
+        context,
+        "${Routes.USER}?name=$encoded",
+      );
+    }
   }
 
   @override
   String matchRegExp() {
-    return r"nuke\.php\?func=ucp&uid=(\d+)?";
+    return r"nuke\.php\?func=ucp&(?:uid=(\d+)|username=([^&]+))";
   }
 }
 
