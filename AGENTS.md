@@ -6,12 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 环境准备
 
-项目通过 [FVM](https://fvm.app) 锁定 Flutter 3.38.5，所有 flutter 命令必须用 `fvm flutter` 前缀执行。
+项目通过 [FVM](https://fvm.app) 使用 Flutter stable（当前 3.44.2），所有 flutter 命令必须用 `fvm flutter` 前缀执行。
 
 ```bash
 dart pub global activate fvm   # 安装 FVM（如未安装）
-fvm install 3.38.5             # 安装指定 Flutter 版本
-fvm use 3.38.5                 # 切换到项目版本
+fvm install stable             # 安装指定 Flutter 版本
+fvm use stable                 # 切换到项目版本
 ```
 
 ## 构建与测试
