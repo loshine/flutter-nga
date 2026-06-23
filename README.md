@@ -1,6 +1,6 @@
 # Flutter NGA
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.38.5-02569B?logo=flutter)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.44.2-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Desktop-lightgrey)]()
@@ -39,7 +39,7 @@
 
 | 分类     | 技术方案                     |
 | -------- | ---------------------------- |
-| 框架     | Flutter 3.38.5 (FVM)         |
+| 框架     | Flutter stable 3.44.2 (FVM)  |
 | 状态管理 | Riverpod 3.x + flutter_hooks |
 | 路由     | go_router                    |
 | 网络     | Dio                          |
@@ -51,7 +51,7 @@
 
 ### 环境要求
 
-- Flutter 3.38.5 (推荐使用 [FVM](https://fvm.app) 管理版本)
+- Flutter stable 3.44.2 (推荐使用 [FVM](https://fvm.app) 管理版本)
 - Dart SDK >=3.0.0 <4.0.0
 - Android SDK / Xcode (取决于目标平台)
 
@@ -65,9 +65,9 @@ cd flutter-nga
 # 安装 FVM (如未安装)
 dart pub global activate fvm
 
-# 使用指定 Flutter 版本
-fvm install 3.38.5
-fvm use 3.38.5
+# 使用指定 Flutter stable 版本
+fvm install stable
+fvm use stable
 
 # 获取依赖
 fvm flutter pub get
