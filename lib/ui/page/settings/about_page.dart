@@ -76,7 +76,7 @@ class AboutPage extends HookConsumerWidget {
             const _SectionHeader(title: '技术栈'),
             const _InfoTile(
               title: 'Flutter',
-              subtitle: '3.38.5',
+              subtitle: '3.44.2',
               icon: Icons.flutter_dash,
             ),
             const _InfoTile(
