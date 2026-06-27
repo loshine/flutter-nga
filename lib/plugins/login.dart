@@ -7,6 +7,8 @@ class Login {
   static Stream<dynamic> get cookieStream {
     if (Platform.isAndroid) {
       return _AndroidLogin.cookieStream;
+    } else if (Platform.isOhos) {
+      return _OhosLogin.cookieStream;
     }
     // iOS 不支持原生登录，返回空流
     return const Stream.empty();
@@ -15,6 +17,8 @@ class Login {
   static Future<String> startLogin() async {
     if (Platform.isAndroid) {
       return _AndroidLogin.startLogin();
+    } else if (Platform.isOhos) {
+      return _OhosLogin.startLogin();
     }
     // iOS 不支持原生登录，请使用 WebView 登录
     throw UnsupportedError("iOS 不支持原生登录，请使用网页登录");
@@ -22,6 +26,20 @@ class Login {
 }
 
 class _AndroidLogin {
+  static const loginChannel =
+      MethodChannel('io.github.loshine.flutternga.login/plugin');
+  static const cookieChannel =
+      EventChannel('io.github.loshine.flutternga.cookies/plugin');
+
+  static Stream<dynamic> get cookieStream =>
+      cookieChannel.receiveBroadcastStream();
+
+  static Future<String> startLogin() async {
+    return await loginChannel.invokeMethod('start_login');
+  }
+}
+
+class _OhosLogin {
   static const loginChannel =
       MethodChannel('io.github.loshine.flutternga.login/plugin');
   static const cookieChannel =
