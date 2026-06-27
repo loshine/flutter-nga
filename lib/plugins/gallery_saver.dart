@@ -8,6 +8,8 @@ class GallerySaver {
       return _AndroidGallerySaver.save(url);
     } else if (Platform.isIOS) {
       return _IOSGallerySaver.save(url);
+    } else if (Platform.isOhos) {
+      return _OhosGallerySaver.save(url);
     }
     throw UnsupportedError("当前平台不支持保存图片");
   }
@@ -23,6 +25,15 @@ class _AndroidGallerySaver {
 }
 
 class _IOSGallerySaver {
+  static const _channel =
+      MethodChannel('io.github.loshine.flutternga.gallery_saver/plugin');
+
+  static Future<bool> save(String url) async {
+    return await _channel.invokeMethod('save', {"url": url});
+  }
+}
+
+class _OhosGallerySaver {
   static const _channel =
       MethodChannel('io.github.loshine.flutternga.gallery_saver/plugin');
 
