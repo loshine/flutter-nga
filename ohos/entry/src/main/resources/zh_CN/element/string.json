@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "flutter_nga"
+    },
+    {
+      "name": "permission_media_reason",
+      "value": "用于选择和保存图片"
     }
   ]
 }

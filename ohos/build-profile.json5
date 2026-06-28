@@ -1,14 +1,28 @@
 {
   "app": {
     "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/loshine/.ohos/config/default_ohos_XGjwFvU8DmPo2VhvT5O_PI83fAYuGWQm9JyhHjFIUYQ=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BD325624B1E5E6E3D3E92C0DA5D973BD706E27F6F14B5F3CD95558ACC93DCDE6EC244EF36D0E828",
+          "profile": "/Users/loshine/.ohos/config/default_ohos_XGjwFvU8DmPo2VhvT5O_PI83fAYuGWQm9JyhHjFIUYQ=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/loshine/.ohos/config/default_ohos_XGjwFvU8DmPo2VhvT5O_PI83fAYuGWQm9JyhHjFIUYQ=.p12",
+          "storePassword": "0000001B6A6C58AB60E89DC7E970D893BF94E9D71FDD45F75D5818DEC62DF9D431A8ED7EDF2711B72B95E7"
+        }
+      }
     ],
     "products": [
       {
         "name": "default",
         "signingConfig": "default",
-        "compatibleSdkVersion": "5.1.0(18)",
+        "compileSdkVersion": "6.1.1(24)",
+        "compatibleSdkVersion": "6.1.1(24)",
         "runtimeOS": "HarmonyOS",
-        "targetSdkVersion": "5.1.0(18)"
+        "targetSdkVersion": "6.1.1(24)"
       }
     ],
     "buildModeSet": [
