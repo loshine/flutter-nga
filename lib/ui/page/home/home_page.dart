@@ -74,7 +74,7 @@ class _HomePageContent extends HookConsumerWidget {
   }
 
   String _getTitleText(int index) {
-    const titles = ['NGA', '贴子收藏', '浏览历史', '短消息', '提醒信息'];
+    const titles = ['FNGA', '贴子收藏', '浏览历史', '短消息', '提醒信息'];
     return titles.elementAtOrNull(index) ?? '';
   }
 
