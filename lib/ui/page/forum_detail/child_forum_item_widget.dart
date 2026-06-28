@@ -33,9 +33,12 @@ class _ChildForumItemState extends ConsumerState<ChildForumItemWidget> {
     return InkWell(
       onTap: () => Routes.navigateTo(
         context,
-        "${Routes.FORUM_DETAIL}?fid=${widget.childForum.fid}"
-        "&name=${widget.childForum.name}"
-        "&type=${widget.childForum.type}",
+        Routes.FORUM_DETAIL,
+        queryParams: {
+          "fid": "${widget.childForum.fid}",
+          "name": widget.childForum.name,
+          "type": "${widget.childForum.type}",
+        },
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -11,6 +11,9 @@ import 'forum_group_page.dart';
 class ForumGroupTabsPage extends HookConsumerWidget {
   const ForumGroupTabsPage({super.key});
 
+  static const _selectedTabStorageKey = 'forum_group_tabs_selected_tab';
+  static int _lastSelectedTab = 0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final list = Data().forumRepository.getForumGroups();
@@ -24,7 +27,14 @@ class ForumGroupTabsPage extends HookConsumerWidget {
     tabBarViews.addAll(list
         .map((group) => KeepAliveTabView(child: ForumGroupPage(group: group))));
 
-    final tabController = useTabController(initialLength: tabs.length);
+    final storedIndex = PageStorage.maybeOf(context)
+        ?.readState(context, identifier: _selectedTabStorageKey);
+    final initialIndex = (storedIndex is int ? storedIndex : _lastSelectedTab)
+        .clamp(0, tabs.length - 1);
+    final tabController = useTabController(
+      initialLength: tabs.length,
+      initialIndex: initialIndex,
+    );
 
     useEffect(() {
       void listener() {
@@ -32,6 +42,13 @@ class ForumGroupTabsPage extends HookConsumerWidget {
         ref
             .read(forumGroupFabVisibleProvider.notifier)
             .setVisible(tabController.index == 0);
+        if (tabController.indexIsChanging) return;
+        _lastSelectedTab = tabController.index;
+        PageStorage.maybeOf(context)?.writeState(
+          context,
+          tabController.index,
+          identifier: _selectedTabStorageKey,
+        );
       }
 
       tabController.addListener(listener);

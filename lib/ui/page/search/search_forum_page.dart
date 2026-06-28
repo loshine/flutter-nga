@@ -74,8 +74,11 @@ class _SearchForumState extends ConsumerState<SearchForumPage> {
       ),
       onTap: () => Routes.navigateTo(
         context,
-        "${Routes.FORUM_DETAIL}?fid=${forum.fid}"
-        "&name=${forum.name}",
+        Routes.FORUM_DETAIL,
+        queryParams: {
+          "fid": "${forum.fid}",
+          "name": forum.name,
+        },
       ),
     );
   }

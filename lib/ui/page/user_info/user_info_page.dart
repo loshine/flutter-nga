@@ -126,7 +126,11 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             builder: (context) => GestureDetector(
                   onTap: () => Routes.navigateTo(
                     context,
-                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
+                    Routes.FORUM_DETAIL,
+                    queryParams: {
+                      "fid": "${entry.key}",
+                      "name": entry.value,
+                    },
                   ),
                   child: Text(
                     "[${entry.value}]",
@@ -293,7 +297,11 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                     return GestureDetector(
                       onTap: () => Routes.navigateTo(
                         context,
-                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
+                        Routes.FORUM_DETAIL,
+                        queryParams: {
+                          "fid": "${entry.key}",
+                          "name": entry.value,
+                        },
                       ),
                       child: Text(
                         "[${entry.value}]",

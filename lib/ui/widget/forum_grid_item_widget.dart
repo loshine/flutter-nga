@@ -18,7 +18,12 @@ class ForumGridItemWidget extends StatelessWidget {
     return InkWell(
       onTap: () => Routes.navigateTo(
         context,
-        "${Routes.FORUM_DETAIL}?fid=${forum.fid}&name=${forum.name}&type=${forum.type}",
+        Routes.FORUM_DETAIL,
+        queryParams: {
+          "fid": "${forum.fid}",
+          "name": forum.name,
+          "type": "${forum.type}",
+        },
       ),
       onLongPress: onLongPress,
       child: Column(
