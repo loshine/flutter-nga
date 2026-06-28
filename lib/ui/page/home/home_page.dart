@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_nga/providers/home/home_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
@@ -173,7 +174,7 @@ class _HomePageContent extends HookConsumerWidget {
           return;
         }
 
-        Navigator.of(context).pop();
+        SystemNavigator.pop();
       },
       child: isLargeScreen
           ? _buildLargeScreenLayout(context, ref, index, pageList)
