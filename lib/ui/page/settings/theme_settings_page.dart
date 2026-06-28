@@ -1,143 +1,110 @@
-import 'dart:io' show Platform;
-
-import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nga/providers/settings/theme_provider.dart';
-import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/route.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ThemeSelectionDialog extends ConsumerWidget {
-  const ThemeSelectionDialog({super.key});
+import 'package:flutter_nga/providers/settings/theme_provider.dart';
 
-  bool get _isAndroid => !kIsWeb && Platform.isAndroid;
+class ThemeSettingsPage extends ConsumerStatefulWidget {
+  const ThemeSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ThemeSettingsPage> createState() => _ThemeSettingsPageState();
+}
+
+class _ThemeSettingsPageState extends ConsumerState<ThemeSettingsPage> {
+  bool get _isAndroid =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(themeProvider.notifier).refresh();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(themeProvider);
     final notifier = ref.read(themeProvider.notifier);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("主题设置")),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        children: [
+          const _SectionTitle("主题模式"),
+          _ThemeOption(
+            title: "跟随系统",
+            subtitle: "根据系统设置自动切换",
+            icon: Icons.brightness_auto,
+            selected: state.mode == AdaptiveThemeMode.system,
+            onTap: () => notifier.update(context, AdaptiveThemeMode.system),
+          ),
+          _ThemeOption(
+            title: "亮色主题",
+            subtitle: "始终使用亮色主题",
+            icon: Icons.light_mode_outlined,
+            selected: state.mode == AdaptiveThemeMode.light,
+            onTap: () => notifier.update(context, AdaptiveThemeMode.light),
+          ),
+          _ThemeOption(
+            title: "暗色主题",
+            subtitle: "始终使用暗色主题",
+            icon: Icons.dark_mode_outlined,
+            selected: state.mode == AdaptiveThemeMode.dark,
+            onTap: () => notifier.update(context, AdaptiveThemeMode.dark),
+          ),
+          const SizedBox(height: 16),
+          const _SectionTitle("颜色设置"),
+          if (_isAndroid)
+            _DynamicColorSwitch(
+              value: state.useDynamicColor,
+              onChanged: (value) => notifier.setUseDynamicColor(context, value),
+            ),
+          if (!_isAndroid || !state.useDynamicColor)
+            _ColorPicker(
+              selectedColor: state.seedColor,
+              onColorSelected: (color) => notifier.setSeedColor(context, color),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Dimen.radiusXL),
-      ),
-      backgroundColor: colorScheme.surfaceContainerHigh,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 24, 0, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 标题
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                "主题设置",
-                style: textTheme.headlineSmall?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // 主题模式区域标题
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                "主题模式",
-                style: textTheme.titleSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            
-            // 选项列表
-            _ThemeOption(
-              title: "跟随系统",
-              subtitle: "根据系统设置自动切换",
-              icon: Icons.brightness_auto,
-              selected: state.mode == AdaptiveThemeMode.system,
-              onTap: () => notifier.update(context, AdaptiveThemeMode.system),
-            ),
-            _ThemeOption(
-              title: "亮色主题",
-              subtitle: "始终使用亮色主题",
-              icon: Icons.light_mode_outlined,
-              selected: state.mode == AdaptiveThemeMode.light,
-              onTap: () => notifier.update(context, AdaptiveThemeMode.light),
-            ),
-            _ThemeOption(
-              title: "暗色主题",
-              subtitle: "始终使用暗色主题",
-              icon: Icons.dark_mode_outlined,
-              selected: state.mode == AdaptiveThemeMode.dark,
-              onTap: () => notifier.update(context, AdaptiveThemeMode.dark),
-            ),
-
-            // 颜色设置区域
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                "颜色设置",
-                style: textTheme.titleSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // 动态取色开关（仅 Android）
-            if (_isAndroid)
-              _DynamicColorSwitch(
-                value: state.useDynamicColor,
-                onChanged: (value) => notifier.setUseDynamicColor(context, value),
-              ),
-
-            // 主题色选择（当动态取色关闭时显示，或非 Android 平台）
-            if (!_isAndroid || !state.useDynamicColor)
-              _ColorPicker(
-                selectedColor: state.seedColor,
-                onColorSelected: (color) => notifier.setSeedColor(context, color),
-              ),
-            
-            const SizedBox(height: 8),
-            
-            // 关闭按钮
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Routes.pop(context),
-                    child: const Text('关闭'),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Text(
+        title,
+        style: textTheme.titleSmall?.copyWith(
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 }
 
-/// 动态取色开关组件
 class _DynamicColorSwitch extends StatelessWidget {
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
   const _DynamicColorSwitch({
     required this.value,
     required this.onChanged,
   });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +114,7 @@ class _DynamicColorSwitch extends StatelessWidget {
     return InkWell(
       onTap: () => onChanged(!value),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
             Icon(
@@ -185,15 +152,14 @@ class _DynamicColorSwitch extends StatelessWidget {
   }
 }
 
-/// 颜色选择器组件
 class _ColorPicker extends StatelessWidget {
-  final Color selectedColor;
-  final ValueChanged<Color> onColorSelected;
-
   const _ColorPicker({
     required this.selectedColor,
     required this.onColorSelected,
   });
+
+  final Color selectedColor;
+  final ValueChanged<Color> onColorSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +167,7 @@ class _ColorPicker extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -224,8 +190,7 @@ class _ColorPicker extends StatelessWidget {
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: ThemeColors.presets.asMap().entries.map((entry) {
-              final color = entry.value;
+            children: ThemeColors.presets.map((color) {
               final isSelected = color.toARGB32() == selectedColor.toARGB32();
               return _ColorCircle(
                 color: color,
@@ -240,17 +205,16 @@ class _ColorPicker extends StatelessWidget {
   }
 }
 
-/// 颜色圆圈组件
 class _ColorCircle extends StatelessWidget {
-  final Color color;
-  final bool isSelected;
-  final VoidCallback onTap;
-
   const _ColorCircle({
     required this.color,
     required this.isSelected,
     required this.onTap,
   });
+
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +245,8 @@ class _ColorCircle extends StatelessWidget {
         child: isSelected
             ? Icon(
                 Icons.check,
-                color: ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+                color: ThemeData.estimateBrightnessForColor(color) ==
+                        Brightness.dark
                     ? Colors.white
                     : Colors.black,
                 size: 20,
@@ -293,12 +258,6 @@ class _ColorCircle extends StatelessWidget {
 }
 
 class _ThemeOption extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
   const _ThemeOption({
     required this.title,
     required this.subtitle,
@@ -306,6 +265,12 @@ class _ThemeOption extends StatelessWidget {
     required this.selected,
     required this.onTap,
   });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -315,7 +280,7 @@ class _ThemeOption extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         color: selected ? colorScheme.secondaryContainer : null,
         child: Row(
           children: [
@@ -342,7 +307,8 @@ class _ThemeOption extends StatelessWidget {
                     subtitle,
                     style: textTheme.bodySmall?.copyWith(
                       color: selected
-                          ? colorScheme.onSecondaryContainer.withValues(alpha: 0.8)
+                          ? colorScheme.onSecondaryContainer
+                              .withValues(alpha: 0.8)
                           : colorScheme.onSurfaceVariant,
                     ),
                   ),

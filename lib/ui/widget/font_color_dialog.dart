@@ -38,20 +38,22 @@ class FontColorDialog extends StatelessWidget {
             const SizedBox(height: 8),
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 400),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: TEXT_COLOR_MAP.length,
-                itemBuilder: (context, index) {
-                  return _ColorOption(
-                    label: keyList[index],
-                    color: valueList[index],
-                    onTap: () {
-                      callback?.call(
-                          "[color=${keyList[index]}]", "[/color]", true);
-                      Routes.pop(context);
-                    },
-                  );
-                },
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: keyList.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final label = entry.value;
+                    return _ColorOption(
+                      label: label,
+                      color: valueList[index],
+                      onTap: () {
+                        callback?.call("[color=$label]", "[/color]", true);
+                        Routes.pop(context);
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
             ),
             const SizedBox(height: 8),

@@ -3,7 +3,6 @@ import 'package:flutter_nga/providers/settings/base_url_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/settings/user_agent_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/base_url_selection_dialog.dart';
-import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/user_agent_selection_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -74,7 +73,7 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                 icon: Icons.palette_outlined,
                 title: "主题模式",
                 subtitle: "当前: ${themeState.modeName}",
-                onTap: _showThemeSelectionDialog,
+                onTap: () => Routes.navigateTo(context, Routes.THEME_SETTINGS),
               ),
               _SettingsTile(
                 icon: Icons.text_fields,
@@ -99,13 +98,6 @@ class _SettingsState extends ConsumerState<SettingsPage> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showThemeSelectionDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => const ThemeSelectionDialog(),
     );
   }
 

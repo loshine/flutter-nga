@@ -12,6 +12,7 @@ class UserAgentSelectionDialog extends ConsumerWidget {
     final state = ref.watch(userAgentSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final maxListHeight = MediaQuery.sizeOf(context).height * 0.55;
     final options = UserAgentPresets.all
         .map((config) => config.key == UserAgentPresets.custom.key &&
                 state.currentConfig.key == UserAgentPresets.custom.key
@@ -23,51 +24,56 @@ class UserAgentSelectionDialog extends ConsumerWidget {
       title: const Text('选择 User-Agent'),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: options.length,
-          itemBuilder: (context, index) {
-            final config = options[index];
-
-            return RadioListTile<UserAgentConfig>(
-              title: Text(
-                config.name,
-                style: textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              subtitle: config.isDeviceSpecific
-                  ? Text(
-                      '根据当前设备自动选择',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxListHeight),
+          child: RadioGroup<UserAgentConfig>(
+            groupValue: state.currentConfig,
+            onChanged: state.isLoading
+                ? (_) {}
+                : (value) async {
+                    if (value != null) {
+                      await _onSelectConfig(context, ref, state, value);
+                    }
+                  },
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: options.map((config) {
+                  return RadioListTile<UserAgentConfig>(
+                    title: Text(
+                      config.name,
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurface,
                       ),
-                    )
-                  : Text(
-                      config.userAgent.isEmpty
-                          ? '点击后输入自定义 User-Agent'
-                          : config.userAgent,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-              value: config,
-              groupValue: state.currentConfig,
-              onChanged: state.isLoading
-                  ? null
-                  : (value) async {
-                      if (value != null) {
-                        await _onSelectConfig(context, ref, state, value);
-                      }
-                    },
-              activeColor: colorScheme.primary,
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-            );
-          },
+                    subtitle: config.isDeviceSpecific
+                        ? Text(
+                            '根据当前设备自动选择',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          )
+                        : Text(
+                            config.userAgent.isEmpty
+                                ? '点击后输入自定义 User-Agent'
+                                : config.userAgent,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                    value: config,
+                    activeColor: colorScheme.primary,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    enabled: !state.isLoading,
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
         ),
       ),
       actions: [

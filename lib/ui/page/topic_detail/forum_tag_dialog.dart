@@ -46,34 +46,39 @@ class _ForumTagDialogState extends ConsumerState<ForumTagDialog> {
   @override
   Widget build(BuildContext context) {
     final tagList = ref.watch(forumTagListProvider);
+    final maxListHeight = MediaQuery.sizeOf(context).height * 0.55;
 
     return AlertDialog(
       title: Text("主题分类"),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: tagList.length,
-          itemBuilder: (context, position) {
-            final tag = tagList[position].content;
-            return InkWell(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  "$tag",
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                    fontSize: Dimen.titleMedium,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxListHeight),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: tagList.map((topicTag) {
+                final tag = topicTag.content;
+                return InkWell(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      tag,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        fontSize: Dimen.titleMedium,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              onTap: () {
-                if (widget.onSelected != null) {
-                  widget.onSelected!(tag);
-                }
-              },
-            );
-          },
+                  onTap: () {
+                    if (widget.onSelected != null) {
+                      widget.onSelected!(tag);
+                    }
+                  },
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );
