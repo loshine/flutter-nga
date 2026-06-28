@@ -46,19 +46,20 @@ class FontSizeDialog extends StatelessWidget {
             const SizedBox(height: 8),
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 400),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: sizeList.length,
-                itemBuilder: (context, index) {
-                  final (label, _) = sizeList[index];
-                  return _SizeOption(
-                    label: label,
-                    onTap: () {
-                      callback?.call("[size=$label]", "[/size]", true);
-                      Routes.pop(context);
-                    },
-                  );
-                },
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: sizeList.map((size) {
+                    final (label, _) = size;
+                    return _SizeOption(
+                      label: label,
+                      onTap: () {
+                        callback?.call("[size=$label]", "[/size]", true);
+                        Routes.pop(context);
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
             ),
             const SizedBox(height: 8),

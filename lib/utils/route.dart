@@ -16,6 +16,7 @@ import 'package:flutter_nga/ui/page/settings/blocklist_users_page.dart';
 import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/about_page.dart';
+import 'package:flutter_nga/ui/page/settings/theme_settings_page.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
@@ -38,6 +39,7 @@ class Routes {
   static const String USER_TOPICS = "/user/posts";
   static const String USER_REPLIES = "/user/replies";
   static const String SETTINGS = "/settings";
+  static const String THEME_SETTINGS = "/settings/theme";
   static const String INTERFACE_SETTINGS = "/settings/interface";
   static const String BLOCKLIST_SETTINGS = "/settings/blocklist";
   static const String BLOCKLIST_USERS = "/settings/blocklist/users";
@@ -234,6 +236,11 @@ List<GoRoute> buildRoutes() {
       path: Routes.INTERFACE_SETTINGS,
       name: Routes.INTERFACE_SETTINGS,
       builder: (context, state) => InterfaceSettingsPage(),
+    ),
+    GoRoute(
+      path: Routes.THEME_SETTINGS,
+      name: Routes.THEME_SETTINGS,
+      builder: (context, state) => const ThemeSettingsPage(),
     ),
     GoRoute(
       path: Routes.BLOCKLIST_SETTINGS,

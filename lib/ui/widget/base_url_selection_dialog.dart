@@ -12,6 +12,7 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
     final state = ref.watch(baseUrlSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final maxListHeight = MediaQuery.sizeOf(context).height * 0.55;
     final options = BaseUrlPresets.all
         .map((config) => config.key == BaseUrlPresets.custom.key &&
                 state.currentConfig.key == BaseUrlPresets.custom.key
@@ -23,39 +24,44 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
       title: const Text('选择服务器'),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: options.length,
-          itemBuilder: (context, index) {
-            final config = options[index];
-
-            return RadioListTile<BaseUrlConfig>(
-              title: Text(
-                config.name,
-                style: textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxListHeight),
+          child: RadioGroup<BaseUrlConfig>(
+            groupValue: state.currentConfig,
+            onChanged: state.isLoading
+                ? (_) {}
+                : (value) async {
+                    if (value != null) {
+                      await _onSelectConfig(context, ref, state, value);
+                    }
+                  },
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: options.map((config) {
+                  return RadioListTile<BaseUrlConfig>(
+                    title: Text(
+                      config.name,
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    subtitle: Text(
+                      config.url.isEmpty ? '点击后输入自定义地址' : config.url,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    value: config,
+                    activeColor: colorScheme.primary,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    enabled: !state.isLoading,
+                  );
+                }).toList(),
               ),
-              subtitle: Text(
-                config.url.isEmpty ? '点击后输入自定义地址' : config.url,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              value: config,
-              groupValue: state.currentConfig,
-              onChanged: state.isLoading
-                  ? null
-                  : (value) async {
-                      if (value != null) {
-                        await _onSelectConfig(context, ref, state, value);
-                      }
-                    },
-              activeColor: colorScheme.primary,
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-            );
-          },
+            ),
+          ),
         ),
       ),
       actions: [
