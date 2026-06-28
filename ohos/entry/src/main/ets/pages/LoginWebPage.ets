@@ -23,13 +23,15 @@ struct LoginWebPage {
       Web({ src: LOGIN_URL, controller: this.controller })
         .javaScriptAccess(true)
         .domStorageAccess(true)
-        .onConsole((event) => {
-          const message = event.getMessage();
+        .onConsole((event: OnConsoleEvent): boolean => {
+          const message: string = event.message.getMessage();
           if (message.startsWith(SUCCESS_PREFIX)) {
-            const json = message.substring(SUCCESS_PREFIX.length);
+            const json: string = message.substring(SUCCESS_PREFIX.length);
             CookiesEventHandler.getInstance().onCookiesChanges(json);
             router.back();
+            return true;
           }
+          return false;
         })
         .width('100%')
         .height('100%')
