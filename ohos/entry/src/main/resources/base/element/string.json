@@ -11,10 +11,6 @@
     {
       "name": "EntryAbility_label",
       "value": "FNGA"
-    },
-    {
-      "name": "permission_media_reason",
-      "value": "Allow selecting and saving images"
     }
   ]
 }

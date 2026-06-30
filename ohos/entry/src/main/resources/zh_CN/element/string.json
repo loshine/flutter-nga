@@ -11,10 +11,6 @@
     {
       "name": "EntryAbility_label",
       "value": "FNGA"
-    },
-    {
-      "name": "permission_media_reason",
-      "value": "用于选择和保存图片"
     }
   ]
 }
