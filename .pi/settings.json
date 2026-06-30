@@ -1,0 +1,27 @@
+{
+	"hud": {
+		"mode": "overlay",
+		"position": "top-right",
+		"shortcut": "ctrl+shift+h",
+		"switchShortcut": "ctrl+.",
+		"minimizeShortcut": "ctrl+h",
+		"autoCompactWhileStreaming": true,
+		"startupNotification": true,
+		"usageDisplay": "metered",
+		"contextIndicator": "icon",
+		"expandedWidth": 42,
+		"compactWidth": 26,
+		"minTerminalWidth": 90,
+		"margin": {
+			"top": 1,
+			"right": 1,
+			"bottom": 1
+		},
+		"visibility": {
+			"context": true,
+			"project": true,
+			"worktrees": true,
+			"mcps": true
+		}
+	}
+}
