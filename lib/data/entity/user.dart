@@ -1,5 +1,3 @@
-import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
-
 class User {
   int? uid;
   final String? username;
@@ -88,10 +86,6 @@ class User {
       signature: map["signature"].toString(),
       bitData: map["bit_data"],
     );
-  }
-
-  String getShowName() {
-    return name_utils.getShowName(username!);
   }
 
   String getShowReputation() {
