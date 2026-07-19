@@ -15,6 +15,10 @@ class ThemeBuilder {
         builders: {
           TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+          TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
         },
       ),
       // AppBar 主题

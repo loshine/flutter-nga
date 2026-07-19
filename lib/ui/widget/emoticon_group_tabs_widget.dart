@@ -23,14 +23,14 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: TabBarView(children: _tabBarViews),
-          ),
           TabBar(
             isScrollable: true,
             labelColor: Theme.of(context).textTheme.bodyLarge?.color,
             unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color,
             tabs: _tabs,
+          ),
+          Expanded(
+            child: TabBarView(children: _tabBarViews),
           ),
         ],
       ),

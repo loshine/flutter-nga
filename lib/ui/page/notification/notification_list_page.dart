@@ -34,14 +34,17 @@ class _NotificationListState extends ConsumerState<NotificationListPage> {
     final state = ref.watch(notificationListProvider);
     final notifier = ref.read(notificationListProvider.notifier);
 
-    return SmartRefresher(
-      controller: _refreshController,
-      enablePullUp: false,
-      onRefresh: () => _onRefresh(notifier),
-      physics: ClampingScrollPhysics(),
-      child: ListView.builder(
-        itemCount: state.count,
-        itemBuilder: (context, index) => _itemBuilder(context, index, state),
+    return Scaffold(
+      appBar: AppBar(title: const Text('提醒信息')),
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullUp: false,
+        onRefresh: () => _onRefresh(notifier),
+        physics: ClampingScrollPhysics(),
+        child: ListView.builder(
+          itemCount: state.count,
+          itemBuilder: (context, index) => _itemBuilder(context, index, state),
+        ),
       ),
     );
   }
