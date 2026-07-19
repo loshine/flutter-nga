@@ -14,6 +14,9 @@ class NgaHtmlContentWidget extends ConsumerWidget {
   final int? pid;
   final int? postDateTimestamp;
 
+  /// 同页楼层 pid → 正文片段，用于把 Reply to 补成带原文的引用（对齐官网）
+  final Map<int, String>? quoteBodyByPid;
+
   const NgaHtmlContentWidget({
     super.key,
     required this.content,
@@ -21,6 +24,7 @@ class NgaHtmlContentWidget extends ConsumerWidget {
     this.tid,
     this.pid,
     this.postDateTimestamp,
+    this.quoteBodyByPid,
   });
 
   @override
@@ -33,6 +37,7 @@ class NgaHtmlContentWidget extends ConsumerWidget {
         tid: tid,
         pid: pid,
         postDateTimestamp: postDateTimestamp,
+        quoteBodyByPid: quoteBodyByPid,
       ),
       extensions: buildNgaHtmlExtensions(context),
       style: {
@@ -45,8 +50,9 @@ class NgaHtmlContentWidget extends ConsumerWidget {
               FontSize(Dimen.bodyMedium * interfaceState.contentSizeMultiple),
         ),
         'blockquote': Style(
-          padding: HtmlPaddings.zero,
-          margin: Margins.zero,
+          padding: HtmlPaddings.symmetric(horizontal: 12, vertical: 8),
+          margin: Margins.symmetric(vertical: 4),
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
         ),
         'table': Style(
           margin: Margins.all(8),

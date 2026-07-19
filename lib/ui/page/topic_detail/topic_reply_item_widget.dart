@@ -25,6 +25,9 @@ class TopicReplyItemWidget extends StatefulWidget {
   final List<User>? userList;
   final bool hot;
 
+  /// 同页楼层引用正文缓存，Reply to 补原文
+  final Map<int, String>? quoteBodyByPid;
+
   const TopicReplyItemWidget({
     super.key,
     required this.reply,
@@ -33,6 +36,7 @@ class TopicReplyItemWidget extends StatefulWidget {
     this.medalList,
     this.userList,
     this.hot = false,
+    this.quoteBodyByPid,
   });
 
   @override
@@ -198,6 +202,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               tid: widget.reply.tid,
               pid: widget.reply.pid,
               postDateTimestamp: widget.reply.postDateTimestamp,
+              quoteBodyByPid: widget.quoteBodyByPid,
             ),
           ),
         ),
