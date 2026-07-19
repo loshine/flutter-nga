@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ForumFavouriteButtonWidget extends ConsumerStatefulWidget {
@@ -42,7 +42,7 @@ class _ForumFavouriteButtonState
         notifier.toggle(widget.fid, widget.name, widget.type).then((_) {
           ref.read(favouriteForumListProvider.notifier).refresh();
         }).catchError((err) {
-          Fluttertoast.showToast(msg: err.message);
+          AppToast.error(err.message);
         });
       },
     );

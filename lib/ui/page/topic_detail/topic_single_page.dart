@@ -5,7 +5,7 @@ import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:dio/dio.dart';
 
@@ -78,7 +78,7 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
       final errorMsg = err is DioException
           ? (err.message ?? err.toString())
           : err.toString();
-      Fluttertoast.showToast(msg: errorMsg);
+      AppToast.error(errorMsg);
     }
   }
 

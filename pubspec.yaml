@@ -45,7 +45,7 @@ dependencies:
   device_info_plus: ^13.1.0
   flutter_inappwebview: ^6.1.5
   image_picker: ^1.2.2
-  fluttertoast: ^9.1.0
+  toastification: ^3.2.0
   url_launcher: ^6.3.2
   shared_preferences: ^2.5.5
   package_info_plus: ^10.1.0

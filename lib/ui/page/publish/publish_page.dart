@@ -10,7 +10,7 @@ import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
 class PublishPage extends StatefulWidget {
   const PublishPage({
@@ -258,9 +258,7 @@ class _PublishPageState extends State<PublishPage> {
   }
 
   void _incognitoIconClicked() {
-    Fluttertoast.showToast(
-      msg: _isAnonymous ? "关闭匿名" : "开启匿名",
-    );
+    AppToast.info(_isAnonymous ? "关闭匿名" : "开启匿名");
     setState(() {
       _isAnonymous = !_isAnonymous;
     });
@@ -365,7 +363,7 @@ class _PublishPageState extends State<PublishPage> {
     final content = _contentController.text;
     final len = content.codeUnits.length;
     if (len < 6 || len > 65530) {
-      Fluttertoast.showToast(msg: "内容过短或过长(6~65530 byte)");
+      AppToast.warning("内容过短或过长(6~65530 byte)");
       return;
     }
     if (widget.tid != null) {
@@ -378,14 +376,10 @@ class _PublishPageState extends State<PublishPage> {
             _isAnonymous,
             _attachments.toString(),
             _attachmentsCheck.toString());
-        Fluttertoast.showToast(
-          msg: message,
-        );
+        AppToast.success(message);
         Routes.pop(context);
       } catch (err) {
-        Fluttertoast.showToast(
-          msg: err.toString(),
-        );
+        AppToast.error(err.toString());
       }
     } else if (widget.fid != null) {
       try {
@@ -396,14 +390,10 @@ class _PublishPageState extends State<PublishPage> {
             _isAnonymous,
             _attachments.toString(),
             _attachmentsCheck.toString());
-        Fluttertoast.showToast(
-          msg: message,
-        );
+        AppToast.success(message);
         Routes.pop(context);
       } catch (err) {
-        Fluttertoast.showToast(
-          msg: err.toString(),
-        );
+        AppToast.error(err.toString());
       }
     }
   }

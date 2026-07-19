@@ -5,7 +5,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         .userRepository
         .saveLogin(map['uid'].toString(), map['token'], map['username'])
         .whenComplete(() {
-      Fluttertoast.showToast(msg: "登录成功");
+      AppToast.success("登录成功");
       Routes.pop(context);
     });
   }
@@ -67,11 +67,11 @@ class _LoginPageState extends State<LoginPage> {
 
   void _processCookiesString(String cookies) {
     Data().userRepository.saveLoginCookies(cookies).whenComplete(() {
-      Fluttertoast.showToast(msg: "登录成功");
+      AppToast.success("登录成功");
       Routes.pop(context);
     }).catchError((e) {
       debugPrintStack(stackTrace: e.stackTrace);
-      Fluttertoast.showToast(msg: e.message);
+      AppToast.error(e.message);
       throw e;
     });
   }
