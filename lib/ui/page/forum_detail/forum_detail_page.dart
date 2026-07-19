@@ -8,7 +8,7 @@ import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'child_forum_list_page.dart';
@@ -129,7 +129,7 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
             _refreshController.refreshCompleted(resetFooterState: true))
         .catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       return null;
     });
   }

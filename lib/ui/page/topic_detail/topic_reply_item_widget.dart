@@ -15,7 +15,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
 class TopicReplyItemWidget extends StatefulWidget {
   final Reply reply;
@@ -318,14 +318,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           .topicRepository
           .likeReply(widget.reply.tid, widget.reply.pid);
       setState(() => widget.reply.score += reaction.countChange);
-      Fluttertoast.showToast(
-        msg: reaction.message,
-      );
+      AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
-      Fluttertoast.showToast(
-        msg: err.toString(),
-      );
+      AppToast.error(err.toString());
     }
   }
 
@@ -335,13 +331,13 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           .topicRepository
           .dislikeReply(widget.reply.tid, widget.reply.pid);
       setState(() => widget.reply.score += reaction.countChange);
-      Fluttertoast.showToast(msg: reaction.message);
+      AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
       if (err is DioException) {
-        Fluttertoast.showToast(msg: err.message ?? '');
+        AppToast.error(err.message ?? '');
       } else {
-        Fluttertoast.showToast(msg: err.toString());
+        AppToast.error(err.toString());
       }
     }
   }

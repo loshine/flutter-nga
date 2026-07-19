@@ -4,7 +4,7 @@ import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_history_list_item_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -48,7 +48,7 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
   void _onRefresh(TopicHistoryListNotifier notifier) {
     notifier.refresh().catchError((err) {
       _refreshController.loadFailed();
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       return ref.read(topicHistoryListProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
@@ -57,13 +57,12 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
   void _onLoading(TopicHistoryListNotifier notifier) {
     notifier.loadMore().catchError((err) {
       _refreshController.loadFailed();
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       return ref.read(topicHistoryListProvider);
     }).whenComplete(() => _refreshController.loadComplete());
   }
 
-  Widget _buildListItem(
-      dynamic itemData, TopicHistoryListNotifier notifier) {
+  Widget _buildListItem(dynamic itemData, TopicHistoryListNotifier notifier) {
     if (itemData is TopicHistory) {
       return TopicHistoryListItemWidget(
         topicHistory: itemData,
@@ -107,7 +106,7 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
 
   void _clean(TopicHistoryListNotifier notifier) {
     notifier.clean().catchError((err) {
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       return 0;
     }).whenComplete(() {
       _refreshController.requestRefresh();

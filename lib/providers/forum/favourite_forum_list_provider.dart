@@ -1,7 +1,7 @@
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
 class FavouriteForumListNotifier extends Notifier<List<Forum>> {
   @override
@@ -17,7 +17,7 @@ class FavouriteForumListNotifier extends Notifier<List<Forum>> {
     final isFavourite =
         await Data().forumRepository.isFavourite(Forum(fid, name));
     if (isFavourite) {
-      Fluttertoast.showToast(msg: "您已添加过该版面");
+      AppToast.warning("您已添加过该版面");
     } else {
       await Data().forumRepository.saveFavourite(Forum(fid, name));
       refresh();
@@ -31,4 +31,5 @@ class FavouriteForumListNotifier extends Notifier<List<Forum>> {
 }
 
 final favouriteForumListProvider =
-    NotifierProvider<FavouriteForumListNotifier, List<Forum>>(FavouriteForumListNotifier.new);
+    NotifierProvider<FavouriteForumListNotifier, List<Forum>>(
+        FavouriteForumListNotifier.new);

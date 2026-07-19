@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'blocklist_edit_dialog.dart';
@@ -57,34 +57,34 @@ class _BlocklistKeywordsPageState extends ConsumerState<BlocklistKeywordsPage> {
     );
   }
 
-  void _deleteAll(BlocklistSettingsNotifier notifier) {
-    notifier
-        .deleteAllWords()
-        .then((value) => Fluttertoast.showToast(msg: value))
-        .catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
-      return false;
-    });
+  Future<void> _deleteAll(BlocklistSettingsNotifier notifier) async {
+    try {
+      AppToast.success(await notifier.deleteAllWords());
+    } catch (e) {
+      AppToast.error(e.toString());
+    }
   }
 
-  void _delete(BlocklistSettingsNotifier notifier, String word) {
-    notifier
-        .deleteWord(word)
-        .then((value) => Fluttertoast.showToast(msg: value))
-        .catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
-      return false;
-    });
+  Future<void> _delete(
+    BlocklistSettingsNotifier notifier,
+    String word,
+  ) async {
+    try {
+      AppToast.success(await notifier.deleteWord(word));
+    } catch (e) {
+      AppToast.error(e.toString());
+    }
   }
 
-  void _add(BlocklistSettingsNotifier notifier, String word) {
-    notifier
-        .addWord(word)
-        .then((value) => Fluttertoast.showToast(msg: value))
-        .catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
-      return false;
-    });
+  Future<void> _add(
+    BlocklistSettingsNotifier notifier,
+    String word,
+  ) async {
+    try {
+      AppToast.success(await notifier.addWord(word));
+    } catch (e) {
+      AppToast.error(e.toString());
+    }
   }
 
   void _showAddDialog(BlocklistSettingsNotifier notifier) {

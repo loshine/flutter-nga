@@ -38,6 +38,7 @@ dependencies:
   dynamic_color: ^1.8.1
   photo_view: ^0.15.0
   pull_to_refresh: ^2.0.0
+  toastification: ^3.0.3
   collection: ^1.19.1
   route_observer_mixin: ^1.8.0
   cached_network_image: ^3.4.1
@@ -62,12 +63,6 @@ dependencies:
       path: packages/device_info_plus/device_info_plus
       ref: br_device_info_plus-v12.3.0_ohos_dev
 
-  permission_handler:
-    git:
-      url: https://gitcode.com/CPF-Flutter/flutter_permission_handler.git
-      path: permission_handler
-      ref: br_v12.0.1_ohos_dev
-
   flutter_inappwebview:
     git:
       url: https://gitcode.com/CPF-Flutter/flutter_inappwebview.git
@@ -79,11 +74,6 @@ dependencies:
       url: https://gitcode.com/CPF-Flutter/flutter_packages.git
       path: packages/image_picker/image_picker
       ref: br_image_picker-v1.1.2_ohos_dev
-
-  fluttertoast:
-    git:
-      url: https://gitcode.com/CPF-Flutter/flutter_fluttertoast.git
-      ref: br_v9.0.0_ohos_dev
 
   url_launcher:
     git:

@@ -4,7 +4,7 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:image_picker/image_picker.dart';
 
 typedef AttachmentCallback = void Function(
@@ -74,7 +74,7 @@ class _AttachmentState extends State<AttachmentWidget> {
               if (!mounted) return;
 
               debugPrint(err.toString());
-              Fluttertoast.showToast(msg: err.toString());
+              AppToast.error(err.toString());
               setState(() => _imageFileList.remove(image));
             }
           },
@@ -95,7 +95,7 @@ class _AttachmentState extends State<AttachmentWidget> {
                   widget.callback
                       ?.call("[img]./${_list[index]}[/img]", "", false);
                 } else {
-                  Fluttertoast.showToast(msg: "上传文件中，请稍候");
+                  AppToast.warning("上传文件中，请稍候");
                 }
               }
             },

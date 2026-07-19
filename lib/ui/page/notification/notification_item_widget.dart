@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
 class ReplyNotificationItemWidget extends StatelessWidget {
   final ReplyNotification notification;
@@ -41,7 +41,7 @@ class ReplyNotificationItemWidget extends StatelessWidget {
 
   void _onTap() {
     // TODO: 实现具体的跳转逻辑，目前保留原有 Toast 提示
-    Fluttertoast.showToast(msg: notification.getNotificationMessage());
+    AppToast.info(notification.getNotificationMessage());
   }
 }
 
@@ -84,6 +84,6 @@ class SystemNotificationItemWidget extends StatelessWidget {
 
   void _onTap() {
     // TODO: 实现具体的跳转逻辑，目前保留原有 Toast 提示
-    Fluttertoast.showToast(msg: notification.getNotificationMessage());
+    AppToast.info(notification.getNotificationMessage());
   }
 }

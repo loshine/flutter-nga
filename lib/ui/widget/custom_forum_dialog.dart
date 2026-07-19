@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class CustomForumDialog extends HookConsumerWidget {
@@ -126,20 +126,20 @@ class CustomForumDialog extends HookConsumerWidget {
   ) {
     final fid = int.tryParse(fidText);
     if (fid == null) {
-      Fluttertoast.showToast(msg: "请输入有效的版面 ID");
+      AppToast.warning("请输入有效的版面 ID");
       return;
     }
     if (name.isEmpty) {
-      Fluttertoast.showToast(msg: "请输入版面名称");
+      AppToast.warning("请输入版面名称");
       return;
     }
 
     ref.read(favouriteForumListProvider.notifier).add(fid, name).then((_) {
-      Fluttertoast.showToast(msg: "添加成功");
+      AppToast.success("添加成功");
       Routes.pop(context);
     }).catchError((e) {
       debugPrint(e.toString());
-      Fluttertoast.showToast(msg: "添加自定义板块失败");
+      AppToast.error("添加自定义板块失败");
     });
   }
 }

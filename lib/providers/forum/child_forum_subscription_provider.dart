@@ -1,6 +1,6 @@
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
 class ChildForumSubscriptionNotifier extends Notifier<bool> {
   @override
@@ -12,10 +12,10 @@ class ChildForumSubscriptionNotifier extends Notifier<bool> {
 
   void addSubscription(int fid, int? parentId) {
     Data().forumRepository.addChildForumSubscription(fid, parentId).then((s) {
-      Fluttertoast.showToast(msg: "订阅成功");
+      AppToast.success("订阅成功");
       state = true;
     }).catchError((e) {
-      Fluttertoast.showToast(msg: e.message);
+      AppToast.error(e.message);
     });
   }
 
@@ -24,13 +24,14 @@ class ChildForumSubscriptionNotifier extends Notifier<bool> {
         .forumRepository
         .deleteChildForumSubscription(fid, parentId)
         .then((s) {
-      Fluttertoast.showToast(msg: "取消订阅成功");
+      AppToast.success("取消订阅成功");
       state = false;
     }).catchError((e) {
-      Fluttertoast.showToast(msg: e.message);
+      AppToast.error(e.message);
     });
   }
 }
 
 final childForumSubscriptionProvider =
-    NotifierProvider<ChildForumSubscriptionNotifier, bool>(ChildForumSubscriptionNotifier.new);
+    NotifierProvider<ChildForumSubscriptionNotifier, bool>(
+        ChildForumSubscriptionNotifier.new);

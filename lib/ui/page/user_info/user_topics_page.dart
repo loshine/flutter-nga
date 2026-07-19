@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/user/user_topics_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -58,7 +58,7 @@ class _UserTopicsPageState extends ConsumerState<UserTopicsPage> {
   void _onRefresh(UserTopicsNotifier notifier) {
     notifier.refresh(widget.uid).catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       return ref.read(userTopicsProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));

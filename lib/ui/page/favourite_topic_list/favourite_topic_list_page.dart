@@ -3,7 +3,7 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -53,7 +53,7 @@ class _FavouriteTopicListState extends ConsumerState<FavouriteTopicListPage> {
   void _onRefresh(FavouriteTopicListNotifier notifier) {
     notifier.refresh().catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       return ref.read(favouriteTopicListProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
@@ -88,7 +88,7 @@ class _FavouriteTopicListState extends ConsumerState<FavouriteTopicListPage> {
                 onPressed: () {
                   Routes.pop(context);
                   notifier.delete(topic).then((message) {
-                    Fluttertoast.showToast(msg: message ?? "");
+                    AppToast.success(message ?? "");
                   });
                 },
                 child: Text("确认"),
