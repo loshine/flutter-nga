@@ -41,6 +41,7 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
       tid: widget.tid!,
       page: 1,
       authorid: widget.authorid,
+      onJumpToFloor: _jumpToFloor,
     );
 
     List<Widget> widgets = [];
@@ -60,6 +61,7 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
           tid: widget.tid!,
           page: i + 1,
           authorid: widget.authorid,
+          onJumpToFloor: _jumpToFloor,
         ));
       }
     }
@@ -172,6 +174,16 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
   void dispose() {
     _tabController?.dispose();
     super.dispose();
+  }
+
+  /// 跳转到指定楼层所在页（与页码选择的跳楼逻辑一致）
+  void _jumpToFloor(int lou) {
+    if (lou <= 0) return;
+    final controller = _tabController;
+    if (controller == null) return;
+    final target =
+        (lou / 20 - 1).ceil().clamp(0, controller.length - 1).toInt();
+    controller.animateTo(target);
   }
 
   _addFavourite() {
