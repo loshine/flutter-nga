@@ -14,6 +14,7 @@ class TopicSinglePageState {
   final Topic? topic;
   final List<Reply> replyList;
   final List<Reply> hotReplyList;
+  final Set<int> hotReplyPids;
   final List<User> userList;
   final Set<Group> groupSet;
   final Set<Medal> medalSet;
@@ -26,6 +27,7 @@ class TopicSinglePageState {
     this.topic,
     this.replyList = const [],
     this.hotReplyList = const [],
+    this.hotReplyPids = const {},
     this.userList = const [],
     this.groupSet = const {},
     this.medalSet = const {},
@@ -39,6 +41,7 @@ class TopicSinglePageState {
         topic: null,
         replyList: [],
         hotReplyList: [],
+        hotReplyPids: const {},
         userList: [],
         groupSet: HashSet(),
         medalSet: HashSet(),
@@ -52,6 +55,7 @@ class TopicSinglePageState {
     Topic? topic,
     List<Reply>? replyList,
     List<Reply>? hotReplyList,
+    Set<int>? hotReplyPids,
     List<User>? userList,
     Set<Group>? groupSet,
     Set<Medal>? medalSet,
@@ -64,6 +68,7 @@ class TopicSinglePageState {
       topic: topic ?? this.topic,
       replyList: replyList ?? this.replyList,
       hotReplyList: hotReplyList ?? this.hotReplyList,
+      hotReplyPids: hotReplyPids ?? this.hotReplyPids,
       userList: userList ?? this.userList,
       groupSet: groupSet ?? this.groupSet,
       medalSet: medalSet ?? this.medalSet,
@@ -119,14 +124,19 @@ class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
 
       List<Reply> hotReplyList = [];
       if (key.page == 1 && data.hotReplies.isNotEmpty && key.authorid == null) {
-        List<dynamic> hots = await Future.wait(
-            data.hotReplies.map((e) => repository.getTopicReplies(e)));
-        hots.forEach((e) {
-          userList.addAll(e.userList.values);
-          groups.addAll(e.groupList.values);
-          medals.addAll(e.medalList.values);
-          hotReplyList.addAll(e.replyList.values);
-        });
+        try {
+          List<dynamic> hots = await Future.wait(
+              data.hotReplies.map((e) => repository.getTopicReplies(e)));
+          hots.forEach((e) {
+            userList.addAll(e.userList.values);
+            groups.addAll(e.groupList.values);
+            medals.addAll(e.medalList.values);
+            hotReplyList.addAll(e.replyList.values);
+          });
+        } catch (_) {
+          // 热评加载失败时降级为不显示热评区，不阻塞主列表
+          hotReplyList = [];
+        }
       }
 
       state = TopicSinglePageState(
@@ -137,6 +147,7 @@ class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
         topic: data.topic,
         replyList: replyList,
         hotReplyList: hotReplyList,
+        hotReplyPids: data.hotReplies.toSet(),
         userList: userList,
         groupSet: groups,
         medalSet: medals,

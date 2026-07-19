@@ -3,6 +3,7 @@ import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
+import 'package:flutter_nga/ui/page/topic_detail/hot_replies_section.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -15,11 +16,15 @@ class TopicSinglePage extends ConsumerStatefulWidget {
     required this.tid,
     required this.page,
     this.authorid,
+    this.onJumpToFloor,
   });
 
   final int tid;
   final int page;
   final int? authorid;
+
+  /// 跳转原楼层回调，参数为楼层号（lou）
+  final ValueChanged<int>? onJumpToFloor;
 
   @override
   ConsumerState<TopicSinglePage> createState() => _TopicSingleState();
@@ -88,11 +93,16 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
       BuildContext context, int position, TopicSinglePageState state) {
     final reply = state.replyList[position];
     if (position == 0 && state.page == 1 && state.hotReplyList.isNotEmpty) {
-      // 显示热评
+      // 楼主下方展示热点回复区块
       return Column(
-        children: [_buildReplyWidget(context, reply, state)]..addAll(state
-            .hotReplyList
-            .map((e) => _buildReplyWidget(context, e, state, hot: true))),
+        children: [
+          _buildReplyWidget(context, reply, state),
+          HotRepliesSection(
+            replies: state.hotReplyList,
+            userList: state.userList,
+            onJumpToFloor: widget.onJumpToFloor,
+          ),
+        ],
       );
     } else {
       return _buildReplyWidget(context, reply, state);
@@ -100,9 +110,8 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
   }
 
   Widget _buildReplyWidget(
-      BuildContext context, Reply reply, TopicSinglePageState state,
-      {bool hot = false}) {
-    final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}_$hot";
+      BuildContext context, Reply reply, TopicSinglePageState state) {
+    final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}";
     var widget = map[uniqueId];
     if (widget != null) {
       return widget;
@@ -157,7 +166,7 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
         group: group,
         medalList: medalList,
         userList: commentUserList,
-        hot: hot,
+        hot: state.hotReplyPids.contains(reply.pid),
       );
       map[uniqueId] = widget;
       return widget;
