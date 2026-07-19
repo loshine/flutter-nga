@@ -74,14 +74,14 @@ class Palette {
     return surfaceContainerHigh(context);
   }
 
-  /// 点赞条背景 - 使用 surfaceContainerHighest
+  /// 点赞条背景 - 使用次要强调色容器
   static Color getColorThumbBackground(BuildContext context) {
-    return surfaceContainerHighest(context);
+    return colorScheme(context).secondaryContainer;
   }
 
   /// 点赞条前景（图标、数字）
   static Color getColorThumbForeground(BuildContext context) {
-    return Colors.white;
+    return colorScheme(context).onSecondaryContainer;
   }
 
   /// 相册边框色 - 使用 outlineVariant

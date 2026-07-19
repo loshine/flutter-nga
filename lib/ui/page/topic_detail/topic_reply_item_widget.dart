@@ -54,8 +54,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
   Widget build(BuildContext context) {
     // 评论楼层使用真实评论内容渲染
     final contentReply = widget.commentSource ?? widget.reply;
-    final thumbBg = Palette.getColorThumbBackground(context);
-    final thumbFg = Palette.getColorThumbForeground(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final thumbBg = colorScheme.surfaceContainerHigh;
+    final thumbFgActive = colorScheme.primary;
+    final thumbFgInactive = colorScheme.onSurfaceVariant;
+    final isLiked = widget.reply.recommend == 1;
+    final isDisliked = widget.reply.recommend == -1;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -277,8 +281,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                     children: <Widget>[
                       GestureDetector(
                         child: Icon(
-                          CommunityMaterialIcons.thumb_up,
-                          color: thumbFg,
+                          isLiked ? CommunityMaterialIcons.thumb_up : CommunityMaterialIcons.thumb_up_outline,
+                          color: isLiked ? thumbFgActive : thumbFgInactive,
                           size: 14,
                         ),
                         onTap: _toggleLike,
@@ -289,7 +293,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           "${contentReply.score}",
                           style: TextStyle(
                             fontSize: Dimen.bodySmall,
-                            color: thumbFg,
+                            color: isLiked || isDisliked ? thumbFgActive : thumbFgInactive,
                           ),
                         ),
                       ),
@@ -298,8 +302,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                         child: GestureDetector(
                           onTap: _toggleDislike,
                           child: Icon(
-                            CommunityMaterialIcons.thumb_down,
-                            color: thumbFg,
+                            isDisliked ? CommunityMaterialIcons.thumb_down : CommunityMaterialIcons.thumb_down_outline,
+                            color: isDisliked ? thumbFgActive : thumbFgInactive,
                             size: 14,
                           ),
                         ),
@@ -353,7 +357,14 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       final reaction = await Data()
           .topicRepository
           .likeReply(widget.reply.tid, widget.reply.pid);
-      setState(() => widget.reply.score += reaction.countChange);
+      setState(() {
+        widget.reply.score += reaction.countChange;
+        if (reaction.countChange > 0) {
+          widget.reply.recommend = 1;
+        } else if (reaction.countChange < 0) {
+          widget.reply.recommend = 0;
+        }
+      });
       AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
@@ -366,7 +377,14 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       final reaction = await Data()
           .topicRepository
           .dislikeReply(widget.reply.tid, widget.reply.pid);
-      setState(() => widget.reply.score += reaction.countChange);
+      setState(() {
+        widget.reply.score += reaction.countChange;
+        if (reaction.countChange < 0) {
+          widget.reply.recommend = -1;
+        } else if (reaction.countChange > 0) {
+          widget.reply.recommend = 0;
+        }
+      });
       AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());

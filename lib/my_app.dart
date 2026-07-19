@@ -78,8 +78,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   );
 
             return AdaptiveTheme(
-              light: ThemeBuilder.buildTheme(lightScheme),
-              dark: ThemeBuilder.buildTheme(darkScheme),
+              light: ThemeBuilder.buildTheme(lightScheme, useDynamic ? lightDynamic.secondary : ThemeBuilder.getSecondaryForSeed(seedColor)),
+              dark: ThemeBuilder.buildTheme(darkScheme, useDynamic && darkDynamic != null ? darkDynamic.secondary : ThemeBuilder.getSecondaryForSeed(seedColor)),
               initial: widget.savedThemeMode ?? AdaptiveThemeMode.light,
               builder: (theme, darkTheme) {
                 return MaterialApp.router(
