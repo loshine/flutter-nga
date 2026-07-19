@@ -46,8 +46,8 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>需要访问相册以保存图片</string>
+	<string>用于选择图片作为帖子附件上传</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>需要访问相册以保存图片</string>
+	<string>用于将图片保存到系统相册</string>
 </dict>
 </plist>
