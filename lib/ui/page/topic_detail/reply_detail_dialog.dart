@@ -41,8 +41,8 @@ class _ReplyDetailState extends ConsumerState<ReplyDetailDialog> {
       0.0,
       560.0,
     );
+    // 背景走 DialogTheme（surfaceContainerHigh），与全应用 M3 弹窗一致。
     return AlertDialog(
-      backgroundColor: Palette.colorBackground,
       constraints: BoxConstraints.tightFor(width: dialogWidth),
       contentPadding: EdgeInsets.zero,
       content: _buildContent(state),
@@ -90,6 +90,8 @@ class _ReplyWidget extends StatefulWidget {
 class _ReplyWidgetState extends State<_ReplyWidget> {
   @override
   Widget build(BuildContext context) {
+    final thumbBg = Palette.getColorThumbBackground(context);
+    final thumbFg = Palette.getColorThumbForeground(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -147,7 +149,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Palette.getColorThumbBackground(context),
+                  color: thumbBg,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(
@@ -157,7 +159,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                       GestureDetector(
                         child: Icon(
                           CommunityMaterialIcons.thumb_up,
-                          color: Colors.white,
+                          color: thumbFg,
                           size: 14,
                         ),
                         onTap: toggleLike,
@@ -168,7 +170,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                           "${widget.reply.score}",
                           style: TextStyle(
                             fontSize: Dimen.bodySmall,
-                            color: Colors.white,
+                            color: thumbFg,
                           ),
                         ),
                       ),
@@ -178,7 +180,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                           onTap: toggleDislike,
                           child: Icon(
                             CommunityMaterialIcons.thumb_down,
-                            color: Colors.white,
+                            color: thumbFg,
                             size: 14,
                           ),
                         ),
