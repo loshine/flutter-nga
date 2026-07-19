@@ -207,33 +207,95 @@ class _ReplyParser implements Parser {
       r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]');
   static final _replyPostRegex = RegExp(
       r'\[b\]Reply to \[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]');
+  static final _anonyReplyTopicRegex = RegExp(
+      r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\)\[/b\]');
+  static final _anonyReplyPostRegex = RegExp(
+      r'\[b\]Reply to \[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\)\[/b\]');
 
   @override
   String parse(String? content) {
     if (content == null || content.isEmpty) return '';
-    // 使用 Data 中的动态 baseUrl
-    final baseUrl = Data().baseUrl;
+    // 统一解析为结构化 <nga_quote> 标签，由渲染层绘制引用条
     return content
         .replaceAllMapped(
             _topicRegex,
-            (m) =>
-                "<a href='${baseUrl}read.php?tid=${m.group(1)}'>Topic</a> Post by <a href='${baseUrl}nuke.php?func=ucp&uid=${m.group(2)}'>[${m.group(3)}]</a> <small>(${m.group(4)})</small>")
+            (m) => _buildQuoteTag(
+                tid: m.group(1),
+                uid: m.group(2),
+                author: m.group(3),
+                date: m.group(4)))
         .replaceAllMapped(
             _replyRegex,
-            (m) =>
-                "<a href='${baseUrl}read.php?searchpost=1&pid=${m.group(1)}'>Reply</a> Post by <a href='${baseUrl}nuke.php?func=ucp&uid=${m.group(4)}'>[${m.group(5)}]</a> <small>(${m.group(6)})</small>:")
+            (m) => _buildQuoteTag(
+                pid: m.group(1),
+                uid: m.group(4),
+                author: m.group(5),
+                date: m.group(6)))
         .replaceAllMapped(
             _anonyRegex,
-            (m) =>
-                "<a href='${baseUrl}read.php?searchpost=1&pid=${m.group(1)}'>Reply</a> Post by ${getShowName("#anony_${m.group(4)}")}</a><font color='gray'>(${m.group(5)}楼)</font> <small>(${m.group(6)})</small>:")
+            (m) => _buildQuoteTag(
+                pid: m.group(1),
+                author: getShowName("#anony_${m.group(4)}"),
+                floor: "${m.group(5)}楼",
+                date: m.group(6)))
         .replaceAllMapped(
             _replyTopicRegex,
-            (m) =>
-                "Reply to <a href='${baseUrl}read.php?searchpost=1&pid=${m.group(1)}'>Topic</a> Post by ${m.group(2)} ${m.group(3)}")
+            (m) => _buildQuoteTag(
+                tid: m.group(1),
+                uid: m.group(2),
+                author: m.group(3),
+                date: m.group(4)))
         .replaceAllMapped(
             _replyPostRegex,
-            (m) =>
-                "Reply to <a href='${baseUrl}read.php?searchpost=1&pid=${m.group(1)}'>Post</a> by ${m.group(5)} ${m.group(6)}");
+            (m) => _buildQuoteTag(
+                pid: m.group(1),
+                uid: m.group(4),
+                author: m.group(5),
+                date: m.group(6)))
+        .replaceAllMapped(
+            _anonyReplyTopicRegex,
+            (m) => _buildQuoteTag(
+                tid: m.group(1),
+                author: getShowName("#anony_${m.group(2)}"),
+                floor: "${m.group(3)}楼",
+                date: m.group(4)))
+        .replaceAllMapped(
+            _anonyReplyPostRegex,
+            (m) => _buildQuoteTag(
+                pid: m.group(1),
+                author: getShowName("#anony_${m.group(4)}"),
+                floor: "${m.group(5)}楼",
+                date: m.group(6)));
+  }
+
+  /// 构建 `<nga_quote>` 标签
+  /// - [pid] 引用楼层 id，点击弹出楼层详情
+  /// - [tid] 引用话题 id（无 pid 时），点击跳转话题
+  /// - [uid] 被引用作者 id（匿名时为空）
+  static String _buildQuoteTag({
+    String? pid,
+    String? tid,
+    String? uid,
+    String? author,
+    String? floor,
+    String? date,
+  }) {
+    final buffer = StringBuffer('<nga_quote');
+    void writeAttr(String key, String? value) {
+      final trimmed = value?.trim();
+      if (trimmed != null && trimmed.isNotEmpty) {
+        buffer.write(" $key='${_escapeHtmlAttribute(trimmed)}'");
+      }
+    }
+
+    writeAttr('pid', pid);
+    writeAttr('tid', tid);
+    writeAttr('uid', uid);
+    writeAttr('author', author);
+    writeAttr('floor', floor);
+    writeAttr('date', date);
+    buffer.write('></nga_quote>');
+    return buffer.toString();
   }
 }
 
