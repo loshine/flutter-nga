@@ -143,14 +143,32 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           children: [
             Padding(
               padding: EdgeInsets.only(left: 16, bottom: 8),
-              child: Text(
-                widget.hot ? "[热评]" : "[${widget.reply.lou} 楼]",
-                style: TextStyle(
-                  color: widget.hot
-                      ? Colors.redAccent
-                      : Theme.of(context).textTheme.bodyMedium?.color,
-                  fontSize: Dimen.bodySmall,
-                ),
+              child: Row(
+                children: [
+                  Text(
+                    "[${widget.reply.lou} 楼]",
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                      fontSize: Dimen.bodySmall,
+                    ),
+                  ),
+                  // 热评在原楼层处的标识（与网页端一致）
+                  if (widget.hot) ...[
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.whatshot,
+                      size: 14,
+                      color: Colors.deepOrange,
+                    ),
+                    const Text(
+                      "热评",
+                      style: TextStyle(
+                        color: Colors.deepOrange,
+                        fontSize: Dimen.bodySmall,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
