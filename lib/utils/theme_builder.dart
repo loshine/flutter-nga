@@ -1,12 +1,31 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 /// 主题构建工具类
 class ThemeBuilder {
   ThemeBuilder._();
 
+  // 经典暗金/琥珀色：与棕色 primary 完美协调，更贴近 NGA 的经典质感，同时提供足够的亮度。
+  static const _secondarySeed = Color(0xFFDCA965);
+
+  static Color getSecondaryForSeed(Color seed) {
+    if (seed == Colors.brown) return const Color(0xFFDCA965);
+    if (seed == Colors.blue) return Colors.lightBlue;
+    if (seed == Colors.teal) return Colors.cyan;
+    if (seed == Colors.green) return Colors.lightGreen;
+    if (seed == Colors.purple) return Colors.deepPurpleAccent;
+    if (seed == Colors.pink) return Colors.purpleAccent;
+    if (seed == Colors.orange) return Colors.amber;
+    if (seed == Colors.red) return Colors.deepOrange;
+    if (seed == Colors.indigo) return Colors.blueAccent;
+    if (seed == Colors.cyan) return Colors.lightBlueAccent;
+    return _secondarySeed;
+  }
+
   /// 从 ColorScheme 构建 ThemeData
-  static ThemeData buildTheme(ColorScheme colorScheme) {
+  static ThemeData buildTheme(ColorScheme baseColorScheme, [Color? secondarySeed]) {
+    final colorScheme = _withRefinedSecondary(baseColorScheme, secondarySeed);
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -156,13 +175,31 @@ class ThemeBuilder {
     );
   }
 
+  static ColorScheme _withRefinedSecondary(ColorScheme base, [Color? secondarySeed]) {
+    final seed = (secondarySeed ?? _secondarySeed).harmonizeWith(base.primary);
+    final accent = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: base.brightness,
+    );
+    return base.copyWith(
+      secondary: accent.primary,
+      onSecondary: accent.onPrimary,
+      secondaryContainer: accent.primaryContainer,
+      onSecondaryContainer: accent.onPrimaryContainer,
+      secondaryFixed: accent.primaryFixed,
+      secondaryFixedDim: accent.primaryFixedDim,
+      onSecondaryFixed: accent.onPrimaryFixed,
+      onSecondaryFixedVariant: accent.onPrimaryFixedVariant,
+    );
+  }
+
   /// 从种子色构建亮色主题
   static ThemeData buildLightTheme(Color seedColor) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.light,
     );
-    return buildTheme(colorScheme);
+    return buildTheme(colorScheme, getSecondaryForSeed(seedColor));
   }
 
   /// 从种子色构建暗色主题
@@ -171,6 +208,6 @@ class ThemeBuilder {
       seedColor: seedColor,
       brightness: Brightness.dark,
     );
-    return buildTheme(colorScheme);
+    return buildTheme(colorScheme, getSecondaryForSeed(seedColor));
   }
 }

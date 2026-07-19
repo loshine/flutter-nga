@@ -90,8 +90,12 @@ class _ReplyWidget extends StatefulWidget {
 class _ReplyWidgetState extends State<_ReplyWidget> {
   @override
   Widget build(BuildContext context) {
-    final thumbBg = Palette.getColorThumbBackground(context);
-    final thumbFg = Palette.getColorThumbForeground(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final thumbBg = colorScheme.surfaceContainerHigh;
+    final thumbFgActive = colorScheme.primary;
+    final thumbFgInactive = colorScheme.onSurfaceVariant;
+    final isLiked = widget.reply.recommend == 1;
+    final isDisliked = widget.reply.recommend == -1;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -158,11 +162,11 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                     children: <Widget>[
                       GestureDetector(
                         child: Icon(
-                          CommunityMaterialIcons.thumb_up,
-                          color: thumbFg,
+                          isLiked ? CommunityMaterialIcons.thumb_up : CommunityMaterialIcons.thumb_up_outline,
+                          color: isLiked ? thumbFgActive : thumbFgInactive,
                           size: 14,
                         ),
-                        onTap: toggleLike,
+                        onTap: _toggleLike,
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 8),
@@ -170,17 +174,17 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                           "${widget.reply.score}",
                           style: TextStyle(
                             fontSize: Dimen.bodySmall,
-                            color: thumbFg,
+                            color: isLiked || isDisliked ? thumbFgActive : thumbFgInactive,
                           ),
                         ),
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 8),
                         child: GestureDetector(
-                          onTap: toggleDislike,
+                          onTap: _toggleDislike,
                           child: Icon(
-                            CommunityMaterialIcons.thumb_down,
-                            color: thumbFg,
+                            isDisliked ? CommunityMaterialIcons.thumb_down : CommunityMaterialIcons.thumb_down_outline,
+                            color: isDisliked ? thumbFgActive : thumbFgInactive,
                             size: 14,
                           ),
                         ),
@@ -204,37 +208,43 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
     );
   }
 
-  toggleLike() async {
+  _toggleLike() async {
     try {
       final reaction = await Data()
           .topicRepository
           .likeReply(widget.reply.tid, widget.reply.pid);
-      setState(() => widget.reply.score += reaction.countChange);
+      setState(() {
+        widget.reply.score += reaction.countChange;
+        if (reaction.countChange > 0) {
+          widget.reply.recommend = 1;
+        } else if (reaction.countChange < 0) {
+          widget.reply.recommend = 0;
+        }
+      });
       AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
-      if (err is DioException) {
-        AppToast.error(err.message ?? '');
-      } else {
-        AppToast.error(err.toString());
-      }
+      AppToast.error(err.toString());
     }
   }
 
-  toggleDislike() async {
+  _toggleDislike() async {
     try {
       final reaction = await Data()
           .topicRepository
           .dislikeReply(widget.reply.tid, widget.reply.pid);
-      setState(() => widget.reply.score += reaction.countChange);
+      setState(() {
+        widget.reply.score += reaction.countChange;
+        if (reaction.countChange < 0) {
+          widget.reply.recommend = -1;
+        } else if (reaction.countChange > 0) {
+          widget.reply.recommend = 0;
+        }
+      });
       AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
-      if (err is DioException) {
-        AppToast.error(err.message ?? '');
-      } else {
-        AppToast.error(err.toString());
-      }
+      AppToast.error(err.toString());
     }
   }
 }
