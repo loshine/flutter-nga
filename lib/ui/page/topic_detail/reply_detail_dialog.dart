@@ -9,6 +9,7 @@ import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,7 +100,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
             ),
             Expanded(
               child: Text(
-                widget.user.getShowName(),
+                name_utils.getShowName(widget.user.username ?? ''),
                 style: TextStyle(color: Colors.black),
               ),
             ),
