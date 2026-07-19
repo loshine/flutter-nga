@@ -36,8 +36,14 @@ class _ReplyDetailState extends ConsumerState<ReplyDetailDialog> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(topicReplyProvider(widget.pid));
+    // 避免 AlertDialog 对 flutter_html 内嵌引用卡执行固有宽度测量。
+    final dialogWidth = (MediaQuery.sizeOf(context).width - 80).clamp(
+      0.0,
+      560.0,
+    );
     return AlertDialog(
       backgroundColor: Palette.colorBackground,
+      constraints: BoxConstraints.tightFor(width: dialogWidth),
       contentPadding: EdgeInsets.zero,
       content: _buildContent(state),
       actions: [
