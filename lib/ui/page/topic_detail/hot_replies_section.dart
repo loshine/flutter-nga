@@ -5,9 +5,10 @@ import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
+import 'package:flutter_nga/utils/route.dart';
 
 /// 热点回复区块：标题 + 容器包裹的紧凑热评卡片列表
-/// 点击卡片跳转原楼层（与网页端"到原楼层"链接对应）
+/// 点击「原帖」打开回复详情，缺失 pid 时回退到楼层跳转
 class HotRepliesSection extends StatelessWidget {
   final List<Reply> replies;
   final List<User> userList;
@@ -87,7 +88,7 @@ class HotRepliesSection extends StatelessWidget {
   }
 }
 
-/// 紧凑热评卡片：头像 + 作者 + 楼号 + 赞数 + 限高折叠内容
+/// 紧凑热评卡片：头像 + 作者 + 原帖入口 + 限高折叠内容
 class _HotReplyItemCard extends StatefulWidget {
   final Reply reply;
   final User? user;
@@ -114,12 +115,25 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
 
   bool _expanded = false;
 
+  void _jumpToOriginal() {
+    final pid = widget.reply.pid;
+    if (pid != null && pid > 0) {
+      Routes.onLinkTap(context, 'read.php?searchpost=1&pid=$pid');
+      return;
+    }
+
+    final lou = widget.reply.lou ?? 0;
+    if (lou > 0) widget.onJumpToFloor?.call(lou);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final reply = widget.reply;
+    final pid = reply.pid ?? 0;
     final lou = reply.lou ?? 0;
+    final canJump = pid > 0 || (lou > 0 && widget.onJumpToFloor != null);
 
     final contentWidget = NgaHtmlContentWidget(
       content: reply.content,
@@ -130,46 +144,56 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
       quoteBodyByPid: widget.quoteBodyByPid,
     );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: lou > 0 ? () => widget.onJumpToFloor?.call(lou) : null,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  AvatarWidget(widget.user?.avatar, size: 28),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      name_utils.getShowName(widget.user?.username ?? ''),
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              AvatarWidget(widget.user?.avatar, size: 28),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  name_utils.getShowName(widget.user?.username ?? ''),
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (lou > 0)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Text(
+                    '$lou楼',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  if (lou > 0)
-                    Text(
-                      '$lou楼',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                ),
+              // pid 优先打开原回复，缺失时回退到楼层跳转
+              if (canJump)
+                GestureDetector(
+                  onTap: _jumpToOriginal,
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    '[原帖]',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: const Color(0xFF888888),
+                      fontWeight: FontWeight.w600,
                     ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              reply.content.length > _collapseThreshold
-                  ? _buildCollapsibleContent(contentWidget, colorScheme)
-                  : contentWidget,
+                  ),
+                ),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+          reply.content.length > _collapseThreshold
+              ? _buildCollapsibleContent(contentWidget, colorScheme)
+              : contentWidget,
+        ],
       ),
     );
   }
