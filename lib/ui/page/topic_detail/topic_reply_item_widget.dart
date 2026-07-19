@@ -12,6 +12,7 @@ import 'package:flutter_nga/ui/widget/dash.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -68,7 +69,9 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       children: [
                         Expanded(
                           child: Text(
-                            widget.user!.getShowName(),
+                            name_utils.getShowName(
+                              widget.user!.username ?? '',
+                            ),
                             style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.bodyLarge?.color,
@@ -344,10 +347,11 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
   }
 
   _onMenuSelected(String action) {
+    final displayName = name_utils.getShowName(widget.user!.username ?? '');
     if (action == _actions[0]) {
       // 引用
       String quoteContent =
-          "[quote][pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] [b]Post by [uid=${widget.user!.uid}]${widget.user!.getShowName()}[/uid] (${widget.reply.postDate}):[/b]\n\n${widget.reply.quoteContent}[/quote]";
+          "[quote][pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] [b]Post by [uid=${widget.user!.uid}]$displayName[/uid] (${widget.reply.postDate}):[/b]\n\n${widget.reply.quoteContent}[/quote]";
       Routes.navigateTo(
         context,
         "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
@@ -356,7 +360,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     } else if (action == _actions[1]) {
       // 回复
       String replyContent =
-          "[b]Reply to [pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] Post by [uid=${widget.user!.uid}]${widget.user!.getShowName()}[/uid] (${widget.reply.postDate})[/b]";
+          "[b]Reply to [pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] Post by [uid=${widget.user!.uid}]$displayName[/uid] (${widget.reply.postDate})[/b]";
       Routes.navigateTo(
         context,
         "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
