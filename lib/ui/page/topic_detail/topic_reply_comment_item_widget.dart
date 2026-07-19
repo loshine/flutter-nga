@@ -4,6 +4,7 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_comment_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 
 class TopicReplyCommentItemWidget extends StatelessWidget {
   const TopicReplyCommentItemWidget(this.reply, this.user, {super.key});
@@ -42,7 +43,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.only(bottom: 4),
                       child: Text(
-                        user!.getShowName(),
+                        name_utils.getShowName(user!.username ?? ''),
                         style: TextStyle(
                             color:
                                 Theme.of(context).textTheme.bodyLarge?.color),

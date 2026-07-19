@@ -4,6 +4,7 @@ import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 
 class MessageItemWidget extends StatelessWidget {
   final Message message;
@@ -28,7 +29,7 @@ class MessageItemWidget extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                message.user.getShowName(),
+                name_utils.getShowName(message.user.username ?? ''),
                 style: TextStyle(color: Colors.black),
               ),
             ),
