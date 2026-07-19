@@ -3,9 +3,9 @@ import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_comment_widget.dart';
-import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 
+/// 贴条评论项：紧凑 M3 风格，由外层容器提供背景与分割线
 class TopicReplyCommentItemWidget extends StatelessWidget {
   const TopicReplyCommentItemWidget(this.reply, this.user, {super.key});
 
@@ -14,55 +14,43 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(color: Theme.of(context).dividerColor),
-          right: BorderSide(color: Theme.of(context).dividerColor),
-          bottom: BorderSide(color: Theme.of(context).dividerColor),
-        ),
-      ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.all(12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: EdgeInsets.only(right: 8),
-                child: AvatarWidget(
-                  user!.avatar,
-                  size: 36,
-                  username: user!.username,
+              AvatarWidget(
+                user?.avatar,
+                size: 28,
+                username: user?.username,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  name_utils.getShowName(user?.username ?? ''),
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        name_utils.getShowName(user!.username ?? ''),
-                        style: TextStyle(
-                            color:
-                                Theme.of(context).textTheme.bodyLarge?.color),
-                      ),
-                    ),
-                    Text(
-                      reply.postDate!,
-                      style: TextStyle(
-                        fontSize: Dimen.bodySmall,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                  ],
+              Text(
+                reply.postDate ?? '',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
           Padding(
-            padding: EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: 8),
             child: NgaHtmlCommentWidget(
               content: reply.content,
               authorId: reply.authorId,

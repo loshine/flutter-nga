@@ -23,10 +23,12 @@ class TopicReplyItemWidget extends StatefulWidget {
   final Group? group;
   final List<Medal>? medalList;
   final List<User>? userList;
-  final bool hot;
 
   /// 同页楼层引用正文缓存，Reply to 补原文
   final Map<int, String>? quoteBodyByPid;
+
+  /// 评论占位楼层对应的真实评论（按 pid 关联），非评论楼层为 null
+  final Reply? commentSource;
 
   const TopicReplyItemWidget({
     super.key,
@@ -35,8 +37,8 @@ class TopicReplyItemWidget extends StatefulWidget {
     this.group,
     this.medalList,
     this.userList,
-    this.hot = false,
     this.quoteBodyByPid,
+    this.commentSource,
   });
 
   @override
@@ -50,6 +52,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // 评论楼层使用真实评论内容渲染
+    final contentReply = widget.commentSource ?? widget.reply;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -156,19 +160,22 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       fontSize: Dimen.bodySmall,
                     ),
                   ),
-                  // 热评在原楼层处的标识（与网页端一致）
-                  if (widget.hot) ...[
+                  // 评论楼层标识
+                  if (widget.commentSource != null) ...[
                     const SizedBox(width: 4),
-                    const Icon(
-                      Icons.whatshot,
-                      size: 14,
-                      color: Colors.deepOrange,
-                    ),
-                    const Text(
-                      "热评",
-                      style: TextStyle(
-                        color: Colors.deepOrange,
-                        fontSize: Dimen.bodySmall,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF909090),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        "评论",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: Dimen.labelSmall,
+                        ),
                       ),
                     ),
                   ],
@@ -178,7 +185,11 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ],
         ),
         SizedBox(
-          height: code_utils.isStringEmpty(widget.reply.subject) ? 0 : null,
+          // 评论楼层隐藏"对主题发表了一条评论"占位标题
+          height: widget.commentSource != null ||
+                  code_utils.isStringEmpty(widget.reply.subject)
+              ? 0
+              : null,
           width: double.infinity,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
@@ -193,15 +204,15 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         SizedBox(
-          height: code_utils.isStringEmpty(widget.reply.content) ? 0 : null,
+          height: code_utils.isStringEmpty(contentReply.content) ? 0 : null,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
             child: NgaHtmlContentWidget(
-              content: widget.reply.content,
-              authorId: widget.reply.authorId,
-              tid: widget.reply.tid,
-              pid: widget.reply.pid,
-              postDateTimestamp: widget.reply.postDateTimestamp,
+              content: contentReply.content,
+              authorId: contentReply.authorId,
+              tid: contentReply.tid,
+              pid: contentReply.pid,
+              postDateTimestamp: contentReply.postDateTimestamp,
               quoteBodyByPid: widget.quoteBodyByPid,
             ),
           ),
@@ -273,7 +284,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       Padding(
                         padding: EdgeInsets.only(left: 8),
                         child: Text(
-                          "${widget.reply.score}",
+                          "${contentReply.score}",
                           style: TextStyle(
                             fontSize: Dimen.bodySmall,
                             color: Colors.white,
@@ -394,31 +405,54 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
   }
 
   _getCommentListWidgets() {
-    List<Widget> widgets = [];
-    widgets.add(Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).dividerColor,
-          ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final comments = widget.reply.commentList;
+    return [
+      Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 8),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.chat_bubble_outline,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    "评论 ${comments.length}",
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            for (final (index, comment) in comments.indexed) ...[
+              if (index > 0)
+                const Divider(height: 1, indent: 12, endIndent: 12),
+              TopicReplyCommentItemWidget(
+                comment,
+                widget.userList!
+                    .firstWhereOrNull((user) => user.uid == comment.authorId),
+              ),
+            ],
+            const SizedBox(height: 4),
+          ],
         ),
       ),
-      child: Text(
-        "评论",
-        style: TextStyle(
-          fontSize: Dimen.titleMedium,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ));
-    widgets.addAll(widget.reply.commentList.map((comment) =>
-        TopicReplyCommentItemWidget(
-            comment,
-            widget.userList!
-                .firstWhereOrNull((user) => user.uid == comment.authorId))));
-    return widgets;
+    ];
   }
 
   _getAttachments() {
