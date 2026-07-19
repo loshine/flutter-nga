@@ -28,6 +28,8 @@ class TopicSinglePage extends ConsumerStatefulWidget {
 class _TopicSingleState extends ConsumerState<TopicSinglePage> {
   final _refreshController = RefreshController(initialRefresh: true);
 
+  TopicDetailKey get _detailProviderKey => TopicDetailKey(tid: widget.tid);
+
   TopicSinglePageKey get _providerKey => TopicSinglePageKey(
         tid: widget.tid,
         page: widget.page,
@@ -56,23 +58,28 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
     );
   }
 
-  _onRefresh() {
+  Future<void> _onRefresh() async {
     map.clear();
     final notifier = ref.read(topicSinglePageProvider(_providerKey).notifier);
-    final detailNotifier = ref.read(topicDetailProvider.notifier);
-    notifier.refresh().then((state) {
-      detailNotifier.setMaxPage(state.maxPage);
-      detailNotifier.setMaxFloor(state.maxFloor);
-      detailNotifier.setTopic(state.topic);
-    }).whenComplete(() {
+    try {
+      final state = await notifier.refresh();
+      if (!mounted) return;
+
+      ref.read(topicDetailProvider(_detailProviderKey).notifier).updateMetadata(
+            maxPage: state.maxPage,
+            maxFloor: state.maxFloor,
+            topic: state.topic,
+          );
       _refreshController.refreshCompleted();
-    }).catchError((err) {
-      _refreshController.loadFailed();
+    } catch (err) {
+      if (!mounted) return;
+
+      _refreshController.refreshFailed();
       final errorMsg = err is DioException
           ? (err.message ?? err.toString())
           : err.toString();
       Fluttertoast.showToast(msg: errorMsg);
-    });
+    }
   }
 
   final map = <String, Widget>{};

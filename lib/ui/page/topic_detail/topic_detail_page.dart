@@ -31,10 +31,12 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
     with TickerProviderStateMixin {
   TabController? _tabController;
 
+  TopicDetailKey get _providerKey => TopicDetailKey(tid: widget.tid!);
+
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(topicDetailProvider);
-    final notifier = ref.read(topicDetailProvider.notifier);
+    final state = ref.watch(topicDetailProvider(_providerKey));
+    final notifier = ref.read(topicDetailProvider(_providerKey).notifier);
     final firstPage = TopicSinglePage(
       tid: widget.tid!,
       page: 1,
@@ -62,7 +64,11 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
       }
     }
     return Scaffold(
-      appBar: AppBar(title: Text(code_utils.unescapeHtml(state.subject ?? ""))),
+      appBar: AppBar(
+        title: Text(
+          code_utils.unescapeHtml(state.subject ?? widget.subject ?? ""),
+        ),
+      ),
       body: TabBarView(
         physics: NeverScrollableScrollPhysics(),
         controller: _tabController,
@@ -169,7 +175,7 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
   }
 
   _addFavourite() {
-    final notifier = ref.read(topicDetailProvider.notifier);
+    final notifier = ref.read(topicDetailProvider(_providerKey).notifier);
     notifier.addFavourite(widget.tid).then((message) {
       Fluttertoast.showToast(msg: message.toString());
     }).catchError((e) {

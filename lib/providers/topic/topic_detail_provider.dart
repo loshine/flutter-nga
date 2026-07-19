@@ -2,6 +2,19 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+class TopicDetailKey {
+  const TopicDetailKey({required this.tid});
+
+  final int tid;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is TopicDetailKey && tid == other.tid;
+
+  @override
+  int get hashCode => tid.hashCode;
+}
+
 class TopicDetailState {
   final int currentPage;
   final int maxPage;
@@ -15,7 +28,7 @@ class TopicDetailState {
     this.topic,
   });
 
-  String? get subject => topic?.subject ?? "";
+  String? get subject => topic?.subject;
 
   TopicDetailState copyWith({
     int? currentPage,
@@ -33,11 +46,19 @@ class TopicDetailState {
 }
 
 class TopicDetailNotifier extends Notifier<TopicDetailState> {
+  TopicDetailNotifier(this.key);
+
+  final TopicDetailKey key;
+
   @override
   TopicDetailState build() => const TopicDetailState();
 
-  void setMaxPage(int maxPage) {
-    var safeMaxPage = maxPage < 1 ? 1 : maxPage;
+  void updateMetadata({
+    required int maxPage,
+    required int maxFloor,
+    required Topic? topic,
+  }) {
+    final safeMaxPage = maxPage < 1 ? 1 : maxPage;
     var safeCurrentPage = state.currentPage;
     if (safeCurrentPage < 1) {
       safeCurrentPage = 1;
@@ -46,12 +67,10 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
     }
     state = state.copyWith(
       maxPage: safeMaxPage,
+      maxFloor: maxFloor,
       currentPage: safeCurrentPage,
+      topic: topic,
     );
-  }
-
-  void setMaxFloor(int maxFloor) {
-    state = state.copyWith(maxFloor: maxFloor);
   }
 
   void setCurrentPage(int currentPage) {
@@ -61,13 +80,6 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
       safeCurrentPage = maxPage;
     }
     state = state.copyWith(currentPage: safeCurrentPage);
-  }
-
-  void setTopic(Topic? topic) {
-    if (topic == null || (state.topic != null && state.topic!.tid == topic.tid)) {
-      return;
-    }
-    state = state.copyWith(topic: topic);
   }
 
   Future<String?> addFavourite(int? tid) async {
@@ -81,5 +93,6 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
   }
 }
 
-final topicDetailProvider =
-    NotifierProvider<TopicDetailNotifier, TopicDetailState>(TopicDetailNotifier.new);
+final topicDetailProvider = NotifierProvider.autoDispose
+    .family<TopicDetailNotifier, TopicDetailState, TopicDetailKey>(
+        TopicDetailNotifier.new);
