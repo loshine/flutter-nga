@@ -54,6 +54,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
   Widget build(BuildContext context) {
     // 评论楼层使用真实评论内容渲染
     final contentReply = widget.commentSource ?? widget.reply;
+    final thumbBg = Palette.getColorThumbBackground(context);
+    final thumbFg = Palette.getColorThumbForeground(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -266,7 +268,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Palette.getColorThumbBackground(context),
+                  color: thumbBg,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Padding(
@@ -276,7 +278,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       GestureDetector(
                         child: Icon(
                           CommunityMaterialIcons.thumb_up,
-                          color: Colors.white,
+                          color: thumbFg,
                           size: 14,
                         ),
                         onTap: _toggleLike,
@@ -287,7 +289,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           "${contentReply.score}",
                           style: TextStyle(
                             fontSize: Dimen.bodySmall,
-                            color: Colors.white,
+                            color: thumbFg,
                           ),
                         ),
                       ),
@@ -297,7 +299,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           onTap: _toggleDislike,
                           child: Icon(
                             CommunityMaterialIcons.thumb_down,
-                            color: Colors.white,
+                            color: thumbFg,
                             size: 14,
                           ),
                         ),
