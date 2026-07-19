@@ -9,6 +9,7 @@ import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 
@@ -29,12 +30,11 @@ class PublishPage extends StatefulWidget {
 }
 
 class _PublishPageState extends State<PublishPage> {
-  final _bottomData = [
-    CommunityMaterialIcons.incognito_off,
-    CommunityMaterialIcons.emoticon,
-    CommunityMaterialIcons.format_text,
-    CommunityMaterialIcons.attachment,
-  ];
+  /// 宽屏断点：大于此宽度时面板以对话框形式展示
+  static const double _wideBreakpoint = 600;
+
+  /// 宽屏下编辑区域最大宽度
+  static const double _contentMaxWidth = 720;
 
   bool _keyboardVisible = false;
   bool _bottomPanelVisible = false;
@@ -53,8 +53,11 @@ class _PublishPageState extends State<PublishPage> {
   late Widget _currentBottomPanelChild;
   final _selectionList = [0, 0];
 
-  StringBuffer _attachments = StringBuffer();
-  StringBuffer _attachmentsCheck = StringBuffer();
+  final StringBuffer _attachments = StringBuffer();
+  final StringBuffer _attachmentsCheck = StringBuffer();
+
+  bool get _isWide =>
+      MediaQuery.sizeOf(context).width >= _wideBreakpoint;
 
   @override
   void initState() {
@@ -78,6 +81,13 @@ class _PublishPageState extends State<PublishPage> {
       attachmentCallback: _attachmentCallback,
     );
     _currentBottomPanelChild = _emoticonGroupTabsWidget;
+  }
+
+  @override
+  void dispose() {
+    _subjectController.dispose();
+    _contentController.dispose();
+    super.dispose();
   }
 
   void _onKeyboardVisibilityChanged(bool visible) {
@@ -107,102 +117,103 @@ class _PublishPageState extends State<PublishPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.tid != null ? "回帖" : "发帖"),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.send),
-              onPressed: _publish,
-            ),
-          ],
         ),
         body: _buildBody(),
+        floatingActionButton: FloatingActionButton(
+          tooltip: '发送',
+          onPressed: _publish,
+          child: const Icon(Icons.send),
+        ),
       ),
     );
   }
 
   Widget _buildBody() {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
+        // 编辑区域：宽屏下限制最大宽度并居中
         Expanded(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Column(
-              children: [
-                TextField(
-                  maxLines: 1,
-                  controller: _subjectController,
-                  decoration: InputDecoration(
-                    labelText: "标题(可选)",
-                    suffixIcon: InkWell(
-                      child: Icon(
-                        CommunityMaterialIcons.tag_multiple,
-                        color: Theme.of(context).iconTheme.color,
+          child: Center(
+            child: ConstrainedBox(
+              constraints:
+                  const BoxConstraints(maxWidth: _contentMaxWidth),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  children: [
+                    TextField(
+                      maxLines: 1,
+                      controller: _subjectController,
+                      decoration: InputDecoration(
+                        labelText: "标题(可选)",
+                        suffixIcon: IconButton(
+                          tooltip: '选择标签',
+                          icon: const Icon(
+                              CommunityMaterialIcons.tag_multiple),
+                          onPressed: _showTagDialog,
+                        ),
                       ),
-                      onTap: _showTagDialog,
+                      keyboardType: TextInputType.text,
                     ),
-                  ),
-                  keyboardType: TextInputType.text,
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: Wrap(
-                    spacing: 8.0, // gap between adjacent chips
-                    runSpacing: 4.0, // gap between line
-                    children: _selectedTags.map((content) {
-                      return InputChip(
-                        label: Text(content),
-                        onDeleted: () {
-                          setState(() {
-                            _selectedTags.remove(content);
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: TextField(
-                    maxLines: null,
-                    expands: true,
-                    textAlignVertical: TextAlignVertical.top,
-                    controller: _contentController,
-                    decoration: InputDecoration(
-                      labelText: "回复内容",
-                      alignLabelWithHint: true,
+                    SizedBox(
+                      width: double.infinity,
+                      child: Wrap(
+                        spacing: 8.0, // gap between adjacent chips
+                        runSpacing: 4.0, // gap between line
+                        children: _selectedTags.map((content) {
+                          return InputChip(
+                            label: Text(content),
+                            onDeleted: () {
+                              setState(() {
+                                _selectedTags.remove(content);
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
                     ),
-                    keyboardType: TextInputType.multiline,
-                  ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: TextField(
+                        maxLines: null,
+                        expands: true,
+                        textAlignVertical: TextAlignVertical.top,
+                        controller: _contentController,
+                        decoration: const InputDecoration(
+                          labelText: "回复内容",
+                          alignLabelWithHint: true,
+                        ),
+                        keyboardType: TextInputType.multiline,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-        SizedBox(
-          height: (_bottomPanelVisible ? Dimen.bottomPanelHeight : 0) +
-              kToolbarHeight +
-              bottomPadding,
+        // 底部工具栏 + 面板（窄屏），整体高度动画
+        AnimatedSize(
+          duration: Motion.durationMedium2,
+          curve: Motion.emphasized,
+          alignment: Alignment.topCenter,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              _buildToolbar(bottomPadding),
               Container(
-                color: Theme.of(context).primaryColor,
-                height:
-                    kToolbarHeight + (_bottomPanelVisible ? 0 : bottomPadding),
                 width: double.infinity,
-                padding: EdgeInsets.only(
-                    bottom: _bottomPanelVisible ? 0 : bottomPadding),
-                child: Row(children: _getBottomBarData()),
-              ),
-              Container(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                width: double.infinity,
+                color: colorScheme.surfaceContainer,
                 height: _bottomPanelVisible
-                    ? (Dimen.bottomPanelHeight + bottomPadding)
+                    ? Dimen.bottomPanelHeight + bottomPadding
                     : 0,
                 padding: EdgeInsets.only(
                     bottom: _bottomPanelVisible ? bottomPadding : 0),
-                child: _bottomPanelVisible ? _currentBottomPanelChild : null,
-              )
+                child:
+                    _bottomPanelVisible ? _currentBottomPanelChild : null,
+              ),
             ],
           ),
         ),
@@ -210,45 +221,63 @@ class _PublishPageState extends State<PublishPage> {
     );
   }
 
-  List<Widget> _getBottomBarData() {
-    return _bottomData
-        .asMap()
-        .map((i, iconData) {
-          return MapEntry(
-            i,
-            Expanded(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  child: Container(
-                    height: kToolbarHeight,
-                    child: Icon(
-                      i == 0
-                          ? (_isAnonymous
-                              ? CommunityMaterialIcons.incognito
-                              : iconData)
-                          : iconData,
-                      color: Colors.white,
-                    ),
-                  ),
-                  onTap: () {
-                    if (i == 0) {
-                      _incognitoIconClicked();
-                    } else if (i == 1) {
-                      _emoticonIconClicked();
-                    } else if (i == 2) {
-                      _formatTextIconClicked();
-                    } else if (i == 3) {
-                      _attachmentIconClicked();
-                    }
-                  },
-                ),
-              ),
-            ),
-          );
-        })
-        .values
-        .toList();
+  /// M3 风格工具栏：tonal 背景 + IconButton 选中态
+  Widget _buildToolbar(double bottomPadding) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      height:
+          kToolbarHeight + (_bottomPanelVisible ? 0 : bottomPadding),
+      padding:
+          EdgeInsets.only(bottom: _bottomPanelVisible ? 0 : bottomPadding),
+      color: colorScheme.surfaceContainer,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(
+            tooltip: _isAnonymous ? '关闭匿名' : '开启匿名',
+            isSelected: _isAnonymous,
+            icon: const Icon(CommunityMaterialIcons.incognito_off),
+            selectedIcon: const Icon(CommunityMaterialIcons.incognito),
+            onPressed: _incognitoIconClicked,
+          ),
+          IconButton(
+            tooltip: '表情',
+            isSelected: _bottomPanelVisible &&
+                _currentBottomPanelChild == _emoticonGroupTabsWidget,
+            icon: const Icon(CommunityMaterialIcons.emoticon),
+            onPressed: () =>
+                _openPanel(_emoticonGroupTabsWidget, '表情'),
+          ),
+          IconButton(
+            tooltip: '格式',
+            isSelected: _bottomPanelVisible &&
+                _currentBottomPanelChild == _fontStyleWidget,
+            icon: const Icon(CommunityMaterialIcons.format_text),
+            onPressed: () => _openPanel(_fontStyleWidget, '格式'),
+          ),
+          IconButton(
+            tooltip: '附件',
+            isSelected: _bottomPanelVisible &&
+                _currentBottomPanelChild == _attachmentWidget,
+            icon: const Icon(CommunityMaterialIcons.attachment),
+            onPressed: () => _openPanel(_attachmentWidget, '附件'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 窄屏从底部弹出面板，宽屏以居中对话框展示
+  void _openPanel(Widget child, String title) {
+    if (_isWide) {
+      showDialog(
+        context: context,
+        builder: (_) => _PanelDialog(title: title, child: child),
+      );
+    } else {
+      _togglePanel(child);
+    }
   }
 
   void _hideBottomPanel() {
@@ -264,19 +293,7 @@ class _PublishPageState extends State<PublishPage> {
     });
   }
 
-  void _emoticonIconClicked() {
-    togglePanel(_emoticonGroupTabsWidget);
-  }
-
-  void _formatTextIconClicked() {
-    togglePanel(_fontStyleWidget);
-  }
-
-  void _attachmentIconClicked() {
-    togglePanel(_attachmentWidget);
-  }
-
-  void togglePanel(Widget widget) {
+  void _togglePanel(Widget widget) {
     if (_keyboardVisible) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
     }
@@ -396,5 +413,50 @@ class _PublishPageState extends State<PublishPage> {
         AppToast.error(err.toString());
       }
     }
+  }
+}
+
+/// 宽屏下面板（表情/格式/附件）的居中对话框容器
+class _PanelDialog extends StatelessWidget {
+  final String title;
+  final Widget child;
+
+  const _PanelDialog({required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Dialog(
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        width: 560,
+        height: 420,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 8, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(title, style: textTheme.titleMedium),
+                  ),
+                  IconButton(
+                    tooltip: '关闭',
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: child,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
