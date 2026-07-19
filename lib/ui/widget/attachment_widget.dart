@@ -6,7 +6,6 @@ import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 typedef AttachmentCallback = void Function(
     String? attachments, String? attachmentsCheck);
@@ -47,32 +46,36 @@ class _AttachmentState extends State<AttachmentWidget> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            final storageStatus = await Permission.storage.request();
-            if (storageStatus == PermissionStatus.granted) {
-              XFile? image =
-                  await _picker.pickImage(source: ImageSource.gallery);
-              if (image == null) return;
-              setState(() => _imageFileList.add(image));
-              try {
-                if (_authCode == null) {
-                  _authCode = await Data().topicRepository.getAuthCode(
-                      widget.fid,
-                      widget.tid,
-                      widget.tid == null ? "new" : "reply");
-                }
-                Map<String, dynamic> data = await Data()
-                    .topicRepository
-                    .uploadAttachment(widget.fid, _authCode, image.path);
-                widget.attachmentCallback
-                    ?.call(data["attachments"], data["attachments_check"]);
-                setState(() => _list.add(data["url"]));
-              } catch (err) {
-                debugPrint(err.toString());
-                Fluttertoast.showToast(msg: err.toString());
-                setState(() => _imageFileList.remove(image));
-              }
-            } else {
-              Fluttertoast.showToast(msg: "请授予存储权限以上传文件");
+            final image = await _picker.pickImage(
+              source: ImageSource.gallery,
+              requestFullMetadata: false,
+            );
+            if (image == null || !mounted) return;
+
+            setState(() => _imageFileList.add(image));
+            try {
+              final topicRepository = Data().topicRepository;
+              _authCode ??= await topicRepository.getAuthCode(
+                widget.fid,
+                widget.tid,
+                widget.tid == null ? "new" : "reply",
+              );
+              final data = await topicRepository.uploadAttachment(
+                widget.fid,
+                _authCode,
+                image.path,
+              );
+              if (!mounted) return;
+
+              widget.attachmentCallback
+                  ?.call(data["attachments"], data["attachments_check"]);
+              setState(() => _list.add(data["url"]));
+            } catch (err) {
+              if (!mounted) return;
+
+              debugPrint(err.toString());
+              Fluttertoast.showToast(msg: err.toString());
+              setState(() => _imageFileList.remove(image));
             }
           },
           child: Icon(CommunityMaterialIcons.image_plus),
