@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 List<HtmlExtension> buildNgaHtmlExtensions(BuildContext context) {
   return [
+    TagExtension(
+      tagsToExtend: {'nga_quote'},
+      builder: (extensionContext) =>
+          _NgaQuoteBar(attributes: extensionContext.attributes),
+    ),
     TagExtension(
       tagsToExtend: {'album'},
       builder: (extensionContext) {
@@ -103,4 +109,92 @@ List<HtmlExtension> buildNgaHtmlExtensions(BuildContext context) {
       ),
     ),
   ];
+}
+
+/// 回复引用条：`<nga_quote pid tid uid author floor date>`
+/// 整条点击打开被引内容（楼层详情弹窗/话题页），作者名可单独点进用户主页
+class _NgaQuoteBar extends StatelessWidget {
+  final Map<String, String> attributes;
+
+  const _NgaQuoteBar({required this.attributes});
+
+  @override
+  Widget build(BuildContext context) {
+    final pid = attributes['pid'];
+    final tid = attributes['tid'];
+    final uid = attributes['uid'];
+    final author = (attributes['author'] ?? '').trim();
+    final floor = attributes['floor'];
+    final date = (attributes['date'] ?? '').trim();
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final baseStyle =
+        textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Material(
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(8),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _openQuote(context, pid: pid, tid: tid),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.format_quote,
+                  size: 16,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Text('回复', style: baseStyle),
+                      if (author.isNotEmpty)
+                        Flexible(
+                          child: GestureDetector(
+                            // 匿名无 uid，不可点击，手势透传给整条引用条
+                            onTap: uid == null || uid.isEmpty
+                                ? null
+                                : () => Routes.onLinkTap(
+                                    context, 'nuke.php?func=ucp&uid=$uid'),
+                            child: Text(
+                              floor != null ? '$author($floor)' : author,
+                              style: baseStyle?.copyWith(
+                                  color: colorScheme.primary),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      if (date.isNotEmpty)
+                        Text(' · $date', style: baseStyle, maxLines: 1),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 复用站内链接路由：pid 弹楼层详情，tid 跳话题详情
+  void _openQuote(BuildContext context, {String? pid, String? tid}) {
+    if (pid != null && pid.isNotEmpty) {
+      Routes.onLinkTap(context, 'read.php?searchpost=1&pid=$pid');
+    } else if (tid != null && tid.isNotEmpty) {
+      Routes.onLinkTap(context, 'read.php?tid=$tid');
+    }
+  }
 }

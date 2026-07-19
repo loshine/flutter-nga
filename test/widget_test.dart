@@ -123,4 +123,55 @@ void main() {
     expect(parsed.contains('[站外音频]'), true);
     expect(parsed.contains('[站外视频]'), true);
   });
+
+  test('Reply quote header → nga_quote tag', () {
+    final parsed = NgaContentParser.parse(
+      '[pid=875718629,47217372,1]Reply[/pid] [b]Post by '
+      '[uid=66738726]golcore[/uid] (2026-07-20 00:43):[/b]<br/>正文',
+    );
+    expect(
+      parsed.contains("<nga_quote pid='875718629' uid='66738726' "
+          "author='golcore' date='2026-07-20 00:43'></nga_quote>"),
+      true,
+    );
+    expect(parsed.contains('正文'), true);
+  });
+
+  test('Topic quote header → nga_quote tag with tid', () {
+    final parsed = NgaContentParser.parse(
+      '[tid=47217372]Topic[/tid] [b]Post by '
+      '[uid=66738726]golcore[/uid] (2026-07-20 00:43):[/b]',
+    );
+    expect(parsed.contains("<nga_quote tid='47217372'"), true);
+    expect(parsed.contains("pid="), false);
+  });
+
+  test('Reply-to headers → nga_quote tag', () {
+    final parsedTopic = NgaContentParser.parse(
+      '[b]Reply to [tid=47217372]Topic[/tid] Post by '
+      '[uid=66738726]golcore[/uid] (2026-07-20 00:43)[/b]',
+    );
+    expect(
+        parsedTopic.contains("<nga_quote tid='47217372' "
+            "uid='66738726' author='golcore'"),
+        true);
+    final parsedPost = NgaContentParser.parse(
+      '[b]Reply to [pid=875718629,47217372,1]Reply[/pid] Post by '
+      '[uid=66738726]golcore[/uid] (2026-07-20 00:43)[/b]',
+    );
+    expect(parsedPost.contains("<nga_quote pid='875718629'"), true);
+    // uid 不应以裸文本形式泄露
+    expect(parsedPost.contains('Post by 66738726'), false);
+  });
+
+  test('Anonymous reply header → nga_quote without uid', () {
+    final parsed = NgaContentParser.parse(
+      '[pid=445996637,23005426,1]Reply[/pid] [b]Post by '
+      '[uid]#anony_7dc5258240df2301fdae75153712d174[/uid]'
+      '[color=gray](6楼)[/color] (2020-08-18 15:04):[/b]',
+    );
+    expect(parsed.contains('<nga_quote pid='), true);
+    expect(parsed.contains("floor='6楼'"), true);
+    expect(parsed.contains('uid='), false);
+  });
 }
