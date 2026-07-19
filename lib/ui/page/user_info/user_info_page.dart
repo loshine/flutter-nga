@@ -7,7 +7,7 @@ import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class UserInfoPage extends ConsumerStatefulWidget {
@@ -30,12 +30,12 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
       final notifier = ref.read(userInfoProvider.notifier);
       if (widget.uid != null) {
         notifier.loadByUid(widget.uid).catchError((err) {
-          Fluttertoast.showToast(msg: err.message);
+          AppToast.error(err.message);
           return ref.read(userInfoProvider);
         });
       } else if (widget.username != null) {
         notifier.loadByName(widget.username).catchError((err) {
-          Fluttertoast.showToast(msg: err.message);
+          AppToast.error(err.message);
           return ref.read(userInfoProvider);
         });
       }

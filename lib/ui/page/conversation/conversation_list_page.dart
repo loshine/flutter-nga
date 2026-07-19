@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -49,9 +49,7 @@ class _ConversationListState extends ConsumerState<ConversationListPage> {
   void _onRefresh(ConversationListNotifier notifier) {
     notifier.refresh().catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(
-        msg: err.toString(),
-      );
+      AppToast.error(err.toString());
       return ref.read(conversationListProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
