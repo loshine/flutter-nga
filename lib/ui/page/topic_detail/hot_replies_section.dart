@@ -1,4 +1,3 @@
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
@@ -162,19 +161,6 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    CommunityMaterialIcons.thumb_up,
-                    size: 14,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '${reply.score}',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 8),
