@@ -16,11 +16,15 @@ class HotRepliesSection extends StatelessWidget {
   /// 跳转原楼层回调，参数为楼层号（lou）
   final ValueChanged<int>? onJumpToFloor;
 
+  /// 同页楼层引用正文缓存
+  final Map<int, String>? quoteBodyByPid;
+
   const HotRepliesSection({
     super.key,
     required this.replies,
     required this.userList,
     this.onJumpToFloor,
+    this.quoteBodyByPid,
   });
 
   @override
@@ -65,6 +69,7 @@ class HotRepliesSection extends StatelessWidget {
                     reply: reply,
                     user: _findUser(reply.authorId),
                     onJumpToFloor: onJumpToFloor,
+                    quoteBodyByPid: quoteBodyByPid,
                   ),
                 ],
               ],
@@ -88,11 +93,13 @@ class _HotReplyItemCard extends StatefulWidget {
   final Reply reply;
   final User? user;
   final ValueChanged<int>? onJumpToFloor;
+  final Map<int, String>? quoteBodyByPid;
 
   const _HotReplyItemCard({
     required this.reply,
     required this.user,
     this.onJumpToFloor,
+    this.quoteBodyByPid,
   });
 
   @override
@@ -121,6 +128,7 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
       tid: reply.tid,
       pid: reply.pid,
       postDateTimestamp: reply.postDateTimestamp,
+      quoteBodyByPid: widget.quoteBodyByPid,
     );
 
     return Material(

@@ -5,6 +5,7 @@ import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/hot_replies_section.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
+import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -92,25 +93,39 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
   Widget _buildListItem(
       BuildContext context, int position, TopicSinglePageState state) {
     final reply = state.replyList[position];
+    final quoteBodyByPid = _quoteBodyCacheFor(state);
     if (position == 0 && state.page == 1 && state.hotReplyList.isNotEmpty) {
       // 楼主下方展示热点回复区块
       return Column(
         children: [
-          _buildReplyWidget(context, reply, state),
+          _buildReplyWidget(context, reply, state, quoteBodyByPid),
           HotRepliesSection(
             replies: state.hotReplyList,
             userList: state.userList,
             onJumpToFloor: widget.onJumpToFloor,
+            quoteBodyByPid: quoteBodyByPid,
           ),
         ],
       );
     } else {
-      return _buildReplyWidget(context, reply, state);
+      return _buildReplyWidget(context, reply, state, quoteBodyByPid);
     }
   }
 
+  /// 同页（含热评）楼层正文缓存，Reply to 补原文
+  Map<int, String> _quoteBodyCacheFor(TopicSinglePageState state) {
+    return NgaContentParser.buildQuoteBodyCache([
+      ...state.replyList.map((r) => (pid: r.pid, content: r.content)),
+      ...state.hotReplyList.map((r) => (pid: r.pid, content: r.content)),
+    ]);
+  }
+
   Widget _buildReplyWidget(
-      BuildContext context, Reply reply, TopicSinglePageState state) {
+    BuildContext context,
+    Reply reply,
+    TopicSinglePageState state,
+    Map<int, String> quoteBodyByPid,
+  ) {
     final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}";
     var widget = map[uniqueId];
     if (widget != null) {
@@ -167,6 +182,7 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
         medalList: medalList,
         userList: commentUserList,
         hot: state.hotReplyPids.contains(reply.pid),
+        quoteBodyByPid: quoteBodyByPid,
       );
       map[uniqueId] = widget;
       return widget;

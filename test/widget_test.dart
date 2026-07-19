@@ -137,6 +137,23 @@ void main() {
     expect(parsed.contains('正文'), true);
   });
 
+  test('Quote block keeps original body inside nga_quote', () {
+    final parsed = NgaContentParser.parse(
+      '[quote][pid=875718629,47217372,1]Reply[/pid] [b]Post by '
+      '[uid=66738726]golcore[/uid] (2026-07-20 00:43):[/b]<br/><br/>'
+      '被引用的原文内容[/quote]<br/>我的回复',
+    );
+    expect(
+      parsed.contains(
+          "<nga_quote pid='875718629' uid='66738726' author='golcore' "
+          "date='2026-07-20 00:43'>被引用的原文内容</nga_quote>"),
+      true,
+    );
+    // 原文不应再落在 blockquote 外变成游离文本
+    expect(parsed.contains('<blockquote>'), false);
+    expect(parsed.contains('我的回复'), true);
+  });
+
   test('Topic quote header → nga_quote tag with tid', () {
     final parsed = NgaContentParser.parse(
       '[tid=47217372]Topic[/tid] [b]Post by '
@@ -173,5 +190,42 @@ void main() {
     expect(parsed.contains('<nga_quote pid='), true);
     expect(parsed.contains("floor='6楼'"), true);
     expect(parsed.contains('uid='), false);
+  });
+
+  test('Reply-to expands with cached body like NGA web', () {
+    final cache = NgaContentParser.buildQuoteBodyCache([
+      (pid: 875718629, content: '这是被回复楼的原文内容'),
+      (
+        pid: 1,
+        content:
+            '[quote][pid=9,1,1]Reply[/pid] [b]Post by [uid=1]a[/uid] (t):[/b]\n嵌套引用[/quote]\n楼层正文',
+      ),
+    ]);
+    // 嵌套引用应被剥掉，只保留楼层正文
+    expect(cache[1], '楼层正文');
+    expect(cache[875718629], '这是被回复楼的原文内容');
+
+    final parsed = NgaContentParser.parse(
+      '[b]Reply to [pid=875718629,47217372,1]Reply[/pid] Post by '
+      '[uid=66738726]golcore[/uid] (2026-07-20 00:43)[/b]我的回复',
+      quoteBodyByPid: cache,
+    );
+    expect(
+      parsed.contains(
+          "<nga_quote pid='875718629' uid='66738726' author='golcore' "
+          "date='2026-07-20 00:43'>这是被回复楼的原文内容</nga_quote>"),
+      true,
+    );
+    expect(parsed.contains('我的回复'), true);
+  });
+
+  test('Reply-to without cache stays header-only', () {
+    final parsed = NgaContentParser.parse(
+      '[b]Reply to [pid=875718629,47217372,1]Reply[/pid] Post by '
+      '[uid=66738726]golcore[/uid] (2026-07-20 00:43)[/b]我的回复',
+    );
+    expect(parsed.contains("<nga_quote pid='875718629'"), true);
+    expect(parsed.contains('这是被回复'), false);
+    expect(parsed.contains('我的回复'), true);
   });
 }

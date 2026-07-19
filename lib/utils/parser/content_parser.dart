@@ -17,6 +17,19 @@ class NgaContentParser {
   static final _cacheKeys = <String>[];
   static const _maxCacheSize = 256;
 
+  /// 与官网一致：缓存每层正文前 250 字（去掉引用头），供 Reply to 补原文
+  static const quoteSnippetMaxLength = 250;
+
+  static final _quoteBlockRegex =
+      RegExp(r'\[quote\][\s\S]*?\[/quote\]', caseSensitive: false);
+  static final _replyToLineRegex = RegExp(
+      r'^\[b\]Reply to \[pid=\d+,\d+,\d+\]Reply\[/pid\] Post by .+?\[/b\]\s*',
+      caseSensitive: false);
+  // Reply to → 展开为 [quote]…[/quote]（官网 contentQuoteCache 逻辑）
+  static final _expandReplyToPidRegex = RegExp(
+      r'\[b\]Reply to \[pid=(\d+),(\d+)?,(\d+)?\]Reply\[/pid\] Post by (\[uid(?:=\d+)?\][\s\S]*?\[/uid\](?:\[color=gray\]\([\s\S]*?\)\[/color\])? \([\s\S]*?\))\[/b\]',
+      caseSensitive: false);
+
   static List<Parser> _buildParserList({int? postDateTimestamp}) {
     return [
       _albumParser,
@@ -27,23 +40,87 @@ class NgaContentParser {
     ];
   }
 
+  /// 从同页楼层构建 pid → 可引用正文片段（对齐官网 contentQuoteCache）
+  static Map<int, String> buildQuoteBodyCache(
+    Iterable<({int? pid, String content})> posts,
+  ) {
+    final map = <int, String>{};
+    for (final post in posts) {
+      final pid = post.pid;
+      if (pid == null || pid == 0) continue;
+      final snippet = extractQuoteSnippet(post.content);
+      if (snippet.isNotEmpty) {
+        map[pid] = snippet;
+      }
+    }
+    return map;
+  }
+
+  /// 去掉引用 / Reply to 头后取前 [quoteSnippetMaxLength] 字
+  static String extractQuoteSnippet(String content) {
+    var text = content;
+    // 多层 [quote] 由内到外剥掉
+    for (var i = 0; i < 8; i++) {
+      final next = text.replaceAll(_quoteBlockRegex, '');
+      if (next == text) break;
+      text = next;
+    }
+    text = text.replaceFirst(_replyToLineRegex, '');
+    text = text.trim();
+    if (text.length > quoteSnippetMaxLength) {
+      text = text.substring(0, quoteSnippetMaxLength);
+    }
+    return text;
+  }
+
+  /// 将「Reply to」在缓存命中时展开为带原文的 [quote]（与官网一致）
+  static String expandReplyToWithCachedBody(
+    String content,
+    Map<int, String> quoteBodyByPid,
+  ) {
+    if (content.isEmpty || quoteBodyByPid.isEmpty) return content;
+    if (!content.contains('Reply to')) return content;
+
+    return content.replaceAllMapped(_expandReplyToPidRegex, (m) {
+      final pid = int.tryParse(m.group(1) ?? '');
+      if (pid == null) return m.group(0)!;
+      final body = quoteBodyByPid[pid];
+      if (body == null || body.isEmpty) return m.group(0)!;
+
+      final tid = m.group(2) ?? '';
+      final flag = m.group(3) ?? '1';
+      final postBy = m.group(4) ?? '';
+      // 转成标准引用格式，后续 _ReplyParser 会收成 <nga_quote>body</nga_quote>
+      return '[quote][pid=$pid,$tid,$flag]Reply[/pid] [b]Post by $postBy:[/b]\n\n$body[/quote]';
+    });
+  }
+
   static String parse(
     String? content, {
     int? authorId,
     int? tid,
     int? pid,
     int? postDateTimestamp,
+    Map<int, String>? quoteBodyByPid,
   }) {
     if (content == null || content.isEmpty) return '';
 
+    final quoteSuffix = (quoteBodyByPid == null || quoteBodyByPid.isEmpty)
+        ? ''
+        : '__q${quoteBodyByPid.length}_${quoteBodyByPid.keys.fold<int>(0, (a, b) => a ^ b)}';
     final cacheKey = authorId != null
-        ? '__dice_${authorId}_${tid}_${pid}_${postDateTimestamp}__$content'
-        : '__postdate_${postDateTimestamp}__$content';
+        ? '__dice_${authorId}_${tid}_${pid}_${postDateTimestamp}${quoteSuffix}__$content'
+        : '__postdate_${postDateTimestamp}${quoteSuffix}__$content';
     if (_parseCache.containsKey(cacheKey)) {
       return _parseCache[cacheKey]!;
     }
 
     var parseContent = code_utils.unescapeHtml(content);
+    // 官网：Reply to 用同页 pid 缓存补原文，再当 quote 渲染
+    if (quoteBodyByPid != null && quoteBodyByPid.isNotEmpty) {
+      parseContent =
+          expandReplyToWithCachedBody(parseContent, quoteBodyByPid);
+    }
     parseContent = _replyParser.parse(parseContent);
     if (authorId != null && tid != null && pid != null) {
       parseContent = _DiceParser(authorId: authorId, tid: tid, pid: pid)
@@ -197,12 +274,21 @@ class _TableParser implements Parser {
 }
 
 class _ReplyParser implements Parser {
+  /// 最内层 [quote]…[/quote]（内容中不再含 [quote]），用于嵌套由内到外折叠
+  static final _innermostQuoteRegex =
+      RegExp(r'\[quote\]((?:(?!\[quote\])[\s\S])*?)\[/quote\]');
+
+  /// 引用块开头可能的空白 / <br>
+  static final _leadingBreaksRegex = RegExp(r'^(?:\s|<br\s*/?>)*');
+
+  // 引用头：匹配「引用」类（带原文 body，通常包在 [quote] 内）
   static final _topicRegex = RegExp(
       r'\[tid=(\d+)?\]Topic\[/tid\] \[b\]Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\):\[/b\]');
   static final _replyRegex = RegExp(
       r'\[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] \[b\]Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\):\[/b\]');
   static final _anonyRegex = RegExp(
       r'\[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] \[b\]Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\):\[/b\]');
+  // 引用头：「回复」类（通常无原文，仅指向原帖）
   static final _replyTopicRegex = RegExp(
       r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]');
   static final _replyPostRegex = RegExp(
@@ -215,7 +301,44 @@ class _ReplyParser implements Parser {
   @override
   String parse(String? content) {
     if (content == null || content.isEmpty) return '';
-    // 统一解析为结构化 <nga_quote> 标签，由渲染层绘制引用条
+
+    // 1) 由内到外处理 [quote] 块：带头的引用把原文 body 收进 <nga_quote>
+    var result = content;
+    for (var i = 0; i < 8; i++) {
+      final before = result;
+      result = result.replaceAllMapped(_innermostQuoteRegex, (m) {
+        final converted = _convertQuoteBlock(m.group(1) ?? '');
+        // 未识别为带头发 → 保留 [quote] 交给 ContentParser 转 blockquote
+        return converted ?? m.group(0)!;
+      });
+      if (result == before) break;
+    }
+
+    // 2) 剩余独立引用头（Reply to / 无 [quote] 包裹）→ 仅标题条
+    return _replaceStandaloneHeaders(result);
+  }
+
+  /// 尝试把 quote 内部「引用头 + 原文」合成一个 nga_quote；识别失败返回 null
+  static String? _convertQuoteBlock(String inner) {
+    final trimmed = inner.replaceFirst(_leadingBreaksRegex, '');
+    final header = _matchHeaderAtStart(trimmed);
+    if (header == null) return null;
+
+    // 去掉引用头后的 body（原文），保留后续 UBB 给下游 Parser
+    var body = trimmed.substring(header.match.end);
+    body = body.replaceFirst(_leadingBreaksRegex, '');
+    return _buildQuoteTag(
+      pid: header.pid,
+      tid: header.tid,
+      uid: header.uid,
+      author: header.author,
+      floor: header.floor,
+      date: header.date,
+      body: body,
+    );
+  }
+
+  static String _replaceStandaloneHeaders(String content) {
     return content
         .replaceAllMapped(
             _topicRegex,
@@ -268,10 +391,82 @@ class _ReplyParser implements Parser {
                 date: m.group(6)));
   }
 
-  /// 构建 `<nga_quote>` 标签
-  /// - [pid] 引用楼层 id，点击弹出楼层详情
-  /// - [tid] 引用话题 id（无 pid 时），点击跳转话题
-  /// - [uid] 被引用作者 id（匿名时为空）
+  static _QuoteHeader? _matchHeaderAtStart(String text) {
+    Match? m;
+    m = _replyRegex.matchAsPrefix(text);
+    if (m != null) {
+      return _QuoteHeader(
+        match: m,
+        pid: m.group(1),
+        uid: m.group(4),
+        author: m.group(5),
+        date: m.group(6),
+      );
+    }
+    m = _anonyRegex.matchAsPrefix(text);
+    if (m != null) {
+      return _QuoteHeader(
+        match: m,
+        pid: m.group(1),
+        author: getShowName("#anony_${m.group(4)}"),
+        floor: "${m.group(5)}楼",
+        date: m.group(6),
+      );
+    }
+    m = _topicRegex.matchAsPrefix(text);
+    if (m != null) {
+      return _QuoteHeader(
+        match: m,
+        tid: m.group(1),
+        uid: m.group(2),
+        author: m.group(3),
+        date: m.group(4),
+      );
+    }
+    m = _replyPostRegex.matchAsPrefix(text);
+    if (m != null) {
+      return _QuoteHeader(
+        match: m,
+        pid: m.group(1),
+        uid: m.group(4),
+        author: m.group(5),
+        date: m.group(6),
+      );
+    }
+    m = _replyTopicRegex.matchAsPrefix(text);
+    if (m != null) {
+      return _QuoteHeader(
+        match: m,
+        tid: m.group(1),
+        uid: m.group(2),
+        author: m.group(3),
+        date: m.group(4),
+      );
+    }
+    m = _anonyReplyPostRegex.matchAsPrefix(text);
+    if (m != null) {
+      return _QuoteHeader(
+        match: m,
+        pid: m.group(1),
+        author: getShowName("#anony_${m.group(4)}"),
+        floor: "${m.group(5)}楼",
+        date: m.group(6),
+      );
+    }
+    m = _anonyReplyTopicRegex.matchAsPrefix(text);
+    if (m != null) {
+      return _QuoteHeader(
+        match: m,
+        tid: m.group(1),
+        author: getShowName("#anony_${m.group(2)}"),
+        floor: "${m.group(3)}楼",
+        date: m.group(4),
+      );
+    }
+    return null;
+  }
+
+  /// 构建 `<nga_quote>` 标签；[body] 为被引用原文（UBB，后续 Parser 继续处理）
   static String _buildQuoteTag({
     String? pid,
     String? tid,
@@ -279,6 +474,7 @@ class _ReplyParser implements Parser {
     String? author,
     String? floor,
     String? date,
+    String? body,
   }) {
     final buffer = StringBuffer('<nga_quote');
     void writeAttr(String key, String? value) {
@@ -294,9 +490,34 @@ class _ReplyParser implements Parser {
     writeAttr('author', author);
     writeAttr('floor', floor);
     writeAttr('date', date);
-    buffer.write('></nga_quote>');
+    final bodyContent = body ?? '';
+    if (bodyContent.trim().isEmpty) {
+      buffer.write('></nga_quote>');
+    } else {
+      buffer.write('>$bodyContent</nga_quote>');
+    }
     return buffer.toString();
   }
+}
+
+class _QuoteHeader {
+  final Match match;
+  final String? pid;
+  final String? tid;
+  final String? uid;
+  final String? author;
+  final String? floor;
+  final String? date;
+
+  const _QuoteHeader({
+    required this.match,
+    this.pid,
+    this.tid,
+    this.uid,
+    this.author,
+    this.floor,
+    this.date,
+  });
 }
 
 class _CommentParser implements Parser {
