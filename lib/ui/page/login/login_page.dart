@@ -1,10 +1,8 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -15,38 +13,16 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  StreamSubscription? _subscription;
-
-  @override
-  void initState() {
-    _subscription = Login.cookieStream.listen((event) {
-      _processCookieJson(event);
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("登录"),
         actions: <Widget>[
-          PopupMenuButton<String>(
-            onSelected: _selectAction,
-            itemBuilder: (BuildContext context) {
-              return ["原生登录", "导入 Cookies"].map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
-                );
-              }).toList();
-            },
+          IconButton(
+            tooltip: "导入 Cookies",
+            onPressed: _showImportCookiesDialog,
+            icon: const Icon(Icons.cookie_outlined),
           )
         ],
       ),
@@ -80,17 +56,13 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _selectAction(String value) {
-    if ("原生登录" == value) {
-      Login.startLogin();
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return ImportCookiesDialog(cookiesCallback: _processCookiesString);
-        },
-      );
-    }
+  void _showImportCookiesDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return ImportCookiesDialog(cookiesCallback: _processCookiesString);
+      },
+    );
   }
 
   void _processCookiesString(String cookies) {

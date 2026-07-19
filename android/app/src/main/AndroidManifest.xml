@@ -37,11 +37,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".ui.LoginActivity"
-            android:label="@string/activity_login"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme" />
     </application>
 </manifest>
