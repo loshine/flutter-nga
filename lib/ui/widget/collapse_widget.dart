@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/utils/motion.dart';
 
 class CollapseWidget extends StatefulWidget {
   const CollapseWidget.fromNodes({this.title, this.child, super.key});
@@ -26,9 +27,15 @@ class _CollapseState extends State<CollapseWidget> {
             child:
                 Text("${_collapsed ? "点击展开" : "点击收起"}:${widget.title ?? ""}"),
           ),
-          SizedBox(
-            height: _collapsed ? 0 : null,
-            child: widget.child,
+          AnimatedSize(
+            duration: Motion.durationMedium2,
+            curve: Motion.emphasized,
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: double.infinity,
+              height: _collapsed ? 0 : null,
+              child: widget.child,
+            ),
           ),
         ],
       ),

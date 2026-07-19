@@ -35,6 +35,14 @@ class _FavouriteTopicListState extends ConsumerState<FavouriteTopicListPage> {
     final state = ref.watch(favouriteTopicListProvider);
     final notifier = ref.read(favouriteTopicListProvider.notifier);
 
+    return Scaffold(
+      appBar: AppBar(title: const Text('贴子收藏')),
+      body: _buildBody(state, notifier),
+    );
+  }
+
+  Widget _buildBody(FavouriteTopicListState state,
+      FavouriteTopicListNotifier notifier) {
     return SmartRefresher(
       onLoading: () => _onLoading(notifier),
       controller: _refreshController,

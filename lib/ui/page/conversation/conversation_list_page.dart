@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -33,15 +34,24 @@ class _ConversationListState extends ConsumerState<ConversationListPage> {
     final state = ref.watch(conversationListProvider);
     final notifier = ref.read(conversationListProvider.notifier);
 
-    return SmartRefresher(
-      onLoading: () => _onLoading(notifier),
-      controller: _refreshController,
-      enablePullUp: state.enablePullUp,
-      onRefresh: () => _onRefresh(notifier),
-      child: ListView.builder(
-        itemCount: state.list.length,
-        itemBuilder: (context, index) =>
-            ConversationItemWidget(conversation: state.list[index]),
+    return Scaffold(
+      appBar: AppBar(title: const Text('短消息')),
+      body: SmartRefresher(
+        onLoading: () => _onLoading(notifier),
+        controller: _refreshController,
+        enablePullUp: state.enablePullUp,
+        onRefresh: () => _onRefresh(notifier),
+        child: ListView.builder(
+          itemCount: state.list.length,
+          itemBuilder: (context, index) =>
+              ConversationItemWidget(conversation: state.list[index]),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: '新建短消息',
+        onPressed: () =>
+            Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
+        child: const Icon(Icons.edit_outlined),
       ),
     );
   }

@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/home/home_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
-import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
-import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
-import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
-import 'package:flutter_nga/ui/page/notification/notification_list_page.dart';
+import 'package:flutter_nga/ui/page/mine/mine_page.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
+import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -28,35 +26,17 @@ class HomePage extends HookConsumerWidget {
 class _HomePageContent extends HookConsumerWidget {
   const _HomePageContent();
 
-  static final GlobalKey<TopicHistoryListPageState> _historyStateKey =
-      GlobalKey<TopicHistoryListPageState>();
-
   /// M3 NavigationBar/Rail 导航目的地
   static const _destinations = [
     NavigationDestination(
-      icon: Icon(Icons.dashboard_outlined),
-      selectedIcon: Icon(Icons.dashboard),
-      label: '论坛',
+      icon: Icon(Icons.forum_outlined),
+      selectedIcon: Icon(Icons.forum),
+      label: '社区',
     ),
     NavigationDestination(
-      icon: Icon(Icons.bookmark_outline),
-      selectedIcon: Icon(Icons.bookmark),
-      label: '收藏',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.history_outlined),
-      selectedIcon: Icon(Icons.history),
-      label: '历史',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.mail_outlined),
-      selectedIcon: Icon(Icons.mail),
-      label: '消息',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.notifications_outlined),
-      selectedIcon: Icon(Icons.notifications),
-      label: '提醒',
+      icon: Icon(Icons.person_outline),
+      selectedIcon: Icon(Icons.person),
+      label: '我的',
     ),
   ];
 
@@ -66,15 +46,12 @@ class _HomePageContent extends HookConsumerWidget {
   List<Widget> _buildPageList() {
     return [
       const ForumGroupTabsPage(),
-      const FavouriteTopicListPage(),
-      TopicHistoryListPage(key: _historyStateKey),
-      const ConversationListPage(),
-      const NotificationListPage(),
+      const MinePage(),
     ];
   }
 
   String _getTitleText(int index) {
-    const titles = ['FNGA', '贴子收藏', '浏览历史', '短消息', '提醒信息'];
+    const titles = ['FNGA', '我的'];
     return titles.elementAtOrNull(index) ?? '';
   }
 
@@ -86,74 +63,34 @@ class _HomePageContent extends HookConsumerWidget {
             icon: const Icon(Icons.search),
             onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
           ),
-          _buildMoreMenu(context),
         ],
-      2 => [
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => _historyStateKey.currentState?.showCleanDialog(),
-          ),
-          _buildMoreMenu(context),
-        ],
-      _ => [_buildMoreMenu(context)],
+      _ => const [],
     };
   }
 
-  /// 右上角菜单，替代 Drawer 的设置/关于入口
-  Widget _buildMoreMenu(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert),
-      onSelected: (value) {
-        switch (value) {
-          case 'settings':
-            Routes.navigateTo(context, Routes.SETTINGS);
-          case 'about':
-            Routes.navigateTo(context, Routes.ABOUT);
-        }
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'settings',
-          child: ListTile(
-            leading: Icon(Icons.settings_outlined),
-            title: Text('设置'),
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'about',
-          child: ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('关于'),
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget? _getFloatingActionButton(
+  Widget _getFloatingActionButton(
       BuildContext context, WidgetRef ref, int index) {
-    if (index == 0) {
-      final fabVisible = ref.watch(forumGroupFabVisibleProvider);
-      if (!fabVisible) return null;
-      return FloatingActionButton(
-        tooltip: '添加自定义版面',
-        onPressed: () => showDialog(
-          context: context,
-          builder: (_) => const CustomForumDialog(),
-        ),
-        child: const Icon(Icons.add),
-      );
-    } else if (index == 3) {
-      return FloatingActionButton(
-        tooltip: '新建短消息',
-        onPressed: () =>
-            Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
-        child: const Icon(Icons.edit_outlined),
-      );
-    }
-    return null;
+    final fabVisible =
+        index == 0 && ref.watch(forumGroupFabVisibleProvider);
+    return AnimatedSwitcher(
+      duration: Motion.durationShort4,
+      switchInCurve: Motion.emphasizedDecelerate,
+      switchOutCurve: Motion.emphasizedAccelerate,
+      transitionBuilder: (child, animation) => ScaleTransition(
+        scale: animation,
+        child: FadeTransition(opacity: animation, child: child),
+      ),
+      child: fabVisible
+          ? FloatingActionButton(
+              tooltip: '添加自定义版面',
+              onPressed: () => showDialog(
+                context: context,
+                builder: (_) => const CustomForumDialog(),
+              ),
+              child: const Icon(Icons.add),
+            )
+          : null,
+    );
   }
 
   @override
@@ -181,6 +118,40 @@ class _HomePageContent extends HookConsumerWidget {
     );
   }
 
+  /// 切换标签页时的过渡动画：淡入淡出 + 轻微上移
+  Widget _buildAnimatedBody(int index, List<Widget> pageList) {
+    return AnimatedSwitcher(
+      duration: Motion.durationMedium2,
+      switchInCurve: Motion.emphasizedDecelerate,
+      switchOutCurve: Motion.emphasizedAccelerate,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.02),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        ),
+      ),
+      child: KeyedSubtree(
+        key: ValueKey(index),
+        child: pageList[index],
+      ),
+    );
+  }
+
+  /// AppBar 标题随标签页切换淡入淡出
+  Widget _buildAnimatedTitle(int index) {
+    return AnimatedSwitcher(
+      duration: Motion.durationShort4,
+      child: Text(
+        _getTitleText(index),
+        key: ValueKey(index),
+      ),
+    );
+  }
+
   /// 移动端布局：AppBar + Content + BottomNavigationBar
   Widget _buildMobileLayout(
     BuildContext context,
@@ -190,12 +161,12 @@ class _HomePageContent extends HookConsumerWidget {
   ) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_getTitleText(index)),
+        title: _buildAnimatedTitle(index),
         scrolledUnderElevation: index == 0 ? 0 : 2,
         actions: _getActionsByPage(context, ref, index),
         automaticallyImplyLeading: false,
       ),
-      body: pageList[index],
+      body: _buildAnimatedBody(index, pageList),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: (i) =>
@@ -234,12 +205,12 @@ class _HomePageContent extends HookConsumerWidget {
         Expanded(
           child: Scaffold(
             appBar: AppBar(
-              title: Text(_getTitleText(index)),
+              title: _buildAnimatedTitle(index),
               scrolledUnderElevation: index == 0 ? 0 : 2,
               actions: _getActionsByPage(context, ref, index),
               automaticallyImplyLeading: false,
             ),
-            body: pageList[index],
+            body: _buildAnimatedBody(index, pageList),
             floatingActionButton: _getFloatingActionButton(context, ref, index),
           ),
         ),

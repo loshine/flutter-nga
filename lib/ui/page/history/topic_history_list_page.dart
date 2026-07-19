@@ -24,12 +24,24 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
     final historyState = ref.watch(topicHistoryListProvider);
     final notifier = ref.read(topicHistoryListProvider.notifier);
 
-    return SmartRefresher(
-      onRefresh: () => _onRefresh(notifier),
-      enablePullUp: historyState.enablePullUp,
-      controller: _refreshController,
-      onLoading: () => _onLoading(notifier),
-      child: _buildChild(historyState, notifier),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('浏览历史'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: '清空浏览历史',
+            onPressed: showCleanDialog,
+          ),
+        ],
+      ),
+      body: SmartRefresher(
+        onRefresh: () => _onRefresh(notifier),
+        enablePullUp: historyState.enablePullUp,
+        controller: _refreshController,
+        onLoading: () => _onLoading(notifier),
+        child: _buildChild(historyState, notifier),
+      ),
     );
   }
 

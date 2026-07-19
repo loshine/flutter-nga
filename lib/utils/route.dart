@@ -1,9 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
+import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
+import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_detail_page.dart';
+import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/ui/page/login/login_page.dart';
+import 'package:flutter_nga/ui/page/notification/notification_list_page.dart';
 import 'package:flutter_nga/ui/page/photo_preview/photo_preview_page.dart';
 import 'package:flutter_nga/ui/page/publish/publish_page.dart';
 import 'package:flutter_nga/ui/page/search/search_forum_page.dart';
@@ -50,6 +54,10 @@ class Routes {
   static const String PHOTO_PREVIEW = "/photo_preview";
   static const String CONVERSATION_DETAIL = "/conversation_detail";
   static const String SEND_MESSAGE = "/send_message";
+  static const String FAVOURITE_TOPICS = "/favourite_topics";
+  static const String TOPIC_HISTORY = "/topic_history";
+  static const String CONVERSATIONS = "/conversations";
+  static const String NOTIFICATIONS = "/notifications";
 
   /// 初始化路由
   static void configureRoutes(GoRouter r) {
@@ -322,6 +330,26 @@ List<GoRoute> buildRoutes() {
       path: Routes.ABOUT,
       name: Routes.ABOUT,
       builder: (context, state) => const AboutPage(),
+    ),
+    GoRoute(
+      path: Routes.FAVOURITE_TOPICS,
+      name: Routes.FAVOURITE_TOPICS,
+      builder: (context, state) => const FavouriteTopicListPage(),
+    ),
+    GoRoute(
+      path: Routes.TOPIC_HISTORY,
+      name: Routes.TOPIC_HISTORY,
+      builder: (context, state) => const TopicHistoryListPage(),
+    ),
+    GoRoute(
+      path: Routes.CONVERSATIONS,
+      name: Routes.CONVERSATIONS,
+      builder: (context, state) => const ConversationListPage(),
+    ),
+    GoRoute(
+      path: Routes.NOTIFICATIONS,
+      name: Routes.NOTIFICATIONS,
+      builder: (context, state) => const NotificationListPage(),
     ),
   ];
 }

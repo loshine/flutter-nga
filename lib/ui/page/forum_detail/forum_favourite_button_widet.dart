@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/motion.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ForumFavouriteButtonWidget extends ConsumerStatefulWidget {
@@ -35,8 +36,18 @@ class _ForumFavouriteButtonState
     final notifier = ref.read(favouriteForumProvider.notifier);
 
     return IconButton(
-      icon: Icon(
-        isFavourite ? Icons.star : Icons.star_border,
+      icon: AnimatedSwitcher(
+        duration: Motion.durationShort4,
+        switchInCurve: Motion.emphasizedDecelerate,
+        switchOutCurve: Motion.emphasizedAccelerate,
+        transitionBuilder: (child, animation) => ScaleTransition(
+          scale: animation,
+          child: FadeTransition(opacity: animation, child: child),
+        ),
+        child: Icon(
+          isFavourite ? Icons.star : Icons.star_border,
+          key: ValueKey(isFavourite),
+        ),
       ),
       onPressed: () {
         notifier.toggle(widget.fid, widget.name, widget.type).then((_) {
