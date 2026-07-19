@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/common/photo_min_scale_provider.dart';
 import 'package:flutter_nga/utils/picture_utils.dart' as picture_utils;
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -53,6 +53,10 @@ class PhotoPreviewPage extends HookConsumerWidget {
     final success = await Data()
         .resourceRepository
         .downloadImage(picture_utils.getOriginalUrl(url!));
-    Fluttertoast.showToast(msg: success == true ? "保存到相册成功" : "保存到相册失败");
+    if (success == true) {
+      AppToast.success("保存到相册成功");
+    } else {
+      AppToast.error("保存到相册失败");
+    }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
 class SendMessageState {
   final List<String> contacts;
@@ -45,13 +45,14 @@ class SendMessageNotifier extends Notifier<SendMessageState> {
           mid, state.contacts, subject, content);
     } catch (err) {
       if (err is DioException) {
-        Fluttertoast.showToast(msg: err.message ?? '');
+        AppToast.error(err.message ?? '');
       } else {
-        Fluttertoast.showToast(msg: err.toString());
+        AppToast.error(err.toString());
       }
     }
   }
 }
 
 final sendMessageProvider =
-    NotifierProvider<SendMessageNotifier, SendMessageState>(SendMessageNotifier.new);
+    NotifierProvider<SendMessageNotifier, SendMessageState>(
+        SendMessageNotifier.new);

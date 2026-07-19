@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/search/search_topic_list_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -98,7 +98,7 @@ class _SearchTopicListSate extends ConsumerState<SearchTopicListPage> {
         .refresh(widget.keyword, widget.fid, widget.content)
         .whenComplete(() => _refreshController.refreshCompleted())
         .catchError((e) {
-      Fluttertoast.showToast(msg: e.message);
+      AppToast.error(e.message);
       _refreshController.refreshFailed();
       return ref.read(searchTopicListProvider);
     });
@@ -109,7 +109,7 @@ class _SearchTopicListSate extends ConsumerState<SearchTopicListPage> {
         .loadMore(widget.keyword, widget.fid, widget.content)
         .whenComplete(() => _refreshController.loadComplete())
         .catchError((e) {
-      Fluttertoast.showToast(msg: e.message);
+      AppToast.error(e.message);
       _refreshController.loadFailed();
       return ref.read(searchTopicListProvider);
     });

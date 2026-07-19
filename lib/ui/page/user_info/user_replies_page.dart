@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/user/user_replies_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -58,7 +58,7 @@ class _UserRepliesPageState extends ConsumerState<UserRepliesPage> {
   void _onRefresh(UserRepliesNotifier notifier) {
     notifier.refresh(widget.uid).catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       return ref.read(userRepliesProvider);
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
@@ -72,7 +72,7 @@ class _UserRepliesPageState extends ConsumerState<UserRepliesPage> {
         _refreshController.loadNoData();
       }
     }).catchError((err) {
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       debugPrintStack(stackTrace: err.stackTrace);
       _refreshController.loadFailed();
     });

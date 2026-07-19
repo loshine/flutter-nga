@@ -7,7 +7,7 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
 class TopicDetailPage extends ConsumerStatefulWidget {
   const TopicDetailPage(
@@ -145,7 +145,7 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
                 } else {
                   modeName = "跟随系统";
                 }
-                Fluttertoast.showToast(msg: "已切换到 $modeName");
+                AppToast.info("已切换到 $modeName");
               },
             ),
             IconButton(
@@ -177,9 +177,9 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
   _addFavourite() {
     final notifier = ref.read(topicDetailProvider(_providerKey).notifier);
     notifier.addFavourite(widget.tid).then((message) {
-      Fluttertoast.showToast(msg: message.toString());
+      AppToast.success(message.toString());
     }).catchError((e) {
-      Fluttertoast.showToast(msg: e.message);
+      AppToast.error(e.message);
     });
   }
 }

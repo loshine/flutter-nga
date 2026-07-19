@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/forum/forum_tag_list_provider.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 typedef TagSelectedCallback = void Function(String tag);
@@ -37,7 +37,7 @@ class _ForumTagDialogState extends ConsumerState<ForumTagDialog> {
         notifier.load(widget.fid).then((value) {
           widget.onLoadComplete?.call(value);
         }).catchError((err) {
-          Fluttertoast.showToast(msg: err.message);
+          AppToast.error(err.message);
         });
       }
     });

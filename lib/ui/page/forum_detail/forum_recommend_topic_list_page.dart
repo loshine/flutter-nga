@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ForumRecommendTopicListPage extends ConsumerStatefulWidget {
@@ -57,7 +57,7 @@ class _ForumRecommendTopicListState
     final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
     notifier.refresh(true, widget.type).catchError((err) {
       _refreshController.refreshFailed();
-      Fluttertoast.showToast(msg: err.message);
+      AppToast.error(err.message);
       return ref.read(forumRecommendProvider(widget.fid));
     }).whenComplete(
         () => _refreshController.refreshCompleted(resetFooterState: true));
