@@ -175,17 +175,36 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
           }
         });
       }
+
+      // 评论占位楼层（无正文、标题为系统文案）按 pid 找回真实评论
+      Reply? commentSource;
+      if (reply.content.isEmpty &&
+          (reply.subject ?? '').contains('发表了一条评论')) {
+        commentSource = _findCommentByPid(state, reply.pid);
+      }
+
       widget = TopicReplyItemWidget(
         reply: reply,
         user: user,
         group: group,
         medalList: medalList,
         userList: commentUserList,
-        hot: state.hotReplyPids.contains(reply.pid),
         quoteBodyByPid: quoteBodyByPid,
+        commentSource: commentSource,
       );
       map[uniqueId] = widget;
       return widget;
     }
+  }
+
+  /// 在本页所有楼层的评论列表中按 pid 查找真实评论
+  Reply? _findCommentByPid(TopicSinglePageState state, int? pid) {
+    if (pid == null) return null;
+    for (final reply in state.replyList) {
+      for (final comment in reply.commentList) {
+        if (comment.pid == pid) return comment;
+      }
+    }
+    return null;
   }
 }

@@ -14,7 +14,6 @@ class TopicSinglePageState {
   final Topic? topic;
   final List<Reply> replyList;
   final List<Reply> hotReplyList;
-  final Set<int> hotReplyPids;
   final List<User> userList;
   final Set<Group> groupSet;
   final Set<Medal> medalSet;
@@ -27,7 +26,6 @@ class TopicSinglePageState {
     this.topic,
     this.replyList = const [],
     this.hotReplyList = const [],
-    this.hotReplyPids = const {},
     this.userList = const [],
     this.groupSet = const {},
     this.medalSet = const {},
@@ -41,7 +39,6 @@ class TopicSinglePageState {
         topic: null,
         replyList: [],
         hotReplyList: [],
-        hotReplyPids: const {},
         userList: [],
         groupSet: HashSet(),
         medalSet: HashSet(),
@@ -55,7 +52,6 @@ class TopicSinglePageState {
     Topic? topic,
     List<Reply>? replyList,
     List<Reply>? hotReplyList,
-    Set<int>? hotReplyPids,
     List<User>? userList,
     Set<Group>? groupSet,
     Set<Medal>? medalSet,
@@ -68,7 +64,6 @@ class TopicSinglePageState {
       topic: topic ?? this.topic,
       replyList: replyList ?? this.replyList,
       hotReplyList: hotReplyList ?? this.hotReplyList,
-      hotReplyPids: hotReplyPids ?? this.hotReplyPids,
       userList: userList ?? this.userList,
       groupSet: groupSet ?? this.groupSet,
       medalSet: medalSet ?? this.medalSet,
@@ -147,7 +142,6 @@ class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
         topic: data.topic,
         replyList: replyList,
         hotReplyList: hotReplyList,
-        hotReplyPids: data.hotReplies.toSet(),
         userList: userList,
         groupSet: groups,
         medalSet: medals,
