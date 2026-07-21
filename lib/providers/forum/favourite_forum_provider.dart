@@ -3,16 +3,20 @@ import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FavouriteForumNotifier extends Notifier<bool> {
+  FavouriteForumNotifier(this.fid);
+
+  final int fid;
+
   @override
   bool build() => false;
 
-  Future<void> load(int fid, String? name) async {
+  Future<void> load(String? name) async {
     state = await Data()
         .forumRepository
         .isFavourite(Forum(fid, name ?? "", type: 0));
   }
 
-  Future<void> toggle(int fid, String? name, int? type) async {
+  Future<void> toggle(String? name, int? type) async {
     if (state) {
       await Data()
           .forumRepository
@@ -27,4 +31,5 @@ class FavouriteForumNotifier extends Notifier<bool> {
 }
 
 final favouriteForumProvider =
-    NotifierProvider<FavouriteForumNotifier, bool>(FavouriteForumNotifier.new);
+    NotifierProvider.family<FavouriteForumNotifier, bool, int>(
+        FavouriteForumNotifier.new);
