@@ -1,9 +1,9 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/user/user_topics_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class UserTopicsPage extends ConsumerStatefulWidget {
   final int uid;
@@ -20,12 +20,19 @@ class UserTopicsPage extends ConsumerStatefulWidget {
 }
 
 class _UserTopicsPageState extends ConsumerState<UserTopicsPage> {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+    controlFinishLoad: true,
+  );
 
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onRefresh(ref.read(userTopicsProvider.notifier));
+      }
+    });
   }
 
   @override
@@ -41,11 +48,10 @@ class _UserTopicsPageState extends ConsumerState<UserTopicsPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text("${widget.username}发布的主题")),
-      body: SmartRefresher(
-        onLoading: () => _onLoading(notifier),
+      body: EasyRefresh(
         controller: _refreshController,
-        enablePullUp: state.enablePullUp,
         onRefresh: () => _onRefresh(notifier),
+        onLoad: state.enablePullUp ? () => _onLoading(notifier) : null,
         child: ListView.builder(
           itemCount: state.list.length,
           itemBuilder: (context, index) =>
@@ -55,24 +61,31 @@ class _UserTopicsPageState extends ConsumerState<UserTopicsPage> {
     );
   }
 
-  void _onRefresh(UserTopicsNotifier notifier) {
-    notifier.refresh(widget.uid).catchError((err) {
-      _refreshController.refreshFailed();
-      AppToast.error(err.message);
-      return ref.read(userTopicsProvider);
-    }).whenComplete(
-        () => _refreshController.refreshCompleted(resetFooterState: true));
+  Future<void> _onRefresh(UserTopicsNotifier notifier) async {
+    try {
+      await notifier.refresh(widget.uid);
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+      _refreshController.resetFooter();
+    } catch (err) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
+      AppToast.error((err as dynamic).message ?? err.toString());
+    }
   }
 
-  void _onLoading(UserTopicsNotifier notifier) async {
-    notifier.loadMore(widget.uid).then((state) {
+  Future<void> _onLoading(UserTopicsNotifier notifier) async {
+    try {
+      final state = await notifier.loadMore(widget.uid);
+      if (!mounted) return;
       if (state.page + 1 < state.maxPage) {
-        _refreshController.loadComplete();
+        _refreshController.finishLoad();
       } else {
-        _refreshController.loadNoData();
+        _refreshController.finishLoad(IndicatorResult.noMore);
       }
-    }).catchError((_) {
-      _refreshController.loadFailed();
-    });
+    } catch (_) {
+      if (!mounted) return;
+      _refreshController.finishLoad(IndicatorResult.fail);
+    }
   }
 }

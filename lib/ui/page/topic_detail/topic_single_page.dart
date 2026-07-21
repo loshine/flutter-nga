@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
@@ -8,8 +10,6 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:dio/dio.dart';
 
 class TopicSinglePage extends ConsumerStatefulWidget {
   const TopicSinglePage({
@@ -32,7 +32,9 @@ class TopicSinglePage extends ConsumerStatefulWidget {
 }
 
 class _TopicSingleState extends ConsumerState<TopicSinglePage> {
-  final _refreshController = RefreshController(initialRefresh: true);
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+  );
 
   TopicDetailKey get _detailProviderKey => TopicDetailKey(tid: widget.tid);
 
@@ -43,6 +45,14 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
       );
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onRefresh();
+    });
+  }
+
+  @override
   void dispose() {
     _refreshController.dispose();
     super.dispose();
@@ -51,11 +61,9 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(topicSinglePageProvider(_providerKey));
-    return SmartRefresher(
-      onRefresh: _onRefresh,
-      enablePullUp: false,
+    return EasyRefresh(
       controller: _refreshController,
-      physics: ClampingScrollPhysics(),
+      onRefresh: _onRefresh,
       child: ListView.builder(
         itemCount: state.replyList.length,
         itemBuilder: (context, position) =>
@@ -76,11 +84,11 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
             maxFloor: state.maxFloor,
             topic: state.topic,
           );
-      _refreshController.refreshCompleted();
+      _refreshController.finishRefresh();
     } catch (err) {
       if (!mounted) return;
 
-      _refreshController.refreshFailed();
+      _refreshController.finishRefresh(IndicatorResult.fail);
       final errorMsg = err is DioException
           ? (err.message ?? err.toString())
           : err.toString();

@@ -1,9 +1,9 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'notification_item_widget.dart';
 
@@ -15,12 +15,18 @@ class NotificationListPage extends ConsumerStatefulWidget {
 }
 
 class _NotificationListState extends ConsumerState<NotificationListPage> {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+  );
 
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onRefresh(ref.read(notificationListProvider.notifier));
+      }
+    });
   }
 
   @override
@@ -36,11 +42,9 @@ class _NotificationListState extends ConsumerState<NotificationListPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('提醒信息')),
-      body: SmartRefresher(
+      body: EasyRefresh(
         controller: _refreshController,
-        enablePullUp: false,
         onRefresh: () => _onRefresh(notifier),
-        physics: ClampingScrollPhysics(),
         child: ListView.builder(
           itemCount: state.count,
           itemBuilder: (context, index) => _itemBuilder(context, index, state),
@@ -49,13 +53,16 @@ class _NotificationListState extends ConsumerState<NotificationListPage> {
     );
   }
 
-  void _onRefresh(NotificationListNotifier notifier) {
-    notifier.refresh().catchError((err) {
-      _refreshController.refreshFailed();
+  Future<void> _onRefresh(NotificationListNotifier notifier) async {
+    try {
+      await notifier.refresh();
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+    } catch (err) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
       AppToast.error(err.toString());
-      return ref.read(notificationListProvider);
-    }).whenComplete(
-        () => _refreshController.refreshCompleted(resetFooterState: true));
+    }
   }
 
   Widget _itemBuilder(

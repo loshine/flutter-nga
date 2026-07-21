@@ -1,11 +1,11 @@
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/user/account_list_provider.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:route_observer_mixin/route_observer_mixin.dart';
 
 class AccountManagementPage extends ConsumerStatefulWidget {
@@ -18,7 +18,25 @@ class AccountManagementPage extends ConsumerStatefulWidget {
 
 class _AccountManagementState extends ConsumerState<AccountManagementPage>
     with RouteAware, RouteObserverMixin {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onRefresh(ref.read(accountListProvider.notifier));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +57,9 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
           ),
         ],
       ),
-      body: SmartRefresher(
-        onRefresh: () => _onRefresh(notifier),
-        enablePullUp: false,
+      body: EasyRefresh(
         controller: _refreshController,
+        onRefresh: () => _onRefresh(notifier),
         child: ListView.builder(
           itemCount: state.list.length,
           itemBuilder: (context, position) => Material(
@@ -88,27 +105,19 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
   }
 
   @override
-  void initState() {
-    super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
-  }
-
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  @override
   void didPopNext() {
-    _refreshController.requestRefresh();
+    _refreshController.callRefresh();
   }
 
-  void _onRefresh(AccountListNotifier notifier) {
-    notifier
-        .refresh()
-        .whenComplete(() => _refreshController.refreshCompleted())
-        .catchError((_) => _refreshController.refreshFailed());
+  Future<void> _onRefresh(AccountListNotifier notifier) async {
+    try {
+      await notifier.refresh();
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+    } catch (_) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
+    }
   }
 
   void _quitAll(AccountListNotifier notifier) async {
@@ -120,7 +129,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
   }
 
   void _setDefault(AccountListNotifier notifier, CacheUser user) {
-    notifier.setDefault(user).then((_) => _refreshController.requestRefresh());
+    notifier.setDefault(user).then((_) => _refreshController.callRefresh());
   }
 
   void _showDeleteDialog(AccountListNotifier notifier, CacheUser user) {
@@ -140,7 +149,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
                   Routes.pop(context);
                   notifier
                       .delete(user)
-                      .then((_) => _refreshController.requestRefresh());
+                      .then((_) => _refreshController.callRefresh());
                 },
                 child: Text("确认"),
               ),

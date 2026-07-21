@@ -1,9 +1,9 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/search/search_forum_provider.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SearchForumPage extends ConsumerStatefulWidget {
   const SearchForumPage(this.keyword, {super.key});
@@ -15,12 +15,18 @@ class SearchForumPage extends ConsumerStatefulWidget {
 }
 
 class _SearchForumState extends ConsumerState<SearchForumPage> {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+  );
 
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onRefresh(ref.read(searchForumProvider.notifier));
+      }
+    });
   }
 
   @override
@@ -38,10 +44,9 @@ class _SearchForumState extends ConsumerState<SearchForumPage> {
       appBar: AppBar(
         title: Text("搜索板块:${widget.keyword}"),
       ),
-      body: SmartRefresher(
-        onRefresh: () => _onRefresh(notifier),
-        enablePullUp: false,
+      body: EasyRefresh(
         controller: _refreshController,
+        onRefresh: () => _onRefresh(notifier),
         child: ListView.builder(
           itemBuilder: (_, index) => _buildForumWidget(forums[index]),
           itemCount: forums.length,
@@ -50,14 +55,15 @@ class _SearchForumState extends ConsumerState<SearchForumPage> {
     );
   }
 
-  void _onRefresh(SearchForumNotifier notifier) {
-    notifier
-        .search(widget.keyword)
-        .whenComplete(() => _refreshController.refreshCompleted())
-        .catchError((_) {
-      _refreshController.refreshFailed();
-      return <Forum>[];
-    });
+  Future<void> _onRefresh(SearchForumNotifier notifier) async {
+    try {
+      await notifier.search(widget.keyword);
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+    } catch (_) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
+    }
   }
 
   Widget _buildForumWidget(Forum forum) {

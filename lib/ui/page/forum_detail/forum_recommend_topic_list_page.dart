@@ -1,9 +1,9 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ForumRecommendTopicListPage extends ConsumerStatefulWidget {
   final int fid;
@@ -22,12 +22,17 @@ class ForumRecommendTopicListPage extends ConsumerStatefulWidget {
 
 class _ForumRecommendTopicListState
     extends ConsumerState<ForumRecommendTopicListPage> {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+    controlFinishLoad: true,
+  );
 
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onRefresh();
+    });
   }
 
   @override
@@ -39,11 +44,10 @@ class _ForumRecommendTopicListState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(forumRecommendProvider(widget.fid));
-    return SmartRefresher(
-      onLoading: _onLoading,
+    return EasyRefresh(
       controller: _refreshController,
-      enablePullUp: state.enablePullUp,
       onRefresh: _onRefresh,
+      onLoad: state.enablePullUp ? _onLoading : null,
       child: ListView.builder(
         itemCount: state.list.length,
         itemBuilder: (context, index) => TopicListItemWidget(
@@ -53,27 +57,33 @@ class _ForumRecommendTopicListState
     );
   }
 
-  void _onRefresh() {
+  Future<void> _onRefresh() async {
     final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
-    notifier.refresh(true, widget.type).catchError((err) {
-      _refreshController.refreshFailed();
-      AppToast.error(err.message);
-      return ref.read(forumRecommendProvider(widget.fid));
-    }).whenComplete(
-        () => _refreshController.refreshCompleted(resetFooterState: true));
+    try {
+      await notifier.refresh(true, widget.type);
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+      _refreshController.resetFooter();
+    } catch (err) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
+      AppToast.error((err as dynamic).message ?? err.toString());
+    }
   }
 
-  void _onLoading() async {
+  Future<void> _onLoading() async {
     final notifier = ref.read(forumRecommendProvider(widget.fid).notifier);
-    notifier.loadMore(true, widget.type).then((state) {
+    try {
+      final state = await notifier.loadMore(true, widget.type);
+      if (!mounted) return;
       if (state.page + 1 < state.maxPage) {
-        _refreshController.loadComplete();
+        _refreshController.finishLoad();
       } else {
-        _refreshController.loadNoData();
+        _refreshController.finishLoad(IndicatorResult.noMore);
       }
-    }).catchError((_) {
-      _refreshController.loadFailed();
-      return null;
-    });
+    } catch (_) {
+      if (!mounted) return;
+      _refreshController.finishLoad(IndicatorResult.fail);
+    }
   }
 }

@@ -1,9 +1,9 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/message/conversation_detail_provider.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'message_item_widget.dart';
 
@@ -18,12 +18,19 @@ class ConversationDetailPage extends ConsumerStatefulWidget {
 }
 
 class _ConversationDetailState extends ConsumerState<ConversationDetailPage> {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+    controlFinishLoad: true,
+  );
 
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onRefresh(ref.read(conversationDetailProvider.notifier));
+      }
+    });
   }
 
   @override
@@ -41,11 +48,10 @@ class _ConversationDetailState extends ConsumerState<ConversationDetailPage> {
       appBar: AppBar(
         title: Text('消息详情'),
       ),
-      body: SmartRefresher(
-        onLoading: () => _onLoading(notifier),
+      body: EasyRefresh(
         controller: _refreshController,
-        enablePullUp: state.enablePullUp,
         onRefresh: () => _onRefresh(notifier),
+        onLoad: state.enablePullUp ? () => _onLoading(notifier) : null,
         child: ListView.builder(
           itemCount: state.list.length,
           itemBuilder: (context, index) =>
@@ -63,25 +69,31 @@ class _ConversationDetailState extends ConsumerState<ConversationDetailPage> {
     );
   }
 
-  void _onRefresh(ConversationDetailNotifier notifier) {
-    notifier.refresh(widget.mid).catchError((err) {
-      _refreshController.refreshFailed();
+  Future<void> _onRefresh(ConversationDetailNotifier notifier) async {
+    try {
+      await notifier.refresh(widget.mid);
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+      _refreshController.resetFooter();
+    } catch (err) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
       AppToast.error(err.toString());
-      return ref.read(conversationDetailProvider);
-    }).whenComplete(
-        () => _refreshController.refreshCompleted(resetFooterState: true));
+    }
   }
 
-  void _onLoading(ConversationDetailNotifier notifier) async {
-    notifier.loadMore(widget.mid).then((state) {
+  Future<void> _onLoading(ConversationDetailNotifier notifier) async {
+    try {
+      final state = await notifier.loadMore(widget.mid);
+      if (!mounted) return;
       if (state.enablePullUp) {
-        _refreshController.loadComplete();
+        _refreshController.finishLoad();
       } else {
-        _refreshController.loadNoData();
+        _refreshController.finishLoad(IndicatorResult.noMore);
       }
-    }).catchError((_) {
-      _refreshController.loadFailed();
-      return null;
-    });
+    } catch (_) {
+      if (!mounted) return;
+      _refreshController.finishLoad(IndicatorResult.fail);
+    }
   }
 }
