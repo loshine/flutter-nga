@@ -1,15 +1,16 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class TopicDetailPage extends ConsumerStatefulWidget {
+class TopicDetailPage extends HookConsumerWidget {
   const TopicDetailPage(
     this.tid,
     this.fid, {
@@ -24,56 +25,55 @@ class TopicDetailPage extends ConsumerStatefulWidget {
   final int? authorid;
 
   @override
-  ConsumerState<TopicDetailPage> createState() => _TopicDetailState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final providerKey = TopicDetailKey(tid: tid!);
+    final state = ref.watch(topicDetailProvider(providerKey));
+    final notifier = ref.read(topicDetailProvider(providerKey).notifier);
 
-class _TopicDetailState extends ConsumerState<TopicDetailPage>
-    with TickerProviderStateMixin {
-  TabController? _tabController;
-
-  TopicDetailKey get _providerKey => TopicDetailKey(tid: widget.tid!);
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(topicDetailProvider(_providerKey));
-    final notifier = ref.read(topicDetailProvider(_providerKey).notifier);
-    final firstPage = TopicSinglePage(
-      tid: widget.tid!,
-      page: 1,
-      authorid: widget.authorid,
-      onJumpToFloor: _jumpToFloor,
+    final length = state.maxPage < 1 ? 1 : state.maxPage;
+    final initialIndex = (state.currentPage - 1).clamp(0, length - 1);
+    final tabController = useTabController(
+      initialLength: length,
+      initialIndex: initialIndex,
+      keys: [length],
     );
 
-    List<Widget> widgets = [];
-    _tabController = TabController(
-      vsync: this,
-      length: state.maxPage,
-      initialIndex: state.currentPage - 1,
-    );
-    _tabController!.addListener(() {
-      notifier.setCurrentPage(_tabController!.index + 1);
-    });
-    for (int i = 0; i < state.maxPage; i++) {
-      if (i == 0) {
-        widgets.add(firstPage);
-      } else {
-        widgets.add(TopicSinglePage(
-          tid: widget.tid!,
-          page: i + 1,
-          authorid: widget.authorid,
-          onJumpToFloor: _jumpToFloor,
-        ));
+    useEffect(() {
+      void listener() {
+        if (tabController.indexIsChanging) return;
+        notifier.setCurrentPage(tabController.index + 1);
       }
+
+      tabController.addListener(listener);
+      return () => tabController.removeListener(listener);
+    }, [tabController]);
+
+    void jumpToFloor(int lou) {
+      if (lou <= 0) return;
+      final target =
+          (lou / 20 - 1).ceil().clamp(0, tabController.length - 1).toInt();
+      tabController.animateTo(target);
     }
+
+    final widgets = <Widget>[
+      for (var i = 0; i < length; i++)
+        TopicSinglePage(
+          tid: tid!,
+          page: i + 1,
+          authorid: authorid,
+          onJumpToFloor: jumpToFloor,
+        ),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          code_utils.unescapeHtml(state.subject ?? widget.subject ?? ""),
+          code_utils.unescapeHtml(state.subject ?? subject ?? ""),
         ),
       ),
       body: TabBarView(
         physics: NeverScrollableScrollPhysics(),
-        controller: _tabController,
+        controller: tabController,
         children: widgets,
       ),
       bottomNavigationBar: BottomAppBar(
@@ -86,7 +86,7 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
                 icon: Icon(Icons.chevron_left),
                 onPressed: () {
                   if (state.currentPage != 1) {
-                    _tabController!.animateTo(_tabController!.index - 1);
+                    tabController.animateTo(tabController.index - 1);
                   }
                 },
               ),
@@ -102,9 +102,9 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
                     maxFloor: state.maxFloor,
                     pageSelectedCallback: (isPage, target) {
                       if (isPage) {
-                        _tabController!.animateTo(target - 1);
+                        tabController.animateTo(target - 1);
                       } else {
-                        _tabController!.animateTo((target / 20 - 1).ceil());
+                        tabController.animateTo((target / 20 - 1).ceil());
                       }
                     },
                   ),
@@ -128,7 +128,7 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
                 icon: Icon(Icons.chevron_right),
                 onPressed: () {
                   if (state.maxPage != state.currentPage) {
-                    _tabController!.animateTo(_tabController!.index + 1);
+                    tabController.animateTo(tabController.index + 1);
                   }
                 },
               ),
@@ -152,15 +152,21 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
             ),
             IconButton(
               icon: Icon(CommunityMaterialIcons.heart_outline),
-              onPressed: _addFavourite,
+              onPressed: () {
+                notifier.addFavourite(tid).then((message) {
+                  AppToast.success(message.toString());
+                }).catchError((e) {
+                  AppToast.error(e.message);
+                });
+              },
             ),
             IconButton(
               icon: Icon(CommunityMaterialIcons.comment_outline),
               onPressed: () {
-                if (widget.fid == null && state.topic == null) return;
+                if (fid == null && state.topic == null) return;
                 Routes.navigateTo(
                   context,
-                  "${Routes.TOPIC_PUBLISH}?tid=${widget.tid}&fid=${widget.fid != null ? widget.fid : state.topic!.fid}",
+                  "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid != null ? fid : state.topic!.fid}",
                 );
               },
             ),
@@ -168,30 +174,5 @@ class _TopicDetailState extends ConsumerState<TopicDetailPage>
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tabController?.dispose();
-    super.dispose();
-  }
-
-  /// 跳转到指定楼层所在页（与页码选择的跳楼逻辑一致）
-  void _jumpToFloor(int lou) {
-    if (lou <= 0) return;
-    final controller = _tabController;
-    if (controller == null) return;
-    final target =
-        (lou / 20 - 1).ceil().clamp(0, controller.length - 1).toInt();
-    controller.animateTo(target);
-  }
-
-  _addFavourite() {
-    final notifier = ref.read(topicDetailProvider(_providerKey).notifier);
-    notifier.addFavourite(widget.tid).then((message) {
-      AppToast.success(message.toString());
-    }).catchError((e) {
-      AppToast.error(e.message);
-    });
   }
 }

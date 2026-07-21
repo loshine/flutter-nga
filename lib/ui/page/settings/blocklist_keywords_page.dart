@@ -2,27 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'blocklist_edit_dialog.dart';
 
-class BlocklistKeywordsPage extends ConsumerStatefulWidget {
-  @override
-  ConsumerState<BlocklistKeywordsPage> createState() =>
-      _BlocklistKeywordsPageState();
-}
+class BlocklistKeywordsPage extends HookConsumerWidget {
+  const BlocklistKeywordsPage({super.key});
 
-class _BlocklistKeywordsPageState extends ConsumerState<BlocklistKeywordsPage> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    usePostFrameEffect(() {
       ref.read(blocklistSettingsProvider.notifier).load();
     });
-  }
 
-  @override
-  Widget build(BuildContext context) {
     final state = ref.watch(blocklistSettingsProvider);
     final notifier = ref.read(blocklistSettingsProvider.notifier);
 
@@ -51,7 +44,7 @@ class _BlocklistKeywordsPageState extends ConsumerState<BlocklistKeywordsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: "添加屏蔽关键词",
-        onPressed: () => _showAddDialog(notifier),
+        onPressed: () => _showAddDialog(context, notifier),
         child: Icon(Icons.add),
       ),
     );
@@ -87,7 +80,10 @@ class _BlocklistKeywordsPageState extends ConsumerState<BlocklistKeywordsPage> {
     }
   }
 
-  void _showAddDialog(BlocklistSettingsNotifier notifier) {
+  void _showAddDialog(
+    BuildContext context,
+    BlocklistSettingsNotifier notifier,
+  ) {
     showDialog(
         context: context,
         builder: (_) {
