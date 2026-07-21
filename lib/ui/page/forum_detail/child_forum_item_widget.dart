@@ -2,25 +2,29 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/providers/forum/child_forum_subscription_provider.dart';
-import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ChildForumItemWidget extends HookConsumerWidget {
+class ChildForumItemWidget extends ConsumerWidget {
   final ChildForum childForum;
 
   const ChildForumItemWidget(this.childForum, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    usePostFrameEffect(() {
-      ref
-          .read(childForumSubscriptionProvider.notifier)
-          .setSubscribed(childForum.selected);
-    }, [childForum.selected]);
-
-    final subscribed = ref.watch(childForumSubscriptionProvider);
-    final notifier = ref.read(childForumSubscriptionProvider.notifier);
+    final tid = childForum.tid;
+    final subscriptionKey = tid == null
+        ? null
+        : ChildForumSubscriptionKey(
+            tid,
+            initialSelected: childForum.selected,
+          );
+    final subscribed = subscriptionKey == null
+        ? false
+        : ref.watch(childForumSubscriptionProvider(subscriptionKey));
+    final notifier = subscriptionKey == null
+        ? null
+        : ref.read(childForumSubscriptionProvider(subscriptionKey).notifier);
 
     return InkWell(
       onTap: () => Routes.navigateTo(
@@ -50,16 +54,14 @@ class ChildForumItemWidget extends HookConsumerWidget {
             ),
             title: Text(childForum.name),
             subtitle: Text(childForum.desc ?? ""),
-            trailing: childForum.tid != null
+            trailing: tid != null && notifier != null
                 ? Switch(
                     value: subscribed,
                     onChanged: (v) {
                       if (v) {
-                        notifier.addSubscription(
-                            childForum.tid!, childForum.parentId);
+                        notifier.addSubscription(childForum.parentId);
                       } else {
-                        notifier.deleteSubscription(
-                            childForum.tid!, childForum.parentId);
+                        notifier.deleteSubscription(childForum.parentId);
                       }
                     },
                   )
