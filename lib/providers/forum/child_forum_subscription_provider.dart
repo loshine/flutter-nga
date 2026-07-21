@@ -41,7 +41,7 @@ class ChildForumSubscriptionNotifier extends Notifier<bool> {
       AppToast.success("订阅成功");
       state = true;
     }).catchError((e) {
-      AppToast.error(e.message);
+      AppToast.error(e);
     });
   }
 
@@ -53,7 +53,7 @@ class ChildForumSubscriptionNotifier extends Notifier<bool> {
       AppToast.success("取消订阅成功");
       state = false;
     }).catchError((e) {
-      AppToast.error(e.message);
+      AppToast.error(e);
     });
   }
 }

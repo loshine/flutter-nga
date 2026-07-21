@@ -31,7 +31,7 @@ class UserRepliesPage extends HookConsumerWidget {
       } catch (err) {
         if (!context.mounted) return;
         refreshController.finishRefresh(IndicatorResult.fail);
-        AppToast.error((err as dynamic).message ?? err.toString());
+        AppToast.error(err);
       }
     }
 
@@ -44,10 +44,10 @@ class UserRepliesPage extends HookConsumerWidget {
         } else {
           refreshController.finishLoad(IndicatorResult.noMore);
         }
-      } catch (err) {
+      } catch (err, stack) {
         if (!context.mounted) return;
-        AppToast.error((err as dynamic).message ?? err.toString());
-        debugPrintStack(stackTrace: (err as dynamic).stackTrace);
+        AppToast.error(err);
+        debugPrintStack(stackTrace: stack);
         refreshController.finishLoad(IndicatorResult.fail);
       }
     }
