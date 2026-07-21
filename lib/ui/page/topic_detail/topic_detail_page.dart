@@ -38,10 +38,30 @@ class TopicDetailPage extends HookConsumerWidget {
       keys: [length],
     );
 
+    // Only mount TopicSinglePage for pages the user has actually opened.
+    final visitedPages = useState(<int>{initialIndex});
+
+    useEffect(() {
+      // Drop indices that no longer exist after maxPage shrinks/grows rebuild.
+      final valid = visitedPages.value.where((i) => i < length).toSet();
+      if (!valid.contains(tabController.index)) {
+        valid.add(tabController.index);
+      }
+      if (valid.length != visitedPages.value.length ||
+          !valid.containsAll(visitedPages.value)) {
+        visitedPages.value = valid;
+      }
+      return null;
+    }, [length]);
+
     useEffect(() {
       void listener() {
         if (tabController.indexIsChanging) return;
-        notifier.setCurrentPage(tabController.index + 1);
+        final index = tabController.index;
+        if (!visitedPages.value.contains(index)) {
+          visitedPages.value = {...visitedPages.value, index};
+        }
+        notifier.setCurrentPage(index + 1);
       }
 
       tabController.addListener(listener);
@@ -52,17 +72,25 @@ class TopicDetailPage extends HookConsumerWidget {
       if (lou <= 0) return;
       final target =
           (lou / 20 - 1).ceil().clamp(0, tabController.length - 1).toInt();
+      // Ensure the target page is built before animating to it.
+      if (!visitedPages.value.contains(target)) {
+        visitedPages.value = {...visitedPages.value, target};
+      }
       tabController.animateTo(target);
     }
 
     final widgets = <Widget>[
       for (var i = 0; i < length; i++)
-        TopicSinglePage(
-          tid: tid!,
-          page: i + 1,
-          authorid: authorid,
-          onJumpToFloor: jumpToFloor,
-        ),
+        if (visitedPages.value.contains(i))
+          TopicSinglePage(
+            key: ValueKey('topic-$tid-page-${i + 1}'),
+            tid: tid!,
+            page: i + 1,
+            authorid: authorid,
+            onJumpToFloor: jumpToFloor,
+          )
+        else
+          const SizedBox.shrink(),
     ];
 
     return Scaffold(
@@ -86,7 +114,11 @@ class TopicDetailPage extends HookConsumerWidget {
                 icon: Icon(Icons.chevron_left),
                 onPressed: () {
                   if (state.currentPage != 1) {
-                    tabController.animateTo(tabController.index - 1);
+                    final target = tabController.index - 1;
+                    if (!visitedPages.value.contains(target)) {
+                      visitedPages.value = {...visitedPages.value, target};
+                    }
+                    tabController.animateTo(target);
                   }
                 },
               ),
@@ -101,11 +133,18 @@ class TopicDetailPage extends HookConsumerWidget {
                     maxPage: state.maxPage,
                     maxFloor: state.maxFloor,
                     pageSelectedCallback: (isPage, target) {
-                      if (isPage) {
-                        tabController.animateTo(target - 1);
-                      } else {
-                        tabController.animateTo((target / 20 - 1).ceil());
+                      final index = isPage
+                          ? target - 1
+                          : (target / 20 - 1).ceil();
+                      final clamped =
+                          index.clamp(0, tabController.length - 1).toInt();
+                      if (!visitedPages.value.contains(clamped)) {
+                        visitedPages.value = {
+                          ...visitedPages.value,
+                          clamped,
+                        };
                       }
+                      tabController.animateTo(clamped);
                     },
                   ),
                 );
@@ -128,7 +167,11 @@ class TopicDetailPage extends HookConsumerWidget {
                 icon: Icon(Icons.chevron_right),
                 onPressed: () {
                   if (state.maxPage != state.currentPage) {
-                    tabController.animateTo(tabController.index + 1);
+                    final target = tabController.index + 1;
+                    if (!visitedPages.value.contains(target)) {
+                      visitedPages.value = {...visitedPages.value, target};
+                    }
+                    tabController.animateTo(target);
                   }
                 },
               ),
