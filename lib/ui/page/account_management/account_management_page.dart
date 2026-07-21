@@ -3,12 +3,13 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/user/account_list_provider.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:route_observer_mixin/route_observer_mixin.dart';
 
-class AccountManagementPage extends ConsumerStatefulWidget {
+class AccountManagementPage extends StatefulHookConsumerWidget {
   const AccountManagementPage({super.key});
 
   @override
@@ -18,30 +19,26 @@ class AccountManagementPage extends ConsumerStatefulWidget {
 
 class _AccountManagementState extends ConsumerState<AccountManagementPage>
     with RouteAware, RouteObserverMixin {
-  final _refreshController = EasyRefreshController(
-    controlFinishRefresh: true,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _onRefresh(ref.read(accountListProvider.notifier));
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
+  late EasyRefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
+    _refreshController = useEasyRefreshController();
     final state = ref.watch(accountListProvider);
     final notifier = ref.read(accountListProvider.notifier);
+
+    Future<void> onRefresh() async {
+      try {
+        await notifier.refresh();
+        if (!mounted) return;
+        _refreshController.finishRefresh();
+      } catch (_) {
+        if (!mounted) return;
+        _refreshController.finishRefresh(IndicatorResult.fail);
+      }
+    }
+
+    usePostFrameEffect(onRefresh);
 
     return Scaffold(
       appBar: AppBar(
@@ -59,7 +56,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
       ),
       body: EasyRefresh(
         controller: _refreshController,
-        onRefresh: () => _onRefresh(notifier),
+        onRefresh: onRefresh,
         child: ListView.builder(
           itemCount: state.list.length,
           itemBuilder: (context, position) => Material(
@@ -107,17 +104,6 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
   @override
   void didPopNext() {
     _refreshController.callRefresh();
-  }
-
-  Future<void> _onRefresh(AccountListNotifier notifier) async {
-    try {
-      await notifier.refresh();
-      if (!mounted) return;
-      _refreshController.finishRefresh();
-    } catch (_) {
-      if (!mounted) return;
-      _refreshController.finishRefresh(IndicatorResult.fail);
-    }
   }
 
   void _quitAll(AccountListNotifier notifier) async {
