@@ -1,6 +1,7 @@
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
@@ -13,56 +14,46 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
 
-class ForumDetailPage extends StatefulHookConsumerWidget {
+class ForumDetailPage extends HookConsumerWidget {
   const ForumDetailPage({required this.fid, this.name, this.type, super.key});
 
   final int fid;
   final String? name;
   final int? type;
 
-  @override
-  ConsumerState<ForumDetailPage> createState() => _ForumDetailState();
-}
-
-class _ForumDetailState extends ConsumerState<ForumDetailPage>
-    with SingleTickerProviderStateMixin {
-  bool _fabVisible = true;
-  bool _mainPage = true;
-
-  final List<Tab> _tabs = [];
-  TabController? _tabController;
+  static const _tabs = [
+    Tab(text: '最新'),
+    Tab(text: '精华'),
+    Tab(text: '子版'),
+  ];
 
   @override
-  void initState() {
-    super.initState();
-    _tabs.add(Tab(text: '最新'));
-    _tabs.add(Tab(text: '精华'));
-    _tabs.add(Tab(text: '子版'));
-    _tabController = TabController(vsync: this, length: _tabs.length);
-    _tabController!.addListener(
-        () => setState(() => _mainPage = _tabController!.index == 0));
-  }
-
-  @override
-  void dispose() {
-    _tabController!.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
-    final state = ref.watch(forumDetailProvider(widget.fid));
-    final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
+    final tabController = useTabController(initialLength: _tabs.length);
+    final fabVisible = useState(true);
+    final mainPage = useState(true);
+
+    final state = ref.watch(forumDetailProvider(fid));
+    final notifier = ref.read(forumDetailProvider(fid).notifier);
+
+    useEffect(() {
+      void listener() {
+        mainPage.value = tabController.index == 0;
+      }
+
+      tabController.addListener(listener);
+      return () => tabController.removeListener(listener);
+    }, [tabController]);
 
     Future<void> onRefresh() async {
       try {
-        await notifier.refresh(false, widget.type);
-        if (!mounted) return;
+        await notifier.refresh(false, type);
+        if (!context.mounted) return;
         refreshController.finishRefresh();
         refreshController.resetFooter();
       } catch (err) {
-        if (!mounted) return;
+        if (!context.mounted) return;
         refreshController.finishRefresh(IndicatorResult.fail);
         AppToast.error((err as dynamic).message ?? err.toString());
       }
@@ -70,15 +61,15 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
 
     Future<void> onLoading() async {
       try {
-        final next = await notifier.loadMore(false, widget.type);
-        if (!mounted) return;
+        final next = await notifier.loadMore(false, type);
+        if (!context.mounted) return;
         if (next.page + 1 < next.maxPage) {
           refreshController.finishLoad();
         } else {
           refreshController.finishLoad(IndicatorResult.noMore);
         }
       } catch (_) {
-        if (!mounted) return;
+        if (!context.mounted) return;
         refreshController.finishLoad(IndicatorResult.fail);
       }
     }
@@ -87,13 +78,13 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.name!),
+        title: Text(name!),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(56),
           child: Align(
             alignment: Alignment.centerLeft,
             child: TabBar(
-              controller: _tabController,
+              controller: tabController,
               tabs: _tabs,
               isScrollable: true,
             ),
@@ -101,28 +92,28 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
         ),
         actions: [
           ForumFavouriteButtonWidget(
-            fid: widget.fid,
-            name: widget.name,
-            type: widget.type,
+            fid: fid,
+            name: name,
+            type: type,
           ),
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () => Routes.navigateTo(
-                context, "${Routes.SEARCH}?fid=${widget.fid}"),
+            onPressed: () =>
+                Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
           ),
         ],
       ),
       body: TabBarView(
-        controller: _tabController,
+        controller: tabController,
         children: [
           KeepAliveTabView(
             child: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
                 final direction = notification.direction;
                 if (direction == ScrollDirection.reverse) {
-                  if (_fabVisible) setState(() => _fabVisible = false);
+                  if (fabVisible.value) fabVisible.value = false;
                 } else if (direction == ScrollDirection.forward) {
-                  if (!_fabVisible) setState(() => _fabVisible = true);
+                  if (!fabVisible.value) fabVisible.value = true;
                 }
                 return false;
               },
@@ -140,17 +131,17 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
             ),
           ),
           KeepAliveTabView(
-            child: ForumRecommendTopicListPage(widget.fid, type: widget.type),
+            child: ForumRecommendTopicListPage(fid, type: type),
           ),
           KeepAliveTabView(
             child: ChildForumListPage(state.info),
           ),
         ],
       ),
-      floatingActionButton: _fabVisible && _mainPage
+      floatingActionButton: fabVisible.value && mainPage.value
           ? FloatingActionButton(
               onPressed: () => Routes.navigateTo(
-                  context, "${Routes.TOPIC_PUBLISH}?fid=${widget.fid}"),
+                  context, "${Routes.TOPIC_PUBLISH}?fid=$fid"),
               child: const Icon(Icons.edit),
             )
           : null,

@@ -1,6 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
@@ -13,7 +14,9 @@ import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 
-class PublishPage extends StatefulWidget {
+enum _BottomPanel { emoticon, font, attachment }
+
+class PublishPage extends HookWidget {
   const PublishPage({
     super.key,
     this.tid,
@@ -25,394 +28,354 @@ class PublishPage extends StatefulWidget {
   final int? fid;
   final String? content;
 
-  @override
-  _PublishPageState createState() => _PublishPageState();
-}
-
-class _PublishPageState extends State<PublishPage> {
   /// 宽屏断点：大于此宽度时面板以对话框形式展示
   static const double _wideBreakpoint = 600;
 
   /// 宽屏下编辑区域最大宽度
   static const double _contentMaxWidth = 720;
 
-  bool _keyboardVisible = false;
-  bool _bottomPanelVisible = false;
-  bool _isAnonymous = false;
-
-  List<String> _selectedTags = [];
-  List<TopicTag> _tagList = [];
-
-  final _subjectController = TextEditingController();
-  final _contentController = TextEditingController();
-
-  late Widget _emoticonGroupTabsWidget;
-  late Widget _fontStyleWidget;
-  late Widget _attachmentWidget;
-
-  late Widget _currentBottomPanelChild;
-  final _selectionList = [0, 0];
-
-  final StringBuffer _attachments = StringBuffer();
-  final StringBuffer _attachmentsCheck = StringBuffer();
-
-  bool get _isWide =>
-      MediaQuery.sizeOf(context).width >= _wideBreakpoint;
-
-  @override
-  void initState() {
-    super.initState();
-    _contentController.text = widget.content ?? "";
-    _contentController.addListener(() {
-      if (_contentController.selection.start > -1) {
-        _selectionList[0] = _contentController.selection.start;
-      }
-      if (_contentController.selection.end > -1) {
-        _selectionList[1] = _contentController.selection.end;
-      }
-    });
-    _emoticonGroupTabsWidget =
-        EmoticonGroupTabsWidget(callback: _inputCallback);
-    _fontStyleWidget = FontStyleWidget(callback: _inputCallback);
-    _attachmentWidget = AttachmentWidget(
-      tid: widget.tid,
-      fid: widget.fid,
-      callback: _inputCallback,
-      attachmentCallback: _attachmentCallback,
-    );
-    _currentBottomPanelChild = _emoticonGroupTabsWidget;
-  }
-
-  @override
-  void dispose() {
-    _subjectController.dispose();
-    _contentController.dispose();
-    super.dispose();
-  }
-
-  void _onKeyboardVisibilityChanged(bool visible) {
-    setState(() {
-      _keyboardVisible = visible;
-    });
-    if (visible && _bottomPanelVisible) {
-      _hideBottomPanel();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    // 使用 MediaQuery 检测键盘
-    final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-    if (keyboardVisible != _keyboardVisible) {
-      _onKeyboardVisibilityChanged(keyboardVisible);
+    final subjectController = useTextEditingController();
+    final contentController = useTextEditingController(text: content ?? "");
+    final isAnonymous = useState(false);
+    final openPanel = useState<_BottomPanel?>(null);
+    final selectedTags = useState(<String>[]);
+    final tagList = useRef(<TopicTag>[]);
+    final selection = useRef((start: 0, end: 0));
+    final attachments = useRef(StringBuffer());
+    final attachmentsCheck = useRef(StringBuffer());
+    final wasKeyboardVisible = useRef(false);
+
+    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final isWide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
+
+    // 键盘弹出时收起底部面板
+    if (keyboardVisible &&
+        !wasKeyboardVisible.value &&
+        openPanel.value != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        openPanel.value = null;
+      });
     }
+    wasKeyboardVisible.value = keyboardVisible;
+
+    useEffect(() {
+      void listener() {
+        final sel = contentController.selection;
+        if (sel.start > -1) {
+          selection.value = (
+            start: sel.start,
+            end: sel.end > -1 ? sel.end : selection.value.end,
+          );
+        }
+        if (sel.end > -1) {
+          selection.value = (
+            start: selection.value.start,
+            end: sel.end,
+          );
+        }
+      }
+
+      contentController.addListener(listener);
+      return () => contentController.removeListener(listener);
+    }, [contentController]);
+
+    void inputCallback(startTag, endTag, hasEnd) {
+      final start = selection.value.start;
+      final end = selection.value.end;
+      final text = contentController.text;
+      final left = text.substring(0, start);
+      final right = text.substring(end, text.length);
+      if (start == end) {
+        contentController.text =
+            "$left$startTag${hasEnd ? endTag : ""}$right";
+        final position = left.length + (startTag.length as int);
+        contentController.selection = TextSelection(
+          extentOffset: position,
+          baseOffset: position,
+        );
+      } else {
+        final selected = text.substring(start, end);
+        if (hasEnd) {
+          contentController.text = "$left$startTag$selected$endTag$right";
+          final position = left.length +
+              (startTag.length as int) +
+              selected.length +
+              (endTag.length as int);
+          contentController.selection = TextSelection(
+            extentOffset: position,
+            baseOffset: position,
+          );
+        } else {
+          contentController.text = "$left$startTag$right";
+          final position = left.length + (startTag.length as int);
+          contentController.selection = TextSelection(
+            extentOffset: position,
+            baseOffset: position,
+          );
+        }
+      }
+    }
+
+    void attachmentCallback(att, attCheck) {
+      final tab = code_utils.urlEncode("\t");
+      attachments.value.write(tab);
+      attachments.value.write(code_utils.urlEncode(att));
+      attachmentsCheck.value.write(tab);
+      attachmentsCheck.value.write(code_utils.urlEncode(attCheck));
+    }
+
+    Widget panelChild(_BottomPanel panel) => switch (panel) {
+          _BottomPanel.emoticon =>
+            EmoticonGroupTabsWidget(callback: inputCallback),
+          _BottomPanel.font => FontStyleWidget(callback: inputCallback),
+          _BottomPanel.attachment => AttachmentWidget(
+              tid: tid,
+              fid: fid,
+              callback: inputCallback,
+              attachmentCallback: attachmentCallback,
+            ),
+        };
+
+    void togglePanel(_BottomPanel panel) {
+      if (keyboardVisible) {
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+      }
+      if (openPanel.value == panel) {
+        openPanel.value = null;
+      } else {
+        openPanel.value = panel;
+      }
+    }
+
+    void openPanelAction(_BottomPanel panel, String title) {
+      if (isWide) {
+        showDialog(
+          context: context,
+          builder: (_) => _PanelDialog(
+            title: title,
+            child: panelChild(panel),
+          ),
+        );
+      } else {
+        togglePanel(panel);
+      }
+    }
+
+    void showTagDialog() {
+      showDialog(
+        context: context,
+        builder: (dialogContext) {
+          return ForumTagDialog(
+            fid: fid!,
+            tagList: tagList.value,
+            onSelected: (tag) {
+              if (!selectedTags.value.contains(tag)) {
+                selectedTags.value = [...selectedTags.value, tag];
+              }
+              Routes.pop(dialogContext);
+            },
+            onLoadComplete: (list) => tagList.value = list,
+          );
+        },
+      );
+    }
+
+    Future<void> publish() async {
+      final body = contentController.text;
+      final len = body.codeUnits.length;
+      if (len < 6 || len > 65530) {
+        AppToast.warning("内容过短或过长(6~65530 byte)");
+        return;
+      }
+      try {
+        final String message;
+        if (tid != null) {
+          message = await Data().topicRepository.createReply(
+            tid,
+            fid,
+            subjectController.text,
+            body,
+            isAnonymous.value,
+            attachments.value.toString(),
+            attachmentsCheck.value.toString(),
+          );
+        } else if (fid != null) {
+          message = await Data().topicRepository.createTopic(
+            fid,
+            subjectController.text,
+            body,
+            isAnonymous.value,
+            attachments.value.toString(),
+            attachmentsCheck.value.toString(),
+          );
+        } else {
+          return;
+        }
+        AppToast.success(message);
+        if (context.mounted) Routes.pop(context);
+      } catch (err) {
+        AppToast.error(err.toString());
+      }
+    }
+
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final colorScheme = Theme.of(context).colorScheme;
+    final panelOpen = openPanel.value != null;
+
     return PopScope(
-      canPop: !_bottomPanelVisible,
+      canPop: !panelOpen,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (_bottomPanelVisible) {
-          _hideBottomPanel();
-        }
+        if (panelOpen) openPanel.value = null;
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.tid != null ? "回帖" : "发帖"),
+          title: Text(tid != null ? "回帖" : "发帖"),
         ),
-        body: _buildBody(),
+        body: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(maxWidth: _contentMaxWidth),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: Column(
+                      children: [
+                        TextField(
+                          maxLines: 1,
+                          controller: subjectController,
+                          decoration: InputDecoration(
+                            labelText: "标题(可选)",
+                            suffixIcon: IconButton(
+                              tooltip: '选择标签',
+                              icon: const Icon(
+                                  CommunityMaterialIcons.tag_multiple),
+                              onPressed: showTagDialog,
+                            ),
+                          ),
+                          keyboardType: TextInputType.text,
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Wrap(
+                            spacing: 8.0,
+                            runSpacing: 4.0,
+                            children: selectedTags.value.map((tag) {
+                              return InputChip(
+                                label: Text(tag),
+                                onDeleted: () {
+                                  selectedTags.value = selectedTags.value
+                                      .where((t) => t != tag)
+                                      .toList();
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: TextField(
+                            maxLines: null,
+                            expands: true,
+                            textAlignVertical: TextAlignVertical.top,
+                            controller: contentController,
+                            decoration: const InputDecoration(
+                              labelText: "回复内容",
+                              alignLabelWithHint: true,
+                            ),
+                            keyboardType: TextInputType.multiline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            AnimatedSize(
+              duration: Motion.durationMedium2,
+              curve: Motion.emphasized,
+              alignment: Alignment.topCenter,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: kToolbarHeight + (panelOpen ? 0 : bottomPadding),
+                    padding: EdgeInsets.only(
+                        bottom: panelOpen ? 0 : bottomPadding),
+                    color: colorScheme.surfaceContainer,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        IconButton(
+                          tooltip: isAnonymous.value ? '关闭匿名' : '开启匿名',
+                          isSelected: isAnonymous.value,
+                          icon: const Icon(CommunityMaterialIcons.incognito_off),
+                          selectedIcon:
+                              const Icon(CommunityMaterialIcons.incognito),
+                          onPressed: () {
+                            AppToast.info(
+                                isAnonymous.value ? "关闭匿名" : "开启匿名");
+                            isAnonymous.value = !isAnonymous.value;
+                          },
+                        ),
+                        IconButton(
+                          tooltip: '表情',
+                          isSelected:
+                              openPanel.value == _BottomPanel.emoticon,
+                          icon: const Icon(CommunityMaterialIcons.emoticon),
+                          onPressed: () =>
+                              openPanelAction(_BottomPanel.emoticon, '表情'),
+                        ),
+                        IconButton(
+                          tooltip: '格式',
+                          isSelected: openPanel.value == _BottomPanel.font,
+                          icon:
+                              const Icon(CommunityMaterialIcons.format_text),
+                          onPressed: () =>
+                              openPanelAction(_BottomPanel.font, '格式'),
+                        ),
+                        IconButton(
+                          tooltip: '附件',
+                          isSelected:
+                              openPanel.value == _BottomPanel.attachment,
+                          icon:
+                              const Icon(CommunityMaterialIcons.attachment),
+                          onPressed: () => openPanelAction(
+                              _BottomPanel.attachment, '附件'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    color: colorScheme.surfaceContainer,
+                    height: panelOpen
+                        ? Dimen.bottomPanelHeight + bottomPadding
+                        : 0,
+                    padding: EdgeInsets.only(
+                        bottom: panelOpen ? bottomPadding : 0),
+                    child: panelOpen
+                        ? panelChild(openPanel.value!)
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
           tooltip: '发送',
-          onPressed: _publish,
+          onPressed: publish,
           child: const Icon(Icons.send),
         ),
       ),
     );
-  }
-
-  Widget _buildBody() {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        // 编辑区域：宽屏下限制最大宽度并居中
-        Expanded(
-          child: Center(
-            child: ConstrainedBox(
-              constraints:
-                  const BoxConstraints(maxWidth: _contentMaxWidth),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Column(
-                  children: [
-                    TextField(
-                      maxLines: 1,
-                      controller: _subjectController,
-                      decoration: InputDecoration(
-                        labelText: "标题(可选)",
-                        suffixIcon: IconButton(
-                          tooltip: '选择标签',
-                          icon: const Icon(
-                              CommunityMaterialIcons.tag_multiple),
-                          onPressed: _showTagDialog,
-                        ),
-                      ),
-                      keyboardType: TextInputType.text,
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Wrap(
-                        spacing: 8.0, // gap between adjacent chips
-                        runSpacing: 4.0, // gap between line
-                        children: _selectedTags.map((content) {
-                          return InputChip(
-                            label: Text(content),
-                            onDeleted: () {
-                              setState(() {
-                                _selectedTags.remove(content);
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: TextField(
-                        maxLines: null,
-                        expands: true,
-                        textAlignVertical: TextAlignVertical.top,
-                        controller: _contentController,
-                        decoration: const InputDecoration(
-                          labelText: "回复内容",
-                          alignLabelWithHint: true,
-                        ),
-                        keyboardType: TextInputType.multiline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        // 底部工具栏 + 面板（窄屏），整体高度动画
-        AnimatedSize(
-          duration: Motion.durationMedium2,
-          curve: Motion.emphasized,
-          alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildToolbar(bottomPadding),
-              Container(
-                width: double.infinity,
-                color: colorScheme.surfaceContainer,
-                height: _bottomPanelVisible
-                    ? Dimen.bottomPanelHeight + bottomPadding
-                    : 0,
-                padding: EdgeInsets.only(
-                    bottom: _bottomPanelVisible ? bottomPadding : 0),
-                child:
-                    _bottomPanelVisible ? _currentBottomPanelChild : null,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// M3 风格工具栏：tonal 背景 + IconButton 选中态
-  Widget _buildToolbar(double bottomPadding) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      height:
-          kToolbarHeight + (_bottomPanelVisible ? 0 : bottomPadding),
-      padding:
-          EdgeInsets.only(bottom: _bottomPanelVisible ? 0 : bottomPadding),
-      color: colorScheme.surfaceContainer,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          IconButton(
-            tooltip: _isAnonymous ? '关闭匿名' : '开启匿名',
-            isSelected: _isAnonymous,
-            icon: const Icon(CommunityMaterialIcons.incognito_off),
-            selectedIcon: const Icon(CommunityMaterialIcons.incognito),
-            onPressed: _incognitoIconClicked,
-          ),
-          IconButton(
-            tooltip: '表情',
-            isSelected: _bottomPanelVisible &&
-                _currentBottomPanelChild == _emoticonGroupTabsWidget,
-            icon: const Icon(CommunityMaterialIcons.emoticon),
-            onPressed: () =>
-                _openPanel(_emoticonGroupTabsWidget, '表情'),
-          ),
-          IconButton(
-            tooltip: '格式',
-            isSelected: _bottomPanelVisible &&
-                _currentBottomPanelChild == _fontStyleWidget,
-            icon: const Icon(CommunityMaterialIcons.format_text),
-            onPressed: () => _openPanel(_fontStyleWidget, '格式'),
-          ),
-          IconButton(
-            tooltip: '附件',
-            isSelected: _bottomPanelVisible &&
-                _currentBottomPanelChild == _attachmentWidget,
-            icon: const Icon(CommunityMaterialIcons.attachment),
-            onPressed: () => _openPanel(_attachmentWidget, '附件'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 窄屏从底部弹出面板，宽屏以居中对话框展示
-  void _openPanel(Widget child, String title) {
-    if (_isWide) {
-      showDialog(
-        context: context,
-        builder: (_) => _PanelDialog(title: title, child: child),
-      );
-    } else {
-      _togglePanel(child);
-    }
-  }
-
-  void _hideBottomPanel() {
-    setState(() {
-      _bottomPanelVisible = false;
-    });
-  }
-
-  void _incognitoIconClicked() {
-    AppToast.info(_isAnonymous ? "关闭匿名" : "开启匿名");
-    setState(() {
-      _isAnonymous = !_isAnonymous;
-    });
-  }
-
-  void _togglePanel(Widget widget) {
-    if (_keyboardVisible) {
-      SystemChannels.textInput.invokeMethod('TextInput.hide');
-    }
-    setState(() {
-      if (_currentBottomPanelChild == widget && _bottomPanelVisible) {
-        _bottomPanelVisible = false;
-      } else {
-        _currentBottomPanelChild = widget;
-        _bottomPanelVisible = true;
-      }
-    });
-  }
-
-  void _inputCallback(startTag, endTag, hasEnd) {
-    final leftPartString =
-        _contentController.text.substring(0, _selectionList[0]);
-    final rightPartString = _contentController.text
-        .substring(_selectionList[1], _contentController.text.length);
-    if (_selectionList[0] == _selectionList[1]) {
-      // 未选中词语
-      _contentController.text =
-          "$leftPartString$startTag${hasEnd ? endTag : ""}$rightPartString";
-      int position = leftPartString.length + (startTag.length as int);
-      _contentController.selection = TextSelection(
-        extentOffset: position,
-        baseOffset: position,
-      );
-    } else {
-      // 选中了词语
-      final selectionString = _contentController.text
-          .substring(_selectionList[0], _selectionList[1]);
-      if (hasEnd) {
-        _contentController.text =
-            "$leftPartString$startTag$selectionString$endTag$rightPartString";
-        int position = leftPartString.length +
-            (startTag.length as int) +
-            selectionString.length +
-            (endTag.length as int);
-        _contentController.selection = TextSelection(
-          extentOffset: position,
-          baseOffset: position,
-        );
-      } else {
-        _contentController.text = "$leftPartString$startTag$rightPartString";
-        int position = leftPartString.length + (startTag.length as int);
-        _contentController.selection = TextSelection(
-          extentOffset: position,
-          baseOffset: position,
-        );
-      }
-    }
-  }
-
-  void _attachmentCallback(attachments, attachmentsCheck) async {
-    final tab = code_utils.urlEncode("\t");
-    _attachments.write(tab);
-    _attachments.write(code_utils.urlEncode(attachments));
-    _attachmentsCheck.write(tab);
-    _attachmentsCheck.write(code_utils.urlEncode(attachmentsCheck));
-  }
-
-  void _showTagDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return ForumTagDialog(
-          fid: widget.fid!,
-          tagList: _tagList,
-          onSelected: (tag) {
-            if (!_selectedTags.contains(tag)) {
-              setState(() {
-                _selectedTags.add(tag);
-              });
-            }
-            Routes.pop(context);
-          },
-          onLoadComplete: (list) => _tagList = list,
-        );
-      },
-    );
-  }
-
-  void _publish() async {
-    final content = _contentController.text;
-    final len = content.codeUnits.length;
-    if (len < 6 || len > 65530) {
-      AppToast.warning("内容过短或过长(6~65530 byte)");
-      return;
-    }
-    if (widget.tid != null) {
-      try {
-        String message = await Data().topicRepository.createReply(
-            widget.tid,
-            widget.fid,
-            _subjectController.text,
-            content,
-            _isAnonymous,
-            _attachments.toString(),
-            _attachmentsCheck.toString());
-        AppToast.success(message);
-        Routes.pop(context);
-      } catch (err) {
-        AppToast.error(err.toString());
-      }
-    } else if (widget.fid != null) {
-      try {
-        String message = await Data().topicRepository.createTopic(
-            widget.fid,
-            _subjectController.text,
-            content,
-            _isAnonymous,
-            _attachments.toString(),
-            _attachmentsCheck.toString());
-        AppToast.success(message);
-        Routes.pop(context);
-      } catch (err) {
-        AppToast.error(err.toString());
-      }
-    }
   }
 }
 
