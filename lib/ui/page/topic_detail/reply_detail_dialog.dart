@@ -214,7 +214,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
-      AppToast.error(err.toString());
+      AppToast.error(err);
     }
   }
 
@@ -234,7 +234,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
-      AppToast.error(err.toString());
+      AppToast.error(err);
     }
   }
 }

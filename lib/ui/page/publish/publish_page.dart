@@ -216,7 +216,7 @@ class PublishPage extends HookWidget {
         AppToast.success(message);
         if (context.mounted) Routes.pop(context);
       } catch (err) {
-        AppToast.error(err.toString());
+        AppToast.error(err);
       }
     }
 

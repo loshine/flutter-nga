@@ -54,7 +54,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
     try {
       AppToast.success(await notifier.deleteAllWords());
     } catch (e) {
-      AppToast.error(e.toString());
+      AppToast.error(e);
     }
   }
 
@@ -65,7 +65,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
     try {
       AppToast.success(await notifier.deleteWord(word));
     } catch (e) {
-      AppToast.error(e.toString());
+      AppToast.error(e);
     }
   }
 
@@ -76,7 +76,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
     try {
       AppToast.success(await notifier.addWord(word));
     } catch (e) {
-      AppToast.error(e.toString());
+      AppToast.error(e);
     }
   }
 

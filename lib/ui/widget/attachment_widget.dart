@@ -74,7 +74,7 @@ class _AttachmentState extends State<AttachmentWidget> {
               if (!mounted) return;
 
               debugPrint(err.toString());
-              AppToast.error(err.toString());
+              AppToast.error(err);
               setState(() => _imageFileList.remove(image));
             }
           },
