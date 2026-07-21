@@ -1,27 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../widget/block_mode_selection_dialog.dart';
 
-class BlocklistSettingsPage extends ConsumerStatefulWidget {
-  @override
-  ConsumerState<BlocklistSettingsPage> createState() =>
-      _BlocklistSettingsState();
-}
+class BlocklistSettingsPage extends HookConsumerWidget {
+  const BlocklistSettingsPage({super.key});
 
-class _BlocklistSettingsState extends ConsumerState<BlocklistSettingsPage> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    usePostFrameEffect(() {
       ref.read(blocklistSettingsProvider.notifier).load();
     });
-  }
 
-  @override
-  Widget build(BuildContext context) {
     final state = ref.watch(blocklistSettingsProvider);
     final notifier = ref.read(blocklistSettingsProvider.notifier);
 
@@ -50,7 +43,10 @@ class _BlocklistSettingsState extends ConsumerState<BlocklistSettingsPage> {
             title: Text("屏蔽模式"),
             subtitle: Text("选择被屏蔽的用户、词语在客户端内的展示方式"),
             trailing: Text("${state.blockMode.name}"),
-            onTap: _showBlockModeSelectionDialog,
+            onTap: () => showDialog(
+              context: context,
+              builder: (_) => BlockModeSelectionDialog(),
+            ),
           ),
           ListTile(
             title: Text("屏蔽用户"),
@@ -64,13 +60,6 @@ class _BlocklistSettingsState extends ConsumerState<BlocklistSettingsPage> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showBlockModeSelectionDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => BlockModeSelectionDialog(),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/data/entity/base_url_config.dart';
 import 'package:flutter_nga/providers/settings/base_url_settings_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -94,33 +95,37 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
     BuildContext context, {
     required String initialValue,
   }) async {
-    final controller = TextEditingController(text: initialValue);
     final value = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('自定义服务器地址'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'https://example.com/',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(controller.text),
-              child: const Text('确定'),
-            ),
-          ],
+        return HookBuilder(
+          builder: (context) {
+            final controller = useTextEditingController(text: initialValue);
+            return AlertDialog(
+              title: const Text('自定义服务器地址'),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'https://example.com/',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('取消'),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.of(dialogContext).pop(controller.text),
+                  child: const Text('确定'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
-    controller.dispose();
     final normalized = _normalizeBaseUrl(value ?? '');
     if (normalized == null) {
       if (context.mounted) {

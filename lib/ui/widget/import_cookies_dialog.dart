@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 
-class ImportCookiesDialog extends StatelessWidget {
+class ImportCookiesDialog extends HookWidget {
   final Function(String) cookiesCallback;
-  final _controller = TextEditingController();
 
-  ImportCookiesDialog({super.key, required this.cookiesCallback});
+  const ImportCookiesDialog({super.key, required this.cookiesCallback});
 
   @override
   Widget build(BuildContext context) {
+    final controller = useTextEditingController();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -32,7 +33,7 @@ class ImportCookiesDialog extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             TextField(
-              controller: _controller,
+              controller: controller,
               maxLines: null,
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
@@ -64,8 +65,8 @@ class ImportCookiesDialog extends StatelessWidget {
                 const SizedBox(width: 8),
                 FilledButton(
                   onPressed: () {
-                    if (_controller.text.isNotEmpty) {
-                      cookiesCallback(_controller.text);
+                    if (controller.text.isNotEmpty) {
+                      cookiesCallback(controller.text);
                     }
                     Routes.pop(context);
                   },
