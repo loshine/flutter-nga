@@ -3,66 +3,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'notification_item_widget.dart';
 
-class NotificationListPage extends ConsumerStatefulWidget {
+class NotificationListPage extends HookConsumerWidget {
   const NotificationListPage({super.key});
 
   @override
-  ConsumerState<NotificationListPage> createState() => _NotificationListState();
-}
-
-class _NotificationListState extends ConsumerState<NotificationListPage> {
-  final _refreshController = EasyRefreshController(
-    controlFinishRefresh: true,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _onRefresh(ref.read(notificationListProvider.notifier));
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refreshController = useEasyRefreshController();
     final state = ref.watch(notificationListProvider);
     final notifier = ref.read(notificationListProvider.notifier);
+
+    Future<void> onRefresh() async {
+      try {
+        await notifier.refresh();
+        if (!context.mounted) return;
+        refreshController.finishRefresh();
+      } catch (err) {
+        if (!context.mounted) return;
+        refreshController.finishRefresh(IndicatorResult.fail);
+        AppToast.error(err.toString());
+      }
+    }
+
+    usePostFrameEffect(onRefresh);
 
     return Scaffold(
       appBar: AppBar(title: const Text('提醒信息')),
       body: EasyRefresh(
-        controller: _refreshController,
-        onRefresh: () => _onRefresh(notifier),
+        controller: refreshController,
+        onRefresh: onRefresh,
         child: ListView.builder(
           itemCount: state.count,
           itemBuilder: (context, index) => _itemBuilder(context, index, state),
         ),
       ),
     );
-  }
-
-  Future<void> _onRefresh(NotificationListNotifier notifier) async {
-    try {
-      await notifier.refresh();
-      if (!mounted) return;
-      _refreshController.finishRefresh();
-    } catch (err) {
-      if (!mounted) return;
-      _refreshController.finishRefresh(IndicatorResult.fail);
-      AppToast.error(err.toString());
-    }
   }
 
   Widget _itemBuilder(

@@ -1,17 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/hot_replies_section.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class TopicSinglePage extends ConsumerStatefulWidget {
+class TopicSinglePage extends HookConsumerWidget {
   const TopicSinglePage({
     super.key,
     required this.tid,
@@ -28,95 +30,93 @@ class TopicSinglePage extends ConsumerStatefulWidget {
   final ValueChanged<int>? onJumpToFloor;
 
   @override
-  ConsumerState<TopicSinglePage> createState() => _TopicSingleState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refreshController = useEasyRefreshController();
+    final replyWidgetCache = useRef(<String, Widget>{});
+    final detailProviderKey = TopicDetailKey(tid: tid);
+    final providerKey = TopicSinglePageKey(
+      tid: tid,
+      page: page,
+      authorid: authorid,
+    );
+    final state = ref.watch(topicSinglePageProvider(providerKey));
 
-class _TopicSingleState extends ConsumerState<TopicSinglePage> {
-  final _refreshController = EasyRefreshController(
-    controlFinishRefresh: true,
-  );
+    Future<void> onRefresh() async {
+      replyWidgetCache.value.clear();
+      final notifier = ref.read(topicSinglePageProvider(providerKey).notifier);
+      try {
+        final next = await notifier.refresh();
+        if (!context.mounted) return;
 
-  TopicDetailKey get _detailProviderKey => TopicDetailKey(tid: widget.tid);
+        ref.read(topicDetailProvider(detailProviderKey).notifier).updateMetadata(
+              maxPage: next.maxPage,
+              maxFloor: next.maxFloor,
+              topic: next.topic,
+            );
+        refreshController.finishRefresh();
+      } catch (err) {
+        if (!context.mounted) return;
 
-  TopicSinglePageKey get _providerKey => TopicSinglePageKey(
-        tid: widget.tid,
-        page: widget.page,
-        authorid: widget.authorid,
-      );
+        refreshController.finishRefresh(IndicatorResult.fail);
+        final errorMsg = err is DioException
+            ? (err.message ?? err.toString())
+            : err.toString();
+        AppToast.error(errorMsg);
+      }
+    }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _onRefresh();
-    });
-  }
+    usePostFrameEffect(onRefresh);
 
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(topicSinglePageProvider(_providerKey));
     return EasyRefresh(
-      controller: _refreshController,
-      onRefresh: _onRefresh,
+      controller: refreshController,
+      onRefresh: onRefresh,
       child: ListView.builder(
         itemCount: state.replyList.length,
-        itemBuilder: (context, position) =>
-            _buildListItem(context, position, state),
+        itemBuilder: (context, position) => _buildListItem(
+          context,
+          position,
+          state,
+          replyWidgetCache.value,
+        ),
       ),
     );
   }
 
-  Future<void> _onRefresh() async {
-    map.clear();
-    final notifier = ref.read(topicSinglePageProvider(_providerKey).notifier);
-    try {
-      final state = await notifier.refresh();
-      if (!mounted) return;
-
-      ref.read(topicDetailProvider(_detailProviderKey).notifier).updateMetadata(
-            maxPage: state.maxPage,
-            maxFloor: state.maxFloor,
-            topic: state.topic,
-          );
-      _refreshController.finishRefresh();
-    } catch (err) {
-      if (!mounted) return;
-
-      _refreshController.finishRefresh(IndicatorResult.fail);
-      final errorMsg = err is DioException
-          ? (err.message ?? err.toString())
-          : err.toString();
-      AppToast.error(errorMsg);
-    }
-  }
-
-  final map = <String, Widget>{};
-
   Widget _buildListItem(
-      BuildContext context, int position, TopicSinglePageState state) {
+    BuildContext context,
+    int position,
+    TopicSinglePageState state,
+    Map<String, Widget> replyWidgetCache,
+  ) {
     final reply = state.replyList[position];
     final quoteBodyByPid = _quoteBodyCacheFor(state);
-    if (position == 0 && state.page == 1 && state.hotReplyList.isNotEmpty) {
+    if (position == 0 && page == 1 && state.hotReplyList.isNotEmpty) {
       // 楼主下方展示热点回复区块
       return Column(
         children: [
-          _buildReplyWidget(context, reply, state, quoteBodyByPid),
+          _buildReplyWidget(
+            context,
+            reply,
+            state,
+            quoteBodyByPid,
+            replyWidgetCache,
+          ),
           HotRepliesSection(
             replies: state.hotReplyList,
             userList: state.userList,
-            onJumpToFloor: widget.onJumpToFloor,
+            onJumpToFloor: onJumpToFloor,
             quoteBodyByPid: quoteBodyByPid,
           ),
         ],
       );
     } else {
-      return _buildReplyWidget(context, reply, state, quoteBodyByPid);
+      return _buildReplyWidget(
+        context,
+        reply,
+        state,
+        quoteBodyByPid,
+        replyWidgetCache,
+      );
     }
   }
 
@@ -133,11 +133,12 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
     Reply reply,
     TopicSinglePageState state,
     Map<int, String> quoteBodyByPid,
+    Map<String, Widget> replyWidgetCache,
   ) {
     final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}";
-    var widget = map[uniqueId];
-    if (widget != null) {
-      return widget;
+    var cached = replyWidgetCache[uniqueId];
+    if (cached != null) {
+      return cached;
     } else {
       User? user;
       for (var u in state.userList) {
@@ -191,7 +192,7 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
         commentSource = _findCommentByPid(state, reply.pid);
       }
 
-      widget = TopicReplyItemWidget(
+      cached = TopicReplyItemWidget(
         reply: reply,
         user: user,
         group: group,
@@ -200,8 +201,8 @@ class _TopicSingleState extends ConsumerState<TopicSinglePage> {
         quoteBodyByPid: quoteBodyByPid,
         commentSource: commentSource,
       );
-      map[uniqueId] = widget;
-      return widget;
+      replyWidgetCache[uniqueId] = cached;
+      return cached;
     }
   }
 
