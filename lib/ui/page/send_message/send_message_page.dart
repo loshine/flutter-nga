@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -24,6 +25,19 @@ class SendMessagePage extends HookConsumerWidget {
       notifier.clear();
     }, [mid]);
 
+    Future<void> send() async {
+      try {
+        await notifier.send(
+          mid,
+          subjectController.text,
+          contentController.text,
+        );
+        if (context.mounted) Routes.pop(context);
+      } catch (err) {
+        AppToast.error(err.toString());
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isNew ? '新建短消息' : '回复消息'),
@@ -31,115 +45,91 @@ class SendMessagePage extends HookConsumerWidget {
       body: Padding(
         padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Column(
-          children: _buildColumnChildren(
-            context,
-            state,
-            notifier,
-            subjectController,
-            contentController,
-          ),
+          children: [
+            TextField(
+              maxLines: 1,
+              controller: subjectController,
+              decoration: InputDecoration(
+                labelText: "标题(可选)",
+              ),
+              keyboardType: TextInputType.text,
+            ),
+            if (isNew) ...[
+              InkWell(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => ContactEditDialog(
+                      callback: (text) => notifier.add(text),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.supervisor_account_rounded,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: Text(
+                          '添加收信人(UID 或 用户名)',
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (state.contacts.isNotEmpty)
+                Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: state.contacts.map((contact) {
+                        return ActionChip(
+                          label: Text(
+                            contact,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: WidgetStatePropertyAll(
+                              Theme.of(context).primaryColor),
+                          onPressed: () => notifier.remove(contact),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+            ],
+            Expanded(
+              child: TextField(
+                maxLines: null,
+                controller: contentController,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  labelText: "消息内容",
+                ),
+                keyboardType: TextInputType.multiline,
+              ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: '发送',
-        onPressed: () => notifier
-            .send(
-              mid,
-              subjectController.text,
-              contentController.text,
-            )
-            .then(
-              (value) => Routes.pop(context),
-            ),
+        onPressed: send,
         child: Icon(Icons.send),
       ),
     );
-  }
-
-  void _showDialog(BuildContext context, SendMessageNotifier notifier) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return ContactEditDialog(
-          callback: (text) => notifier.add(text),
-        );
-      },
-    );
-  }
-
-  List<Widget> _buildColumnChildren(
-    BuildContext context,
-    SendMessageState state,
-    SendMessageNotifier notifier,
-    TextEditingController subjectController,
-    TextEditingController contentController,
-  ) {
-    final children = <Widget>[];
-    children.add(TextField(
-      maxLines: 1,
-      controller: subjectController,
-      decoration: InputDecoration(
-        labelText: "标题(可选)",
-      ),
-      keyboardType: TextInputType.text,
-    ));
-    if (isNew) {
-      children.add(InkWell(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            children: [
-              Icon(
-                Icons.supervisor_account_rounded,
-                color: Theme.of(context).iconTheme.color,
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Text(
-                  '添加收信人(UID 或 用户名)',
-                  style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color),
-                ),
-              ),
-            ],
-          ),
-        ),
-        onTap: () => _showDialog(context, notifier),
-      ));
-      if (state.contacts.isNotEmpty) {
-        children.add(Padding(
-          padding: EdgeInsets.only(bottom: 16),
-          child: SizedBox(
-            width: double.infinity,
-            child: Wrap(
-              spacing: 8.0, // gap between adjacent chips
-              runSpacing: 4.0, // gap between line
-              children: state.contacts.map((content) {
-                return ActionChip(
-                  label: Text(
-                    content,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  color: WidgetStatePropertyAll(Theme.of(context).primaryColor),
-                  onPressed: () => notifier.remove(content),
-                );
-              }).toList(),
-            ),
-          ),
-        ));
-      }
-    }
-    children.add(Expanded(
-      child: TextField(
-        maxLines: null,
-        controller: contentController,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          labelText: "消息内容",
-        ),
-        keyboardType: TextInputType.multiline,
-      ),
-    ));
-    return children;
   }
 }
