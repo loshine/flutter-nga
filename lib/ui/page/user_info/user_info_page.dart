@@ -8,9 +8,10 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class UserInfoPage extends ConsumerStatefulWidget {
+class UserInfoPage extends StatefulHookConsumerWidget {
   final String? username;
   final String? uid;
 
@@ -21,12 +22,11 @@ class UserInfoPage extends ConsumerStatefulWidget {
 }
 
 class _UserInfoPageState extends ConsumerState<UserInfoPage> {
-  final _actions = const ["发布的主题", "发布的回复"];
+  static const _actions = ["发布的主题", "发布的回复"];
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  Widget build(BuildContext context) {
+    usePostFrameEffect(() {
       final notifier = ref.read(userInfoProvider.notifier);
       if (widget.uid != null) {
         notifier.loadByUid(widget.uid).catchError((err) {
@@ -39,11 +39,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
           return ref.read(userInfoProvider);
         });
       }
-    });
-  }
+    }, [widget.uid, widget.username]);
 
-  @override
-  Widget build(BuildContext context) {
     final userInfo = ref.watch(userInfoProvider);
 
     return Scaffold(

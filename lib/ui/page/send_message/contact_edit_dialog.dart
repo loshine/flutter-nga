@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 typedef EditCallback = void Function(String text);
 
-class ContactEditDialog extends StatelessWidget {
+class ContactEditDialog extends HookWidget {
   final EditCallback? callback;
 
-  final _controller = TextEditingController();
-
-  ContactEditDialog({super.key, this.callback});
+  const ContactEditDialog({super.key, this.callback});
 
   @override
   Widget build(BuildContext context) {
+    final controller = useTextEditingController();
+
     return AlertDialog(
       title: Text("添加收信人"),
       content: TextField(
         maxLines: 1,
-        controller: _controller,
+        controller: controller,
         decoration: InputDecoration(
           labelText: "UID 或 用户名",
         ),
@@ -33,7 +34,7 @@ class ContactEditDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {
-            callback?.call(_controller.text);
+            callback?.call(controller.text);
             Routes.pop(context);
           },
           child: Text('确定'),

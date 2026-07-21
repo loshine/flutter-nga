@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/motion.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ForumFavouriteButtonWidget extends ConsumerStatefulWidget {
+class ForumFavouriteButtonWidget extends HookConsumerWidget {
   const ForumFavouriteButtonWidget(
       {super.key, this.name, required this.fid, this.type});
 
@@ -14,24 +15,11 @@ class ForumFavouriteButtonWidget extends ConsumerStatefulWidget {
   final int? type;
 
   @override
-  ConsumerState<ForumFavouriteButtonWidget> createState() =>
-      _ForumFavouriteButtonState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    usePostFrameEffect(() {
+      ref.read(favouriteForumProvider.notifier).load(fid, name ?? "");
+    }, [fid, name]);
 
-class _ForumFavouriteButtonState
-    extends ConsumerState<ForumFavouriteButtonWidget> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(favouriteForumProvider.notifier)
-          .load(widget.fid, widget.name ?? "");
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     final isFavourite = ref.watch(favouriteForumProvider);
     final notifier = ref.read(favouriteForumProvider.notifier);
 
@@ -50,7 +38,7 @@ class _ForumFavouriteButtonState
         ),
       ),
       onPressed: () {
-        notifier.toggle(widget.fid, widget.name, widget.type).then((_) {
+        notifier.toggle(fid, name, type).then((_) {
           ref.read(favouriteForumListProvider.notifier).refresh();
         }).catchError((err) {
           AppToast.error(err.message);

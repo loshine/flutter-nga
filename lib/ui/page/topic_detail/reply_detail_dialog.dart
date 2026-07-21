@@ -1,5 +1,4 @@
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
@@ -10,32 +9,23 @@ import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ReplyDetailDialog extends ConsumerStatefulWidget {
+class ReplyDetailDialog extends HookConsumerWidget {
   final int? pid;
 
   const ReplyDetailDialog({super.key, this.pid});
 
   @override
-  ConsumerState<ReplyDetailDialog> createState() => _ReplyDetailState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    usePostFrameEffect(() {
+      ref.read(topicReplyProvider(pid).notifier).load();
+    }, [pid]);
 
-class _ReplyDetailState extends ConsumerState<ReplyDetailDialog> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(topicReplyProvider(widget.pid).notifier).load();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(topicReplyProvider(widget.pid));
+    final state = ref.watch(topicReplyProvider(pid));
     // 避免 AlertDialog 对 flutter_html 内嵌引用卡执行固有宽度测量。
     final dialogWidth = (MediaQuery.sizeOf(context).width - 80).clamp(
       0.0,

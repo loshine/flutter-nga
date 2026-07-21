@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class FavouriteForumGroupPage extends ConsumerStatefulWidget {
+class FavouriteForumGroupPage extends StatefulHookConsumerWidget {
+  const FavouriteForumGroupPage({super.key});
+
   @override
   ConsumerState<FavouriteForumGroupPage> createState() =>
       _FavouriteForumGroupState();
 }
 
-class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
+class _FavouriteForumGroupState
+    extends ConsumerState<FavouriteForumGroupPage> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(favouriteForumListProvider.notifier).refresh();
-    });
+  void deactivate() {
+    ref.read(favouriteForumListProvider.notifier).refresh();
+    super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
+    usePostFrameEffect(() {
+      ref.read(favouriteForumListProvider.notifier).refresh();
+    });
+
     final forums = ref.watch(favouriteForumListProvider);
     final notifier = ref.read(favouriteForumListProvider.notifier);
     final size = MediaQuery.of(context).size;
@@ -40,12 +46,6 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
         onLongPress: () => _showDeleteDialog(notifier, forums[index].fid),
       ),
     );
-  }
-
-  @override
-  void deactivate() {
-    ref.read(favouriteForumListProvider.notifier).refresh();
-    super.deactivate();
   }
 
   void _showDeleteDialog(FavouriteForumListNotifier notifier, int fid) {
