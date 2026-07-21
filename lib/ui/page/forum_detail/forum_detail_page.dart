@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
@@ -9,7 +8,6 @@ import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
@@ -29,7 +27,10 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
     with SingleTickerProviderStateMixin {
   bool _fabVisible = true;
   bool _mainPage = true;
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+    controlFinishLoad: true,
+  );
 
   final List<Tab> _tabs = [];
   TabController? _tabController;
@@ -68,15 +69,25 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
         controller: _tabController,
         children: [
           KeepAliveTabView(
-            child: SmartRefresher(
-              onLoading: _onLoading,
-              controller: _refreshController,
-              enablePullUp: state.enablePullUp,
-              onRefresh: _onRefresh,
-              child: ListView.builder(
-                itemCount: state.list.length,
-                itemBuilder: (context, index) => TopicListItemWidget(
-                  topic: state.list[index],
+            child: NotificationListener<UserScrollNotification>(
+              onNotification: (notification) {
+                final direction = notification.direction;
+                if (direction == ScrollDirection.reverse) {
+                  if (_fabVisible) setState(() => _fabVisible = false);
+                } else if (direction == ScrollDirection.forward) {
+                  if (!_fabVisible) setState(() => _fabVisible = true);
+                }
+                return false;
+              },
+              child: EasyRefresh(
+                controller: _refreshController,
+                onRefresh: _onRefresh,
+                onLoad: state.enablePullUp ? _onLoading : null,
+                child: ListView.builder(
+                  itemCount: state.list.length,
+                  itemBuilder: (context, index) => TopicListItemWidget(
+                    topic: state.list[index],
+                  ),
                 ),
               ),
             ),
@@ -102,15 +113,14 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
     _tabs.add(Tab(text: '最新'));
     _tabs.add(Tab(text: '精华'));
     _tabs.add(Tab(text: '子版'));
     _tabController = TabController(vsync: this, length: _tabs.length);
     _tabController!.addListener(
         () => setState(() => _mainPage = _tabController!.index == 0));
-    Future.delayed(const Duration()).then((_) {
-      _refreshController.position?.addListener(_scrollListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onRefresh();
     });
   }
 
@@ -121,41 +131,33 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
     super.dispose();
   }
 
-  void _onRefresh() {
+  Future<void> _onRefresh() async {
     final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
-    notifier
-        .refresh(false, widget.type)
-        .then((value) =>
-            _refreshController.refreshCompleted(resetFooterState: true))
-        .catchError((err) {
-      _refreshController.refreshFailed();
-      AppToast.error(err.message);
-      return null;
-    });
-  }
-
-  void _onLoading() async {
-    final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
-    notifier.loadMore(false, widget.type).then((state) {
-      if (state.page + 1 < state.maxPage) {
-        _refreshController.loadComplete();
-      } else {
-        _refreshController.loadNoData();
-      }
-    }).catchError((_) {
-      _refreshController.loadFailed();
-      return null;
-    });
-  }
-
-  void _scrollListener() {
-    if (_refreshController.position?.userScrollDirection ==
-        ScrollDirection.reverse) {
-      if (_fabVisible) setState(() => _fabVisible = false);
+    try {
+      await notifier.refresh(false, widget.type);
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+      _refreshController.resetFooter();
+    } catch (err) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
+      AppToast.error((err as dynamic).message ?? err.toString());
     }
-    if (_refreshController.position?.userScrollDirection ==
-        ScrollDirection.forward) {
-      if (!_fabVisible) setState(() => _fabVisible = true);
+  }
+
+  Future<void> _onLoading() async {
+    final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
+    try {
+      final state = await notifier.loadMore(false, widget.type);
+      if (!mounted) return;
+      if (state.page + 1 < state.maxPage) {
+        _refreshController.finishLoad();
+      } else {
+        _refreshController.finishLoad(IndicatorResult.noMore);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      _refreshController.finishLoad(IndicatorResult.fail);
     }
   }
 }
