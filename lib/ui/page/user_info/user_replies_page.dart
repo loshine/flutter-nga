@@ -1,9 +1,9 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/user/user_replies_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class UserRepliesPage extends ConsumerStatefulWidget {
   final int uid;
@@ -20,12 +20,19 @@ class UserRepliesPage extends ConsumerStatefulWidget {
 }
 
 class _UserRepliesPageState extends ConsumerState<UserRepliesPage> {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+    controlFinishLoad: true,
+  );
 
   @override
   void initState() {
     super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onRefresh(ref.read(userRepliesProvider.notifier));
+      }
+    });
   }
 
   @override
@@ -41,11 +48,10 @@ class _UserRepliesPageState extends ConsumerState<UserRepliesPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text("${widget.username}发布的回复")),
-      body: SmartRefresher(
-        onLoading: () => _onLoading(notifier),
+      body: EasyRefresh(
         controller: _refreshController,
-        enablePullUp: state.enablePullUp,
         onRefresh: () => _onRefresh(notifier),
+        onLoad: state.enablePullUp ? () => _onLoading(notifier) : null,
         child: ListView.builder(
           itemCount: state.list.length,
           itemBuilder: (context, index) =>
@@ -55,26 +61,33 @@ class _UserRepliesPageState extends ConsumerState<UserRepliesPage> {
     );
   }
 
-  void _onRefresh(UserRepliesNotifier notifier) {
-    notifier.refresh(widget.uid).catchError((err) {
-      _refreshController.refreshFailed();
-      AppToast.error(err.message);
-      return ref.read(userRepliesProvider);
-    }).whenComplete(
-        () => _refreshController.refreshCompleted(resetFooterState: true));
+  Future<void> _onRefresh(UserRepliesNotifier notifier) async {
+    try {
+      await notifier.refresh(widget.uid);
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+      _refreshController.resetFooter();
+    } catch (err) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
+      AppToast.error((err as dynamic).message ?? err.toString());
+    }
   }
 
-  void _onLoading(UserRepliesNotifier notifier) async {
-    notifier.loadMore(widget.uid).then((state) {
+  Future<void> _onLoading(UserRepliesNotifier notifier) async {
+    try {
+      final state = await notifier.loadMore(widget.uid);
+      if (!mounted) return;
       if (state.list.length == state.page * state.size) {
-        _refreshController.loadComplete();
+        _refreshController.finishLoad();
       } else {
-        _refreshController.loadNoData();
+        _refreshController.finishLoad(IndicatorResult.noMore);
       }
-    }).catchError((err) {
-      AppToast.error(err.message);
-      debugPrintStack(stackTrace: err.stackTrace);
-      _refreshController.loadFailed();
-    });
+    } catch (err) {
+      if (!mounted) return;
+      AppToast.error((err as dynamic).message ?? err.toString());
+      debugPrintStack(stackTrace: (err as dynamic).stackTrace);
+      _refreshController.finishLoad(IndicatorResult.fail);
+    }
   }
 }
