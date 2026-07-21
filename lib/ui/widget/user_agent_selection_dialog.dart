@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/data/entity/user_agent_config.dart';
 import 'package:flutter_nga/providers/settings/user_agent_settings_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -108,34 +109,38 @@ class UserAgentSelectionDialog extends ConsumerWidget {
     BuildContext context, {
     required String initialValue,
   }) async {
-    final controller = TextEditingController(text: initialValue);
     final value = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('自定义 User-Agent'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            maxLines: 2,
-            decoration: const InputDecoration(
-              hintText: 'Mozilla/5.0 ...',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(controller.text),
-              child: const Text('确定'),
-            ),
-          ],
+        return HookBuilder(
+          builder: (context) {
+            final controller = useTextEditingController(text: initialValue);
+            return AlertDialog(
+              title: const Text('自定义 User-Agent'),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  hintText: 'Mozilla/5.0 ...',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('取消'),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.of(dialogContext).pop(controller.text),
+                  child: const Text('确定'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
-    controller.dispose();
     final trimmed = (value ?? '').trim();
     if (trimmed.isEmpty) {
       if (context.mounted) {

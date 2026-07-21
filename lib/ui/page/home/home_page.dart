@@ -6,6 +6,7 @@ import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/mine/mine_page.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
 import 'package:flutter_nga/utils/motion.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -14,7 +15,7 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    usePostFrameEffect(() {
       ref.read(blocklistSettingsProvider.notifier).init();
       ref.read(blocklistSettingsProvider.notifier).loopSyncBlockList();
       ref.read(interfaceSettingsProvider.notifier).init();
