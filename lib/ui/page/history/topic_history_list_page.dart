@@ -4,44 +4,50 @@ import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_history_list_item_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class TopicHistoryListPage extends ConsumerStatefulWidget {
+class TopicHistoryListPage extends HookConsumerWidget {
   const TopicHistoryListPage({super.key});
 
   @override
-  ConsumerState<TopicHistoryListPage> createState() =>
-      TopicHistoryListPageState();
-}
-
-class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
-  final _refreshController = EasyRefreshController(
-    controlFinishRefresh: true,
-    controlFinishLoad: true,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _onRefresh(ref.read(topicHistoryListProvider.notifier));
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final historyState = ref.watch(topicHistoryListProvider);
     final notifier = ref.read(topicHistoryListProvider.notifier);
+
+    Future<void> onRefresh() async {
+      try {
+        await notifier.refresh();
+        if (!context.mounted) return;
+        refreshController.finishRefresh();
+        refreshController.resetFooter();
+      } catch (err) {
+        if (!context.mounted) return;
+        refreshController.finishRefresh(IndicatorResult.fail);
+        AppToast.error((err as dynamic).message ?? err.toString());
+      }
+    }
+
+    Future<void> onLoading() async {
+      try {
+        final next = await notifier.loadMore();
+        if (!context.mounted) return;
+        if (next.enablePullUp) {
+          refreshController.finishLoad();
+        } else {
+          refreshController.finishLoad(IndicatorResult.noMore);
+        }
+      } catch (err) {
+        if (!context.mounted) return;
+        refreshController.finishLoad(IndicatorResult.fail);
+        AppToast.error((err as dynamic).message ?? err.toString());
+      }
+    }
+
+    usePostFrameEffect(onRefresh);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,53 +56,28 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: '清空浏览历史',
-            onPressed: showCleanDialog,
+            onPressed: () => _showCleanDialog(context, notifier, refreshController),
           ),
         ],
       ),
       body: EasyRefresh(
-        controller: _refreshController,
-        onRefresh: () => _onRefresh(notifier),
-        onLoad: historyState.enablePullUp ? () => _onLoading(notifier) : null,
-        child: _buildChild(historyState, notifier),
+        controller: refreshController,
+        onRefresh: onRefresh,
+        onLoad: historyState.enablePullUp ? onLoading : null,
+        child: _buildChild(context, historyState, notifier),
       ),
     );
   }
 
-  Future<void> _onRefresh(TopicHistoryListNotifier notifier) async {
-    try {
-      await notifier.refresh();
-      if (!mounted) return;
-      _refreshController.finishRefresh();
-      _refreshController.resetFooter();
-    } catch (err) {
-      if (!mounted) return;
-      _refreshController.finishRefresh(IndicatorResult.fail);
-      AppToast.error((err as dynamic).message ?? err.toString());
-    }
-  }
-
-  Future<void> _onLoading(TopicHistoryListNotifier notifier) async {
-    try {
-      final state = await notifier.loadMore();
-      if (!mounted) return;
-      if (state.enablePullUp) {
-        _refreshController.finishLoad();
-      } else {
-        _refreshController.finishLoad(IndicatorResult.noMore);
-      }
-    } catch (err) {
-      if (!mounted) return;
-      _refreshController.finishLoad(IndicatorResult.fail);
-      AppToast.error((err as dynamic).message ?? err.toString());
-    }
-  }
-
-  Widget _buildListItem(dynamic itemData, TopicHistoryListNotifier notifier) {
+  Widget _buildListItem(
+    BuildContext context,
+    dynamic itemData,
+    TopicHistoryListNotifier notifier,
+  ) {
     if (itemData is TopicHistory) {
       return TopicHistoryListItemWidget(
         topicHistory: itemData,
-        onLongPress: () => _showDeleteDialog(notifier, itemData.id!),
+        onLongPress: () => _showDeleteDialog(context, notifier, itemData.id!),
       );
     } else {
       return Padding(
@@ -109,8 +90,11 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
     }
   }
 
-  void showCleanDialog() {
-    final notifier = ref.read(topicHistoryListProvider.notifier);
+  void _showCleanDialog(
+    BuildContext context,
+    TopicHistoryListNotifier notifier,
+    EasyRefreshController refreshController,
+  ) {
     showDialog(
         context: context,
         builder: (_) {
@@ -125,7 +109,12 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
               TextButton(
                 onPressed: () {
                   Routes.pop(context);
-                  _clean(notifier);
+                  notifier.clean().catchError((err) {
+                    AppToast.error(err.message);
+                    return 0;
+                  }).whenComplete(() {
+                    refreshController.callRefresh();
+                  });
                 },
                 child: Text("确认"),
               ),
@@ -134,16 +123,11 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
         });
   }
 
-  void _clean(TopicHistoryListNotifier notifier) {
-    notifier.clean().catchError((err) {
-      AppToast.error(err.message);
-      return 0;
-    }).whenComplete(() {
-      _refreshController.callRefresh();
-    });
-  }
-
-  void _showDeleteDialog(TopicHistoryListNotifier notifier, int id) {
+  void _showDeleteDialog(
+    BuildContext context,
+    TopicHistoryListNotifier notifier,
+    int id,
+  ) {
     showDialog(
         context: context,
         builder: (_) {
@@ -168,12 +152,15 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
   }
 
   Widget _buildChild(
-      TopicHistoryListState historyState, TopicHistoryListNotifier notifier) {
+    BuildContext context,
+    TopicHistoryListState historyState,
+    TopicHistoryListNotifier notifier,
+  ) {
     if (historyState.list.isNotEmpty) {
       return ListView.builder(
         itemCount: historyState.list.length,
         itemBuilder: (_, position) =>
-            _buildListItem(historyState.list[position], notifier),
+            _buildListItem(context, historyState.list[position], notifier),
       );
     } else {
       return ListView(

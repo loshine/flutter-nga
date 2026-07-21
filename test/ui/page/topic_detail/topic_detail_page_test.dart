@@ -97,9 +97,9 @@ void main() {
         topic: Topic(tid: 2, subject: '接口标题'),
       ),
     );
-    // refresh() completes → updateMetadata → AppBar rebuild.
-    // EasyRefresh may also schedule zero-duration timers during layout.
-    await tester.pumpAndSettle();
+    // Flush refresh Future, then AppBar rebuild from updateMetadata.
+    await tester.pump();
+    await tester.pump();
 
     expect(find.text('接口标题'), findsOneWidget);
     expect(find.text('1/4'), findsOneWidget);
