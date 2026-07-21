@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_nga/utils/error_utils.dart';
 import 'package:toastification/toastification.dart';
 
 abstract final class AppToast {
@@ -7,8 +8,12 @@ abstract final class AppToast {
     _show(message, ToastificationType.success);
   }
 
+  /// Accepts either a display string or an arbitrary error object.
+  ///
+  /// Error objects are normalized via [errorMessage] so Dio/server text
+  /// is preferred over noisy [Object.toString] dumps.
   static void error(Object? message) {
-    _show(message ?? '操作失败', ToastificationType.error);
+    _show(errorMessage(message), ToastificationType.error);
   }
 
   static void warning(Object? message) {

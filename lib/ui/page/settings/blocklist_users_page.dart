@@ -54,7 +54,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
     try {
       AppToast.success(await notifier.deleteAllUsers());
     } catch (e) {
-      AppToast.error(e.toString());
+      AppToast.error(e);
     }
   }
 
@@ -65,7 +65,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
     try {
       AppToast.success(await notifier.deleteUser(user));
     } catch (e) {
-      AppToast.error(e.toString());
+      AppToast.error(e);
     }
   }
 
@@ -76,7 +76,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
     try {
       AppToast.success(await notifier.addUser(user));
     } catch (e) {
-      AppToast.error(e.toString());
+      AppToast.error(e);
     }
   }
 

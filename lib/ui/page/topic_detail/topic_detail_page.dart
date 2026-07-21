@@ -199,7 +199,7 @@ class TopicDetailPage extends HookConsumerWidget {
                 notifier.addFavourite(tid).then((message) {
                   AppToast.success(message.toString());
                 }).catchError((e) {
-                  AppToast.error(e.message);
+                  AppToast.error(e);
                 });
               },
             ),

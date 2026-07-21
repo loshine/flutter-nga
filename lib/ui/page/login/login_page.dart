@@ -69,9 +69,9 @@ class _LoginPageState extends State<LoginPage> {
     Data().userRepository.saveLoginCookies(cookies).whenComplete(() {
       AppToast.success("登录成功");
       Routes.pop(context);
-    }).catchError((e) {
-      debugPrintStack(stackTrace: e.stackTrace);
-      AppToast.error(e.message);
+    }).catchError((e, stack) {
+      debugPrintStack(stackTrace: stack);
+      AppToast.error(e);
       throw e;
     });
   }

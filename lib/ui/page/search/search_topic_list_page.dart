@@ -34,7 +34,7 @@ class SearchTopicListPage extends HookConsumerWidget {
         refreshController.resetFooter();
       } catch (e) {
         if (!context.mounted) return;
-        AppToast.error((e as dynamic).message ?? e.toString());
+        AppToast.error(e);
         refreshController.finishRefresh(IndicatorResult.fail);
       }
     }
@@ -50,7 +50,7 @@ class SearchTopicListPage extends HookConsumerWidget {
         }
       } catch (e) {
         if (!context.mounted) return;
-        AppToast.error((e as dynamic).message ?? e.toString());
+        AppToast.error(e);
         refreshController.finishLoad(IndicatorResult.fail);
       }
     }

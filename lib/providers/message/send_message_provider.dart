@@ -1,7 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SendMessageState {
   final List<String> contacts;
@@ -44,11 +43,7 @@ class SendMessageNotifier extends Notifier<SendMessageState> {
       return await repository.sendMessage(
           mid, state.contacts, subject, content);
     } catch (err) {
-      if (err is DioException) {
-        AppToast.error(err.message ?? '');
-      } else {
-        AppToast.error(err.toString());
-      }
+      AppToast.error(err);
     }
   }
 }
