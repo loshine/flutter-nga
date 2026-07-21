@@ -1,10 +1,10 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/search/search_topic_list_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SearchTopicListPage extends ConsumerStatefulWidget {
   const SearchTopicListPage(
@@ -23,7 +23,26 @@ class SearchTopicListPage extends ConsumerStatefulWidget {
 }
 
 class _SearchTopicListSate extends ConsumerState<SearchTopicListPage> {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+    controlFinishLoad: true,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onRefresh(ref.read(searchTopicListProvider.notifier));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +54,20 @@ class _SearchTopicListSate extends ConsumerState<SearchTopicListPage> {
       appBar: AppBar(
         title: Text('搜索: ${widget.keyword}'),
       ),
-      body: SmartRefresher(
-        onRefresh: () => _onRefresh(notifier),
-        onLoading: () => _onLoadMore(notifier),
-        enablePullUp: state.enablePullUp,
+      body: EasyRefresh(
         controller: _refreshController,
+        onRefresh: () => _onRefresh(notifier),
+        onLoad: state.enablePullUp ? () => _onLoadMore(notifier) : null,
         child: state.list.isEmpty
-            ? _buildEmptyState(colorScheme)
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.6,
+                    child: _buildEmptyState(colorScheme),
+                  ),
+                ],
+              )
             : ListView.separated(
                 padding: const EdgeInsets.symmetric(
                   vertical: Dimen.spacingS,
@@ -79,39 +105,33 @@ class _SearchTopicListSate extends ConsumerState<SearchTopicListPage> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _refreshController = RefreshController(
-      initialRefresh: true,
-    );
+  Future<void> _onRefresh(SearchTopicListNotifier notifier) async {
+    try {
+      await notifier.refresh(widget.keyword, widget.fid, widget.content);
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+      _refreshController.resetFooter();
+    } catch (e) {
+      if (!mounted) return;
+      AppToast.error((e as dynamic).message ?? e.toString());
+      _refreshController.finishRefresh(IndicatorResult.fail);
+    }
   }
 
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  void _onRefresh(SearchTopicListNotifier notifier) {
-    notifier
-        .refresh(widget.keyword, widget.fid, widget.content)
-        .whenComplete(() => _refreshController.refreshCompleted())
-        .catchError((e) {
-      AppToast.error(e.message);
-      _refreshController.refreshFailed();
-      return ref.read(searchTopicListProvider);
-    });
-  }
-
-  void _onLoadMore(SearchTopicListNotifier notifier) {
-    notifier
-        .loadMore(widget.keyword, widget.fid, widget.content)
-        .whenComplete(() => _refreshController.loadComplete())
-        .catchError((e) {
-      AppToast.error(e.message);
-      _refreshController.loadFailed();
-      return ref.read(searchTopicListProvider);
-    });
+  Future<void> _onLoadMore(SearchTopicListNotifier notifier) async {
+    try {
+      final state =
+          await notifier.loadMore(widget.keyword, widget.fid, widget.content);
+      if (!mounted) return;
+      if (state.enablePullUp) {
+        _refreshController.finishLoad();
+      } else {
+        _refreshController.finishLoad(IndicatorResult.noMore);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      AppToast.error((e as dynamic).message ?? e.toString());
+      _refreshController.finishLoad(IndicatorResult.fail);
+    }
   }
 }
