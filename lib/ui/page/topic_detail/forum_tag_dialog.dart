@@ -32,7 +32,7 @@ class ForumTagDialog extends HookConsumerWidget {
         notifier.load(fid).then((value) {
           onLoadComplete?.call(value);
         }).catchError((err) {
-          AppToast.error(err.message);
+          AppToast.error(err);
         });
       }
     }, [fid]);
