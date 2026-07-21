@@ -1,3 +1,4 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
@@ -6,7 +7,6 @@ import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TopicHistoryListPage extends ConsumerStatefulWidget {
   const TopicHistoryListPage({super.key});
@@ -17,7 +17,26 @@ class TopicHistoryListPage extends ConsumerStatefulWidget {
 }
 
 class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
-  late RefreshController _refreshController;
+  final _refreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+    controlFinishLoad: true,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onRefresh(ref.read(topicHistoryListProvider.notifier));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,43 +54,42 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
           ),
         ],
       ),
-      body: SmartRefresher(
-        onRefresh: () => _onRefresh(notifier),
-        enablePullUp: historyState.enablePullUp,
+      body: EasyRefresh(
         controller: _refreshController,
-        onLoading: () => _onLoading(notifier),
+        onRefresh: () => _onRefresh(notifier),
+        onLoad: historyState.enablePullUp ? () => _onLoading(notifier) : null,
         child: _buildChild(historyState, notifier),
       ),
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _refreshController = RefreshController(initialRefresh: true);
+  Future<void> _onRefresh(TopicHistoryListNotifier notifier) async {
+    try {
+      await notifier.refresh();
+      if (!mounted) return;
+      _refreshController.finishRefresh();
+      _refreshController.resetFooter();
+    } catch (err) {
+      if (!mounted) return;
+      _refreshController.finishRefresh(IndicatorResult.fail);
+      AppToast.error((err as dynamic).message ?? err.toString());
+    }
   }
 
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  void _onRefresh(TopicHistoryListNotifier notifier) {
-    notifier.refresh().catchError((err) {
-      _refreshController.loadFailed();
-      AppToast.error(err.message);
-      return ref.read(topicHistoryListProvider);
-    }).whenComplete(
-        () => _refreshController.refreshCompleted(resetFooterState: true));
-  }
-
-  void _onLoading(TopicHistoryListNotifier notifier) {
-    notifier.loadMore().catchError((err) {
-      _refreshController.loadFailed();
-      AppToast.error(err.message);
-      return ref.read(topicHistoryListProvider);
-    }).whenComplete(() => _refreshController.loadComplete());
+  Future<void> _onLoading(TopicHistoryListNotifier notifier) async {
+    try {
+      final state = await notifier.loadMore();
+      if (!mounted) return;
+      if (state.enablePullUp) {
+        _refreshController.finishLoad();
+      } else {
+        _refreshController.finishLoad(IndicatorResult.noMore);
+      }
+    } catch (err) {
+      if (!mounted) return;
+      _refreshController.finishLoad(IndicatorResult.fail);
+      AppToast.error((err as dynamic).message ?? err.toString());
+    }
   }
 
   Widget _buildListItem(dynamic itemData, TopicHistoryListNotifier notifier) {
@@ -121,7 +139,7 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
       AppToast.error(err.message);
       return 0;
     }).whenComplete(() {
-      _refreshController.requestRefresh();
+      _refreshController.callRefresh();
     });
   }
 
@@ -158,14 +176,22 @@ class TopicHistoryListPageState extends ConsumerState<TopicHistoryListPage> {
             _buildListItem(historyState.list[position], notifier),
       );
     } else {
-      return Center(
-        child: Text(
-          "暂无浏览历史",
-          style: TextStyle(
-            fontSize: Dimen.titleMedium,
-            color: Theme.of(context).textTheme.bodyMedium?.color,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.sizeOf(context).height * 0.6,
+            child: Center(
+              child: Text(
+                "暂无浏览历史",
+                style: TextStyle(
+                  fontSize: Dimen.titleMedium,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
   }
