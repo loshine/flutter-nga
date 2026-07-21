@@ -5,14 +5,15 @@ import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
 
-class ForumDetailPage extends ConsumerStatefulWidget {
+class ForumDetailPage extends StatefulHookConsumerWidget {
   const ForumDetailPage({required this.fid, this.name, this.type, super.key});
 
   final int fid;
@@ -27,17 +28,63 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
     with SingleTickerProviderStateMixin {
   bool _fabVisible = true;
   bool _mainPage = true;
-  final _refreshController = EasyRefreshController(
-    controlFinishRefresh: true,
-    controlFinishLoad: true,
-  );
 
   final List<Tab> _tabs = [];
   TabController? _tabController;
 
   @override
+  void initState() {
+    super.initState();
+    _tabs.add(Tab(text: '最新'));
+    _tabs.add(Tab(text: '精华'));
+    _tabs.add(Tab(text: '子版'));
+    _tabController = TabController(vsync: this, length: _tabs.length);
+    _tabController!.addListener(
+        () => setState(() => _mainPage = _tabController!.index == 0));
+  }
+
+  @override
+  void dispose() {
+    _tabController!.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final state = ref.watch(forumDetailProvider(widget.fid));
+    final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
+
+    Future<void> onRefresh() async {
+      try {
+        await notifier.refresh(false, widget.type);
+        if (!mounted) return;
+        refreshController.finishRefresh();
+        refreshController.resetFooter();
+      } catch (err) {
+        if (!mounted) return;
+        refreshController.finishRefresh(IndicatorResult.fail);
+        AppToast.error((err as dynamic).message ?? err.toString());
+      }
+    }
+
+    Future<void> onLoading() async {
+      try {
+        final next = await notifier.loadMore(false, widget.type);
+        if (!mounted) return;
+        if (next.page + 1 < next.maxPage) {
+          refreshController.finishLoad();
+        } else {
+          refreshController.finishLoad(IndicatorResult.noMore);
+        }
+      } catch (_) {
+        if (!mounted) return;
+        refreshController.finishLoad(IndicatorResult.fail);
+      }
+    }
+
+    usePostFrameEffect(onRefresh);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.name!),
@@ -80,9 +127,9 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
                 return false;
               },
               child: EasyRefresh(
-                controller: _refreshController,
-                onRefresh: _onRefresh,
-                onLoad: state.enablePullUp ? _onLoading : null,
+                controller: refreshController,
+                onRefresh: onRefresh,
+                onLoad: state.enablePullUp ? onLoading : null,
                 child: ListView.builder(
                   itemCount: state.list.length,
                   itemBuilder: (context, index) => TopicListItemWidget(
@@ -108,56 +155,5 @@ class _ForumDetailState extends ConsumerState<ForumDetailPage>
             )
           : null,
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _tabs.add(Tab(text: '最新'));
-    _tabs.add(Tab(text: '精华'));
-    _tabs.add(Tab(text: '子版'));
-    _tabController = TabController(vsync: this, length: _tabs.length);
-    _tabController!.addListener(
-        () => setState(() => _mainPage = _tabController!.index == 0));
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _onRefresh();
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    _tabController!.dispose();
-    super.dispose();
-  }
-
-  Future<void> _onRefresh() async {
-    final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
-    try {
-      await notifier.refresh(false, widget.type);
-      if (!mounted) return;
-      _refreshController.finishRefresh();
-      _refreshController.resetFooter();
-    } catch (err) {
-      if (!mounted) return;
-      _refreshController.finishRefresh(IndicatorResult.fail);
-      AppToast.error((err as dynamic).message ?? err.toString());
-    }
-  }
-
-  Future<void> _onLoading() async {
-    final notifier = ref.read(forumDetailProvider(widget.fid).notifier);
-    try {
-      final state = await notifier.loadMore(false, widget.type);
-      if (!mounted) return;
-      if (state.page + 1 < state.maxPage) {
-        _refreshController.finishLoad();
-      } else {
-        _refreshController.finishLoad(IndicatorResult.noMore);
-      }
-    } catch (_) {
-      if (!mounted) return;
-      _refreshController.finishLoad(IndicatorResult.fail);
-    }
   }
 }

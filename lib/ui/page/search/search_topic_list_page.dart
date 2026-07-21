@@ -4,9 +4,10 @@ import 'package:flutter_nga/providers/search/search_topic_list_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SearchTopicListPage extends ConsumerStatefulWidget {
+class SearchTopicListPage extends HookConsumerWidget {
   const SearchTopicListPage(
     this.keyword, {
     super.key,
@@ -19,52 +20,58 @@ class SearchTopicListPage extends ConsumerStatefulWidget {
   final bool content;
 
   @override
-  ConsumerState<SearchTopicListPage> createState() => _SearchTopicListSate();
-}
-
-class _SearchTopicListSate extends ConsumerState<SearchTopicListPage> {
-  final _refreshController = EasyRefreshController(
-    controlFinishRefresh: true,
-    controlFinishLoad: true,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _onRefresh(ref.read(searchTopicListProvider.notifier));
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final state = ref.watch(searchTopicListProvider);
     final notifier = ref.read(searchTopicListProvider.notifier);
     final colorScheme = Theme.of(context).colorScheme;
 
+    Future<void> onRefresh() async {
+      try {
+        await notifier.refresh(keyword, fid, content);
+        if (!context.mounted) return;
+        refreshController.finishRefresh();
+        refreshController.resetFooter();
+      } catch (e) {
+        if (!context.mounted) return;
+        AppToast.error((e as dynamic).message ?? e.toString());
+        refreshController.finishRefresh(IndicatorResult.fail);
+      }
+    }
+
+    Future<void> onLoadMore() async {
+      try {
+        final next = await notifier.loadMore(keyword, fid, content);
+        if (!context.mounted) return;
+        if (next.enablePullUp) {
+          refreshController.finishLoad();
+        } else {
+          refreshController.finishLoad(IndicatorResult.noMore);
+        }
+      } catch (e) {
+        if (!context.mounted) return;
+        AppToast.error((e as dynamic).message ?? e.toString());
+        refreshController.finishLoad(IndicatorResult.fail);
+      }
+    }
+
+    usePostFrameEffect(onRefresh);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('搜索: ${widget.keyword}'),
+        title: Text('搜索: $keyword'),
       ),
       body: EasyRefresh(
-        controller: _refreshController,
-        onRefresh: () => _onRefresh(notifier),
-        onLoad: state.enablePullUp ? () => _onLoadMore(notifier) : null,
+        controller: refreshController,
+        onRefresh: onRefresh,
+        onLoad: state.enablePullUp ? onLoadMore : null,
         child: state.list.isEmpty
             ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   SizedBox(
                     height: MediaQuery.sizeOf(context).height * 0.6,
-                    child: _buildEmptyState(colorScheme),
+                    child: _buildEmptyState(context, colorScheme),
                   ),
                 ],
               )
@@ -83,7 +90,7 @@ class _SearchTopicListSate extends ConsumerState<SearchTopicListPage> {
     );
   }
 
-  Widget _buildEmptyState(ColorScheme colorScheme) {
+  Widget _buildEmptyState(BuildContext context, ColorScheme colorScheme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -103,35 +110,5 @@ class _SearchTopicListSate extends ConsumerState<SearchTopicListPage> {
         ],
       ),
     );
-  }
-
-  Future<void> _onRefresh(SearchTopicListNotifier notifier) async {
-    try {
-      await notifier.refresh(widget.keyword, widget.fid, widget.content);
-      if (!mounted) return;
-      _refreshController.finishRefresh();
-      _refreshController.resetFooter();
-    } catch (e) {
-      if (!mounted) return;
-      AppToast.error((e as dynamic).message ?? e.toString());
-      _refreshController.finishRefresh(IndicatorResult.fail);
-    }
-  }
-
-  Future<void> _onLoadMore(SearchTopicListNotifier notifier) async {
-    try {
-      final state =
-          await notifier.loadMore(widget.keyword, widget.fid, widget.content);
-      if (!mounted) return;
-      if (state.enablePullUp) {
-        _refreshController.finishLoad();
-      } else {
-        _refreshController.finishLoad(IndicatorResult.noMore);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      AppToast.error((e as dynamic).message ?? e.toString());
-      _refreshController.finishLoad(IndicatorResult.fail);
-    }
   }
 }

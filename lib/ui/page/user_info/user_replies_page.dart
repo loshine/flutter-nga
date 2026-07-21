@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/user/user_replies_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class UserRepliesPage extends ConsumerStatefulWidget {
+class UserRepliesPage extends HookConsumerWidget {
   final int uid;
   final String username;
 
@@ -16,42 +17,49 @@ class UserRepliesPage extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<UserRepliesPage> createState() => _UserRepliesPageState();
-}
-
-class _UserRepliesPageState extends ConsumerState<UserRepliesPage> {
-  final _refreshController = EasyRefreshController(
-    controlFinishRefresh: true,
-    controlFinishLoad: true,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _onRefresh(ref.read(userRepliesProvider.notifier));
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final state = ref.watch(userRepliesProvider);
     final notifier = ref.read(userRepliesProvider.notifier);
 
+    Future<void> onRefresh() async {
+      try {
+        await notifier.refresh(uid);
+        if (!context.mounted) return;
+        refreshController.finishRefresh();
+        refreshController.resetFooter();
+      } catch (err) {
+        if (!context.mounted) return;
+        refreshController.finishRefresh(IndicatorResult.fail);
+        AppToast.error((err as dynamic).message ?? err.toString());
+      }
+    }
+
+    Future<void> onLoading() async {
+      try {
+        final next = await notifier.loadMore(uid);
+        if (!context.mounted) return;
+        if (next.list.length == next.page * next.size) {
+          refreshController.finishLoad();
+        } else {
+          refreshController.finishLoad(IndicatorResult.noMore);
+        }
+      } catch (err) {
+        if (!context.mounted) return;
+        AppToast.error((err as dynamic).message ?? err.toString());
+        debugPrintStack(stackTrace: (err as dynamic).stackTrace);
+        refreshController.finishLoad(IndicatorResult.fail);
+      }
+    }
+
+    usePostFrameEffect(onRefresh);
+
     return Scaffold(
-      appBar: AppBar(title: Text("${widget.username}发布的回复")),
+      appBar: AppBar(title: Text("$username发布的回复")),
       body: EasyRefresh(
-        controller: _refreshController,
-        onRefresh: () => _onRefresh(notifier),
-        onLoad: state.enablePullUp ? () => _onLoading(notifier) : null,
+        controller: refreshController,
+        onRefresh: onRefresh,
+        onLoad: state.enablePullUp ? onLoading : null,
         child: ListView.builder(
           itemCount: state.list.length,
           itemBuilder: (context, index) =>
@@ -59,35 +67,5 @@ class _UserRepliesPageState extends ConsumerState<UserRepliesPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _onRefresh(UserRepliesNotifier notifier) async {
-    try {
-      await notifier.refresh(widget.uid);
-      if (!mounted) return;
-      _refreshController.finishRefresh();
-      _refreshController.resetFooter();
-    } catch (err) {
-      if (!mounted) return;
-      _refreshController.finishRefresh(IndicatorResult.fail);
-      AppToast.error((err as dynamic).message ?? err.toString());
-    }
-  }
-
-  Future<void> _onLoading(UserRepliesNotifier notifier) async {
-    try {
-      final state = await notifier.loadMore(widget.uid);
-      if (!mounted) return;
-      if (state.list.length == state.page * state.size) {
-        _refreshController.finishLoad();
-      } else {
-        _refreshController.finishLoad(IndicatorResult.noMore);
-      }
-    } catch (err) {
-      if (!mounted) return;
-      AppToast.error((err as dynamic).message ?? err.toString());
-      debugPrintStack(stackTrace: (err as dynamic).stackTrace);
-      _refreshController.finishLoad(IndicatorResult.fail);
-    }
   }
 }
