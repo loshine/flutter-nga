@@ -30,12 +30,12 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
       final notifier = ref.read(userInfoProvider.notifier);
       if (widget.uid != null) {
         notifier.loadByUid(widget.uid).catchError((err) {
-          AppToast.error(err.message);
+          AppToast.error(err);
           return ref.read(userInfoProvider);
         });
       } else if (widget.username != null) {
         notifier.loadByName(widget.username).catchError((err) {
-          AppToast.error(err.message);
+          AppToast.error(err);
           return ref.read(userInfoProvider);
         });
       }

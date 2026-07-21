@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
@@ -368,7 +367,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
-      AppToast.error(err.toString());
+      AppToast.error(err);
     }
   }
 
@@ -388,11 +387,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       AppToast.success(reaction.message);
     } catch (err) {
       print(err.toString());
-      if (err is DioException) {
-        AppToast.error(err.message ?? '');
-      } else {
-        AppToast.error(err.toString());
-      }
+      AppToast.error(err);
     }
   }
 

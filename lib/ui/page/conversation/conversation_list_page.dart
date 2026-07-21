@@ -26,7 +26,7 @@ class ConversationListPage extends HookConsumerWidget {
       } catch (err) {
         if (!context.mounted) return;
         refreshController.finishRefresh(IndicatorResult.fail);
-        AppToast.error(err.toString());
+        AppToast.error(err);
       }
     }
 

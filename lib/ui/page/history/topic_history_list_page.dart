@@ -27,7 +27,7 @@ class TopicHistoryListPage extends HookConsumerWidget {
       } catch (err) {
         if (!context.mounted) return;
         refreshController.finishRefresh(IndicatorResult.fail);
-        AppToast.error((err as dynamic).message ?? err.toString());
+        AppToast.error(err);
       }
     }
 
@@ -43,7 +43,7 @@ class TopicHistoryListPage extends HookConsumerWidget {
       } catch (err) {
         if (!context.mounted) return;
         refreshController.finishLoad(IndicatorResult.fail);
-        AppToast.error((err as dynamic).message ?? err.toString());
+        AppToast.error(err);
       }
     }
 
@@ -110,7 +110,7 @@ class TopicHistoryListPage extends HookConsumerWidget {
                 onPressed: () {
                   Routes.pop(context);
                   notifier.clean().catchError((err) {
-                    AppToast.error(err.message);
+                    AppToast.error(err);
                     return 0;
                   }).whenComplete(() {
                     refreshController.callRefresh();

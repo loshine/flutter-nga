@@ -41,7 +41,7 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
         notifier.toggle(name, type).then((_) {
           ref.read(favouriteForumListProvider.notifier).refresh();
         }).catchError((err) {
-          AppToast.error(err.message);
+          AppToast.error(err);
         });
       },
     );

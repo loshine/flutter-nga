@@ -34,7 +34,7 @@ class SendMessagePage extends HookConsumerWidget {
         );
         if (context.mounted) Routes.pop(context);
       } catch (err) {
-        AppToast.error(err.toString());
+        AppToast.error(err);
       }
     }
 
