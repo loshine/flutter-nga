@@ -1,12 +1,12 @@
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/scroll_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -31,20 +31,13 @@ class ForumDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final tabController = useTabController(initialLength: _tabs.length);
-    final fabVisible = useState(true);
-    final mainPage = useState(true);
+    final fabScroll = useScrollFabVisibility();
+
+    useListenable(tabController);
+    final mainPage = tabController.index == 0;
 
     final state = ref.watch(forumDetailProvider(fid));
     final notifier = ref.read(forumDetailProvider(fid).notifier);
-
-    useEffect(() {
-      void listener() {
-        mainPage.value = tabController.index == 0;
-      }
-
-      tabController.addListener(listener);
-      return () => tabController.removeListener(listener);
-    }, [tabController]);
 
     Future<void> onRefresh() async {
       try {
@@ -108,15 +101,7 @@ class ForumDetailPage extends HookConsumerWidget {
         children: [
           KeepAliveTabView(
             child: NotificationListener<UserScrollNotification>(
-              onNotification: (notification) {
-                final direction = notification.direction;
-                if (direction == ScrollDirection.reverse) {
-                  if (fabVisible.value) fabVisible.value = false;
-                } else if (direction == ScrollDirection.forward) {
-                  if (!fabVisible.value) fabVisible.value = true;
-                }
-                return false;
-              },
+              onNotification: fabScroll.onNotification,
               child: EasyRefresh(
                 controller: refreshController,
                 onRefresh: onRefresh,
@@ -138,7 +123,7 @@ class ForumDetailPage extends HookConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: fabVisible.value && mainPage.value
+      floatingActionButton: fabScroll.visible && mainPage
           ? FloatingActionButton(
               onPressed: () => Routes.navigateTo(
                   context, "${Routes.TOPIC_PUBLISH}?fid=$fid"),

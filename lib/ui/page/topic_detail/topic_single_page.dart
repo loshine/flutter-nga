@@ -65,7 +65,12 @@ class TopicSinglePage extends HookConsumerWidget {
       }
     }
 
-    usePostFrameEffect(onRefresh);
+    // Auto-load only when this page has no data yet (lazy tab mount / remount).
+    usePostFrameEffect(() {
+      final existing = ref.read(topicSinglePageProvider(providerKey));
+      if (existing.replyList.isNotEmpty) return;
+      onRefresh();
+    }, [providerKey.tid, providerKey.page, providerKey.authorid]);
 
     return EasyRefresh(
       controller: refreshController,
