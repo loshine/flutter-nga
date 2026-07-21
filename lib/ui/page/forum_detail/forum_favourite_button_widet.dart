@@ -17,11 +17,11 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     usePostFrameEffect(() {
-      ref.read(favouriteForumProvider.notifier).load(fid, name ?? "");
+      ref.read(favouriteForumProvider(fid).notifier).load(name);
     }, [fid, name]);
 
-    final isFavourite = ref.watch(favouriteForumProvider);
-    final notifier = ref.read(favouriteForumProvider.notifier);
+    final isFavourite = ref.watch(favouriteForumProvider(fid));
+    final notifier = ref.read(favouriteForumProvider(fid).notifier);
 
     return IconButton(
       icon: AnimatedSwitcher(
@@ -38,7 +38,7 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
         ),
       ),
       onPressed: () {
-        notifier.toggle(fid, name, type).then((_) {
+        notifier.toggle(name, type).then((_) {
           ref.read(favouriteForumListProvider.notifier).refresh();
         }).catchError((err) {
           AppToast.error(err.message);
