@@ -6,29 +6,21 @@ import 'package:flutter_nga/ui/widget/base_url_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/user_agent_selection_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SettingsPage extends ConsumerStatefulWidget {
+class SettingsPage extends HookConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  ConsumerState<SettingsPage> createState() => _SettingsState();
-}
-
-class _SettingsState extends ConsumerState<SettingsPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    usePostFrameEffect(() {
       ref.read(themeProvider.notifier).refresh();
       ref.read(baseUrlSettingsProvider.notifier).init();
       ref.read(userAgentSettingsProvider.notifier).init();
     });
-  }
 
-  @override
-  Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
     final baseUrlState = ref.watch(baseUrlSettingsProvider);
     final userAgentState = ref.watch(userAgentSettingsProvider);
@@ -57,13 +49,19 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                 icon: Icons.dns_outlined,
                 title: "服务器设置",
                 subtitle: "当前: ${baseUrlState.currentConfig.name}",
-                onTap: _showBaseUrlSelectionDialog,
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (_) => const BaseUrlSelectionDialog(),
+                ),
               ),
               _SettingsTile(
                 icon: Icons.devices_outlined,
                 title: "User-Agent 设置",
                 subtitle: "当前: ${userAgentState.currentConfig.name}",
-                onTap: _showUserAgentSelectionDialog,
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (_) => const UserAgentSelectionDialog(),
+                ),
               ),
             ],
           ),
@@ -74,7 +72,10 @@ class _SettingsState extends ConsumerState<SettingsPage> {
                 icon: Icons.palette_outlined,
                 title: "主题模式",
                 subtitle: "当前: ${themeState.modeName}",
-                onTap: _showThemeSelectionDialog,
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (_) => const ThemeSelectionDialog(),
+                ),
               ),
               _SettingsTile(
                 icon: Icons.text_fields,
@@ -99,27 +100,6 @@ class _SettingsState extends ConsumerState<SettingsPage> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showThemeSelectionDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => const ThemeSelectionDialog(),
-    );
-  }
-
-  void _showBaseUrlSelectionDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => const BaseUrlSelectionDialog(),
-    );
-  }
-
-  void _showUserAgentSelectionDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => const UserAgentSelectionDialog(),
     );
   }
 }

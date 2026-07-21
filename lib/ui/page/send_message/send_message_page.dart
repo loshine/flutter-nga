@@ -1,37 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SendMessagePage extends ConsumerStatefulWidget {
+class SendMessagePage extends HookConsumerWidget {
   final int? mid;
 
   const SendMessagePage({super.key, this.mid});
 
-  @override
-  ConsumerState<SendMessagePage> createState() => _SendMessageState();
-}
-
-class _SendMessageState extends ConsumerState<SendMessagePage> {
-  final _subjectController = TextEditingController();
-  final _contentController = TextEditingController();
-
-  bool get isNew => widget.mid == null || widget.mid == 0;
+  bool get isNew => mid == null || mid == 0;
 
   @override
-  void initState() {
-    super.initState();
-    // Clear contacts when starting new message
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(sendMessageProvider.notifier).clear();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final subjectController = useTextEditingController();
+    final contentController = useTextEditingController();
     final state = ref.watch(sendMessageProvider);
     final notifier = ref.read(sendMessageProvider.notifier);
+
+    usePostFrameEffect(() {
+      notifier.clear();
+    }, [mid]);
 
     return Scaffold(
       appBar: AppBar(
@@ -40,16 +31,22 @@ class _SendMessageState extends ConsumerState<SendMessagePage> {
       body: Padding(
         padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Column(
-          children: _buildColumnChildren(state, notifier),
+          children: _buildColumnChildren(
+            context,
+            state,
+            notifier,
+            subjectController,
+            contentController,
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: '发送',
         onPressed: () => notifier
             .send(
-              widget.mid,
-              _subjectController.text,
-              _contentController.text,
+              mid,
+              subjectController.text,
+              contentController.text,
             )
             .then(
               (value) => Routes.pop(context),
@@ -59,7 +56,7 @@ class _SendMessageState extends ConsumerState<SendMessagePage> {
     );
   }
 
-  void _showDialog(SendMessageNotifier notifier) {
+  void _showDialog(BuildContext context, SendMessageNotifier notifier) {
     showDialog(
       context: context,
       builder: (_) {
@@ -71,11 +68,16 @@ class _SendMessageState extends ConsumerState<SendMessagePage> {
   }
 
   List<Widget> _buildColumnChildren(
-      SendMessageState state, SendMessageNotifier notifier) {
+    BuildContext context,
+    SendMessageState state,
+    SendMessageNotifier notifier,
+    TextEditingController subjectController,
+    TextEditingController contentController,
+  ) {
     final children = <Widget>[];
     children.add(TextField(
       maxLines: 1,
-      controller: _subjectController,
+      controller: subjectController,
       decoration: InputDecoration(
         labelText: "标题(可选)",
       ),
@@ -102,7 +104,7 @@ class _SendMessageState extends ConsumerState<SendMessagePage> {
             ],
           ),
         ),
-        onTap: () => _showDialog(notifier),
+        onTap: () => _showDialog(context, notifier),
       ));
       if (state.contacts.isNotEmpty) {
         children.add(Padding(
@@ -130,7 +132,7 @@ class _SendMessageState extends ConsumerState<SendMessagePage> {
     children.add(Expanded(
       child: TextField(
         maxLines: null,
-        controller: _contentController,
+        controller: contentController,
         decoration: InputDecoration(
           border: InputBorder.none,
           labelText: "消息内容",
