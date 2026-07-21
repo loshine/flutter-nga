@@ -1,57 +1,62 @@
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/message/conversation_detail_provider.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'message_item_widget.dart';
 
-class ConversationDetailPage extends ConsumerStatefulWidget {
+class ConversationDetailPage extends HookConsumerWidget {
   final int? mid;
 
   const ConversationDetailPage({super.key, this.mid});
 
   @override
-  ConsumerState<ConversationDetailPage> createState() =>
-      _ConversationDetailState();
-}
-
-class _ConversationDetailState extends ConsumerState<ConversationDetailPage> {
-  final _refreshController = EasyRefreshController(
-    controlFinishRefresh: true,
-    controlFinishLoad: true,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _onRefresh(ref.read(conversationDetailProvider.notifier));
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final state = ref.watch(conversationDetailProvider);
     final notifier = ref.read(conversationDetailProvider.notifier);
+
+    Future<void> onRefresh() async {
+      try {
+        await notifier.refresh(mid);
+        if (!context.mounted) return;
+        refreshController.finishRefresh();
+        refreshController.resetFooter();
+      } catch (err) {
+        if (!context.mounted) return;
+        refreshController.finishRefresh(IndicatorResult.fail);
+        AppToast.error(err.toString());
+      }
+    }
+
+    Future<void> onLoading() async {
+      try {
+        final next = await notifier.loadMore(mid);
+        if (!context.mounted) return;
+        if (next.enablePullUp) {
+          refreshController.finishLoad();
+        } else {
+          refreshController.finishLoad(IndicatorResult.noMore);
+        }
+      } catch (_) {
+        if (!context.mounted) return;
+        refreshController.finishLoad(IndicatorResult.fail);
+      }
+    }
+
+    usePostFrameEffect(onRefresh);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('消息详情'),
       ),
       body: EasyRefresh(
-        controller: _refreshController,
-        onRefresh: () => _onRefresh(notifier),
-        onLoad: state.enablePullUp ? () => _onLoading(notifier) : null,
+        controller: refreshController,
+        onRefresh: onRefresh,
+        onLoad: state.enablePullUp ? onLoading : null,
         child: ListView.builder(
           itemCount: state.list.length,
           itemBuilder: (context, index) =>
@@ -62,38 +67,10 @@ class _ConversationDetailState extends ConsumerState<ConversationDetailPage> {
         tooltip: '回复',
         onPressed: () => Routes.navigateTo(
           context,
-          "${Routes.SEND_MESSAGE}?mid=${widget.mid}",
+          "${Routes.SEND_MESSAGE}?mid=$mid",
         ),
         child: Icon(Icons.reply),
       ),
     );
-  }
-
-  Future<void> _onRefresh(ConversationDetailNotifier notifier) async {
-    try {
-      await notifier.refresh(widget.mid);
-      if (!mounted) return;
-      _refreshController.finishRefresh();
-      _refreshController.resetFooter();
-    } catch (err) {
-      if (!mounted) return;
-      _refreshController.finishRefresh(IndicatorResult.fail);
-      AppToast.error(err.toString());
-    }
-  }
-
-  Future<void> _onLoading(ConversationDetailNotifier notifier) async {
-    try {
-      final state = await notifier.loadMore(widget.mid);
-      if (!mounted) return;
-      if (state.enablePullUp) {
-        _refreshController.finishLoad();
-      } else {
-        _refreshController.finishLoad(IndicatorResult.noMore);
-      }
-    } catch (_) {
-      if (!mounted) return;
-      _refreshController.finishLoad(IndicatorResult.fail);
-    }
   }
 }
