@@ -45,7 +45,7 @@ class FavouriteTopicListPage extends HookConsumerWidget {
       }
     }
 
-    usePostFrameEffect(onRefresh);
+    useInitialRefresh(refreshController);
 
     return Scaffold(
       appBar: AppBar(title: const Text('贴子收藏')),
