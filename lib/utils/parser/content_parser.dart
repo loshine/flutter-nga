@@ -880,8 +880,14 @@ class _ContentParser implements Parser {
     return "<span style='color:$colorValue;'>$content</span>";
   }
 
-  static String _alignReplacer(Match m) =>
-      "<div align='${m.group(1)}'>${m.group(2) ?? ''}</div>";
+  static const _supportedAligns = {'left', 'center', 'right', 'justify'};
+
+  static String _alignReplacer(Match m) {
+    final align = (m.group(1) ?? '').toLowerCase();
+    final content = m.group(2) ?? '';
+    if (!_supportedAligns.contains(align)) return content;
+    return "<div style='text-align:$align;'>$content</div>";
+  }
 
   static String _lrReplacer(Match m) {
     final align = m.group(1) == 'l' ? 'left' : 'right';
