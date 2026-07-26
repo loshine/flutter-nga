@@ -38,7 +38,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
       }
     }
 
-    usePostFrameEffect(onRefresh);
+    useInitialRefresh(_refreshController);
 
     return Scaffold(
       appBar: AppBar(
