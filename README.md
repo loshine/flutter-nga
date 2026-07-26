@@ -107,10 +107,9 @@ lib/
 ├── my_app.dart            # 根 Widget
 ├── data/
 │   ├── data.dart          # 单例数据管理器
-│   ├── http.dart          # HTTP 客户端配置
 │   ├── entity/            # 数据实体
 │   ├── repository/        # 数据仓库
-│   └── usecase/           # 用例层
+│   └── core/              # Dio 配置与仓库装配
 ├── providers/             # Riverpod Providers
 │   ├── core/              # 核心 Provider
 │   ├── forum/             # 版块相关
