@@ -1,7 +1,4 @@
-import 'dart:io' show Platform;
-
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -10,8 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ThemeSelectionDialog extends ConsumerWidget {
   const ThemeSelectionDialog({super.key});
-
-  bool get _isAndroid => !kIsWeb && Platform.isAndroid;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,7 +50,7 @@ class ThemeSelectionDialog extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // 选项列表
             _ThemeOption(
               title: "跟随系统",
@@ -93,22 +88,13 @@ class ThemeSelectionDialog extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
 
-            // 动态取色开关（仅 Android）
-            if (_isAndroid)
-              _DynamicColorSwitch(
-                value: state.useDynamicColor,
-                onChanged: (value) => notifier.setUseDynamicColor(context, value),
-              ),
+            _ColorPicker(
+              selectedColor: state.seedColor,
+              onColorSelected: (color) => notifier.setSeedColor(context, color),
+            ),
 
-            // 主题色选择（当动态取色关闭时显示，或非 Android 平台）
-            if (!_isAndroid || !state.useDynamicColor)
-              _ColorPicker(
-                selectedColor: state.seedColor,
-                onColorSelected: (color) => notifier.setSeedColor(context, color),
-              ),
-            
             const SizedBox(height: 8),
-            
+
             // 关闭按钮
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -121,62 +107,6 @@ class ThemeSelectionDialog extends ConsumerWidget {
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 动态取色开关组件
-class _DynamicColorSwitch extends StatelessWidget {
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _DynamicColorSwitch({
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return InkWell(
-      onTap: () => onChanged(!value),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              Icons.auto_awesome,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "动态取色 (Material You)",
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    "根据系统壁纸自动提取主题色 (Android 12+)",
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Switch(
-              value: value,
-              onChanged: onChanged,
             ),
           ],
         ),
