@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,9 +12,6 @@ class ThemeSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _ThemeSettingsPageState extends ConsumerState<ThemeSettingsPage> {
-  bool get _isAndroid =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-
   @override
   void initState() {
     super.initState();
@@ -58,12 +54,6 @@ class _ThemeSettingsPageState extends ConsumerState<ThemeSettingsPage> {
           ),
           const SizedBox(height: 16),
           const _SectionTitle("颜色设置"),
-          if (_isAndroid)
-            _DynamicColorSwitch(
-              value: state.useDynamicColor,
-              onChanged: (value) => notifier.setUseDynamicColor(context, value),
-            ),
-          if (!_isAndroid || !state.useDynamicColor)
             _ColorPicker(
               selectedColor: state.seedColor,
               onColorSelected: (color) => notifier.setSeedColor(context, color),
@@ -91,61 +81,6 @@ class _SectionTitle extends StatelessWidget {
         style: textTheme.titleSmall?.copyWith(
           color: colorScheme.primary,
           fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _DynamicColorSwitch extends StatelessWidget {
-  const _DynamicColorSwitch({
-    required this.value,
-    required this.onChanged,
-  });
-
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return InkWell(
-      onTap: () => onChanged(!value),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              Icons.auto_awesome,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "动态取色 (Material You)",
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    "根据系统壁纸自动提取主题色 (Android 12+)",
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Switch(
-              value: value,
-              onChanged: onChanged,
-            ),
-          ],
         ),
       ),
     );
