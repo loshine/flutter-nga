@@ -105,6 +105,14 @@ void main() {
     expect(parsed.contains('Times New Roman, SimSun, serif'), true);
   });
 
+  test('P1 parser: align uses text-align style', () {
+    final parsed = NgaContentParser.parse(
+      '[align=center]hello[/align][align=right]r[/align]',
+    );
+    expect(parsed.contains("<div style='text-align:center;'>hello</div>"), true);
+    expect(parsed.contains("<div style='text-align:right;'>r</div>"), true);
+  });
+
   test('P1 parser: list nested stability', () {
     final parsed = NgaContentParser.parse(
       '[list][*]a[list][*]b[/list][*]c[/list]',
