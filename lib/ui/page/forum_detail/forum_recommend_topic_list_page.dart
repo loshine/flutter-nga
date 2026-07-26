@@ -50,7 +50,7 @@ class ForumRecommendTopicListPage extends HookConsumerWidget {
       }
     }
 
-    usePostFrameEffect(onRefresh);
+    useInitialRefresh(refreshController);
 
     return EasyRefresh(
       controller: refreshController,

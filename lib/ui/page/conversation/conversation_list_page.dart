@@ -45,7 +45,7 @@ class ConversationListPage extends HookConsumerWidget {
       }
     }
 
-    usePostFrameEffect(onRefresh);
+    useInitialRefresh(refreshController);
 
     return Scaffold(
       appBar: AppBar(title: const Text('短消息')),

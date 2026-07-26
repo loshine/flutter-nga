@@ -29,7 +29,7 @@ class NotificationListPage extends HookConsumerWidget {
       }
     }
 
-    usePostFrameEffect(onRefresh);
+    useInitialRefresh(refreshController);
 
     return Scaffold(
       appBar: AppBar(title: const Text('提醒信息')),

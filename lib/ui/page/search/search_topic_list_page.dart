@@ -55,7 +55,7 @@ class SearchTopicListPage extends HookConsumerWidget {
       }
     }
 
-    usePostFrameEffect(onRefresh);
+    useInitialRefresh(refreshController);
 
     return Scaffold(
       appBar: AppBar(
