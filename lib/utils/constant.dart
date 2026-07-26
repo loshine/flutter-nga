@@ -1,9 +1,5 @@
 import 'dart:ui';
 
-/// 默认域名配置 (向后兼容，实际使用 Data().domain 获取动态配置)
-const String DOMAIN_WITHOUT_HTTPS = "nga.178.com";
-const String DOMAIN = "https://$DOMAIN_WITHOUT_HTTPS/";
-
 /// 登录 URL 基础路径 (使用时需要拼接当前 baseUrl)
 const String LOGIN_URL_PATH = "nuke.php?__lib=login&__act=account&login";
 
