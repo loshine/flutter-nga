@@ -80,6 +80,6 @@ Future setUpInterceptors() async {
     _gbkCodecInterceptor,
     _jsFormatJsonInterceptor,
     _serviceErrorInterceptor,
-    PrettyDioLogger(),
+    PrettyDioLogger(responseBody: false),
   ]);
 }
