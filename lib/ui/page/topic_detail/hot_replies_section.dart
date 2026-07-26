@@ -3,8 +3,8 @@ import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
+import 'package:flutter_nga/ui/widget/username_text.dart';
 import 'package:flutter_nga/utils/motion.dart';
-import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/route.dart';
 
 /// 热点回复区块：标题 + 容器包裹的紧凑热评卡片列表
@@ -154,8 +154,9 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
               AvatarWidget(widget.user?.avatar, size: 28),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  name_utils.getShowName(widget.user?.username ?? ''),
+                child: UsernameText(
+                  username: widget.user?.username ?? '',
+                  uid: widget.user?.uid ?? reply.authorId,
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,

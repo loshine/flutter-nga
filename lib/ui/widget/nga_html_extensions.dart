@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
+import 'package:flutter_nga/ui/widget/username_text.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 List<HtmlExtension> buildNgaHtmlExtensions(BuildContext context) {
@@ -167,18 +168,11 @@ class _NgaQuoteBar extends StatelessWidget {
               Text('回复', style: baseStyle),
               if (author.isNotEmpty)
                 Flexible(
-                  child: GestureDetector(
-                    // 匿名无 uid，不可点击，手势透传给整条引用条
-                    onTap: uid == null || uid.isEmpty
-                        ? null
-                        : () => Routes.onLinkTap(
-                            context, 'nuke.php?func=ucp&uid=$uid'),
-                    child: Text(
-                      floor != null ? '$author($floor)' : author,
-                      style: baseStyle?.copyWith(color: colorScheme.primary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  child: UsernameText(
+                    username: author,
+                    uid: int.tryParse(uid ?? ''),
+                    suffix: floor == null ? '' : '($floor)',
+                    style: baseStyle?.copyWith(color: colorScheme.primary),
                   ),
                 ),
               if (date.isNotEmpty)

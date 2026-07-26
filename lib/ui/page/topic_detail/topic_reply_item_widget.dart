@@ -9,10 +9,10 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/dash.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
+import 'package:flutter_nga/ui/widget/username_text.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
-import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 
@@ -81,10 +81,9 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            name_utils.getShowName(
-                              widget.user!.username ?? '',
-                            ),
+                          child: UsernameText(
+                            username: widget.user!.username ?? '',
+                            uid: widget.user!.uid,
                             style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.bodyLarge?.color,
