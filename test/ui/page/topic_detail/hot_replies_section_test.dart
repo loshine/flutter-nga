@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/page/topic_detail/hot_replies_section.dart';
+import 'package:flutter_nga/ui/widget/username_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,7 +23,7 @@ void main() {
           home: Scaffold(
             body: HotRepliesSection(
               replies: [reply],
-              userList: const [],
+              userList: [User(uid: 1, username: '热点用户')],
             ),
           ),
         ),
@@ -37,5 +39,6 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(find.byType(UsernameText), findsOneWidget);
   });
 }
