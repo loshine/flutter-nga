@@ -5,7 +5,10 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 
 void main() {
@@ -78,13 +81,85 @@ void main() {
 
   test('P0 parser: custom/unknown tags fallback', () {
     final parsed = NgaContentParser.parse(
-      '====== [collapse=标题]内容[/collapse] [s:1] [randomblock]x[/randomblock]',
+      '====== [collapse=标题]内容[/collapse] [s:1] [futuretag]x[/futuretag]',
     );
     expect(parsed.contains('<nga_hr></nga_hr>'), true);
     expect(parsed.contains("<collapse title='标题'>内容</collapse>"), true);
     expect(parsed.contains('<nga_emoticon src=') || parsed.contains('[s:1]'),
         true);
     expect(parsed.contains("class='ubb-unknown'"), true);
+  });
+
+  test('P0 parser: randomblock keeps exactly one block', () {
+    NgaContentParser.clearCache();
+    final parsed = NgaContentParser.parse(
+      '前[randomblock][b]甲[/b][/randomblock]中'
+      '[randomblock][i]乙[/i][/randomblock]后',
+    );
+
+    expect(parsed.contains('前'), true);
+    expect(parsed.contains('中'), true);
+    expect(parsed.contains('后'), true);
+    expect(parsed.contains('randomblock'), false);
+    expect(
+      [parsed.contains('<b>甲</b>'), parsed.contains('<i>乙</i>')]
+          .where((selected) => selected)
+          .length,
+      1,
+    );
+  });
+
+  test('P0 parser: dict shares a definition across the post', () {
+    final parsed = NgaContentParser.parse(
+      '[dict][SCP-087][/dict] '
+      '[dict][SCP-087]一座[b]向下[/b]延伸的楼梯[/dict] '
+      '[dict][带未知标签][futuretag]原样内容[/futuretag][/dict] '
+      '[dict][未定义][/dict]',
+    );
+
+    expect(RegExp('<nga_dict ').allMatches(parsed).length, 3);
+    expect(
+      parsed.contains(
+        "definition='一座&lt;b&gt;向下&lt;/b&gt;延伸的楼梯'",
+      ),
+      true,
+    );
+    expect(
+      parsed.contains(
+        "definition='&#91;futuretag&#93;原样内容&#91;/futuretag&#93;'",
+      ),
+      true,
+    );
+    expect(parsed.contains('[dict]'), false);
+    expect(parsed.endsWith('未定义'), true);
+  });
+
+  testWidgets('P0 widget: tapping dict term opens its definition',
+      (tester) async {
+    final parsed = NgaContentParser.parse(
+      '[dict][SCP-087]一座向下延伸的楼梯[/dict]',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => Html(
+              data: parsed,
+              extensions: buildNgaHtmlExtensions(context),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('SCP-087'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(
+      find.textContaining('一座向下延伸的楼梯', findRichText: true),
+      findsOneWidget,
+    );
   });
 
   test('P1 parser: table span + width', () {
@@ -109,7 +184,8 @@ void main() {
     final parsed = NgaContentParser.parse(
       '[align=center]hello[/align][align=right]r[/align]',
     );
-    expect(parsed.contains("<div style='text-align:center;'>hello</div>"), true);
+    expect(
+        parsed.contains("<div style='text-align:center;'>hello</div>"), true);
     expect(parsed.contains("<div style='text-align:right;'>r</div>"), true);
   });
 
