@@ -41,5 +41,6 @@ const TEXT_COLOR_MAP = {
   "burlywood": Color(0xFFDEB887),
   "sandybrown": Color(0xFFF4A460),
   "chocolate": Color(0xFFD2691E),
+  "sienna": Color(0xFFA0522D),
   "silver": Color(0xFFC0C0C0),
 };

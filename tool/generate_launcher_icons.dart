@@ -3,7 +3,9 @@ import 'dart:math' as math;
 
 import 'package:image/image.dart';
 
-/// Regenerates Android / master launcher icons with splash-like safe-zone padding.
+/// Regenerates launcher icons and the shared splash asset.
+///
+/// Run with `fvm dart run tool/generate_launcher_icons.dart`.
 void main() {
   const size = 1024;
   // Keep FNGA inside adaptive-icon safe zone (~66/108 of layer).
