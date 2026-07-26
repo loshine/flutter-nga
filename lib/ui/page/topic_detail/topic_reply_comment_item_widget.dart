@@ -3,7 +3,7 @@ import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_comment_widget.dart';
-import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
+import 'package:flutter_nga/ui/widget/username_text.dart';
 
 /// 贴条评论项：紧凑 M3 风格，由外层容器提供背景与分割线
 class TopicReplyCommentItemWidget extends StatelessWidget {
@@ -31,8 +31,9 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  name_utils.getShowName(user?.username ?? ''),
+                child: UsernameText(
+                  username: user?.username ?? '',
+                  uid: user?.uid ?? reply.authorId,
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
