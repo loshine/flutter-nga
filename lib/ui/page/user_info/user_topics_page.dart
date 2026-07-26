@@ -50,7 +50,7 @@ class UserTopicsPage extends HookConsumerWidget {
       }
     }
 
-    usePostFrameEffect(onRefresh);
+    useInitialRefresh(refreshController);
 
     return Scaffold(
       appBar: AppBar(title: Text("$username发布的主题")),

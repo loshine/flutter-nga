@@ -65,7 +65,7 @@ class TopicSinglePage extends HookConsumerWidget {
     usePostFrameEffect(() {
       final existing = ref.read(topicSinglePageProvider(providerKey));
       if (existing.replyList.isNotEmpty) return;
-      onRefresh();
+      refreshController.callRefresh();
     }, [providerKey.tid, providerKey.page, providerKey.authorid]);
 
     return EasyRefresh(
