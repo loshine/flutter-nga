@@ -20,6 +20,19 @@ void usePostFrameEffect(
   }, keys);
 }
 
+/// Triggers header refresh after the first frame so the indicator is visible.
+///
+/// Prefer this over calling `onRefresh` directly on first load; a bare
+/// `onRefresh` finishes the task without ever entering the refreshing state.
+void useInitialRefresh(
+  EasyRefreshController controller, [
+  List<Object?> keys = const [],
+]) {
+  usePostFrameEffect(() {
+    controller.callRefresh();
+  }, keys);
+}
+
 /// Creates an [EasyRefreshController] and disposes it with the hook scope.
 EasyRefreshController useEasyRefreshController({
   bool controlFinishRefresh = true,
