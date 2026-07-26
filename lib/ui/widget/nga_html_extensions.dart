@@ -96,6 +96,29 @@ List<HtmlExtension> buildNgaHtmlExtensions(BuildContext context) {
       },
     ),
     TagExtension.inline(
+      tagsToExtend: {'nga_dict'},
+      builder: (extensionContext) {
+        final term = (extensionContext.attributes['term'] ?? '').trim();
+        final definition =
+            (extensionContext.attributes['definition'] ?? '').trim();
+        if (term.isEmpty || definition.isEmpty) {
+          return TextSpan(text: term);
+        }
+
+        final style = (extensionContext.styledElement?.style ?? Style())
+            .generateTextStyle();
+        return WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: _NgaDictionaryTerm(
+            term: term,
+            definition: definition,
+            style: style,
+          ),
+        );
+      },
+    ),
+    TagExtension.inline(
       tagsToExtend: {'nga_emoticon'},
       builder: (extensionContext) {
         final src = extensionContext.attributes['src'];
@@ -128,6 +151,71 @@ List<HtmlExtension> buildNgaHtmlExtensions(BuildContext context) {
       ),
     ),
   ];
+}
+
+class _NgaDictionaryTerm extends StatelessWidget {
+  final String term;
+  final String definition;
+  final TextStyle style;
+
+  const _NgaDictionaryTerm({
+    required this.term,
+    required this.definition,
+    required this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.primary;
+    return Semantics(
+      button: true,
+      label: term,
+      hint: '查看词条注释',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _showDefinition(context),
+        child: Text(
+          term,
+          style: style.copyWith(
+            color: color,
+            decoration: TextDecoration.underline,
+            decorationColor: color,
+            decorationStyle: TextDecorationStyle.dotted,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDefinition(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(term),
+        content: SingleChildScrollView(
+          child: Html(
+            data: definition,
+            extensions: buildNgaHtmlExtensions(dialogContext),
+            style: {
+              'body': Style(
+                margin: Margins.zero,
+                padding: HtmlPaddings.zero,
+                color: Theme.of(dialogContext).textTheme.bodyMedium?.color,
+              ),
+            },
+            onLinkTap: (url, attributes, element) =>
+                Routes.onLinkTap(dialogContext, url),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// 回复引用卡：`<nga_quote pid tid uid author floor date>原文</nga_quote>`

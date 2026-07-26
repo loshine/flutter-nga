@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/emoticon.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
@@ -7,9 +9,11 @@ import 'package:flutter_nga/utils/name_utils.dart';
 class NgaContentParser {
   static final Parser _replyParser = _ReplyParser();
   static final Parser _commentParser = _CommentParser();
+  static final Parser _randomBlockParser = _RandomBlockParser();
   static final Parser _albumParser = _AlbumParser();
   static final Parser _tableParser = _TableParser();
   static final Parser _emoticonParser = _EmoticonParser();
+  static final Parser _dictionaryParser = _DictionaryParser();
   static final Parser _fallbackParser = _UnsupportedTagFallbackParser();
 
   // 优化 3: LRU 缓存（最多缓存 256 条）
@@ -32,10 +36,12 @@ class NgaContentParser {
 
   static List<Parser> _buildParserList({int? postDateTimestamp}) {
     return [
+      _randomBlockParser,
       _albumParser,
       _tableParser,
       _ContentParser(postDateTimestamp: postDateTimestamp),
       _emoticonParser,
+      _dictionaryParser,
       _fallbackParser,
     ];
   }
@@ -109,8 +115,8 @@ class NgaContentParser {
         ? ''
         : '__q${quoteBodyByPid.length}_${quoteBodyByPid.keys.fold<int>(0, (a, b) => a ^ b)}';
     final cacheKey = authorId != null
-        ? '__dice_${authorId}_${tid}_${pid}_${postDateTimestamp}${quoteSuffix}__$content'
-        : '__postdate_${postDateTimestamp}${quoteSuffix}__$content';
+        ? '__dice_${authorId}_${tid}_${pid}_$postDateTimestamp${quoteSuffix}__$content'
+        : '__postdate_$postDateTimestamp${quoteSuffix}__$content';
     if (_parseCache.containsKey(cacheKey)) {
       return _parseCache[cacheKey]!;
     }
@@ -118,8 +124,7 @@ class NgaContentParser {
     var parseContent = code_utils.unescapeHtml(content);
     // 官网：Reply to 用同页 pid 缓存补原文，再当 quote 渲染
     if (quoteBodyByPid != null && quoteBodyByPid.isNotEmpty) {
-      parseContent =
-          expandReplyToWithCachedBody(parseContent, quoteBodyByPid);
+      parseContent = expandReplyToWithCachedBody(parseContent, quoteBodyByPid);
     }
     parseContent = _replyParser.parse(parseContent);
     if (authorId != null && tid != null && pid != null) {
@@ -185,6 +190,37 @@ class NgaContentParser {
 
 abstract class Parser {
   String parse(String? content);
+}
+
+class _RandomBlockParser implements Parser {
+  static final _randomBlockRegex = RegExp(
+    r'\[randomblock\]([\s\S]*?)\[/randomblock\]',
+    caseSensitive: false,
+  );
+  static final _random = Random();
+
+  @override
+  String parse(String? content) {
+    if (content == null || content.isEmpty) return '';
+
+    final matches = _randomBlockRegex.allMatches(content).toList();
+    if (matches.isEmpty) return content;
+
+    final selectedIndex =
+        matches.length == 1 ? 0 : _random.nextInt(matches.length);
+    final result = StringBuffer();
+    var cursor = 0;
+    for (var index = 0; index < matches.length; index++) {
+      final match = matches[index];
+      result.write(content.substring(cursor, match.start));
+      if (index == selectedIndex) {
+        result.write(match.group(1) ?? '');
+      }
+      cursor = match.end;
+    }
+    result.write(content.substring(cursor));
+    return result.toString();
+  }
 }
 
 // 优化 1: 预编译正则
@@ -1100,6 +1136,42 @@ class _EmoticonParser implements Parser {
   }
 }
 
+class _DictionaryParser implements Parser {
+  static final _dictionaryRegex = RegExp(
+    r'\[dict\]\[([^\]\r\n]+)\]([\s\S]*?)\[/dict\]',
+    caseSensitive: false,
+  );
+
+  @override
+  String parse(String? content) {
+    if (content == null || content.isEmpty) return '';
+
+    final matches = _dictionaryRegex.allMatches(content).toList();
+    if (matches.isEmpty) return content;
+
+    final definitions = <String, String>{};
+    for (final match in matches) {
+      final term = (match.group(1) ?? '').trim();
+      final definition = (match.group(2) ?? '').trim();
+      if (term.isNotEmpty && definition.isNotEmpty) {
+        definitions.putIfAbsent(term, () => definition);
+      }
+    }
+
+    return content.replaceAllMapped(_dictionaryRegex, (match) {
+      final term = (match.group(1) ?? '').trim();
+      if (term.isEmpty) return '';
+
+      final definition = definitions[term];
+      if (definition == null) return _escapeHtmlText(term);
+
+      return "<nga_dict term='${_escapeHtmlAttribute(term)}' "
+          "definition='${_escapeDictionaryDefinition(definition)}'>"
+          "${_escapeHtmlText(term)}</nga_dict>";
+    });
+  }
+}
+
 class _UnsupportedTagFallbackParser implements Parser {
   static final _ubbTagRegex =
       RegExp(r'\[/?([a-zA-Z_][a-zA-Z0-9_]*)(?:[^\]]*)\]');
@@ -1113,6 +1185,7 @@ class _UnsupportedTagFallbackParser implements Parser {
     'color',
     'del',
     'dice',
+    'dict',
     'flash',
     'font',
     'h',
@@ -1124,6 +1197,7 @@ class _UnsupportedTagFallbackParser implements Parser {
     'pid',
     'quote',
     'r',
+    'randomblock',
     'size',
     'table',
     'tbody',
@@ -1160,3 +1234,9 @@ String _escapeHtmlText(String text) {
 }
 
 String _escapeHtmlAttribute(String text) => _escapeHtmlText(text);
+
+String _escapeDictionaryDefinition(String text) {
+  return _escapeHtmlAttribute(text)
+      .replaceAll('[', '&#91;')
+      .replaceAll(']', '&#93;');
+}
