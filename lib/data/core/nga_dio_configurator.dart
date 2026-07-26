@@ -25,7 +25,7 @@ class NgaDioConfigurator {
     dio.options.headers["Connection"] = "Keep-Alive";
 
     dio.interceptors.add(_createMainInterceptor());
-    dio.interceptors.add(PrettyDioLogger());
+    dio.interceptors.add(PrettyDioLogger(responseBody: false));
   }
 
   InterceptorsWrapper _createMainInterceptor() {
