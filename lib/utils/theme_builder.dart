@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 
 /// 主题构建工具类
 class ThemeBuilder {
@@ -176,7 +175,7 @@ class ThemeBuilder {
   }
 
   static ColorScheme _withRefinedSecondary(ColorScheme base, [Color? secondarySeed]) {
-    final seed = (secondarySeed ?? _secondarySeed).harmonizeWith(base.primary);
+    final seed = secondarySeed ?? _secondarySeed;
     final accent = ColorScheme.fromSeed(
       seedColor: seed,
       brightness: base.brightness,
