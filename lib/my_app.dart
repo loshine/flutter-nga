@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
@@ -53,66 +52,49 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return Consumer(
       builder: (context, ref, _) {
         final themeState = ref.watch(themeProvider);
+        final seedColor = themeState.seedColor;
+        final secondary = ThemeBuilder.getSecondaryForSeed(seedColor);
+        final lightScheme = ColorScheme.fromSeed(
+          seedColor: seedColor,
+          brightness: Brightness.light,
+        );
+        final darkScheme = ColorScheme.fromSeed(
+          seedColor: seedColor,
+          brightness: Brightness.dark,
+        );
 
-        return DynamicColorBuilder(
-          builder: (lightDynamic, darkDynamic) {
-            // Determine if dynamic color should be used
-            final useDynamic = themeState.useDynamicColor && lightDynamic != null;
-
-            // Use user selected seed color or default
-            final seedColor = themeState.seedColor;
-
-            // Build color schemes
-            final lightScheme = useDynamic
-                ? lightDynamic.harmonized()
-                : ColorScheme.fromSeed(
-                    seedColor: seedColor,
-                    brightness: Brightness.light,
-                  );
-
-            final darkScheme = useDynamic && darkDynamic != null
-                ? darkDynamic.harmonized()
-                : ColorScheme.fromSeed(
-                    seedColor: seedColor,
-                    brightness: Brightness.dark,
-                  );
-
-            return AdaptiveTheme(
-              light: ThemeBuilder.buildTheme(lightScheme, useDynamic ? lightDynamic.secondary : ThemeBuilder.getSecondaryForSeed(seedColor)),
-              dark: ThemeBuilder.buildTheme(darkScheme, useDynamic && darkDynamic != null ? darkDynamic.secondary : ThemeBuilder.getSecondaryForSeed(seedColor)),
-              initial: widget.savedThemeMode ?? AdaptiveThemeMode.light,
-              builder: (theme, darkTheme) {
-                return MaterialApp.router(
-                  routerConfig: _router,
-                  builder: (context, c) {
-                    final colorScheme = Theme.of(context).colorScheme;
-                    EasyRefresh.defaultHeaderBuilder = () => MaterialHeader(
-                          triggerOffset: 50,
-                          color: colorScheme.primary,
-                          backgroundColor:
-                              colorScheme.surfaceContainerHighest,
-                        );
-                    EasyRefresh.defaultFooterBuilder =
-                        () => const ClassicFooter();
-                    return ScrollConfiguration(
-                      behavior: SimpleScrollBehavior(),
-                      child: c!,
+        return AdaptiveTheme(
+          light: ThemeBuilder.buildTheme(lightScheme, secondary),
+          dark: ThemeBuilder.buildTheme(darkScheme, secondary),
+          initial: widget.savedThemeMode ?? AdaptiveThemeMode.light,
+          builder: (theme, darkTheme) {
+            return MaterialApp.router(
+              routerConfig: _router,
+              builder: (context, c) {
+                final colorScheme = Theme.of(context).colorScheme;
+                EasyRefresh.defaultHeaderBuilder = () => MaterialHeader(
+                      triggerOffset: 50,
+                      color: colorScheme.primary,
+                      backgroundColor: colorScheme.surfaceContainerHighest,
                     );
-                  },
-                  theme: theme,
-                  darkTheme: darkTheme,
-                  localizationsDelegates: [
-                    GlobalWidgetsLocalizations.delegate,
-                    GlobalMaterialLocalizations.delegate,
-                    GlobalCupertinoLocalizations.delegate,
-                  ],
-                  supportedLocales: [
-                    const Locale('en'),
-                    const Locale('zh', 'CN'),
-                  ],
-                  localeResolutionCallback: (locale, supportedLocales) => locale,
+                EasyRefresh.defaultFooterBuilder = () => const ClassicFooter();
+                return ScrollConfiguration(
+                  behavior: SimpleScrollBehavior(),
+                  child: c!,
                 );
               },
+              theme: theme,
+              darkTheme: darkTheme,
+              localizationsDelegates: [
+                GlobalWidgetsLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: [
+                const Locale('en'),
+                const Locale('zh', 'CN'),
+              ],
+              localeResolutionCallback: (locale, supportedLocales) => locale,
             );
           },
         );
