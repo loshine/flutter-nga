@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 
 class AccountListState {
   final List<CacheUser> list;
@@ -28,21 +30,32 @@ class AccountListNotifier extends Notifier<AccountListState> {
     state = state.copyWith(list: accountList);
   }
 
-  Future<int> quitAll() {
+  Future<int> quitAll() async {
     final repository = ref.read(userRepositoryProvider);
-    return repository.quitAllLoginUser();
+    final result = await repository.quitAllLoginUser();
+    ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+    return result;
   }
 
-  Future<bool> setDefault(CacheUser cacheUser) {
+  Future<bool> setDefault(CacheUser cacheUser) async {
     final repository = ref.read(userRepositoryProvider);
-    return repository.setDefault(cacheUser);
+    final result = await repository.setDefault(cacheUser);
+    if (result) {
+      ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+    }
+    return result;
   }
 
-  Future<bool> delete(CacheUser cacheUser) {
+  Future<bool> delete(CacheUser cacheUser) async {
     final repository = ref.read(userRepositoryProvider);
-    return repository.deleteCacheUser(cacheUser);
+    final result = await repository.deleteCacheUser(cacheUser);
+    if (result) {
+      ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+    }
+    return result;
   }
 }
 
 final accountListProvider =
-    NotifierProvider<AccountListNotifier, AccountListState>(AccountListNotifier.new);
+    NotifierProvider<AccountListNotifier, AccountListState>(
+        AccountListNotifier.new);

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class CustomForumDialog extends HookConsumerWidget {
   const CustomForumDialog({super.key});
@@ -118,12 +119,12 @@ class CustomForumDialog extends HookConsumerWidget {
     );
   }
 
-  void _addForum(
+  Future<void> _addForum(
     BuildContext context,
     WidgetRef ref,
     String fidText,
     String name,
-  ) {
+  ) async {
     final fid = int.tryParse(fidText);
     if (fid == null) {
       AppToast.warning("请输入有效的版面 ID");
@@ -134,12 +135,15 @@ class CustomForumDialog extends HookConsumerWidget {
       return;
     }
 
-    ref.read(favouriteForumListProvider.notifier).add(fid, name).then((_) {
-      AppToast.success("添加成功");
+    try {
+      final added =
+          await ref.read(favouriteForumListProvider.notifier).add(fid, name);
+      if (!added || !context.mounted) return;
+      AppToast.success('添加成功');
       Routes.pop(context);
-    }).catchError((e) {
-      debugPrint(e.toString());
-      AppToast.error("添加自定义板块失败");
-    });
+    } catch (error) {
+      debugPrint(error.toString());
+      AppToast.error('添加自定义板块失败');
+    }
   }
 }
