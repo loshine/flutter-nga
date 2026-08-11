@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/motion.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ForumFavouriteButtonWidget extends HookConsumerWidget {
   const ForumFavouriteButtonWidget(
@@ -16,12 +18,14 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final forum = Forum(fid, name ?? '', type: type ?? 0);
     usePostFrameEffect(() {
-      ref.read(favouriteForumProvider(fid).notifier).load(name);
-    }, [fid, name]);
+      ref.read(favouriteForumListProvider.notifier).ensureLoaded();
+    }, [fid, name, type]);
 
-    final isFavourite = ref.watch(favouriteForumProvider(fid));
-    final notifier = ref.read(favouriteForumProvider(fid).notifier);
+    final isFavourite = ref.watch(favouriteForumProvider(forum.identity));
+    final isBusy = ref.watch(favouriteForumBusyProvider(forum.identity));
+    final notifier = ref.read(favouriteForumListProvider.notifier);
 
     return IconButton(
       icon: AnimatedSwitcher(
@@ -37,13 +41,15 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
           key: ValueKey(isFavourite),
         ),
       ),
-      onPressed: () {
-        notifier.toggle(name, type).then((_) {
-          ref.read(favouriteForumListProvider.notifier).refresh();
-        }).catchError((err) {
-          AppToast.error(err);
-        });
-      },
+      onPressed: isBusy
+          ? null
+          : () async {
+              try {
+                await notifier.toggle(forum);
+              } catch (error) {
+                AppToast.error(error);
+              }
+            },
     );
   }
 }
