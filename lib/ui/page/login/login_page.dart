@@ -2,17 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
-import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LoginPage extends StatefulWidget {
+import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/route.dart';
+
+class LoginPage extends ConsumerStatefulWidget {
+  const LoginPage({super.key});
+
   @override
-  _LoginPageState createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,15 +50,22 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _processCookieJson(String cookiesJson) {
-    Map map = json.decode(cookiesJson);
-    Data()
-        .userRepository
-        .saveLogin(map['uid'].toString(), map['token'], map['username'])
-        .whenComplete(() {
-      AppToast.success("登录成功");
-      Routes.pop(context);
-    });
+  Future<void> _processCookieJson(String cookiesJson) async {
+    try {
+      final map = json.decode(cookiesJson) as Map;
+      await Data().userRepository.saveLogin(
+            map['uid'].toString(),
+            map['token'],
+            map['username'],
+          );
+      ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+      if (mounted) {
+        AppToast.success("登录成功");
+        Routes.pop(context);
+      }
+    } catch (error) {
+      AppToast.error(error);
+    }
   }
 
   void _showImportCookiesDialog() {
@@ -65,14 +77,16 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _processCookiesString(String cookies) {
-    Data().userRepository.saveLoginCookies(cookies).whenComplete(() {
+  Future<void> _processCookiesString(String cookies) async {
+    try {
+      await Data().userRepository.saveLoginCookies(cookies);
+      ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+      if (!mounted) return;
       AppToast.success("登录成功");
       Routes.pop(context);
-    }).catchError((e, stack) {
+    } catch (error, stack) {
       debugPrintStack(stackTrace: stack);
-      AppToast.error(e);
-      throw e;
-    });
+      AppToast.error(error);
+    }
   }
 }
