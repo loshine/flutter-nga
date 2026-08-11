@@ -12,17 +12,23 @@ class DataRepositories {
   DataRepositories({
     required Database database,
     required Dio dio,
-  })  : emoticonRepository = EmoticonDataRepository(),
-        forumRepository = ForumDataRepository(database, dio),
-        messageRepository = MessageDataRepository(dio),
-        resourceRepository = ResourceDataRepository(),
-        topicRepository = TopicDataRepository(database, dio),
-        userRepository = UserDataRepository(database, dio);
+  }) {
+    userRepository = UserDataRepository(database, dio);
+    emoticonRepository = EmoticonDataRepository();
+    forumRepository = ForumDataRepository(
+      database,
+      dio,
+      userRepository.getDefaultUser,
+    );
+    messageRepository = MessageDataRepository(dio);
+    resourceRepository = ResourceDataRepository();
+    topicRepository = TopicDataRepository(database, dio);
+  }
 
-  final EmoticonRepository emoticonRepository;
-  final ForumRepository forumRepository;
-  final MessageRepository messageRepository;
-  final ResourceRepository resourceRepository;
-  final TopicRepository topicRepository;
-  final UserRepository userRepository;
+  late final EmoticonRepository emoticonRepository;
+  late final ForumRepository forumRepository;
+  late final MessageRepository messageRepository;
+  late final ResourceRepository resourceRepository;
+  late final TopicRepository topicRepository;
+  late final UserRepository userRepository;
 }
