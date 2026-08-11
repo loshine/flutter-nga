@@ -12,23 +12,42 @@ class _PendingTopicSinglePageNotifier extends TopicSinglePageNotifier {
   _PendingTopicSinglePageNotifier(
     super.key,
     this.completer,
+    this.started,
   );
 
   final Completer<TopicSinglePageState> completer;
+  final Completer<void> started;
 
   @override
-  Future<TopicSinglePageState> refresh() => completer.future;
+  Future<TopicSinglePageState> refresh() {
+    if (!started.isCompleted) started.complete();
+    return completer.future;
+  }
 }
 
 class _TopicRequestHarness {
   final requests = <TopicSinglePageKey, Completer<TopicSinglePageState>>{};
+  final refreshStarts = <TopicSinglePageKey, Completer<void>>{};
 
   TopicSinglePageNotifier createNotifier(TopicSinglePageKey key) {
     final completer = requests.putIfAbsent(
       key,
       () => Completer<TopicSinglePageState>(),
     );
-    return _PendingTopicSinglePageNotifier(key, completer);
+    final started = refreshStarts.putIfAbsent(key, Completer<void>.new);
+    return _PendingTopicSinglePageNotifier(key, completer, started);
+  }
+
+  Future<void> waitForRefreshStart(
+    WidgetTester tester,
+    TopicSinglePageKey key,
+  ) async {
+    final started = refreshStarts[key]!;
+    for (var i = 0; i < 50 && !started.isCompleted; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(started.isCompleted, isTrue,
+        reason: 'Initial refresh did not start.');
   }
 }
 
@@ -67,7 +86,10 @@ void main() {
     expect(find.text('新标题'), findsOneWidget);
     expect(find.text('旧标题'), findsNothing);
     expect(find.text('1/1'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 50));
+    await harness.waitForRefreshStart(
+      tester,
+      const TopicSinglePageKey(tid: 2, page: 1),
+    );
   });
 
   testWidgets('network title replaces an empty route title', (tester) async {
@@ -88,7 +110,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 50));
+    await harness.waitForRefreshStart(tester, requestKey);
 
     harness.requests[requestKey]!.complete(
       const TopicSinglePageState(
@@ -97,9 +119,11 @@ void main() {
         topic: Topic(tid: 2, subject: '接口标题'),
       ),
     );
-    // Flush refresh Future, then AppBar rebuild from updateMetadata.
     await tester.pump();
     await tester.pump();
+    // Advance EasyRefresh's processed-state timer before test teardown.
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(find.text('接口标题'), findsOneWidget);
     expect(find.text('1/4'), findsOneWidget);
@@ -124,7 +148,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 50));
+    await harness.waitForRefreshStart(tester, requestKey);
     await tester.pumpWidget(const SizedBox.shrink());
 
     harness.requests[requestKey]!.complete(
