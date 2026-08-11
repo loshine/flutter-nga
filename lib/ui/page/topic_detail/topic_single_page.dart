@@ -47,7 +47,9 @@ class TopicSinglePage extends HookConsumerWidget {
         final next = await notifier.refresh();
         if (!context.mounted) return;
 
-        ref.read(topicDetailProvider(detailProviderKey).notifier).updateMetadata(
+        ref
+            .read(topicDetailProvider(detailProviderKey).notifier)
+            .updateMetadata(
               maxPage: next.maxPage,
               maxFloor: next.maxFloor,
               topic: next.topic,
@@ -61,15 +63,9 @@ class TopicSinglePage extends HookConsumerWidget {
       }
     }
 
-    // Auto-load only when this page has no data yet (lazy tab mount / remount).
-    usePostFrameEffect(() {
-      final existing = ref.read(topicSinglePageProvider(providerKey));
-      if (existing.replyList.isNotEmpty) return;
-      refreshController.callRefresh();
-    }, [providerKey.tid, providerKey.page, providerKey.authorid]);
-
     return EasyRefresh(
       controller: refreshController,
+      refreshOnStart: state.replyList.isEmpty,
       onRefresh: onRefresh,
       child: ListView.builder(
         itemCount: state.replyList.length,
@@ -188,8 +184,7 @@ class TopicSinglePage extends HookConsumerWidget {
 
       // 评论占位楼层（无正文、标题为系统文案）按 pid 找回真实评论
       Reply? commentSource;
-      if (reply.content.isEmpty &&
-          (reply.subject ?? '').contains('发表了一条评论')) {
+      if (reply.content.isEmpty && (reply.subject ?? '').contains('发表了一条评论')) {
         commentSource = _findCommentByPid(state, reply.pid);
       }
 
