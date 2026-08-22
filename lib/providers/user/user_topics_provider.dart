@@ -43,10 +43,14 @@ class UserTopicsState {
 }
 
 class UserTopicsNotifier extends Notifier<UserTopicsState> {
+  UserTopicsNotifier(this.authorid);
+
+  final int authorid;
+
   @override
   UserTopicsState build() => UserTopicsState.initial();
 
-  Future<UserTopicsState> refresh(int authorid) async {
+  Future<UserTopicsState> refresh() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
       TopicListData data =
@@ -64,7 +68,7 @@ class UserTopicsNotifier extends Notifier<UserTopicsState> {
     }
   }
 
-  Future<UserTopicsState> loadMore(int authorid) async {
+  Future<UserTopicsState> loadMore() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
       TopicListData data =
@@ -86,4 +90,5 @@ class UserTopicsNotifier extends Notifier<UserTopicsState> {
 }
 
 final userTopicsProvider =
-    NotifierProvider<UserTopicsNotifier, UserTopicsState>(UserTopicsNotifier.new);
+    NotifierProvider.family<UserTopicsNotifier, UserTopicsState, int>(
+        UserTopicsNotifier.new);

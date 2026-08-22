@@ -38,10 +38,14 @@ class UserRepliesState {
 }
 
 class UserRepliesNotifier extends Notifier<UserRepliesState> {
+  UserRepliesNotifier(this.authorid);
+
+  final int authorid;
+
   @override
   UserRepliesState build() => UserRepliesState.initial();
 
-  Future<UserRepliesState> refresh(int authorid) async {
+  Future<UserRepliesState> refresh() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
       TopicListData data = await repository.getUserReplies(authorid, 1);
@@ -57,7 +61,7 @@ class UserRepliesNotifier extends Notifier<UserRepliesState> {
     }
   }
 
-  Future<UserRepliesState> loadMore(int authorid) async {
+  Future<UserRepliesState> loadMore() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
       TopicListData data =
@@ -67,8 +71,7 @@ class UserRepliesNotifier extends Notifier<UserRepliesState> {
       state = UserRepliesState(
         size: data.rRows,
         page: state.page + 1,
-        enablePullUp:
-            newList.length == data.rRows * (state.page + 1),
+        enablePullUp: newList.length == data.rRows * (state.page + 1),
         list: newList,
       );
       return state;
@@ -79,4 +82,5 @@ class UserRepliesNotifier extends Notifier<UserRepliesState> {
 }
 
 final userRepliesProvider =
-    NotifierProvider<UserRepliesNotifier, UserRepliesState>(UserRepliesNotifier.new);
+    NotifierProvider.family<UserRepliesNotifier, UserRepliesState, int>(
+        UserRepliesNotifier.new);
