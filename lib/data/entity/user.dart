@@ -1,3 +1,5 @@
+import 'package:flutter_nga/utils/json_cast.dart';
+
 class User {
   int? uid;
   final String? username;
@@ -147,11 +149,12 @@ class UserInfo {
 
   factory UserInfo.fromJson(Map map) {
     List<ForumReputation> reputationList = [];
-    Map<String, dynamic>? reputationMap = map['reputation'];
+    final reputationMap = asJsonMapOrNull(map['reputation'], 'UserInfo.reputation');
     if (reputationMap != null) {
       reputationMap.forEach((k, v) {
-        (v as Map)['id'] = int.parse(k);
-        reputationList.add(ForumReputation.fromJson(v));
+        final item = asJsonMap(v, 'UserInfo.reputation.$k');
+        item['id'] = int.parse(k);
+        reputationList.add(ForumReputation.fromJson(item));
       });
     }
     final userForum = map['userForum'];
