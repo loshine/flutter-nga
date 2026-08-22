@@ -26,24 +26,20 @@ class UserInfoPage extends StatefulHookConsumerWidget {
 }
 
 class _UserInfoPageState extends ConsumerState<UserInfoPage> {
+  UserInfoKey get _query =>
+      UserInfoKey(uid: widget.uid, username: widget.username);
+
   @override
   Widget build(BuildContext context) {
+    final query = _query;
     usePostFrameEffect(() {
-      final notifier = ref.read(userInfoProvider.notifier);
-      if (widget.uid != null) {
-        notifier.loadByUid(widget.uid).catchError((err) {
-          AppToast.error(err);
-          return ref.read(userInfoProvider);
-        });
-      } else if (widget.username != null) {
-        notifier.loadByName(widget.username).catchError((err) {
-          AppToast.error(err);
-          return ref.read(userInfoProvider);
-        });
-      }
+      ref.read(userInfoProvider(query).notifier).load().catchError((err) {
+        AppToast.error(err);
+        return ref.read(userInfoProvider(query));
+      });
     }, [widget.uid, widget.username]);
 
-    final userInfo = ref.watch(userInfoProvider);
+    final userInfo = ref.watch(userInfoProvider(query));
 
     return Scaffold(
       body: CustomScrollView(
