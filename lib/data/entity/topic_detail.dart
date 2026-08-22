@@ -2,6 +2,7 @@ import 'dart:core';
 
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/user.dart';
+import 'package:flutter_nga/utils/json_cast.dart';
 
 class TopicDetailData {
   final Map<String, Reply> replyList;
@@ -34,9 +35,9 @@ class TopicDetailData {
   });
 
   factory TopicDetailData.fromJson(Map<String, dynamic> map) {
-    Map<String, dynamic> userMap = map["__U"];
-    Map<String, dynamic> replyMap = map["__R"];
-    Map<String, dynamic> topicInfoMap = map["__T"];
+    final userMap = asJsonMap(map["__U"], 'TopicDetailData.__U');
+    final replyMap = asJsonMap(map["__R"], 'TopicDetailData.__R');
+    final topicInfoMap = asJsonMap(map["__T"], 'TopicDetailData.__T');
     Map<String, User> tempUserMap = {};
     Map<String, Group> tempGroupMap = {};
     Map<String, Medal> tempMedalMap = {};
@@ -46,22 +47,32 @@ class TopicDetailData {
       if (key == null) {
         // __GROUPS 用户等级
         if ("__GROUPS" == entry.key) {
-          for (MapEntry<String, dynamic> m in entry.value.entries) {
-            tempGroupMap[m.key] = Group.fromJson(m.value);
+          final groups = asJsonMap(entry.value, 'TopicDetailData.__U.__GROUPS');
+          for (final m in groups.entries) {
+            tempGroupMap[m.key] =
+                Group.fromJson(asJsonMap(m.value, 'TopicDetailData.__U.__GROUPS.${m.key}'));
           }
         } else if ("__MEDALS" == entry.key) {
           // __MEDALS 奖牌
-          for (MapEntry<String, dynamic> m in entry.value.entries) {
-            tempMedalMap[m.key] = Medal.fromJson(m.value);
+          final medals = asJsonMap(entry.value, 'TopicDetailData.__U.__MEDALS');
+          for (final m in medals.entries) {
+            tempMedalMap[m.key] =
+                Medal.fromJson(asJsonMap(m.value, 'TopicDetailData.__U.__MEDALS.${m.key}'));
           }
         } else if ("__REPUTATIONS" == entry.key) {
           // __REPUTATIONS 威望
-          for (MapEntry<String, dynamic> m in entry.value.entries) {
-            tempReputationMap[m.key] = Reputation.fromJson(m.value);
+          final reputations =
+              asJsonMap(entry.value, 'TopicDetailData.__U.__REPUTATIONS');
+          for (final m in reputations.entries) {
+            tempReputationMap[m.key] = Reputation.fromJson(
+              asJsonMap(m.value, 'TopicDetailData.__U.__REPUTATIONS.${m.key}'),
+            );
           }
         }
       } else {
-        tempUserMap[entry.key] = User.fromJson(entry.value);
+        tempUserMap[entry.key] = User.fromJson(
+          asJsonMap(entry.value, 'TopicDetailData.__U.${entry.key}'),
+        );
         if (key != tempUserMap[entry.key]!.uid) {
           tempUserMap[entry.key]!.uid = key;
         }
@@ -69,9 +80,15 @@ class TopicDetailData {
     }
     Map<String, Reply> tempReplyMap = {};
     for (MapEntry<String, dynamic> entry in replyMap.entries) {
-      tempReplyMap[entry.key] = Reply.fromJson(entry.value);
+      tempReplyMap[entry.key] = Reply.fromJson(
+        asJsonMap(entry.value, 'TopicDetailData.__R.${entry.key}'),
+      );
     }
-    Map<String, dynamic> topicMisc = topicInfoMap["post_misc_var"];
+    final topicMisc = asJsonMapOrNull(
+          topicInfoMap["post_misc_var"],
+          'TopicDetailData.__T.post_misc_var',
+        ) ??
+        {};
     List<int> hotReplies = [];
     if (topicMisc.containsKey("17")) {
       String hots = topicMisc["17"];
@@ -92,7 +109,7 @@ class TopicDetailData {
       currentRows: map["__R__ROWS"],
       replyPageRows: map["__R__ROWS_PAGE"],
       rows: map["__ROWS"],
-      topic: Topic.fromJson(map["__T"]),
+      topic: Topic.fromJson(asJsonMap(map["__T"], 'TopicDetailData.__T')),
       hotReplies: hotReplies,
     );
   }
@@ -142,14 +159,19 @@ class Reply {
   factory Reply.fromJson(Map<String, dynamic> map) {
     dynamic commentData = map["comment"];
     List<Reply> commentList = [];
-    if (commentData is Map<String, dynamic>) {
-      commentData.forEach((k, v) => commentList.add(Reply.fromJson(v)));
+    if (commentData is Map) {
+      final comments = asJsonMap(commentData, 'Reply.comment');
+      comments.forEach((k, v) => commentList.add(
+            Reply.fromJson(asJsonMap(v, 'Reply.comment.$k')),
+          ));
     }
     dynamic attachmentData = map["attachs"];
     List<Attachment> attachmentList = [];
-    if (attachmentData is Map<String, dynamic>) {
-      attachmentData
-          .forEach((k, v) => attachmentList.add(Attachment.fromJson(v)));
+    if (attachmentData is Map) {
+      final attachments = asJsonMap(attachmentData, 'Reply.attachs');
+      attachments.forEach((k, v) => attachmentList.add(
+            Attachment.fromJson(asJsonMap(v, 'Reply.attachs.$k')),
+          ));
     }
     return Reply(
       content: map["content"] == null ? "" : map["content"].toString(),
