@@ -8,6 +8,10 @@ class UserInfoState {
   final int? uid;
   final String? username;
   final String? avatar;
+  final String? group;
+  final int? fame;
+  final int? money;
+  final int? registerDate;
   final Map<String, String>? basicInfoMap;
   final String? signature;
   final Map<int, String>? moderatorForums;
@@ -19,6 +23,10 @@ class UserInfoState {
     this.uid,
     this.username,
     this.avatar,
+    this.group,
+    this.fame,
+    this.money,
+    this.registerDate,
     this.basicInfoMap,
     this.signature,
     this.moderatorForums,
@@ -107,6 +115,10 @@ class UserInfoNotifier extends Notifier<UserInfoState> {
       uid: userInfo.uid,
       username: userInfo.username,
       avatar: userInfo.avatar,
+      group: userInfo.group,
+      fame: userInfo.fame,
+      money: userInfo.money,
+      registerDate: userInfo.registerDate,
       basicInfoMap: {
         '用户ID': '${userInfo.uid}',
         '用户名': '${userInfo.username}',
@@ -133,6 +145,10 @@ extension UserInfoStateCopyWith on UserInfoState {
       uid: uid,
       username: username,
       avatar: avatar,
+      group: group,
+      fame: fame,
+      money: money,
+      registerDate: registerDate,
       basicInfoMap: basicInfoMap,
       signature: signature,
       moderatorForums: moderatorForums,
