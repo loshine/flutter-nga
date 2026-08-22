@@ -63,9 +63,36 @@ class UserInfoState {
       );
 }
 
+/// 用户主页查询身份：按 uid 或用户名分桶，避免不同用户共用一份缓存
+class UserInfoKey {
+  final String? uid;
+  final String? username;
+
+  const UserInfoKey({this.uid, this.username});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserInfoKey && uid == other.uid && username == other.username;
+
+  @override
+  int get hashCode => Object.hash(uid, username);
+}
+
 class UserInfoNotifier extends Notifier<UserInfoState> {
+  UserInfoNotifier(this.query);
+
+  final UserInfoKey query;
+
   @override
   UserInfoState build() => UserInfoState.initial();
+
+  Future<UserInfoState> load() {
+    if (query.uid != null && query.uid!.isNotEmpty) {
+      return loadByUid(query.uid);
+    }
+    return loadByName(query.username);
+  }
 
   Future<UserInfoState> loadByName(String? username) async {
     state = UserInfoState.initial().copyWith(isLoading: true);
@@ -160,4 +187,5 @@ extension UserInfoStateCopyWith on UserInfoState {
 }
 
 final userInfoProvider =
-    NotifierProvider<UserInfoNotifier, UserInfoState>(UserInfoNotifier.new);
+    NotifierProvider.family<UserInfoNotifier, UserInfoState, UserInfoKey>(
+        UserInfoNotifier.new);
