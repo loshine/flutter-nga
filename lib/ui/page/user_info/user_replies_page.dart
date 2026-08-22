@@ -19,12 +19,12 @@ class UserRepliesPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
-    final state = ref.watch(userRepliesProvider);
-    final notifier = ref.read(userRepliesProvider.notifier);
+    final state = ref.watch(userRepliesProvider(uid));
+    final notifier = ref.read(userRepliesProvider(uid).notifier);
 
     Future<void> onRefresh() async {
       try {
-        await notifier.refresh(uid);
+        await notifier.refresh();
         if (!context.mounted) return;
         refreshController.finishRefresh();
         refreshController.resetFooter();
@@ -37,7 +37,7 @@ class UserRepliesPage extends HookConsumerWidget {
 
     Future<void> onLoading() async {
       try {
-        final next = await notifier.loadMore(uid);
+        final next = await notifier.loadMore();
         if (!context.mounted) return;
         if (next.list.length == next.page * next.size) {
           refreshController.finishLoad();
