@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/utils/constant.dart';
+import 'package:flutter_nga/utils/json_cast.dart';
 
 class TopicListData {
   const TopicListData({
@@ -25,15 +26,16 @@ class TopicListData {
   final int rRows;
 
   factory TopicListData.fromJson(Map<String, dynamic> map, int? page) {
-    Map<String, dynamic> topicMap = map["__T"];
+    final topicMap = asJsonMap(map["__T"], 'TopicListData.__T');
     Map<String, Topic> tempMap = {};
     for (MapEntry<String, dynamic> entry in topicMap.entries) {
-      entry.value["page"] = page;
-      tempMap[entry.key] = Topic.fromJson(entry.value);
+      final topicJson = asJsonMap(entry.value, 'TopicListData.__T.${entry.key}');
+      topicJson["page"] = page;
+      tempMap[entry.key] = Topic.fromJson(topicJson);
     }
     return TopicListData(
       global: map["__GLOBAL"],
-      forum: ForumInfo.fromJson(map["__F"]),
+      forum: ForumInfo.fromJson(asJsonMap(map["__F"], 'TopicListData.__F')),
       rows: map["__ROWS"] != "" ? map["__ROWS"] : null,
       topicList: tempMap,
       currentRows: map["__T__ROWS"],
@@ -111,7 +113,7 @@ class Topic {
       replies: map["replies"],
       topicMisc: map["topic_misc"],
       page: map["page"],
-      parent: TopicParent.fromJson(map["parent"] == null ? {} : map["parent"]),
+      parent: TopicParent.parse(map["parent"]),
     );
   }
 
@@ -200,6 +202,17 @@ class TopicParent {
   factory TopicParent.fromJson(Map<String, dynamic> map) {
     return TopicParent(map["2"]);
   }
+
+  /// NGA 的 parent 可能是 `{"2": "名称"}`，也可能是空字符串或名称本身。
+  static TopicParent? parse(dynamic value) {
+    if (value == null || value == '') return null;
+    if (value is String) return TopicParent(value);
+    if (value is Map) {
+      return TopicParent.fromJson(asJsonMap(value, 'Topic.parent'));
+    }
+    logJsonTypeMismatch('Topic.parent', value);
+    return null;
+  }
 }
 
 class ForumInfo {
@@ -212,7 +225,8 @@ class ForumInfo {
   factory ForumInfo.fromJson(Map map) {
     List<ChildForum> subForums = [];
     if (map['sub_forums'] != null && map['sub_forums'] is Map) {
-      (map['sub_forums'] as Map<String, dynamic>).forEach((k, v) {
+      asJsonMap(map['sub_forums'], 'ForumInfo.sub_forums').forEach((k, v) {
+        final forum = asJsonMap(v, 'ForumInfo.sub_forums.$k');
         dynamic selectedForum = map['__SELECTED_FORUM'];
         List<int> selectedIds = [];
         if (selectedForum is String) {
@@ -221,12 +235,12 @@ class ForumInfo {
                 .addAll(selectedForum.split(",").map((s) => int.parse(s)));
           }
         }
-        String? desc = v['2'];
-        int id = v['0'];
+        String? desc = forum['2'];
+        int id = forum['0'];
         subForums.add(ChildForum(
           id,
-          v['1'],
-          v['3'],
+          forum['1'],
+          forum['3'],
           parentId: map['fid'],
           desc: desc != null && desc.isNotEmpty ? desc : null,
           type: k.startsWith("t") ? 1 : 0,

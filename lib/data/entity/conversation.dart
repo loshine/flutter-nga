@@ -1,3 +1,5 @@
+import 'package:flutter_nga/utils/json_cast.dart';
+
 class Conversation {
   final int? mid;
   final int? lastModify;
@@ -98,7 +100,8 @@ class ConversationListData {
       if (entry.key != 'nextPage' &&
           entry.key != 'currentPage' &&
           entry.key != 'rowsPerPage') {
-        tempMap[entry.key] = Conversation.fromJson(entry.value);
+        tempMap[entry.key] =
+            Conversation.fromJson(asJsonMap(entry.value, 'ConversationListData.${entry.key}'));
       }
     }
     return ConversationListData(
