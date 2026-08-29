@@ -106,6 +106,15 @@ class DataConfigService {
         return;
       }
 
+      if (savedKey == BaseUrlPresets.legacyNga178Key) {
+        _currentBaseUrlConfig = BaseUrlPresets.ngaOfficial;
+        await _saveBaseUrlConfig(_currentBaseUrlConfig);
+        debugPrint(
+          'Data: 已将旧版 baseUrl 迁移至: ${_currentBaseUrlConfig.url}',
+        );
+        return;
+      }
+
       final preset = BaseUrlPresets.getByKey(savedKey);
       if (preset == null) {
         _currentBaseUrlConfig = BaseUrlPresets.defaultConfig;

@@ -70,19 +70,15 @@ class BaseUrlConfig {
 class BaseUrlPresets {
   BaseUrlPresets._();
 
-  /// NGA 178 域名 (默认)
-  static const BaseUrlConfig nga178 = BaseUrlConfig(
-    key: 'nga_178',
-    name: 'NGA 178 (nga.178.com)',
-    url: 'https://nga.178.com/',
-    isDefault: true,
-  );
+  /// 旧版 NGA 178 配置键，仅用于迁移已保存的用户设置。
+  static const String legacyNga178Key = 'nga_178';
 
   /// NGA 官方主站 (bbs.nga.cn)
   static const BaseUrlConfig ngaOfficial = BaseUrlConfig(
     key: 'nga_official',
     name: 'NGA 官方 (bbs.nga.cn)',
     url: 'https://bbs.nga.cn/',
+    isDefault: true,
   );
 
   /// NGA 新域名 (ngabbs.cn)
@@ -101,7 +97,6 @@ class BaseUrlPresets {
 
   /// 所有可用配置列表
   static const List<BaseUrlConfig> all = [
-    nga178,
     ngaOfficial,
     ngaBbs,
     custom,
@@ -109,7 +104,7 @@ class BaseUrlPresets {
 
   /// 获取默认配置
   static BaseUrlConfig get defaultConfig =>
-      all.firstWhere((config) => config.isDefault, orElse: () => nga178);
+      all.firstWhere((config) => config.isDefault, orElse: () => ngaOfficial);
 
   /// 根据 key 获取配置
   static BaseUrlConfig? getByKey(String key) {
