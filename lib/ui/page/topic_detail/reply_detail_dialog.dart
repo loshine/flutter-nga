@@ -1,18 +1,18 @@
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/topic/topic_reply_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ReplyDetailDialog extends HookConsumerWidget {
   final int? pid;

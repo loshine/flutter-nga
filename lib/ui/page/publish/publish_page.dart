@@ -1,18 +1,18 @@
-import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_nga/utils/app_toast.dart';
 
 enum _BottomPanel { emoticon, font, attachment }
 

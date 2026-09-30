@@ -1,9 +1,9 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ThemeSelectionDialog extends ConsumerWidget {
   const ThemeSelectionDialog({super.key});

@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
-import 'package:flutter_nga/ui/widget/username_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_nga/ui/widget/username_text.dart';
 
 void main() {
   testWidgets('uses a stable color for the same user', (tester) async {

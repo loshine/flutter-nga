@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class InfoWidget extends StatelessWidget {
   const InfoWidget({this.title, this.subTitle, super.key});

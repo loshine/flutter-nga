@@ -10,7 +10,8 @@ description: A new Flutter project.
 version: 0.0.51+4051
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.13.0 <4.0.0"
+  flutter: ">=3.47.0"
 
 dependencies:
   flutter:
@@ -34,9 +35,9 @@ dependencies:
   html_unescape: ^2.0.0
   timeago: ^3.7.1
   intl: ^0.20.3
-  # 3.8.0 migrates to material_ui, which is incompatible with the
-  # package:flutter/material.dart types used by this app and flutter_html.
-  adaptive_theme: 3.7.2
+  adaptive_theme: ^3.8.0
+  material_ui: ^1.5.0
+  cupertino_ui: ^1.1.1
   photo_view: ^0.15.0
   easy_refresh: ^3.5.1
   collection: ^1.19.1
@@ -56,6 +57,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  shared_preferences_platform_interface: ^2.4.2
   build_runner: ^2.16.1
   image: ^4.10.1
 

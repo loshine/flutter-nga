@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/user/user_info_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';

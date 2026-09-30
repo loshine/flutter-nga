@@ -1,10 +1,10 @@
 import 'package:easy_refresh/easy_refresh.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
-import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 
 import 'notification_item_widget.dart';
 

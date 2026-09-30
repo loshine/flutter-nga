@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// 【我的】页面：集中收藏、历史、消息、提醒以及设置、关于入口
 class MinePage extends HookConsumerWidget {

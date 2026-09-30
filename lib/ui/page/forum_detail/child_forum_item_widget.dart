@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/providers/forum/child_forum_subscription_provider.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ChildForumItemWidget extends ConsumerWidget {
   final ChildForum childForum;
