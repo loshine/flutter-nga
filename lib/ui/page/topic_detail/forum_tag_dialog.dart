@@ -29,15 +29,18 @@ class ForumTagDialog extends HookConsumerWidget {
       notifier.setList(tagList);
 
       if (tagList.isEmpty) {
-        notifier.load(fid).then((value) {
-          onLoadComplete?.call(value);
-        }).catchError((err) {
-          AppToast.error(err);
-        });
+        notifier
+            .load(fid)
+            .then((value) {
+              onLoadComplete?.call(value);
+            })
+            .catchError((err) {
+              AppToast.error(err);
+            });
       }
     }, [fid]);
 
-    final tagList = ref.watch(forumTagListProvider);
+    final tags = ref.watch(forumTagListProvider);
     final maxListHeight = MediaQuery.sizeOf(context).height * 0.55;
 
     return AlertDialog(
@@ -49,7 +52,7 @@ class ForumTagDialog extends HookConsumerWidget {
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: tagList.map((topicTag) {
+              children: tags.map((topicTag) {
                 final tag = topicTag.content;
                 return InkWell(
                   child: Padding(
