@@ -14,23 +14,25 @@ jobs:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '2.10.2'
+          flutter-version: '3.47.5'
           channel: 'stable'
-      - run: flutter --version
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '2.10.2'
+          flutter-version: '3.47.5'
         env:
           run: echo $JKS > ${{ secrets.STORE_FILE }} && echo -e "keyAlias=${{ secrets.KEY_ALIAS }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nstoreFile=${{ secrets.STORE_FILE }}\nstorePassword=${{ secrets.STORE_PASSWORD }}" > android/key.properties
-      - run: flutter pub get
-      - run: flutter test
-      - run: flutter build apk
-      - run: flutter build appbundle
+      - run: dart pub global activate fvm
+      - run: fvm install
+      - run: fvm flutter --version
+      - run: fvm flutter pub get
+      - run: fvm flutter test
+      - run: fvm flutter build apk
+      - run: fvm flutter build appbundle
       - uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
