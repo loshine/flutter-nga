@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 

@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
@@ -10,11 +10,11 @@ import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/dash.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/ui/widget/username_text.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_nga/utils/app_toast.dart';
 
 class TopicReplyItemWidget extends StatefulWidget {
   final Reply reply;

@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/topic/topic_reply_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/reply_detail_dialog.dart';
 import 'package:flutter_nga/ui/widget/username_text.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('renders quoted reply content in a dialog', (tester) async {

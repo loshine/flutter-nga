@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:timeago/timeago.dart' as time_ago;
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/utils/custom_time_messages.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:timeago/timeago.dart' as time_ago;
 
 class SplashPage extends StatefulWidget {
   @override

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import 'package:flutter_nga/data/entity/user.dart';

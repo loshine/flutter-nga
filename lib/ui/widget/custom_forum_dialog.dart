@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/utils/app_toast.dart';

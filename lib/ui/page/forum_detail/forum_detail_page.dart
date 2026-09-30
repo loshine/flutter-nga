@@ -1,15 +1,16 @@
 import 'package:easy_refresh/easy_refresh.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 import 'package:flutter_nga/utils/hooks/scroll_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
@@ -30,7 +31,7 @@ class ForumDetailPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
-    final tabController = useTabController(initialLength: _tabs.length);
+    final tabController = useMaterialTabController(initialLength: _tabs.length);
     final fabScroll = useScrollFabVisibility();
 
     useListenable(tabController);

@@ -1,13 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/common/photo_min_scale_provider.dart';
-import 'package:flutter_nga/utils/picture_utils.dart' as picture_utils;
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:photo_view/photo_view.dart';
+import 'package:flutter_nga/utils/picture_utils.dart' as picture_utils;
 
 class PhotoPreviewPage extends HookConsumerWidget {
   const PhotoPreviewPage({super.key, this.url, this.screenWidth});

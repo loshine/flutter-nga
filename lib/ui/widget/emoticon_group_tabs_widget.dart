@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/emoticon.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';

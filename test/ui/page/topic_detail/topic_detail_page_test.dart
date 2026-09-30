@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 class _PendingTopicSinglePageNotifier extends TopicSinglePageNotifier {
   _PendingTopicSinglePageNotifier(

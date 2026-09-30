@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:image_picker/image_picker.dart';
 
 typedef AttachmentCallback = void Function(
     String? attachments, String? attachmentsCheck);

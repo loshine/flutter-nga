@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 enum BlockMode { COLLAPSE, PAINT, ALPHA, DELETE_LINE, GONE }
 

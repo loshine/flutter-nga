@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('thumb colors use the refined secondary container roles',

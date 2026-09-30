@@ -1,14 +1,15 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
-import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
+import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class TopicDetailPage extends HookConsumerWidget {
   const TopicDetailPage(
@@ -32,7 +33,7 @@ class TopicDetailPage extends HookConsumerWidget {
 
     final length = state.maxPage < 1 ? 1 : state.maxPage;
     final initialIndex = (state.currentPage - 1).clamp(0, length - 1);
-    final tabController = useTabController(
+    final tabController = useMaterialTabController(
       initialLength: length,
       initialIndex: initialIndex,
       keys: [length],

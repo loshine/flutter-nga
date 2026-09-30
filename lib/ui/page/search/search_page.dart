@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/search/input_deletion_status_provider.dart';
 import 'package:flutter_nga/providers/search/search_options_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SearchPage extends HookConsumerWidget {
   final int? fid;

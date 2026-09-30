@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/line_height_selection_dialog.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class InterfaceSettingsPage extends ConsumerWidget {
   @override

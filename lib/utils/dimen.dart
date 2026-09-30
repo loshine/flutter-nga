@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 尺寸常量 - M3 Typography 对齐版本
 /// 

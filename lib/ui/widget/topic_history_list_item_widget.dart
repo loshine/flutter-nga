@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
@@ -6,7 +7,6 @@ import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/route.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TopicHistoryListItemWidget extends ConsumerWidget {
   const TopicHistoryListItemWidget({
