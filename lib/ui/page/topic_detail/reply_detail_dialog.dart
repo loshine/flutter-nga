@@ -68,7 +68,6 @@ class _ReplyWidget extends StatefulWidget {
   final User user;
 
   const _ReplyWidget({
-    super.key,
     required this.reply,
     required this.user,
   });

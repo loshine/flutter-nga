@@ -29,7 +29,6 @@ Map<String, dynamic>? asJsonMapOrNull(dynamic value, String path) {
   return asJsonMap(value, path);
 }
 
-@visibleForTesting
 void logJsonTypeMismatch(
   String path,
   dynamic value, {
