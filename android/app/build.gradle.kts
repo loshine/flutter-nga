@@ -5,6 +5,15 @@ plugins {
 
 import java.util.Properties
 
+val keyProperties = Properties().apply {
+    val propertiesFile = rootProject.file("key.properties")
+    if (propertiesFile.isFile) {
+        propertiesFile.inputStream().use { load(it) }
+    }
+}
+val releaseStorePath = keyProperties.getProperty("storeFile")
+    ?.trim()?.takeIf { it.isNotEmpty() }
+
 android {
     namespace = "io.github.loshine.flutternga"
     compileSdk = flutter.compileSdkVersion
@@ -25,6 +34,20 @@ android {
     }
 
     signingConfigs {
+        if (releaseStorePath != null) {
+            create("release") {
+                fun signingProperty(name: String): String =
+                    keyProperties.getProperty(name)?.takeIf { it.isNotEmpty() }
+                        ?: throw GradleException("请在 android/key.properties 中填写 $name")
+
+                storeFile = rootProject.file(releaseStorePath).also {
+                    require(it.isFile) { "storeFile 指定的 keystore 文件不存在" }
+                }
+                storePassword = signingProperty("storePassword")
+                keyAlias = signingProperty("keyAlias")
+                keyPassword = signingProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
