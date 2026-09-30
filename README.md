@@ -89,6 +89,26 @@ fvm flutter build appbundle
 fvm flutter build ios --no-codesign
 ```
 
+复制签名配置示例并填写实际值：
+
+```bash
+cp android/key.example.properties android/key.properties
+```
+
+`android/key.properties` 配置示例：
+
+```properties
+storeFile=/absolute/path/upload-keystore.jks
+storePassword=your-store-password
+keyAlias=upload
+keyPassword=your-key-password
+```
+
+`storeFile` 支持绝对路径或相对于 `android/` 的路径。未填写或为空时，
+Release 回退到 debug 签名；填写后必须提供其余三个字段，文件不存在或签名信息错误会报错，不回退。
+`key.properties` 已被 Git 忽略；`key.example.properties` 仅保存示例，不要在其中填写真实密码或提交 keystore。
+`key.properties` 不存在时也会回退到 debug 签名。
+
 ### 测试
 
 ```bash
