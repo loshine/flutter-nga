@@ -6,12 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 环境准备
 
-项目通过 [FVM](https://fvm.app) 使用 Flutter stable（当前 3.44.2），所有 flutter 命令必须用 `fvm flutter` 前缀执行。
+本分支通过 [FVM](https://fvm.app) 使用 Flutter OHOS（以 `.fvmrc` 中的 `ohos/3.35.8-ohos-1.0.1` 为准），所有 flutter 命令必须用 `fvm flutter` 前缀执行。
 
 ```bash
 dart pub global activate fvm   # 安装 FVM（如未安装）
-fvm install stable             # 安装指定 Flutter 版本
-fvm use stable                 # 切换到项目版本
+fvm fork add ohos https://gitcode.com/CPF-Flutter/flutter_flutter.git
+fvm install                    # 安装并使用 .fvmrc 指定版本
 ```
 
 ## 构建与测试
@@ -23,7 +23,11 @@ fvm flutter test             # 运行所有测试
 fvm flutter test test/widget_test.dart              # 单个测试文件
 fvm flutter test --name "Substring test"            # 按名称匹配
 fvm flutter build apk                               # 构建 APK
+fvm flutter build hap --debug --no-codesign          # 构建未签名鸿蒙 HAP（需 DevEco SDK）
 ```
+
+从 master 同步时保留 OHOS SDK、CPF-Flutter 插件来源及原生登录/图片保存适配。
+通用功能用 `git cherry-pick -x` 记录来源；Flutter 升级、`material_ui` / `cupertino_ui` 导入迁移和 Android 专属构建变更需独立评估。
 
 ## 核心架构
 
