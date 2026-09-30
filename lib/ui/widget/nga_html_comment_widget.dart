@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NgaHtmlCommentWidget extends ConsumerWidget {
   final String content;

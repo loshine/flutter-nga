@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/home/home_provider.dart';
 import 'package:flutter_nga/ui/page/forum_group/favourite_forum_group_page.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 
 import 'forum_group_page.dart';
 
@@ -24,7 +25,7 @@ class ForumGroupTabsPage extends HookConsumerWidget {
     tabBarViews.addAll(list
         .map((group) => KeepAliveTabView(child: ForumGroupPage(group: group))));
 
-    final tabController = useTabController(initialLength: tabs.length);
+    final tabController = useMaterialTabController(initialLength: tabs.length);
 
     useEffect(() {
       void listener() {

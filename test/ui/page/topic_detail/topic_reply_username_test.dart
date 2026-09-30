@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
 import 'package:flutter_nga/ui/widget/username_text.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('reply and comment headers use UsernameText', (tester) async {

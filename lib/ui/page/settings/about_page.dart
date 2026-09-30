@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_nga/utils/dimen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_nga/utils/dimen.dart';
 
 /// 应用信息 Provider
 final appInfoProvider = FutureProvider<PackageInfo>((ref) async {

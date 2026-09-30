@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_nga/utils/error_utils.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:toastification/toastification.dart';
+import 'package:flutter_nga/utils/error_utils.dart';
 
 abstract final class AppToast {
   static void success(Object? message) {

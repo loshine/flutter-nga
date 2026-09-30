@@ -1,8 +1,8 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_nga/utils/theme_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_nga/utils/theme_builder.dart';
 
 const String _keySeedColorValue = 'seed_color_value';
 
@@ -112,7 +112,10 @@ class ThemeNotifier extends Notifier<ThemeState> {
     _applyThemeWithRef(adaptiveTheme, color);
   }
 
-  void _applyThemeWithRef(AdaptiveThemeManager adaptiveTheme, Color seedColor) {
+  void _applyThemeWithRef(
+    AdaptiveThemeManager<ThemeData> adaptiveTheme,
+    Color seedColor,
+  ) {
     adaptiveTheme.setTheme(
       light: ThemeBuilder.buildLightTheme(seedColor),
       dark: ThemeBuilder.buildDarkTheme(seedColor),

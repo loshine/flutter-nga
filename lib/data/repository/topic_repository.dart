@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:path/path.dart';
+import 'package:sembast/sembast.dart';
 import 'package:flutter_nga/data/entity/toggle_like_reaction.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
-import 'package:path/path.dart';
-import 'package:sembast/sembast.dart';
 
 abstract class TopicRepository {
   Future<TopicListData> getTopicList(

@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_nga/data/entity/base_url_config.dart';
