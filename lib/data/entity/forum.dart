@@ -63,6 +63,56 @@ class ForumGroup {
 
   final String name;
   final List<Forum> forumList;
+
+  factory ForumGroup.fromJson(Map map) {
+    final name = map['name']?.toString();
+    final forums = map['forums'];
+    if (name == null || forums is! List) {
+      throw const FormatException('Invalid forum group data.');
+    }
+    return ForumGroup(
+      name,
+      forums.map((forum) => Forum.fromJson(forum as Map)).toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'forums': forumList.map((forum) => forum.toJson()).toList(),
+    };
+  }
+}
+
+/// 版块分类实体类（首页一级 Tab），包含若干版块组
+class ForumCategory {
+  const ForumCategory(this.id, this.name, this.groups);
+
+  final String id;
+  final String name;
+  final List<ForumGroup> groups;
+
+  factory ForumCategory.fromJson(Map map) {
+    final id = map['id']?.toString();
+    final name = map['name']?.toString();
+    final groups = map['groups'];
+    if (id == null || name == null || groups is! List) {
+      throw const FormatException('Invalid forum category data.');
+    }
+    return ForumCategory(
+      id,
+      name,
+      groups.map((group) => ForumGroup.fromJson(group as Map)).toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'groups': groups.map((group) => group.toJson()).toList(),
+    };
+  }
 }
 
 int? _parseInt(Object? value) {
