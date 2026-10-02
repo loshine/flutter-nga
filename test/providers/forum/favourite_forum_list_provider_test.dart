@@ -226,7 +226,12 @@ class _FakeForumRepository implements ForumRepository {
   }
 
   @override
-  List<ForumGroup> getForumGroups() => const [];
+  Future<List<ForumCategory>?> getCachedForumCategories() =>
+      throw UnimplementedError();
+
+  @override
+  Future<List<ForumCategory>> fetchForumCategories() =>
+      throw UnimplementedError();
 
   @override
   Future<List<Forum>> getForumByName(String keyword) =>
