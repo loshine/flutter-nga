@@ -10,6 +10,23 @@ import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/route.dart';
 
+/// NGA 登录页未声明移动端 viewport，WebView 会按桌面宽度排版后整体缩小，
+/// 注入 viewport 让页面按设备宽度排版以撑满屏幕
+const _fitViewportScript = '''
+(function() {
+  const content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no';
+  let viewport = document.querySelector('meta[name="viewport"]');
+  if (viewport) {
+    viewport.setAttribute('content', content);
+  } else {
+    viewport = document.createElement('meta');
+    viewport.name = 'viewport';
+    viewport.content = content;
+    document.head.appendChild(viewport);
+  }
+})();
+''';
+
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
@@ -38,6 +55,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           '__act': 'account',
           'login': null,
         }))),
+        onLoadStop: (InAppWebViewController controller, WebUri? url) async {
+          if (url?.queryParameters['__lib'] == 'login') {
+            await controller.evaluateJavascript(source: _fitViewportScript);
+          }
+        },
         onConsoleMessage:
             (InAppWebViewController controller, ConsoleMessage consoleMessage) {
           if (consoleMessage.message.startsWith("loginSuccess :")) {
