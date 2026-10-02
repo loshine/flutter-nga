@@ -292,6 +292,161 @@ void main() {
       );
     });
   });
+
+  group('ForumDataRepository categories', () {
+    var databaseIndex = 0;
+    late Database database;
+    late _FakeCategoryApi api;
+    late ForumDataRepository repository;
+
+    setUp(() async {
+      database = await databaseFactoryMemory.openDatabase(
+        'forum-category-test-${databaseIndex++}.db',
+      );
+      api = _FakeCategoryApi();
+      repository = ForumDataRepository(database, api.dio, () async => null);
+    });
+
+    tearDown(() async {
+      await database.close();
+    });
+
+    test('fetch posts to category endpoint and parses nested groups', () async {
+      api.data = _categoryResponse();
+
+      final categories = await repository.fetchForumCategories();
+
+      expect(api.requests.single.method, 'POST');
+      expect(
+        api.requests.single.path,
+        'app_api.php?__lib=home&__act=category&__inchst=UTF8&__output=8',
+      );
+      expect(api.requests.single.data, isA<FormData>());
+
+      expect(categories.map((category) => category.id), ['other', 'mobi']);
+      final other = categories.first;
+      expect(other.name, '网事杂谈');
+      expect(other.groups.map((group) => group.name), ['网事杂谈', 'IT软硬件']);
+      expect(
+        other.groups.first.forumList.map((forum) => forum.identity),
+        [const ForumIdentity(-7, 0), const ForumIdentity(39827852, 1)],
+      );
+      expect(other.groups.first.forumList.last.iconId, 39827852);
+
+      // 缺少 fid 但带 stid 的版块可用；缺少名称的脏数据被跳过，空组和空分类被丢弃
+      final mobi = categories.last;
+      expect(mobi.groups.single.forumList.single.identity,
+          const ForumIdentity(29182350, 1));
+    });
+
+    test('cache is empty until a successful fetch persists categories',
+        () async {
+      expect(await repository.getCachedForumCategories(), isNull);
+
+      api.data = _categoryResponse();
+      final fetched = await repository.fetchForumCategories();
+
+      final reopened = ForumDataRepository(database, api.dio, () async => null);
+      final cached = await reopened.getCachedForumCategories();
+      expect(cached, isNotNull);
+      expect(cached!.map((category) => category.toJson()),
+          fetched.map((category) => category.toJson()));
+    });
+
+    test('failed or malformed fetch keeps the previous cache', () async {
+      api.data = _categoryResponse();
+      await repository.fetchForumCategories();
+
+      api.data = {'unexpected': {}};
+      await expectLater(
+        repository.fetchForumCategories(),
+        throwsA(isA<FormatException>()),
+      );
+
+      api.fail = true;
+      await expectLater(
+        repository.fetchForumCategories(),
+        throwsA(isA<DioException>()),
+      );
+
+      final cached = await repository.getCachedForumCategories();
+      expect(cached!.map((category) => category.id), ['other', 'mobi']);
+    });
+  });
+}
+
+Map<String, dynamic> _categoryResponse() {
+  return {
+    '0': {
+      'id': 0,
+      '_id': 'other',
+      'name': '网事杂谈',
+      'groups': {
+        '0': {
+          'name': '网事杂谈',
+          'forums': {
+            '0': {'fid': -7, 'name': '网事杂谈', 'id': -7, 'bit': 1},
+            '1': {
+              'fid': -7,
+              'stid': 39827852,
+              'name': '考研讨论',
+              'id': 39827852,
+            },
+          },
+        },
+        '1': {
+          'name': 'IT软硬件',
+          'forums': {
+            '0': {'fid': '334', 'name': '硬件配置', 'id': '334'},
+          },
+        },
+      },
+    },
+    '1': {
+      'id': 0,
+      '_id': 'mobi',
+      'name': '手机游戏',
+      'groups': {
+        '0': {
+          'name': '手机/网页游戏',
+          'forums': {
+            '0': {'stid': 29182350, 'name': '评测/安利', 'id': 29182350},
+            '1': {'fid': 1, 'id': 1},
+          },
+        },
+        '1': {'name': '空组', 'forums': {}},
+      },
+    },
+    '2': {'id': 0, '_id': 'empty', 'name': '空分类', 'groups': {}},
+  };
+}
+
+class _FakeCategoryApi {
+  _FakeCategoryApi() {
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          requests.add(options);
+          if (fail) {
+            handler.reject(DioException(
+              requestOptions: options,
+              error: StateError('network failed'),
+            ));
+            return;
+          }
+          handler.resolve(Response<dynamic>(
+            requestOptions: options,
+            data: data,
+          ));
+        },
+      ),
+    );
+  }
+
+  final Dio dio = Dio();
+  final List<RequestOptions> requests = [];
+  Object? data;
+  bool fail = false;
 }
 
 CacheUser _user(String uid, String token) {
