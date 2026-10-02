@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
+import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
@@ -39,6 +40,8 @@ class ForumDetailPage extends HookConsumerWidget {
 
     final state = ref.watch(forumDetailProvider(fid));
     final notifier = ref.read(forumDetailProvider(fid).notifier);
+    final blockFilter = ref.watch(blockFilterProvider);
+    final topics = blockFilter.visibleTopics(state.list);
 
     Future<void> onRefresh() async {
       try {
@@ -69,6 +72,12 @@ class ForumDetailPage extends HookConsumerWidget {
     }
 
     useInitialRefresh(refreshController);
+    useAutoLoadWhenAllFiltered(
+      refreshController,
+      rawItems: state.list,
+      visibleCount: topics.length,
+      canLoadMore: state.enablePullUp,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -108,9 +117,10 @@ class ForumDetailPage extends HookConsumerWidget {
                 onRefresh: onRefresh,
                 onLoad: state.enablePullUp ? onLoading : null,
                 child: ListView.builder(
-                  itemCount: state.list.length,
+                  itemCount: topics.length,
                   itemBuilder: (context, index) => TopicListItemWidget(
-                    topic: state.list[index],
+                    topic: topics[index],
+                    blockMode: blockFilter.topicMode(topics[index]),
                   ),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/search/search_topic_list_provider.dart';
+import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -24,6 +25,8 @@ class SearchTopicListPage extends HookConsumerWidget {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final state = ref.watch(searchTopicListProvider);
     final notifier = ref.read(searchTopicListProvider.notifier);
+    final blockFilter = ref.watch(blockFilterProvider);
+    final topics = blockFilter.visibleTopics(state.list);
     final colorScheme = Theme.of(context).colorScheme;
 
     Future<void> onRefresh() async {
@@ -56,6 +59,12 @@ class SearchTopicListPage extends HookConsumerWidget {
     }
 
     useInitialRefresh(refreshController);
+    useAutoLoadWhenAllFiltered(
+      refreshController,
+      rawItems: state.list,
+      visibleCount: topics.length,
+      canLoadMore: state.enablePullUp,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -80,11 +89,12 @@ class SearchTopicListPage extends HookConsumerWidget {
                   vertical: Dimen.spacingS,
                 ),
                 itemBuilder: (_, index) => TopicListItemWidget(
-                  topic: state.list[index],
+                  topic: topics[index],
+                  blockMode: blockFilter.topicMode(topics[index]),
                 ),
                 separatorBuilder: (_, __) =>
                     const SizedBox(height: Dimen.spacingXS),
-                itemCount: state.list.length,
+                itemCount: topics.length,
               ),
       ),
     );

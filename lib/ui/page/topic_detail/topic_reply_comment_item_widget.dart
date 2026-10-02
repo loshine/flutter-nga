@@ -7,10 +7,18 @@ import 'package:flutter_nga/ui/widget/username_text.dart';
 
 /// 贴条评论项：紧凑 M3 风格，由外层容器提供背景与分割线
 class TopicReplyCommentItemWidget extends StatelessWidget {
-  const TopicReplyCommentItemWidget(this.reply, this.user, {super.key});
+  const TopicReplyCommentItemWidget(
+    this.reply,
+    this.user, {
+    super.key,
+    this.textDecoration,
+  });
 
   final User? user;
   final Reply reply;
+
+  /// 用户名与正文的文字装饰，用于屏蔽的删除线模式
+  final TextDecoration? textDecoration;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +45,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
+                    decoration: textDecoration,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -58,6 +67,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
               tid: reply.tid,
               pid: reply.pid,
               postDateTimestamp: reply.postDateTimestamp,
+              textDecoration: textDecoration,
             ),
           ),
         ],

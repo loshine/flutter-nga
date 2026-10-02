@@ -13,6 +13,9 @@ class NgaHtmlCommentWidget extends ConsumerWidget {
   final int? pid;
   final int? postDateTimestamp;
 
+  /// 正文整体的文字装饰，用于屏蔽的删除线模式
+  final TextDecoration? textDecoration;
+
   const NgaHtmlCommentWidget({
     super.key,
     required this.content,
@@ -20,6 +23,7 @@ class NgaHtmlCommentWidget extends ConsumerWidget {
     this.tid,
     this.pid,
     this.postDateTimestamp,
+    this.textDecoration,
   });
 
   @override
@@ -42,6 +46,7 @@ class NgaHtmlCommentWidget extends ConsumerWidget {
           padding: HtmlPaddings.zero,
           margin: Margins.zero,
           color: Theme.of(context).textTheme.bodyLarge?.color,
+          textDecoration: textDecoration,
         ),
         'pre': Style(
           margin: Margins.symmetric(vertical: 8),

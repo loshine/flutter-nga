@@ -39,6 +39,13 @@ class BlocklistSettingsPage extends HookConsumerWidget {
                 : null,
             title: Text("在列表页开启屏蔽功能"),
           ),
+          SwitchListTile(
+            value: state.detailsBlockEnabled,
+            onChanged: state.clientBlockEnabled
+                ? (v) => notifier.setDetailsBlockEnabled(v)
+                : null,
+            title: Text("在详情页开启屏蔽功能"),
+          ),
           ListTile(
             title: Text("屏蔽模式"),
             subtitle: Text("选择被屏蔽的用户、词语在客户端内的展示方式"),

@@ -17,6 +17,9 @@ class NgaHtmlContentWidget extends ConsumerWidget {
   /// 同页楼层 pid → 正文片段，用于把 Reply to 补成带原文的引用（对齐官网）
   final Map<int, String>? quoteBodyByPid;
 
+  /// 正文整体的文字装饰，用于屏蔽的删除线模式
+  final TextDecoration? textDecoration;
+
   const NgaHtmlContentWidget({
     super.key,
     required this.content,
@@ -25,6 +28,7 @@ class NgaHtmlContentWidget extends ConsumerWidget {
     this.pid,
     this.postDateTimestamp,
     this.quoteBodyByPid,
+    this.textDecoration,
   });
 
   @override
@@ -48,6 +52,7 @@ class NgaHtmlContentWidget extends ConsumerWidget {
           color: Theme.of(context).textTheme.bodyLarge?.color,
           fontSize:
               FontSize(Dimen.bodyMedium * interfaceState.contentSizeMultiple),
+          textDecoration: textDecoration,
         ),
         'blockquote': Style(
           padding: HtmlPaddings.symmetric(horizontal: 12, vertical: 8),
