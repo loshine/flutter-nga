@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
+import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/data/entity/topic_detail.dart';
 
 enum BlockMode { COLLAPSE, PAINT, ALPHA, DELETE_LINE, GONE }
 
@@ -247,3 +249,53 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 final blocklistSettingsProvider =
     NotifierProvider<BlocklistSettingsNotifier, BlocklistSettingsState>(
         BlocklistSettingsNotifier.new);
+
+/// 屏蔽判定结果：组合开关、屏蔽模式与匹配规则，UI 只按返回的 [BlockMode] 渲染
+class BlockFilter {
+  BlockFilter({
+    required this.mode,
+    required this.listEnabled,
+    required this.detailsEnabled,
+    required this.matcher,
+  });
+
+  factory BlockFilter.fromSettings(BlocklistSettingsState state) {
+    final matcher = BlockMatcher(
+      users: state.blockUserList,
+      words: state.blockWordList,
+    );
+    return BlockFilter(
+      mode: state.blockMode,
+      listEnabled: state.clientBlockEnabled && state.listBlockEnabled,
+      detailsEnabled: state.clientBlockEnabled && state.detailsBlockEnabled,
+      matcher: matcher,
+    );
+  }
+
+  final BlockMode mode;
+  final bool listEnabled;
+  final bool detailsEnabled;
+  final BlockMatcher matcher;
+
+  /// 主题被屏蔽时返回展示模式，否则返回 null
+  BlockMode? topicMode(Topic topic) {
+    if (!listEnabled || matcher.isEmpty) return null;
+    return matcher.matchesTopic(topic) ? mode : null;
+  }
+
+  /// 楼层被屏蔽时返回展示模式，否则返回 null
+  BlockMode? replyMode(Reply reply, {String? username}) {
+    if (!detailsEnabled || matcher.isEmpty) return null;
+    return matcher.matchesReply(reply, username: username) ? mode : null;
+  }
+
+  /// 隐藏模式下直接移除被屏蔽的主题，避免列表中残留零高度条目
+  List<Topic> visibleTopics(List<Topic> topics) {
+    if (mode != BlockMode.GONE) return topics;
+    return topics.where((topic) => topicMode(topic) == null).toList();
+  }
+}
+
+final blockFilterProvider = Provider<BlockFilter>((ref) {
+  return BlockFilter.fromSettings(ref.watch(blocklistSettingsProvider));
+});

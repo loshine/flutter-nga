@@ -5,8 +5,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
+import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
+import 'package:flutter_nga/ui/widget/blocked_content.dart';
 import 'package:flutter_nga/ui/widget/dash.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/ui/widget/username_text.dart';
@@ -29,6 +31,12 @@ class TopicReplyItemWidget extends StatefulWidget {
   /// 评论占位楼层对应的真实评论（按 pid 关联），非评论楼层为 null
   final Reply? commentSource;
 
+  /// 楼层被屏蔽时的展示模式，由页面通过 [BlockFilter] 判定；null 表示正常展示
+  final BlockMode? blockMode;
+
+  /// 与 [Reply.commentList] 一一对应的评论屏蔽模式；null 表示均不屏蔽
+  final List<BlockMode?>? commentBlockModes;
+
   const TopicReplyItemWidget({
     super.key,
     required this.reply,
@@ -38,6 +46,8 @@ class TopicReplyItemWidget extends StatefulWidget {
     this.userList,
     this.quoteBodyByPid,
     this.commentSource,
+    this.blockMode,
+    this.commentBlockModes,
   });
 
   @override
@@ -59,7 +69,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     final thumbFgInactive = colorScheme.onSurfaceVariant;
     final isLiked = widget.reply.recommend == 1;
     final isDisliked = widget.reply.recommend == -1;
-    return Column(
+    final blockDecoration = widget.blockMode == BlockMode.DELETE_LINE
+        ? TextDecoration.lineThrough
+        : null;
+    final visibleComments = _visibleComments();
+
+    final floor = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
@@ -87,6 +102,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.bodyLarge?.color,
+                              decoration: blockDecoration,
                             ),
                           ),
                         ),
@@ -203,6 +219,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 fontSize: Dimen.titleLarge,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).textTheme.bodyLarge?.color,
+                decoration: blockDecoration,
               ),
             ),
           ),
@@ -218,19 +235,20 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
               pid: contentReply.pid,
               postDateTimestamp: contentReply.postDateTimestamp,
               quoteBodyByPid: widget.quoteBodyByPid,
+              textDecoration: blockDecoration,
             ),
           ),
         ),
-        SizedBox(
-          width: double.infinity,
-          height: widget.reply.commentList.isEmpty ? 0 : null,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Column(
-              children: _getCommentListWidgets(),
+        if (visibleComments.isNotEmpty)
+          SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                children: _getCommentListWidgets(visibleComments),
+              ),
             ),
           ),
-        ),
         Offstage(
           offstage: widget.reply.attachmentList.isEmpty,
           child: Column(
@@ -324,6 +342,20 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         Divider(height: 1),
       ],
     );
+
+    return BlockedContent(mode: widget.blockMode, child: floor);
+  }
+
+  /// 隐藏模式的评论直接移除，其余评论连同各自的屏蔽模式一起返回
+  List<(Reply, BlockMode?)> _visibleComments() {
+    final modes = widget.commentBlockModes;
+    return [
+      for (final (index, comment) in widget.reply.commentList.indexed)
+        if (modes == null || index >= modes.length)
+          (comment, null)
+        else if (modes[index] != BlockMode.GONE)
+          (comment, modes[index]),
+    ];
   }
 
   List<Widget> _getMedalListWidgets() {
@@ -418,9 +450,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     }
   }
 
-  _getCommentListWidgets() {
+  _getCommentListWidgets(List<(Reply, BlockMode?)> comments) {
     final colorScheme = Theme.of(context).colorScheme;
-    final comments = widget.reply.commentList;
     return [
       Container(
         width: double.infinity,
@@ -453,13 +484,19 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 ],
               ),
             ),
-            for (final (index, comment) in comments.indexed) ...[
+            for (final (index, (comment, mode)) in comments.indexed) ...[
               if (index > 0)
                 const Divider(height: 1, indent: 12, endIndent: 12),
-              TopicReplyCommentItemWidget(
-                comment,
-                widget.userList!
-                    .firstWhereOrNull((user) => user.uid == comment.authorId),
+              BlockedContent(
+                mode: mode,
+                child: TopicReplyCommentItemWidget(
+                  comment,
+                  widget.userList!
+                      .firstWhereOrNull((user) => user.uid == comment.authorId),
+                  textDecoration: mode == BlockMode.DELETE_LINE
+                      ? TextDecoration.lineThrough
+                      : null,
+                ),
               ),
             ],
             const SizedBox(height: 4),

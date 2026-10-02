@@ -13,42 +13,36 @@ class TopicListItemWidget extends ConsumerWidget {
   const TopicListItemWidget({
     super.key,
     required this.topic,
-    this.needBlock = true,
+    this.blockMode,
     this.onLongPress,
   });
 
   final Topic topic;
-  final bool needBlock;
+
+  /// 主题被屏蔽时的展示模式，由页面通过 [BlockFilter] 判定；null 表示正常展示
+  final BlockMode? blockMode;
   final GestureLongPressCallback? onLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final blockState = ref.watch(blocklistSettingsProvider);
     final interfaceState = ref.watch(interfaceSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final blockEnabled =
-        blockState.clientBlockEnabled && blockState.listBlockEnabled;
-    final blockMode = blockState.blockMode;
     final topicSubject = code_utils.unescapeHtml(topic.subject);
-    final isTopicBlocked = _isBlocked(blockState, topicSubject);
 
     // 折叠模式
-    if (blockEnabled && isTopicBlocked && blockMode == BlockMode.COLLAPSE) {
+    if (blockMode == BlockMode.COLLAPSE) {
       return _buildCollapsedCard(context, colorScheme);
     }
 
-    // 隐藏模式
-    if (blockEnabled && isTopicBlocked && blockMode == BlockMode.GONE) {
+    // 隐藏模式：页面通常已通过 BlockFilter.visibleTopics 移除，这里兜底
+    if (blockMode == BlockMode.GONE) {
       return const SizedBox.shrink();
     }
 
     // 计算透明度
-    final alpha =
-        (blockEnabled && isTopicBlocked && blockMode == BlockMode.ALPHA)
-            ? 0.38
-            : 1.0;
+    final alpha = blockMode == BlockMode.ALPHA ? 0.38 : 1.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -68,9 +62,6 @@ class TopicListItemWidget extends ConsumerWidget {
                     context,
                     topic,
                     topicSubject,
-                    blockEnabled,
-                    blockMode,
-                    isTopicBlocked,
                     interfaceState,
                     textTheme,
                     colorScheme,
@@ -81,9 +72,6 @@ class TopicListItemWidget extends ConsumerWidget {
                   // 元信息行
                   _buildMetaRow(
                     context,
-                    blockEnabled,
-                    blockMode,
-                    isTopicBlocked,
                     colorScheme,
                     textTheme,
                   ),
@@ -99,13 +87,6 @@ class TopicListItemWidget extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  bool _isBlocked(BlocklistSettingsState blockState, String topicSubject) {
-    return blockState.blockUserList.contains(topic.author) ||
-        blockState.blockUserList.contains(topic.authorId) ||
-        blockState.blockWordList
-            .any((blockWord) => topicSubject.contains(blockWord));
   }
 
   Widget _buildCollapsedCard(BuildContext context, ColorScheme colorScheme) {
@@ -134,17 +115,12 @@ class TopicListItemWidget extends ConsumerWidget {
     BuildContext context,
     Topic topic,
     String topicSubject,
-    bool blockEnabled,
-    BlockMode blockMode,
-    bool isTopicBlocked,
     InterfaceSettingsState interfaceState,
     TextTheme textTheme,
     ColorScheme colorScheme,
   ) {
-    final isPaintBlockMode =
-        blockEnabled && isTopicBlocked && blockMode == BlockMode.PAINT;
-    final isDeleteBlockMode =
-        blockEnabled && isTopicBlocked && blockMode == BlockMode.DELETE_LINE;
+    final isPaintBlockMode = blockMode == BlockMode.PAINT;
+    final isDeleteBlockMode = blockMode == BlockMode.DELETE_LINE;
 
     return RichText(
       text: TextSpan(
@@ -214,14 +190,10 @@ class TopicListItemWidget extends ConsumerWidget {
 
   Widget _buildMetaRow(
     BuildContext context,
-    bool blockEnabled,
-    BlockMode blockMode,
-    bool isTopicBlocked,
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
-    final isPaintBlockMode =
-        blockEnabled && isTopicBlocked && blockMode == BlockMode.PAINT;
+    final isPaintBlockMode = blockMode == BlockMode.PAINT;
 
     return Row(
       children: [

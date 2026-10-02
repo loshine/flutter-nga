@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
+import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/hot_replies_section.dart';
@@ -39,6 +40,7 @@ class TopicSinglePage extends HookConsumerWidget {
       authorid: authorid,
     );
     final state = ref.watch(topicSinglePageProvider(providerKey));
+    final blockFilter = ref.watch(blockFilterProvider);
 
     Future<void> onRefresh() async {
       replyWidgetCache.value.clear();
@@ -73,6 +75,7 @@ class TopicSinglePage extends HookConsumerWidget {
           context,
           position,
           state,
+          blockFilter,
           replyWidgetCache.value,
         ),
       ),
@@ -83,11 +86,23 @@ class TopicSinglePage extends HookConsumerWidget {
     BuildContext context,
     int position,
     TopicSinglePageState state,
+    BlockFilter blockFilter,
     Map<String, Widget> replyWidgetCache,
   ) {
     final reply = state.replyList[position];
     final quoteBodyByPid = _quoteBodyCacheFor(state);
-    if (position == 0 && page == 1 && state.hotReplyList.isNotEmpty) {
+    // 热点回复是精选区块，被屏蔽的直接移除而不是按屏蔽模式展示
+    final hotReplies = position == 0 && page == 1
+        ? state.hotReplyList
+            .where((hot) =>
+                blockFilter.replyMode(
+                  hot,
+                  username: _findUser(state, hot.authorId)?.username,
+                ) ==
+                null)
+            .toList()
+        : const <Reply>[];
+    if (hotReplies.isNotEmpty) {
       // 楼主下方展示热点回复区块
       return Column(
         children: [
@@ -95,11 +110,12 @@ class TopicSinglePage extends HookConsumerWidget {
             context,
             reply,
             state,
+            blockFilter,
             quoteBodyByPid,
             replyWidgetCache,
           ),
           HotRepliesSection(
-            replies: state.hotReplyList,
+            replies: hotReplies,
             userList: state.userList,
             onJumpToFloor: onJumpToFloor,
             quoteBodyByPid: quoteBodyByPid,
@@ -111,6 +127,7 @@ class TopicSinglePage extends HookConsumerWidget {
         context,
         reply,
         state,
+        blockFilter,
         quoteBodyByPid,
         replyWidgetCache,
       );
@@ -129,24 +146,38 @@ class TopicSinglePage extends HookConsumerWidget {
     BuildContext context,
     Reply reply,
     TopicSinglePageState state,
+    BlockFilter blockFilter,
     Map<int, String> quoteBodyByPid,
     Map<String, Widget> replyWidgetCache,
   ) {
-    final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}";
+    final user = _findUser(state, reply.authorId) ?? User();
+    // 评论占位楼层（无正文、标题为系统文案）按 pid 找回真实评论
+    Reply? commentSource;
+    if (reply.content.isEmpty && (reply.subject ?? '').contains('发表了一条评论')) {
+      commentSource = _findCommentByPid(state, reply.pid);
+    }
+    final blockMode = blockFilter.replyMode(reply, username: user.username) ??
+        (commentSource == null
+            ? null
+            : blockFilter.replyMode(commentSource, username: user.username));
+
+    final commentBlockModes = [
+      for (final comment in reply.commentList)
+        blockFilter.replyMode(
+          comment,
+          username: _findUser(state, comment.authorId)?.username,
+        ),
+    ];
+
+    // 楼层与评论的屏蔽模式参与缓存 key，屏蔽设置变化后重新构建楼层
+    final blockKey = [blockMode, ...commentBlockModes]
+        .map((mode) => mode?.index ?? '-')
+        .join();
+    final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}_$blockKey";
     var cached = replyWidgetCache[uniqueId];
     if (cached != null) {
       return cached;
     } else {
-      User? user;
-      for (var u in state.userList) {
-        if (u.uid == reply.authorId) {
-          user = u;
-          break;
-        }
-      }
-      if (user == null) {
-        user = User();
-      }
 
       Group? group;
       if (user.memberId != null) {
@@ -182,12 +213,6 @@ class TopicSinglePage extends HookConsumerWidget {
         });
       }
 
-      // 评论占位楼层（无正文、标题为系统文案）按 pid 找回真实评论
-      Reply? commentSource;
-      if (reply.content.isEmpty && (reply.subject ?? '').contains('发表了一条评论')) {
-        commentSource = _findCommentByPid(state, reply.pid);
-      }
-
       cached = TopicReplyItemWidget(
         reply: reply,
         user: user,
@@ -196,10 +221,19 @@ class TopicSinglePage extends HookConsumerWidget {
         userList: commentUserList,
         quoteBodyByPid: quoteBodyByPid,
         commentSource: commentSource,
+        blockMode: blockMode,
+        commentBlockModes: commentBlockModes,
       );
       replyWidgetCache[uniqueId] = cached;
       return cached;
     }
+  }
+
+  User? _findUser(TopicSinglePageState state, int? uid) {
+    for (final user in state.userList) {
+      if (user.uid == uid) return user;
+    }
+    return null;
   }
 
   /// 在本页所有楼层的评论列表中按 pid 查找真实评论
