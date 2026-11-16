@@ -22,7 +22,7 @@ void main() {
     final container = _container(repository);
     final subscription = container.listen(
       favouriteForumListProvider,
-      (_, __) {},
+      (_, _) {},
     );
     addTearDown(() {
       subscription.close();
@@ -54,7 +54,7 @@ void main() {
     final container = _container(repository);
     final subscription = container.listen(
       favouriteForumListProvider,
-      (_, __) {},
+      (_, _) {},
     );
     addTearDown(() {
       subscription.close();
@@ -81,7 +81,7 @@ void main() {
     final container = _container(repository);
     final subscription = container.listen(
       favouriteForumListProvider,
-      (_, __) {},
+      (_, _) {},
     );
     addTearDown(() {
       subscription.close();
@@ -115,7 +115,7 @@ void main() {
     final container = _container(repository);
     final subscription = container.listen(
       favouriteForumListProvider,
-      (_, __) {},
+      (_, _) {},
     );
     addTearDown(() {
       subscription.close();

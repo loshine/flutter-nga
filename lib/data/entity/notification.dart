@@ -42,23 +42,23 @@ class NotificationInfoListData {
   factory NotificationInfoListData.fromJson(Map<String, dynamic> map) {
     final replyNotificationList = <ReplyNotification>[];
     if (map['0'] != null) {
-      (map['0'] as List<dynamic>).forEach((element) {
+      for (var element in (map['0'] as List<dynamic>)) {
         replyNotificationList.add(ReplyNotification.fromJson(element));
-      });
+      }
       replyNotificationList.sort((a, b) => a.getTime() - b.getTime());
     }
     final messageNotificationList = <MessageNotification>[];
     if (map['1'] != null) {
-      (map['1'] as List<dynamic>).forEach((element) {
+      for (var element in (map['1'] as List<dynamic>)) {
         messageNotificationList.add(MessageNotification.fromJson(element));
-      });
+      }
       messageNotificationList.sort((a, b) => a.getTime() - b.getTime());
     }
     final systemNotificationList = <SystemNotification>[];
     if (map['2'] != null) {
-      (map['2'] as List<dynamic>).forEach((element) {
+      for (var element in (map['2'] as List<dynamic>)) {
         systemNotificationList.add(SystemNotification.fromJson(element));
-      });
+      }
       systemNotificationList.sort((a, b) => a.getTime() - b.getTime());
     }
     return NotificationInfoListData(

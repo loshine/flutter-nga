@@ -68,7 +68,6 @@ class _ReplyWidget extends StatefulWidget {
   final User user;
 
   const _ReplyWidget({
-    super.key,
     required this.reply,
     required this.user,
   });
@@ -151,12 +150,12 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                   child: Row(
                     children: <Widget>[
                       GestureDetector(
+                        onTap: _toggleLike,
                         child: Icon(
                           isLiked ? CommunityMaterialIcons.thumb_up : CommunityMaterialIcons.thumb_up_outline,
                           color: isLiked ? thumbFgActive : thumbFgInactive,
                           size: 14,
                         ),
-                        onTap: _toggleLike,
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 8),
@@ -198,7 +197,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
     );
   }
 
-  _toggleLike() async {
+  Future<void> _toggleLike() async {
     try {
       final reaction = await Data()
           .topicRepository
@@ -218,7 +217,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
     }
   }
 
-  _toggleDislike() async {
+  Future<void> _toggleDislike() async {
     try {
       final reaction = await Data()
           .topicRepository

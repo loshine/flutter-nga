@@ -203,14 +203,14 @@ class TopicSinglePage extends HookConsumerWidget {
 
       List<User> commentUserList = [];
       if (reply.commentList.isNotEmpty) {
-        reply.commentList.forEach((comment) {
+        for (var comment in reply.commentList) {
           for (var user in state.userList) {
             if (user.uid == comment.authorId) {
               commentUserList.add(user);
               break;
             }
           }
-        });
+        }
       }
 
       cached = TopicReplyItemWidget(

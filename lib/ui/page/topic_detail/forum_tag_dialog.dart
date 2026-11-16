@@ -52,7 +52,7 @@ class ForumTagDialog extends HookConsumerWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Text(
-                  "$tag",
+                  tag,
                   style: TextStyle(
                     color: Theme.of(context).textTheme.bodyLarge?.color,
                     fontSize: Dimen.titleMedium,
