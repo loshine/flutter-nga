@@ -8,7 +8,7 @@ String getShowName(String username) {
         "苗谷盛曲翁冉骆蓝路游辛靳管柴蒙鲍华喻祁蒲房滕屈饶解牟艾尤阳时穆农司卓古吉缪简车"
         "项连芦麦褚娄窦戚岑景党宫费卜冷晏席卫米柏宗瞿桂全佟应臧闵苟邬边卞姬师和仇栾隋商"
         "刁沙荣巫寇桑郎甄丛仲虞敖巩明佘池查麻苑迟邝";
-    final buffer = new StringBuffer();
+    final buffer = StringBuffer();
     var i = 6;
     for (var j = 0; j <= 5; j++) {
       if (j == 0 || j == 3) {

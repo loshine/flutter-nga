@@ -7,7 +7,6 @@ import 'package:flutter_localizations/flutter_localizations.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:route_observer_mixin/route_observer_mixin.dart';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/ui/widget/legacy_theme_bridge.dart';
 import 'package:flutter_nga/ui/widget/simple_scroll_behavior.dart';
 import 'package:flutter_nga/utils/route.dart';
+import 'package:flutter_nga/utils/route_observer.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
 class MyApp extends ConsumerStatefulWidget {
@@ -43,7 +43,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _router = GoRouter(
       routes: buildRoutes(),
-      observers: [RouteObserverProvider.of(context)],
+      observers: [appRouteObserver],
     );
     Routes.configureRoutes(_router);
   }

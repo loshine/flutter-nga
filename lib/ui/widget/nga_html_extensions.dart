@@ -134,7 +134,7 @@ List<HtmlExtension> buildNgaHtmlExtensions(BuildContext context) {
               width: 22,
               height: 22,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Text('[表情]'),
+              errorBuilder: (_, _, _) => const Text('[表情]'),
             ),
           ),
         );

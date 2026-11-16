@@ -70,9 +70,7 @@ class TopicDataRepository implements TopicRepository {
   final Dio _dio;
 
   StoreRef<int, dynamic> get _store {
-    if (_lateInitStore == null) {
-      _lateInitStore = intMapStoreFactory.store('topic_histories');
-    }
+    _lateInitStore ??= intMapStoreFactory.store('topic_histories');
     return _lateInitStore!;
   }
 
@@ -107,6 +105,7 @@ class TopicDataRepository implements TopicRepository {
     }
   }
 
+  @override
   Future<dynamic> getUserReplies(int authorid, int page) async {
     try {
       Response<Map<String, dynamic>> response = await _dio.get(

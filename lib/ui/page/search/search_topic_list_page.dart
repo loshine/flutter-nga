@@ -97,7 +97,7 @@ class SearchTopicListPage extends HookConsumerWidget {
                   topic: topics[index],
                   blockMode: blockFilter.topicMode(topics[index]),
                 ),
-                separatorBuilder: (_, __) =>
+                separatorBuilder: (_, _) =>
                     const SizedBox(height: Dimen.spacingXS),
                 itemCount: topics.length,
               ),

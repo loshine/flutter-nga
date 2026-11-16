@@ -210,7 +210,7 @@ class TopicDetailPage extends HookConsumerWidget {
                 if (fid == null && state.topic == null) return;
                 Routes.navigateTo(
                   context,
-                  "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid != null ? fid : state.topic!.fid}",
+                  "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
                 );
               },
             ),

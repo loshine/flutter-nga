@@ -94,7 +94,7 @@ String stripLow(String str, [bool keepNewLines = false]) {
 /// The characters are used in a RegExp and so you will need to escape
 /// some chars.
 String blacklist(String str, String chars) {
-  return str.replaceAll(RegExp('[' + chars + ']+'), '');
+  return str.replaceAll(RegExp('[$chars]+'), '');
 }
 
 String urlDecode(String content) {

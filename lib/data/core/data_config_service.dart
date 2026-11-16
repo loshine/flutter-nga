@@ -1,6 +1,6 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter_nga/data/core/app_preferences.dart';
 import 'package:flutter_nga/data/entity/base_url_config.dart';
 import 'package:flutter_nga/data/entity/user_agent_config.dart';
 
@@ -8,10 +8,11 @@ typedef BaseUrlChangeListener = void Function(BaseUrlConfig);
 typedef UserAgentChangeListener = void Function(UserAgentConfig, String);
 
 class DataConfigService {
-  static const String _baseUrlPrefsKey = 'base_url_config_key';
-  static const String _customBaseUrlPrefsKey = 'custom_base_url_value';
-  static const String _userAgentPrefsKey = 'user_agent_config_key';
-  static const String _customUserAgentPrefsKey = 'custom_user_agent_value';
+  static const String _baseUrlPrefsKey = PrefsKeys.baseUrlConfigKey;
+  static const String _customBaseUrlPrefsKey = PrefsKeys.customBaseUrlValue;
+  static const String _userAgentPrefsKey = PrefsKeys.userAgentConfigKey;
+  static const String _customUserAgentPrefsKey =
+      PrefsKeys.customUserAgentValue;
 
   BaseUrlConfig _currentBaseUrlConfig = BaseUrlPresets.defaultConfig;
   UserAgentConfig _currentUserAgentConfig = UserAgentPresets.defaultConfig;
@@ -99,7 +100,7 @@ class DataConfigService {
 
   Future<void> _loadBaseUrlConfig() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await AppPreferences.instance();
       final savedKey = prefs.getString(_baseUrlPrefsKey);
       if (savedKey == null) {
         _currentBaseUrlConfig = BaseUrlPresets.defaultConfig;
@@ -141,7 +142,7 @@ class DataConfigService {
 
   Future<void> _loadUserAgentConfig() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await AppPreferences.instance();
       final savedKey = prefs.getString(_userAgentPrefsKey);
       if (savedKey == null) {
         _currentUserAgentConfig = UserAgentPresets.defaultConfig;
@@ -174,7 +175,7 @@ class DataConfigService {
 
   Future<void> _saveBaseUrlConfig(BaseUrlConfig config) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await AppPreferences.instance();
       await prefs.setString(_baseUrlPrefsKey, config.key);
       if (config.key == BaseUrlPresets.custom.key) {
         await prefs.setString(_customBaseUrlPrefsKey, config.url);
@@ -186,7 +187,7 @@ class DataConfigService {
 
   Future<void> _saveUserAgentConfig(UserAgentConfig config) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await AppPreferences.instance();
       await prefs.setString(_userAgentPrefsKey, config.key);
       if (config.key == UserAgentPresets.custom.key) {
         await prefs.setString(_customUserAgentPrefsKey, config.userAgent);
