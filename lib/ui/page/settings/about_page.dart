@@ -18,6 +18,8 @@ class AboutPage extends HookConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final appInfoAsync = ref.watch(appInfoProvider);
 
+    final mediaPadding = MediaQuery.paddingOf(context);
+
     return Scaffold(
       appBar: AppBar(title: const Text('关于')),
       body: appInfoAsync.when(
@@ -26,7 +28,12 @@ class AboutPage extends HookConsumerWidget {
           child: Text('加载失败: $error'),
         ),
         data: (appInfo) => ListView(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.fromLTRB(
+            mediaPadding.left,
+            16,
+            mediaPadding.right,
+            16 + mediaPadding.bottom,
+          ),
           children: [
             // 应用信息区
             Center(

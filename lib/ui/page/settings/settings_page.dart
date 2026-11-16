@@ -25,10 +25,17 @@ class SettingsPage extends HookConsumerWidget {
     final baseUrlState = ref.watch(baseUrlSettingsProvider);
     final userAgentState = ref.watch(userAgentSettingsProvider);
 
+    final mediaPadding = MediaQuery.paddingOf(context);
+
     return Scaffold(
       appBar: AppBar(title: const Text("设置")),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.fromLTRB(
+          mediaPadding.left,
+          8,
+          mediaPadding.right,
+          8 + mediaPadding.bottom,
+        ),
         children: [
           _SettingsGroup(
             title: "账户",

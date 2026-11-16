@@ -66,6 +66,8 @@ class SearchTopicListPage extends HookConsumerWidget {
       canLoadMore: state.enablePullUp,
     );
 
+    final mediaPadding = MediaQuery.paddingOf(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('搜索: $keyword'),
@@ -85,8 +87,11 @@ class SearchTopicListPage extends HookConsumerWidget {
                 ],
               )
             : ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  vertical: Dimen.spacingS,
+                padding: EdgeInsets.fromLTRB(
+                  mediaPadding.left,
+                  Dimen.spacingS,
+                  mediaPadding.right,
+                  Dimen.spacingS + mediaPadding.bottom,
                 ),
                 itemBuilder: (_, index) => TopicListItemWidget(
                   topic: topics[index],
