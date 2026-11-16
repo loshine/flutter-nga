@@ -1,972 +1,341 @@
+import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/entity/emoticon.dart';
 
 /// 表情资源库
 abstract class EmoticonRepository {
-  // 获取所有表情组
+  /// 获取所有表情组
   List<EmoticonGroup> getEmoticonGroups();
 }
 
+/// 表情图片的根地址。
+const emoticonImageBase = '$ngaImage4Origin/ngabbs/post/smile/';
+
 class EmoticonDataRepository implements EmoticonRepository {
-  static final List<EmoticonGroup> expressionGroupList = [];
+  static final List<EmoticonGroup> _groups = [
+    for (final (name, code, entries) in _emoticonTable)
+      EmoticonGroup(name, [
+        for (final (key, file) in entries)
+          Emoticon(
+            content: code.isEmpty ? '[s:$key]' : '[s:$code:$key]',
+            url: '$emoticonImageBase$file',
+          ),
+      ]),
+  ];
 
   @override
-  List<EmoticonGroup> getEmoticonGroups() {
-    if (expressionGroupList.isEmpty) {
-      var expressionList = [
-        Emoticon(
-          content: "[s:1]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/smile.gif",
-        ),
-        Emoticon(
-          content: "[s:2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/mrgreen.gif",
-        ),
-        Emoticon(
-          content: "[s:3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/question.gif",
-        ),
-        Emoticon(
-          content: "[s:4]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/wink.gif",
-        ),
-        Emoticon(
-          content: "[s:5]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/redface.gif",
-        ),
-        Emoticon(
-          content: "[s:6]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/sad.gif",
-        ),
-        Emoticon(
-          content: "[s:7]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/cool.gif",
-        ),
-        Emoticon(
-          content: "[s:8]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/crazy.gif",
-        ),
-        Emoticon(
-          content: "[s:24]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/04.gif",
-        ),
-        Emoticon(
-          content: "[s:25]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/05.gif",
-        ),
-        Emoticon(
-          content: "[s:26]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/06.gif",
-        ),
-        Emoticon(
-          content: "[s:27]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/07.gif",
-        ),
-        Emoticon(
-          content: "[s:28]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/08.gif",
-        ),
-        Emoticon(
-          content: "[s:29]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/09.gif",
-        ),
-        Emoticon(
-          content: "[s:30]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/10.gif",
-        ),
-        Emoticon(
-          content: "[s:32]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/12.gif",
-        ),
-        Emoticon(
-          content: "[s:33]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/13.gif",
-        ),
-        Emoticon(
-          content: "[s:34]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/14.gif",
-        ),
-        Emoticon(
-          content: "[s:35]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/15.gif",
-        ),
-        Emoticon(
-          content: "[s:36]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/16.gif",
-        ),
-        Emoticon(
-          content: "[s:37]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/17.gif",
-        ),
-        Emoticon(
-          content: "[s:38]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/18.gif",
-        ),
-        Emoticon(
-          content: "[s:39]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/19.gif",
-        ),
-        Emoticon(
-          content: "[s:40]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/20.gif",
-        ),
-        Emoticon(
-          content: "[s:41]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/21.gif",
-        ),
-        Emoticon(
-          content: "[s:42]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/22.gif",
-        ),
-        Emoticon(
-          content: "[s:43]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/23.gif",
-        ),
-      ];
-      var group = EmoticonGroup("默认", expressionList);
-      expressionGroupList.add(group);
-
-      expressionList = [
-        Emoticon(
-          content: "[s:ac:blink]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac0.png",
-        ),
-        Emoticon(
-          content: "[s:ac:goodjob]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac1.png",
-        ),
-        Emoticon(
-          content: "[s:ac:上]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac2.png",
-        ),
-        Emoticon(
-          content: "[s:ac:中枪]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac3.png",
-        ),
-        Emoticon(
-          content: "[s:ac:偷笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac4.png",
-        ),
-        Emoticon(
-          content: "[s:ac:冷]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac5.png",
-        ),
-        Emoticon(
-          content: "[s:ac:凌乱]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac6.png",
-        ),
-        Emoticon(
-          content: "[s:ac:反对]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac7.png",
-        ),
-        Emoticon(
-          content: "[s:ac:吓]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac8.png",
-        ),
-        Emoticon(
-          content: "[s:ac:吻]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac9.png",
-        ),
-        Emoticon(
-          content: "[s:ac:呆]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac10.png",
-        ),
-        Emoticon(
-          content: "[s:ac:咦]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac11.png",
-        ),
-        Emoticon(
-          content: "[s:ac:哦]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac12.png",
-        ),
-        Emoticon(
-          content: "[s:ac:哭]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac13.png",
-        ),
-        Emoticon(
-          content: "[s:ac:哭1]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac14.png",
-        ),
-        Emoticon(
-          content: "[s:ac:哭笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac15.png",
-        ),
-        Emoticon(
-          content: "[s:ac:哼]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac16.png",
-        ),
-        Emoticon(
-          content: "[s:ac:喘]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac17.png",
-        ),
-        Emoticon(
-          content: "[s:ac:喷]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac18.png",
-        ),
-        Emoticon(
-          content: "[s:ac:嘲笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac19.png",
-        ),
-        Emoticon(
-          content: "[s:ac:嘲笑1]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac20.png",
-        ),
-        Emoticon(
-          content: "[s:ac:囧]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac21.png",
-        ),
-        Emoticon(
-          content: "[s:ac:委屈]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac22.png",
-        ),
-        Emoticon(
-          content: "[s:ac:心]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac23.png",
-        ),
-        Emoticon(
-          content: "[s:ac:忧伤]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac24.png",
-        ),
-        Emoticon(
-          content: "[s:ac:怒]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac25.png",
-        ),
-        Emoticon(
-          content: "[s:ac:怕]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac26.png",
-        ),
-        Emoticon(
-          content: "[s:ac:惊]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac27.png",
-        ),
-        Emoticon(
-          content: "[s:ac:愁]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac28.png",
-        ),
-        Emoticon(
-          content: "[s:ac:抓狂]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac29.png",
-        ),
-        Emoticon(
-          content: "[s:ac:抠鼻]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac30.png",
-        ),
-        Emoticon(
-          content: "[s:ac:擦汗]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac31.png",
-        ),
-        Emoticon(
-          content: "[s:ac:无语]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac32.png",
-        ),
-        Emoticon(
-          content: "[s:ac:晕]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac33.png",
-        ),
-        Emoticon(
-          content: "[s:ac:汗]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac34.png",
-        ),
-        Emoticon(
-          content: "[s:ac:瞎]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac35.png",
-        ),
-        Emoticon(
-          content: "[s:ac:羞]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac36.png",
-        ),
-        Emoticon(
-          content: "[s:ac:羡慕]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac37.png",
-        ),
-        Emoticon(
-          content: "[s:ac:花痴]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac38.png",
-        ),
-        Emoticon(
-          content: "[s:ac:茶]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac39.png",
-        ),
-        Emoticon(
-          content: "[s:ac:衰]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac40.png",
-        ),
-        Emoticon(
-          content: "[s:ac:计划通]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac41.png",
-        ),
-        Emoticon(
-          content: "[s:ac:赞同]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac42.png",
-        ),
-        Emoticon(
-          content: "[s:ac:闪光]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac43.png",
-        ),
-        Emoticon(
-          content: "[s:ac:黑枪]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/ac44.png",
-        ),
-      ];
-      group = EmoticonGroup("AC娘", expressionList);
-      expressionGroupList.add(group);
-
-      expressionList = [
-        Emoticon(
-          content: "[s:a2:goodjob]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_02.png",
-        ),
-        Emoticon(
-          content: "[s:a2:诶嘿]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_05.png",
-        ),
-        Emoticon(
-          content: "[s:a2:偷笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_03.png",
-        ),
-        Emoticon(
-          content: "[s:a2:怒]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_04.png",
-        ),
-        Emoticon(
-          content: "[s:a2:笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_07.png",
-        ),
-        Emoticon(
-          content: "[s:a2:那个…]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_08.png",
-        ),
-        Emoticon(
-          content: "[s:a2:哦嗬嗬嗬]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_09.png",
-        ),
-        Emoticon(
-          content: "[s:a2:舔]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_10.png",
-        ),
-        Emoticon(
-          content: "[s:a2:鬼脸]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_14.png",
-        ),
-        Emoticon(
-          content: "[s:a2:冷]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_16.png",
-        ),
-        Emoticon(
-          content: "[s:a2:大哭]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_15.png",
-        ),
-        Emoticon(
-          content: "[s:a2:哭]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_17.png",
-        ),
-        Emoticon(
-          content: "[s:a2:恨]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_21.png",
-        ),
-        Emoticon(
-          content: "[s:a2:中枪]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_23.png",
-        ),
-        Emoticon(
-          content: "[s:a2:囧]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_24.png",
-        ),
-        Emoticon(
-          content: "[s:a2:你看看你]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_25.png",
-        ),
-        Emoticon(
-          content: "[s:a2:doge]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_27.png",
-        ),
-        Emoticon(
-          content: "[s:a2:自戳双目]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_28.png",
-        ),
-        Emoticon(
-          content: "[s:a2:偷吃]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_30.png",
-        ),
-        Emoticon(
-          content: "[s:a2:冷笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_31.png",
-        ),
-        Emoticon(
-          content: "[s:a2:壁咚]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_32.png",
-        ),
-        Emoticon(
-          content: "[s:a2:不活了]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_33.png",
-        ),
-        Emoticon(
-          content: "[s:a2:不明觉厉]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_36.png",
-        ),
-        Emoticon(
-          content: "[s:a2:是在下输了]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_51.png",
-        ),
-        Emoticon(
-          content: "[s:a2:你为猴这么]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_53.png",
-        ),
-        Emoticon(
-          content: "[s:a2:干杯]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_54.png",
-        ),
-        Emoticon(
-          content: "[s:a2:干杯2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_55.png",
-        ),
-        Emoticon(
-          content: "[s:a2:异议]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_47.png",
-        ),
-        Emoticon(
-          content: "[s:a2:认真]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_48.png",
-        ),
-        Emoticon(
-          content: "[s:a2:你已经死了]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_45.png",
-        ),
-        Emoticon(
-          content: "[s:a2:你这种人…]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_49.png",
-        ),
-        Emoticon(
-          content: "[s:a2:妮可妮可妮]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_18.png",
-        ),
-        Emoticon(
-          content: "[s:a2:惊]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_19.png",
-        ),
-        Emoticon(
-          content: "[s:a2:抢镜头]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_52.png",
-        ),
-        Emoticon(
-          content: "[s:a2:yes]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_26.png",
-        ),
-        Emoticon(
-          content: "[s:a2:有何贵干]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_11.png",
-        ),
-        Emoticon(
-          content: "[s:a2:病娇]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_12.png",
-        ),
-        Emoticon(
-          content: "[s:a2:lucky]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_13.png",
-        ),
-        Emoticon(
-          content: "[s:a2:poi]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_20.png",
-        ),
-        Emoticon(
-          content: "[s:a2:囧2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_22.png",
-        ),
-        Emoticon(
-          content: "[s:a2:威吓]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_42.png",
-        ),
-        Emoticon(
-          content: "[s:a2:jojo立]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_37.png",
-        ),
-        Emoticon(
-          content: "[s:a2:jojo立2",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_38.png",
-        ),
-        Emoticon(
-          content: "[s:a2:jojo立3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_39.png",
-        ),
-        Emoticon(
-          content: "[s:a2:jojo立4]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_41.png",
-        ),
-        Emoticon(
-          content: "[s:a2:jojo立5]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/a2_40.png",
-        ),
-      ];
-      group = EmoticonGroup("新AC娘", expressionList);
-      expressionGroupList.add(group);
-
-      expressionList = [
-        Emoticon(
-          content: "[s:pst:举手]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt00.png",
-        ),
-        Emoticon(
-          content: "[s:pst:亲]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt01.png",
-        ),
-        Emoticon(
-          content: "[s:pst:偷笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt02.png",
-        ),
-        Emoticon(
-          content: "[s:pst:偷笑2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt03.png",
-        ),
-        Emoticon(
-          content: "[s:pst:偷笑3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt04.png",
-        ),
-        Emoticon(
-          content: "[s:pst:傻眼]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt05.png",
-        ),
-        Emoticon(
-          content: "[s:pst:傻眼2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt06.png",
-        ),
-        Emoticon(
-          content: "[s:pst:兔子]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt07.png",
-        ),
-        Emoticon(
-          content: "[s:pst:发光]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt08.png",
-        ),
-        Emoticon(
-          content: "[s:pst:呆]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt09.png",
-        ),
-        Emoticon(
-          content: "[s:pst:呆2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt10.png",
-        ),
-        Emoticon(
-          content: "[s:pst:呆3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt11.png",
-        ),
-        Emoticon(
-          content: "[s:pst:呕]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt12.png",
-        ),
-        Emoticon(
-          content: "[s:pst:呵欠]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt13.png",
-        ),
-        Emoticon(
-          content: "[s:pst:哭]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt14.png",
-        ),
-        Emoticon(
-          content: "[s:pst:哭2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt15.png",
-        ),
-        Emoticon(
-          content: "[s:pst:哭3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt16.png",
-        ),
-        Emoticon(
-          content: "[s:pst:嘲笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt17.png",
-        ),
-        Emoticon(
-          content: "[s:pst:基]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt18.png",
-        ),
-        Emoticon(
-          content: "[s:pst:宅]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt19.png",
-        ),
-        Emoticon(
-          content: "[s:pst:安慰]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt20.png",
-        ),
-        Emoticon(
-          content: "[s:pst:幸福]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt21.png",
-        ),
-        Emoticon(
-          content: "[s:pst:开心]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt22.png",
-        ),
-        Emoticon(
-          content: "[s:pst:开心2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt23.png",
-        ),
-        Emoticon(
-          content: "[s:pst:开心3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt24.png",
-        ),
-        Emoticon(
-          content: "[s:pst:怀疑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt25.png",
-        ),
-        Emoticon(
-          content: "[s:pst:怒]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt26.png",
-        ),
-        Emoticon(
-          content: "[s:pst:怒2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt27.png",
-        ),
-        Emoticon(
-          content: "[s:pst:怨]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt28.png",
-        ),
-        Emoticon(
-          content: "[s:pst:惊吓]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt29.png",
-        ),
-        Emoticon(
-          content: "[s:pst:惊吓2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt30.png",
-        ),
-        Emoticon(
-          content: "[s:pst:惊呆]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt31.png",
-        ),
-        Emoticon(
-          content: "[s:pst:惊呆2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt32.png",
-        ),
-        Emoticon(
-          content: "[s:pst:惊呆3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt33.png",
-        ),
-        Emoticon(
-          content: "[s:pst:惨]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt34.png",
-        ),
-        Emoticon(
-          content: "[s:pst:斜眼]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt35.png",
-        ),
-        Emoticon(
-          content: "[s:pst:晕]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt36.png",
-        ),
-        Emoticon(
-          content: "[s:pst:汗]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt37.png",
-        ),
-        Emoticon(
-          content: "[s:pst:泪]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt38.png",
-        ),
-        Emoticon(
-          content: "[s:pst:泪2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt39.png",
-        ),
-        Emoticon(
-          content: "[s:pst:泪3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt40.png",
-        ),
-        Emoticon(
-          content: "[s:pst:泪4]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt41.png",
-        ),
-        Emoticon(
-          content: "[s:pst:满足]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt42.png",
-        ),
-        Emoticon(
-          content: "[s:pst:满足2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt43.png",
-        ),
-        Emoticon(
-          content: "[s:pst:火星]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt44.png",
-        ),
-        Emoticon(
-          content: "[s:pst:牙疼]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt45.png",
-        ),
-        Emoticon(
-          content: "[s:pst:电击]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt46.png",
-        ),
-        Emoticon(
-          content: "[s:pst:看戏]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt47.png",
-        ),
-        Emoticon(
-          content: "[s:pst:眼袋]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt48.png",
-        ),
-        Emoticon(
-          content: "[s:pst:眼镜]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt49.png",
-        ),
-        Emoticon(
-          content: "[s:pst:笑而不语]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt50.png",
-        ),
-        Emoticon(
-          content: "[s:pst:紧张]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt51.png",
-        ),
-        Emoticon(
-          content: "[s:pst:美味]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt52.png",
-        ),
-        Emoticon(
-          content: "[s:pst:背]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt53.png",
-        ),
-        Emoticon(
-          content: "[s:pst:脸红]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt54.png",
-        ),
-        Emoticon(
-          content: "[s:pst:脸红]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt55.png",
-        ),
-        Emoticon(
-          content: "[s:pst:腐]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt56.png",
-        ),
-        Emoticon(
-          content: "[s:pst:星星眼]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt57.png",
-        ),
-        Emoticon(
-          content: "[s:pst:谢]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt58.png",
-        ),
-        Emoticon(
-          content: "[s:pst:醉]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt59.png",
-        ),
-        Emoticon(
-          content: "[s:pst:闷]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt60.png",
-        ),
-        Emoticon(
-          content: "[s:pst:闷2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt61.png",
-        ),
-        Emoticon(
-          content: "[s:pst:音乐]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt62.png",
-        ),
-        Emoticon(
-          content: "[s:pst:黑脸]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt63.png",
-        ),
-        Emoticon(
-          content: "[s:pst:鼻血]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pt64.png",
-        ),
-      ];
-      group = EmoticonGroup("潘斯特", expressionList);
-      expressionGroupList.add(group);
-
-      expressionList = [
-        Emoticon(
-          content: "[s:dt:ROLL]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt01.png",
-        ),
-        Emoticon(
-          content: "[s:dt:上]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt02.png",
-        ),
-        Emoticon(
-          content: "[s:dt:傲娇]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt03.png",
-        ),
-        Emoticon(
-          content: "[s:dt:叉出去]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt04.png",
-        ),
-        Emoticon(
-          content: "[s:dt:发光]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt05.png",
-        ),
-        Emoticon(
-          content: "[s:dt:呵欠]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt06.png",
-        ),
-        Emoticon(
-          content: "[s:dt:哭]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt07.png",
-        ),
-        Emoticon(
-          content: "[s:dt:啃古头]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt08.png",
-        ),
-        Emoticon(
-          content: "[s:dt:嘲笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt09.png",
-        ),
-        Emoticon(
-          content: "[s:dt:心]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt10.png",
-        ),
-        Emoticon(
-          content: "[s:dt:怒]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt11.png",
-        ),
-        Emoticon(
-          content: "[s:dt:怒2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt12.png",
-        ),
-        Emoticon(
-          content: "[s:dt:怨]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt13.png",
-        ),
-        Emoticon(
-          content: "[s:dt:惊]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt14.png",
-        ),
-        Emoticon(
-          content: "[s:dt:惊2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt15.png",
-        ),
-        Emoticon(
-          content: "[s:dt:无语]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt16.png",
-        ),
-        Emoticon(
-          content: "[s:dt:星星眼]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt17.png",
-        ),
-        Emoticon(
-          content: "[s:dt:星星眼2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt18.png",
-        ),
-        Emoticon(
-          content: "[s:dt:晕]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt19.png",
-        ),
-        Emoticon(
-          content: "[s:dt:注意]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt20.png",
-        ),
-        Emoticon(
-          content: "[s:dt:注意2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt21.png",
-        ),
-        Emoticon(
-          content: "[s:dt:泪]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt22.png",
-        ),
-        Emoticon(
-          content: "[s:dt:泪2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt23.png",
-        ),
-        Emoticon(
-          content: "[s:dt:烧]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt24.png",
-        ),
-        Emoticon(
-          content: "[s:dt:笑]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt25.png",
-        ),
-        Emoticon(
-          content: "[s:dt:笑2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt26.png",
-        ),
-        Emoticon(
-          content: "[s:dt:笑3]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt27.png",
-        ),
-        Emoticon(
-          content: "[s:dt:脸红]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt28.png",
-        ),
-        Emoticon(
-          content: "[s:dt:药]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt29.png",
-        ),
-        Emoticon(
-          content: "[s:dt:衰]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt30.png",
-        ),
-        Emoticon(
-          content: "[s:dt:鄙视]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt31.png",
-        ),
-        Emoticon(
-          content: "[s:dt:闲]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt32.png",
-        ),
-        Emoticon(
-          content: "[s:dt:黑脸]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/dt33.png",
-        ),
-      ];
-      group = EmoticonGroup("外域三人组", expressionList);
-      expressionGroupList.add(group);
-
-      expressionList = [
-        Emoticon(
-          content: "[s:pg:战斗力]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg01.png",
-        ),
-        Emoticon(
-          content: "[s:pg:哈啤]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg02.png",
-        ),
-        Emoticon(
-          content: "[s:pg:满分]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg03.png",
-        ),
-        Emoticon(
-          content: "[s:pg:衰]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg04.png",
-        ),
-        Emoticon(
-          content: "[s:pg:拒绝]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg05.png",
-        ),
-        Emoticon(
-          content: "[s:pg:心]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg06.png",
-        ),
-        Emoticon(
-          content: "[s:pg:严肃]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg07.png",
-        ),
-        Emoticon(
-          content: "[s:pg:吃瓜]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg08.png",
-        ),
-        Emoticon(
-          content: "[s:pg:嘣]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg09.png",
-        ),
-        Emoticon(
-          content: "[s:pg:嘣2]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg10.png",
-        ),
-        Emoticon(
-          content: "[s:pg:冻]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg11.png",
-        ),
-        Emoticon(
-          content: "[s:pg:谢]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg12.png",
-        ),
-        Emoticon(
-          content: "[s:pg:哭]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg13.png",
-        ),
-        Emoticon(
-          content: "[s:pg:响指]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg14.png",
-        ),
-        Emoticon(
-          content: "[s:pg:转身]",
-          url: "https://img4.nga.178.com/ngabbs/post/smile/pg15.png",
-        ),
-      ];
-      group = EmoticonGroup("企鹅", expressionList);
-      expressionGroupList.add(group);
-    }
-
-    return expressionGroupList;
-  }
+  List<EmoticonGroup> getEmoticonGroups() => _groups;
 }
+
+/// (分组名, UBB 分组代码, [(表情名, 图片文件名)])。
+///
+/// 数据取自 NGA 网页版 `js_bbscode_core.js` 中的 `ubbcode.smiles`，
+/// 默认分组的 UBB 为 `[s:名称]`，其余为 `[s:分组代码:名称]`。
+const _emoticonTable = <(String, String, List<(String, String)>)>[
+  (
+    '默认',
+    '',
+    [
+      ('1', 'smile.gif'),
+      ('2', 'mrgreen.gif'),
+      ('3', 'question.gif'),
+      ('4', 'wink.gif'),
+      ('5', 'redface.gif'),
+      ('6', 'sad.gif'),
+      ('7', 'cool.gif'),
+      ('8', 'crazy.gif'),
+      ('32', '12.gif'),
+      ('33', '13.gif'),
+      ('34', '14.gif'),
+      ('30', '10.gif'),
+      ('29', '09.gif'),
+      ('28', '08.gif'),
+      ('27', '07.gif'),
+      ('26', '06.gif'),
+      ('25', '05.gif'),
+      ('24', '04.gif'),
+      ('35', '15.gif'),
+      ('36', '16.gif'),
+      ('37', '17.gif'),
+      ('38', '18.gif'),
+      ('39', '19.gif'),
+      ('40', '20.gif'),
+      ('41', '21.gif'),
+      ('42', '22.gif'),
+      ('43', '23.gif'),
+    ],
+  ),
+  (
+    'AC娘',
+    'ac',
+    [
+      ('blink', 'ac0.png'),
+      ('goodjob', 'ac1.png'),
+      ('上', 'ac2.png'),
+      ('中枪', 'ac3.png'),
+      ('偷笑', 'ac4.png'),
+      ('冷', 'ac5.png'),
+      ('凌乱', 'ac6.png'),
+      ('吓', 'ac8.png'),
+      ('吻', 'ac9.png'),
+      ('呆', 'ac10.png'),
+      ('咦', 'ac11.png'),
+      ('哦', 'ac12.png'),
+      ('哭', 'ac13.png'),
+      ('哭1', 'ac14.png'),
+      ('哭笑', 'ac15.png'),
+      ('喘', 'ac17.png'),
+      ('心', 'ac23.png'),
+      ('囧', 'ac21.png'),
+      ('晕', 'ac33.png'),
+      ('汗', 'ac34.png'),
+      ('瞎', 'ac35.png'),
+      ('羞', 'ac36.png'),
+      ('羡慕', 'ac37.png'),
+      ('委屈', 'ac22.png'),
+      ('忧伤', 'ac24.png'),
+      ('怒', 'ac25.png'),
+      ('怕', 'ac26.png'),
+      ('惊', 'ac27.png'),
+      ('愁', 'ac28.png'),
+      ('抓狂', 'ac29.png'),
+      ('哼', 'ac16.png'),
+      ('喷', 'ac18.png'),
+      ('嘲笑', 'ac19.png'),
+      ('嘲笑1', 'ac20.png'),
+      ('抠鼻', 'ac30.png'),
+      ('无语', 'ac32.png'),
+      ('衰', 'ac40.png'),
+      ('黑枪', 'ac44.png'),
+      ('花痴', 'ac38.png'),
+      ('闪光', 'ac43.png'),
+      ('擦汗', 'ac31.png'),
+      ('茶', 'ac39.png'),
+      ('计划通', 'ac41.png'),
+      ('反对', 'ac7.png'),
+      ('赞同', 'ac42.png'),
+    ],
+  ),
+  (
+    '新AC娘',
+    'a2',
+    [
+      ('goodjob', 'a2_02.png'),
+      ('诶嘿', 'a2_05.png'),
+      ('偷笑', 'a2_03.png'),
+      ('怒', 'a2_04.png'),
+      ('笑', 'a2_07.png'),
+      ('那个…', 'a2_08.png'),
+      ('哦嗬嗬嗬', 'a2_09.png'),
+      ('舔', 'a2_10.png'),
+      ('鬼脸', 'a2_14.png'),
+      ('冷', 'a2_16.png'),
+      ('大哭', 'a2_15.png'),
+      ('哭', 'a2_17.png'),
+      ('恨', 'a2_21.png'),
+      ('中枪', 'a2_23.png'),
+      ('囧', 'a2_24.png'),
+      ('你看看你', 'a2_25.png'),
+      ('doge', 'a2_27.png'),
+      ('自戳双目', 'a2_28.png'),
+      ('偷吃', 'a2_30.png'),
+      ('冷笑', 'a2_31.png'),
+      ('壁咚', 'a2_32.png'),
+      ('不活了', 'a2_33.png'),
+      ('不明觉厉', 'a2_36.png'),
+      ('是在下输了', 'a2_51.png'),
+      ('你为猴这么', 'a2_53.png'),
+      ('干杯', 'a2_54.png'),
+      ('干杯2', 'a2_55.png'),
+      ('异议', 'a2_47.png'),
+      ('认真', 'a2_48.png'),
+      ('你已经死了', 'a2_45.png'),
+      ('你这种人…', 'a2_49.png'),
+      ('妮可妮可妮', 'a2_18.png'),
+      ('惊', 'a2_19.png'),
+      ('抢镜头', 'a2_52.png'),
+      ('yes', 'a2_26.png'),
+      ('有何贵干', 'a2_11.png'),
+      ('病娇', 'a2_12.png'),
+      ('lucky', 'a2_13.png'),
+      ('poi', 'a2_20.png'),
+      ('囧2', 'a2_22.png'),
+      ('威吓', 'a2_42.png'),
+      ('jojo立', 'a2_37.png'),
+      ('jojo立2', 'a2_38.png'),
+      ('jojo立3', 'a2_39.png'),
+      ('jojo立4', 'a2_41.png'),
+      ('jojo立5', 'a2_40.png'),
+    ],
+  ),
+  (
+    'NG娘',
+    'ng',
+    [
+      ('呲牙笑', 'ng_1.png'),
+      ('奸笑', 'ng_2.png'),
+      ('问号', 'ng_3.png'),
+      ('茶', 'ng_4.png'),
+      ('笑指', 'ng_5.png'),
+      ('燃尽', 'ng_6.png'),
+      ('晕', 'ng_7.png'),
+      ('扇笑', 'ng_8.png'),
+      ('寄', 'ng_9.png'),
+      ('别急', 'ng_10.png'),
+      ('doge', 'ng_11.png'),
+      ('丧', 'ng_12.png'),
+      ('汗', 'ng_13.png'),
+      ('叹气', 'ng_15.png'),
+      ('吃饼', 'ng_16.png'),
+      ('吃瓜', 'ng_17.png'),
+      ('吐舌', 'ng_18.png'),
+      ('哭', 'ng_19.png'),
+      ('喘', 'ng_20.png'),
+      ('心', 'ng_21.png'),
+      ('喷', 'ng_22.png'),
+      ('困', 'ng_24.png'),
+      ('大哭', 'ng_25.png'),
+      ('大惊', 'ng_26.png'),
+      ('害怕', 'ng_27.png'),
+      ('惊', 'ng_28.png'),
+      ('暴怒', 'ng_30.png'),
+      ('气愤', 'ng_31.png'),
+      ('热', 'ng_32.png'),
+      ('瓜不熟', 'ng_33.png'),
+      ('瞎', 'ng_34.png'),
+      ('色', 'ng_35.png'),
+      ('斜眼', 'ng_37.png'),
+      ('问号大', 'ng_38.png'),
+    ],
+  ),
+  (
+    '潘斯特',
+    'pst',
+    [
+      ('举手', 'pt00.png'),
+      ('亲', 'pt01.png'),
+      ('偷笑', 'pt02.png'),
+      ('偷笑2', 'pt03.png'),
+      ('偷笑3', 'pt04.png'),
+      ('傻眼', 'pt05.png'),
+      ('傻眼2', 'pt06.png'),
+      ('兔子', 'pt07.png'),
+      ('发光', 'pt08.png'),
+      ('呆', 'pt09.png'),
+      ('呆2', 'pt10.png'),
+      ('呆3', 'pt11.png'),
+      ('呕', 'pt12.png'),
+      ('呵欠', 'pt13.png'),
+      ('哭', 'pt14.png'),
+      ('哭2', 'pt15.png'),
+      ('哭3', 'pt16.png'),
+      ('嘲笑', 'pt17.png'),
+      ('基', 'pt18.png'),
+      ('宅', 'pt19.png'),
+      ('安慰', 'pt20.png'),
+      ('幸福', 'pt21.png'),
+      ('开心', 'pt22.png'),
+      ('开心2', 'pt23.png'),
+      ('开心3', 'pt24.png'),
+      ('怀疑', 'pt25.png'),
+      ('怒', 'pt26.png'),
+      ('怒2', 'pt27.png'),
+      ('怨', 'pt28.png'),
+      ('惊吓', 'pt29.png'),
+      ('惊吓2', 'pt30.png'),
+      ('惊呆', 'pt31.png'),
+      ('惊呆2', 'pt32.png'),
+      ('惊呆3', 'pt33.png'),
+      ('惨', 'pt34.png'),
+      ('斜眼', 'pt35.png'),
+      ('晕', 'pt36.png'),
+      ('汗', 'pt37.png'),
+      ('泪', 'pt38.png'),
+      ('泪2', 'pt39.png'),
+      ('泪3', 'pt40.png'),
+      ('泪4', 'pt41.png'),
+      ('满足', 'pt42.png'),
+      ('满足2', 'pt43.png'),
+      ('火星', 'pt44.png'),
+      ('牙疼', 'pt45.png'),
+      ('电击', 'pt46.png'),
+      ('看戏', 'pt47.png'),
+      ('眼袋', 'pt48.png'),
+      ('眼镜', 'pt49.png'),
+      ('笑而不语', 'pt50.png'),
+      ('紧张', 'pt51.png'),
+      ('美味', 'pt52.png'),
+      ('背', 'pt53.png'),
+      ('脸红', 'pt54.png'),
+      ('脸红2', 'pt55.png'),
+      ('腐', 'pt56.png'),
+      ('星星眼', 'pt57.png'),
+      ('谢', 'pt58.png'),
+      ('醉', 'pt59.png'),
+      ('闷', 'pt60.png'),
+      ('闷2', 'pt61.png'),
+      ('音乐', 'pt62.png'),
+      ('黑脸', 'pt63.png'),
+      ('鼻血', 'pt64.png'),
+    ],
+  ),
+  (
+    '外域三人组',
+    'dt',
+    [
+      ('ROLL', 'dt01.png'),
+      ('上', 'dt02.png'),
+      ('傲娇', 'dt03.png'),
+      ('叉出去', 'dt04.png'),
+      ('发光', 'dt05.png'),
+      ('呵欠', 'dt06.png'),
+      ('哭', 'dt07.png'),
+      ('啃古头', 'dt08.png'),
+      ('嘲笑', 'dt09.png'),
+      ('心', 'dt10.png'),
+      ('怒', 'dt11.png'),
+      ('怒2', 'dt12.png'),
+      ('怨', 'dt13.png'),
+      ('惊', 'dt14.png'),
+      ('惊2', 'dt15.png'),
+      ('无语', 'dt16.png'),
+      ('星星眼', 'dt17.png'),
+      ('星星眼2', 'dt18.png'),
+      ('晕', 'dt19.png'),
+      ('注意', 'dt20.png'),
+      ('注意2', 'dt21.png'),
+      ('泪', 'dt22.png'),
+      ('泪2', 'dt23.png'),
+      ('烧', 'dt24.png'),
+      ('笑', 'dt25.png'),
+      ('笑2', 'dt26.png'),
+      ('笑3', 'dt27.png'),
+      ('脸红', 'dt28.png'),
+      ('药', 'dt29.png'),
+      ('衰', 'dt30.png'),
+      ('鄙视', 'dt31.png'),
+      ('闲', 'dt32.png'),
+      ('黑脸', 'dt33.png'),
+    ],
+  ),
+  (
+    '企鹅',
+    'pg',
+    [
+      ('战斗力', 'pg01.png'),
+      ('哈啤', 'pg02.png'),
+      ('满分', 'pg03.png'),
+      ('衰', 'pg04.png'),
+      ('拒绝', 'pg05.png'),
+      ('心', 'pg06.png'),
+      ('严肃', 'pg07.png'),
+      ('吃瓜', 'pg08.png'),
+      ('嘣', 'pg09.png'),
+      ('嘣2', 'pg10.png'),
+      ('冻', 'pg11.png'),
+      ('谢', 'pg12.png'),
+      ('哭', 'pg13.png'),
+      ('响指', 'pg14.png'),
+      ('转身', 'pg15.png'),
+    ],
+  ),
+];

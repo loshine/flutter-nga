@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 
@@ -13,11 +14,11 @@ class AvatarWidget extends StatelessWidget {
   String get _realAvatarUrl {
     if (avatar == null) {
       return "";
-    } else if (avatar!.startsWith("http://")) {
-      return avatar!.replaceAll("http://", "https://");
-    } else {
-      return avatar!;
     }
+    final url = normalizeNgaImageUrl(avatar!);
+    return url.startsWith("http://")
+        ? url.replaceFirst("http://", "https://")
+        : url;
   }
 
   @override

@@ -189,7 +189,7 @@ void main() {
     testWidgets('renders 22px inline image', (tester) async {
       await _pumpHtml(
         tester,
-        "前<nga_emoticon src='https://img4.nga.178.com/ngabbs/post/smile/ac0.png'>"
+        "前<nga_emoticon src='https://img4.nga.cn/ngabbs/post/smile/ac0.png'>"
         '</nga_emoticon>后',
       );
 
