@@ -51,16 +51,11 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
+        // minify / shrinkResources / proguard-android-optimize.txt 由 Flutter Gradle 插件在 release 下自动开启，
+        // 插件与 AndroidX 依赖各自携带 consumer rules，无需额外的 proguard-rules.pro。
+        release {
             signingConfig = signingConfigs.findByName("release")
-            if (signingConfig == null) {
-                signingConfig = signingConfigs.getByName("debug")
-            }
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+                ?: signingConfigs.getByName("debug")
         }
     }
 
