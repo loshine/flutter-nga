@@ -5,7 +5,6 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
@@ -142,17 +141,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Builder(
-            builder: (context) => Html(
-              data: parsed,
-              extensions: buildNgaHtmlExtensions(context),
-            ),
-          ),
+          body: NgaHtml(parsed),
         ),
       ),
     );
 
-    await tester.tap(find.text('SCP-087'));
+    await tester.tap(find.text('SCP-087', findRichText: true));
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);

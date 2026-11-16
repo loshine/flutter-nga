@@ -31,7 +31,8 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   fast_gbk: ^1.0.0
   sembast: ^3.10.1
-  flutter_html: ^3.0.0
+  flutter_widget_from_html_core: ^0.17.4
+  html: ^0.15.7
   html_unescape: ^2.0.0
   timeago: ^3.7.1
   intl: ^0.20.3
@@ -60,10 +61,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   shared_preferences_platform_interface: ^2.4.2
   image: ^4.13.1
-
-# flutter_html 3.0.0 calls an internal selector API removed in html 0.15.7.
-dependency_overrides:
-  html: 0.15.6
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

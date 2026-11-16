@@ -1,11 +1,9 @@
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
-import 'package:flutter_nga/utils/route.dart';
 
 class NgaHtmlContentWidget extends ConsumerWidget {
   final String content;
@@ -34,8 +32,8 @@ class NgaHtmlContentWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final interfaceState = ref.watch(interfaceSettingsProvider);
-    return Html(
-      data: NgaContentParser.parse(
+    return NgaHtml(
+      NgaContentParser.parse(
         content,
         authorId: authorId,
         tid: tid,
@@ -43,54 +41,12 @@ class NgaHtmlContentWidget extends ConsumerWidget {
         postDateTimestamp: postDateTimestamp,
         quoteBodyByPid: quoteBodyByPid,
       ),
-      extensions: buildNgaHtmlExtensions(context),
-      style: {
-        'body': Style(
-          lineHeight: LineHeight(interfaceState.lineHeight.size),
-          padding: HtmlPaddings.zero,
-          margin: Margins.zero,
-          color: Theme.of(context).textTheme.bodyLarge?.color,
-          fontSize:
-              FontSize(Dimen.bodyMedium * interfaceState.contentSizeMultiple),
-          textDecoration: textDecoration,
-        ),
-        'blockquote': Style(
-          padding: HtmlPaddings.symmetric(horizontal: 12, vertical: 8),
-          margin: Margins.symmetric(vertical: 4),
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-        ),
-        'table': Style(
-          margin: Margins.all(8),
-          border: Border(
-            left: BorderSide(color: Colors.grey.shade300),
-            right: BorderSide(color: Colors.grey.shade300),
-            top: BorderSide(color: Colors.grey.shade300),
-          ),
-        ),
-        'tr': Style(
-          backgroundColor: Colors.white.withValues(alpha: 0.6),
-          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-        ),
-        'td': Style(padding: HtmlPaddings.all(8)),
-        'pre': Style(
-          margin: Margins.symmetric(vertical: 8),
-          padding: HtmlPaddings.all(8),
-          backgroundColor:
-              Theme.of(context).dividerColor.withValues(alpha: 0.15),
-          fontFamily: 'monospace',
-          whiteSpace: WhiteSpace.pre,
-        ),
-        'code': Style(fontFamily: 'monospace'),
-        '.ubb-unknown': Style(
-          fontFamily: 'monospace',
-          color: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.color
-              ?.withValues(alpha: 0.75),
-        ),
-      },
-      onLinkTap: (url, attributes, element) => Routes.onLinkTap(context, url),
+      textStyle: TextStyle(
+        fontSize: Dimen.bodyMedium * interfaceState.contentSizeMultiple,
+        height: interfaceState.lineHeight.size,
+        color: Theme.of(context).textTheme.bodyLarge?.color,
+        decoration: textDecoration,
+      ),
     );
   }
 }

@@ -26,7 +26,7 @@ class ReplyDetailDialog extends HookConsumerWidget {
     }, [pid]);
 
     final state = ref.watch(topicReplyProvider(pid));
-    // 避免 AlertDialog 对 flutter_html 内嵌引用卡执行固有宽度测量。
+    // 避免 AlertDialog 对 HTML 内嵌引用卡执行固有宽度测量。
     final dialogWidth = (MediaQuery.sizeOf(context).width - 80).clamp(
       0.0,
       560.0,
