@@ -1,6 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'
     show GlobalWidgetsLocalizations;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,17 +76,30 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
         return MaterialApp.router(
           routerConfig: _router,
           builder: (context, child) {
-            final colorScheme = Theme.of(context).colorScheme;
+            final appTheme = Theme.of(context);
+            final colorScheme = appTheme.colorScheme;
+            final isDark = appTheme.brightness == Brightness.dark;
+            final overlayStyle = (isDark
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark)
+                .copyWith(
+              statusBarColor: Colors.transparent,
+              systemNavigationBarColor: Colors.transparent,
+              systemNavigationBarContrastEnforced: false,
+            );
             EasyRefresh.defaultHeaderBuilder = () => MaterialHeader(
                   triggerOffset: 50,
                   color: colorScheme.primary,
                   backgroundColor: colorScheme.surfaceContainerHighest,
                 );
             EasyRefresh.defaultFooterBuilder = () => const ClassicFooter();
-            return LegacyThemeBridge(
-              child: ScrollConfiguration(
-                behavior: SimpleScrollBehavior(),
-                child: child!,
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: overlayStyle,
+              child: LegacyThemeBridge(
+                child: ScrollConfiguration(
+                  behavior: SimpleScrollBehavior(),
+                  child: child!,
+                ),
               ),
             );
           },
