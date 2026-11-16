@@ -28,9 +28,8 @@ android {
         applicationId = "io.github.loshine.flutternga"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode.toInt()
+        versionCode = flutter.versionCode
         versionName = flutter.versionName
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -58,19 +57,6 @@ android {
                 ?: signingConfigs.getByName("debug")
         }
     }
-
-    sourceSets {
-        getByName("main") {
-            java.srcDirs("src/main/kotlin")
-        }
-        getByName("test") {
-            java.srcDirs("src/test/kotlin")
-        }
-    }
-
-    lint {
-        disable += "InvalidPackage"
-    }
 }
 
 kotlin {
@@ -81,11 +67,4 @@ kotlin {
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    testImplementation("junit:junit:4.13.2")
-
-    androidTestImplementation("androidx.test:runner:1.7.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 }
