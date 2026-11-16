@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:route_observer_mixin/route_observer_mixin.dart';
 import 'package:toastification/toastification.dart';
 
 import 'my_app.dart';
@@ -17,9 +16,7 @@ void main() async {
   runApp(
     ToastificationWrapper(
       child: ProviderScope(
-        child: RouteObserverProvider(
-          child: MyApp(savedThemeMode: savedThemeMode),
-        ),
+        child: MyApp(savedThemeMode: savedThemeMode),
       ),
     ),
   );

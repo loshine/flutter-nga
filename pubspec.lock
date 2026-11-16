@@ -265,14 +265,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
-  disposable_provider:
-    dependency: transitive
-    description:
-      name: disposable_provider
-      sha256: ec708a9ab97d590b2e9901b8354d3f4344008a01503667a69cd7fe6ab674c44d
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.5.0"
   easy_refresh:
     dependency: "direct main"
     description:
@@ -813,14 +805,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  nested:
-    dependency: transitive
-    description:
-      name: nested
-      sha256: "03bac4c528c64c95c722ec99280375a6f2fc708eec17c7b3f07253b626cd2a20"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   objective_c:
     dependency: transitive
     description:
@@ -997,14 +981,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  provider:
-    dependency: transitive
-    description:
-      name: provider
-      sha256: "4e82183fa20e5ca25703ead7e05de9e4cceed1fbd1eadc1ac3cb6f565a09f272"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.1.5+1"
   pub_semver:
     dependency: transitive
     description:
@@ -1037,14 +1013,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.5.0"
-  route_observer_mixin:
-    dependency: "direct main"
-    description:
-      name: route_observer_mixin
-      sha256: "2b5436b4aab0de86503728bd771177d47e3194be7ef4f9508b8e47b5b1c267c5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.9.1"
   rxdart:
     dependency: transitive
     description:
@@ -1443,5 +1411,5 @@ packages:
     source: hosted
     version: "3.1.4"
 sdks:
-  dart: ">=3.14.0 <4.0.0"
-  flutter: ">=3.50.0"
+  dart: ">=3.13.0 <4.0.0"
+  flutter: ">=3.47.0"
