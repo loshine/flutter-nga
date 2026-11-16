@@ -28,9 +28,8 @@ android {
         applicationId = "io.github.loshine.flutternga"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode.toInt()
+        versionCode = flutter.versionCode
         versionName = flutter.versionName
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -51,30 +50,12 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
+        // minify / shrinkResources / proguard-android-optimize.txt 由 Flutter Gradle 插件在 release 下自动开启，
+        // 插件与 AndroidX 依赖各自携带 consumer rules，无需额外的 proguard-rules.pro。
+        release {
             signingConfig = signingConfigs.findByName("release")
-            if (signingConfig == null) {
-                signingConfig = signingConfigs.getByName("debug")
-            }
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+                ?: signingConfigs.getByName("debug")
         }
-    }
-
-    sourceSets {
-        getByName("main") {
-            java.srcDirs("src/main/kotlin")
-        }
-        getByName("test") {
-            java.srcDirs("src/test/kotlin")
-        }
-    }
-
-    lint {
-        disable += "InvalidPackage"
     }
 }
 
@@ -86,11 +67,4 @@ kotlin {
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    testImplementation("junit:junit:4.13.2")
-
-    androidTestImplementation("androidx.test:runner:1.7.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 }

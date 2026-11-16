@@ -5,9 +5,10 @@ class ChildForum extends Forum {
   final String? desc;
   final bool selected;
   final int? parentId;
+  @override
   final int type;
 
-  ChildForum(int fid, String name, this.tid,
+  ChildForum(super.fid, super.name, this.tid,
       {this.parentId, this.desc, this.type = 0, this.selected = false})
-      : super(fid, name, type: type);
+      : super(type: type);
 }

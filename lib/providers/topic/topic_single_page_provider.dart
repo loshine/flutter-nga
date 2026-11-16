@@ -109,9 +109,9 @@ class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
       final data = await repository.getTopicDetail(key.tid, key.page, key.authorid);
 
       List<Reply> replyList = [];
-      data.replyList.values.forEach((reply) {
+      for (var reply in data.replyList.values) {
         replyList.add(reply);
-      });
+      }
 
       List<User> userList = data.userList.values.toList();
       Set<Group> groups = data.groupList.values.toSet();
@@ -122,12 +122,12 @@ class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
         try {
           List<dynamic> hots = await Future.wait(
               data.hotReplies.map((e) => repository.getTopicReplies(e)));
-          hots.forEach((e) {
+          for (var e in hots) {
             userList.addAll(e.userList.values);
             groups.addAll(e.groupList.values);
             medals.addAll(e.medalList.values);
             hotReplyList.addAll(e.replyList.values);
-          });
+          }
         } catch (_) {
           // 热评加载失败时降级为不显示热评区，不阻塞主列表
           hotReplyList = [];

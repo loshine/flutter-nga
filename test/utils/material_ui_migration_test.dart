@@ -1,3 +1,6 @@
+// 刻意导入已弃用的旧 Material 库，用来验证 LegacyThemeBridge 向尚未迁移到
+// material_ui 的第三方组件（flutter_html、photo_view、toastification）提供主题。
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart' as legacy;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';

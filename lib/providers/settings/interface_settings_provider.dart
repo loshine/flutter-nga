@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter_nga/data/core/app_preferences.dart';
+
 enum CustomLineHeight { NORMAL, MEDIUM, LARGE, XLARGE, XXLARGE }
 
 extension LineHeightExtension on CustomLineHeight {
@@ -62,25 +64,24 @@ class InterfaceSettingsState {
 }
 
 class InterfaceSettingsNotifier extends Notifier<InterfaceSettingsState> {
-  static const String _prefsName = 'ui';
-  SharedPreferences? _prefs;
+  SharedPreferencesWithCache? _prefs;
 
   @override
   InterfaceSettingsState build() => const InterfaceSettingsState();
 
-  Future<SharedPreferences> get _settings async {
-    _prefs ??= await SharedPreferences.getInstance();
+  Future<SharedPreferencesWithCache> get _settings async {
+    _prefs ??= await AppPreferences.instance();
     return _prefs!;
   }
 
   Future<void> init() async {
     final settings = await _settings;
     final contentSize =
-        settings.getDouble('${_prefsName}_contentSizeMultiple') ?? 1.0;
+        settings.getDouble(PrefsKeys.uiContentSizeMultiple) ?? 1.0;
     final titleSize =
-        settings.getDouble('${_prefsName}_titleSizeMultiple') ?? 1.0;
+        settings.getDouble(PrefsKeys.uiTitleSizeMultiple) ?? 1.0;
     final lineHeightIndex =
-        settings.getInt('${_prefsName}_lineHeight') ?? CustomLineHeight.MEDIUM.index;
+        settings.getInt(PrefsKeys.uiLineHeight) ?? CustomLineHeight.MEDIUM.index;
 
     state = InterfaceSettingsState(
       contentSizeMultiple: contentSize,
@@ -92,20 +93,20 @@ class InterfaceSettingsNotifier extends Notifier<InterfaceSettingsState> {
   Future<void> setContentSizeMultiple(double multiple) async {
     state = state.copyWith(contentSizeMultiple: multiple);
     final settings = await _settings;
-    await settings.setDouble('${_prefsName}_contentSizeMultiple', multiple);
+    await settings.setDouble(PrefsKeys.uiContentSizeMultiple, multiple);
   }
 
   Future<void> setTitleSizeMultiple(double multiple) async {
     state = state.copyWith(titleSizeMultiple: multiple);
     final settings = await _settings;
-    await settings.setDouble('${_prefsName}_titleSizeMultiple', multiple);
+    await settings.setDouble(PrefsKeys.uiTitleSizeMultiple, multiple);
   }
 
   Future<void> setLineHeight(int index) async {
     final lineHeight = _getLineHeightByIndex(index);
     state = state.copyWith(lineHeight: lineHeight);
     final settings = await _settings;
-    await settings.setInt('${_prefsName}_lineHeight', index);
+    await settings.setInt(PrefsKeys.uiLineHeight, index);
   }
 
   CustomLineHeight _getLineHeightByIndex(int index) {

@@ -107,7 +107,6 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           ),
                         ),
                         PopupMenuButton(
-                          child: Icon(Icons.more_vert),
                           onSelected: _onMenuSelected,
                           itemBuilder: (BuildContext context) {
                             return _actions.map((String choice) {
@@ -117,6 +116,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                               );
                             }).toList();
                           },
+                          child: Icon(Icons.more_vert),
                         ),
                       ],
                     ),
@@ -260,7 +260,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                   opacity: 0.5,
                   child: Dash(
                     dashColor: Theme.of(context).dividerColor,
-                    length: MediaQuery.of(context).size.width,
+                    length: MediaQuery.sizeOf(context).width,
                   ),
                 ),
               ),
@@ -296,12 +296,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                   child: Row(
                     children: <Widget>[
                       GestureDetector(
+                        onTap: _toggleLike,
                         child: Icon(
                           isLiked ? CommunityMaterialIcons.thumb_up : CommunityMaterialIcons.thumb_up_outline,
                           color: isLiked ? thumbFgActive : thumbFgInactive,
                           size: 14,
                         ),
-                        onTap: _toggleLike,
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 8),
@@ -359,7 +359,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
   }
 
   List<Widget> _getMedalListWidgets() {
-    if (widget.medalList!.isEmpty)
+    if (widget.medalList!.isEmpty) {
       return [
         Text(
           "-",
@@ -369,6 +369,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         )
       ];
+    }
     return widget.medalList!.map((medal) {
       return Padding(
         padding: EdgeInsets.only(right: 4),
@@ -382,7 +383,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     }).toList();
   }
 
-  _toggleLike() async {
+  Future<void> _toggleLike() async {
     try {
       final reaction = await Data()
           .topicRepository
@@ -397,12 +398,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       });
       AppToast.success(reaction.message);
     } catch (err) {
-      print(err.toString());
+      debugPrint(err.toString());
       AppToast.error(err);
     }
   }
 
-  _toggleDislike() async {
+  Future<void> _toggleDislike() async {
     try {
       final reaction = await Data()
           .topicRepository
@@ -417,12 +418,12 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       });
       AppToast.success(reaction.message);
     } catch (err) {
-      print(err.toString());
+      debugPrint(err.toString());
       AppToast.error(err);
     }
   }
 
-  _onMenuSelected(String action) {
+  void _onMenuSelected(String action) {
     final displayName = name_utils.getShowName(widget.user!.username ?? '');
     if (action == _actions[0]) {
       // 引用
@@ -450,7 +451,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     }
   }
 
-  _getCommentListWidgets(List<(Reply, BlockMode?)> comments) {
+  List<Container> _getCommentListWidgets(List<(Reply, BlockMode?)> comments) {
     final colorScheme = Theme.of(context).colorScheme;
     return [
       Container(
@@ -506,7 +507,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     ];
   }
 
-  _getAttachments() {
+  Column _getAttachments() {
     List<Widget> columnWidgets = [];
     final button = FilledButton.tonal(
       onPressed: () =>

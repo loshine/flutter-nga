@@ -24,39 +24,39 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
       title: const Text('选择服务器'),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: options.length,
-          itemBuilder: (context, index) {
-            final config = options[index];
-
-            return RadioListTile<BaseUrlConfig>(
-              title: Text(
-                config.name,
-                style: textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              subtitle: Text(
-                config.url.isEmpty ? '点击后输入自定义地址' : config.url,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              value: config,
-              groupValue: state.currentConfig,
-              onChanged: state.isLoading
-                  ? null
-                  : (value) async {
-                      if (value != null) {
-                        await _onSelectConfig(context, ref, state, value);
-                      }
-                    },
-              activeColor: colorScheme.primary,
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-            );
+        child: RadioGroup<BaseUrlConfig>(
+          groupValue: state.currentConfig,
+          onChanged: (value) {
+            if (value == null || state.isLoading) return;
+            _onSelectConfig(context, ref, state, value);
           },
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              final config = options[index];
+
+              return RadioListTile<BaseUrlConfig>(
+                title: Text(
+                  config.name,
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                subtitle: Text(
+                  config.url.isEmpty ? '点击后输入自定义地址' : config.url,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                value: config,
+                enabled: !state.isLoading,
+                activeColor: colorScheme.primary,
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              );
+            },
+          ),
         ),
       ),
       actions: [

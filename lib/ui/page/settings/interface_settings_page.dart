@@ -4,6 +4,8 @@ import 'package:flutter_nga/providers/settings/interface_settings_provider.dart'
 import 'package:flutter_nga/ui/widget/line_height_selection_dialog.dart';
 
 class InterfaceSettingsPage extends ConsumerWidget {
+  const InterfaceSettingsPage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(interfaceSettingsProvider);
@@ -51,7 +53,7 @@ class InterfaceSettingsPage extends ConsumerWidget {
           ),
           ListTile(
             title: Text("贴子正文行间距"),
-            trailing: Text("${state.lineHeight.nameWithSize}"),
+            trailing: Text(state.lineHeight.nameWithSize),
             subtitle: Text("用于控制贴子正文以及贴子列表的行间距"),
             onTap: () => _showLineHeightSelectionDialog(context, ref),
           ),

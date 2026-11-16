@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import 'package:flutter_nga/data/core/nga_domains.dart';
@@ -12,13 +12,16 @@ import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 
 class NgaDioConfigurator {
-  NgaDioConfigurator(this._loadDefaultUser);
+  /// [enableLogging] 默认仅在 debug 构建开启：PrettyDioLogger 会把请求头
+  /// （含 uid/cid 登录 Cookie）打印到 logcat / 系统日志，release 下必须关闭。
+  NgaDioConfigurator(this._loadDefaultUser, {this.enableLogging = kDebugMode});
 
   /// 在 [RequestOptions.extra] 中置为 true 时，响应拦截器跳过 GBK 解码与
   /// JSON 解包，原样返回字节（用于下载图片等二进制资源）。
   static const String rawResponseKey = 'nga_raw_response';
 
   final Future<CacheUser?> Function() _loadDefaultUser;
+  final bool enableLogging;
   final GbkCodec _gbk = const GbkCodec(allowMalformed: true);
 
   void configure(Dio dio) {
@@ -30,7 +33,9 @@ class NgaDioConfigurator {
     dio.options.headers["Connection"] = "Keep-Alive";
 
     dio.interceptors.add(_createMainInterceptor());
-    dio.interceptors.add(PrettyDioLogger(responseBody: false));
+    if (enableLogging) {
+      dio.interceptors.add(PrettyDioLogger(responseBody: false));
+    }
   }
 
   InterceptorsWrapper _createMainInterceptor() {

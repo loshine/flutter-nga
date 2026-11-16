@@ -250,7 +250,7 @@ class ForumDataRepository implements ForumRepository {
 
     final completion = result.then<void>(
       (_) {},
-      onError: (Object _, StackTrace __) {},
+      onError: (Object _, StackTrace _) {},
     );
     late final Future<void> tail;
     tail = completion.whenComplete(() {

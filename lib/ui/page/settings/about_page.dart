@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart' show FlutterVersion;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -81,9 +82,10 @@ class AboutPage extends HookConsumerWidget {
 
             // 技术栈区
             const _SectionHeader(title: '技术栈'),
+            // flutter run / build 会自动注入 FLUTTER_VERSION，无需手动维护版本号。
             const _InfoTile(
               title: 'Flutter',
-              subtitle: '3.44.2',
+              subtitle: FlutterVersion.version ?? '未知',
               icon: Icons.flutter_dash,
             ),
             const _InfoTile(

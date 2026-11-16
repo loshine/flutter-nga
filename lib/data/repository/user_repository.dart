@@ -40,9 +40,7 @@ class UserDataRepository implements UserRepository {
   final Dio _dio;
 
   StoreRef<int, dynamic> get _store {
-    if (_lateInitStore == null) {
-      _lateInitStore = intMapStoreFactory.store('users');
-    }
+    _lateInitStore ??= intMapStoreFactory.store('users');
     return _lateInitStore!;
   }
 

@@ -76,7 +76,7 @@ class Routes {
     final uri = Uri.parse(path);
     final mergedQueryParams = {
       ...uri.queryParameters,
-      if (queryParams != null) ...queryParams,
+      ...?queryParams,
     };
     final newUri = uri.replace(queryParameters: mergedQueryParams);
 
@@ -133,7 +133,9 @@ class Routes {
     for (LinkRoute linkRoute in _linkRoutes) {
       final matches = RegExp(linkRoute.matchRegExp()).allMatches(link ?? "");
       if (matches.isEmpty) continue;
-      matches.forEach((match) => linkRoute.handleMatch(context, match));
+      for (var match in matches) {
+        linkRoute.handleMatch(context, match);
+      }
       handled = true;
     }
     if (!handled) {
