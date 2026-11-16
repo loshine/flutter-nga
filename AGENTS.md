@@ -37,6 +37,7 @@ iOS 构建（最低 iOS 15.0）：
 - 插件依赖由 Swift Package Manager 管理（Flutter 3.50 默认开启，无需配置）。`flutter build ios` / `flutter run` 会生成 `ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` 并被 Xcode 工程引用；ephemeral 目录不入库。
 - `flutter_inappwebview_ios` 1.1.2 不支持 SPM，仍通过 CocoaPods 集成（连带 `OrderedSet`），所以保留 `ios/Podfile`，`ios/Podfile.lock` 需入库。上游稳定版支持 SPM 后可移除 CocoaPods。
 - 若 `pod install` 报 `Unicode Normalization not appropriate for ASCII-8BIT`，设置 `LANG=en_US.UTF-8` 后重试。
+- 原生单元测试在 `ios/RunnerTests/`（Swift Testing，以 Runner.app 为 `TEST_HOST`），已加入 Runner scheme 的 Test。先 `fvm flutter build ios --simulator --debug` 生成 Pods 与 SPM 包，再运行 `xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination 'platform=iOS Simulator,name=<机型>'`。
 
 ## 核心架构
 
