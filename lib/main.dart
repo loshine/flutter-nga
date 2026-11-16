@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:toastification/toastification.dart';
 
 import 'package:flutter_nga/data/core/app_preferences.dart';
+import 'package:flutter_nga/providers/settings/theme_provider.dart';
 
 import 'my_app.dart';
 
@@ -15,12 +15,17 @@ void main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   // 必须在读取任何设置（含 adaptive_theme 的亮/暗模式）之前完成旧数据迁移。
   await AppPreferences.ensureMigrated();
-  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  // AdaptiveTheme 只在首次构建时读取 light/dark，必须在 runApp 前读出已保存的
+  // 主题色并注入 themeProvider，否则冷启动会一直使用默认色。
+  final savedTheme = await ThemeNotifier.loadSaved();
 
   runApp(
     ToastificationWrapper(
       child: ProviderScope(
-        child: MyApp(savedThemeMode: savedThemeMode),
+        overrides: [
+          themeProvider.overrideWith(() => ThemeNotifier(savedTheme)),
+        ],
+        child: MyApp(savedThemeMode: savedTheme.mode),
       ),
     ),
   );

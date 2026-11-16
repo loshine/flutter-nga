@@ -10,12 +10,11 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
-import 'package:flutter_nga/providers/settings/theme_provider.dart';
+import 'package:flutter_nga/ui/widget/app_adaptive_theme.dart';
 import 'package:flutter_nga/ui/widget/legacy_theme_bridge.dart';
 import 'package:flutter_nga/ui/widget/simple_scroll_behavior.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/route_observer.dart';
-import 'package:flutter_nga/utils/theme_builder.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   final AdaptiveThemeMode? savedThemeMode;
@@ -57,21 +56,8 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final seedColor = ref.watch(themeProvider).seedColor;
-    final secondary = ThemeBuilder.getSecondaryForSeed(seedColor);
-    final lightScheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: Brightness.light,
-    );
-    final darkScheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: Brightness.dark,
-    );
-
-    return AdaptiveTheme(
-      light: ThemeBuilder.buildTheme(lightScheme, secondary),
-      dark: ThemeBuilder.buildTheme(darkScheme, secondary),
-      initial: widget.savedThemeMode ?? AdaptiveThemeMode.light,
+    return AppAdaptiveTheme(
+      initialMode: widget.savedThemeMode,
       builder: (theme, darkTheme) {
         return MaterialApp.router(
           routerConfig: _router,
