@@ -397,7 +397,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       });
       AppToast.success(reaction.message);
     } catch (err) {
-      print(err.toString());
+      debugPrint(err.toString());
       AppToast.error(err);
     }
   }
@@ -417,7 +417,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       });
       AppToast.success(reaction.message);
     } catch (err) {
-      print(err.toString());
+      debugPrint(err.toString());
       AppToast.error(err);
     }
   }

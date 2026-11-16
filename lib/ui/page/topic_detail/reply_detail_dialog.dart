@@ -213,7 +213,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       });
       AppToast.success(reaction.message);
     } catch (err) {
-      print(err.toString());
+      debugPrint(err.toString());
       AppToast.error(err);
     }
   }
@@ -233,7 +233,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       });
       AppToast.success(reaction.message);
     } catch (err) {
-      print(err.toString());
+      debugPrint(err.toString());
       AppToast.error(err);
     }
   }
