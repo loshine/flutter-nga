@@ -8,6 +8,6 @@ import io.github.loshine.flutternga.plugins.login.FlutterGallerySaverPlugin
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
-        FlutterGallerySaverPlugin.registerWith(flutterEngine)
+        FlutterGallerySaverPlugin.registerWith(flutterEngine, applicationContext)
     }
 }

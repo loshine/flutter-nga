@@ -1,25 +1,26 @@
 package io.github.loshine.flutternga.plugins.login
 
 import android.Manifest
+import android.content.ContentResolver
 import android.content.ContentValues
+import android.content.Context
+import android.content.pm.PackageManager
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.text.TextUtils
 import android.util.Log
 import android.webkit.MimeTypeMap
-import com.blankj.utilcode.util.*
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
 import java.io.File
-import java.io.IOException
-import java.io.OutputStream
 import java.net.URL
 
-class FlutterGallerySaverPlugin : MethodChannel.MethodCallHandler {
+class FlutterGallerySaverPlugin(private val context: Context) :
+    MethodChannel.MethodCallHandler {
 
     private val job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
@@ -27,9 +28,9 @@ class FlutterGallerySaverPlugin : MethodChannel.MethodCallHandler {
     companion object {
         const val CHANNEL = "io.github.loshine.flutternga.gallery_saver/plugin"
 
-        fun registerWith(flutterEngine: FlutterEngine) {
+        fun registerWith(flutterEngine: FlutterEngine, context: Context) {
             val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
-            val instance = FlutterGallerySaverPlugin()
+            val instance = FlutterGallerySaverPlugin(context)
             // setMethodCallHandler在此通道上接收方法调用的回调
             channel.setMethodCallHandler(instance)
         }
@@ -40,13 +41,13 @@ class FlutterGallerySaverPlugin : MethodChannel.MethodCallHandler {
         when (call.method) {
             "save" -> {
                 val url = call.argument<String>("url") ?: return
-                LogUtils.d(url)
+                Log.d("GallerySaver", url)
                 uiScope.launch {
                     val success = async(Dispatchers.IO) {
                         val fileUrl = URL(url)
                         val extension = MimeTypeMap.getFileExtensionFromUrl(url)
                         val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-                        val byteArray = ConvertUtils.inputStream2Bytes(fileUrl.openStream())
+                        val byteArray = fileUrl.openStream().use { it.readBytes() }
                         val file = save2Album(
                             byteArray,
                             "NationalGayAlliance",
@@ -78,20 +79,28 @@ class FlutterGallerySaverPlugin : MethodChannel.MethodCallHandler {
         suffix: String?,
         mime: String?
     ): File? {
-        val safeDirName = if (TextUtils.isEmpty(dirName)) Utils.getApp().packageName else dirName!!
+        val safeDirName = if (dirName.isNullOrEmpty()) context.packageName else dirName
         val realSuffix = suffix ?: "JPG"
         val fileName = System.currentTimeMillis().toString() + "." + realSuffix
         return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (!PermissionUtils.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
                 Log.e("ImageUtils", "save to album need storage permission")
                 return null
             }
-            val picDir = Utils.getApp().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            val picDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                ?: return null
             val destFile = File(picDir, "$safeDirName/$fileName")
-            if (!FileIOUtils.writeFileFromBytesByChannel(destFile, src, true)) {
+            try {
+                destFile.parentFile?.mkdirs()
+                destFile.writeBytes(src)
+            } catch (e: Exception) {
                 return null
             }
-            FileUtils.notifySystemToScan(destFile)
+            MediaScannerConnection.scanFile(
+                context, arrayOf(destFile.absolutePath), null, null
+            )
             destFile
         } else {
             val contentValues = ContentValues()
@@ -108,27 +117,42 @@ class FlutterGallerySaverPlugin : MethodChannel.MethodCallHandler {
                 Environment.DIRECTORY_PICTURES + "/" + safeDirName
             )
             contentValues.put(MediaStore.MediaColumns.IS_PENDING, 1)
-            val uri = Utils.getApp().contentResolver.insert(contentUri, contentValues)
+            val uri = context.contentResolver.insert(contentUri, contentValues)
                 ?: return null
-            var os: OutputStream? = null
             try {
-                os = Utils.getApp().contentResolver.openOutputStream(uri)
-                os?.write(src)
+                context.contentResolver.openOutputStream(uri)?.use { it.write(src) }
                 contentValues.clear()
                 contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
-                Utils.getApp().contentResolver.update(uri, contentValues, null, null)
-                UriUtils.uri2File(uri)
+                context.contentResolver.update(uri, contentValues, null, null)
+                uri2File(uri)
             } catch (e: Exception) {
-                Utils.getApp().contentResolver.delete(uri, null, null)
+                context.contentResolver.delete(uri, null, null)
                 e.printStackTrace()
                 null
-            } finally {
-                try {
-                    os?.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
+            }
+        }
+    }
+
+    private fun uri2File(uri: Uri): File? {
+        if (ContentResolver.SCHEME_FILE == uri.scheme) {
+            return uri.path?.let(::File)
+        }
+        if (ContentResolver.SCHEME_CONTENT != uri.scheme) {
+            return null
+        }
+        return try {
+            context.contentResolver.query(
+                uri, arrayOf(MediaStore.MediaColumns.DATA), null, null, null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val index = cursor.getColumnIndex(MediaStore.MediaColumns.DATA)
+                    if (index >= 0) cursor.getString(index)?.let(::File) else null
+                } else {
+                    null
                 }
             }
+        } catch (e: Exception) {
+            null
         }
     }
 }
