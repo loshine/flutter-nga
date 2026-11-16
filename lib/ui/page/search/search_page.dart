@@ -176,8 +176,15 @@ class SearchPage extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    final mediaPadding = MediaQuery.paddingOf(context);
+
     return ListView(
-      padding: const EdgeInsets.all(Dimen.spacingL),
+      padding: EdgeInsets.fromLTRB(
+        Dimen.spacingL + mediaPadding.left,
+        Dimen.spacingL,
+        Dimen.spacingL + mediaPadding.right,
+        Dimen.spacingL + mediaPadding.bottom,
+      ),
       children: [
         // 搜索类型分组
         _buildOptionSection(

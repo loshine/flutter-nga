@@ -22,8 +22,15 @@ class MinePage extends HookConsumerWidget {
       return null;
     }, []);
 
+    final mediaPadding = MediaQuery.paddingOf(context);
+
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: Dimen.spacingS),
+      padding: EdgeInsets.fromLTRB(
+        mediaPadding.left,
+        Dimen.spacingS,
+        mediaPadding.right,
+        Dimen.spacingS + mediaPadding.bottom,
+      ),
       children: [
         _EntranceAnimation(
           index: 0,
