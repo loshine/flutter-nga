@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 环境准备
 
-通过 [FVM](https://fvm.app) 锁定 Flutter stable 版本（以 `.fvmrc` 为准，当前 3.47.5），所有 flutter 命令用 `fvm flutter` 前缀执行。
+通过 [FVM](https://fvm.app) 锁定 Flutter stable 版本（以 `.fvmrc` 为准，当前 3.50.0），所有 flutter 命令用 `fvm flutter` 前缀执行。
 
 ```bash
 dart pub global activate fvm   # 安装 FVM（如未安装）
