@@ -1,3 +1,6 @@
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter_nga/data/entity/user.dart';
 
 int? _parseInt(dynamic value) {
@@ -33,17 +36,26 @@ class Message {
   );
 
   factory Message.fromJson(Map map, List<User> userList) {
+    final from = _parseInt(map['from']);
     return Message(
       _parseInt(map['id']),
       map['subject']?.toString(),
-      map['content'],
-      _parseInt(map['from']),
+      map['content']?.toString() ?? '',
+      from,
       _parseInt(map['time']),
-      userList.firstWhere((e) => e.uid == _parseInt(map['from']),
-          orElse: null),
+      // userInfo 里可能缺少发信人（系统消息、已注销用户等），此时用占位用户，
+      // 避免 firstWhere 抛 StateError 导致整页消息解析失败。
+      userList.firstWhereOrNull((e) => e.uid == from) ?? placeholderUser(from),
       map['data'],
     );
   }
+
+  /// [userList] 中找不到发信人时使用的占位用户。
+  @visibleForTesting
+  static User placeholderUser(int? uid) => User(
+        uid: uid,
+        username: uid == null || uid == 0 ? '系统' : 'UID:$uid',
+      );
 }
 
 class MessageListData {
