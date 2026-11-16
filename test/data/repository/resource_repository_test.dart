@@ -198,6 +198,25 @@ void main() {
       );
     });
 
+    test('does not send the NGA cookie to third-party image hosts', () async {
+      final dio = Dio();
+      final adapter = _BytesAdapter(_gifBytes);
+      dio.httpClientAdapter = adapter;
+      NgaDioConfigurator(() async => CacheUser('42', 'cid', 'nick', true))
+          .configure(dio);
+      dio.options.baseUrl = 'https://bbs.nga.cn/';
+      final repository = ResourceDataRepository(
+        dio,
+        loadCachedBytes: (_) async => null,
+      );
+
+      await repository.saveImageToGallery('https://i.example.com/a/pic.gif');
+
+      expect(gal.saved.single.bytes, _gifBytes);
+      expect(adapter.lastRequest!.uri.host, 'i.example.com');
+      expect(adapter.lastRequest!.headers.containsKey('Cookie'), isFalse);
+    });
+
     test('requests permission when missing', () async {
       gal.hasPermissionResult = false;
       final repository = ResourceDataRepository(

@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
+import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
@@ -44,11 +45,24 @@ class NgaDioConfigurator {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final user = await _loadDefaultUser();
-    if (user != null && options.headers["Cookie"] == null) {
-      options.headers["Cookie"] = "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
+    if (options.headers["Cookie"] == null && shouldAttachLoginCookie(options)) {
+      final user = await _loadDefaultUser();
+      if (user != null) {
+        options.headers["Cookie"] = "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
+      }
     }
     handler.next(options);
+  }
+
+  /// 只有请求 NGA 自有域名或当前 baseUrl（含用户自定义地址）时才携带登录
+  /// Cookie，避免把凭据发给帖子中引用的第三方图床等外部站点。
+  @visibleForTesting
+  static bool shouldAttachLoginCookie(RequestOptions options) {
+    final host = options.uri.host.toLowerCase();
+    if (host.isEmpty) return false;
+    if (isNgaHost(host)) return true;
+    final baseHost = Uri.tryParse(options.baseUrl)?.host.toLowerCase() ?? '';
+    return baseHost.isNotEmpty && host == baseHost;
   }
 
   Future<void> _handleResponse(
