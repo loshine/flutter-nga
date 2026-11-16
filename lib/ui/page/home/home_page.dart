@@ -102,16 +102,13 @@ class _HomePageContent extends HookConsumerWidget {
     final isLargeScreen = width >= _railBreakpoint;
 
     return PopScope(
-      canPop: false,
+      canPop: index == 0,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
         if (index != 0) {
           ref.read(homeIndexProvider.notifier).setIndex(0);
-          return;
         }
-
-        Navigator.of(context).pop();
       },
       child: isLargeScreen
           ? _buildLargeScreenLayout(context, ref, index, pageList)
