@@ -20,6 +20,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
     id("com.android.application") version "9.5.1" apply false
+    // builtInKotlin 下不再 apply 该插件，此处仅用于把 KGP / Kotlin 编译器锁定到 2.4.21；
+    // 删除后会回落到 AGP 内置的 KGP 版本（AGP 9.5.1 为 2.4.10），app 与所有插件模块都会受影响。
     id("org.jetbrains.kotlin.android") version "2.4.21" apply false
 }
 

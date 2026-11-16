@@ -10,8 +10,8 @@ void main() {
     const topicBKey = TopicDetailKey(tid: 2);
     final topicA = topicDetailProvider(topicAKey);
     final topicB = topicDetailProvider(topicBKey);
-    final topicASubscription = container.listen(topicA, (_, __) {});
-    final topicBSubscription = container.listen(topicB, (_, __) {});
+    final topicASubscription = container.listen(topicA, (_, _) {});
+    final topicBSubscription = container.listen(topicB, (_, _) {});
     addTearDown(() {
       topicASubscription.close();
       topicBSubscription.close();
@@ -35,7 +35,7 @@ void main() {
     final container = ProviderContainer();
     const key = TopicDetailKey(tid: 1);
     final provider = topicDetailProvider(key);
-    final subscription = container.listen(provider, (_, __) {});
+    final subscription = container.listen(provider, (_, _) {});
     addTearDown(() {
       subscription.close();
       container.dispose();
@@ -66,7 +66,7 @@ void main() {
     addTearDown(container.dispose);
     const key = TopicDetailKey(tid: 1);
     final provider = topicDetailProvider(key);
-    final subscription = container.listen(provider, (_, __) {});
+    final subscription = container.listen(provider, (_, _) {});
 
     container.read(provider.notifier).updateMetadata(
           maxPage: 4,
@@ -76,7 +76,7 @@ void main() {
     subscription.close();
     await container.pump();
 
-    final newSubscription = container.listen(provider, (_, __) {});
+    final newSubscription = container.listen(provider, (_, _) {});
     addTearDown(newSubscription.close);
     final state = container.read(provider);
     expect(state.currentPage, 1);

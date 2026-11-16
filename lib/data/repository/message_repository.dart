@@ -55,7 +55,7 @@ class MessageDataRepository extends MessageRepository {
           "&__output=8"
           "&act=${isNew ? 'new' : 'reply'}"
           "&to=${code_utils.urlDecode(sendToValue)}"
-          "&mid=${mid == null ? 0 : mid}"
+          "&mid=${mid ?? 0}"
           "&subject=${code_utils.urlEncode(subject)}"
           "&content=${code_utils.urlEncode(content)}";
       final options = Options()

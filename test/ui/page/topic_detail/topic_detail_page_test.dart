@@ -62,7 +62,7 @@ void main() {
     );
     const oldKey = TopicDetailKey(tid: 1);
     final oldProvider = topicDetailProvider(oldKey);
-    final oldSubscription = container.listen(oldProvider, (_, __) {});
+    final oldSubscription = container.listen(oldProvider, (_, _) {});
     addTearDown(() {
       oldSubscription.close();
       container.dispose();

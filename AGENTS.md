@@ -30,6 +30,9 @@ fvm flutter build ios --no-codesign
 Android 构建（详见 README）：
 - Gradle 通过 Foojay 自动下载 Java 21 作为构建 JVM，启动 Wrapper 只需 Java 17+；应用字节码目标为 Java 17。
 - `android.newDsl=false` 是 Flutter 3.47 所需，不要移除。
+- `android.builtInKotlin=true` 下 app 不 apply Kotlin 插件，但 `settings.gradle.kts` 中的 `org.jetbrains.kotlin.android` 声明仍用于锁定 KGP 版本，删除会回落到 AGP 内置版本。
+- Release 的 R8 混淆与资源压缩由 Flutter Gradle 插件自动开启，工程不维护 `proguard-rules.pro`，依赖插件与 AndroidX 自带的 consumer rules。新增需要反射 / JNI 按名访问的原生代码时，再创建 `android/app/proguard-rules.pro`（Flutter 插件会自动引用），改完需在设备上实测 release 包。
+- `AndroidManifest.xml` 中的 `flutterEmbedding=2` meta-data 是 Flutter 工具识别 v2 embedding 的依据，不要删除。
 - `android/settings.gradle.kts` 会在 `build/gradle-compat/` 生成 `flutter_inappwebview_android` 的补丁副本以兼容 AGP 9，上游发布修复后可删除该逻辑。
 - 签名读取 `android/key.properties`（参考 `key.example.properties`），缺失时 Release 回退 debug 签名。
 
@@ -37,6 +40,7 @@ iOS 构建（最低 iOS 15.0）：
 - 插件依赖由 Swift Package Manager 管理（Flutter 3.50 默认开启，无需配置）。`flutter build ios` / `flutter run` 会生成 `ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` 并被 Xcode 工程引用；ephemeral 目录不入库。
 - `flutter_inappwebview_ios` 1.1.2 不支持 SPM，仍通过 CocoaPods 集成（连带 `OrderedSet`），所以保留 `ios/Podfile`，`ios/Podfile.lock` 需入库。上游稳定版支持 SPM 后可移除 CocoaPods。
 - 若 `pod install` 报 `Unicode Normalization not appropriate for ASCII-8BIT`，设置 `LANG=en_US.UTF-8` 后重试。
+- 原生单元测试在 `ios/RunnerTests/`（Swift Testing，以 Runner.app 为 `TEST_HOST`），已加入 Runner scheme 的 Test。先 `fvm flutter build ios --simulator --debug` 生成 Pods 与 SPM 包，再运行 `xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination 'platform=iOS Simulator,name=<机型>'`。
 
 ## 核心架构
 
@@ -66,14 +70,23 @@ NGA 帖子使用 UBB 标签，`NgaContentParser.parse()` 将其转为 HTML：
 
 ### HTML 渲染（lib/ui/widget/）
 
-- `NgaHtmlContentWidget` / `NgaHtmlCommentWidget` 用 flutter_html 渲染解析结果。
-- `nga_html_extensions.dart` 定义自定义标签：`nga_quote`、`album`、`collapse`、`nga_dict`、`nga_emoticon`、`nga_hr`。解析器新增输出标签时需在此处添加渲染。
-- `pubspec.yaml` 将 `html` 锁在 0.15.6，因为 flutter_html 3.0.0 依赖了 0.15.7 中被移除的内部 API。
+- `NgaHtmlContentWidget` / `NgaHtmlCommentWidget` 通过 `NgaHtml`（`nga_html_extensions.dart`）用 flutter_widget_from_html_core 渲染解析结果；样式全部写在 `customStylesBuilder`，颜色取 material_ui 主题，链接经 `onTapUrl` 交给 `Routes.onLinkTap()`。
+- 自定义标签在 `NgaHtmlWidgetFactory.parse()` 注册：`nga_quote`、`album`、`collapse` 用 `BuildOp.onRenderBlock`，`nga_dict` 用 `BuildOp.inline`，`nga_emoticon` 走 `customWidgetBuilder` + `InlineCustomWidget`；分割线直接输出 `<hr/>`。解析器新增输出标签时需在此处添加渲染，块级标签还要加入 `_blockTags`。
+- 为与旧版 flutter_html 外观一致：块元素后紧跟的第一个 `<br>` 不占行，单元格的 `width` 会被忽略，`buildAsync` 关闭。
+- 暂不升级 fwfh 0.18 beta（会识别 material_ui 主题）：它要求 `cupertino_ui <1.1.0`，与项目冲突。
+
+### 本地设置（lib/data/core/app_preferences.dart）
+
+- 统一通过 `AppPreferences.instance()` 获取 `SharedPreferencesWithCache`，不要再用已弃用的 `SharedPreferences.getInstance()`。
+- 所有 key 定义在 `PrefsKeys`，新增 key 必须加入 `PrefsKeys.all`（cache 的 allowList，未列出的 key 读写会抛 `ArgumentError`）。
+- 旧 API 数据（`flutter.` 前缀，Android 为 `FlutterSharedPreferences.xml`）在 `main()` 里由 `AppPreferences.ensureMigrated()` 用官方 `migrateLegacySharedPreferencesToSharedPreferencesAsyncIfNecessary` 一次性迁移到新存储（Android 为 DataStore），完成标记 `flutter_nga_legacy_prefs_migrated` 不能改名。`adaptive_theme` 的亮/暗模式 key 只在新存储缺失时才迁移。
+- 账号数据在 Sembast（`users` store），不在 prefs 中。
+- 测试用 `test/test_utils/preferences.dart` 的 `setUpTestPreferences(legacy:, current:)` 准备内存存储。
 
 ### Material UI 迁移
 
 应用代码统一从 `package:material_ui/material_ui.dart` / `package:cupertino_ui/cupertino_ui.dart` 导入，lib 下不再使用 `package:flutter/material.dart`。
-flutter_html、photo_view、toastification 尚未迁移，依赖旧版主题，由 `LegacyThemeBridge`（`MaterialUiCompatibilityBridge`）提供；`test/utils/material_ui_migration_test.dart` 覆盖这一桥接。
+photo_view、toastification 尚未迁移，依赖旧版主题，由 `LegacyThemeBridge`（`MaterialUiCompatibilityBridge`）提供；`test/utils/material_ui_migration_test.dart` 覆盖这一桥接。
 
 ### 路由（lib/utils/route.dart, lib/utils/linkroute/）
 

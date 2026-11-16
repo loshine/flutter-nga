@@ -26,7 +26,7 @@ class ReplyDetailDialog extends HookConsumerWidget {
     }, [pid]);
 
     final state = ref.watch(topicReplyProvider(pid));
-    // 避免 AlertDialog 对 flutter_html 内嵌引用卡执行固有宽度测量。
+    // 避免 AlertDialog 对 HTML 内嵌引用卡执行固有宽度测量。
     final dialogWidth = (MediaQuery.sizeOf(context).width - 80).clamp(
       0.0,
       560.0,
@@ -68,7 +68,6 @@ class _ReplyWidget extends StatefulWidget {
   final User user;
 
   const _ReplyWidget({
-    super.key,
     required this.reply,
     required this.user,
   });
@@ -151,12 +150,12 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                   child: Row(
                     children: <Widget>[
                       GestureDetector(
+                        onTap: _toggleLike,
                         child: Icon(
                           isLiked ? CommunityMaterialIcons.thumb_up : CommunityMaterialIcons.thumb_up_outline,
                           color: isLiked ? thumbFgActive : thumbFgInactive,
                           size: 14,
                         ),
-                        onTap: _toggleLike,
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 8),
@@ -198,7 +197,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
     );
   }
 
-  _toggleLike() async {
+  Future<void> _toggleLike() async {
     try {
       final reaction = await Data()
           .topicRepository
@@ -213,12 +212,12 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       });
       AppToast.success(reaction.message);
     } catch (err) {
-      print(err.toString());
+      debugPrint(err.toString());
       AppToast.error(err);
     }
   }
 
-  _toggleDislike() async {
+  Future<void> _toggleDislike() async {
     try {
       final reaction = await Data()
           .topicRepository
@@ -233,7 +232,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
       });
       AppToast.success(reaction.message);
     } catch (err) {
-      print(err.toString());
+      debugPrint(err.toString());
       AppToast.error(err);
     }
   }

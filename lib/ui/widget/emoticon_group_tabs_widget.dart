@@ -50,7 +50,7 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
 }
 
 class _EmoticonGroupWidget extends StatelessWidget {
-  _EmoticonGroupWidget({this.group, this.callback, super.key});
+  const _EmoticonGroupWidget({this.group, this.callback});
 
   final EmoticonGroup? group;
   final InputCallback? callback;

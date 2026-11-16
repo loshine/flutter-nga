@@ -1,11 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="io.github.loshine.flutternga">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- The INTERNET permission is required for development. Specifically,
-         flutter needs it to communicate with the running application
-         to allow setting breakpoints, to provide hot reload, etc.
-    -->
+    <!-- 访问论坛接口与图片资源需要网络权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- gal: Android 10 及以下写入系统相册需要存储权限 -->
     <uses-permission
@@ -23,20 +19,16 @@
         </intent>
     </queries>
 
-    <!-- io.flutter.app.FlutterApplication is an android.app.Application that
-         calls FlutterMain.startInitialization(this); in its onCreate method.
-         In most cases you can leave this as-is, but you if you want to provide
-         additional functionality it is fine to subclass or reimplement
-         FlutterApplication and put your custom class here. -->
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="FNGA"
         android:requestLegacyExternalStorage="true"
-        tools:ignore="AllowBackup,GoogleAppIndexingWarning"
-        tools:replace="android:label">
+        tools:ignore="AllowBackup">
 
+        <!-- Flutter 工具据此判定工程使用 v2 embedding 并生成 GeneratedPluginRegistrant，
+             缺失时会被当作已删除的 v1 embedding 而拒绝构建，不要删除。 -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

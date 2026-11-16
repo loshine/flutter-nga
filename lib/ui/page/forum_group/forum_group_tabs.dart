@@ -67,6 +67,7 @@ class ForumGroupTabsPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
         child: AppBar(
           bottom: TabBar(
             controller: tabController,
@@ -74,7 +75,6 @@ class ForumGroupTabsPage extends HookConsumerWidget {
             tabs: tabs,
           ),
         ),
-        preferredSize: const Size.fromHeight(kToolbarHeight),
       ),
       body: TabBarView(
         controller: tabController,

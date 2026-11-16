@@ -1,7 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import 'package:flutter_nga/data/core/nga_dio_configurator.dart';
 import 'package:flutter_nga/data/core/nga_domains.dart';
@@ -114,5 +114,28 @@ void main() {
 
     expect(adapter.requests[0].headers['Cookie'], contains('42'));
     expect(adapter.requests[1].headers.containsKey('Cookie'), isFalse);
+  });
+
+  group('PrettyDioLogger', () {
+    bool hasLogger(Dio dio) =>
+        dio.interceptors.any((interceptor) => interceptor is PrettyDioLogger);
+
+    test('is not added when logging is disabled (release builds)', () {
+      final dio = Dio();
+      NgaDioConfigurator(() async => null, enableLogging: false).configure(dio);
+      expect(hasLogger(dio), isFalse);
+    });
+
+    test('is added when logging is enabled', () {
+      final dio = Dio();
+      NgaDioConfigurator(() async => null, enableLogging: true).configure(dio);
+      expect(hasLogger(dio), isTrue);
+    });
+
+    test('defaults to kDebugMode', () {
+      final dio = Dio();
+      NgaDioConfigurator(() async => null).configure(dio);
+      expect(hasLogger(dio), kDebugMode);
+    });
   });
 }

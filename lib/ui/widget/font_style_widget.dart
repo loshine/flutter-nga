@@ -30,14 +30,15 @@ class FontStyleWidget extends StatelessWidget {
       crossAxisCount: 4,
       children: _operationMap.entries.map((entry) {
         return Material(
+          color: Colors.transparent,
           child: InkWell(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(entry.value),
                 Padding(
-                  child: Text(entry.key),
                   padding: EdgeInsets.only(top: 8),
+                  child: Text(entry.key),
                 ),
               ],
             ),
@@ -45,7 +46,6 @@ class FontStyleWidget extends StatelessWidget {
               handleByKey(context, entry.key);
             },
           ),
-          color: Colors.transparent,
         );
       }).toList(),
     );

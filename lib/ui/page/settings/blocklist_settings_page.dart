@@ -49,7 +49,7 @@ class BlocklistSettingsPage extends HookConsumerWidget {
           ListTile(
             title: Text("屏蔽模式"),
             subtitle: Text("选择被屏蔽的用户、词语在客户端内的展示方式"),
-            trailing: Text("${state.blockMode.name}"),
+            trailing: Text(state.blockMode.name),
             onTap: () => showDialog(
               context: context,
               builder: (_) => BlockModeSelectionDialog(),

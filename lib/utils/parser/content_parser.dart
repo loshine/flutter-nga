@@ -593,7 +593,7 @@ class _ContentParser implements Parser {
     '[/font]': '</span>',
     '[quote]': '<blockquote>',
     '[/quote]': '</blockquote>',
-    '======': '<br/><nga_hr></nga_hr>',
+    '======': '<br/><hr/>',
     '[stripbr]': '<br/>',
   };
 

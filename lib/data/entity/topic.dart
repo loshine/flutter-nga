@@ -188,7 +188,7 @@ class Topic {
       author: author,
       type: type,
       topicMisc: topicMisc,
-      topicParentName: parent == null ? null : parent!.name,
+      topicParentName: parent?.name,
       time: DateTime.now().millisecondsSinceEpoch,
     );
   }
@@ -249,7 +249,7 @@ class ForumInfo {
       });
     }
     dynamic toppedTopic = map['topped_topic'];
-    if (toppedTopic != null && !(toppedTopic is int) && toppedTopic != "") {
+    if (toppedTopic != null && toppedTopic is! int && toppedTopic != "") {
       toppedTopic = int.tryParse(toppedTopic);
     } else {
       toppedTopic = null;

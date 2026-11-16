@@ -24,8 +24,8 @@ class AttachmentWidget extends StatefulWidget {
 }
 
 class _AttachmentState extends State<AttachmentWidget> {
-  List<String?> _list = [];
-  List<XFile> _imageFileList = [];
+  final List<String?> _list = [];
+  final List<XFile> _imageFileList = [];
   String? _authCode;
   Widget? _addImageWidget;
 
@@ -41,8 +41,7 @@ class _AttachmentState extends State<AttachmentWidget> {
 
   List<Widget> _getImageWidgetList() {
     List<Widget> widgets = [];
-    if (_addImageWidget == null) {
-      _addImageWidget = Material(
+    _addImageWidget ??= Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
@@ -81,7 +80,6 @@ class _AttachmentState extends State<AttachmentWidget> {
           child: Icon(CommunityMaterialIcons.image_plus),
         ),
       );
-    }
     widgets.add(_addImageWidget!);
     if (_imageFileList.isNotEmpty) {
       widgets.addAll(_imageFileList.map((image) {

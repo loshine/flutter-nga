@@ -5,7 +5,6 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
@@ -83,7 +82,7 @@ void main() {
     final parsed = NgaContentParser.parse(
       '====== [collapse=标题]内容[/collapse] [s:1] [futuretag]x[/futuretag]',
     );
-    expect(parsed.contains('<nga_hr></nga_hr>'), true);
+    expect(parsed.contains('<hr/>'), true);
     expect(parsed.contains("<collapse title='标题'>内容</collapse>"), true);
     expect(parsed.contains('<nga_emoticon src=') || parsed.contains('[s:1]'),
         true);
@@ -142,17 +141,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Builder(
-            builder: (context) => Html(
-              data: parsed,
-              extensions: buildNgaHtmlExtensions(context),
-            ),
-          ),
+          body: NgaHtml(parsed),
         ),
       ),
     );
 
-    await tester.tap(find.text('SCP-087'));
+    await tester.tap(find.text('SCP-087', findRichText: true));
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);

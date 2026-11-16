@@ -7,6 +7,8 @@ import 'package:flutter_nga/utils/custom_time_messages.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class SplashPage extends StatefulWidget {
+  const SplashPage({super.key});
+
   @override
   _SplashState createState() => _SplashState();
 }
