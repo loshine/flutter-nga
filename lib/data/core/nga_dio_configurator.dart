@@ -13,6 +13,10 @@ import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 class NgaDioConfigurator {
   NgaDioConfigurator(this._loadDefaultUser);
 
+  /// 在 [RequestOptions.extra] 中置为 true 时，响应拦截器跳过 GBK 解码与
+  /// JSON 解包，原样返回字节（用于下载图片等二进制资源）。
+  static const String rawResponseKey = 'nga_raw_response';
+
   final Future<CacheUser?> Function() _loadDefaultUser;
   final GbkCodec _gbk = const GbkCodec(allowMalformed: true);
 
@@ -51,6 +55,10 @@ class NgaDioConfigurator {
     Response response,
     ResponseInterceptorHandler handler,
   ) async {
+    if (_isRawResponse(response.requestOptions)) {
+      handler.next(response);
+      return;
+    }
     response.headers.set('Content-Type', "application/json; charset=GBK");
     final responseBody = _formatResponseBody(response);
     final map = _tryDecodeMap(responseBody);
@@ -83,7 +91,9 @@ class NgaDioConfigurator {
       ));
       return;
     }
-    if (e.response == null || e.response!.data == null) {
+    if (_isRawResponse(e.requestOptions) ||
+        e.response == null ||
+        e.response!.data == null) {
       handler.next(e);
       return;
     }
@@ -98,6 +108,9 @@ class NgaDioConfigurator {
     final dioError = _preHandleServerError(e.response, map);
     handler.next(dioError ?? e);
   }
+
+  bool _isRawResponse(RequestOptions options) =>
+      options.extra[rawResponseKey] == true;
 
   Map<String, dynamic>? _tryDecodeMap(String responseBody) {
     try {

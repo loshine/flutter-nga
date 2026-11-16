@@ -50,13 +50,13 @@ class PhotoPreviewPage extends HookConsumerWidget {
   }
 
   Future<void> _save() async {
-    final success = await Data()
-        .resourceRepository
-        .downloadImage(picture_utils.getOriginalUrl(url!));
-    if (success == true) {
+    try {
+      await Data()
+          .resourceRepository
+          .saveImageToGallery(picture_utils.getOriginalUrl(url!));
       AppToast.success("保存到相册成功");
-    } else {
-      AppToast.error("保存到相册失败");
+    } catch (e) {
+      AppToast.error(e);
     }
   }
 }
