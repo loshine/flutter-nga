@@ -71,7 +71,6 @@ build/
 .flutter-plugins-dependencies
 ios/Flutter/flutter_export_environment.sh
 /android/key.properties
-!/android/flutter_nga_android.iml
 
 # FVM Version Cache
 .fvm/
