@@ -83,7 +83,7 @@ void main() {
     final parsed = NgaContentParser.parse(
       '====== [collapse=标题]内容[/collapse] [s:1] [futuretag]x[/futuretag]',
     );
-    expect(parsed.contains('<nga_hr></nga_hr>'), true);
+    expect(parsed.contains('<hr/>'), true);
     expect(parsed.contains("<collapse title='标题'>内容</collapse>"), true);
     expect(parsed.contains('<nga_emoticon src=') || parsed.contains('[s:1]'),
         true);
