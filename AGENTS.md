@@ -70,6 +70,14 @@ NGA 帖子使用 UBB 标签，`NgaContentParser.parse()` 将其转为 HTML：
 - `nga_html_extensions.dart` 定义自定义标签：`nga_quote`、`album`、`collapse`、`nga_dict`、`nga_emoticon`、`nga_hr`。解析器新增输出标签时需在此处添加渲染。
 - `pubspec.yaml` 将 `html` 锁在 0.15.6，因为 flutter_html 3.0.0 依赖了 0.15.7 中被移除的内部 API。
 
+### 本地设置（lib/data/core/app_preferences.dart）
+
+- 统一通过 `AppPreferences.instance()` 获取 `SharedPreferencesWithCache`，不要再用已弃用的 `SharedPreferences.getInstance()`。
+- 所有 key 定义在 `PrefsKeys`，新增 key 必须加入 `PrefsKeys.all`（cache 的 allowList，未列出的 key 读写会抛 `ArgumentError`）。
+- 旧 API 数据（`flutter.` 前缀，Android 为 `FlutterSharedPreferences.xml`）在 `main()` 里由 `AppPreferences.ensureMigrated()` 用官方 `migrateLegacySharedPreferencesToSharedPreferencesAsyncIfNecessary` 一次性迁移到新存储（Android 为 DataStore），完成标记 `flutter_nga_legacy_prefs_migrated` 不能改名。`adaptive_theme` 的亮/暗模式 key 只在新存储缺失时才迁移。
+- 账号数据在 Sembast（`users` store），不在 prefs 中。
+- 测试用 `test/test_utils/preferences.dart` 的 `setUpTestPreferences(legacy:, current:)` 准备内存存储。
+
 ### Material UI 迁移
 
 应用代码统一从 `package:material_ui/material_ui.dart` / `package:cupertino_ui/cupertino_ui.dart` 导入，lib 下不再使用 `package:flutter/material.dart`。

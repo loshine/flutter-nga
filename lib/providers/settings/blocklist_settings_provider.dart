@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:flutter_nga/data/core/app_preferences.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
@@ -64,8 +66,7 @@ class BlocklistSettingsState {
 }
 
 class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
-  static const String _prefsName = 'blocklist';
-  SharedPreferences? _prefs;
+  SharedPreferencesWithCache? _prefs;
   Timer? _syncTimer;
 
   @override
@@ -76,21 +77,21 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
     return const BlocklistSettingsState();
   }
 
-  Future<SharedPreferences> get _settings async {
-    _prefs ??= await SharedPreferences.getInstance();
+  Future<SharedPreferencesWithCache> get _settings async {
+    _prefs ??= await AppPreferences.instance();
     return _prefs!;
   }
 
   Future<void> init() async {
     final settings = await _settings;
     final clientBlockEnabled =
-        settings.getBool('${_prefsName}_clientBlockEnabled') ?? false;
+        settings.getBool(PrefsKeys.blocklistClientBlockEnabled) ?? false;
     final listBlockEnabled =
-        settings.getBool('${_prefsName}_listBlockEnabled') ?? true;
+        settings.getBool(PrefsKeys.blocklistListBlockEnabled) ?? true;
     final detailsBlockEnabled =
-        settings.getBool('${_prefsName}_detailsBlockEnabled') ?? true;
+        settings.getBool(PrefsKeys.blocklistDetailsBlockEnabled) ?? true;
     final blockModeIndex =
-        settings.getInt('${_prefsName}_blockMode') ?? BlockMode.COLLAPSE.index;
+        settings.getInt(PrefsKeys.blocklistBlockMode) ?? BlockMode.COLLAPSE.index;
 
     state = state.copyWith(
       clientBlockEnabled: clientBlockEnabled,
@@ -117,19 +118,19 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   Future<void> setClientBlockEnabled(bool enabled) async {
     state = state.copyWith(clientBlockEnabled: enabled);
     final settings = await _settings;
-    await settings.setBool('${_prefsName}_clientBlockEnabled', enabled);
+    await settings.setBool(PrefsKeys.blocklistClientBlockEnabled, enabled);
   }
 
   Future<void> setListBlockEnabled(bool enabled) async {
     state = state.copyWith(listBlockEnabled: enabled);
     final settings = await _settings;
-    await settings.setBool('${_prefsName}_listBlockEnabled', enabled);
+    await settings.setBool(PrefsKeys.blocklistListBlockEnabled, enabled);
   }
 
   Future<void> setDetailsBlockEnabled(bool enabled) async {
     state = state.copyWith(detailsBlockEnabled: enabled);
     final settings = await _settings;
-    await settings.setBool('${_prefsName}_detailsBlockEnabled', enabled);
+    await settings.setBool(PrefsKeys.blocklistDetailsBlockEnabled, enabled);
   }
 
   Future<void> load() async {
@@ -224,7 +225,7 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<void> updateBlockMode(BlockMode mode) async {
     final settings = await _settings;
-    await settings.setInt('${_prefsName}_blockMode', mode.index);
+    await settings.setInt(PrefsKeys.blocklistBlockMode, mode.index);
     state = state.copyWith(blockMode: mode);
   }
 

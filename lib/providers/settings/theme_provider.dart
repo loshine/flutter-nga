@@ -1,10 +1,11 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:flutter_nga/data/core/app_preferences.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
-const String _keySeedColorValue = 'seed_color_value';
+const String _keySeedColorValue = PrefsKeys.seedColorValue;
 
 /// 预设主题色列表
 class ThemeColors {
@@ -84,7 +85,7 @@ class ThemeNotifier extends Notifier<ThemeState> {
 
   Future<void> refresh() async {
     final mode = await AdaptiveTheme.getThemeMode();
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await AppPreferences.instance();
     final seedColorValue = prefs.getInt(_keySeedColorValue);
     final seedColor = seedColorValue != null
         ? Color(seedColorValue)
@@ -104,7 +105,7 @@ class ThemeNotifier extends Notifier<ThemeState> {
     // Get AdaptiveTheme reference before async gap
     final adaptiveTheme = AdaptiveTheme.of(context);
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await AppPreferences.instance();
     await prefs.setInt(_keySeedColorValue, color.toARGB32());
     state = state.copyWith(seedColor: color);
 
