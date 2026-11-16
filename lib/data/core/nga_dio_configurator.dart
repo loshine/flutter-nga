@@ -6,12 +6,17 @@ import 'package:dio/dio.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
+import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 
 class NgaDioConfigurator {
   NgaDioConfigurator(this._loadDefaultUser);
+
+  /// 在 [RequestOptions.extra] 中置为 true 时，响应拦截器跳过 GBK 解码与
+  /// JSON 解包，原样返回字节（用于下载图片等二进制资源）。
+  static const String rawResponseKey = 'nga_raw_response';
 
   final Future<CacheUser?> Function() _loadDefaultUser;
   final GbkCodec _gbk = const GbkCodec(allowMalformed: true);
@@ -40,17 +45,34 @@ class NgaDioConfigurator {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final user = await _loadDefaultUser();
-    if (user != null && options.headers["Cookie"] == null) {
-      options.headers["Cookie"] = "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
+    if (options.headers["Cookie"] == null && shouldAttachLoginCookie(options)) {
+      final user = await _loadDefaultUser();
+      if (user != null) {
+        options.headers["Cookie"] = "$TAG_UID=${user.uid};$TAG_CID=${user.cid}";
+      }
     }
     handler.next(options);
+  }
+
+  /// 只有请求 NGA 自有域名或当前 baseUrl（含用户自定义地址）时才携带登录
+  /// Cookie，避免把凭据发给帖子中引用的第三方图床等外部站点。
+  @visibleForTesting
+  static bool shouldAttachLoginCookie(RequestOptions options) {
+    final host = options.uri.host.toLowerCase();
+    if (host.isEmpty) return false;
+    if (isNgaHost(host)) return true;
+    final baseHost = Uri.tryParse(options.baseUrl)?.host.toLowerCase() ?? '';
+    return baseHost.isNotEmpty && host == baseHost;
   }
 
   Future<void> _handleResponse(
     Response response,
     ResponseInterceptorHandler handler,
   ) async {
+    if (_isRawResponse(response.requestOptions)) {
+      handler.next(response);
+      return;
+    }
     response.headers.set('Content-Type', "application/json; charset=GBK");
     final responseBody = _formatResponseBody(response);
     final map = _tryDecodeMap(responseBody);
@@ -83,7 +105,9 @@ class NgaDioConfigurator {
       ));
       return;
     }
-    if (e.response == null || e.response!.data == null) {
+    if (_isRawResponse(e.requestOptions) ||
+        e.response == null ||
+        e.response!.data == null) {
       handler.next(e);
       return;
     }
@@ -98,6 +122,9 @@ class NgaDioConfigurator {
     final dioError = _preHandleServerError(e.response, map);
     handler.next(dioError ?? e);
   }
+
+  bool _isRawResponse(RequestOptions options) =>
+      options.extra[rawResponseKey] == true;
 
   Map<String, dynamic>? _tryDecodeMap(String responseBody) {
     try {

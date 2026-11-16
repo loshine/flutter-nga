@@ -166,7 +166,7 @@ lib/
 ## 支持平台
 
 - Android
-- iOS
+- iOS（15.0+）
 - macOS
 - Linux
 - Windows

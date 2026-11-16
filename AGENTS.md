@@ -33,6 +33,11 @@ Android 构建（详见 README）：
 - `android/settings.gradle.kts` 会在 `build/gradle-compat/` 生成 `flutter_inappwebview_android` 的补丁副本以兼容 AGP 9，上游发布修复后可删除该逻辑。
 - 签名读取 `android/key.properties`（参考 `key.example.properties`），缺失时 Release 回退 debug 签名。
 
+iOS 构建（最低 iOS 15.0）：
+- 插件依赖由 Swift Package Manager 管理（Flutter 3.50 默认开启，无需配置）。`flutter build ios` / `flutter run` 会生成 `ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` 并被 Xcode 工程引用；ephemeral 目录不入库。
+- `flutter_inappwebview_ios` 1.1.2 不支持 SPM，仍通过 CocoaPods 集成（连带 `OrderedSet`），所以保留 `ios/Podfile`，`ios/Podfile.lock` 需入库。上游稳定版支持 SPM 后可移除 CocoaPods。
+- 若 `pod install` 报 `Unicode Normalization not appropriate for ASCII-8BIT`，设置 `LANG=en_US.UTF-8` 后重试。
+
 ## 核心架构
 
 ### Data() 单例（lib/data/data.dart）

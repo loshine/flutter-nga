@@ -21,7 +21,7 @@ class DataRepositories {
       userRepository.getDefaultUser,
     );
     messageRepository = MessageDataRepository(dio);
-    resourceRepository = ResourceDataRepository();
+    resourceRepository = ResourceDataRepository(dio);
     topicRepository = TopicDataRepository(database, dio);
   }
 
