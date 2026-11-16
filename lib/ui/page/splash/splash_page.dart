@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:timeago/timeago.dart' as time_ago;
@@ -26,13 +27,20 @@ class _SplashState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _splashBackground,
-      body: Center(
-        child: Image.asset(
-          'images/launcher/splash_icon_1024.png',
-          width: 200,
-          height: 200,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: _splashBackground,
+        body: Center(
+          child: Image.asset(
+            'images/launcher/splash_icon_1024.png',
+            width: 200,
+            height: 200,
+          ),
         ),
       ),
     );
