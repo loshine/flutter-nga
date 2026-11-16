@@ -27,7 +27,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
 
     final state = ref.watch(favouriteForumListProvider);
     final forums = state.forums;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
 
     /*24 is for notification bar on Android*/
     final double itemHeight = 108;

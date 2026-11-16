@@ -260,7 +260,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                   opacity: 0.5,
                   child: Dash(
                     dashColor: Theme.of(context).dividerColor,
-                    length: MediaQuery.of(context).size.width,
+                    length: MediaQuery.sizeOf(context).width,
                   ),
                 ),
               ),
