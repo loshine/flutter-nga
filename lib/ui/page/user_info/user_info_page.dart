@@ -1,4 +1,3 @@
-import 'package:flutter_html/flutter_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
@@ -6,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/user/user_info_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
+import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
@@ -91,7 +91,9 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     final widgets = <Widget>[
       _SectionCard(
         title: '签名',
-        children: [Html(data: userInfo.signature ?? "")],
+        children: [
+          NgaHtml(userInfo.signature ?? "", decorateBlocks: false),
+        ],
       ),
       _SectionCard(
         title: '声望',

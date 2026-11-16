@@ -1,4 +1,3 @@
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
@@ -29,43 +28,21 @@ class NgaHtmlCommentWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final interfaceState = ref.watch(interfaceSettingsProvider);
-    return Html(
-      data: NgaContentParser.parseComment(
+    return NgaHtml(
+      NgaContentParser.parseComment(
         content,
         authorId: authorId,
         tid: tid,
         pid: pid,
         postDateTimestamp: postDateTimestamp,
       ),
-      extensions: buildNgaHtmlExtensions(context),
-      style: {
-        'body': Style(
-          fontSize:
-              FontSize(Dimen.bodyMedium * interfaceState.contentSizeMultiple),
-          lineHeight: LineHeight(interfaceState.lineHeight.size),
-          padding: HtmlPaddings.zero,
-          margin: Margins.zero,
-          color: Theme.of(context).textTheme.bodyLarge?.color,
-          textDecoration: textDecoration,
-        ),
-        'pre': Style(
-          margin: Margins.symmetric(vertical: 8),
-          padding: HtmlPaddings.all(8),
-          backgroundColor:
-              Theme.of(context).dividerColor.withValues(alpha: 0.15),
-          fontFamily: 'monospace',
-          whiteSpace: WhiteSpace.pre,
-        ),
-        'code': Style(fontFamily: 'monospace'),
-        '.ubb-unknown': Style(
-          fontFamily: 'monospace',
-          color: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.color
-              ?.withValues(alpha: 0.75),
-        ),
-      },
+      decorateBlocks: false,
+      textStyle: TextStyle(
+        fontSize: Dimen.bodyMedium * interfaceState.contentSizeMultiple,
+        height: interfaceState.lineHeight.size,
+        color: Theme.of(context).textTheme.bodyLarge?.color,
+        decoration: textDecoration,
+      ),
     );
   }
 }

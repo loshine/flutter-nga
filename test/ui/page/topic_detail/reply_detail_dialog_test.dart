@@ -40,8 +40,8 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    expect(find.textContaining('被引用的原文'), findsOneWidget);
-    expect(find.textContaining('回复正文'), findsOneWidget);
+    expect(find.textContaining('被引用的原文', findRichText: true), findsOneWidget);
+    expect(find.textContaining('回复正文', findRichText: true), findsOneWidget);
     expect(find.byType(UsernameText), findsOneWidget);
   });
 }

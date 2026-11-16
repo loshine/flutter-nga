@@ -70,9 +70,10 @@ NGA 帖子使用 UBB 标签，`NgaContentParser.parse()` 将其转为 HTML：
 
 ### HTML 渲染（lib/ui/widget/）
 
-- `NgaHtmlContentWidget` / `NgaHtmlCommentWidget` 用 flutter_html 渲染解析结果。
-- `nga_html_extensions.dart` 定义自定义标签：`nga_quote`、`album`、`collapse`、`nga_dict`、`nga_emoticon`、`nga_hr`。解析器新增输出标签时需在此处添加渲染。
-- `pubspec.yaml` 将 `html` 锁在 0.15.6，因为 flutter_html 3.0.0 依赖了 0.15.7 中被移除的内部 API。
+- `NgaHtmlContentWidget` / `NgaHtmlCommentWidget` 通过 `NgaHtml`（`nga_html_extensions.dart`）用 flutter_widget_from_html_core 渲染解析结果；样式全部写在 `customStylesBuilder`，颜色取 material_ui 主题，链接经 `onTapUrl` 交给 `Routes.onLinkTap()`。
+- 自定义标签在 `NgaHtmlWidgetFactory.parse()` 注册：`nga_quote`、`album`、`collapse` 用 `BuildOp.onRenderBlock`，`nga_dict` 用 `BuildOp.inline`，`nga_emoticon` 走 `customWidgetBuilder` + `InlineCustomWidget`；分割线直接输出 `<hr/>`。解析器新增输出标签时需在此处添加渲染，块级标签还要加入 `_blockTags`。
+- 为与旧版 flutter_html 外观一致：块元素后紧跟的第一个 `<br>` 不占行，单元格的 `width` 会被忽略，`buildAsync` 关闭。
+- 暂不升级 fwfh 0.18 beta（会识别 material_ui 主题）：它要求 `cupertino_ui <1.1.0`，与项目冲突。
 
 ### 本地设置（lib/data/core/app_preferences.dart）
 
@@ -85,7 +86,7 @@ NGA 帖子使用 UBB 标签，`NgaContentParser.parse()` 将其转为 HTML：
 ### Material UI 迁移
 
 应用代码统一从 `package:material_ui/material_ui.dart` / `package:cupertino_ui/cupertino_ui.dart` 导入，lib 下不再使用 `package:flutter/material.dart`。
-flutter_html、photo_view、toastification 尚未迁移，依赖旧版主题，由 `LegacyThemeBridge`（`MaterialUiCompatibilityBridge`）提供；`test/utils/material_ui_migration_test.dart` 覆盖这一桥接。
+photo_view、toastification 尚未迁移，依赖旧版主题，由 `LegacyThemeBridge`（`MaterialUiCompatibilityBridge`）提供；`test/utils/material_ui_migration_test.dart` 覆盖这一桥接。
 
 ### 路由（lib/utils/route.dart, lib/utils/linkroute/）
 
