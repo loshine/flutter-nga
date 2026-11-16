@@ -30,6 +30,9 @@ fvm flutter build ios --no-codesign
 Android 构建（详见 README）：
 - Gradle 通过 Foojay 自动下载 Java 21 作为构建 JVM，启动 Wrapper 只需 Java 17+；应用字节码目标为 Java 17。
 - `android.newDsl=false` 是 Flutter 3.47 所需，不要移除。
+- `android.builtInKotlin=true` 下 app 不 apply Kotlin 插件，但 `settings.gradle.kts` 中的 `org.jetbrains.kotlin.android` 声明仍用于锁定 KGP 版本，删除会回落到 AGP 内置版本。
+- Release 的 R8 混淆与资源压缩由 Flutter Gradle 插件自动开启，工程不维护 `proguard-rules.pro`，依赖插件与 AndroidX 自带的 consumer rules。新增需要反射 / JNI 按名访问的原生代码时，再创建 `android/app/proguard-rules.pro`（Flutter 插件会自动引用），改完需在设备上实测 release 包。
+- `AndroidManifest.xml` 中的 `flutterEmbedding=2` meta-data 是 Flutter 工具识别 v2 embedding 的依据，不要删除。
 - `android/settings.gradle.kts` 会在 `build/gradle-compat/` 生成 `flutter_inappwebview_android` 的补丁副本以兼容 AGP 9，上游发布修复后可删除该逻辑。
 - 签名读取 `android/key.properties`（参考 `key.example.properties`），缺失时 Release 回退 debug 签名。
 
