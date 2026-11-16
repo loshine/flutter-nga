@@ -9,13 +9,15 @@ class ContentDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(
-          child: DefaultTextStyle.merge(
-            child: Wrap(children: children),
-            style: TextStyle(
-              fontSize: Dimen.displaySmall.toDouble(),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(
+            child: DefaultTextStyle.merge(
+              child: Wrap(children: children),
+              style: TextStyle(
+                fontSize: Dimen.displaySmall.toDouble(),
+              ),
             ),
           ),
         ),
