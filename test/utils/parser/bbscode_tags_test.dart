@@ -113,7 +113,7 @@ void main() {
     expect(parsed, contains('<blockquote>q</blockquote>'));
     expect(parsed, contains("<collapse title='t'>内容</collapse>"));
     expect(parsed, contains("<div style='text-align:center;'>中</div>"));
-    expect(parsed, contains("<p style='text-align:left'>左</p>"));
+    expect(parsed, contains("<div style='text-align:left;'>左</div>"));
     expect(parsed, isNot(contains('ubb-unknown')));
   });
 
@@ -214,6 +214,18 @@ void main() {
         "前<nga_crypt data='${NgaCrypt.toHex(cipher)}'></nga_crypt>后",
       );
       expect(NgaCrypt.fromHex(NgaCrypt.toHex(cipher)), cipher);
+      // 楼层参数一并带上，解密后按同样参数解析
+      expect(
+        NgaContentParser.parse(
+          '[crypt]$cipher[/crypt]',
+          authorId: 1,
+          tid: 2,
+          pid: 3,
+          postDateTimestamp: 1763337600,
+        ),
+        "<nga_crypt data='${NgaCrypt.toHex(cipher)}' author='1' tid='2' "
+        "pid='3' date='1763337600'></nga_crypt>",
+      );
       expect(
         NgaContentParser.parse('[crypt]<b>[/crypt]'),
         '<nga_crypt></nga_crypt>',
@@ -299,6 +311,23 @@ void main() {
       expect(parsed, isNot(contains('[iframe')));
     });
 
+    test('l / r become aligned blocks and swallow adjacent line breaks', () {
+      expect(
+        NgaContentParser.parse('前文<br/>[l]左<br/>[/l]<br/>[r]右[/r]<br/>后文'),
+        "前文<div style='text-align:left;'>左</div>"
+        "<div style='text-align:right;'>右</div>后文",
+      );
+      // 同名嵌套由内到外配对
+      expect(
+        NgaContentParser.parse('[r]外[r]内[/r]尾[/r]'),
+        "<div style='text-align:right;'>外"
+        "<div style='text-align:right;'>内</div>尾</div>",
+      );
+      // 带参数的保留原文（与网页版一致），未闭合的不处理
+      expect(NgaContentParser.parse('[l=50]x[/l]'), '[l=50]x[/l]');
+      expect(NgaContentParser.parse('a<br/>[l]x'), 'a<br/>[l]x');
+    });
+
     test('upup is bold', () {
       expect(
         NgaContentParser.parse('[upup]顶[/upup] [UPUP]x[/UPUP]'),
@@ -345,6 +374,32 @@ void main() {
     await tester.tap(find.text('重新输入密码'));
     await tester.pump();
     expect(find.byType(TextField), findsOneWidget);
+  });
+
+  testWidgets('decrypted content keeps the post date for noimg', (
+    tester,
+  ) async {
+    final cipher = NgaCrypt.encrypt('pw', '[noimg]abc.jpg[/noimg]');
+    // 2025-11-17 08:00（北京时间）
+    final parsed = NgaContentParser.parse(
+      '[crypt]$cipher[/crypt]',
+      postDateTimestamp: 1763337600,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: SingleChildScrollView(child: NgaHtml(parsed))),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'pw');
+    await tester.tap(find.text('确认'));
+    await tester.pump();
+
+    final images = tester.widgetList<Image>(find.byType(Image));
+    expect(
+      images.map((image) => image.image.toString()),
+      contains(contains('attachments/mon_202511/17/abc.jpg')),
+    );
   });
 
   testWidgets('lessernuke renders as collapse', (tester) async {

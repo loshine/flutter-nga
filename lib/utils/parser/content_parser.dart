@@ -13,7 +13,6 @@ class NgaContentParser {
   static final Parser _lesserNukeParser = _LesserNukeParser();
   static final Parser _replyParser = _ReplyParser();
   static final Parser _commentParser = _CommentParser();
-  static final Parser _cryptParser = _CryptParser();
   static final Parser _randomBlockParser = _RandomBlockParser();
   static final Parser _albumParser = _AlbumParser();
   static final Parser _tableParser = _TableParser();
@@ -44,9 +43,19 @@ class NgaContentParser {
     caseSensitive: false,
   );
 
-  static List<Parser> _buildParserList({int? postDateTimestamp}) {
+  static List<Parser> _buildParserList({
+    int? authorId,
+    int? tid,
+    int? pid,
+    int? postDateTimestamp,
+  }) {
     return [
-      _cryptParser,
+      _CryptParser(
+        authorId: authorId,
+        tid: tid,
+        pid: pid,
+        postDateTimestamp: postDateTimestamp,
+      ),
       _randomBlockParser,
       _albumParser,
       _tableParser,
@@ -150,6 +159,9 @@ class NgaContentParser {
       ).parse(parseContent);
     }
     for (final parser in _buildParserList(
+      authorId: authorId,
+      tid: tid,
+      pid: pid,
       postDateTimestamp: postDateTimestamp,
     )) {
       parseContent = parser.parse(parseContent);
@@ -192,6 +204,9 @@ class NgaContentParser {
       ).parse(parseContent);
     }
     for (final parser in _buildParserList(
+      authorId: authorId,
+      tid: tid,
+      pid: pid,
       postDateTimestamp: postDateTimestamp,
     )) {
       parseContent = parser.parse(parseContent);
@@ -286,7 +301,18 @@ class _LesserNukeParser implements Parser {
 /// `[crypt]密文[/crypt]`：网页版输入密码后用 RC4 解密（见 [NgaCrypt]）。
 /// 这里输出 `<nga_crypt data='…'>`，由渲染层提供密码输入框；密文按十六进制
 /// 存放，避免后续 Parser（如 `===`、`------`）误改。
+///
+/// 明文要按所在楼层的参数重新解析（`[noimg]` 补日期目录、`[dice]` 掷骰），
+/// 所以把楼层参数一并写进属性（`author` / `tid` / `pid` / `date`），
+/// 渲染层原样传回 [NgaContentParser.parse]。这些参数都已在解析缓存的 key 里。
 class _CryptParser implements Parser {
+  _CryptParser({this.authorId, this.tid, this.pid, this.postDateTimestamp});
+
+  final int? authorId;
+  final int? tid;
+  final int? pid;
+  final int? postDateTimestamp;
+
   static final _cryptRegex = RegExp(
     r'\[crypt\]([\s\S]*?)\[/crypt\]',
     caseSensitive: false,
@@ -298,7 +324,19 @@ class _CryptParser implements Parser {
     return content.replaceAllMapped(_cryptRegex, (m) {
       final cipher = (m.group(1) ?? '').trim();
       if (!NgaCrypt.isValidCipher(cipher)) return '<nga_crypt></nga_crypt>';
-      return "<nga_crypt data='${NgaCrypt.toHex(cipher)}'></nga_crypt>";
+      final buffer = StringBuffer(
+        "<nga_crypt data='${NgaCrypt.toHex(cipher)}'",
+      );
+      void writeAttr(String key, int? value) {
+        if (value != null) buffer.write(" $key='$value'");
+      }
+
+      writeAttr('author', authorId);
+      writeAttr('tid', tid);
+      writeAttr('pid', pid);
+      writeAttr('date', postDateTimestamp);
+      buffer.write('></nga_crypt>');
+      return buffer.toString();
     });
   }
 }
@@ -924,8 +962,15 @@ class _ContentParser implements Parser {
     r'\[align=([a-z]+?)\]([\s\S]*?)\[/align\]',
     caseSensitive: false,
   );
+
+  /// `[l]` / `[r]`：网页版输出 `display:block` 的 `.left` / `.right`（左右浮动）
+  /// 块，并吞掉标签两侧各一个换行；带参数的 `[l=…]` 保留原文。fwfh 不支持
+  /// 浮动，这里输出靠左 / 靠右对齐的块（不用 `<p>`，避免多出段落间距）。
+  /// 只匹配内部不再含 `[l]` / `[r]` 标签的一层，由内到外处理嵌套。
   static final _lrRegex = RegExp(
-    r'\[(l|r)\]([\s\S]*?)\[/\1\]',
+    r'\s*(?:<br\s*/?>)?\s*\[(l|r)\]\s*(?:<br\s*/?>)?'
+    r'((?:(?!\[/?[lr]\])[\s\S])*?)'
+    r'\s*(?:<br\s*/?>)?\s*\[/\1\](?:\s*<br\s*/?>)?\s*',
     caseSensitive: false,
   );
   static final _hRegex = RegExp(r'\[h\]([\s\S]*?)\[/h\]', caseSensitive: false);
@@ -1010,7 +1055,11 @@ class _ContentParser implements Parser {
     result = result.replaceAllMapped(_collapseRegex, _collapseReplacer);
     result = result.replaceAllMapped(_colorRegex, _colorReplacer);
     result = result.replaceAllMapped(_alignRegex, _alignReplacer);
-    result = result.replaceAllMapped(_lrRegex, _lrReplacer);
+    for (var i = 0; i < 8; i++) {
+      final next = result.replaceAllMapped(_lrRegex, _lrReplacer);
+      if (next == result) break;
+      result = next;
+    }
     result = result.replaceAllMapped(_hRegex, _hReplacer);
     result = result.replaceAllMapped(_h2Regex, _h2Replacer);
     result = result.replaceAllMapped(_dashTitleRegex, _dashTitleReplacer);
@@ -1296,7 +1345,7 @@ class _ContentParser implements Parser {
 
   static String _lrReplacer(Match m) {
     final align = m.group(1)!.toLowerCase() == 'l' ? 'left' : 'right';
-    return "<p style='text-align:$align'>${m.group(2) ?? ''}</p>";
+    return "<div style='text-align:$align;'>${m.group(2) ?? ''}</div>";
   }
 
   static String _hReplacer(Match m) => '<h3>${m.group(1)}</h3>';

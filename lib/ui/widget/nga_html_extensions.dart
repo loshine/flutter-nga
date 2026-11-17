@@ -303,8 +303,14 @@ class NgaHtmlWidgetFactory extends WidgetFactory {
             debugLabel: 'nga_crypt',
             onRenderBlock: (tree, _) {
               final resolvers = tree.inheritanceResolvers;
+              final attributes = tree.element.attributes;
+              int? intAttr(String key) => int.tryParse(attributes[key] ?? '');
               return NgaCryptBlock(
-                cipher: NgaCrypt.fromHex(tree.element.attributes['data'] ?? ''),
+                cipher: NgaCrypt.fromHex(attributes['data'] ?? ''),
+                authorId: intAttr('author'),
+                tid: intAttr('tid'),
+                pid: intAttr('pid'),
+                postDateTimestamp: intAttr('date'),
                 textStyleOf: (context) =>
                     resolvers.resolve(context).prepareTextStyle(),
               );
@@ -522,10 +528,24 @@ class _NgaHeadline extends StatelessWidget {
 /// 重新解析渲染。与网页版一致，密码错误无法识别，只会得到乱码，可以重新输入。
 @visibleForTesting
 class NgaCryptBlock extends StatefulWidget {
-  const NgaCryptBlock({super.key, required this.cipher, this.textStyleOf});
+  const NgaCryptBlock({
+    super.key,
+    required this.cipher,
+    this.authorId,
+    this.tid,
+    this.pid,
+    this.postDateTimestamp,
+    this.textStyleOf,
+  });
 
   /// 密文；为 null 表示无法识别。
   final String? cipher;
+
+  /// 所在楼层的解析参数，解密后原样传给 [NgaContentParser.parse]。
+  final int? authorId;
+  final int? tid;
+  final int? pid;
+  final int? postDateTimestamp;
 
   /// 解密后正文的文字样式，缺省沿用 [DefaultTextStyle]。
   final TextStyle Function(BuildContext context)? textStyleOf;
@@ -552,6 +572,10 @@ class _NgaCryptBlockState extends State<NgaCryptBlock> {
     setState(() {
       _html = NgaContentParser.parse(
         plain.replaceAll('\r\n', '\n').replaceAll('\n', '<br/>'),
+        authorId: widget.authorId,
+        tid: widget.tid,
+        pid: widget.pid,
+        postDateTimestamp: widget.postDateTimestamp,
       );
     });
   }
