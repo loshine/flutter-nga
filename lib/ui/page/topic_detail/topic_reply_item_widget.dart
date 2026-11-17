@@ -52,7 +52,7 @@ class TopicReplyItemWidget extends StatefulWidget {
   });
 
   @override
-  _TopicReplyItemState createState() => _TopicReplyItemState();
+  State<TopicReplyItemWidget> createState() => _TopicReplyItemState();
 }
 
 class _TopicReplyItemState extends State<TopicReplyItemWidget> {

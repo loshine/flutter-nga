@@ -5,8 +5,6 @@ class ChildForum extends Forum {
   final String? desc;
   final bool selected;
   final int? parentId;
-  @override
-  final int type;
 
   ChildForum(
     super.fid,
@@ -14,7 +12,7 @@ class ChildForum extends Forum {
     this.tid, {
     this.parentId,
     this.desc,
-    this.type = 0,
+    super.type = 0,
     this.selected = false,
-  }) : super(type: type);
+  });
 }

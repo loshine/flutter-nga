@@ -102,7 +102,8 @@ Riverpod 3.x + flutter_hooks。Provider 全部基于 `Notifier` / `NotifierProvi
 
 ## 代码风格
 
-- Lint：`package:flutter_lints/flutter.yaml`；analyzer 排除各平台原生目录。
+- Lint：`package:flutter_lints/flutter.yaml`；analyzer 排除各平台原生目录。关闭了 `constant_identifier_names`，因为路由常量、通知类型、主题掩码、设置枚举值等沿用 SCREAMING_SNAKE_CASE。`fvm flutter analyze` 须保持 0 条问题，不用 `// ignore` 压制（`State` 子类私有时，`createState()` 返回类型写 `State<Xxx>`）。
+- 格式：提交前运行 `fvm dart format lib test tool`。
 - 导入顺序：`dart:` → 第三方包（含 `material_ui`）→ `package:flutter_nga/`。
 - Provider 命名：小驼峰 + `Provider` 后缀。
 - Repository：抽象类定义接口，实现类 `XxxDataRepository`，通过 `Data()` 访问。

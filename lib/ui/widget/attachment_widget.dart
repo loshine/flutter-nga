@@ -27,7 +27,7 @@ class AttachmentWidget extends StatefulWidget {
   final AttachmentCallback? attachmentCallback;
 
   @override
-  _AttachmentState createState() => _AttachmentState();
+  State<AttachmentWidget> createState() => _AttachmentState();
 }
 
 class _AttachmentState extends State<AttachmentWidget> {

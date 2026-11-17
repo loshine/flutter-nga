@@ -8,7 +8,7 @@ class CollapseWidget extends StatefulWidget {
   final Widget? child;
 
   @override
-  _CollapseState createState() => _CollapseState();
+  State<CollapseWidget> createState() => _CollapseState();
 }
 
 class _CollapseState extends State<CollapseWidget> {

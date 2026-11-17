@@ -7,7 +7,7 @@ class KeepAliveTabView extends StatefulWidget {
   const KeepAliveTabView({this.child, this.keepAlive, super.key});
 
   @override
-  _KeepAliveTabState createState() => _KeepAliveTabState();
+  State<KeepAliveTabView> createState() => _KeepAliveTabState();
 }
 
 class _KeepAliveTabState extends State<KeepAliveTabView>
