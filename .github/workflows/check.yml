@@ -2,6 +2,23 @@ name: test
 on: pull_request
 
 jobs:
+  lint:
+    name: Format & Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.50.0'
+          channel: 'stable'
+      - run: dart pub global activate fvm
+      - run: fvm install
+      - run: fvm flutter pub get
+      - name: Check formatting
+        run: fvm dart format --output=none --set-exit-if-changed lib test tool
+      - name: Analyze
+        run: fvm flutter analyze --no-pub
+
   check:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

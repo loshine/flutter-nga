@@ -30,8 +30,9 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # 项目约定路由常量（Routes）、通知类型、主题掩码、设置枚举值等使用
+    # SCREAMING_SNAKE_CASE（见 AGENTS.md「路由」），因此关闭此规则。
+    constant_identifier_names: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

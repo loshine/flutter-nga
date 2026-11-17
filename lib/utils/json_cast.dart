@@ -27,7 +27,7 @@ Map<String, dynamic>? asJsonMapOrNull(dynamic value, String path) {
   return asJsonMap(value, path);
 }
 
-@visibleForTesting
+/// 记录一次 JSON 类型不符（字段路径 + 值预览），供解析代码在容错返回前留痕。
 void logJsonTypeMismatch(
   String path,
   dynamic value, {

@@ -10,7 +10,7 @@ class ChildForumListPage extends StatefulWidget {
   const ChildForumListPage(this.forumInfo, {super.key});
 
   @override
-  _ChildForumListPage createState() => _ChildForumListPage();
+  State<ChildForumListPage> createState() => _ChildForumListPage();
 }
 
 class _ChildForumListPage extends State<ChildForumListPage> {

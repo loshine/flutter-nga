@@ -9,7 +9,7 @@ class EmoticonGroupTabsWidget extends StatefulWidget {
   final InputCallback? callback;
 
   @override
-  _EmoticonGroupTabsState createState() => _EmoticonGroupTabsState();
+  State<EmoticonGroupTabsWidget> createState() => _EmoticonGroupTabsState();
 }
 
 class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {

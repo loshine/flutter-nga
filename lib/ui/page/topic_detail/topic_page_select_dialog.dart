@@ -19,7 +19,7 @@ class TopicPageSelectDialog extends StatefulWidget {
   });
 
   @override
-  _TopicPageSelectState createState() => _TopicPageSelectState();
+  State<TopicPageSelectDialog> createState() => _TopicPageSelectState();
 }
 
 class _TopicPageSelectState extends State<TopicPageSelectDialog> {
