@@ -6,4 +6,4 @@ flutter_native_splash:
     color: "#FFF9E3"
     # Android 12+ 圆形裁切，需使用留白更大的专用图
     image: images/launcher/splash_icon_1024.png
-    icon_background_color: "#E0C19E"
+    icon_background_color: "#F5E8CB"

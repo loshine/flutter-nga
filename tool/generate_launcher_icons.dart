@@ -3,77 +3,49 @@ import 'dart:math' as math;
 
 import 'package:image/image.dart';
 
-/// Regenerates launcher icons and the shared splash asset.
+/// 启动图标唯一源文件：108×108 viewBox，对应 Android 自适应图标前景层。
+const _svgPath = 'images/launcher/icon_foreground.svg';
+
+/// 图标背景色，需与 `android/app/src/main/res/values/colors.xml` 的
+/// `ic_launcher_background`、`flutter_native_splash.yaml` 的
+/// `icon_background_color` 保持一致。
+final _background = ColorRgba8(0xF5, 0xE8, 0xCB, 0xFF);
+
+/// Regenerates launcher icons and the shared splash asset from [_svgPath].
 ///
-/// Run with `fvm dart run tool/generate_launcher_icons.dart`.
-void main() {
+/// 需在 macOS 上运行（借助 `tool/render_svg.swift` 用 AppKit 光栅化 SVG）：
+/// `fvm dart run tool/generate_launcher_icons.dart`，
+/// 然后执行 `fvm dart run flutter_native_splash:create` 刷新原生启动屏。
+Future<void> main() async {
   const size = 1024;
-  // Keep FNGA inside adaptive-icon safe zone (~66/108 of layer).
-  const targetContentWidthRatio = 0.50;
-  final background = ColorRgba8(0xE0, 0xC1, 0x9E, 0xFF);
+  final svg = File(_svgPath).readAsStringSync();
 
-  final foregroundSrc = _decode('images/launcher/icon_foreground_1024.png');
-  final monochromeSrc = _decode('images/launcher/icon_monochrome_1024.png');
+  _writeVectorDrawables(_parseSvgPaths(svg));
 
-  final foreground =
-      _padToSafeZone(foregroundSrc, size, targetContentWidthRatio);
-  final monochrome =
-      _padToSafeZone(monochromeSrc, size, targetContentWidthRatio);
-
+  final foreground = await _rasterize(_svgPath, size);
   final full = Image(width: size, height: size, numChannels: 4);
-  fill(full, color: background);
+  fill(full, color: _background);
   compositeImage(full, foreground);
-
   final round = _circularMask(full);
 
-  _writePng('images/launcher/icon_foreground_1024.png', foreground);
-  _writePng('images/launcher/icon_monochrome_1024.png', monochrome);
   _writePng('images/launcher/icon_1024.png', full);
   _writePng('images/launcher/splash_icon_1024.png', full);
 
-  const densities = <String, ({int launcher, int adaptive})>{
-    'mdpi': (launcher: 48, adaptive: 108),
-    'hdpi': (launcher: 72, adaptive: 162),
-    'xhdpi': (launcher: 96, adaptive: 216),
-    'xxhdpi': (launcher: 144, adaptive: 324),
-    'xxxhdpi': (launcher: 192, adaptive: 432),
+  // Legacy launcher icons (< API 26). API 26+ uses the adaptive icon whose
+  // foreground / monochrome layers are the generated vector drawables.
+  const densities = <String, int>{
+    'mdpi': 48,
+    'hdpi': 72,
+    'xhdpi': 96,
+    'xxhdpi': 144,
+    'xxxhdpi': 192,
   };
-
-  for (final entry in densities.entries) {
-    final dir = 'android/app/src/main/res/mipmap-${entry.key}';
-    final launcherSize = entry.value.launcher;
-    final adaptiveSize = entry.value.adaptive;
-    _writePng(
-      '$dir/ic_launcher.png',
-      copyResize(full,
-          width: launcherSize,
-          height: launcherSize,
-          interpolation: Interpolation.average),
-    );
-    _writePng(
-      '$dir/ic_launcher_round.png',
-      copyResize(round,
-          width: launcherSize,
-          height: launcherSize,
-          interpolation: Interpolation.average),
-    );
-    _writePng(
-      '$dir/ic_launcher_foreground.png',
-      copyResize(foreground,
-          width: adaptiveSize,
-          height: adaptiveSize,
-          interpolation: Interpolation.average),
-    );
-    _writePng(
-      '$dir/ic_launcher_monochrome.png',
-      copyResize(monochrome,
-          width: adaptiveSize,
-          height: adaptiveSize,
-          interpolation: Interpolation.average),
-    );
+  for (final MapEntry(key: density, value: px) in densities.entries) {
+    final dir = 'android/app/src/main/res/mipmap-$density';
+    _writePng('$dir/ic_launcher.png', _resize(full, px));
+    _writePng('$dir/ic_launcher_round.png', _resize(round, px));
   }
 
-  // Keep iOS AppIcon set in sync with the padded full icon.
   const iosIcons = <String, int>{
     'Icon-App-20x20@1x.png': 20,
     'Icon-App-20x20@2x.png': 40,
@@ -91,39 +63,104 @@ void main() {
     'Icon-App-83.5x83.5@2x.png': 167,
     'Icon-App-1024x1024@1x.png': 1024,
   };
-  for (final entry in iosIcons.entries) {
+  for (final MapEntry(key: name, value: px) in iosIcons.entries) {
     _writePng(
-      'ios/Runner/Assets.xcassets/AppIcon.appiconset/${entry.key}',
-      copyResize(
-        full,
-        width: entry.value,
-        height: entry.value,
-        interpolation: Interpolation.average,
-      ),
+      'ios/Runner/Assets.xcassets/AppIcon.appiconset/$name',
+      _resize(full, px),
     );
   }
 
-  // Web icons
-  for (final entry in {
+  const webIcons = <String, int>{
     'web/favicon.png': 16,
     'web/icons/Icon-192.png': 192,
     'web/icons/Icon-512.png': 512,
     'web/icons/Icon-maskable-192.png': 192,
     'web/icons/Icon-maskable-512.png': 512,
-  }.entries) {
-    _writePng(
-      entry.key,
-      copyResize(
-        full,
-        width: entry.value,
-        height: entry.value,
-        interpolation: Interpolation.average,
-      ),
-    );
+  };
+  for (final MapEntry(key: path, value: px) in webIcons.entries) {
+    _writePng(path, _resize(full, px));
   }
 
-  stdout.writeln('Launcher icons regenerated with safe-zone padding.');
+  stdout.writeln('Launcher icons regenerated from $_svgPath.');
 }
+
+typedef _SvgPath = ({String fill, String d});
+
+List<_SvgPath> _parseSvgPaths(String svg) {
+  final attr = RegExp(r'(\w+)="([^"]*)"');
+  final paths = [
+    for (final tag in RegExp(r'<path\b([^>]*)/>').allMatches(svg))
+      {
+        for (final a in attr.allMatches(tag.group(1)!))
+          a.group(1)!: a.group(2)!,
+      },
+  ];
+  if (paths.isEmpty || paths.any((p) => p['fill'] == null || p['d'] == null)) {
+    stderr.writeln('$_svgPath must only contain <path fill="..." d="..."/>');
+    exit(1);
+  }
+  return [for (final p in paths) (fill: p['fill']!, d: p['d']!)];
+}
+
+void _writeVectorDrawables(List<_SvgPath> paths) {
+  const dir = 'android/app/src/main/res/drawable';
+  File('$dir/ic_launcher_foreground.xml')
+      .writeAsStringSync(_vectorDrawable(paths, (p) => p.fill));
+  // Monochrome layer only uses alpha; the launcher tints it.
+  File('$dir/ic_launcher_monochrome.xml')
+      .writeAsStringSync(_vectorDrawable(paths, (_) => '#FFFFFFFF'));
+}
+
+String _vectorDrawable(List<_SvgPath> paths, String Function(_SvgPath) fill) {
+  final body = paths
+      .map(
+        (p) =>
+            '    <path\n'
+            '        android:fillColor="${fill(p)}"\n'
+            '        android:pathData="${p.d}" />\n',
+      )
+      .join();
+  return '<?xml version="1.0" encoding="utf-8"?>\n'
+      '<!-- Generated by tool/generate_launcher_icons.dart from $_svgPath. Do not edit. -->\n'
+      '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+      '    android:width="108dp"\n'
+      '    android:height="108dp"\n'
+      '    android:viewportWidth="108"\n'
+      '    android:viewportHeight="108">\n'
+      '$body'
+      '</vector>\n';
+}
+
+Future<Image> _rasterize(String svgPath, int size) async {
+  if (!Platform.isMacOS) {
+    stderr.writeln('SVG rasterization requires macOS (AppKit).');
+    exit(1);
+  }
+  final tmp = await Directory.systemTemp.createTemp('launcher_icon');
+  try {
+    final png = '${tmp.path}/foreground.png';
+    final result = await Process.run('swift', [
+      'tool/render_svg.swift',
+      svgPath,
+      png,
+      '$size',
+    ]);
+    if (result.exitCode != 0) {
+      stderr.write(result.stderr);
+      exit(1);
+    }
+    return _decode(png);
+  } finally {
+    await tmp.delete(recursive: true);
+  }
+}
+
+Image _resize(Image src, int px) => copyResize(
+  src,
+  width: px,
+  height: px,
+  interpolation: Interpolation.average,
+);
 
 Image _decode(String path) {
   final image = decodeImage(File(path).readAsBytesSync());
@@ -136,63 +173,6 @@ Image _decode(String path) {
 
 void _writePng(String path, Image image) {
   File(path).writeAsBytesSync(encodePng(image));
-}
-
-Image _padToSafeZone(Image src, int size, double targetContentWidthRatio) {
-  final bounds = _opaqueBounds(src);
-  if (bounds == null) {
-    stderr.writeln('No opaque content found');
-    exit(1);
-  }
-  final content = copyCrop(
-    src,
-    x: bounds.$1,
-    y: bounds.$2,
-    width: bounds.$3,
-    height: bounds.$4,
-  );
-  final targetWidth = (size * targetContentWidthRatio).round();
-  final scale = targetWidth / content.width;
-  final targetHeight = math.max(1, (content.height * scale).round());
-  final resized = copyResize(
-    content,
-    width: targetWidth,
-    height: targetHeight,
-    interpolation: Interpolation.average,
-  );
-
-  final out = Image(width: size, height: size, numChannels: 4);
-  // Transparent canvas for adaptive foreground / monochrome layers.
-  for (final p in out) {
-    p
-      ..r = 0
-      ..g = 0
-      ..b = 0
-      ..a = 0;
-  }
-  compositeImage(
-    out,
-    resized,
-    dstX: (size - resized.width) ~/ 2,
-    dstY: (size - resized.height) ~/ 2,
-  );
-  return out;
-}
-
-(int, int, int, int)? _opaqueBounds(Image image) {
-  var minX = image.width;
-  var minY = image.height;
-  var maxX = -1;
-  var maxY = -1;
-  for (final p in image) {
-    if (p.a < 16) continue;
-    if (p.x < minX) minX = p.x;
-    if (p.y < minY) minY = p.y;
-    if (p.x > maxX) maxX = p.x;
-    if (p.y > maxY) maxY = p.y;
-  }
-  if (maxX < minX || maxY < minY) return null;
-  return (minX, minY, maxX - minX + 1, maxY - minY + 1);
 }
 
 Image _circularMask(Image src) {
