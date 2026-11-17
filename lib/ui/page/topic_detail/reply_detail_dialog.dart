@@ -115,6 +115,8 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
         ),
         SizedBox(
           height: code_utils.isStringEmpty(widget.reply.content) ? 0 : null,
+          // HtmlWidget 宽度随内容收缩，不撑满会被外层 Column 居中。
+          width: double.infinity,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
             child: NgaHtmlContentWidget(
