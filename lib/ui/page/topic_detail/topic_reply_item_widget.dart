@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
@@ -374,7 +375,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
       return Padding(
         padding: EdgeInsets.only(right: 4),
         child: CachedNetworkImage(
-          imageUrl: "https://img4.nga.178.com/ngabbs/medal/${medal.image}",
+          imageUrl: "$ngaImage4Origin/ngabbs/medal/${medal.image}",
           width: 12,
           height: 12,
           fit: BoxFit.cover,

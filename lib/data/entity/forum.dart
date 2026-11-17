@@ -1,3 +1,5 @@
+import 'package:flutter_nga/data/core/nga_domains.dart';
+
 /// 版块实体类
 class Forum {
   const Forum(this.fid, this.name, {this.type = 0, this.iconId});
@@ -36,7 +38,7 @@ class Forum {
 
   String getIconUrl() {
     final imageId = iconId ?? fid;
-    return "https://img4.nga.178.com/ngabbs/nga_classic/f/app/$imageId.png";
+    return "$ngaImage4Origin/ngabbs/nga_classic/f/app/$imageId.png";
   }
 }
 

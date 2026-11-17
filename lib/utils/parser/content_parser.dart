@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/emoticon.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
@@ -582,7 +583,7 @@ class _CommentParser implements Parser {
 
 // 优化 2: 简单标签映射表 + 复杂标签正则合并
 class _ContentParser implements Parser {
-  static const _ngaAttachmentBase = 'https://img.nga.178.com/attachments';
+  static const _ngaAttachmentBase = ngaAttachmentBase;
   final int? postDateTimestamp;
 
   _ContentParser({this.postDateTimestamp});
@@ -781,7 +782,7 @@ class _ContentParser implements Parser {
   }
 
   static String _normalizeGeneralUrl(String raw) {
-    final value = raw.trim();
+    final value = normalizeNgaImageUrl(raw.trim());
     if (value.isEmpty) return '';
     if (value.startsWith('http://')) {
       return value.replaceFirst('http://', 'https://');
@@ -824,7 +825,7 @@ class _ContentParser implements Parser {
   }
 
   static String _normalizeAttachmentUrl(String raw) {
-    final value = raw.trim();
+    final value = normalizeNgaImageUrl(raw.trim());
     if (value.isEmpty) return '';
     if (value.startsWith('http://')) {
       return value.replaceFirst('http://', 'https://');
@@ -839,7 +840,7 @@ class _ContentParser implements Parser {
       return '$_ngaAttachmentBase/$value';
     }
     if (value.startsWith('/attachments/')) {
-      return 'https://img.nga.178.com$value';
+      return '$ngaImageOrigin$value';
     }
     if (value.startsWith('/')) {
       return _resolveInternalUrl(value);
