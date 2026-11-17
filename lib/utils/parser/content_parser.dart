@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/emoticon.dart';
@@ -1157,24 +1158,14 @@ class _DiceParser implements Parser {
   }
 }
 
-// 优化 4: 表情解析优化（构建映射表）
 class _EmoticonParser implements Parser {
-  static final _emoticonMap = <String, String>{};
-  static bool _initialized = false;
+  static EmoticonLookup? _lookup;
 
-  void _ensureInitialized() {
-    if (_initialized) return;
-    final list = _loadGroupsSafely();
-    if (list == null) return;
-    for (final group in list) {
-      for (final emoticon in group.expressionList) {
-        _emoticonMap[emoticon.content] =
-            "<nga_emoticon src='${emoticon.url}' "
-            "height='${emoticon.height.round()}' "
-            "descent='${emoticon.descent.round()}'></nga_emoticon>";
-      }
-    }
-    _initialized = true;
+  EmoticonLookup? _ensureLookup() {
+    if (_lookup != null) return _lookup;
+    final groups = _loadGroupsSafely();
+    if (groups == null) return null;
+    return _lookup = EmoticonLookup(groups);
   }
 
   List<EmoticonGroup>? _loadGroupsSafely() {
@@ -1188,16 +1179,42 @@ class _EmoticonParser implements Parser {
   @override
   String parse(String? content) {
     if (content == null || content.isEmpty) return '';
-    _ensureInitialized();
+    return _ensureLookup()?.replace(content) ?? content;
+  }
+}
 
-    if (_emoticonMap.isEmpty) return content;
-
-    // 单次遍历替换所有表情
-    var result = content;
-    for (final entry in _emoticonMap.entries) {
-      result = result.replaceAll(entry.key, entry.value);
+/// 把 `[s:...]` 表情代码替换为 `<nga_emoticon>`，规则对齐网页版
+/// `js_bbscode_core.js`：匹配 `[s:内容]`（内容 1～10 个字符），按 `:` 拆成
+/// 「分组代码:表情名」；没有 `:` 或分组代码为空（如 `[s::37]`）时属于默认分组。
+/// 找不到的表情保留原文。
+@visibleForTesting
+class EmoticonLookup {
+  EmoticonLookup(List<EmoticonGroup> groups) {
+    for (final group in groups) {
+      for (final emoticon in group.expressionList) {
+        final body = emoticon.content.substring(3, emoticon.content.length - 1);
+        final (code, name) = _split(body);
+        (_htmlByGroup[code] ??= {})[name] =
+            "<nga_emoticon src='${emoticon.url}' "
+            "height='${emoticon.height.round()}' "
+            "descent='${emoticon.descent.round()}'></nga_emoticon>";
+      }
     }
-    return result;
+  }
+
+  static final _tagRegex = RegExp(r'\[s:(.{1,10}?)\]');
+
+  /// 分组代码（默认分组为空串）→ 表情名 → HTML。
+  final _htmlByGroup = <String, Map<String, String>>{};
+
+  String replace(String content) => content.replaceAllMapped(_tagRegex, (m) {
+    final (code, name) = _split(m[1]!);
+    return _htmlByGroup[code]?[name] ?? m[0]!;
+  });
+
+  static (String, String) _split(String body) {
+    final parts = body.split(':');
+    return parts.length == 1 ? ('', body) : (parts[0], parts[1]);
   }
 }
 
