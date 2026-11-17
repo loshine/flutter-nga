@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:html/dom.dart' as dom;
@@ -128,23 +129,34 @@ String cssColor(Color color) {
 /// `[表情]`。
 ///
 /// 与网页版一致按原图尺寸显示：高度取 `height`（图片原始高度），宽度随图片比例；
-/// 预先占住高度，避免图片加载后行高跳动。缺 `height` 时按图片自身尺寸。
-/// 垂直方向对齐文字基线，底边再下沉 `descent`（网页的 `vertical-align` 负值）。
+/// 缺 `height` 时按图片自身尺寸。垂直方向对齐文字基线，底边再下沉 `descent`
+/// （网页的 `vertical-align` 负值）。
+///
+/// 用 [CachedNetworkImage] 走磁盘缓存，App 重启后不必重新下载。加载中显示与
+/// 高度相同的透明正方形占位：OctoImage 的占位不受 `height` 约束，默认的空
+/// `Container` 在行内会撑满整行宽度；正方形保证行高不跳，宽度也接近多数表情。
+/// 占位和图片都没有文字基线，[EmoticonBaseline] 按同一个 `descent` 对齐，
+/// 加载前后位置一致；失败时的 `[表情]` 沿用文字自身基线。关掉淡入淡出，
+/// 避免占位在淡出期间把宽度撑在正方形上，也让缓存命中的表情直接出现。
 Widget? _buildCustomWidget(dom.Element element) {
   if (element.localName != 'nga_emoticon') return null;
   final src = element.attributes['src'];
   if (src == null || src.isEmpty) {
     return const InlineCustomWidget(child: Text('[表情]'));
   }
+  final height = double.tryParse(element.attributes['height'] ?? '');
   return InlineCustomWidget(
     child: EmoticonBaseline(
       descent: double.tryParse(element.attributes['descent'] ?? '') ?? 0,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Image.network(
-          src,
-          height: double.tryParse(element.attributes['height'] ?? ''),
-          errorBuilder: (_, _, _) => const Text('[表情]'),
+        child: CachedNetworkImage(
+          imageUrl: src,
+          height: height,
+          fadeInDuration: Duration.zero,
+          fadeOutDuration: Duration.zero,
+          placeholder: (_, _) => SizedBox.square(dimension: height ?? 0),
+          errorWidget: (_, _, _) => const Text('[表情]'),
         ),
       ),
     ),

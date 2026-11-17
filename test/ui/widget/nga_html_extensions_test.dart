@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:material_ui/material_ui.dart';
@@ -201,11 +202,31 @@ void main() {
         tester.widget<EmoticonBaseline>(find.byType(EmoticonBaseline)).descent,
         12,
       );
-      final image = tester.widget<Image>(find.byType(Image));
+      final image = tester.widget<CachedNetworkImage>(
+        find.byType(CachedNetworkImage),
+      );
       expect(image.width, isNull);
       expect(image.height, 60);
-      expect((image.image as NetworkImage).url, endsWith('ac0.png'));
+      expect(image.imageUrl, endsWith('ac0.png'));
       expect(_richText('前'), findsOneWidget);
+    });
+
+    testWidgets('loading placeholder keeps final height and baseline', (
+      tester,
+    ) async {
+      await _pumpHtml(
+        tester,
+        "前<nga_emoticon src='https://img4.nga.cn/ngabbs/post/smile/ac0.png'"
+        " height='60' descent='12'></nga_emoticon>后",
+      );
+
+      // 图片尚未加载：占位是高 60 的正方形（另加左右各 2 的间距），
+      // 没有文字基线，按「高度 - descent」对齐，与加载完成后一致。
+      final baseline = find.byType(EmoticonBaseline);
+      expect(tester.getSize(baseline), const Size(64, 60));
+      final box = tester.renderObject<RenderBox>(baseline);
+      expect(box.getDryBaseline(box.constraints, TextBaseline.alphabetic), 48);
+      expect(find.text('[表情]'), findsNothing);
     });
 
     testWidgets('missing src falls back to placeholder text', (tester) async {
