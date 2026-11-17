@@ -5,12 +5,15 @@ import 'package:html/dom.dart' as dom;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
 import 'package:flutter_nga/ui/widget/username_text.dart';
+import 'package:flutter_nga/utils/parser/content_parser.dart';
+import 'package:flutter_nga/utils/parser/nga_crypt.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 /// NGA 帖子 / 评论通用的 HTML 渲染入口。
 ///
 /// 负责把 `NgaContentParser` 的输出交给 flutter_widget_from_html_core：
-/// - 自定义标签（`nga_quote` / `album` / `collapse` / `nga_dict` / `nga_emoticon`）
+/// - 自定义标签（`nga_quote` / `album` / `collapse` / `nga_headline` /
+///   `nga_crypt` / `nga_dict` / `nga_emoticon`）
 ///   由 [NgaHtmlWidgetFactory] 与 [_buildCustomWidget] 处理；
 /// - 样式统一走 `customStylesBuilder`，颜色取自 material_ui 主题；
 /// - 链接点击交给 [Routes.onLinkTap]。
@@ -234,6 +237,8 @@ class NgaHtmlWidgetFactory extends WidgetFactory {
   BuildOp? _quoteOp;
   BuildOp? _albumOp;
   BuildOp? _collapseOp;
+  BuildOp? _headlineOp;
+  BuildOp? _cryptOp;
   BuildOp? _dictOp;
 
   @override
@@ -281,6 +286,35 @@ class NgaHtmlWidgetFactory extends WidgetFactory {
                 child: placeholder,
               ),
             ),
+          ),
+        );
+      case 'nga_headline':
+        tree.register(
+          _headlineOp ??= BuildOp(
+            debugLabel: 'nga_headline',
+            onRenderBlock: (tree, placeholder) =>
+                _NgaHeadline(body: placeholder),
+          ),
+        );
+      case 'nga_crypt':
+        // 解密后的正文要按当前位置的文字样式渲染，所以把样式解析器传下去。
+        tree.register(
+          _cryptOp ??= BuildOp(
+            debugLabel: 'nga_crypt',
+            onRenderBlock: (tree, _) {
+              final resolvers = tree.inheritanceResolvers;
+              final attributes = tree.element.attributes;
+              int? intAttr(String key) => int.tryParse(attributes[key] ?? '');
+              return NgaCryptBlock(
+                cipher: NgaCrypt.fromHex(attributes['data'] ?? ''),
+                authorId: intAttr('author'),
+                tid: intAttr('tid'),
+                pid: intAttr('pid'),
+                postDateTimestamp: intAttr('date'),
+                textStyleOf: (context) =>
+                    resolvers.resolve(context).prepareTextStyle(),
+              );
+            },
           ),
         );
       case 'nga_dict':
@@ -334,6 +368,8 @@ class NgaHtmlWidgetFactory extends WidgetFactory {
     'li',
     'main',
     'nav',
+    'nga_crypt',
+    'nga_headline',
     'nga_quote',
     'ol',
     'p',
@@ -438,6 +474,180 @@ class _NgaAlbum extends StatelessWidget {
           body,
         ],
       ),
+    );
+  }
+}
+
+/// 帖子头条 `[headline]`：网页版是带图片的轮播，这里按顺序列出每条的图片和
+/// 标题链接。
+class _NgaHeadline extends StatelessWidget {
+  const _NgaHeadline({required this.body});
+
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.newspaper,
+                size: 16,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '头条',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          body,
+        ],
+      ),
+    );
+  }
+}
+
+/// 加密内容 `[crypt]`：输入密码后在本地解密（[NgaCrypt]），把明文当作正文
+/// 重新解析渲染。与网页版一致，密码错误无法识别，只会得到乱码，可以重新输入。
+@visibleForTesting
+class NgaCryptBlock extends StatefulWidget {
+  const NgaCryptBlock({
+    super.key,
+    required this.cipher,
+    this.authorId,
+    this.tid,
+    this.pid,
+    this.postDateTimestamp,
+    this.textStyleOf,
+  });
+
+  /// 密文；为 null 表示无法识别。
+  final String? cipher;
+
+  /// 所在楼层的解析参数，解密后原样传给 [NgaContentParser.parse]。
+  final int? authorId;
+  final int? tid;
+  final int? pid;
+  final int? postDateTimestamp;
+
+  /// 解密后正文的文字样式，缺省沿用 [DefaultTextStyle]。
+  final TextStyle Function(BuildContext context)? textStyleOf;
+
+  @override
+  State<NgaCryptBlock> createState() => _NgaCryptBlockState();
+}
+
+class _NgaCryptBlockState extends State<NgaCryptBlock> {
+  final _controller = TextEditingController();
+  String? _html;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _decrypt() {
+    final cipher = widget.cipher;
+    if (cipher == null) return;
+    final plain = NgaCrypt.decrypt(_controller.text, cipher);
+    if (plain == null) return;
+    setState(() {
+      _html = NgaContentParser.parse(
+        plain.replaceAll('\r\n', '\n').replaceAll('\n', '<br/>'),
+        authorId: widget.authorId,
+        tid: widget.tid,
+        pid: widget.pid,
+        postDateTimestamp: widget.postDateTimestamp,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final hintStyle = theme.textTheme.bodySmall?.copyWith(
+      color: colorScheme.onSurfaceVariant,
+    );
+    final html = _html;
+
+    final Widget child;
+    if (widget.cipher == null) {
+      child = Text('加密内容格式无法识别', style: hintStyle);
+    } else if (html != null) {
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          NgaHtml(html, textStyle: widget.textStyleOf?.call(context)),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => setState(() => _html = null),
+              child: const Text('重新输入密码'),
+            ),
+          ),
+        ],
+      );
+    } else {
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.lock_outline, size: 16, color: hintStyle?.color),
+              const SizedBox(width: 8),
+              Expanded(child: Text('输入正确的密码以浏览加密的内容', style: hintStyle)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    hintText: '密码',
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (_) => _decrypt(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton.tonal(onPressed: _decrypt, child: const Text('确认')),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: child,
     );
   }
 }

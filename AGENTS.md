@@ -62,18 +62,19 @@ iOS 构建（最低 iOS 15.0）：
 
 NGA 帖子使用 UBB 标签，`NgaContentParser.parse()` 将其转为 HTML：
 
-`unescapeHtml → (Reply to 展开) → ReplyParser → DiceParser → RandomBlock → Album → Table → Content → Emoticon → Dictionary → UnsupportedTagFallback`
+`unescapeHtml → LesserNuke → (Reply to 展开) → ReplyParser → DiceParser → Crypt → RandomBlock → Album → Table → Headline → Content → Emoticon → Dictionary → UnsupportedTagFallback`
 
 - `_ContentParser` 持有 `postDateTimestamp`（用于 `[noimg]` 附件日期前缀推断），每次新建；其余 Parser 无状态，复用 static 实例。
 - Dice 需要 `authorId + tid + pid` 生成确定性伪随机结果，只有三者齐全时才执行。
 - `quoteBodyByPid`（由 `buildQuoteBodyCache` 从同页楼层构建）用于把「Reply to」展开为带原文的引用。
 - 表情映射在首次解析时从 `Data().emoticonRepository` 延迟加载；表情数据（`expression_repository.dart`）取自 NGA 网页版 `js_bbscode_core.js` 的 `ubbcode.smiles`，增删表情以官方表为准。
+- `[crypt]` 的密文以十六进制放进 `<nga_crypt data>`，由渲染层输入密码后用 `nga_crypt.dart`（网页版 RC4 + 自定义转义）解密，明文再走一遍 `parse()`。
 - 结果缓存最多 256 条，key 含 dice 参数、发帖时间和引用缓存摘要；新增影响输出的参数时必须同步加入 cache key。
 
 ### HTML 渲染（lib/ui/widget/）
 
 - `NgaHtmlContentWidget` / `NgaHtmlCommentWidget` 通过 `NgaHtml`（`nga_html_extensions.dart`）用 flutter_widget_from_html_core 渲染解析结果；样式全部写在 `customStylesBuilder`，颜色取 material_ui 主题，链接经 `onTapUrl` 交给 `Routes.onLinkTap()`。
-- 自定义标签在 `NgaHtmlWidgetFactory.parse()` 注册：`nga_quote`、`album`、`collapse` 用 `BuildOp.onRenderBlock`，`nga_dict` 用 `BuildOp.inline`，`nga_emoticon` 走 `customWidgetBuilder` + `InlineCustomWidget`；分割线直接输出 `<hr/>`。解析器新增输出标签时需在此处添加渲染，块级标签还要加入 `_blockTags`。
+- 自定义标签在 `NgaHtmlWidgetFactory.parse()` 注册：`nga_quote`、`album`、`collapse`、`nga_headline`、`nga_crypt` 用 `BuildOp.onRenderBlock`，`nga_dict` 用 `BuildOp.inline`，`nga_emoticon` 走 `customWidgetBuilder` + `InlineCustomWidget`；分割线直接输出 `<hr/>`。解析器新增输出标签时需在此处添加渲染，块级标签还要加入 `_blockTags`。
 - 为与旧版 flutter_html 外观一致：块元素后紧跟的第一个 `<br>` 不占行，单元格的 `width` 会被忽略，`buildAsync` 关闭。
 - 暂不升级 fwfh 0.18 beta（会识别 material_ui 主题）：它要求 `cupertino_ui <1.1.0`，与项目冲突。
 

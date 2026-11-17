@@ -7,13 +7,16 @@ import 'package:flutter_nga/data/entity/emoticon.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dice_roller.dart';
 import 'package:flutter_nga/utils/name_utils.dart';
+import 'package:flutter_nga/utils/parser/nga_crypt.dart';
 
 class NgaContentParser {
+  static final Parser _lesserNukeParser = _LesserNukeParser();
   static final Parser _replyParser = _ReplyParser();
   static final Parser _commentParser = _CommentParser();
   static final Parser _randomBlockParser = _RandomBlockParser();
   static final Parser _albumParser = _AlbumParser();
   static final Parser _tableParser = _TableParser();
+  static final Parser _headlineParser = _HeadlineParser();
   static final Parser _emoticonParser = _EmoticonParser();
   static final Parser _dictionaryParser = _DictionaryParser();
   static final Parser _fallbackParser = _UnsupportedTagFallbackParser();
@@ -40,11 +43,23 @@ class NgaContentParser {
     caseSensitive: false,
   );
 
-  static List<Parser> _buildParserList({int? postDateTimestamp}) {
+  static List<Parser> _buildParserList({
+    int? authorId,
+    int? tid,
+    int? pid,
+    int? postDateTimestamp,
+  }) {
     return [
+      _CryptParser(
+        authorId: authorId,
+        tid: tid,
+        pid: pid,
+        postDateTimestamp: postDateTimestamp,
+      ),
       _randomBlockParser,
       _albumParser,
       _tableParser,
+      _headlineParser,
       _ContentParser(postDateTimestamp: postDateTimestamp),
       _emoticonParser,
       _dictionaryParser,
@@ -78,6 +93,7 @@ class NgaContentParser {
       text = next;
     }
     text = text.replaceFirst(_replyToLineRegex, '');
+    text = text.replaceAll(_LesserNukeParser._tagRegex, '');
     text = text.trim();
     if (text.length > quoteSnippetMaxLength) {
       text = text.substring(0, quoteSnippetMaxLength);
@@ -127,7 +143,9 @@ class NgaContentParser {
       return _parseCache[cacheKey]!;
     }
 
-    var parseContent = code_utils.unescapeHtml(content);
+    var parseContent = _lesserNukeParser.parse(
+      code_utils.unescapeHtml(content),
+    );
     // 官网：Reply to 用同页 pid 缓存补原文，再当 quote 渲染
     if (quoteBodyByPid != null && quoteBodyByPid.isNotEmpty) {
       parseContent = expandReplyToWithCachedBody(parseContent, quoteBodyByPid);
@@ -141,6 +159,9 @@ class NgaContentParser {
       ).parse(parseContent);
     }
     for (final parser in _buildParserList(
+      authorId: authorId,
+      tid: tid,
+      pid: pid,
       postDateTimestamp: postDateTimestamp,
     )) {
       parseContent = parser.parse(parseContent);
@@ -171,7 +192,9 @@ class NgaContentParser {
       return _parseCache[cacheKey]!;
     }
 
-    var parseContent = code_utils.unescapeHtml(content);
+    var parseContent = _lesserNukeParser.parse(
+      code_utils.unescapeHtml(content),
+    );
     parseContent = _commentParser.parse(parseContent);
     if (authorId != null && tid != null && pid != null) {
       parseContent = _DiceParser(
@@ -181,6 +204,9 @@ class NgaContentParser {
       ).parse(parseContent);
     }
     for (final parser in _buildParserList(
+      authorId: authorId,
+      tid: tid,
+      pid: pid,
       postDateTimestamp: postDateTimestamp,
     )) {
       parseContent = parser.parse(parseContent);
@@ -231,6 +257,125 @@ class _RandomBlockParser implements Parser {
       if (index == selectedIndex) {
         result.write(match.group(1) ?? '');
       }
+      cursor = match.end;
+    }
+    result.write(content.substring(cursor));
+    return result.toString();
+  }
+}
+
+/// `[lessernuke]` / `[lessernuke1]`…`[lessernuke9]`：被处罚的发言，网页版只认
+/// 正文开头的开标签和结尾的闭标签，整段内容折叠成「点击查看」。这里复用
+/// `collapse` 渲染；不在首尾的标签直接去掉，不露出原文。
+class _LesserNukeParser implements Parser {
+  static final _openRegex = RegExp(
+    r'^(?:\s|<br\s*/?>)*\[lessernuke(\d)?\]',
+    caseSensitive: false,
+  );
+  static final _closeRegex = RegExp(
+    r'\[/lessernuke\d?\](?:\s|<br\s*/?>)*$',
+    caseSensitive: false,
+  );
+  static final _tagRegex = RegExp(r'\[/?lessernuke\d?\]', caseSensitive: false);
+
+  @override
+  String parse(String? content) {
+    if (content == null || content.isEmpty) return '';
+    if (!_tagRegex.hasMatch(content)) return content;
+
+    final open = _openRegex.firstMatch(content);
+    if (open == null) return content.replaceAll(_tagRegex, '');
+    final body = content
+        .substring(open.end)
+        .replaceFirst(_closeRegex, '')
+        .replaceAll(_tagRegex, '');
+    final title = switch (open.group(1)) {
+      '2' => '用户在主题中被处罚',
+      '3' => '被锁定账号发布的内容无法查看',
+      _ => '用户因此帖中的发言被处罚',
+    };
+    return "<collapse title='$title'>$body</collapse>";
+  }
+}
+
+/// `[crypt]密文[/crypt]`：网页版输入密码后用 RC4 解密（见 [NgaCrypt]）。
+/// 这里输出 `<nga_crypt data='…'>`，由渲染层提供密码输入框；密文按十六进制
+/// 存放，避免后续 Parser（如 `===`、`------`）误改。
+///
+/// 明文要按所在楼层的参数重新解析（`[noimg]` 补日期目录、`[dice]` 掷骰），
+/// 所以把楼层参数一并写进属性（`author` / `tid` / `pid` / `date`），
+/// 渲染层原样传回 [NgaContentParser.parse]。这些参数都已在解析缓存的 key 里。
+class _CryptParser implements Parser {
+  _CryptParser({this.authorId, this.tid, this.pid, this.postDateTimestamp});
+
+  final int? authorId;
+  final int? tid;
+  final int? pid;
+  final int? postDateTimestamp;
+
+  static final _cryptRegex = RegExp(
+    r'\[crypt\]([\s\S]*?)\[/crypt\]',
+    caseSensitive: false,
+  );
+
+  @override
+  String parse(String? content) {
+    if (content == null || content.isEmpty) return '';
+    return content.replaceAllMapped(_cryptRegex, (m) {
+      final cipher = (m.group(1) ?? '').trim();
+      if (!NgaCrypt.isValidCipher(cipher)) return '<nga_crypt></nga_crypt>';
+      final buffer = StringBuffer(
+        "<nga_crypt data='${NgaCrypt.toHex(cipher)}'",
+      );
+      void writeAttr(String key, int? value) {
+        if (value != null) buffer.write(" $key='$value'");
+      }
+
+      writeAttr('author', authorId);
+      writeAttr('tid', tid);
+      writeAttr('pid', pid);
+      writeAttr('date', postDateTimestamp);
+      buffer.write('></nga_crypt>');
+      return buffer.toString();
+    });
+  }
+}
+
+/// `[headline]…[/headline]`：帖子头条，内容一般是 `[img]` 加 `[url]` /
+/// `[tid]` / `[hltxt]` 标题。网页版把所有头条合成一个轮播放在第一处，这里
+/// 同样合并为一个 `<nga_headline>` 块，每条一个 `<div>`；里面的 UBB 交给后续
+/// Parser，`[hltxt]` 按加粗显示。
+class _HeadlineParser implements Parser {
+  static final _headlineRegex = RegExp(
+    r'(?:\s|<br\s*/?>)*\[headline\]([\s\S]*?)\[/headline\](?:\s|<br\s*/?>)*',
+    caseSensitive: false,
+  );
+  static final _hltxtRegex = RegExp(
+    r'\[hltxt\]([\s\S]*?)\[/hltxt\]',
+    caseSensitive: false,
+  );
+
+  @override
+  String parse(String? content) {
+    if (content == null || content.isEmpty) return '';
+    final matches = _headlineRegex.allMatches(content).toList();
+    if (matches.isEmpty) return content;
+
+    final items = StringBuffer();
+    for (final match in matches) {
+      final item = (match.group(1) ?? '')
+          .replaceAllMapped(_hltxtRegex, (m) => '<b>${m.group(1)}</b>')
+          .trim();
+      if (item.isNotEmpty) items.write('<div>$item</div>');
+    }
+    final block = items.isEmpty ? '' : '<nga_headline>$items</nga_headline>';
+
+    final result = StringBuffer();
+    var cursor = 0;
+    for (var index = 0; index < matches.length; index++) {
+      final match = matches[index];
+      result.write(content.substring(cursor, match.start));
+      if (index == 0) result.write(block);
       cursor = match.end;
     }
     result.write(content.substring(cursor));
@@ -735,8 +880,10 @@ class _ContentParser implements Parser {
   );
 
   // 复杂标签的预编译正则（需要捕获内容的）
+  /// `[img0]`、`[img-50]` 等带参数的写法（网页版的缩放 / 对齐参数）按普通
+  /// 图片处理。
   static final _imgRegex = RegExp(
-    r'\[img\]([\s\S]*?)\[/img\]',
+    r'\[img-?\d{0,3}\]([\s\S]*?)\[/img\]',
     caseSensitive: false,
   );
   static final _noImgRegex = RegExp(
@@ -787,6 +934,13 @@ class _ContentParser implements Parser {
     caseSensitive: false,
   );
 
+  /// `[iframe]` / `[iframe=高,宽]`：App 里不嵌入网页，降级成链接。
+  static final _iframeRegex = RegExp(
+    r'\[iframe(?:=[\d,]*)?\]([\s\S]*?)\[/iframe\]',
+    caseSensitive: false,
+  );
+  static final _httpUrlRegex = RegExp(r'^https?://\S+$', caseSensitive: false);
+
   /// `[code=js]` 等带语言的写法按普通代码块显示。
   static final _codeRegex = RegExp(
     r'\[code(?:=[^\]]*)?\]([\s\S]*?)\[/code\]',
@@ -808,12 +962,27 @@ class _ContentParser implements Parser {
     r'\[align=([a-z]+?)\]([\s\S]*?)\[/align\]',
     caseSensitive: false,
   );
+
+  /// `[l]` / `[r]`：网页版输出 `display:block` 的 `.left` / `.right`（左右浮动）
+  /// 块，并吞掉标签两侧各一个换行；带参数的 `[l=…]` 保留原文。fwfh 不支持
+  /// 浮动，这里输出靠左 / 靠右对齐的块（不用 `<p>`，避免多出段落间距）。
+  /// 只匹配内部不再含 `[l]` / `[r]` 标签的一层，由内到外处理嵌套。
   static final _lrRegex = RegExp(
-    r'\[(l|r)\]([\s\S]*?)\[/\1\]',
+    r'\s*(?:<br\s*/?>)?\s*\[(l|r)\]\s*(?:<br\s*/?>)?'
+    r'((?:(?!\[/?[lr]\])[\s\S])*?)'
+    r'\s*(?:<br\s*/?>)?\s*\[/\1\](?:\s*<br\s*/?>)?\s*',
     caseSensitive: false,
   );
   static final _hRegex = RegExp(r'\[h\]([\s\S]*?)\[/h\]', caseSensitive: false);
   static final _h2Regex = RegExp(r'===([^\n]*?)===');
+
+  /// `---小标题---`（网页版 `parseTitle`）：须独占一行，即前面是行首 / 标签，
+  /// 后面是行尾 / 标签；标题不能跨行，为空时是一条细分隔（同 `------`）。
+  static final _dashTitleRegex = RegExp(
+    r'(^|>|\]|\n)[ \t]*---((?:(?!<br\s*/?>)[^\n]){0,100}?)-{3,}[ \t]*(?=<|\[|\n|$)',
+    caseSensitive: false,
+  );
+  static final _dashTrimRegex = RegExp(r'^-+|-+$');
   static final _sizeRegex = RegExp(r'\[size=([^\]]+)\]', caseSensitive: false);
   static final _fontRegex = RegExp(
     r'\[font=([^\[\]]+)\]',
@@ -821,6 +990,12 @@ class _ContentParser implements Parser {
   );
   static final _formatRegex = RegExp(
     r'\[(/?(?:b|u|i|del|sup|sub))\]',
+    caseSensitive: false,
+  );
+
+  /// `[upup]`：网页版加粗后再挂一个顶贴效果，这里只保留加粗。
+  static final _upupRegex = RegExp(
+    r'\[(/?)upup(?:[=\s][^\]]*)?\]',
     caseSensitive: false,
   );
 
@@ -871,6 +1046,7 @@ class _ContentParser implements Parser {
     result = result.replaceAllMapped(_urlRegex, _urlReplacer);
     result = result.replaceAllMapped(_attachRegex, _attachReplacer);
     result = result.replaceAllMapped(_flashRegex, _flashReplacer);
+    result = result.replaceAllMapped(_iframeRegex, _iframeReplacer);
     result = result.replaceAllMapped(_codeRegex, _codeReplacer);
     result = result.replaceAllMapped(
       _collapseWithTitleRegex,
@@ -879,12 +1055,18 @@ class _ContentParser implements Parser {
     result = result.replaceAllMapped(_collapseRegex, _collapseReplacer);
     result = result.replaceAllMapped(_colorRegex, _colorReplacer);
     result = result.replaceAllMapped(_alignRegex, _alignReplacer);
-    result = result.replaceAllMapped(_lrRegex, _lrReplacer);
+    for (var i = 0; i < 8; i++) {
+      final next = result.replaceAllMapped(_lrRegex, _lrReplacer);
+      if (next == result) break;
+      result = next;
+    }
     result = result.replaceAllMapped(_hRegex, _hReplacer);
     result = result.replaceAllMapped(_h2Regex, _h2Replacer);
+    result = result.replaceAllMapped(_dashTitleRegex, _dashTitleReplacer);
     result = result.replaceAllMapped(_sizeRegex, _sizeReplacer);
     result = result.replaceAllMapped(_fontRegex, _fontReplacer);
     result = result.replaceAllMapped(_formatRegex, _formatReplacer);
+    result = result.replaceAllMapped(_upupRegex, (m) => '<${m.group(1)}b>');
     result = result.replaceAllMapped(_dashRegex, _dashReplacer);
 
     return result;
@@ -991,6 +1173,13 @@ class _ContentParser implements Parser {
         : (isAudio ? '[站外音频]' : '[站外视频]');
     if (url.isEmpty) return label;
     return "<a href='${_escapeHtmlAttribute(url)}'>$label</a>";
+  }
+
+  static String _iframeReplacer(Match m) {
+    final raw = (m.group(1) ?? '').trim();
+    if (!_httpUrlRegex.hasMatch(raw)) return _escapeHtmlText(raw);
+    final url = _normalizeGeneralUrl(raw);
+    return "<a href='${_escapeHtmlAttribute(url)}'>[网页] ${_escapeHtmlText(raw)}</a>";
   }
 
   static String _codeReplacer(Match m) {
@@ -1156,12 +1345,17 @@ class _ContentParser implements Parser {
 
   static String _lrReplacer(Match m) {
     final align = m.group(1)!.toLowerCase() == 'l' ? 'left' : 'right';
-    return "<p style='text-align:$align'>${m.group(2) ?? ''}</p>";
+    return "<div style='text-align:$align;'>${m.group(2) ?? ''}</div>";
   }
 
   static String _hReplacer(Match m) => '<h3>${m.group(1)}</h3>';
 
   static String _h2Replacer(Match m) => '<h3>${m.group(1)}</h3>';
+
+  static String _dashTitleReplacer(Match m) {
+    final title = (m.group(2) ?? '').replaceAll(_dashTrimRegex, '').trim();
+    return '${m.group(1)}<h5>$title</h5>';
+  }
 
   static String _sizeReplacer(Match m) {
     final raw = (m.group(1) ?? '').trim().toLowerCase();
@@ -1430,6 +1624,7 @@ class _UnsupportedTagFallbackParser implements Parser {
     'code',
     'collapse',
     'color',
+    'crypt',
     'del',
     'dice',
     'dict',
@@ -1437,9 +1632,13 @@ class _UnsupportedTagFallbackParser implements Parser {
     'flash',
     'font',
     'h',
+    'headline',
+    'hltxt',
     'i',
+    'iframe',
     'img',
     'l',
+    'lessernuke',
     'list',
     'media',
     'noimg',
@@ -1458,8 +1657,12 @@ class _UnsupportedTagFallbackParser implements Parser {
     'tr',
     'u',
     'uid',
+    'upup',
     'url',
   };
+
+  /// 带数字后缀的已知标签：`[td20]`、`[img0]`、`[lessernuke1]`。
+  static final _numberedTagRegex = RegExp(r'^(?:td|img|lessernuke)\d+$');
 
   @override
   String parse(String? content) {
@@ -1467,8 +1670,7 @@ class _UnsupportedTagFallbackParser implements Parser {
     return content.replaceAllMapped(_ubbTagRegex, (match) {
       final rawTag = match.group(0) ?? '';
       final tag = (match.group(1) ?? '').toLowerCase();
-      if (_knownTags.contains(tag) ||
-          (tag.startsWith('td') && int.tryParse(tag.substring(2)) != null)) {
+      if (_knownTags.contains(tag) || _numberedTagRegex.hasMatch(tag)) {
         return rawTag;
       }
       return "<span class='ubb-unknown'>${_escapeHtmlText(rawTag)}</span>";
