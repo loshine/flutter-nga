@@ -22,6 +22,25 @@ class TopicLinkRoute extends LinkRoute {
   }
 }
 
+/// 版面 / 合集超链接：`thread.php?fid=7` / `thread.php?stid=7`（合集对应 type=1）
+class ForumLinkRoute extends LinkRoute {
+  @override
+  void handleMatch(BuildContext context, Match match) {
+    final isStid = match.group(1) == 'stid';
+    final id = match.group(2);
+    final name = Uri.encodeQueryComponent('${isStid ? '合集' : '版面'} $id');
+    Routes.navigateTo(
+      context,
+      "${Routes.FORUM_DETAIL}?fid=$id&name=$name&type=${isStid ? 1 : 0}",
+    );
+  }
+
+  @override
+  String matchRegExp() {
+    return r"thread\.php\?(fid|stid)=(\d+)";
+  }
+}
+
 /// 用户超链接
 class UserLinkRoute extends LinkRoute {
   @override

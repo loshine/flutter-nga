@@ -143,6 +143,7 @@ class Routes {
   /// 提前定义好的超链接对应的路由
   static final _linkRoutes = [
     TopicLinkRoute(),
+    ForumLinkRoute(),
     UserLinkRoute(),
     ReplyLinkRoute(),
   ];
