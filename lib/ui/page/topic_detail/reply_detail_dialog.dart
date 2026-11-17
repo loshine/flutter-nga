@@ -17,7 +17,10 @@ import 'package:flutter_nga/utils/route.dart';
 class ReplyDetailDialog extends HookConsumerWidget {
   final int? pid;
 
-  const ReplyDetailDialog({super.key, this.pid});
+  /// 回复所在主题，传入时显示「进入主题」按钮。
+  final int? tid;
+
+  const ReplyDetailDialog({super.key, this.pid, this.tid});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,6 +40,14 @@ class ReplyDetailDialog extends HookConsumerWidget {
       contentPadding: EdgeInsets.zero,
       content: _buildContent(state),
       actions: [
+        if (tid != null && tid != 0)
+          TextButton(
+            onPressed: () {
+              Routes.pop(context);
+              Routes.navigateTo(context, "${Routes.TOPIC_DETAIL}?tid=$tid");
+            },
+            child: Text('进入主题'),
+          ),
         TextButton(onPressed: () => Routes.pop(context), child: Text('关闭')),
       ],
     );
