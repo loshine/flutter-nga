@@ -55,8 +55,8 @@
 - Dart SDK >=3.13.0 <4.0.0
 - Android SDK / Xcode (取决于目标平台)
 
-Android 构建使用 Gradle 9.3.1、AGP 9.1.0、Kotlin 2.4.0。
-与 `missevan-kmp` 相同，通过 Foojay 和 `android/gradle/gradle-daemon-jvm.properties`
+Android 构建使用 Gradle 9.9.1、AGP 9.5.1、Kotlin 2.4.21。
+通过 Foojay 和 `android/gradle/gradle-daemon-jvm.properties`
 自动获取 Java 21 作为构建 JVM，无需手动安装或配置本机 JDK 21。首次构建需要联网，
 下载的 JDK 缓存在 Gradle 用户目录的 `jdks/` 下。应用字节码目标保持 Java 17。
 启动 Gradle Wrapper 仍需要可用的 Java 17+，可使用 Android Studio 自带的 JBR。
@@ -77,7 +77,7 @@ cd android
 
 ```bash
 # 克隆项目
-git clone https://github.com/user/flutter-nga.git
+git clone https://github.com/loshine/flutter-nga.git
 cd flutter-nga
 
 # 安装 FVM (如未安装)
@@ -148,16 +148,22 @@ lib/
 │   ├── repository/        # 数据仓库
 │   └── core/              # Dio 配置与仓库装配
 ├── providers/             # Riverpod Providers
+│   ├── common/            # 通用 Provider
 │   ├── core/              # 核心 Provider
+│   ├── home/              # 首页相关
 │   ├── forum/             # 版块相关
 │   ├── topic/             # 帖子相关
 │   ├── user/              # 用户相关
-│   ├── message/           # 消息相关
+│   ├── message/           # 私信相关
+│   ├── notification/      # 通知相关
+│   ├── search/            # 搜索相关
 │   └── settings/          # 设置相关
 ├── ui/
 │   ├── page/              # 页面组件
 │   └── widget/            # 通用组件
 └── utils/
+    ├── parser/            # UBB 内容解析
+    ├── linkroute/         # 站内链接路由
     ├── route.dart         # 路由定义
     ├── palette.dart       # 调色板
     └── dimen.dart         # 尺寸常量
@@ -171,6 +177,8 @@ lib/
 - Linux
 - Windows
 - Web
+
+鸿蒙（HarmonyOS）适配在 [`feature/ohos`](https://github.com/loshine/flutter-nga/tree/feature/ohos) 分支维护。
 
 ## 开源协议
 

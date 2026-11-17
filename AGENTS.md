@@ -13,7 +13,7 @@ dart pub global activate fvm   # 安装 FVM（如未安装）
 fvm install                    # 安装 .fvmrc 指定版本
 ```
 
-鸿蒙（OHOS）适配在 `feature/ohos` 分支维护，master 不包含 `ohos/` 目录和原生登录插件。
+默认分支为 `main`。鸿蒙（OHOS）适配在 `feature/ohos` 分支维护，`main` 不包含 `ohos/` 目录和原生登录插件。
 
 ## 构建与测试
 
@@ -55,6 +55,8 @@ iOS 构建（最低 iOS 15.0）：
 - 服务端返回 GBK，`responseType` 为 bytes，在响应拦截器用 `fast_gbk` 统一解码，业务层拿到的已是 UTF-8。
 - JSON 响应若含 `data` 字段会被自动解包；服务端错误在拦截器里转为 `DioException`。
 - 网络请求的 baseUrl 通过 `Data().baseUrl` / `Data().domain` 动态获取，不要写死域名。
+- 图床地址统一使用 `data/core/nga_domains.dart` 的 `ngaImageOrigin`（附件、头像）/ `ngaImage4Origin`（表情、勋章、版块图标）/ `ngaAttachmentBase`。旧图床 `img(4).nga.178.com`、`img(4).ngacn.cc` 已失效，正文和接口返回中出现的旧地址经 `normalizeNgaImageUrl()` 改写，新增图片入口时也要调用。
+- `ngaDomainSuffixes` 决定登录 Cookie 的注入范围，仍保留旧域名，与图片加载无关。
 
 ### 内容解析管道（lib/utils/parser/content_parser.dart）
 
@@ -65,7 +67,7 @@ NGA 帖子使用 UBB 标签，`NgaContentParser.parse()` 将其转为 HTML：
 - `_ContentParser` 持有 `postDateTimestamp`（用于 `[noimg]` 附件日期前缀推断），每次新建；其余 Parser 无状态，复用 static 实例。
 - Dice 需要 `authorId + tid + pid` 生成确定性伪随机结果，只有三者齐全时才执行。
 - `quoteBodyByPid`（由 `buildQuoteBodyCache` 从同页楼层构建）用于把「Reply to」展开为带原文的引用。
-- 表情映射在首次解析时从 `Data().emoticonRepository` 延迟加载。
+- 表情映射在首次解析时从 `Data().emoticonRepository` 延迟加载；表情数据（`expression_repository.dart`）取自 NGA 网页版 `js_bbscode_core.js` 的 `ubbcode.smiles`，增删表情以官方表为准。
 - 结果缓存最多 256 条，key 含 dice 参数、发帖时间和引用缓存摘要；新增影响输出的参数时必须同步加入 cache key。
 
 ### HTML 渲染（lib/ui/widget/）
