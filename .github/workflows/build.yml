@@ -1,7 +1,6 @@
 name: Build
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# 推送版本 tag（如 v1.2.3）时运行测试，构建 APK 与 AAB 并发布到 GitHub Release。
 on:
   push:
     tags:
@@ -11,12 +10,7 @@ jobs:
     name: Build App Bundle
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.50.0'
-          channel: 'stable'
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -24,8 +18,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.50.0'
-        env:
-          run: echo $JKS > ${{ secrets.STORE_FILE }} && echo -e "keyAlias=${{ secrets.KEY_ALIAS }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nstoreFile=${{ secrets.STORE_FILE }}\nstorePassword=${{ secrets.STORE_PASSWORD }}" > android/key.properties
+          channel: 'stable'
       - run: dart pub global activate fvm
       - run: fvm install
       - run: fvm flutter --version
