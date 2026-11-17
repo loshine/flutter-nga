@@ -6,10 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 ///
 /// Replaces the common `initState` + `addPostFrameCallback` template.
 /// Skips [effect] if the hook host has been unmounted.
-void usePostFrameEffect(
-  VoidCallback effect, [
-  List<Object?> keys = const [],
-]) {
+void usePostFrameEffect(VoidCallback effect, [List<Object?> keys = const []]) {
   final context = useContext();
   useEffect(() {
     WidgetsBinding.instance.addPostFrameCallback((_) {

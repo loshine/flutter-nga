@@ -6,11 +6,7 @@ import 'package:flutter_nga/utils/dimen.dart';
 /// 按屏蔽模式包装楼层 / 评论：折叠与涂抹可点击查看，隐藏不占位，淡化降低透明度。
 /// 删除线模式需要作用到文字本身，由 [child] 自行处理，这里原样展示。
 class BlockedContent extends StatefulWidget {
-  const BlockedContent({
-    super.key,
-    required this.mode,
-    required this.child,
-  });
+  const BlockedContent({super.key, required this.mode, required this.child});
 
   /// null 表示未被屏蔽
   final BlockMode? mode;
@@ -37,13 +33,11 @@ class _BlockedContentState extends State<BlockedContent> {
       BlockMode.COLLAPSE => _buildMask(colorScheme, "折叠的屏蔽内容，点击展开"),
       BlockMode.ALPHA => Opacity(opacity: 0.38, child: widget.child),
       BlockMode.PAINT => Stack(
-          children: [
-            widget.child,
-            Positioned.fill(
-              child: _buildMask(colorScheme, "已涂抹的屏蔽内容，点击查看"),
-            ),
-          ],
-        ),
+        children: [
+          widget.child,
+          Positioned.fill(child: _buildMask(colorScheme, "已涂抹的屏蔽内容，点击查看")),
+        ],
+      ),
       _ => widget.child,
     };
   }

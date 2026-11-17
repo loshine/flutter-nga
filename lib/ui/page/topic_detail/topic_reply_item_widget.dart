@@ -101,8 +101,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             username: widget.user!.username ?? '',
                             uid: widget.user!.uid,
                             style: TextStyle(
-                              color:
-                                  Theme.of(context).textTheme.bodyLarge?.color,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.color,
                               decoration: blockDecoration,
                             ),
                           ),
@@ -128,8 +130,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           child: Text(
                             "级别: ${widget.group == null ? "" : widget.group!.name}",
                             style: TextStyle(
-                              color:
-                                  Theme.of(context).textTheme.bodyMedium?.color,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.color,
                               fontSize: Dimen.bodySmall,
                             ),
                           ),
@@ -139,8 +143,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           child: Text(
                             "威望: ${widget.user!.getShowReputation()}",
                             style: TextStyle(
-                              color:
-                                  Theme.of(context).textTheme.bodyMedium?.color,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.color,
                               fontSize: Dimen.bodySmall,
                             ),
                           ),
@@ -150,8 +156,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           child: Text(
                             "发帖: ${widget.user!.postNum ?? 0}",
                             style: TextStyle(
-                              color:
-                                  Theme.of(context).textTheme.bodyMedium?.color,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.color,
                               fontSize: Dimen.bodySmall,
                             ),
                           ),
@@ -186,7 +194,9 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                     const SizedBox(width: 4),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 0),
+                        horizontal: 6,
+                        vertical: 0,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF909090),
                         borderRadius: BorderRadius.circular(4),
@@ -207,7 +217,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
         ),
         SizedBox(
           // 评论楼层隐藏"对主题发表了一条评论"占位标题
-          height: widget.commentSource != null ||
+          height:
+              widget.commentSource != null ||
                   code_utils.isStringEmpty(widget.reply.subject)
               ? 0
               : null,
@@ -245,9 +256,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             width: double.infinity,
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                children: _getCommentListWidgets(visibleComments),
-              ),
+              child: Column(children: _getCommentListWidgets(visibleComments)),
             ),
           ),
         Offstage(
@@ -299,7 +308,9 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       GestureDetector(
                         onTap: _toggleLike,
                         child: Icon(
-                          isLiked ? CommunityMaterialIcons.thumb_up : CommunityMaterialIcons.thumb_up_outline,
+                          isLiked
+                              ? CommunityMaterialIcons.thumb_up
+                              : CommunityMaterialIcons.thumb_up_outline,
                           color: isLiked ? thumbFgActive : thumbFgInactive,
                           size: 14,
                         ),
@@ -310,7 +321,9 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                           "${contentReply.score}",
                           style: TextStyle(
                             fontSize: Dimen.bodySmall,
-                            color: isLiked || isDisliked ? thumbFgActive : thumbFgInactive,
+                            color: isLiked || isDisliked
+                                ? thumbFgActive
+                                : thumbFgInactive,
                           ),
                         ),
                       ),
@@ -319,7 +332,9 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                         child: GestureDetector(
                           onTap: _toggleDislike,
                           child: Icon(
-                            isDisliked ? CommunityMaterialIcons.thumb_down : CommunityMaterialIcons.thumb_down_outline,
+                            isDisliked
+                                ? CommunityMaterialIcons.thumb_down
+                                : CommunityMaterialIcons.thumb_down_outline,
                             color: isDisliked ? thumbFgActive : thumbFgInactive,
                             size: 14,
                           ),
@@ -368,7 +383,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             fontSize: Dimen.bodySmall,
             color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
-        )
+        ),
       ];
     }
     return widget.medalList!.map((medal) {
@@ -386,9 +401,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
 
   Future<void> _toggleLike() async {
     try {
-      final reaction = await Data()
-          .topicRepository
-          .likeReply(widget.reply.tid, widget.reply.pid);
+      final reaction = await Data().topicRepository.likeReply(
+        widget.reply.tid,
+        widget.reply.pid,
+      );
       setState(() {
         widget.reply.score += reaction.countChange;
         if (reaction.countChange > 0) {
@@ -406,9 +422,10 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
 
   Future<void> _toggleDislike() async {
     try {
-      final reaction = await Data()
-          .topicRepository
-          .dislikeReply(widget.reply.tid, widget.reply.pid);
+      final reaction = await Data().topicRepository.dislikeReply(
+        widget.reply.tid,
+        widget.reply.pid,
+      );
       setState(() {
         widget.reply.score += reaction.countChange;
         if (reaction.countChange < 0) {
@@ -479,9 +496,9 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                   Text(
                     "评论 ${comments.length}",
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -493,8 +510,9 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                 mode: mode,
                 child: TopicReplyCommentItemWidget(
                   comment,
-                  widget.userList!
-                      .firstWhereOrNull((user) => user.uid == comment.authorId),
+                  widget.userList!.firstWhereOrNull(
+                    (user) => user.uid == comment.authorId,
+                  ),
                   textDecoration: mode == BlockMode.DELETE_LINE
                       ? TextDecoration.lineThrough
                       : null,
@@ -526,29 +544,31 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     columnWidgets.add(button);
     if (_attachmentsExpanded) {
       List<Widget> attachmentWidgets = [];
-      attachmentWidgets.addAll(widget.reply.attachmentList.map((attachment) {
-        return Padding(
-          padding: EdgeInsets.only(right: 16),
-          child: SizedBox(
-            width: 120,
-            height: 120,
-            child: CachedNetworkImage(
-              imageUrl: attachment.realUrl,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Image.asset(
-                'images/default_forum_icon.png',
-                width: 48,
-                height: 48,
-              ),
-              errorWidget: (context, url, err) => Image.asset(
-                'images/default_forum_icon.png',
-                width: 48,
-                height: 48,
+      attachmentWidgets.addAll(
+        widget.reply.attachmentList.map((attachment) {
+          return Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: SizedBox(
+              width: 120,
+              height: 120,
+              child: CachedNetworkImage(
+                imageUrl: attachment.realUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Image.asset(
+                  'images/default_forum_icon.png',
+                  width: 48,
+                  height: 48,
+                ),
+                errorWidget: (context, url, err) => Image.asset(
+                  'images/default_forum_icon.png',
+                  width: 48,
+                  height: 48,
+                ),
               ),
             ),
-          ),
-        );
-      }));
+          );
+        }),
+      );
       columnWidgets.add(Wrap(children: attachmentWidgets));
     }
     return Column(

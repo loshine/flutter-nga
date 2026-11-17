@@ -13,5 +13,6 @@ class SearchForumNotifier extends Notifier<List<Forum>> {
   }
 }
 
-final searchForumProvider =
-    NotifierProvider<SearchForumNotifier, List<Forum>>(SearchForumNotifier.new);
+final searchForumProvider = NotifierProvider<SearchForumNotifier, List<Forum>>(
+  SearchForumNotifier.new,
+);

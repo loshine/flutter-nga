@@ -38,7 +38,11 @@ class DiceResult {
   final String original;
   final String expanded;
   final String total;
-  DiceResult({required this.original, required this.expanded, required this.total});
+  DiceResult({
+    required this.original,
+    required this.expanded,
+    required this.total,
+  });
 }
 
 class DiceRoller {

@@ -70,11 +70,7 @@ class TopicListItemWidget extends ConsumerWidget {
                   const SizedBox(height: 8),
 
                   // 元信息行
-                  _buildMetaRow(
-                    context,
-                    colorScheme,
-                    textTheme,
-                  ),
+                  _buildMetaRow(context, colorScheme, textTheme),
                 ],
               ),
             ),
@@ -127,8 +123,9 @@ class TopicListItemWidget extends ConsumerWidget {
         text: topicSubject,
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
-          backgroundColor:
-              isPaintBlockMode ? textTheme.bodyMedium?.color : null,
+          backgroundColor: isPaintBlockMode
+              ? textTheme.bodyMedium?.color
+              : null,
           color: isPaintBlockMode
               ? Colors.transparent
               : topic.getSubjectColor() ?? textTheme.bodyLarge?.color,
@@ -137,8 +134,8 @@ class TopicListItemWidget extends ConsumerWidget {
           decoration: isDeleteBlockMode
               ? TextDecoration.lineThrough
               : topic.isUnderline()
-                  ? TextDecoration.underline
-                  : null,
+              ? TextDecoration.underline
+              : null,
           height: interfaceState.lineHeight.size,
         ),
         children: [
@@ -211,8 +208,9 @@ class TopicListItemWidget extends ConsumerWidget {
               color: isPaintBlockMode
                   ? Colors.transparent
                   : colorScheme.onSurfaceVariant,
-              backgroundColor:
-                  isPaintBlockMode ? colorScheme.onSurfaceVariant : null,
+              backgroundColor: isPaintBlockMode
+                  ? colorScheme.onSurfaceVariant
+                  : null,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -246,11 +244,7 @@ class TopicListItemWidget extends ConsumerWidget {
         const SizedBox(width: 12),
 
         // 时间
-        Icon(
-          Icons.access_time,
-          size: 14,
-          color: colorScheme.onSurfaceVariant,
-        ),
+        Icon(Icons.access_time, size: 14, color: colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         Text(
           code_utils.formatPostDate(topic.lastPost! * 1000),

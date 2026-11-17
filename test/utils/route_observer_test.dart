@@ -31,8 +31,9 @@ class _AwarePageState extends State<_AwarePage> with RouteAwareSubscription {
 }
 
 void main() {
-  testWidgets('RouteAware callbacks fire through GoRouter observers',
-      (tester) async {
+  testWidgets('RouteAware callbacks fire through GoRouter observers', (
+    tester,
+  ) async {
     final events = <String>[];
     final router = GoRouter(
       initialLocation: '/',

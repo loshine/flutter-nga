@@ -36,10 +36,10 @@ class TopicHistoryListState {
   }
 
   factory TopicHistoryListState.initial() => TopicHistoryListState(
-        page: 1,
-        enablePullUp: false,
-        dateTopicHistoryMap: {},
-      );
+    page: 1,
+    enablePullUp: false,
+    dateTopicHistoryMap: {},
+  );
 }
 
 class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
@@ -52,8 +52,8 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
   int get _offset => state.page * 20;
 
   Future<TopicHistoryListState> refresh() async {
-    List<TopicHistory> histories =
-        await Data().topicRepository.getTopicHistories(_limit, 0);
+    List<TopicHistory> histories = await Data().topicRepository
+        .getTopicHistories(_limit, 0);
     Map<String, List<TopicHistory>> map = {};
     for (var history in histories) {
       final date = DateTime.fromMillisecondsSinceEpoch(history.time!);
@@ -72,8 +72,8 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
   }
 
   Future<TopicHistoryListState> loadMore() async {
-    List<TopicHistory> histories =
-        await Data().topicRepository.getTopicHistories(_limit, _offset);
+    List<TopicHistory> histories = await Data().topicRepository
+        .getTopicHistories(_limit, _offset);
     Map<String, List<TopicHistory>> map = Map.from(state.dateTopicHistoryMap);
     for (var history in histories) {
       final date = DateTime.fromMicrosecondsSinceEpoch(history.time!);
@@ -114,4 +114,5 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
 
 final topicHistoryListProvider =
     NotifierProvider<TopicHistoryListNotifier, TopicHistoryListState>(
-        TopicHistoryListNotifier.new);
+      TopicHistoryListNotifier.new,
+    );

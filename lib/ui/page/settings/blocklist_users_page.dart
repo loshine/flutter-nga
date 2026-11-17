@@ -25,21 +25,20 @@ class BlocklistUsersPage extends HookConsumerWidget {
         actions: [
           IconButton(
             onPressed: () => _deleteAll(notifier),
-            icon: Icon(
-              Icons.delete_forever,
-              color: Colors.white,
-            ),
+            icon: Icon(Icons.delete_forever, color: Colors.white),
             tooltip: "删除所有屏蔽用户",
           ),
         ],
       ),
       body: ListView(
         children: state.blockUserList
-            .map((e) => ListTile(
-                  title: Text(code_utils.unescapeHtml(e)),
-                  trailing: Icon(Icons.delete),
-                  onTap: () => _delete(notifier, e),
-                ))
+            .map(
+              (e) => ListTile(
+                title: Text(code_utils.unescapeHtml(e)),
+                trailing: Icon(Icons.delete),
+                onTap: () => _delete(notifier, e),
+              ),
+            )
             .toList(),
       ),
       floatingActionButton: FloatingActionButton(
@@ -58,10 +57,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
     }
   }
 
-  Future<void> _delete(
-    BlocklistSettingsNotifier notifier,
-    String user,
-  ) async {
+  Future<void> _delete(BlocklistSettingsNotifier notifier, String user) async {
     try {
       AppToast.success(await notifier.deleteUser(user));
     } catch (e) {
@@ -69,10 +65,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
     }
   }
 
-  Future<void> _add(
-    BlocklistSettingsNotifier notifier,
-    String user,
-  ) async {
+  Future<void> _add(BlocklistSettingsNotifier notifier, String user) async {
     try {
       AppToast.success(await notifier.addUser(user));
     } catch (e) {
@@ -85,13 +78,14 @@ class BlocklistUsersPage extends HookConsumerWidget {
     BlocklistSettingsNotifier notifier,
   ) {
     showDialog(
-        context: context,
-        builder: (_) {
-          return BlocklistEditDialog(
-            title: "添加屏蔽用户",
-            inputHint: "UID 或 用户名",
-            callback: (user) => _add(notifier, user),
-          );
-        });
+      context: context,
+      builder: (_) {
+        return BlocklistEditDialog(
+          title: "添加屏蔽用户",
+          inputHint: "UID 或 用户名",
+          callback: (user) => _add(notifier, user),
+        );
+      },
+    );
   }
 }

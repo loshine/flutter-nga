@@ -41,11 +41,18 @@ class SearchTopicListNotifier extends Notifier<SearchTopicListState> {
   SearchTopicListState build() => SearchTopicListState.initial();
 
   Future<SearchTopicListState> refresh(
-      String keyword, int? fid, bool content) async {
+    String keyword,
+    int? fid,
+    bool content,
+  ) async {
     state = state.copyWith(isLoading: true);
     try {
-      TopicListData data =
-          await Data().topicRepository.searchTopic(keyword, fid, content, 1);
+      TopicListData data = await Data().topicRepository.searchTopic(
+        keyword,
+        fid,
+        content,
+        1,
+      );
       state = SearchTopicListState(
         page: 1,
         maxPage: data.maxPage,
@@ -61,13 +68,19 @@ class SearchTopicListNotifier extends Notifier<SearchTopicListState> {
   }
 
   Future<SearchTopicListState> loadMore(
-      String keyword, int? fid, bool content) async {
+    String keyword,
+    int? fid,
+    bool content,
+  ) async {
     if (state.isLoading) return state;
     state = state.copyWith(isLoading: true);
     try {
-      TopicListData data = await Data()
-          .topicRepository
-          .searchTopic(keyword, fid, content, state.page + 1);
+      TopicListData data = await Data().topicRepository.searchTopic(
+        keyword,
+        fid,
+        content,
+        state.page + 1,
+      );
       state = SearchTopicListState(
         page: state.page + 1,
         maxPage: data.maxPage,
@@ -84,4 +97,6 @@ class SearchTopicListNotifier extends Notifier<SearchTopicListState> {
 }
 
 final searchTopicListProvider =
-    NotifierProvider<SearchTopicListNotifier, SearchTopicListState>(SearchTopicListNotifier.new);
+    NotifierProvider<SearchTopicListNotifier, SearchTopicListState>(
+      SearchTopicListNotifier.new,
+    );

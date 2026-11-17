@@ -73,13 +73,13 @@ void main() {
     List<BlockMode?> commentModes,
   ) {
     Reply comment(int pid, String content) => Reply(
-          content: content,
-          tid: 1,
-          pid: pid,
-          authorId: 200 + pid,
-          commentList: [],
-          attachmentList: [],
-        );
+      content: content,
+      tid: 1,
+      pid: pid,
+      authorId: 200 + pid,
+      commentList: [],
+      attachmentList: [],
+    );
     return tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(

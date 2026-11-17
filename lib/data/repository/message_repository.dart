@@ -10,7 +10,11 @@ abstract class MessageRepository {
   Future<MessageListData> getMessageList(int? mid, int page);
 
   Future<void> sendMessage(
-      int? mid, List<String> sendTo, String subject, String content);
+    int? mid,
+    List<String> sendTo,
+    String subject,
+    String content,
+  );
 
   Future<NotificationInfo> getNotificationInfo();
 
@@ -26,7 +30,8 @@ class MessageDataRepository extends MessageRepository {
   Future<ConversationListData> getConversationList(int page) async {
     try {
       Response<Map<String, dynamic>> response = await _dio.get(
-          "nuke.php?__lib=message&__output=8&act=list&__act=message&page=$page");
+        "nuke.php?__lib=message&__output=8&act=list&__act=message&page=$page",
+      );
       return ConversationListData.fromJson(response.data!['0']);
     } catch (err) {
       rethrow;
@@ -37,7 +42,8 @@ class MessageDataRepository extends MessageRepository {
   Future<MessageListData> getMessageList(int? mid, int page) async {
     try {
       Response<Map<String, dynamic>> response = await _dio.get(
-          "nuke.php?__lib=message&__output=8&act=read&__act=message&mid=$mid&page=$page");
+        "nuke.php?__lib=message&__output=8&act=read&__act=message&mid=$mid&page=$page",
+      );
       return MessageListData.fromJson(response.data!['0']);
     } catch (err) {
       rethrow;
@@ -46,12 +52,18 @@ class MessageDataRepository extends MessageRepository {
 
   @override
   Future<void> sendMessage(
-      int? mid, List<String> sendTo, String subject, String content) async {
+    int? mid,
+    List<String> sendTo,
+    String subject,
+    String content,
+  ) async {
     try {
       final isNew = mid == null || mid == 0;
-      final sendToValue =
-          sendTo.isNotEmpty ? sendTo.reduce((s, e) => "$s,$e") : "";
-      final postData = "__lib=message&__act=message"
+      final sendToValue = sendTo.isNotEmpty
+          ? sendTo.reduce((s, e) => "$s,$e")
+          : "";
+      final postData =
+          "__lib=message&__act=message"
           "&__output=8"
           "&act=${isNew ? 'new' : 'reply'}"
           "&to=${code_utils.urlDecode(sendToValue)}"
@@ -69,8 +81,9 @@ class MessageDataRepository extends MessageRepository {
   @override
   Future<NotificationInfo> getNotificationInfo() async {
     try {
-      Response<Map<String, dynamic>> response =
-          await _dio.get("nuke.php?__output=8&__lib=noti&__act=if");
+      Response<Map<String, dynamic>> response = await _dio.get(
+        "nuke.php?__output=8&__lib=noti&__act=if",
+      );
       return NotificationInfo.fromJson(response.data!['0']);
     } catch (err) {
       rethrow;
@@ -80,8 +93,9 @@ class MessageDataRepository extends MessageRepository {
   @override
   Future<NotificationInfoListData> getNotificationList() async {
     try {
-      Response<Map<String, dynamic>> response =
-          await _dio.get("nuke.php?__output=8&__lib=noti&__act=get_all");
+      Response<Map<String, dynamic>> response = await _dio.get(
+        "nuke.php?__output=8&__lib=noti&__act=get_all",
+      );
       final data = response.data!['0'];
       if (data == "") {
         return NotificationInfoListData.fromJson({});

@@ -10,16 +10,16 @@ const String _keySeedColorValue = PrefsKeys.seedColorValue;
 /// 预设主题色列表
 class ThemeColors {
   static const List<Color> presets = [
-    Colors.brown,   // 默认 - 棕色
-    Colors.blue,    // 蓝色
-    Colors.teal,    // 青色
-    Colors.green,   // 绿色
-    Colors.purple,  // 紫色
-    Colors.pink,    // 粉色
-    Colors.orange,  // 橙色
-    Colors.red,     // 红色
-    Colors.indigo,  // 靛蓝
-    Colors.cyan,    // 青蓝
+    Colors.brown, // 默认 - 棕色
+    Colors.blue, // 蓝色
+    Colors.teal, // 青色
+    Colors.green, // 绿色
+    Colors.purple, // 紫色
+    Colors.pink, // 粉色
+    Colors.orange, // 橙色
+    Colors.red, // 红色
+    Colors.indigo, // 靛蓝
+    Colors.cyan, // 青蓝
   ];
 
   static const List<String> names = [
@@ -42,10 +42,8 @@ class ThemeState {
   final AdaptiveThemeMode? mode;
   final Color seedColor;
 
-  ThemeState({
-    this.mode,
-    Color? seedColor,
-  }) : seedColor = seedColor ?? ThemeColors.defaultColor;
+  ThemeState({this.mode, Color? seedColor})
+    : seedColor = seedColor ?? ThemeColors.defaultColor;
 
   String get modeName {
     switch (mode) {
@@ -68,10 +66,7 @@ class ThemeState {
     return "自定义";
   }
 
-  ThemeState copyWith({
-    AdaptiveThemeMode? mode,
-    Color? seedColor,
-  }) {
+  ThemeState copyWith({AdaptiveThemeMode? mode, Color? seedColor}) {
     return ThemeState(
       mode: mode ?? this.mode,
       seedColor: seedColor ?? this.seedColor,
@@ -115,10 +110,7 @@ class ThemeNotifier extends Notifier<ThemeState> {
 
   Future<void> refresh() async {
     final saved = await loadSaved();
-    state = state.copyWith(
-      mode: saved.mode,
-      seedColor: saved.seedColor,
-    );
+    state = state.copyWith(mode: saved.mode, seedColor: saved.seedColor);
   }
 
   void update(BuildContext context, AdaptiveThemeMode adaptiveThemeMode) {
@@ -149,4 +141,6 @@ class ThemeNotifier extends Notifier<ThemeState> {
   }
 }
 
-final themeProvider = NotifierProvider<ThemeNotifier, ThemeState>(ThemeNotifier.new);
+final themeProvider = NotifierProvider<ThemeNotifier, ThemeState>(
+  ThemeNotifier.new,
+);

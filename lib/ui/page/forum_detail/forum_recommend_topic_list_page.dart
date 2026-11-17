@@ -11,11 +11,7 @@ class ForumRecommendTopicListPage extends HookConsumerWidget {
   final int fid;
   final int? type;
 
-  const ForumRecommendTopicListPage(
-    this.fid, {
-    super.key,
-    this.type,
-  });
+  const ForumRecommendTopicListPage(this.fid, {super.key, this.type});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

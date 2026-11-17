@@ -6,8 +6,9 @@ import 'package:flutter_nga/utils/palette.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
 void main() {
-  testWidgets('thumb colors use the refined secondary container roles',
-      (tester) async {
+  testWidgets('thumb colors use the refined secondary container roles', (
+    tester,
+  ) async {
     final base = ColorScheme.fromSeed(seedColor: Colors.brown);
     final theme = ThemeBuilder.buildTheme(base);
     late Color background;

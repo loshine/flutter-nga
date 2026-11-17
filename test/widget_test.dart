@@ -30,13 +30,16 @@ void main() {
 
   test('Substring test', () {
     String url = "./mon_201901/23/7nQ5-1s5nK1kT1kSb9-45.png.thumb.jpg";
-    expect(url.substring(0, url.length - 10),
-        "./mon_201901/23/7nQ5-1s5nK1kT1kSb9-45.png");
+    expect(
+      url.substring(0, url.length - 10),
+      "./mon_201901/23/7nQ5-1s5nK1kT1kSb9-45.png",
+    );
   });
 
   test('RegExp test', () {
     RegExp regExp = RegExp(
-        "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid]([\\s\\S]*?)\\[/uid]\\[color=gray]\\(([\\s\\S]*?)\\)\\[/color] \\(([\\s\\S]*?)\\)\\[/b]");
+      "\\[b]Reply to \\[tid=(\\d+)?]Topic\\[/tid] Post by \\[uid]([\\s\\S]*?)\\[/uid]\\[color=gray]\\(([\\s\\S]*?)\\)\\[/color] \\(([\\s\\S]*?)\\)\\[/b]",
+    );
     String content =
         "[b]Reply to [tid=16893894]Topic[/tid] Post by [uid]#anony_6b0df884c0e44bf854e195a52cbc3a0e[/uid][color=gray](0楼)[/color] (2019-04-08 14:29)[/b]  哈哈哈哈哈哈";
     expect(content.replaceAll(regExp, ""), "  哈哈哈哈哈哈");
@@ -44,7 +47,8 @@ void main() {
 
   test('Anony RegExp test', () {
     RegExp regExp = RegExp(
-        "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid]#anony_([0-9a-zA-Z]*)\\[/uid]\\[color=gray]\\((\\d+)?楼\\)\\[/color] \\(([\\s\\S]*?)\\):\\[/b]");
+      "\\[pid=(\\d+)?,(\\d+)?,(\\d+)?]Reply\\[/pid] \\[b]Post by \\[uid]#anony_([0-9a-zA-Z]*)\\[/uid]\\[color=gray]\\((\\d+)?楼\\)\\[/color] \\(([\\s\\S]*?)\\):\\[/b]",
+    );
     String content =
         "[pid=445996637,23005426,1]Reply[/pid] [b]Post by [uid]#anony_7dc5258240df2301fdae75153712d174[/uid][color=gray](6楼)[/color] (2020-08-18 15:04):[/b]";
     expect(content.replaceAll(regExp, ""), "");
@@ -84,8 +88,10 @@ void main() {
     );
     expect(parsed.contains('<hr/>'), true);
     expect(parsed.contains("<collapse title='标题'>内容</collapse>"), true);
-    expect(parsed.contains('<nga_emoticon src=') || parsed.contains('[s:1]'),
-        true);
+    expect(
+      parsed.contains('<nga_emoticon src=') || parsed.contains('[s:1]'),
+      true,
+    );
     expect(parsed.contains("class='ubb-unknown'"), true);
   });
 
@@ -101,9 +107,10 @@ void main() {
     expect(parsed.contains('后'), true);
     expect(parsed.contains('randomblock'), false);
     expect(
-      [parsed.contains('<b>甲</b>'), parsed.contains('<i>乙</i>')]
-          .where((selected) => selected)
-          .length,
+      [
+        parsed.contains('<b>甲</b>'),
+        parsed.contains('<i>乙</i>'),
+      ].where((selected) => selected).length,
       1,
     );
   });
@@ -117,12 +124,7 @@ void main() {
     );
 
     expect(RegExp('<nga_dict ').allMatches(parsed).length, 3);
-    expect(
-      parsed.contains(
-        "definition='一座&lt;b&gt;向下&lt;/b&gt;延伸的楼梯'",
-      ),
-      true,
-    );
+    expect(parsed.contains("definition='一座&lt;b&gt;向下&lt;/b&gt;延伸的楼梯'"), true);
     expect(
       parsed.contains(
         "definition='&#91;futuretag&#93;原样内容&#91;/futuretag&#93;'",
@@ -133,18 +135,11 @@ void main() {
     expect(parsed.endsWith('未定义'), true);
   });
 
-  testWidgets('P0 widget: tapping dict term opens its definition',
-      (tester) async {
-    final parsed = NgaContentParser.parse(
-      '[dict][SCP-087]一座向下延伸的楼梯[/dict]',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: NgaHtml(parsed),
-        ),
-      ),
-    );
+  testWidgets('P0 widget: tapping dict term opens its definition', (
+    tester,
+  ) async {
+    final parsed = NgaContentParser.parse('[dict][SCP-087]一座向下延伸的楼梯[/dict]');
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: NgaHtml(parsed))));
 
     await tester.tap(find.text('SCP-087', findRichText: true));
     await tester.pumpAndSettle();
@@ -179,7 +174,9 @@ void main() {
       '[align=center]hello[/align][align=right]r[/align]',
     );
     expect(
-        parsed.contains("<div style='text-align:center;'>hello</div>"), true);
+      parsed.contains("<div style='text-align:center;'>hello</div>"),
+      true,
+    );
     expect(parsed.contains("<div style='text-align:right;'>r</div>"), true);
   });
 
@@ -187,8 +184,10 @@ void main() {
     final parsed = NgaContentParser.parse(
       '[list][*]a[list][*]b[/list][*]c[/list]',
     );
-    expect(parsed.contains('<ul><li>a<ul><li>b</li></ul></li><li>c</li></ul>'),
-        true);
+    expect(
+      parsed.contains('<ul><li>a<ul><li>b</li></ul></li><li>c</li></ul>'),
+      true,
+    );
   });
 
   test('P1 parser: album + flash media semantic', () {
@@ -225,8 +224,10 @@ void main() {
       '[uid=66738726]golcore[/uid] (2026-07-20 00:43):[/b]<br/>正文',
     );
     expect(
-      parsed.contains("<nga_quote pid='875718629' uid='66738726' "
-          "author='golcore' date='2026-07-20 00:43'></nga_quote>"),
+      parsed.contains(
+        "<nga_quote pid='875718629' uid='66738726' "
+        "author='golcore' date='2026-07-20 00:43'></nga_quote>",
+      ),
       true,
     );
     expect(parsed.contains('正文'), true);
@@ -240,8 +241,9 @@ void main() {
     );
     expect(
       parsed.contains(
-          "<nga_quote pid='875718629' uid='66738726' author='golcore' "
-          "date='2026-07-20 00:43'>被引用的原文内容</nga_quote>"),
+        "<nga_quote pid='875718629' uid='66738726' author='golcore' "
+        "date='2026-07-20 00:43'>被引用的原文内容</nga_quote>",
+      ),
       true,
     );
     // 原文不应再落在 blockquote 外变成游离文本
@@ -264,9 +266,12 @@ void main() {
       '[uid=66738726]golcore[/uid] (2026-07-20 00:43)[/b]',
     );
     expect(
-        parsedTopic.contains("<nga_quote tid='47217372' "
-            "uid='66738726' author='golcore'"),
-        true);
+      parsedTopic.contains(
+        "<nga_quote tid='47217372' "
+        "uid='66738726' author='golcore'",
+      ),
+      true,
+    );
     final parsedPost = NgaContentParser.parse(
       '[b]Reply to [pid=875718629,47217372,1]Reply[/pid] Post by '
       '[uid=66738726]golcore[/uid] (2026-07-20 00:43)[/b]',
@@ -292,8 +297,7 @@ void main() {
       (pid: 875718629, content: '这是被回复楼的原文内容'),
       (
         pid: 1,
-        content:
-            '[quote][pid=9,1,1]Reply[/pid] [b]Post by [uid=1]a[/uid] (t):[/b]\n嵌套引用[/quote]\n楼层正文',
+        content: '[quote][pid=9,1,1]Reply[/pid] [b]Post by [uid=1]a[/uid] (t):[/b]\n嵌套引用[/quote]\n楼层正文',
       ),
     ]);
     // 嵌套引用应被剥掉，只保留楼层正文
@@ -307,8 +311,9 @@ void main() {
     );
     expect(
       parsed.contains(
-          "<nga_quote pid='875718629' uid='66738726' author='golcore' "
-          "date='2026-07-20 00:43'>这是被回复楼的原文内容</nga_quote>"),
+        "<nga_quote pid='875718629' uid='66738726' author='golcore' "
+        "date='2026-07-20 00:43'>这是被回复楼的原文内容</nga_quote>",
+      ),
       true,
     );
     expect(parsed.contains('我的回复'), true);

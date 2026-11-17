@@ -55,11 +55,11 @@ class ForumDetailNotifier extends Notifier<ForumDetailState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       TopicListData data = await Data().topicRepository.getTopicList(
-            fid: fid,
-            page: 1,
-            recommend: recommend,
-            type: type,
-          );
+        fid: fid,
+        page: 1,
+        recommend: recommend,
+        type: type,
+      );
       state = ForumDetailState(
         page: 1,
         maxPage: data.maxPage,
@@ -80,11 +80,11 @@ class ForumDetailNotifier extends Notifier<ForumDetailState> {
     state = state.copyWith(isLoading: true);
     try {
       TopicListData data = await Data().topicRepository.getTopicList(
-            fid: fid,
-            page: state.page + 1,
-            recommend: recommend,
-            type: type,
-          );
+        fid: fid,
+        page: state.page + 1,
+        recommend: recommend,
+        type: type,
+      );
       state = ForumDetailState(
         page: state.page + 1,
         maxPage: data.maxPage,
@@ -103,9 +103,11 @@ class ForumDetailNotifier extends Notifier<ForumDetailState> {
 
 final forumDetailProvider =
     NotifierProvider.family<ForumDetailNotifier, ForumDetailState, int>(
-        ForumDetailNotifier.new);
+      ForumDetailNotifier.new,
+    );
 
 /// Provider for forum recommended topics (separate from main forum list)
 final forumRecommendProvider =
     NotifierProvider.family<ForumDetailNotifier, ForumDetailState, int>(
-        ForumDetailNotifier.new);
+      ForumDetailNotifier.new,
+    );

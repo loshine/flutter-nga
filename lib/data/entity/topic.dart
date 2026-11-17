@@ -29,7 +29,10 @@ class TopicListData {
     final topicMap = asJsonMap(map["__T"], 'TopicListData.__T');
     Map<String, Topic> tempMap = {};
     for (MapEntry<String, dynamic> entry in topicMap.entries) {
-      final topicJson = asJsonMap(entry.value, 'TopicListData.__T.${entry.key}');
+      final topicJson = asJsonMap(
+        entry.value,
+        'TopicListData.__T.${entry.key}',
+      );
       topicJson["page"] = page;
       tempMap[entry.key] = Topic.fromJson(topicJson);
     }
@@ -231,21 +234,24 @@ class ForumInfo {
         List<int> selectedIds = [];
         if (selectedForum is String) {
           if (selectedForum.isNotEmpty) {
-            selectedIds
-                .addAll(selectedForum.split(",").map((s) => int.parse(s)));
+            selectedIds.addAll(
+              selectedForum.split(",").map((s) => int.parse(s)),
+            );
           }
         }
         String? desc = forum['2'];
         int id = forum['0'];
-        subForums.add(ChildForum(
-          id,
-          forum['1'],
-          forum['3'],
-          parentId: map['fid'],
-          desc: desc != null && desc.isNotEmpty ? desc : null,
-          type: k.startsWith("t") ? 1 : 0,
-          selected: selectedIds.contains(id),
-        ));
+        subForums.add(
+          ChildForum(
+            id,
+            forum['1'],
+            forum['3'],
+            parentId: map['fid'],
+            desc: desc != null && desc.isNotEmpty ? desc : null,
+            type: k.startsWith("t") ? 1 : 0,
+            selected: selectedIds.contains(id),
+          ),
+        );
       });
     }
     dynamic toppedTopic = map['topped_topic'];

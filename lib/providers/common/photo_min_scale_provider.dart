@@ -10,10 +10,14 @@ class PhotoMinScaleNotifier extends Notifier<double> {
   void load(String url, double? screenWidth) {
     CachedNetworkImageProvider(picture_utils.getOriginalUrl(url))
         .resolve(ImageConfiguration())
-        .addListener(ImageStreamListener(
-            (ImageInfo info, _) => state = screenWidth! / info.image.width));
+        .addListener(
+          ImageStreamListener(
+            (ImageInfo info, _) => state = screenWidth! / info.image.width,
+          ),
+        );
   }
 }
 
-final photoMinScaleProvider =
-    NotifierProvider<PhotoMinScaleNotifier, double>(PhotoMinScaleNotifier.new);
+final photoMinScaleProvider = NotifierProvider<PhotoMinScaleNotifier, double>(
+  PhotoMinScaleNotifier.new,
+);

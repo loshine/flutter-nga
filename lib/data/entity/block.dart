@@ -55,9 +55,8 @@ class BlockMatcher {
   BlockMatcher({
     required Iterable<String> users,
     required Iterable<String> words,
-  })  : _users = users.map((e) => e.trim()).where((e) => e.isNotEmpty).toSet(),
-        _words =
-            words.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  }) : _users = users.map((e) => e.trim()).where((e) => e.isNotEmpty).toSet(),
+       _words = words.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
   final Set<String> _users;
   final List<String> _words;

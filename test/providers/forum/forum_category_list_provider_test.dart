@@ -24,8 +24,9 @@ void main() {
     );
     final container = _container(repository);
 
-    final loading =
-        container.read(forumCategoryListProvider.notifier).ensureLoaded();
+    final loading = container
+        .read(forumCategoryListProvider.notifier)
+        .ensureLoaded();
     await Future<void>.delayed(Duration.zero);
 
     final cachedState = container.read(forumCategoryListProvider);
@@ -40,21 +41,23 @@ void main() {
     expect(remoteState.error, isNull);
   });
 
-  test('remote failure keeps cached categories and records the error',
-      () async {
-    final repository = _FakeForumRepository(
-      cached: [cached],
-      fetch: () async => throw StateError('offline'),
-    );
-    final container = _container(repository);
+  test(
+    'remote failure keeps cached categories and records the error',
+    () async {
+      final repository = _FakeForumRepository(
+        cached: [cached],
+        fetch: () async => throw StateError('offline'),
+      );
+      final container = _container(repository);
 
-    await container.read(forumCategoryListProvider.notifier).ensureLoaded();
+      await container.read(forumCategoryListProvider.notifier).ensureLoaded();
 
-    final state = container.read(forumCategoryListProvider);
-    expect(state.categories, [cached]);
-    expect(state.isLoading, isFalse);
-    expect(state.error, isNotNull);
-  });
+      final state = container.read(forumCategoryListProvider);
+      expect(state.categories, [cached]);
+      expect(state.isLoading, isFalse);
+      expect(state.error, isNotNull);
+    },
+  );
 
   test('without cache a failed load can be retried by refresh', () async {
     var fail = true;
@@ -86,9 +89,7 @@ void main() {
 
 ProviderContainer _container(ForumRepository repository) {
   final container = ProviderContainer(
-    overrides: [
-      forumRepositoryProvider.overrideWithValue(repository),
-    ],
+    overrides: [forumRepositoryProvider.overrideWithValue(repository)],
   );
   final subscription = container.listen(forumCategoryListProvider, (_, _) {});
   addTearDown(() {

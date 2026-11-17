@@ -11,8 +11,7 @@ class DataConfigService {
   static const String _baseUrlPrefsKey = PrefsKeys.baseUrlConfigKey;
   static const String _customBaseUrlPrefsKey = PrefsKeys.customBaseUrlValue;
   static const String _userAgentPrefsKey = PrefsKeys.userAgentConfigKey;
-  static const String _customUserAgentPrefsKey =
-      PrefsKeys.customUserAgentValue;
+  static const String _customUserAgentPrefsKey = PrefsKeys.customUserAgentValue;
 
   BaseUrlConfig _currentBaseUrlConfig = BaseUrlPresets.defaultConfig;
   UserAgentConfig _currentUserAgentConfig = UserAgentPresets.defaultConfig;
@@ -36,8 +35,9 @@ class DataConfigService {
   Future<void> init() async {
     await _loadBaseUrlConfig();
     await _loadUserAgentConfig();
-    _currentUserAgent =
-        await UserAgentPresets.resolveUserAgent(_currentUserAgentConfig);
+    _currentUserAgent = await UserAgentPresets.resolveUserAgent(
+      _currentUserAgentConfig,
+    );
   }
 
   Future<void> switchBaseUrl(BaseUrlConfig config) async {
@@ -110,9 +110,7 @@ class DataConfigService {
       if (savedKey == BaseUrlPresets.legacyNga178Key) {
         _currentBaseUrlConfig = BaseUrlPresets.ngaOfficial;
         await _saveBaseUrlConfig(_currentBaseUrlConfig);
-        debugPrint(
-          'Data: 已将旧版 baseUrl 迁移至: ${_currentBaseUrlConfig.url}',
-        );
+        debugPrint('Data: 已将旧版 baseUrl 迁移至: ${_currentBaseUrlConfig.url}');
         return;
       }
 
@@ -161,8 +159,8 @@ class DataConfigService {
         return;
       }
 
-      final customUserAgent =
-          (prefs.getString(_customUserAgentPrefsKey) ?? '').trim();
+      final customUserAgent = (prefs.getString(_customUserAgentPrefsKey) ?? '')
+          .trim();
       _currentUserAgentConfig = customUserAgent.isEmpty
           ? UserAgentPresets.defaultConfig
           : preset.copyWith(userAgent: customUserAgent);

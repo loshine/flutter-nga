@@ -5,16 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class SendMessageState {
   final List<String> contacts;
 
-  const SendMessageState({
-    this.contacts = const [],
-  });
+  const SendMessageState({this.contacts = const []});
 
-  SendMessageState copyWith({
-    List<String>? contacts,
-  }) {
-    return SendMessageState(
-      contacts: contacts ?? this.contacts,
-    );
+  SendMessageState copyWith({List<String>? contacts}) {
+    return SendMessageState(contacts: contacts ?? this.contacts);
   }
 }
 
@@ -41,7 +35,11 @@ class SendMessageNotifier extends Notifier<SendMessageState> {
     try {
       final repository = ref.read(messageRepositoryProvider);
       return await repository.sendMessage(
-          mid, state.contacts, subject, content);
+        mid,
+        state.contacts,
+        subject,
+        content,
+      );
     } catch (err) {
       AppToast.error(err);
     }
@@ -50,4 +48,5 @@ class SendMessageNotifier extends Notifier<SendMessageState> {
 
 final sendMessageProvider =
     NotifierProvider<SendMessageNotifier, SendMessageState>(
-        SendMessageNotifier.new);
+      SendMessageNotifier.new,
+    );

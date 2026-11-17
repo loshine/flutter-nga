@@ -21,4 +21,6 @@ class HomeDrawerHeaderNotifier extends Notifier<UserInfo?> {
 }
 
 final homeDrawerHeaderProvider =
-    NotifierProvider<HomeDrawerHeaderNotifier, UserInfo?>(HomeDrawerHeaderNotifier.new);
+    NotifierProvider<HomeDrawerHeaderNotifier, UserInfo?>(
+      HomeDrawerHeaderNotifier.new,
+    );

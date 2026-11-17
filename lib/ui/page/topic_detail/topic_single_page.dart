@@ -94,13 +94,15 @@ class TopicSinglePage extends HookConsumerWidget {
     // 热点回复是精选区块，被屏蔽的直接移除而不是按屏蔽模式展示
     final hotReplies = position == 0 && page == 1
         ? state.hotReplyList
-            .where((hot) =>
-                blockFilter.replyMode(
-                  hot,
-                  username: _findUser(state, hot.authorId)?.username,
-                ) ==
-                null)
-            .toList()
+              .where(
+                (hot) =>
+                    blockFilter.replyMode(
+                      hot,
+                      username: _findUser(state, hot.authorId)?.username,
+                    ) ==
+                    null,
+              )
+              .toList()
         : const <Reply>[];
     if (hotReplies.isNotEmpty) {
       // 楼主下方展示热点回复区块
@@ -156,7 +158,8 @@ class TopicSinglePage extends HookConsumerWidget {
     if (reply.content.isEmpty && (reply.subject ?? '').contains('发表了一条评论')) {
       commentSource = _findCommentByPid(state, reply.pid);
     }
-    final blockMode = blockFilter.replyMode(reply, username: user.username) ??
+    final blockMode =
+        blockFilter.replyMode(reply, username: user.username) ??
         (commentSource == null
             ? null
             : blockFilter.replyMode(commentSource, username: user.username));
@@ -170,15 +173,15 @@ class TopicSinglePage extends HookConsumerWidget {
     ];
 
     // 楼层与评论的屏蔽模式参与缓存 key，屏蔽设置变化后重新构建楼层
-    final blockKey = [blockMode, ...commentBlockModes]
-        .map((mode) => mode?.index ?? '-')
-        .join();
+    final blockKey = [
+      blockMode,
+      ...commentBlockModes,
+    ].map((mode) => mode?.index ?? '-').join();
     final uniqueId = "${reply.pid}_${reply.tid}_${reply.fid}_$blockKey";
     var cached = replyWidgetCache[uniqueId];
     if (cached != null) {
       return cached;
     } else {
-
       Group? group;
       if (user.memberId != null) {
         for (var g in state.groupSet) {

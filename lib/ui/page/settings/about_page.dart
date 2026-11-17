@@ -25,9 +25,7 @@ class AboutPage extends HookConsumerWidget {
       appBar: AppBar(title: const Text('关于')),
       body: appInfoAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('加载失败: $error'),
-        ),
+        error: (error, stack) => Center(child: Text('加载失败: $error')),
         data: (appInfo) => ListView(
           padding: EdgeInsets.fromLTRB(
             mediaPadding.left,
@@ -228,11 +226,7 @@ class _InfoTile extends StatelessWidget {
               color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(Dimen.radiusS),
             ),
-            child: Icon(
-              icon,
-              color: colorScheme.onSurface,
-              size: 20,
-            ),
+            child: Icon(icon, color: colorScheme.onSurface, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(

@@ -39,8 +39,7 @@ abstract final class AppToast {
     return switch (platform) {
       TargetPlatform.macOS ||
       TargetPlatform.windows ||
-      TargetPlatform.linux =>
-        Alignment.topRight,
+      TargetPlatform.linux => Alignment.topRight,
       _ => Alignment.topCenter,
     };
   }

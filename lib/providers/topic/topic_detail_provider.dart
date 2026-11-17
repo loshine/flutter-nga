@@ -95,4 +95,5 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
 
 final topicDetailProvider = NotifierProvider.autoDispose
     .family<TopicDetailNotifier, TopicDetailState, TopicDetailKey>(
-        TopicDetailNotifier.new);
+      TopicDetailNotifier.new,
+    );

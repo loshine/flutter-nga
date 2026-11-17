@@ -69,9 +69,7 @@ class SearchTopicListPage extends HookConsumerWidget {
     final mediaPadding = MediaQuery.paddingOf(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('搜索: $keyword'),
-      ),
+      appBar: AppBar(title: Text('搜索: $keyword')),
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
@@ -118,9 +116,8 @@ class SearchTopicListPage extends HookConsumerWidget {
           const SizedBox(height: Dimen.spacingL),
           Text(
             '暂无搜索结果',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+            style: Theme.of(context).textTheme.bodyLarge
+                ?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),

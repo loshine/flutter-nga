@@ -16,11 +16,11 @@ class NotificationListState {
   });
 
   factory NotificationListState.initial() => const NotificationListState(
-        replyNotificationList: [],
-        messageNotificationList: [],
-        systemNotificationList: [],
-        unread: 0,
-      );
+    replyNotificationList: [],
+    messageNotificationList: [],
+    systemNotificationList: [],
+    unread: 0,
+  );
 
   int get count =>
       3 +
@@ -69,4 +69,5 @@ class NotificationListNotifier extends Notifier<NotificationListState> {
 
 final notificationListProvider =
     NotifierProvider<NotificationListNotifier, NotificationListState>(
-        NotificationListNotifier.new);
+      NotificationListNotifier.new,
+    );

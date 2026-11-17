@@ -9,8 +9,9 @@ class HomeIndexNotifier extends Notifier<int> {
   }
 }
 
-final homeIndexProvider =
-    NotifierProvider<HomeIndexNotifier, int>(HomeIndexNotifier.new);
+final homeIndexProvider = NotifierProvider<HomeIndexNotifier, int>(
+  HomeIndexNotifier.new,
+);
 
 class ForumGroupFabVisibleNotifier extends Notifier<bool> {
   @override
@@ -22,4 +23,6 @@ class ForumGroupFabVisibleNotifier extends Notifier<bool> {
 }
 
 final forumGroupFabVisibleProvider =
-    NotifierProvider<ForumGroupFabVisibleNotifier, bool>(ForumGroupFabVisibleNotifier.new);
+    NotifierProvider<ForumGroupFabVisibleNotifier, bool>(
+      ForumGroupFabVisibleNotifier.new,
+    );

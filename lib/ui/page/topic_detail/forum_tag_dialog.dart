@@ -29,11 +29,14 @@ class ForumTagDialog extends HookConsumerWidget {
       notifier.setList(tagList);
 
       if (tagList.isEmpty) {
-        notifier.load(fid).then((value) {
-          onLoadComplete?.call(value);
-        }).catchError((err) {
-          AppToast.error(err);
-        });
+        notifier
+            .load(fid)
+            .then((value) {
+              onLoadComplete?.call(value);
+            })
+            .catchError((err) {
+              AppToast.error(err);
+            });
       }
     }, [fid]);
 

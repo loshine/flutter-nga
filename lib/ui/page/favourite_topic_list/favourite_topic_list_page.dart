@@ -57,11 +57,8 @@ class FavouriteTopicListPage extends HookConsumerWidget {
           itemCount: state.list.length,
           itemBuilder: (context, index) => TopicListItemWidget(
             topic: state.list[index],
-            onLongPress: () => _showDeleteDialog(
-              context,
-              notifier,
-              state.list[index],
-            ),
+            onLongPress: () =>
+                _showDeleteDialog(context, notifier, state.list[index]),
           ),
         ),
       ),
@@ -74,27 +71,25 @@ class FavouriteTopicListPage extends HookConsumerWidget {
     Topic topic,
   ) {
     showDialog(
-        context: context,
-        builder: (_) {
-          return AlertDialog(
-            title: Text("提示"),
-            content: Text("是否删除该收藏"),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Routes.pop(context),
-                child: Text("取消"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Routes.pop(context);
-                  notifier.delete(topic).then((message) {
-                    AppToast.success(message ?? "");
-                  });
-                },
-                child: Text("确认"),
-              ),
-            ],
-          );
-        });
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text("提示"),
+          content: Text("是否删除该收藏"),
+          actions: <Widget>[
+            TextButton(onPressed: () => Routes.pop(context), child: Text("取消")),
+            TextButton(
+              onPressed: () {
+                Routes.pop(context);
+                notifier.delete(topic).then((message) {
+                  AppToast.success(message ?? "");
+                });
+              },
+              child: Text("确认"),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

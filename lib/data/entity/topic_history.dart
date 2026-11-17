@@ -34,7 +34,7 @@ class TopicHistory {
       'type': type,
       'topicMisc': topicMisc,
       'topicParentName': topicParentName,
-      'time': time
+      'time': time,
     };
   }
 

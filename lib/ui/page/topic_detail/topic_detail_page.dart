@@ -71,8 +71,10 @@ class TopicDetailPage extends HookConsumerWidget {
 
     void jumpToFloor(int lou) {
       if (lou <= 0) return;
-      final target =
-          (lou / 20 - 1).ceil().clamp(0, tabController.length - 1).toInt();
+      final target = (lou / 20 - 1)
+          .ceil()
+          .clamp(0, tabController.length - 1)
+          .toInt();
       // Ensure the target page is built before animating to it.
       if (!visitedPages.value.contains(target)) {
         visitedPages.value = {...visitedPages.value, target};
@@ -96,9 +98,7 @@ class TopicDetailPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          code_utils.unescapeHtml(state.subject ?? subject ?? ""),
-        ),
+        title: Text(code_utils.unescapeHtml(state.subject ?? subject ?? "")),
       ),
       body: TabBarView(
         physics: NeverScrollableScrollPhysics(),
@@ -137,13 +137,11 @@ class TopicDetailPage extends HookConsumerWidget {
                       final index = isPage
                           ? target - 1
                           : (target / 20 - 1).ceil();
-                      final clamped =
-                          index.clamp(0, tabController.length - 1).toInt();
+                      final clamped = index
+                          .clamp(0, tabController.length - 1)
+                          .toInt();
                       if (!visitedPages.value.contains(clamped)) {
-                        visitedPages.value = {
-                          ...visitedPages.value,
-                          clamped,
-                        };
+                        visitedPages.value = {...visitedPages.value, clamped};
                       }
                       tabController.animateTo(clamped);
                     },
@@ -151,14 +149,16 @@ class TopicDetailPage extends HookConsumerWidget {
                 );
               },
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Text(
                   "${state.currentPage}/${state.maxPage}",
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               ),
             ),
@@ -197,11 +197,14 @@ class TopicDetailPage extends HookConsumerWidget {
             IconButton(
               icon: Icon(CommunityMaterialIcons.heart_outline),
               onPressed: () {
-                notifier.addFavourite(tid).then((message) {
-                  AppToast.success(message.toString());
-                }).catchError((e) {
-                  AppToast.error(e);
-                });
+                notifier
+                    .addFavourite(tid)
+                    .then((message) {
+                      AppToast.success(message.toString());
+                    })
+                    .catchError((e) {
+                      AppToast.error(e);
+                    });
               },
             ),
             IconButton(

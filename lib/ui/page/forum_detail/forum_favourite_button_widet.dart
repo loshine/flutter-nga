@@ -9,8 +9,12 @@ import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/motion.dart';
 
 class ForumFavouriteButtonWidget extends HookConsumerWidget {
-  const ForumFavouriteButtonWidget(
-      {super.key, this.name, required this.fid, this.type});
+  const ForumFavouriteButtonWidget({
+    super.key,
+    this.name,
+    required this.fid,
+    this.type,
+  });
 
   final String? name;
   final int fid;

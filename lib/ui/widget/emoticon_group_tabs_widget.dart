@@ -29,9 +29,7 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
             unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color,
             tabs: _tabs,
           ),
-          Expanded(
-            child: TabBarView(children: _tabBarViews),
-          ),
+          Expanded(child: TabBarView(children: _tabBarViews)),
         ],
       ),
     );
@@ -42,10 +40,12 @@ class _EmoticonGroupTabsState extends State<EmoticonGroupTabsWidget> {
     super.initState();
     final list = Data().emoticonRepository.getEmoticonGroups();
     _tabs.addAll(list.map((group) => Tab(text: group.name)));
-    _tabBarViews.addAll(list.map((group) => _EmoticonGroupWidget(
-          group: group,
-          callback: widget.callback,
-        )));
+    _tabBarViews.addAll(
+      list.map(
+        (group) =>
+            _EmoticonGroupWidget(group: group, callback: widget.callback),
+      ),
+    );
   }
 }
 

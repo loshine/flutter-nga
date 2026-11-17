@@ -52,10 +52,8 @@ class Message {
 
   /// [userList] 中找不到发信人时使用的占位用户。
   @visibleForTesting
-  static User placeholderUser(int? uid) => User(
-        uid: uid,
-        username: uid == null || uid == 0 ? '系统' : 'UID:$uid',
-      );
+  static User placeholderUser(int? uid) =>
+      User(uid: uid, username: uid == null || uid == 0 ? '系统' : 'UID:$uid');
 }
 
 class MessageListData {
@@ -79,7 +77,7 @@ class MessageListData {
     this.userList,
   );
 
-// final String allUsers;
+  // final String allUsers;
 
   factory MessageListData.fromJson(Map map) {
     dynamic nextPage = map['nextPage'];

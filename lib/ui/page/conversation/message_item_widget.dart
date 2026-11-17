@@ -14,53 +14,59 @@ class MessageItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[];
-    children.add(Padding(
-      padding: EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AvatarWidget(
-            message.user.avatar,
-            size: 24,
-            username: message.user.username,
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                name_utils.getShowName(message.user.username ?? ''),
-                style: TextStyle(color: Colors.black),
+    children.add(
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AvatarWidget(
+              message.user.avatar,
+              size: 24,
+              username: message.user.username,
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  name_utils.getShowName(message.user.username ?? ''),
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
-          ),
-          Text(
-            code_utils.formatPostDate(message.time! * 1000),
+            Text(
+              code_utils.formatPostDate(message.time! * 1000),
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                fontSize: Dimen.bodySmall,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!code_utils.isStringEmpty(message.subject)) {
+      children.add(
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            code_utils.unescapeHtml(message.subject),
             style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color,
-              fontSize: Dimen.bodySmall,
+              fontSize: Dimen.titleLarge,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
-        ],
-      ),
-    ));
-    if (!code_utils.isStringEmpty(message.subject)) {
-      children.add(Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Text(
-          code_utils.unescapeHtml(message.subject),
-          style: TextStyle(
-            fontSize: Dimen.titleLarge,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-          ),
         ),
-      ));
+      );
     }
-    children.add(Padding(
-      padding: EdgeInsets.all(16),
-      child: NgaHtmlContentWidget(content: message.content),
-    ));
+    children.add(
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: NgaHtmlContentWidget(content: message.content),
+      ),
+    );
     children.add(Divider(height: 1));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

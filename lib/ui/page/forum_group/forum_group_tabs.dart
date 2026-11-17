@@ -28,7 +28,7 @@ class ForumGroupTabsPage extends HookConsumerWidget {
 
     List<Tab> tabs = [const Tab(text: "我的收藏")];
     List<Widget> tabBarViews = [
-      KeepAliveTabView(child: FavouriteForumGroupPage())
+      KeepAliveTabView(child: FavouriteForumGroupPage()),
     ];
 
     if (categories.isEmpty) {
@@ -37,9 +37,12 @@ class ForumGroupTabsPage extends HookConsumerWidget {
       tabBarViews.add(const _ForumCategoryPlaceholder());
     } else {
       tabs.addAll(categories.map((category) => Tab(text: category.name)));
-      tabBarViews.addAll(categories.map((category) => KeepAliveTabView(
-            child: ForumCategoryPage(category: category),
-          )));
+      tabBarViews.addAll(
+        categories.map(
+          (category) =>
+              KeepAliveTabView(child: ForumCategoryPage(category: category)),
+        ),
+      );
     }
 
     // 分类数量变化时会重建 controller，尽量保留当前选中的 Tab
@@ -76,10 +79,7 @@ class ForumGroupTabsPage extends HookConsumerWidget {
           ),
         ),
       ),
-      body: TabBarView(
-        controller: tabController,
-        children: tabBarViews,
-      ),
+      body: TabBarView(controller: tabController, children: tabBarViews),
     );
   }
 }

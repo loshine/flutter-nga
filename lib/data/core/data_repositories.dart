@@ -9,10 +9,7 @@ import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/data/repository/user_repository.dart';
 
 class DataRepositories {
-  DataRepositories({
-    required Database database,
-    required Dio dio,
-  }) {
+  DataRepositories({required Database database, required Dio dio}) {
     userRepository = UserDataRepository(database, dio);
     emoticonRepository = EmoticonDataRepository();
     forumRepository = ForumDataRepository(

@@ -23,11 +23,7 @@ class ForumDetailPage extends HookConsumerWidget {
   final String? name;
   final int? type;
 
-  static const _tabs = [
-    Tab(text: '最新'),
-    Tab(text: '精华'),
-    Tab(text: '子版'),
-  ];
+  static const _tabs = [Tab(text: '最新'), Tab(text: '精华'), Tab(text: '子版')];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,11 +90,7 @@ class ForumDetailPage extends HookConsumerWidget {
           ),
         ),
         actions: [
-          ForumFavouriteButtonWidget(
-            fid: fid,
-            name: name,
-            type: type,
-          ),
+          ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () =>
@@ -126,18 +118,16 @@ class ForumDetailPage extends HookConsumerWidget {
               ),
             ),
           ),
-          KeepAliveTabView(
-            child: ForumRecommendTopicListPage(fid, type: type),
-          ),
-          KeepAliveTabView(
-            child: ChildForumListPage(state.info),
-          ),
+          KeepAliveTabView(child: ForumRecommendTopicListPage(fid, type: type)),
+          KeepAliveTabView(child: ChildForumListPage(state.info)),
         ],
       ),
       floatingActionButton: fabScroll.visible && mainPage
           ? FloatingActionButton(
               onPressed: () => Routes.navigateTo(
-                  context, "${Routes.TOPIC_PUBLISH}?fid=$fid"),
+                context,
+                "${Routes.TOPIC_PUBLISH}?fid=$fid",
+              ),
               child: const Icon(Icons.edit),
             )
           : null,

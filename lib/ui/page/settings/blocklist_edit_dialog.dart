@@ -26,9 +26,7 @@ class BlocklistEditDialog extends HookWidget {
       content: TextField(
         maxLines: 1,
         controller: controller,
-        decoration: InputDecoration(
-          labelText: inputHint,
-        ),
+        decoration: InputDecoration(labelText: inputHint),
         keyboardType: TextInputType.text,
       ),
       actions: [
@@ -36,8 +34,9 @@ class BlocklistEditDialog extends HookWidget {
           onPressed: () => Routes.pop(context),
           child: Text(
             '取消',
-            style:
-                TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
           ),
         ),
         TextButton(
@@ -46,7 +45,7 @@ class BlocklistEditDialog extends HookWidget {
             Routes.pop(context);
           },
           child: Text('确定'),
-        )
+        ),
       ],
     );
   }

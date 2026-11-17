@@ -37,10 +37,7 @@ class ReplyDetailDialog extends HookConsumerWidget {
       contentPadding: EdgeInsets.zero,
       content: _buildContent(state),
       actions: [
-        TextButton(
-          onPressed: () => Routes.pop(context),
-          child: Text('关闭'),
-        )
+        TextButton(onPressed: () => Routes.pop(context), child: Text('关闭')),
       ],
     );
   }
@@ -55,10 +52,7 @@ class ReplyDetailDialog extends HookConsumerWidget {
         ),
       );
     } else {
-      return _ReplyWidget(
-        reply: state.replyList[0],
-        user: state.userList[0],
-      );
+      return _ReplyWidget(reply: state.replyList[0], user: state.userList[0]);
     }
   }
 }
@@ -67,10 +61,7 @@ class _ReplyWidget extends StatefulWidget {
   final Reply reply;
   final User user;
 
-  const _ReplyWidget({
-    required this.reply,
-    required this.user,
-  });
+  const _ReplyWidget({required this.reply, required this.user});
 
   @override
   _ReplyWidgetState createState() => _ReplyWidgetState();
@@ -152,7 +143,9 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                       GestureDetector(
                         onTap: _toggleLike,
                         child: Icon(
-                          isLiked ? CommunityMaterialIcons.thumb_up : CommunityMaterialIcons.thumb_up_outline,
+                          isLiked
+                              ? CommunityMaterialIcons.thumb_up
+                              : CommunityMaterialIcons.thumb_up_outline,
                           color: isLiked ? thumbFgActive : thumbFgInactive,
                           size: 14,
                         ),
@@ -163,7 +156,9 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                           "${widget.reply.score}",
                           style: TextStyle(
                             fontSize: Dimen.bodySmall,
-                            color: isLiked || isDisliked ? thumbFgActive : thumbFgInactive,
+                            color: isLiked || isDisliked
+                                ? thumbFgActive
+                                : thumbFgInactive,
                           ),
                         ),
                       ),
@@ -172,7 +167,9 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
                         child: GestureDetector(
                           onTap: _toggleDislike,
                           child: Icon(
-                            isDisliked ? CommunityMaterialIcons.thumb_down : CommunityMaterialIcons.thumb_down_outline,
+                            isDisliked
+                                ? CommunityMaterialIcons.thumb_down
+                                : CommunityMaterialIcons.thumb_down_outline,
                             color: isDisliked ? thumbFgActive : thumbFgInactive,
                             size: 14,
                           ),
@@ -199,9 +196,10 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
 
   Future<void> _toggleLike() async {
     try {
-      final reaction = await Data()
-          .topicRepository
-          .likeReply(widget.reply.tid, widget.reply.pid);
+      final reaction = await Data().topicRepository.likeReply(
+        widget.reply.tid,
+        widget.reply.pid,
+      );
       setState(() {
         widget.reply.score += reaction.countChange;
         if (reaction.countChange > 0) {
@@ -219,9 +217,10 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
 
   Future<void> _toggleDislike() async {
     try {
-      final reaction = await Data()
-          .topicRepository
-          .dislikeReply(widget.reply.tid, widget.reply.pid);
+      final reaction = await Data().topicRepository.dislikeReply(
+        widget.reply.tid,
+        widget.reply.pid,
+      );
       setState(() {
         widget.reply.score += reaction.countChange;
         if (reaction.countChange < 0) {

@@ -116,10 +116,7 @@ class _SettingsGroup extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _SettingsGroup({
-    required this.title,
-    required this.children,
-  });
+  const _SettingsGroup({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {

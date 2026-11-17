@@ -78,8 +78,11 @@ void main() {
 
     test('sync sends exact endpoint, auth form, and stable cookie', () async {
       currentUser = _user('1', 'token-1');
-      api.remoteFor('1')[const ForumIdentity(7, 0)] =
-          const Forum(7, '议事厅', iconId: 70);
+      api.remoteFor('1')[const ForumIdentity(7, 0)] = const Forum(
+        7,
+        '议事厅',
+        iconId: 70,
+      );
 
       final forums = await repository.syncFavouriteList();
 
@@ -94,33 +97,32 @@ void main() {
         'access_token': 'token-1',
         'access_uid': '1',
       });
-      expect(
-        request.cookie,
-        'ngaPassportUid=1;ngaPassportCid=token-1',
-      );
+      expect(request.cookie, 'ngaPassportUid=1;ngaPassportCid=token-1');
     });
 
-    test('special forums send their stid value in the fid form field',
-        () async {
-      currentUser = _user('1', 'token-1');
-      api.addAsSpecial = true;
-      const special = Forum(88, '特殊版块', type: 1);
+    test(
+      'special forums send their stid value in the fid form field',
+      () async {
+        currentUser = _user('1', 'token-1');
+        api.addAsSpecial = true;
+        const special = Forum(88, '特殊版块', type: 1);
 
-      await repository.saveFavourite(special);
-      await repository.syncFavouriteList();
-      await repository.deleteFavourite(special);
+        await repository.saveFavourite(special);
+        await repository.syncFavouriteList();
+        await repository.deleteFavourite(special);
 
-      final addRequest = api.requests.firstWhere(
-        (request) => request.fields['action'] == 'add',
-      );
-      final deleteRequest = api.requests.firstWhere(
-        (request) => request.fields['action'] == 'del',
-      );
-      expect(addRequest.fields['fid'], '88');
-      expect(deleteRequest.fields['fid'], '88');
-      expect(addRequest.fields['access_uid'], '1');
-      expect(addRequest.fields['access_token'], 'token-1');
-    });
+        final addRequest = api.requests.firstWhere(
+          (request) => request.fields['action'] == 'add',
+        );
+        final deleteRequest = api.requests.firstWhere(
+          (request) => request.fields['action'] == 'del',
+        );
+        expect(addRequest.fields['fid'], '88');
+        expect(deleteRequest.fields['fid'], '88');
+        expect(addRequest.fields['access_uid'], '1');
+        expect(addRequest.fields['access_token'], 'token-1');
+      },
+    );
 
     test('account caches are isolated by uid', () async {
       currentUser = _user('1', 'token-1');
@@ -136,63 +138,71 @@ void main() {
       expect((await repository.getFavouriteList()).single.fid, 1);
     });
 
-    test('offline add stays local and retries only one coalesced add',
-        () async {
-      currentUser = _user('1', 'token-1');
-      const forum = Forum(42, '本地名称');
+    test(
+      'offline add stays local and retries only one coalesced add',
+      () async {
+        currentUser = _user('1', 'token-1');
+        const forum = Forum(42, '本地名称');
 
-      await repository.saveFavourite(forum);
-      await repository.saveFavourite(forum);
-      api.failGet = true;
-      await expectLater(
-        repository.syncFavouriteList(),
-        throwsA(isA<DioException>()),
-      );
-      expect((await repository.getFavouriteList()).single.identity,
-          forum.identity);
+        await repository.saveFavourite(forum);
+        await repository.saveFavourite(forum);
+        api.failGet = true;
+        await expectLater(
+          repository.syncFavouriteList(),
+          throwsA(isA<DioException>()),
+        );
+        expect(
+          (await repository.getFavouriteList()).single.identity,
+          forum.identity,
+        );
 
-      api.failGet = false;
-      await repository.syncFavouriteList();
-      await repository.syncFavouriteList();
+        api.failGet = false;
+        await repository.syncFavouriteList();
+        await repository.syncFavouriteList();
 
-      expect(api.actionCount('add'), 1);
-      expect(api.remoteFor('1').keys, contains(forum.identity));
-    });
+        expect(api.actionCount('add'), 1);
+        expect(api.remoteFor('1').keys, contains(forum.identity));
+      },
+    );
 
-    test('remote refresh failure preserves the confirmed local cache',
-        () async {
-      currentUser = _user('1', 'token-1');
-      api.remoteFor('1')[const ForumIdentity(1, 0)] = const Forum(1, '旧数据');
-      await repository.syncFavouriteList();
+    test(
+      'remote refresh failure preserves the confirmed local cache',
+      () async {
+        currentUser = _user('1', 'token-1');
+        api.remoteFor('1')[const ForumIdentity(1, 0)] = const Forum(1, '旧数据');
+        await repository.syncFavouriteList();
 
-      api.remoteFor('1')
-        ..clear()
-        ..[const ForumIdentity(2, 0)] = const Forum(2, '新数据');
-      api.failGet = true;
-      await expectLater(
-        repository.syncFavouriteList(),
-        throwsA(isA<DioException>()),
-      );
+        api.remoteFor('1')
+          ..clear()
+          ..[const ForumIdentity(2, 0)] = const Forum(2, '新数据');
+        api.failGet = true;
+        await expectLater(
+          repository.syncFavouriteList(),
+          throwsA(isA<DioException>()),
+        );
 
-      final cached = await repository.getFavouriteList();
-      expect(cached.single.fid, 1);
-    });
+        final cached = await repository.getFavouriteList();
+        expect(cached.single.fid, 1);
+      },
+    );
 
-    test('malformed remote response preserves the confirmed local cache',
-        () async {
-      currentUser = _user('1', 'token-1');
-      api.remoteFor('1')[const ForumIdentity(1, 0)] = const Forum(1, '旧数据');
-      await repository.syncFavouriteList();
+    test(
+      'malformed remote response preserves the confirmed local cache',
+      () async {
+        currentUser = _user('1', 'token-1');
+        api.remoteFor('1')[const ForumIdentity(1, 0)] = const Forum(1, '旧数据');
+        await repository.syncFavouriteList();
 
-      api.invalidGetResponse = true;
-      await expectLater(
-        repository.syncFavouriteList(),
-        throwsA(isA<FormatException>()),
-      );
+        api.invalidGetResponse = true;
+        await expectLater(
+          repository.syncFavouriteList(),
+          throwsA(isA<FormatException>()),
+        );
 
-      final cached = await repository.getFavouriteList();
-      expect(cached.single.fid, 1);
-    });
+        final cached = await repository.getFavouriteList();
+        expect(cached.single.fid, 1);
+      },
+    );
 
     test('delete changes local data only after remote success', () async {
       currentUser = _user('1', 'token-1');
@@ -244,34 +254,37 @@ void main() {
       await deleteFuture;
       await syncFuture;
 
-      expect(
-        api.requests.map((request) => request.fields['action']),
-        ['get', 'del', 'get'],
-      );
+      expect(api.requests.map((request) => request.fields['action']), [
+        'get',
+        'del',
+        'get',
+      ]);
       expect(await repository.isFavourite(forum), isFalse);
     });
 
-    test('a newer add intent survives an in-flight successful delete',
-        () async {
-      currentUser = _user('1', 'token-1');
-      const forum = Forum(7, '议事厅');
-      api.remoteFor('1')[forum.identity] = forum;
-      await repository.syncFavouriteList();
+    test(
+      'a newer add intent survives an in-flight successful delete',
+      () async {
+        currentUser = _user('1', 'token-1');
+        const forum = Forum(7, '议事厅');
+        api.remoteFor('1')[forum.identity] = forum;
+        await repository.syncFavouriteList();
 
-      api.deleteGate = Completer<void>();
-      api.deleteStarted = Completer<void>();
-      final deleteFuture = repository.deleteFavourite(forum);
-      await api.deleteStarted!.future;
+        api.deleteGate = Completer<void>();
+        api.deleteStarted = Completer<void>();
+        final deleteFuture = repository.deleteFavourite(forum);
+        await api.deleteStarted!.future;
 
-      await repository.saveFavourite(forum);
-      api.deleteGate!.complete();
-      await deleteFuture;
+        await repository.saveFavourite(forum);
+        api.deleteGate!.complete();
+        await deleteFuture;
 
-      expect(await repository.isFavourite(forum), isTrue);
-      await repository.syncFavouriteList();
-      expect(api.actionCount('add'), 1);
-      expect(api.remoteFor('1').keys, contains(forum.identity));
-    });
+        expect(await repository.isFavourite(forum), isTrue);
+        await repository.syncFavouriteList();
+        expect(api.actionCount('add'), 1);
+        expect(api.remoteFor('1').keys, contains(forum.identity));
+      },
+    );
 
     test('legacy guest favourites migrate to the first account only', () async {
       const legacy = Forum(11, '旧本地收藏');
@@ -327,31 +340,41 @@ void main() {
       final other = categories.first;
       expect(other.name, '网事杂谈');
       expect(other.groups.map((group) => group.name), ['网事杂谈', 'IT软硬件']);
-      expect(
-        other.groups.first.forumList.map((forum) => forum.identity),
-        [const ForumIdentity(-7, 0), const ForumIdentity(39827852, 1)],
-      );
+      expect(other.groups.first.forumList.map((forum) => forum.identity), [
+        const ForumIdentity(-7, 0),
+        const ForumIdentity(39827852, 1),
+      ]);
       expect(other.groups.first.forumList.last.iconId, 39827852);
 
       // 缺少 fid 但带 stid 的版块可用；缺少名称的脏数据被跳过，空组和空分类被丢弃
       final mobi = categories.last;
-      expect(mobi.groups.single.forumList.single.identity,
-          const ForumIdentity(29182350, 1));
+      expect(
+        mobi.groups.single.forumList.single.identity,
+        const ForumIdentity(29182350, 1),
+      );
     });
 
-    test('cache is empty until a successful fetch persists categories',
-        () async {
-      expect(await repository.getCachedForumCategories(), isNull);
+    test(
+      'cache is empty until a successful fetch persists categories',
+      () async {
+        expect(await repository.getCachedForumCategories(), isNull);
 
-      api.data = _categoryResponse();
-      final fetched = await repository.fetchForumCategories();
+        api.data = _categoryResponse();
+        final fetched = await repository.fetchForumCategories();
 
-      final reopened = ForumDataRepository(database, api.dio, () async => null);
-      final cached = await reopened.getCachedForumCategories();
-      expect(cached, isNotNull);
-      expect(cached!.map((category) => category.toJson()),
-          fetched.map((category) => category.toJson()));
-    });
+        final reopened = ForumDataRepository(
+          database,
+          api.dio,
+          () async => null,
+        );
+        final cached = await reopened.getCachedForumCategories();
+        expect(cached, isNotNull);
+        expect(
+          cached!.map((category) => category.toJson()),
+          fetched.map((category) => category.toJson()),
+        );
+      },
+    );
 
     test('failed or malformed fetch keeps the previous cache', () async {
       api.data = _categoryResponse();
@@ -386,12 +409,7 @@ Map<String, dynamic> _categoryResponse() {
           'name': '网事杂谈',
           'forums': {
             '0': {'fid': -7, 'name': '网事杂谈', 'id': -7, 'bit': 1},
-            '1': {
-              'fid': -7,
-              'stid': 39827852,
-              'name': '考研讨论',
-              'id': 39827852,
-            },
+            '1': {'fid': -7, 'stid': 39827852, 'name': '考研讨论', 'id': 39827852},
           },
         },
         '1': {
@@ -428,16 +446,17 @@ class _FakeCategoryApi {
         onRequest: (options, handler) {
           requests.add(options);
           if (fail) {
-            handler.reject(DioException(
-              requestOptions: options,
-              error: StateError('network failed'),
-            ));
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                error: StateError('network failed'),
+              ),
+            );
             return;
           }
-          handler.resolve(Response<dynamic>(
-            requestOptions: options,
-            data: data,
-          ));
+          handler.resolve(
+            Response<dynamic>(requestOptions: options, data: data),
+          );
         },
       ),
     );
@@ -474,11 +493,13 @@ class _FakeFavouriteApi {
             final fields = Map<String, String>.fromEntries(
               (options.data as FormData).fields,
             );
-            requests.add(_CapturedRequest(
-              path: options.path,
-              fields: fields,
-              cookie: options.headers['Cookie']?.toString(),
-            ));
+            requests.add(
+              _CapturedRequest(
+                path: options.path,
+                fields: fields,
+                cookie: options.headers['Cookie']?.toString(),
+              ),
+            );
             if (fields['action'] == 'del') {
               final started = deleteStarted;
               if (started != null && !started.isCompleted) {
@@ -486,15 +507,11 @@ class _FakeFavouriteApi {
               }
               await deleteGate?.future;
             }
-            handler.resolve(Response<dynamic>(
-              requestOptions: options,
-              data: _handle(fields),
-            ));
+            handler.resolve(
+              Response<dynamic>(requestOptions: options, data: _handle(fields)),
+            );
           } catch (error) {
-            handler.reject(DioException(
-              requestOptions: options,
-              error: error,
-            ));
+            handler.reject(DioException(requestOptions: options, error: error));
           }
         },
       ),
@@ -540,10 +557,8 @@ class _FakeFavouriteApi {
     if (action == 'add') {
       final type = addAsSpecial ? 1 : 0;
       final identity = ForumIdentity(fid, type);
-      remoteFor(uid).putIfAbsent(
-        identity,
-        () => Forum(fid, '远程版块 $fid', type: type),
-      );
+      remoteFor(uid)
+          .putIfAbsent(identity, () => Forum(fid, '远程版块 $fid', type: type));
       return [];
     }
     if (action == 'del') {

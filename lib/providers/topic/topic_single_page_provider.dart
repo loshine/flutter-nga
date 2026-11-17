@@ -32,17 +32,17 @@ class TopicSinglePageState {
   });
 
   factory TopicSinglePageState.initial() => TopicSinglePageState(
-        page: 1,
-        maxPage: 1,
-        maxFloor: 1,
-        enablePullUp: false,
-        topic: null,
-        replyList: [],
-        hotReplyList: [],
-        userList: [],
-        groupSet: HashSet(),
-        medalSet: HashSet(),
-      );
+    page: 1,
+    maxPage: 1,
+    maxFloor: 1,
+    enablePullUp: false,
+    topic: null,
+    replyList: [],
+    hotReplyList: [],
+    userList: [],
+    groupSet: HashSet(),
+    medalSet: HashSet(),
+  );
 
   TopicSinglePageState copyWith({
     int? page,
@@ -106,7 +106,11 @@ class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
   Future<TopicSinglePageState> refresh() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
-      final data = await repository.getTopicDetail(key.tid, key.page, key.authorid);
+      final data = await repository.getTopicDetail(
+        key.tid,
+        key.page,
+        key.authorid,
+      );
 
       List<Reply> replyList = [];
       for (var reply in data.replyList.values) {
@@ -121,7 +125,8 @@ class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
       if (key.page == 1 && data.hotReplies.isNotEmpty && key.authorid == null) {
         try {
           List<dynamic> hots = await Future.wait(
-              data.hotReplies.map((e) => repository.getTopicReplies(e)));
+            data.hotReplies.map((e) => repository.getTopicReplies(e)),
+          );
           for (var e in hots) {
             userList.addAll(e.userList.values);
             groups.addAll(e.groupList.values);
@@ -153,7 +158,9 @@ class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
   }
 }
 
-final topicSinglePageProvider = NotifierProvider.family<
-    TopicSinglePageNotifier, TopicSinglePageState, TopicSinglePageKey>(
-  TopicSinglePageNotifier.new,
-);
+final topicSinglePageProvider =
+    NotifierProvider.family<
+      TopicSinglePageNotifier,
+      TopicSinglePageState,
+      TopicSinglePageKey
+    >(TopicSinglePageNotifier.new);

@@ -40,10 +40,7 @@ class M3ListTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                if (leading != null) ...[
-                  leading!,
-                  const SizedBox(width: 16),
-                ],
+                if (leading != null) ...[leading!, const SizedBox(width: 16)],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +60,9 @@ class M3ListTile extends StatelessWidget {
                           subtitle!,
                           style: textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? colorScheme.onSecondaryContainer.withValues(alpha: 0.8)
+                                ? colorScheme.onSecondaryContainer.withValues(
+                                    alpha: 0.8,
+                                  )
                                 : colorScheme.onSurfaceVariant,
                           ),
                         ),

@@ -44,13 +44,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            pinned: true,
-            title: Text(userInfo.username ?? ""),
-          ),
-          SliverToBoxAdapter(
-            child: _HeaderCard(userInfo: userInfo),
-          ),
+          SliverAppBar(pinned: true, title: Text(userInfo.username ?? "")),
+          SliverToBoxAdapter(child: _HeaderCard(userInfo: userInfo)),
           SliverToBoxAdapter(
             child: _EntryGroup(
               title: '发布',
@@ -91,9 +86,7 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     final widgets = <Widget>[
       _SectionCard(
         title: '签名',
-        children: [
-          NgaHtml(userInfo.signature ?? "", decorateBlocks: false),
-        ],
+        children: [NgaHtml(userInfo.signature ?? "", decorateBlocks: false)],
       ),
       _SectionCard(
         title: '声望',
@@ -108,27 +101,31 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     ];
 
     if (userInfo.personalForum != null && userInfo.personalForum!.isNotEmpty) {
-      widgets.add(_SectionCard(
-        title: '个人版面',
-        subtitle: '个人版面是由用户自己管理的版面',
-        children: [
-          Builder(builder: (context) {
-            final entry = userInfo.personalForum!.entries.toList()[0];
-            return GestureDetector(
-              onTap: () => Routes.navigateTo(
-                context,
-                "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
-              ),
-              child: Text(
-                "[${entry.value}]",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            );
-          }),
-        ],
-      ));
+      widgets.add(
+        _SectionCard(
+          title: '个人版面',
+          subtitle: '个人版面是由用户自己管理的版面',
+          children: [
+            Builder(
+              builder: (context) {
+                final entry = userInfo.personalForum!.entries.toList()[0];
+                return GestureDetector(
+                  onTap: () => Routes.navigateTo(
+                    context,
+                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
+                  ),
+                  child: Text(
+                    "[${entry.value}]",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
     }
 
     widgets.add(const SizedBox(height: 40));
@@ -147,8 +144,9 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                   "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
                 ),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: Dimen.spacingXS),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: Dimen.spacingXS,
+                  ),
                   child: Text(
                     "[${entry.value}]",
                     style: TextStyle(
@@ -167,10 +165,9 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
   List<Widget> _getReputationWidgets(UserInfoState userInfo) {
     if (userInfo.reputationMap == null) return [];
     return userInfo.reputationMap!.entries
-        .map((entry) => InfoWidget(
-              title: "${entry.key}: ",
-              subTitle: entry.value,
-            ))
+        .map(
+          (entry) => InfoWidget(title: "${entry.key}: ", subTitle: entry.value),
+        )
         .toList();
   }
 }
@@ -285,7 +282,8 @@ class _HeaderCard extends StatelessWidget {
   String _formatRegisterDate(int? registerDate) {
     if (registerDate == null) return '-';
     return _registerDateFormat.format(
-        DateTime.fromMillisecondsSinceEpoch(registerDate * 1000));
+      DateTime.fromMillisecondsSinceEpoch(registerDate * 1000),
+    );
   }
 }
 
@@ -395,12 +393,14 @@ class _EntryGroup extends StatelessWidget {
     final items = <Widget>[];
     for (var i = 0; i < children.length; i++) {
       if (i > 0) {
-        items.add(Divider(
-          height: 1,
-          indent: 72,
-          endIndent: 16,
-          color: colorScheme.outlineVariant,
-        ));
+        items.add(
+          Divider(
+            height: 1,
+            indent: 72,
+            endIndent: 16,
+            color: colorScheme.outlineVariant,
+          ),
+        );
       }
       items.add(children[i]);
     }
@@ -480,10 +480,7 @@ class _EntryTile extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
           ],
         ),
       ),

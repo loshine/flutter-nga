@@ -11,10 +11,12 @@ void main() {
     ];
 
     test('能找到发信人时使用 userList 中的用户', () {
-      final message = Message.fromJson(
-        {'id': '1', 'content': 'hi', 'from': '200', 'time': 1700000000},
-        users,
-      );
+      final message = Message.fromJson({
+        'id': '1',
+        'content': 'hi',
+        'from': '200',
+        'time': 1700000000,
+      }, users);
 
       expect(message.from, 200);
       expect(message.user, same(users[1]));
@@ -22,10 +24,11 @@ void main() {
     });
 
     test('userList 中缺少发信人时用占位用户，不抛异常', () {
-      final message = Message.fromJson(
-        {'id': 2, 'content': 'hello', 'from': 999},
-        users,
-      );
+      final message = Message.fromJson({
+        'id': 2,
+        'content': 'hello',
+        'from': 999,
+      }, users);
 
       expect(message.user.uid, 999);
       expect(message.user.username, 'UID:999');
@@ -63,10 +66,11 @@ void main() {
       });
 
       expect(data.messageList, hasLength(3));
-      expect(
-        data.messageList.map((m) => m.user.username).toList(),
-        ['alice', 'UID:404', '系统'],
-      );
+      expect(data.messageList.map((m) => m.user.username).toList(), [
+        'alice',
+        'UID:404',
+        '系统',
+      ]);
     });
   });
 }

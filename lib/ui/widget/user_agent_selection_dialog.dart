@@ -14,10 +14,13 @@ class UserAgentSelectionDialog extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final options = UserAgentPresets.all
-        .map((config) => config.key == UserAgentPresets.custom.key &&
-                state.currentConfig.key == UserAgentPresets.custom.key
-            ? state.currentConfig
-            : config)
+        .map(
+          (config) =>
+              config.key == UserAgentPresets.custom.key &&
+                  state.currentConfig.key == UserAgentPresets.custom.key
+              ? state.currentConfig
+              : config,
+        )
         .toList();
 
     return AlertDialog(
@@ -121,9 +124,7 @@ class UserAgentSelectionDialog extends ConsumerWidget {
                 controller: controller,
                 autofocus: true,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  hintText: 'Mozilla/5.0 ...',
-                ),
+                decoration: const InputDecoration(hintText: 'Mozilla/5.0 ...'),
               ),
               actions: [
                 TextButton(
@@ -144,9 +145,8 @@ class UserAgentSelectionDialog extends ConsumerWidget {
     final trimmed = (value ?? '').trim();
     if (trimmed.isEmpty) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User-Agent 不能为空')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('User-Agent 不能为空')));
       }
       return null;
     }

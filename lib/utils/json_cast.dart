@@ -18,9 +18,7 @@ Map<String, dynamic> asJsonMap(dynamic value, String path) {
     }
   }
   logJsonTypeMismatch(path, value);
-  throw FormatException(
-    'JSON $path 期望 Map，实际是 ${value.runtimeType}',
-  );
+  throw FormatException('JSON $path 期望 Map，实际是 ${value.runtimeType}');
 }
 
 /// 值为 null 时返回 null；非 Map 仍会记日志并抛错。

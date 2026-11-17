@@ -39,8 +39,8 @@ class ConversationListNotifier extends Notifier<ConversationListState> {
   Future<ConversationListState> refresh() async {
     state = state.copyWith(isLoading: true);
     try {
-      ConversationListData data =
-          await Data().messageRepository.getConversationList(1);
+      ConversationListData data = await Data().messageRepository
+          .getConversationList(1);
       state = ConversationListState(
         page: 1,
         enablePullUp: data.hasNext,
@@ -58,8 +58,8 @@ class ConversationListNotifier extends Notifier<ConversationListState> {
     if (state.isLoading) return state;
     state = state.copyWith(isLoading: true);
     try {
-      ConversationListData data =
-          await Data().messageRepository.getConversationList(state.page + 1);
+      ConversationListData data = await Data().messageRepository
+          .getConversationList(state.page + 1);
       state = ConversationListState(
         page: state.page + 1,
         enablePullUp: data.hasNext,
@@ -76,4 +76,5 @@ class ConversationListNotifier extends Notifier<ConversationListState> {
 
 final conversationListProvider =
     NotifierProvider<ConversationListNotifier, ConversationListState>(
-        ConversationListNotifier.new);
+      ConversationListNotifier.new,
+    );

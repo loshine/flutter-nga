@@ -42,7 +42,7 @@ class ConversationItemWidget extends StatelessWidget {
                         style: textTheme.titleMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -74,8 +74,9 @@ class ConversationItemWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      code_utils
-                          .formatPostDate(conversation!.lastModify! * 1000),
+                      code_utils.formatPostDate(
+                        conversation!.lastModify! * 1000,
+                      ),
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),

@@ -21,4 +21,6 @@ class ForumTagListNotifier extends Notifier<List<TopicTag>> {
 }
 
 final forumTagListProvider =
-    NotifierProvider<ForumTagListNotifier, List<TopicTag>>(ForumTagListNotifier.new);
+    NotifierProvider<ForumTagListNotifier, List<TopicTag>>(
+      ForumTagListNotifier.new,
+    );

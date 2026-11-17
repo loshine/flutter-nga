@@ -47,8 +47,9 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
   Future<FavouriteTopicListState> refresh() async {
     state = state.copyWith(isLoading: true);
     try {
-      TopicListData data =
-          await Data().topicRepository.getFavouriteTopicList(1);
+      TopicListData data = await Data().topicRepository.getFavouriteTopicList(
+        1,
+      );
       state = FavouriteTopicListState(
         size: data.topicRows,
         page: 1,
@@ -68,8 +69,9 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
     if (state.isLoading) return state;
     state = state.copyWith(isLoading: true);
     try {
-      TopicListData data =
-          await Data().topicRepository.getFavouriteTopicList(state.page + 1);
+      TopicListData data = await Data().topicRepository.getFavouriteTopicList(
+        state.page + 1,
+      );
       state = FavouriteTopicListState(
         size: data.topicRows,
         page: state.page + 1,
@@ -87,9 +89,10 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
 
   Future<String?> delete(Topic topic) async {
     try {
-      String? message = await Data()
-          .topicRepository
-          .deleteFavouriteTopic(topic.tid, topic.page);
+      String? message = await Data().topicRepository.deleteFavouriteTopic(
+        topic.tid,
+        topic.page,
+      );
       state = state.copyWith(
         list: state.list.where((t) => t.tid != topic.tid).toList(),
       );
@@ -102,4 +105,5 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
 
 final favouriteTopicListProvider =
     NotifierProvider<FavouriteTopicListNotifier, FavouriteTopicListState>(
-        FavouriteTopicListNotifier.new);
+      FavouriteTopicListNotifier.new,
+    );

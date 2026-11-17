@@ -47,21 +47,21 @@ class UserInfoState {
   }
 
   factory UserInfoState.initial() => UserInfoState(
-        uid: 0,
-        username: "",
-        avatar: "",
-        basicInfoMap: {
-          '用户ID': 'N/A',
-          '用户名': 'N/A',
-          '用户组': 'N/A',
-          '财富': 'N/A',
-          '注册日期': 'N/A'
-        },
-        signature: "N/A",
-        moderatorForums: {},
-        reputationMap: {'威望': '0.0'},
-        personalForum: {},
-      );
+    uid: 0,
+    username: "",
+    avatar: "",
+    basicInfoMap: {
+      '用户ID': 'N/A',
+      '用户名': 'N/A',
+      '用户组': 'N/A',
+      '财富': 'N/A',
+      '注册日期': 'N/A',
+    },
+    signature: "N/A",
+    moderatorForums: {},
+    reputationMap: {'威望': '0.0'},
+    personalForum: {},
+  );
 }
 
 /// 用户主页查询身份：按 uid 或用户名分桶，避免不同用户共用一份缓存
@@ -123,8 +123,9 @@ class UserInfoNotifier extends Notifier<UserInfoState> {
     final moderatorForumsMap = <int, String>{};
     if (userInfo.adminForums != null && userInfo.adminForums!.isNotEmpty) {
       for (var entry in userInfo.adminForums!.entries) {
-        moderatorForumsMap[int.parse(entry.key)] =
-            code_utils.unescapeHtml(entry.value);
+        moderatorForumsMap[int.parse(entry.key)] = code_utils.unescapeHtml(
+          entry.value,
+        );
       }
     }
     final reputationMap = <String?, String>{};
@@ -136,8 +137,9 @@ class UserInfoNotifier extends Notifier<UserInfoState> {
     }
     final personalForumMap = <int?, String>{};
     if (userInfo.userForum != null) {
-      personalForumMap[userInfo.userForum!['0']] =
-          code_utils.unescapeHtml(userInfo.userForum!['1']);
+      personalForumMap[userInfo.userForum!['0']] = code_utils.unescapeHtml(
+        userInfo.userForum!['1'],
+      );
     }
     return UserInfoState(
       uid: userInfo.uid,
@@ -153,8 +155,9 @@ class UserInfoNotifier extends Notifier<UserInfoState> {
         '用户组': '${userInfo.group}(${userInfo.groupId})',
         '财富':
             '${userInfo.money! ~/ 10000}金 ${(userInfo.money! % 10000) ~/ 100}银 ${userInfo.money! % 100}铜',
-        '注册日期':
-            code_utils.formatDate(DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate! * 1000))
+        '注册日期': code_utils.formatDate(
+          DateTime.fromMillisecondsSinceEpoch(userInfo.registerDate! * 1000),
+        ),
       },
       signature: code_utils.isStringEmpty(userInfo.sign)
           ? "暂无签名"
@@ -189,4 +192,5 @@ extension UserInfoStateCopyWith on UserInfoState {
 
 final userInfoProvider =
     NotifierProvider.family<UserInfoNotifier, UserInfoState, UserInfoKey>(
-        UserInfoNotifier.new);
+      UserInfoNotifier.new,
+    );

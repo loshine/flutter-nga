@@ -23,7 +23,10 @@ class ThemeBuilder {
   }
 
   /// 从 ColorScheme 构建 ThemeData
-  static ThemeData buildTheme(ColorScheme baseColorScheme, [Color? secondarySeed]) {
+  static ThemeData buildTheme(
+    ColorScheme baseColorScheme, [
+    Color? secondarySeed,
+  ]) {
     final colorScheme = _withRefinedSecondary(baseColorScheme, secondarySeed);
     return ThemeData(
       useMaterial3: true,
@@ -49,9 +52,7 @@ class ThemeBuilder {
       // Card 主题
       cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         color: colorScheme.surfaceContainerLow,
       ),
       // FAB 主题
@@ -59,9 +60,7 @@ class ThemeBuilder {
         backgroundColor: colorScheme.primaryContainer,
         foregroundColor: colorScheme.onPrimaryContainer,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       // Divider 主题
       dividerTheme: DividerThemeData(
@@ -70,15 +69,11 @@ class ThemeBuilder {
       ),
       // ListTile 主题
       listTileTheme: ListTileThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       // M3 Dialog Theme
       dialogTheme: DialogThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         backgroundColor: colorScheme.surfaceContainerHigh,
       ),
       // M3 Button Themes
@@ -120,27 +115,20 @@ class ThemeBuilder {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(
-            color: colorScheme.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(
-            color: colorScheme.error,
-            width: 1,
-          ),
+          borderSide: BorderSide(color: colorScheme.error, width: 1),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(
-            color: colorScheme.error,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: colorScheme.error, width: 2),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       bottomAppBarTheme: BottomAppBarThemeData(
         color: colorScheme.surfaceContainer,
@@ -159,10 +147,10 @@ class ThemeBuilder {
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: colorScheme.surface,
         indicatorColor: colorScheme.secondaryContainer,
-        selectedIconTheme:
-            IconThemeData(color: colorScheme.onSecondaryContainer),
-        unselectedIconTheme:
-            IconThemeData(color: colorScheme.onSurfaceVariant),
+        selectedIconTheme: IconThemeData(
+          color: colorScheme.onSecondaryContainer,
+        ),
+        unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
         selectedLabelTextStyle: TextStyle(
           color: colorScheme.onSurface,
           fontWeight: FontWeight.w600,
@@ -174,7 +162,10 @@ class ThemeBuilder {
     );
   }
 
-  static ColorScheme _withRefinedSecondary(ColorScheme base, [Color? secondarySeed]) {
+  static ColorScheme _withRefinedSecondary(
+    ColorScheme base, [
+    Color? secondarySeed,
+  ]) {
     final seed = secondarySeed ?? _secondarySeed;
     final accent = ColorScheme.fromSeed(
       seedColor: seed,

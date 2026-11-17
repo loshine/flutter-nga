@@ -43,12 +43,7 @@ class BaseUrlConfig {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'key': key,
-      'name': name,
-      'url': url,
-      'isDefault': isDefault,
-    };
+    return {'key': key, 'name': name, 'url': url, 'isDefault': isDefault};
   }
 
   @override
@@ -96,11 +91,7 @@ class BaseUrlPresets {
   );
 
   /// 所有可用配置列表
-  static const List<BaseUrlConfig> all = [
-    ngaOfficial,
-    ngaBbs,
-    custom,
-  ];
+  static const List<BaseUrlConfig> all = [ngaOfficial, ngaBbs, custom];
 
   /// 获取默认配置
   static BaseUrlConfig get defaultConfig =>

@@ -39,19 +39,20 @@ class LineHeightSelectionDialog extends ConsumerWidget {
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CustomLineHeight.NORMAL,
-                    CustomLineHeight.MEDIUM,
-                    CustomLineHeight.LARGE,
-                    CustomLineHeight.XLARGE,
-                    CustomLineHeight.XXLARGE,
-                  ].map((e) {
-                    return _LineHeightOption(
-                      title: e.nameWithSize,
-                      selected: state.lineHeight == e,
-                      onTap: () => notifier.setLineHeight(e.index),
-                    );
-                  }).toList(),
+                  children:
+                      [
+                        CustomLineHeight.NORMAL,
+                        CustomLineHeight.MEDIUM,
+                        CustomLineHeight.LARGE,
+                        CustomLineHeight.XLARGE,
+                        CustomLineHeight.XXLARGE,
+                      ].map((e) {
+                        return _LineHeightOption(
+                          title: e.nameWithSize,
+                          selected: state.lineHeight == e,
+                          onTap: () => notifier.setLineHeight(e.index),
+                        );
+                      }).toList(),
                 ),
               ),
             ),
@@ -109,10 +110,7 @@ class _LineHeightOption extends StatelessWidget {
               ),
             ),
             if (selected)
-              Icon(
-                Icons.check,
-                color: colorScheme.onSecondaryContainer,
-              ),
+              Icon(Icons.check, color: colorScheme.onSecondaryContainer),
           ],
         ),
       ),

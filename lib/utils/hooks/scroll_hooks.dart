@@ -9,7 +9,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 ({
   bool visible,
   bool Function(UserScrollNotification notification) onNotification,
-}) useScrollFabVisibility({bool initialVisible = true}) {
+})
+useScrollFabVisibility({bool initialVisible = true}) {
   final visible = useState(initialVisible);
 
   bool onNotification(UserScrollNotification notification) {

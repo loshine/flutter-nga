@@ -14,10 +14,13 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final options = BaseUrlPresets.all
-        .map((config) => config.key == BaseUrlPresets.custom.key &&
-                state.currentConfig.key == BaseUrlPresets.custom.key
-            ? state.currentConfig
-            : config)
+        .map(
+          (config) =>
+              config.key == BaseUrlPresets.custom.key &&
+                  state.currentConfig.key == BaseUrlPresets.custom.key
+              ? state.currentConfig
+              : config,
+        )
         .toList();
 
     return AlertDialog(
@@ -129,9 +132,9 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
     final normalized = _normalizeBaseUrl(value ?? '');
     if (normalized == null) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('请输入有效的 http/https 地址')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('请输入有效的 http/https 地址')));
       }
       return null;
     }

@@ -16,11 +16,13 @@ void main() {
     test('throws with field path when value is a String', () {
       expect(
         () => asJsonMap('', 'TopicListData.__T'),
-        throwsA(isA<FormatException>().having(
-          (error) => error.message,
-          'message',
-          contains('TopicListData.__T'),
-        )),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('TopicListData.__T'),
+          ),
+        ),
       );
     });
 

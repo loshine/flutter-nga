@@ -10,12 +10,13 @@ class TopicPageSelectDialog extends StatefulWidget {
   final int maxFloor;
   final PageSelectedCallback? pageSelectedCallback;
 
-  const TopicPageSelectDialog(
-      {super.key,
-      required this.maxPage,
-      required this.maxFloor,
-      required this.currentPage,
-      this.pageSelectedCallback});
+  const TopicPageSelectDialog({
+    super.key,
+    required this.maxPage,
+    required this.maxFloor,
+    required this.currentPage,
+    this.pageSelectedCallback,
+  });
 
   @override
   _TopicPageSelectState createState() => _TopicPageSelectState();

@@ -47,7 +47,10 @@ class FontColorDialog extends StatelessWidget {
                     color: valueList[index],
                     onTap: () {
                       callback?.call(
-                          "[color=${keyList[index]}]", "[/color]", true);
+                        "[color=${keyList[index]}]",
+                        "[/color]",
+                        true,
+                      );
                       Routes.pop(context);
                     },
                   );
@@ -102,10 +105,7 @@ class _ColorOption extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: colorScheme.outlineVariant,
-                  width: 1,
-                ),
+                border: Border.all(color: colorScheme.outlineVariant, width: 1),
               ),
             ),
             const SizedBox(width: 16),

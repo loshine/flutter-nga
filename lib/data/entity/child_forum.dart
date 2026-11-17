@@ -8,7 +8,13 @@ class ChildForum extends Forum {
   @override
   final int type;
 
-  ChildForum(super.fid, super.name, this.tid,
-      {this.parentId, this.desc, this.type = 0, this.selected = false})
-      : super(type: type);
+  ChildForum(
+    super.fid,
+    super.name,
+    this.tid, {
+    this.parentId,
+    this.desc,
+    this.type = 0,
+    this.selected = false,
+  }) : super(type: type);
 }
