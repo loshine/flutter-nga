@@ -48,21 +48,38 @@ class ConversationListPage extends HookConsumerWidget {
     useInitialRefresh(refreshController);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('短消息')),
+      appBar: AppBar(
+        title: const Text('短消息'),
+        actions: [
+          IconButton(
+            tooltip: '屏蔽用户',
+            icon: const Icon(Icons.block),
+            onPressed: () =>
+                Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
+          ),
+        ],
+      ),
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
         onLoad: state.enablePullUp ? onLoading : null,
         child: ListView.builder(
           itemCount: state.list.length,
-          itemBuilder: (context, index) =>
-              ConversationItemWidget(conversation: state.list[index]),
+          itemBuilder: (context, index) => ConversationItemWidget(
+            conversation: state.list[index],
+            onLeft: refreshController.callRefresh,
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: '新建短消息',
-        onPressed: () =>
-            Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=0"),
+        onPressed: () async {
+          final sent = await Routes.navigateTo(
+            context,
+            "${Routes.SEND_MESSAGE}?mid=0",
+          );
+          if (sent == true && context.mounted) refreshController.callRefresh();
+        },
         child: const Icon(Icons.edit_outlined),
       ),
     );

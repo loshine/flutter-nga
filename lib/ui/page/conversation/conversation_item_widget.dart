@@ -6,7 +6,10 @@ import 'package:flutter_nga/utils/route.dart';
 class ConversationItemWidget extends StatelessWidget {
   final Conversation? conversation;
 
-  const ConversationItemWidget({super.key, this.conversation});
+  /// 从对话详情返回且已退出对话时回调。
+  final VoidCallback? onLeft;
+
+  const ConversationItemWidget({super.key, this.conversation, this.onLeft});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +20,13 @@ class ConversationItemWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
-          onTap: () => Routes.navigateTo(
-            context,
-            "${Routes.CONVERSATION_DETAIL}?mid=${conversation!.mid}",
-          ),
+          onTap: () async {
+            final left = await Routes.navigateTo(
+              context,
+              "${Routes.CONVERSATION_DETAIL}?mid=${conversation!.mid}",
+            );
+            if (left == true) onLeft?.call();
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
@@ -56,6 +62,15 @@ class ConversationItemWidget extends StatelessWidget {
                       size: 14,
                     ),
                     const SizedBox(width: 4),
+                    if (conversation!.isMultiUser) ...[
+                      Text(
+                        '[多人]',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
                     Expanded(
                       child: Text(
                         conversation!.users,

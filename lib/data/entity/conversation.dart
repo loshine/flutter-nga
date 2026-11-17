@@ -1,3 +1,4 @@
+import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/utils/json_cast.dart';
 
 class Conversation {
@@ -13,14 +14,30 @@ class Conversation {
   final String? fromUsername;
   final String? lastFromUsername;
 
+  /// 参与对话的用户（`all_user`），可能为空。
+  final List<MessageParticipant> participants;
+
   String? get realFromUsername => from == 0 ? '#SYSTEM#' : fromUsername;
 
-  String get users =>
-      "$realFromUsername${lastFromUsername != '' ? ", $lastFromUsername" : ''}";
+  /// 列表中显示的参与者：发起人、最后回复人、再加一位其他参与者，更多的用「…」省略
+  /// （与网页版一致）。
+  String get users {
+    final names = <String>[realFromUsername ?? ''];
+    final last = lastFromUsername ?? '';
+    if (lastFrom != from && last.isNotEmpty) names.add(last);
+    final others = participants
+        .where((p) => p.uid != from && p.uid != lastFrom)
+        .toList();
+    if (others.isNotEmpty) {
+      names.add(others.first.username);
+      if (others.length > 1) names.add('…');
+    }
+    return names.where((e) => e.isNotEmpty).join(', ');
+  }
 
-  bool get isMultiUser => bit! & 1 == 1;
+  bool get isMultiUser => (bit ?? 0) & 1 == 1;
 
-  bool get isUnread => bit! & 2 == 2;
+  bool get isUnread => (bit ?? 0) & 2 == 2;
 
   Conversation(
     this.mid,
@@ -33,10 +50,9 @@ class Conversation {
     this.posts,
     this.sbit,
     this.fromUsername,
-    this.lastFromUsername,
-  );
-
-  // final String allUser;
+    this.lastFromUsername, {
+    this.participants = const [],
+  });
 
   factory Conversation.fromJson(Map map) {
     int? parseInt(dynamic value) {
@@ -64,6 +80,7 @@ class Conversation {
       parseInt(map['sbit']),
       map['from_username']?.toString(),
       map['last_from_username']?.toString(),
+      participants: parseMessageParticipants(map['all_user']),
     );
   }
 }

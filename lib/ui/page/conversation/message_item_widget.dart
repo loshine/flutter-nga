@@ -13,6 +13,7 @@ class MessageItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final children = <Widget>[];
     children.add(
       Padding(
@@ -29,16 +30,32 @@ class MessageItemWidget extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  name_utils.getShowName(message.user.username ?? ''),
-                  style: TextStyle(color: Colors.black),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name_utils.getShowName(message.user.username ?? ''),
+                      style: TextStyle(color: colorScheme.onSurface),
+                    ),
+                    if (message.isHidden || message.ip != null)
+                      Text(
+                        [
+                          if (message.isHidden) '[隐藏]',
+                          if (message.ip != null) message.ip!,
+                        ].join(' '),
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: Dimen.bodySmall,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
             Text(
-              code_utils.formatPostDate(message.time! * 1000),
+              code_utils.formatPostDate((message.time ?? 0) * 1000),
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color,
+                color: colorScheme.onSurfaceVariant,
                 fontSize: Dimen.bodySmall,
               ),
             ),

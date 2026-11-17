@@ -4,40 +4,41 @@ import 'package:flutter_nga/utils/route.dart';
 
 typedef EditCallback = void Function(String text);
 
+/// 输入 UID 或用户名的对话框，用于添加收信人、邀请用户、屏蔽用户。
 class ContactEditDialog extends HookWidget {
   final EditCallback? callback;
+  final String title;
 
-  const ContactEditDialog({super.key, this.callback});
+  const ContactEditDialog({super.key, this.callback, this.title = '添加收信人'});
 
   @override
   Widget build(BuildContext context) {
     final controller = useTextEditingController();
 
+    void submit() {
+      callback?.call(controller.text);
+      Routes.pop(context);
+    }
+
     return AlertDialog(
-      title: Text("添加收信人"),
+      title: Text(title),
       content: TextField(
+        autofocus: true,
         maxLines: 1,
         controller: controller,
-        decoration: InputDecoration(labelText: "UID 或 用户名"),
+        decoration: const InputDecoration(
+          labelText: 'UID 或用户名',
+          helperText: '多个用空格或逗号分隔，纯数字用户名前加 \\',
+        ),
         keyboardType: TextInputType.text,
+        onSubmitted: (_) => submit(),
       ),
       actions: [
         TextButton(
           onPressed: () => Routes.pop(context),
-          child: Text(
-            '取消',
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color,
-            ),
-          ),
+          child: const Text('取消'),
         ),
-        TextButton(
-          onPressed: () {
-            callback?.call(controller.text);
-            Routes.pop(context);
-          },
-          child: Text('确定'),
-        ),
+        TextButton(onPressed: submit, child: const Text('确定')),
       ],
     );
   }
