@@ -58,13 +58,16 @@ void main() {
   test('fid / stid become forum links', () {
     final parsed = NgaContentParser.parse(
       '[fid=7]艾泽拉斯议事厅[/fid] [stid=123]合集名[/stid] '
-      '[fid]7[/fid] [STID]5[/STID] [fid=]abc[/fid]',
+      '[fid]7[/fid] [STID]5[/STID] [fid=]abc[/fid] '
+      '[fid=-7]网事杂谈[/fid] [fid]-7[/fid]',
     );
     expect(parsed, contains("thread.php?fid=7'>艾泽拉斯议事厅</a>"));
     expect(parsed, contains("thread.php?stid=123'>合集名</a>"));
     expect(parsed, contains("thread.php?fid=7'>版面7</a>"));
     expect(parsed, contains("thread.php?stid=5'>合集5</a>"));
     expect(parsed, contains('[fid=]abc[/fid]'));
+    expect(parsed, contains("thread.php?fid=-7'>网事杂谈</a>"));
+    expect(parsed, contains("thread.php?fid=-7'>版面-7</a>"));
   });
 
   test('sup / sub map to html tags', () {
@@ -137,6 +140,7 @@ void main() {
     final stid = regExp.firstMatch('/thread.php?stid=123&page=2');
     expect(fid?.group(1), 'fid');
     expect(fid?.group(2), '7');
+    expect(regExp.firstMatch('/thread.php?fid=-7')?.group(2), '-7');
     expect(stid?.group(1), 'stid');
     expect(stid?.group(2), '123');
     expect(regExp.hasMatch('/read.php?tid=7'), false);

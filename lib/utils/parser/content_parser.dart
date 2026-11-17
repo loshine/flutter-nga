@@ -761,11 +761,12 @@ class _ContentParser implements Parser {
   );
 
   /// `[fid=7]名称[/fid]` / `[stid=7]名称[/stid]`；不带参数时内容即 ID，
-  /// 文字按网页版补「版面」「合集」前缀。
+  /// 文字按网页版补「版面」「合集」前缀。ID 可为负数（如网事杂谈 fid=-7）。
   static final _forumLinkRegex = RegExp(
-    r'\[(fid|stid)(?:=(\d*))?\]([\s\S]*?)\[/\1\]',
+    r'\[(fid|stid)(?:=(-?\d*))?\]([\s\S]*?)\[/\1\]',
     caseSensitive: false,
   );
+  static final _signedIdRegex = RegExp(r'^-?\d+$');
   static final _atRegex = RegExp(r'\[@([^\]\r\n]+)\]');
   static final _urlWithTitleRegex = RegExp(
     r'\[url=([\s\S]*?)\]([\s\S]*?)\[/url\]',
@@ -964,7 +965,7 @@ class _ContentParser implements Parser {
     final arg = m.group(2);
     final text = (m.group(3) ?? '').trim();
     final id = (arg != null && arg.isNotEmpty) ? arg : text;
-    if (!_isDigits(id)) return m.group(0)!;
+    if (!_signedIdRegex.hasMatch(id)) return m.group(0)!;
     final title = arg != null && arg.isNotEmpty
         ? (text.isEmpty ? id : text)
         : '${tag == 'stid' ? '合集' : '版面'}$text';

@@ -22,7 +22,8 @@ class TopicLinkRoute extends LinkRoute {
   }
 }
 
-/// 版面 / 合集超链接：`thread.php?fid=7` / `thread.php?stid=7`（合集对应 type=1）
+/// 版面 / 合集超链接：`thread.php?fid=7` / `thread.php?stid=7`（合集对应 type=1），
+/// fid 可为负数（如网事杂谈 fid=-7）
 class ForumLinkRoute extends LinkRoute {
   @override
   void handleMatch(BuildContext context, Match match) {
@@ -37,7 +38,7 @@ class ForumLinkRoute extends LinkRoute {
 
   @override
   String matchRegExp() {
-    return r"thread\.php\?(fid|stid)=(\d+)";
+    return r"thread\.php\?(fid|stid)=(-?\d+)";
   }
 }
 
