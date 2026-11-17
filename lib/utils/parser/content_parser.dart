@@ -242,6 +242,7 @@ class _RandomBlockParser implements Parser {
 class _AlbumParser implements Parser {
   static final _albumRegex = RegExp(
     r'\[album(=([\s\S]*?)?)?\]([\s\S]*?)?\[/album\]',
+    caseSensitive: false,
   );
   static final _urlRegex = RegExp(
     r'\[url\]([\s\S]*?)?\[/url\]',
@@ -263,55 +264,135 @@ class _AlbumParser implements Parser {
   }
 }
 
+/// 表格：对齐网页版 `parseTable`。
+///
+/// - 标签可带选项：`[table noborder]`、`[tr th]`（表头行）、
+///   `[td20]` / `[td width50]`（列宽）、`[td colspan2 rowspan=3]`（`=` 可省略）。
+/// - 按栈配对：`[td]` 前缺 `[tr]` 时补开一行，`[/tr]`、`[/table]` 会先关掉未闭合的
+///   单元格 / 行；没有对应开标签的闭标签丢弃，表格外的 `[tr]`、`[td]` 原样保留，
+///   保证输出的 HTML 始终配对。
 class _TableParser implements Parser {
-  static final _tableOpenRegex = RegExp(r'\[table\]', caseSensitive: false);
-  static final _tableCloseRegex = RegExp(r'\[/table\]', caseSensitive: false);
-  static final _trRegex = RegExp(r'\[([/]?tr)\]', caseSensitive: false);
-  static final _tdOpenRegex = RegExp(r'\[td([^\]]*)\]', caseSensitive: false);
-  static final _tdCloseRegex = RegExp(r'\[/td\]', caseSensitive: false);
-  static final _tdWidthRegex = RegExp(r'^\s*(\d{1,3})\b');
-  static final _tdSpanAttrRegex = RegExp(
-    r'(rowspan|colspan)\s*=\s*(\d+)',
+  /// 选项须以空白、`=` 或数字开头，避免把 `[trick]` 之类当成 `[tr]`。
+  static final _tokenRegex = RegExp(
+    r'\[(/?)(table|tr|td)((?:[\s=\d][^\]\[]*)?)\]',
     caseSensitive: false,
   );
-  static final _tagBrRegex = RegExp(r'<([/]?(table|tbody|tr|td))><br/>');
-  static final _brTagRegex = RegExp(r'[ ]?<br/><([/]?(table|tbody|tr|td))>');
+  static final _leadingWidthRegex = RegExp(r'^\s*(\d{1,3})(?!\d)');
+  static final _namedWidthRegex = RegExp(
+    r'(?:^|\s)width\s*=?\s*(\d{1,3})(?!\d)',
+    caseSensitive: false,
+  );
+  static final _tdSpanAttrRegex = RegExp(
+    r'(rowspan|colspan)\s*=?\s*(\d{1,2})',
+    caseSensitive: false,
+  );
+  static final _optionWordRegex = RegExp(r'[a-zA-Z]+');
+  static final _tagBrRegex = RegExp(
+    r'<(/?(?:table|tbody|tr|td)(?:\s[^>]*)?)><br/>',
+  );
+  static final _brTagRegex = RegExp(
+    r'[ ]?<br/><(/?(?:table|tbody|tr|td)(?:\s[^>]*)?)>',
+  );
 
   @override
   String parse(String? content) {
     if (content == null || content.isEmpty) return '';
-    return content
-        .replaceAllMapped(_tableOpenRegex, (_) => '<div><table><tbody>')
-        .replaceAllMapped(_tableCloseRegex, (_) => '</tbody></table></div>')
-        .replaceAllMapped(
-          _trRegex,
-          (match) => '<${match.group(1)!.toLowerCase()}>',
-        )
-        .replaceAllMapped(_tdOpenRegex, _tdOpenReplacer)
-        .replaceAllMapped(_tdCloseRegex, (_) => '</td>')
+    if (!_tokenRegex.hasMatch(content)) return content;
+
+    final output = StringBuffer();
+    final stack = <_TableState>[];
+    var cursor = 0;
+
+    void closeCell(_TableState table) {
+      if (!table.cellOpen) return;
+      output.write('</td>');
+      table.cellOpen = false;
+    }
+
+    void closeRow(_TableState table) {
+      closeCell(table);
+      if (!table.rowOpen) return;
+      output.write('</tr>');
+      table.rowOpen = false;
+    }
+
+    void closeTable() {
+      closeRow(stack.removeLast());
+      output.write('</tbody></table></div>');
+    }
+
+    for (final match in _tokenRegex.allMatches(content)) {
+      output.write(content.substring(cursor, match.start));
+      cursor = match.end;
+
+      final isClose = match.group(1)!.isNotEmpty;
+      final tag = match.group(2)!.toLowerCase();
+      final options = match.group(3) ?? '';
+      if (tag != 'table' && stack.isEmpty) {
+        output.write(match.group(0));
+        continue;
+      }
+
+      switch ((tag, isClose)) {
+        case ('table', false):
+          stack.add(_TableState());
+          final noBorder = _hasOption(options, 'noborder');
+          output.write(
+            noBorder
+                ? "<div><table class='noborder'><tbody>"
+                : '<div><table><tbody>',
+          );
+        case ('table', true):
+          if (stack.isNotEmpty) closeTable();
+        case ('tr', false):
+          final table = stack.last;
+          closeRow(table);
+          output.write(_hasOption(options, 'th') ? "<tr class='th'>" : '<tr>');
+          table.rowOpen = true;
+        case ('tr', true):
+          closeRow(stack.last);
+        case ('td', false):
+          final table = stack.last;
+          closeCell(table);
+          if (!table.rowOpen) {
+            output.write('<tr>');
+            table.rowOpen = true;
+          }
+          output.write(_buildCellTag(options));
+          table.cellOpen = true;
+        case ('td', true):
+          closeCell(stack.last);
+      }
+    }
+    output.write(content.substring(cursor));
+    while (stack.isNotEmpty) {
+      closeTable();
+    }
+
+    return output
+        .toString()
         .replaceAllMapped(_tagBrRegex, (match) => '<${match.group(1)}>')
         .replaceAllMapped(_brTagRegex, (match) => '<${match.group(1)}>')
         .replaceAll('</table>', '</table><br/><br/>');
   }
 
-  static String _tdOpenReplacer(Match match) {
-    final raw = (match.group(1) ?? '').trim();
+  static bool _hasOption(String options, String name) => _optionWordRegex
+      .allMatches(options)
+      .any((m) => m.group(0)!.toLowerCase() == name);
+
+  static String _buildCellTag(String options) {
+    final raw = options.trim();
     if (raw.isEmpty) return '<td>';
 
-    var rest = raw;
-    int? widthPercent;
-    final widthMatch = _tdWidthRegex.firstMatch(raw);
-    if (widthMatch != null) {
-      widthPercent = int.tryParse(widthMatch.group(1)!);
-      rest = raw.substring(widthMatch.end).trim();
-    }
+    final widthMatch =
+        _leadingWidthRegex.firstMatch(raw) ?? _namedWidthRegex.firstMatch(raw);
+    final widthPercent = int.tryParse(widthMatch?.group(1) ?? '');
 
     final attrs = <String, String>{};
-    for (final spanMatch in _tdSpanAttrRegex.allMatches(rest)) {
-      final key = spanMatch.group(1)!.toLowerCase();
-      final value = spanMatch.group(2)!;
-      if (int.tryParse(value) != null) {
-        attrs[key] = value;
+    for (final spanMatch in _tdSpanAttrRegex.allMatches(raw)) {
+      final value = int.tryParse(spanMatch.group(2)!);
+      if (value != null && value > 0) {
+        attrs[spanMatch.group(1)!.toLowerCase()] = '$value';
       }
     }
 
@@ -329,6 +410,11 @@ class _TableParser implements Parser {
     buffer.write('>');
     return buffer.toString();
   }
+}
+
+class _TableState {
+  bool rowOpen = false;
+  bool cellOpen = false;
 }
 
 class _ReplyParser implements Parser {
@@ -635,55 +721,116 @@ class _ContentParser implements Parser {
 
   _ContentParser({this.postDateTimestamp});
 
-  // 简单替换映射表（不需要捕获组的标签）
-  static const _simpleReplacements = {
-    '[/size]': '</span>',
-    '[/font]': '</span>',
-    '[quote]': '<blockquote>',
-    '[/quote]': '</blockquote>',
-    '======': '<br/><hr/>',
-    '[stripbr]': '<br/>',
+  // 简单替换（不需要捕获组的标签）。与网页版一致，标签名不区分大小写。
+  static const _simpleTagReplacements = {
+    '/size': '</span>',
+    '/font': '</span>',
+    'quote': '<blockquote>',
+    '/quote': '</blockquote>',
+    'stripbr': '<br/>',
   };
+  static final _simpleTagRegex = RegExp(
+    r'\[(/size|/font|/?quote|stripbr)\]',
+    caseSensitive: false,
+  );
 
   // 复杂标签的预编译正则（需要捕获内容的）
-  static final _imgRegex = RegExp(r'\[img\]([\s\S]*?)\[/img\]');
-  static final _noImgRegex = RegExp(r'\[noimg\]([\s\S]*?)\[/noimg\]');
-  static final _uidWithIdRegex = RegExp(r'\[uid=([^\]]+?)\]([\s\S]*?)\[/uid\]');
-  static final _uidTextRegex = RegExp(r'\[uid\]([\s\S]*?)\[/uid\]');
+  static final _imgRegex = RegExp(
+    r'\[img\]([\s\S]*?)\[/img\]',
+    caseSensitive: false,
+  );
+  static final _noImgRegex = RegExp(
+    r'\[noimg\]([\s\S]*?)\[/noimg\]',
+    caseSensitive: false,
+  );
+  static final _uidWithIdRegex = RegExp(
+    r'\[uid=([^\]]+?)\]([\s\S]*?)\[/uid\]',
+    caseSensitive: false,
+  );
+  static final _uidTextRegex = RegExp(
+    r'\[uid\]([\s\S]*?)\[/uid\]',
+    caseSensitive: false,
+  );
   static final _pidRegex = RegExp(
     r'\[pid=(\d+)?(?:,(\d+)?)?(?:,(\d+)?)?\]([\s\S]*?)\[/pid\]',
+    caseSensitive: false,
   );
-  static final _tidRegex = RegExp(r'\[tid=(\d+)?\]([\s\S]*?)\[/tid\]');
+  static final _tidRegex = RegExp(
+    r'\[tid=(\d+)?\]([\s\S]*?)\[/tid\]',
+    caseSensitive: false,
+  );
+
+  /// `[fid=7]名称[/fid]` / `[stid=7]名称[/stid]`；不带参数时内容即 ID，
+  /// 文字按网页版补「版面」「合集」前缀。ID 可为负数（如网事杂谈 fid=-7）。
+  static final _forumLinkRegex = RegExp(
+    r'\[(fid|stid)(?:=(-?\d*))?\]([\s\S]*?)\[/\1\]',
+    caseSensitive: false,
+  );
+  static final _signedIdRegex = RegExp(r'^-?\d+$');
   static final _atRegex = RegExp(r'\[@([^\]\r\n]+)\]');
   static final _urlWithTitleRegex = RegExp(
     r'\[url=([\s\S]*?)\]([\s\S]*?)\[/url\]',
-  );
-  static final _urlRegex = RegExp(r'\[url\]([\s\S]*?)\[/url\]');
-  static final _attachRegex = RegExp(r'\[attach\]([\s\S]*?)\[/attach\]');
-  static final _flashWithTypeRegex = RegExp(
-    r'\[flash=([a-z]+?)\]([\s\S]*?)\[/flash\]',
     caseSensitive: false,
   );
-  static final _flashRegex = RegExp(r'\[flash\]([\s\S]*?)\[/flash\]');
-  static final _codeRegex = RegExp(r'\[code\]([\s\S]*?)\[/code\]');
+  static final _urlRegex = RegExp(
+    r'\[url\]([\s\S]*?)\[/url\]',
+    caseSensitive: false,
+  );
+  static final _attachRegex = RegExp(
+    r'\[attach\]([\s\S]*?)\[/attach\]',
+    caseSensitive: false,
+  );
+
+  /// `[flash]` 与 `[media]` 网页版同一套处理，可带 `=video` / `=audio`。
+  static final _flashRegex = RegExp(
+    r'\[(flash|media)(?:=([a-z]*))?\]([\s\S]*?)\[/\1\]',
+    caseSensitive: false,
+  );
+
+  /// `[code=js]` 等带语言的写法按普通代码块显示。
+  static final _codeRegex = RegExp(
+    r'\[code(?:=[^\]]*)?\]([\s\S]*?)\[/code\]',
+    caseSensitive: false,
+  );
   static final _collapseWithTitleRegex = RegExp(
     r'\[collapse=([\s\S]*?)\]([\s\S]*?)\[/collapse\]',
+    caseSensitive: false,
   );
-  static final _collapseRegex = RegExp(r'\[collapse\]([\s\S]*?)\[/collapse\]');
+  static final _collapseRegex = RegExp(
+    r'\[collapse\]([\s\S]*?)\[/collapse\]',
+    caseSensitive: false,
+  );
   static final _colorRegex = RegExp(
     r'\[color=([^\]]+?)\]([\s\S]*?)\[/color\]',
     caseSensitive: false,
   );
-  static final _alignRegex = RegExp(r'\[align=([a-z]+?)\]([\s\S]*?)\[/align\]');
-  static final _lrRegex = RegExp(r'\[(l|r)\]([\s\S]*?)\[/\1\]');
-  static final _hRegex = RegExp(r'\[h\]([\s\S]*?)\[/h\]');
+  static final _alignRegex = RegExp(
+    r'\[align=([a-z]+?)\]([\s\S]*?)\[/align\]',
+    caseSensitive: false,
+  );
+  static final _lrRegex = RegExp(
+    r'\[(l|r)\]([\s\S]*?)\[/\1\]',
+    caseSensitive: false,
+  );
+  static final _hRegex = RegExp(r'\[h\]([\s\S]*?)\[/h\]', caseSensitive: false);
   static final _h2Regex = RegExp(r'===([^\n]*?)===');
   static final _sizeRegex = RegExp(r'\[size=([^\]]+)\]', caseSensitive: false);
   static final _fontRegex = RegExp(
     r'\[font=([^\[\]]+)\]',
     caseSensitive: false,
   );
-  static final _formatRegex = RegExp(r'\[([/]?(?:b|u|i|del))\]');
+  static final _formatRegex = RegExp(
+    r'\[(/?(?:b|u|i|del|sup|sub))\]',
+    caseSensitive: false,
+  );
+
+  /// 网页版 `[color=bgxxx]` 可用的底色（文字为白色的色块）。
+  static const _backgroundColors = {
+    'skyblue', 'royalblue', 'blue', 'darkblue', 'orange', 'orangered', //
+    'crimson', 'red', 'firebrick', 'darkred', 'green', 'limegreen', //
+    'seagreen', 'teal', 'deeppink', 'tomato', 'coral', 'purple', 'indigo', //
+    'burlywood', 'sandybrown', 'sienna', 'chocolate', 'silver', 'gray',
+  };
   static final _namedColorRegex = RegExp(r'^[a-zA-Z]+$');
   static final _hexColorRegex = RegExp(
     r'^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$',
@@ -704,10 +851,12 @@ class _ContentParser implements Parser {
 
     var result = content;
 
-    // 先执行简单替换（字符串查找比正则快）
-    _simpleReplacements.forEach((key, value) {
-      result = result.replaceAll(key, value);
-    });
+    result = result
+        .replaceAll('======', '<br/><hr/>')
+        .replaceAllMapped(
+          _simpleTagRegex,
+          (m) => _simpleTagReplacements[m.group(1)!.toLowerCase()]!,
+        );
     result = _rewriteListSyntax(result);
 
     result = result.replaceAllMapped(_noImgRegex, _noImgReplacer);
@@ -716,14 +865,11 @@ class _ContentParser implements Parser {
     result = result.replaceAllMapped(_uidTextRegex, _uidTextReplacer);
     result = result.replaceAllMapped(_pidRegex, _pidReplacer);
     result = result.replaceAllMapped(_tidRegex, _tidReplacer);
+    result = result.replaceAllMapped(_forumLinkRegex, _forumLinkReplacer);
     result = result.replaceAllMapped(_atRegex, _atReplacer);
     result = result.replaceAllMapped(_urlWithTitleRegex, _urlWithTitleReplacer);
     result = result.replaceAllMapped(_urlRegex, _urlReplacer);
     result = result.replaceAllMapped(_attachRegex, _attachReplacer);
-    result = result.replaceAllMapped(
-      _flashWithTypeRegex,
-      _flashWithTypeReplacer,
-    );
     result = result.replaceAllMapped(_flashRegex, _flashReplacer);
     result = result.replaceAllMapped(_codeRegex, _codeReplacer);
     result = result.replaceAllMapped(
@@ -814,21 +960,35 @@ class _ContentParser implements Parser {
     return "<a class='nga-attach' href='${_escapeHtmlAttribute(url)}'>[附件]</a>";
   }
 
-  static String _flashWithTypeReplacer(Match m) {
-    final flashType = (m.group(1) ?? '').toLowerCase();
-    final raw = m.group(2) ?? '';
-    final url = _normalizeGeneralUrl(raw);
-    final mediaType = _resolveFlashMediaType(flashType: flashType, url: url);
-    final label = mediaType == _FlashMediaType.audio ? '[站外音频]' : '[站外视频]';
-    if (url.isEmpty) return label;
-    return "<a href='${_escapeHtmlAttribute(url)}'>$label</a>";
+  static String _forumLinkReplacer(Match m) {
+    final tag = m.group(1)!.toLowerCase();
+    final arg = m.group(2);
+    final text = (m.group(3) ?? '').trim();
+    final id = (arg != null && arg.isNotEmpty) ? arg : text;
+    if (!_signedIdRegex.hasMatch(id)) return m.group(0)!;
+    final title = arg != null && arg.isNotEmpty
+        ? (text.isEmpty ? id : text)
+        : '${tag == 'stid' ? '合集' : '版面'}$text';
+    final href = _resolveInternalUrl('/thread.php?$tag=$id');
+    return "<a href='${_escapeHtmlAttribute(href)}'>${_escapeHtmlText(title)}</a>";
   }
 
+  /// `[flash]` / `[media]`：站内附件（`./mon_…`）按附件地址拼接，其余视为站外链接。
   static String _flashReplacer(Match m) {
-    final raw = m.group(1) ?? '';
-    final url = _normalizeGeneralUrl(raw);
-    final mediaType = _resolveFlashMediaType(url: url);
-    final label = mediaType == _FlashMediaType.audio ? '[站外音频]' : '[站外视频]';
+    final flashType = (m.group(2) ?? '').toLowerCase();
+    final raw = (m.group(3) ?? '').trim();
+    final isAttachment =
+        raw.startsWith('./') ||
+        raw.startsWith('mon_') ||
+        raw.startsWith('/attachments/');
+    final url = isAttachment
+        ? _normalizeAttachmentUrl(raw)
+        : _normalizeGeneralUrl(raw);
+    final mediaType = _resolveFlashMediaType(flashType: flashType, url: url);
+    final isAudio = mediaType == _FlashMediaType.audio;
+    final label = isAttachment
+        ? (isAudio ? '[音频]' : '[视频]')
+        : (isAudio ? '[站外音频]' : '[站外视频]');
     if (url.isEmpty) return label;
     return "<a href='${_escapeHtmlAttribute(url)}'>$label</a>";
   }
@@ -975,8 +1135,12 @@ class _ContentParser implements Parser {
       "<collapse>${m.group(1)}</collapse>";
 
   static String _colorReplacer(Match m) {
-    final colorValue = _normalizeColorValue(m.group(1) ?? '');
+    final raw = (m.group(1) ?? '').trim().toLowerCase();
     final content = m.group(2) ?? '';
+    if (raw.startsWith('bg') && _backgroundColors.contains(raw.substring(2))) {
+      return "<span style='background-color:${raw.substring(2)};color:white;'>$content</span>";
+    }
+    final colorValue = _normalizeColorValue(m.group(1) ?? '');
     if (colorValue == null) return content;
     return "<span style='color:$colorValue;'>$content</span>";
   }
@@ -991,7 +1155,7 @@ class _ContentParser implements Parser {
   }
 
   static String _lrReplacer(Match m) {
-    final align = m.group(1) == 'l' ? 'left' : 'right';
+    final align = m.group(1)!.toLowerCase() == 'l' ? 'left' : 'right';
     return "<p style='text-align:$align'>${m.group(2) ?? ''}</p>";
   }
 
@@ -1011,7 +1175,7 @@ class _ContentParser implements Parser {
     return "<span style='font-family:$family;'>";
   }
 
-  static String _formatReplacer(Match m) => '<${m.group(1)}>';
+  static String _formatReplacer(Match m) => '<${m.group(1)!.toLowerCase()}>';
 
   static String _dashReplacer(Match m) => '<h5></h5>';
 
@@ -1269,6 +1433,7 @@ class _UnsupportedTagFallbackParser implements Parser {
     'del',
     'dice',
     'dict',
+    'fid',
     'flash',
     'font',
     'h',
@@ -1276,12 +1441,16 @@ class _UnsupportedTagFallbackParser implements Parser {
     'img',
     'l',
     'list',
+    'media',
     'noimg',
     'pid',
     'quote',
     'r',
     'randomblock',
     'size',
+    'stid',
+    'sub',
+    'sup',
     'table',
     'tbody',
     'td',

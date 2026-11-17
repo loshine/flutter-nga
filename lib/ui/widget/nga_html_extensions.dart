@@ -76,6 +76,9 @@ class NgaHtml extends StatelessWidget {
             };
           case 'code':
             return {'font-family': 'monospace'};
+          case 'tr' when element.classes.contains('th'):
+            // [tr th] 表头行
+            return {'font-weight': 'bold'};
         }
         if (element.classes.contains('ubb-unknown')) {
           return {
@@ -95,13 +98,13 @@ class NgaHtml extends StatelessWidget {
           case 'table':
             return {
               'margin': '8px',
-              'border': border,
+              if (!_isNoBorderTable(element)) 'border': border,
               'border-collapse': 'collapse',
             };
           case 'td':
             return {
               'padding': '8px',
-              'border': border,
+              if (!_isNoBorderTable(_closestTable(element))) 'border': border,
               'background-color': cssColor(
                 colorScheme.surfaceContainerLowest.withValues(alpha: 0.6),
               ),
@@ -115,6 +118,18 @@ class NgaHtml extends StatelessWidget {
       },
     );
   }
+}
+
+/// `[table noborder]` 生成的表格。
+bool _isNoBorderTable(dom.Element? table) =>
+    table != null && table.classes.contains('noborder');
+
+dom.Element? _closestTable(dom.Element element) {
+  var current = element.parent;
+  while (current != null && current.localName != 'table') {
+    current = current.parent;
+  }
+  return current;
 }
 
 /// 把 [Color] 转成 csslib 能解析的 `rgba()`。
