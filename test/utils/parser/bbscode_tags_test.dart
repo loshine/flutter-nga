@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
 import 'package:flutter_nga/utils/linkroute/link_route.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
+import 'package:flutter_nga/utils/parser/nga_crypt.dart';
 
 /// 对齐网页版 js_bbscode_core.js 的标签支持。
 void main() {
@@ -166,5 +167,191 @@ void main() {
       return true;
     });
     expect(headerWeights, contains(FontWeight.bold));
+  });
+
+  group('second batch', () {
+    test('---title--- becomes h5, existing === / ------ / ====== kept', () {
+      expect(NgaContentParser.parse('---小标题---<br/>正文'), '<h5>小标题</h5><br/>正文');
+      expect(
+        NgaContentParser.parse('前文<br/>----- 标题 -----<br/>后文'),
+        '前文<br/><h5>标题</h5><br/>后文',
+      );
+      // 标题为空即细分隔，与原先 6 个以上 - 的输出相同
+      expect(
+        NgaContentParser.parse('a<br/>------<br/>b'),
+        'a<br/><h5></h5><br/>b',
+      );
+      expect(NgaContentParser.parse('a ------ b'), 'a <h5></h5> b');
+      // 不独占一行、不能跨行的不处理
+      expect(NgaContentParser.parse('a ---x--- b'), 'a ---x--- b');
+      expect(NgaContentParser.parse('---a<br/>b---'), '---a<br/>b---');
+      expect(NgaContentParser.parse('===标题==='), '<h3>标题</h3>');
+      expect(NgaContentParser.parse('a======b'), 'a<br/><hr/>b');
+    });
+
+    test('img with parameter renders as normal image', () {
+      final parsed = NgaContentParser.parse(
+        '[img0]https://a.com/x.png[/img] [img-50]https://a.com/y.png[/img] '
+        '[IMG100]./mon_202611/17/z.jpg[/IMG]',
+      );
+      expect(parsed, contains("<img src='https://a.com/x.png' />"));
+      expect(parsed, contains("<img src='https://a.com/y.png' />"));
+      expect(
+        parsed,
+        contains(
+          "<img src='https://img.nga.cn/attachments/mon_202611/17/z.jpg' />",
+        ),
+      );
+      expect(parsed, isNot(contains('[img')));
+    });
+
+    test('crypt becomes a password block carrying the cipher', () {
+      // 由网页版算法（JS escape + RC4）独立生成的密文
+      const cipher = 'h%9D%12%0BK%13^{~|=(:~';
+      final parsed = NgaContentParser.parse('前[crypt]$cipher[/crypt]后');
+      expect(
+        parsed,
+        "前<nga_crypt data='${NgaCrypt.toHex(cipher)}'></nga_crypt>后",
+      );
+      expect(NgaCrypt.fromHex(NgaCrypt.toHex(cipher)), cipher);
+      expect(
+        NgaContentParser.parse('[crypt]<b>[/crypt]'),
+        '<nga_crypt></nga_crypt>',
+      );
+    });
+
+    test('crypt decrypts like the web version', () {
+      expect(NgaCrypt.decrypt('123456', 'h%9D%12%0BK%13^{~|=(:~'), 'hello 世界');
+      expect(
+        NgaCrypt.decrypt(
+          '密码pw',
+          '])})`(}=(!;,(,=!%D2E%0D=?{?^}#|%A7%83y%98y%ED%EC%81P',
+        ),
+        '隐藏内容[b]粗体[/b] abc!',
+      );
+      expect(
+        NgaCrypt.decrypt('wrong', 'h%9D%12%0BK%13^{~|=(:~'),
+        isNot('hello 世界'),
+      );
+      expect(NgaCrypt.decrypt('', 'abc'), isNull);
+      expect(NgaCrypt.decrypt('pw', 'a<b'), isNull);
+      const plain = '多行\n[url]https://a.com[/url] 😀';
+      expect(NgaCrypt.decrypt('k', NgaCrypt.encrypt('k', plain)), plain);
+    });
+
+    test('headline merges into one block with links and hltxt', () {
+      final parsed = NgaContentParser.parse(
+        '正文<br/>[headline][img]https://a.com/1.jpg[/img]'
+        '[url=https://a.com/p]标题一[/url][/headline]<br/>'
+        '[headline][tid=123]标题二[/tid][/headline]'
+        '[HEADLINE][hltxt]纯文字[/hltxt][/HEADLINE]后文',
+      );
+      expect(
+        parsed,
+        startsWith(
+          "正文<nga_headline><div><img src='https://a.com/1.jpg' />"
+          "<a href='https://a.com/p'>标题一</a></div>",
+        ),
+      );
+      expect(parsed, contains("read.php?tid=123'>标题二</a></div>"));
+      expect(parsed, endsWith('<div><b>纯文字</b></div></nga_headline>后文'));
+      expect(parsed, isNot(contains('[headline')));
+      expect(parsed, isNot(contains('hltxt')));
+    });
+
+    test('lessernuke at the start folds the whole post', () {
+      expect(
+        NgaContentParser.parse('[lessernuke]违规内容[/lessernuke]'),
+        "<collapse title='用户因此帖中的发言被处罚'>违规内容</collapse>",
+      );
+      expect(
+        NgaContentParser.parse('<br/>[lessernuke2][b]x[/b][/lessernuke2] '),
+        "<collapse title='用户在主题中被处罚'><b>x</b></collapse>",
+      );
+      expect(
+        NgaContentParser.parse('[LESSERNUKE3]y'),
+        "<collapse title='被锁定账号发布的内容无法查看'>y</collapse>",
+      );
+      // 不在开头的标签直接去掉
+      expect(NgaContentParser.parse('a[lessernuke]b[/lessernuke]'), 'ab');
+      expect(
+        NgaContentParser.extractQuoteSnippet('[lessernuke]被引用[/lessernuke]'),
+        '被引用',
+      );
+    });
+
+    test('iframe degrades to a link', () {
+      final parsed = NgaContentParser.parse(
+        '[iframe=300,500]http://a.com/page?x=1[/iframe] '
+        '[iframe]https://b.com[/iframe] [iframe]javascript:x[/iframe]',
+      );
+      expect(
+        parsed,
+        contains(
+          "<a href='https://a.com/page?x=1'>[网页] http://a.com/page?x=1</a>",
+        ),
+      );
+      expect(
+        parsed,
+        contains("<a href='https://b.com'>[网页] https://b.com</a>"),
+      );
+      expect(parsed, endsWith(' javascript:x'));
+      expect(parsed, isNot(contains('[iframe')));
+    });
+
+    test('upup is bold', () {
+      expect(
+        NgaContentParser.parse('[upup]顶[/upup] [UPUP]x[/UPUP]'),
+        '<b>顶</b> <b>x</b>',
+      );
+    });
+  });
+
+  testWidgets('headline renders as a block with a clickable link', (
+    tester,
+  ) async {
+    final parsed = NgaContentParser.parse(
+      '[headline][url=https://a.com/p]头条标题[/url][/headline]正文',
+    );
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: NgaHtml(parsed))));
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('头条'), findsOneWidget);
+    expect(find.byIcon(Icons.newspaper), findsOneWidget);
+    expect(find.textContaining('头条标题', findRichText: true), findsOneWidget);
+    expect(find.textContaining('正文', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets('crypt block decrypts with the right password', (tester) async {
+    final cipher = NgaCrypt.encrypt('pw', '[b]秘密[/b]内容');
+    final parsed = NgaContentParser.parse('前文[crypt]$cipher[/crypt]');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: SingleChildScrollView(child: NgaHtml(parsed))),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('输入正确的密码以浏览加密的内容'), findsOneWidget);
+    expect(find.textContaining('秘密', findRichText: true), findsNothing);
+
+    await tester.enterText(find.byType(TextField), 'pw');
+    await tester.tap(find.text('确认'));
+    await tester.pump();
+
+    expect(find.textContaining('秘密', findRichText: true), findsOneWidget);
+    expect(find.text('重新输入密码'), findsOneWidget);
+
+    await tester.tap(find.text('重新输入密码'));
+    await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+  });
+
+  testWidgets('lessernuke renders as collapse', (tester) async {
+    final parsed = NgaContentParser.parse('[lessernuke]违规内容[/lessernuke]');
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: NgaHtml(parsed))));
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('点击展开:用户因此帖中的发言被处罚'), findsOneWidget);
   });
 }
