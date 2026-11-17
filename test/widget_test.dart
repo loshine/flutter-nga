@@ -202,6 +202,23 @@ void main() {
     expect(parsed.contains('[站外视频]'), true);
   });
 
+  test('P1 parser: legacy image hosts are rewritten to nga.cn', () {
+    final parsed = NgaContentParser.parse(
+      '[img]./mon_202402/17/a.jpg[/img] '
+      '[img]http://img.nga.178.com/attachments/mon_202402/17/b.jpg[/img] '
+      '[album=图集][url]https://img.ngacn.cc/attachments/c.jpg[/url][/album]',
+    );
+    for (final name in ['a', 'b']) {
+      expect(
+        parsed,
+        contains('https://img.nga.cn/attachments/mon_202402/17/$name.jpg'),
+      );
+    }
+    expect(parsed, contains('https://img.nga.cn/attachments/c.jpg'));
+    expect(parsed, isNot(contains('178.com')));
+    expect(parsed, isNot(contains('ngacn.cc')));
+  });
+
   test('Reply quote header → nga_quote tag', () {
     final parsed = NgaContentParser.parse(
       '[pid=875718629,47217372,1]Reply[/pid] [b]Post by '

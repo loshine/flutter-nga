@@ -1,3 +1,4 @@
+import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/user.dart' as user;
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
@@ -38,11 +39,11 @@ class UserInfoState {
   String get realAvatarUrl {
     if (avatar == null) {
       return "";
-    } else if (avatar!.startsWith("http://")) {
-      return avatar!.replaceAll("http://", "https://");
-    } else {
-      return avatar!;
     }
+    final url = normalizeNgaImageUrl(avatar!);
+    return url.startsWith("http://")
+        ? url.replaceFirst("http://", "https://")
+        : url;
   }
 
   factory UserInfoState.initial() => UserInfoState(

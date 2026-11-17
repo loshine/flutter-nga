@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/utils/json_cast.dart';
@@ -288,5 +289,5 @@ class Attachment {
   final String? ext;
   final dynamic thumb;
 
-  String get realUrl => "https://img.nga.178.com/attachments/$attachUrl";
+  String get realUrl => "$ngaAttachmentBase/$attachUrl";
 }
