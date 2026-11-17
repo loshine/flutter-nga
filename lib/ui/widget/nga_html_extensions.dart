@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:material_ui/material_ui.dart';
@@ -123,7 +124,12 @@ String cssColor(Color color) {
   return 'rgba(${channel(color.r)}, ${channel(color.g)}, ${channel(color.b)}, $alpha)';
 }
 
-/// 行内表情：`<nga_emoticon src>`，加载失败或缺 src 时回退为 `[表情]`。
+/// 行内表情：`<nga_emoticon src height descent>`，加载失败或缺 src 时回退为
+/// `[表情]`。
+///
+/// 与网页版一致按原图尺寸显示：高度取 `height`（图片原始高度），宽度随图片比例；
+/// 预先占住高度，避免图片加载后行高跳动。缺 `height` 时按图片自身尺寸。
+/// 垂直方向对齐文字基线，底边再下沉 `descent`（网页的 `vertical-align` 负值）。
 Widget? _buildCustomWidget(dom.Element element) {
   if (element.localName != 'nga_emoticon') return null;
   final src = element.attributes['src'];
@@ -131,18 +137,69 @@ Widget? _buildCustomWidget(dom.Element element) {
     return const InlineCustomWidget(child: Text('[表情]'));
   }
   return InlineCustomWidget(
-    alignment: PlaceholderAlignment.middle,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Image.network(
-        src,
-        width: 22,
-        height: 22,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) => const Text('[表情]'),
+    child: EmoticonBaseline(
+      descent: double.tryParse(element.attributes['descent'] ?? '') ?? 0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: Image.network(
+          src,
+          height: double.tryParse(element.attributes['height'] ?? ''),
+          errorBuilder: (_, _, _) => const Text('[表情]'),
+        ),
       ),
     ),
   );
+}
+
+/// 让没有文字基线的子组件（图片）以「距底部 [descent]」处作为基线，
+/// 等价于 CSS 的 `vertical-align: -descent`。子组件自带基线（如加载失败时的
+/// 占位文字）时沿用其基线。
+@visibleForTesting
+class EmoticonBaseline extends SingleChildRenderObjectWidget {
+  const EmoticonBaseline({
+    super.key,
+    required this.descent,
+    required super.child,
+  });
+
+  final double descent;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      RenderEmoticonBaseline(descent);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderEmoticonBaseline renderObject,
+  ) {
+    renderObject.descent = descent;
+  }
+}
+
+/// [EmoticonBaseline] 的渲染对象。
+class RenderEmoticonBaseline extends RenderProxyBox {
+  RenderEmoticonBaseline(this._descent);
+
+  double _descent;
+
+  set descent(double value) {
+    if (value == _descent) return;
+    _descent = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
+      child?.getDistanceToActualBaseline(baseline) ?? size.height - _descent;
+
+  @override
+  double? computeDryBaseline(
+    BoxConstraints constraints,
+    TextBaseline baseline,
+  ) =>
+      child?.getDryBaseline(constraints, baseline) ??
+      getDryLayout(constraints).height - _descent;
 }
 
 /// 注册 NGA 自定义块级标签，并把图片加载 / 失败占位换成 material_ui 组件。

@@ -25,15 +25,19 @@ class NgaContentParser {
   /// 与官网一致：缓存每层正文前 250 字（去掉引用头），供 Reply to 补原文
   static const quoteSnippetMaxLength = 250;
 
-  static final _quoteBlockRegex =
-      RegExp(r'\[quote\][\s\S]*?\[/quote\]', caseSensitive: false);
+  static final _quoteBlockRegex = RegExp(
+    r'\[quote\][\s\S]*?\[/quote\]',
+    caseSensitive: false,
+  );
   static final _replyToLineRegex = RegExp(
-      r'^\[b\]Reply to \[pid=\d+,\d+,\d+\]Reply\[/pid\] Post by .+?\[/b\]\s*',
-      caseSensitive: false);
+    r'^\[b\]Reply to \[pid=\d+,\d+,\d+\]Reply\[/pid\] Post by .+?\[/b\]\s*',
+    caseSensitive: false,
+  );
   // Reply to → 展开为 [quote]…[/quote]（官网 contentQuoteCache 逻辑）
   static final _expandReplyToPidRegex = RegExp(
-      r'\[b\]Reply to \[pid=(\d+),(\d+)?,(\d+)?\]Reply\[/pid\] Post by (\[uid(?:=\d+)?\][\s\S]*?\[/uid\](?:\[color=gray\]\([\s\S]*?\)\[/color\])? \([\s\S]*?\))\[/b\]',
-      caseSensitive: false);
+    r'\[b\]Reply to \[pid=(\d+),(\d+)?,(\d+)?\]Reply\[/pid\] Post by (\[uid(?:=\d+)?\][\s\S]*?\[/uid\](?:\[color=gray\]\([\s\S]*?\)\[/color\])? \([\s\S]*?\))\[/b\]',
+    caseSensitive: false,
+  );
 
   static List<Parser> _buildParserList({int? postDateTimestamp}) {
     return [
@@ -129,11 +133,15 @@ class NgaContentParser {
     }
     parseContent = _replyParser.parse(parseContent);
     if (authorId != null && tid != null && pid != null) {
-      parseContent = _DiceParser(authorId: authorId, tid: tid, pid: pid)
-          .parse(parseContent);
+      parseContent = _DiceParser(
+        authorId: authorId,
+        tid: tid,
+        pid: pid,
+      ).parse(parseContent);
     }
-    for (final parser
-        in _buildParserList(postDateTimestamp: postDateTimestamp)) {
+    for (final parser in _buildParserList(
+      postDateTimestamp: postDateTimestamp,
+    )) {
       parseContent = parser.parse(parseContent);
     }
 
@@ -165,11 +173,15 @@ class NgaContentParser {
     var parseContent = code_utils.unescapeHtml(content);
     parseContent = _commentParser.parse(parseContent);
     if (authorId != null && tid != null && pid != null) {
-      parseContent = _DiceParser(authorId: authorId, tid: tid, pid: pid)
-          .parse(parseContent);
+      parseContent = _DiceParser(
+        authorId: authorId,
+        tid: tid,
+        pid: pid,
+      ).parse(parseContent);
     }
-    for (final parser
-        in _buildParserList(postDateTimestamp: postDateTimestamp)) {
+    for (final parser in _buildParserList(
+      postDateTimestamp: postDateTimestamp,
+    )) {
       parseContent = parser.parse(parseContent);
     }
 
@@ -207,8 +219,9 @@ class _RandomBlockParser implements Parser {
     final matches = _randomBlockRegex.allMatches(content).toList();
     if (matches.isEmpty) return content;
 
-    final selectedIndex =
-        matches.length == 1 ? 0 : _random.nextInt(matches.length);
+    final selectedIndex = matches.length == 1
+        ? 0
+        : _random.nextInt(matches.length);
     final result = StringBuffer();
     var cursor = 0;
     for (var index = 0; index < matches.length; index++) {
@@ -226,10 +239,13 @@ class _RandomBlockParser implements Parser {
 
 // 优化 1: 预编译正则
 class _AlbumParser implements Parser {
-  static final _albumRegex =
-      RegExp(r'\[album(=([\s\S]*?)?)?\]([\s\S]*?)?\[/album\]');
-  static final _urlRegex =
-      RegExp(r'\[url\]([\s\S]*?)?\[/url\]', caseSensitive: false);
+  static final _albumRegex = RegExp(
+    r'\[album(=([\s\S]*?)?)?\]([\s\S]*?)?\[/album\]',
+  );
+  static final _urlRegex = RegExp(
+    r'\[url\]([\s\S]*?)?\[/url\]',
+    caseSensitive: false,
+  );
 
   @override
   String parse(String? content) {
@@ -253,8 +269,10 @@ class _TableParser implements Parser {
   static final _tdOpenRegex = RegExp(r'\[td([^\]]*)\]', caseSensitive: false);
   static final _tdCloseRegex = RegExp(r'\[/td\]', caseSensitive: false);
   static final _tdWidthRegex = RegExp(r'^\s*(\d{1,3})\b');
-  static final _tdSpanAttrRegex =
-      RegExp(r'(rowspan|colspan)\s*=\s*(\d+)', caseSensitive: false);
+  static final _tdSpanAttrRegex = RegExp(
+    r'(rowspan|colspan)\s*=\s*(\d+)',
+    caseSensitive: false,
+  );
   static final _tagBrRegex = RegExp(r'<([/]?(table|tbody|tr|td))><br/>');
   static final _brTagRegex = RegExp(r'[ ]?<br/><([/]?(table|tbody|tr|td))>');
 
@@ -265,7 +283,9 @@ class _TableParser implements Parser {
         .replaceAllMapped(_tableOpenRegex, (_) => '<div><table><tbody>')
         .replaceAllMapped(_tableCloseRegex, (_) => '</tbody></table></div>')
         .replaceAllMapped(
-            _trRegex, (match) => '<${match.group(1)!.toLowerCase()}>')
+          _trRegex,
+          (match) => '<${match.group(1)!.toLowerCase()}>',
+        )
         .replaceAllMapped(_tdOpenRegex, _tdOpenReplacer)
         .replaceAllMapped(_tdCloseRegex, (_) => '</td>')
         .replaceAllMapped(_tagBrRegex, (match) => '<${match.group(1)}>')
@@ -312,28 +332,36 @@ class _TableParser implements Parser {
 
 class _ReplyParser implements Parser {
   /// 最内层 [quote]…[/quote]（内容中不再含 [quote]），用于嵌套由内到外折叠
-  static final _innermostQuoteRegex =
-      RegExp(r'\[quote\]((?:(?!\[quote\])[\s\S])*?)\[/quote\]');
+  static final _innermostQuoteRegex = RegExp(
+    r'\[quote\]((?:(?!\[quote\])[\s\S])*?)\[/quote\]',
+  );
 
   /// 引用块开头可能的空白 / <br>
   static final _leadingBreaksRegex = RegExp(r'^(?:\s|<br\s*/?>)*');
 
   // 引用头：匹配「引用」类（带原文 body，通常包在 [quote] 内）
   static final _topicRegex = RegExp(
-      r'\[tid=(\d+)?\]Topic\[/tid\] \[b\]Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\):\[/b\]');
+    r'\[tid=(\d+)?\]Topic\[/tid\] \[b\]Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\):\[/b\]',
+  );
   static final _replyRegex = RegExp(
-      r'\[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] \[b\]Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\):\[/b\]');
+    r'\[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] \[b\]Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\):\[/b\]',
+  );
   static final _anonyRegex = RegExp(
-      r'\[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] \[b\]Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\):\[/b\]');
+    r'\[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] \[b\]Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\):\[/b\]',
+  );
   // 引用头：「回复」类（通常无原文，仅指向原帖）
   static final _replyTopicRegex = RegExp(
-      r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]');
+    r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]',
+  );
   static final _replyPostRegex = RegExp(
-      r'\[b\]Reply to \[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]');
+    r'\[b\]Reply to \[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]',
+  );
   static final _anonyReplyTopicRegex = RegExp(
-      r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\)\[/b\]');
+    r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\)\[/b\]',
+  );
   static final _anonyReplyPostRegex = RegExp(
-      r'\[b\]Reply to \[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\)\[/b\]');
+    r'\[b\]Reply to \[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] Post by \[uid\]#anony_([0-9a-zA-Z]*)\[/uid\]\[color=gray\]\((\d+)?楼\)\[/color\] \(([\s\S]*?)\)\[/b\]',
+  );
 
   @override
   String parse(String? content) {
@@ -378,54 +406,68 @@ class _ReplyParser implements Parser {
   static String _replaceStandaloneHeaders(String content) {
     return content
         .replaceAllMapped(
-            _topicRegex,
-            (m) => _buildQuoteTag(
-                tid: m.group(1),
-                uid: m.group(2),
-                author: m.group(3),
-                date: m.group(4)))
+          _topicRegex,
+          (m) => _buildQuoteTag(
+            tid: m.group(1),
+            uid: m.group(2),
+            author: m.group(3),
+            date: m.group(4),
+          ),
+        )
         .replaceAllMapped(
-            _replyRegex,
-            (m) => _buildQuoteTag(
-                pid: m.group(1),
-                uid: m.group(4),
-                author: m.group(5),
-                date: m.group(6)))
+          _replyRegex,
+          (m) => _buildQuoteTag(
+            pid: m.group(1),
+            uid: m.group(4),
+            author: m.group(5),
+            date: m.group(6),
+          ),
+        )
         .replaceAllMapped(
-            _anonyRegex,
-            (m) => _buildQuoteTag(
-                pid: m.group(1),
-                author: getShowName("#anony_${m.group(4)}"),
-                floor: "${m.group(5)}楼",
-                date: m.group(6)))
+          _anonyRegex,
+          (m) => _buildQuoteTag(
+            pid: m.group(1),
+            author: getShowName("#anony_${m.group(4)}"),
+            floor: "${m.group(5)}楼",
+            date: m.group(6),
+          ),
+        )
         .replaceAllMapped(
-            _replyTopicRegex,
-            (m) => _buildQuoteTag(
-                tid: m.group(1),
-                uid: m.group(2),
-                author: m.group(3),
-                date: m.group(4)))
+          _replyTopicRegex,
+          (m) => _buildQuoteTag(
+            tid: m.group(1),
+            uid: m.group(2),
+            author: m.group(3),
+            date: m.group(4),
+          ),
+        )
         .replaceAllMapped(
-            _replyPostRegex,
-            (m) => _buildQuoteTag(
-                pid: m.group(1),
-                uid: m.group(4),
-                author: m.group(5),
-                date: m.group(6)))
+          _replyPostRegex,
+          (m) => _buildQuoteTag(
+            pid: m.group(1),
+            uid: m.group(4),
+            author: m.group(5),
+            date: m.group(6),
+          ),
+        )
         .replaceAllMapped(
-            _anonyReplyTopicRegex,
-            (m) => _buildQuoteTag(
-                tid: m.group(1),
-                author: getShowName("#anony_${m.group(2)}"),
-                floor: "${m.group(3)}楼",
-                date: m.group(4)))
+          _anonyReplyTopicRegex,
+          (m) => _buildQuoteTag(
+            tid: m.group(1),
+            author: getShowName("#anony_${m.group(2)}"),
+            floor: "${m.group(3)}楼",
+            date: m.group(4),
+          ),
+        )
         .replaceAllMapped(
-            _anonyReplyPostRegex,
-            (m) => _buildQuoteTag(
-                pid: m.group(1),
-                author: getShowName("#anony_${m.group(4)}"),
-                floor: "${m.group(5)}楼",
-                date: m.group(6)));
+          _anonyReplyPostRegex,
+          (m) => _buildQuoteTag(
+            pid: m.group(1),
+            author: getShowName("#anony_${m.group(4)}"),
+            floor: "${m.group(5)}楼",
+            date: m.group(6),
+          ),
+        );
   }
 
   static _QuoteHeader? _matchHeaderAtStart(String text) {
@@ -560,13 +602,17 @@ class _QuoteHeader {
 class _CommentParser implements Parser {
   static final _removePatterns = [
     RegExp(
-        r'\[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] \[b\]Post by \[uid(=\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\):\[/b\]'),
+      r'\[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] \[b\]Post by \[uid(=\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\):\[/b\]',
+    ),
     RegExp(
-        r'\[b\]Reply to \[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]'),
+      r'\[b\]Reply to \[pid=(\d+)?,(\d+)?,(\d+)?\]Reply\[/pid\] Post by \[uid=(\d+)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]',
+    ),
     RegExp(
-        r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid(=(\d+)?)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]'),
+      r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid(=(\d+)?)?\]([\s\S]*?)\[/uid\] \(([\s\S]*?)\)\[/b\]',
+    ),
     RegExp(
-        r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid\]([\s\S]*?)\[/uid\]\[color=gray\]\(([\s\S]*?)\)\[/color\] \(([\s\S]*?)\)\[/b\]'),
+      r'\[b\]Reply to \[tid=(\d+)?\]Topic\[/tid\] Post by \[uid\]([\s\S]*?)\[/uid\]\[color=gray\]\(([\s\S]*?)\)\[/color\] \(([\s\S]*?)\)\[/b\]',
+    ),
   ];
   static final _trimBrRegex = RegExp(r'^(<br/>)+|(<br/>)+$');
 
@@ -603,39 +649,52 @@ class _ContentParser implements Parser {
   static final _noImgRegex = RegExp(r'\[noimg\]([\s\S]*?)\[/noimg\]');
   static final _uidWithIdRegex = RegExp(r'\[uid=([^\]]+?)\]([\s\S]*?)\[/uid\]');
   static final _uidTextRegex = RegExp(r'\[uid\]([\s\S]*?)\[/uid\]');
-  static final _pidRegex =
-      RegExp(r'\[pid=(\d+)?(?:,(\d+)?)?(?:,(\d+)?)?\]([\s\S]*?)\[/pid\]');
+  static final _pidRegex = RegExp(
+    r'\[pid=(\d+)?(?:,(\d+)?)?(?:,(\d+)?)?\]([\s\S]*?)\[/pid\]',
+  );
   static final _tidRegex = RegExp(r'\[tid=(\d+)?\]([\s\S]*?)\[/tid\]');
   static final _atRegex = RegExp(r'\[@([^\]\r\n]+)\]');
-  static final _urlWithTitleRegex =
-      RegExp(r'\[url=([\s\S]*?)\]([\s\S]*?)\[/url\]');
+  static final _urlWithTitleRegex = RegExp(
+    r'\[url=([\s\S]*?)\]([\s\S]*?)\[/url\]',
+  );
   static final _urlRegex = RegExp(r'\[url\]([\s\S]*?)\[/url\]');
   static final _attachRegex = RegExp(r'\[attach\]([\s\S]*?)\[/attach\]');
-  static final _flashWithTypeRegex =
-      RegExp(r'\[flash=([a-z]+?)\]([\s\S]*?)\[/flash\]', caseSensitive: false);
+  static final _flashWithTypeRegex = RegExp(
+    r'\[flash=([a-z]+?)\]([\s\S]*?)\[/flash\]',
+    caseSensitive: false,
+  );
   static final _flashRegex = RegExp(r'\[flash\]([\s\S]*?)\[/flash\]');
   static final _codeRegex = RegExp(r'\[code\]([\s\S]*?)\[/code\]');
-  static final _collapseWithTitleRegex =
-      RegExp(r'\[collapse=([\s\S]*?)\]([\s\S]*?)\[/collapse\]');
+  static final _collapseWithTitleRegex = RegExp(
+    r'\[collapse=([\s\S]*?)\]([\s\S]*?)\[/collapse\]',
+  );
   static final _collapseRegex = RegExp(r'\[collapse\]([\s\S]*?)\[/collapse\]');
-  static final _colorRegex =
-      RegExp(r'\[color=([^\]]+?)\]([\s\S]*?)\[/color\]', caseSensitive: false);
+  static final _colorRegex = RegExp(
+    r'\[color=([^\]]+?)\]([\s\S]*?)\[/color\]',
+    caseSensitive: false,
+  );
   static final _alignRegex = RegExp(r'\[align=([a-z]+?)\]([\s\S]*?)\[/align\]');
   static final _lrRegex = RegExp(r'\[(l|r)\]([\s\S]*?)\[/\1\]');
   static final _hRegex = RegExp(r'\[h\]([\s\S]*?)\[/h\]');
   static final _h2Regex = RegExp(r'===([^\n]*?)===');
   static final _sizeRegex = RegExp(r'\[size=([^\]]+)\]', caseSensitive: false);
-  static final _fontRegex =
-      RegExp(r'\[font=([^\[\]]+)\]', caseSensitive: false);
+  static final _fontRegex = RegExp(
+    r'\[font=([^\[\]]+)\]',
+    caseSensitive: false,
+  );
   static final _formatRegex = RegExp(r'\[([/]?(?:b|u|i|del))\]');
   static final _namedColorRegex = RegExp(r'^[a-zA-Z]+$');
-  static final _hexColorRegex =
-      RegExp(r'^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$');
+  static final _hexColorRegex = RegExp(
+    r'^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$',
+  );
   static final _rgbColorRegex = RegExp(
-      r'^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|0?\.\d+|1(?:\.0+)?)\s*)?\)$',
-      caseSensitive: false);
-  static final _listTokenRegex =
-      RegExp(r'\[list(?:=[^\]]*)?\]|\[/list\]|\[\*\]', caseSensitive: false);
+    r'^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|0?\.\d+|1(?:\.0+)?)\s*)?\)$',
+    caseSensitive: false,
+  );
+  static final _listTokenRegex = RegExp(
+    r'\[list(?:=[^\]]*)?\]|\[/list\]|\[\*\]',
+    caseSensitive: false,
+  );
   static final _dashRegex = RegExp(r'[-]{6,}');
 
   @override
@@ -660,12 +719,16 @@ class _ContentParser implements Parser {
     result = result.replaceAllMapped(_urlWithTitleRegex, _urlWithTitleReplacer);
     result = result.replaceAllMapped(_urlRegex, _urlReplacer);
     result = result.replaceAllMapped(_attachRegex, _attachReplacer);
-    result =
-        result.replaceAllMapped(_flashWithTypeRegex, _flashWithTypeReplacer);
+    result = result.replaceAllMapped(
+      _flashWithTypeRegex,
+      _flashWithTypeReplacer,
+    );
     result = result.replaceAllMapped(_flashRegex, _flashReplacer);
     result = result.replaceAllMapped(_codeRegex, _codeReplacer);
     result = result.replaceAllMapped(
-        _collapseWithTitleRegex, _collapseWithTitleReplacer);
+      _collapseWithTitleRegex,
+      _collapseWithTitleReplacer,
+    );
     result = result.replaceAllMapped(_collapseRegex, _collapseReplacer);
     result = result.replaceAllMapped(_colorRegex, _colorReplacer);
     result = result.replaceAllMapped(_alignRegex, _alignReplacer);
@@ -1066,14 +1129,13 @@ class _ContentParser implements Parser {
   }
 }
 
-enum _FlashMediaType {
-  audio,
-  video,
-}
+enum _FlashMediaType { audio, video }
 
 class _DiceParser implements Parser {
-  static final _diceRegex =
-      RegExp(r'\[dice\](.*?)\[/dice\]', caseSensitive: false);
+  static final _diceRegex = RegExp(
+    r'\[dice\](.*?)\[/dice\]',
+    caseSensitive: false,
+  );
 
   final int authorId;
   final int tid;
@@ -1107,7 +1169,9 @@ class _EmoticonParser implements Parser {
     for (final group in list) {
       for (final emoticon in group.expressionList) {
         _emoticonMap[emoticon.content] =
-            "<nga_emoticon src='${emoticon.url}'></nga_emoticon>";
+            "<nga_emoticon src='${emoticon.url}' "
+            "height='${emoticon.height.round()}' "
+            "descent='${emoticon.descent.round()}'></nga_emoticon>";
       }
     }
     _initialized = true;
@@ -1174,8 +1238,9 @@ class _DictionaryParser implements Parser {
 }
 
 class _UnsupportedTagFallbackParser implements Parser {
-  static final _ubbTagRegex =
-      RegExp(r'\[/?([a-zA-Z_][a-zA-Z0-9_]*)(?:[^\]]*)\]');
+  static final _ubbTagRegex = RegExp(
+    r'\[/?([a-zA-Z_][a-zA-Z0-9_]*)(?:[^\]]*)\]',
+  );
   static const _knownTags = <String>{
     'album',
     'align',
