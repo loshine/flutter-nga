@@ -28,9 +28,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          topicReplyProvider(124).overrideWith(
-            () => _FakeTopicReplyNotifier(124, state),
-          ),
+          topicReplyProvider(124)
+              .overrideWith(() => _FakeTopicReplyNotifier(124, state)),
         ],
         child: const MaterialApp(
           home: Scaffold(body: ReplyDetailDialog(pid: 124)),

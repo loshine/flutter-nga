@@ -78,10 +78,10 @@ class InterfaceSettingsNotifier extends Notifier<InterfaceSettingsState> {
     final settings = await _settings;
     final contentSize =
         settings.getDouble(PrefsKeys.uiContentSizeMultiple) ?? 1.0;
-    final titleSize =
-        settings.getDouble(PrefsKeys.uiTitleSizeMultiple) ?? 1.0;
+    final titleSize = settings.getDouble(PrefsKeys.uiTitleSizeMultiple) ?? 1.0;
     final lineHeightIndex =
-        settings.getInt(PrefsKeys.uiLineHeight) ?? CustomLineHeight.MEDIUM.index;
+        settings.getInt(PrefsKeys.uiLineHeight) ??
+        CustomLineHeight.MEDIUM.index;
 
     state = InterfaceSettingsState(
       contentSizeMultiple: contentSize,
@@ -128,4 +128,5 @@ class InterfaceSettingsNotifier extends Notifier<InterfaceSettingsState> {
 
 final interfaceSettingsProvider =
     NotifierProvider<InterfaceSettingsNotifier, InterfaceSettingsState>(
-        InterfaceSettingsNotifier.new);
+      InterfaceSettingsNotifier.new,
+    );

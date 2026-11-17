@@ -17,12 +17,7 @@ import 'package:flutter_nga/utils/route.dart';
 enum _BottomPanel { emoticon, font, attachment }
 
 class PublishPage extends HookWidget {
-  const PublishPage({
-    super.key,
-    this.tid,
-    this.fid,
-    this.content,
-  });
+  const PublishPage({super.key, this.tid, this.fid, this.content});
 
   final int? tid;
   final int? fid;
@@ -70,10 +65,7 @@ class PublishPage extends HookWidget {
           );
         }
         if (sel.end > -1) {
-          selection.value = (
-            start: selection.value.start,
-            end: sel.end,
-          );
+          selection.value = (start: selection.value.start, end: sel.end);
         }
       }
 
@@ -88,8 +80,7 @@ class PublishPage extends HookWidget {
       final left = text.substring(0, start);
       final right = text.substring(end, text.length);
       if (start == end) {
-        contentController.text =
-            "$left$startTag${hasEnd ? endTag : ""}$right";
+        contentController.text = "$left$startTag${hasEnd ? endTag : ""}$right";
         final position = left.length + (startTag.length as int);
         contentController.selection = TextSelection(
           extentOffset: position,
@@ -99,7 +90,8 @@ class PublishPage extends HookWidget {
         final selected = text.substring(start, end);
         if (hasEnd) {
           contentController.text = "$left$startTag$selected$endTag$right";
-          final position = left.length +
+          final position =
+              left.length +
               (startTag.length as int) +
               selected.length +
               (endTag.length as int);
@@ -127,16 +119,15 @@ class PublishPage extends HookWidget {
     }
 
     Widget panelChild(_BottomPanel panel) => switch (panel) {
-          _BottomPanel.emoticon =>
-            EmoticonGroupTabsWidget(callback: inputCallback),
-          _BottomPanel.font => FontStyleWidget(callback: inputCallback),
-          _BottomPanel.attachment => AttachmentWidget(
-              tid: tid,
-              fid: fid,
-              callback: inputCallback,
-              attachmentCallback: attachmentCallback,
-            ),
-        };
+      _BottomPanel.emoticon => EmoticonGroupTabsWidget(callback: inputCallback),
+      _BottomPanel.font => FontStyleWidget(callback: inputCallback),
+      _BottomPanel.attachment => AttachmentWidget(
+        tid: tid,
+        fid: fid,
+        callback: inputCallback,
+        attachmentCallback: attachmentCallback,
+      ),
+    };
 
     void togglePanel(_BottomPanel panel) {
       if (keyboardVisible) {
@@ -153,10 +144,7 @@ class PublishPage extends HookWidget {
       if (isWide) {
         showDialog(
           context: context,
-          builder: (_) => _PanelDialog(
-            title: title,
-            child: panelChild(panel),
-          ),
+          builder: (_) => _PanelDialog(title: title, child: panelChild(panel)),
         );
       } else {
         togglePanel(panel);
@@ -231,16 +219,13 @@ class PublishPage extends HookWidget {
         if (panelOpen) openPanel.value = null;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(tid != null ? "回帖" : "发帖"),
-        ),
+        appBar: AppBar(title: Text(tid != null ? "回帖" : "发帖")),
         body: Column(
           children: [
             Expanded(
               child: Center(
                 child: ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxWidth: _contentMaxWidth),
+                  constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     child: Column(
@@ -253,7 +238,8 @@ class PublishPage extends HookWidget {
                             suffixIcon: IconButton(
                               tooltip: '选择标签',
                               icon: const Icon(
-                                  CommunityMaterialIcons.tag_multiple),
+                                CommunityMaterialIcons.tag_multiple,
+                              ),
                               onPressed: showTagDialog,
                             ),
                           ),
@@ -307,7 +293,8 @@ class PublishPage extends HookWidget {
                     width: double.infinity,
                     height: kToolbarHeight + (panelOpen ? 0 : bottomPadding),
                     padding: EdgeInsets.only(
-                        bottom: panelOpen ? 0 : bottomPadding),
+                      bottom: panelOpen ? 0 : bottomPadding,
+                    ),
                     color: colorScheme.surfaceContainer,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -315,19 +302,20 @@ class PublishPage extends HookWidget {
                         IconButton(
                           tooltip: isAnonymous.value ? '关闭匿名' : '开启匿名',
                           isSelected: isAnonymous.value,
-                          icon: const Icon(CommunityMaterialIcons.incognito_off),
-                          selectedIcon:
-                              const Icon(CommunityMaterialIcons.incognito),
+                          icon: const Icon(
+                            CommunityMaterialIcons.incognito_off,
+                          ),
+                          selectedIcon: const Icon(
+                            CommunityMaterialIcons.incognito,
+                          ),
                           onPressed: () {
-                            AppToast.info(
-                                isAnonymous.value ? "关闭匿名" : "开启匿名");
+                            AppToast.info(isAnonymous.value ? "关闭匿名" : "开启匿名");
                             isAnonymous.value = !isAnonymous.value;
                           },
                         ),
                         IconButton(
                           tooltip: '表情',
-                          isSelected:
-                              openPanel.value == _BottomPanel.emoticon,
+                          isSelected: openPanel.value == _BottomPanel.emoticon,
                           icon: const Icon(CommunityMaterialIcons.emoticon),
                           onPressed: () =>
                               openPanelAction(_BottomPanel.emoticon, '表情'),
@@ -335,8 +323,7 @@ class PublishPage extends HookWidget {
                         IconButton(
                           tooltip: '格式',
                           isSelected: openPanel.value == _BottomPanel.font,
-                          icon:
-                              const Icon(CommunityMaterialIcons.format_text),
+                          icon: const Icon(CommunityMaterialIcons.format_text),
                           onPressed: () =>
                               openPanelAction(_BottomPanel.font, '格式'),
                         ),
@@ -344,10 +331,9 @@ class PublishPage extends HookWidget {
                           tooltip: '附件',
                           isSelected:
                               openPanel.value == _BottomPanel.attachment,
-                          icon:
-                              const Icon(CommunityMaterialIcons.attachment),
-                          onPressed: () => openPanelAction(
-                              _BottomPanel.attachment, '附件'),
+                          icon: const Icon(CommunityMaterialIcons.attachment),
+                          onPressed: () =>
+                              openPanelAction(_BottomPanel.attachment, '附件'),
                         ),
                       ],
                     ),
@@ -359,10 +345,9 @@ class PublishPage extends HookWidget {
                         ? Dimen.bottomPanelHeight + bottomPadding
                         : 0,
                     padding: EdgeInsets.only(
-                        bottom: panelOpen ? bottomPadding : 0),
-                    child: panelOpen
-                        ? panelChild(openPanel.value!)
-                        : null,
+                      bottom: panelOpen ? bottomPadding : 0,
+                    ),
+                    child: panelOpen ? panelChild(openPanel.value!) : null,
                   ),
                 ],
               ),
@@ -400,9 +385,7 @@ class _PanelDialog extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 16, 8, 8),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Text(title, style: textTheme.titleMedium),
-                  ),
+                  Expanded(child: Text(title, style: textTheme.titleMedium)),
                   IconButton(
                     tooltip: '关闭',
                     icon: const Icon(Icons.close),

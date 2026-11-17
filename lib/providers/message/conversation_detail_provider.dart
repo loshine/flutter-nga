@@ -13,11 +13,8 @@ class ConversationDetailState {
     this.list = const [],
   });
 
-  factory ConversationDetailState.initial() => const ConversationDetailState(
-        page: 1,
-        enablePullUp: false,
-        list: [],
-      );
+  factory ConversationDetailState.initial() =>
+      const ConversationDetailState(page: 1, enablePullUp: false, list: []);
 
   ConversationDetailState copyWith({
     int? page,
@@ -54,8 +51,10 @@ class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
   Future<ConversationDetailState> loadMore(int? mid) async {
     try {
       final repository = ref.read(messageRepositoryProvider);
-      MessageListData data =
-          await repository.getMessageList(mid, state.page + 1);
+      MessageListData data = await repository.getMessageList(
+        mid,
+        state.page + 1,
+      );
       final newList = List<Message>.from(state.list)..addAll(data.messageList);
       state = ConversationDetailState(
         page: state.page + 1,
@@ -71,4 +70,5 @@ class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
 
 final conversationDetailProvider =
     NotifierProvider<ConversationDetailNotifier, ConversationDetailState>(
-        ConversationDetailNotifier.new);
+      ConversationDetailNotifier.new,
+    );

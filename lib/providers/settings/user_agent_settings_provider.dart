@@ -48,8 +48,9 @@ class UserAgentSettingsNotifier extends Notifier<UserAgentSettingsState> {
 
   /// 初始化，从 Data 同步配置
   Future<void> init() async {
-    final userAgent =
-        await UserAgentPresets.resolveUserAgent(Data().currentUserAgentConfig);
+    final userAgent = await UserAgentPresets.resolveUserAgent(
+      Data().currentUserAgentConfig,
+    );
     state = state.copyWith(
       currentConfig: Data().currentUserAgentConfig,
       resolvedUserAgent: userAgent,
@@ -103,8 +104,8 @@ class UserAgentSettingsNotifier extends Notifier<UserAgentSettingsState> {
 /// UserAgent 设置 Provider
 final userAgentSettingsProvider =
     NotifierProvider<UserAgentSettingsNotifier, UserAgentSettingsState>(
-  UserAgentSettingsNotifier.new,
-);
+      UserAgentSettingsNotifier.new,
+    );
 
 /// 当前 UserAgent Provider (便于直接监听)
 final currentUserAgentProvider = Provider<String>((ref) {

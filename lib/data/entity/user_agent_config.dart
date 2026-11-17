@@ -109,8 +109,7 @@ class UserAgentPresets {
   static const UserAgentConfig desktop = UserAgentConfig(
     key: 'desktop',
     name: '桌面浏览器',
-    userAgent:
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36',
   );
 
   /// Windows Phone 客户端

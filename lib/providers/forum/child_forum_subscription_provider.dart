@@ -34,31 +34,33 @@ class ChildForumSubscriptionNotifier extends Notifier<bool> {
   }
 
   void addSubscription(int? parentId) {
-    Data()
-        .forumRepository
+    Data().forumRepository
         .addChildForumSubscription(key.tid, parentId)
         .then((_) {
-      AppToast.success("订阅成功");
-      state = true;
-    }).catchError((e) {
-      AppToast.error(e);
-    });
+          AppToast.success("订阅成功");
+          state = true;
+        })
+        .catchError((e) {
+          AppToast.error(e);
+        });
   }
 
   void deleteSubscription(int? parentId) {
-    Data()
-        .forumRepository
+    Data().forumRepository
         .deleteChildForumSubscription(key.tid, parentId)
         .then((_) {
-      AppToast.success("取消订阅成功");
-      state = false;
-    }).catchError((e) {
-      AppToast.error(e);
-    });
+          AppToast.success("取消订阅成功");
+          state = false;
+        })
+        .catchError((e) {
+          AppToast.error(e);
+        });
   }
 }
 
-final childForumSubscriptionProvider = NotifierProvider.family<
-    ChildForumSubscriptionNotifier, bool, ChildForumSubscriptionKey>(
-  ChildForumSubscriptionNotifier.new,
-);
+final childForumSubscriptionProvider =
+    NotifierProvider.family<
+      ChildForumSubscriptionNotifier,
+      bool,
+      ChildForumSubscriptionKey
+    >(ChildForumSubscriptionNotifier.new);

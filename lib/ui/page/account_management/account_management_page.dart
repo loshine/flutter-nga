@@ -46,10 +46,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
         actions: [
           IconButton(
             onPressed: () => _quitAll(notifier),
-            icon: Icon(
-              Icons.delete_forever,
-              color: Colors.white,
-            ),
+            icon: Icon(Icons.delete_forever, color: Colors.white),
             tooltip: "退出所有账号",
           ),
         ],
@@ -72,14 +69,16 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
                     title: Text(
                       state.list[position].nickname,
                       style: TextStyle(
-                          color: state.list[position].enabled
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).textTheme.bodyLarge?.color),
+                        color: state.list[position].enabled
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                     ),
                     subtitle: Text(
                       "UID:${state.list[position].uid}",
                       style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyMedium?.color),
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
                     ),
                     trailing: Icon(
                       CommunityMaterialIcons.check,
@@ -120,27 +119,25 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
 
   void _showDeleteDialog(AccountListNotifier notifier, CacheUser user) {
     showDialog(
-        context: context,
-        builder: (_) {
-          return AlertDialog(
-            title: Text("提示"),
-            content: Text("是否删除该登录用户"),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Routes.pop(context),
-                child: Text("取消"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Routes.pop(context);
-                  notifier
-                      .delete(user)
-                      .then((_) => _refreshController.callRefresh());
-                },
-                child: Text("确认"),
-              ),
-            ],
-          );
-        });
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text("提示"),
+          content: Text("是否删除该登录用户"),
+          actions: <Widget>[
+            TextButton(onPressed: () => Routes.pop(context), child: Text("取消")),
+            TextButton(
+              onPressed: () {
+                Routes.pop(context);
+                notifier
+                    .delete(user)
+                    .then((_) => _refreshController.callRefresh());
+              },
+              child: Text("确认"),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

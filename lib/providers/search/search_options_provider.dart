@@ -25,28 +25,32 @@ class SearchOptionsState {
   });
 
   factory SearchOptionsState.allForumTopic() => SearchOptionsState(
-      firstRadio: FIRST_RADIO_TOPIC,
-      content: false,
-      topicRadio: TOPIC_RADIO_ALL_FORUM,
-      userRadio: USER_RADIO_NAME);
+    firstRadio: FIRST_RADIO_TOPIC,
+    content: false,
+    topicRadio: TOPIC_RADIO_ALL_FORUM,
+    userRadio: USER_RADIO_NAME,
+  );
 
   factory SearchOptionsState.currentForumTopic() => SearchOptionsState(
-      firstRadio: FIRST_RADIO_TOPIC,
-      content: false,
-      topicRadio: TOPIC_RADIO_CURRENT_FORUM,
-      userRadio: USER_RADIO_NAME);
+    firstRadio: FIRST_RADIO_TOPIC,
+    content: false,
+    topicRadio: TOPIC_RADIO_CURRENT_FORUM,
+    userRadio: USER_RADIO_NAME,
+  );
 
   factory SearchOptionsState.forum() => SearchOptionsState(
-      firstRadio: FIRST_RADIO_FORUM,
-      content: false,
-      topicRadio: TOPIC_RADIO_ALL_FORUM,
-      userRadio: USER_RADIO_NAME);
+    firstRadio: FIRST_RADIO_FORUM,
+    content: false,
+    topicRadio: TOPIC_RADIO_ALL_FORUM,
+    userRadio: USER_RADIO_NAME,
+  );
 
   factory SearchOptionsState.user() => SearchOptionsState(
-      firstRadio: FIRST_RADIO_USER,
-      content: false,
-      topicRadio: TOPIC_RADIO_ALL_FORUM,
-      userRadio: USER_RADIO_NAME);
+    firstRadio: FIRST_RADIO_USER,
+    content: false,
+    topicRadio: TOPIC_RADIO_ALL_FORUM,
+    userRadio: USER_RADIO_NAME,
+  );
 
   SearchOptionsState copyWith({
     int? firstRadio,
@@ -94,4 +98,6 @@ class SearchOptionsNotifier extends Notifier<SearchOptionsState> {
 }
 
 final searchOptionsProvider =
-    NotifierProvider.family<SearchOptionsNotifier, SearchOptionsState, int?>(SearchOptionsNotifier.new);
+    NotifierProvider.family<SearchOptionsNotifier, SearchOptionsState, int?>(
+      SearchOptionsNotifier.new,
+    );

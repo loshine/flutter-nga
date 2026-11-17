@@ -28,10 +28,7 @@ Reply _reply({int? authorId, String subject = '', String content = ''}) {
 }
 
 void main() {
-  final matcher = BlockMatcher(
-    users: ['', '42', '坏人', ' '],
-    words: ['剧透', ''],
-  );
+  final matcher = BlockMatcher(users: ['', '42', '坏人', ' '], words: ['剧透', '']);
 
   test('matches numeric uid against string entries', () {
     expect(matcher.matchesTopic(_topic(authorId: 42)), isTrue);
@@ -41,8 +38,10 @@ void main() {
   test('matches usernames and anonymous string ids', () {
     expect(matcher.matchesTopic(_topic(author: '坏人')), isTrue);
     expect(
-      BlockMatcher(users: ['#anony_1'], words: [])
-          .matchesTopic(_topic(authorId: '#anony_1')),
+      BlockMatcher(
+        users: ['#anony_1'],
+        words: [],
+      ).matchesTopic(_topic(authorId: '#anony_1')),
       isTrue,
     );
   });

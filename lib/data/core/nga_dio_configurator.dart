@@ -103,11 +103,13 @@ class NgaDioConfigurator {
   ) async {
     debugPrint(e.toString());
     if (e.error is IOException) {
-      handler.next(DioException(
-        requestOptions: e.requestOptions,
-        error: "网络错误，请稍候重试。",
-        type: DioExceptionType.unknown,
-      ));
+      handler.next(
+        DioException(
+          requestOptions: e.requestOptions,
+          error: "网络错误，请稍候重试。",
+          type: DioExceptionType.unknown,
+        ),
+      );
       return;
     }
     if (_isRawResponse(e.requestOptions) ||
@@ -148,8 +150,9 @@ class NgaDioConfigurator {
         .replaceAll("\t", "\\t")
         .replaceAll("\\x", "\\\\x")
         .replaceAll(
-            "<html><head><meta http-equiv='Content-Type' content='text/html; charset=GBK'></head><body><script>",
-            "")
+          "<html><head><meta http-equiv='Content-Type' content='text/html; charset=GBK'></head><body><script>",
+          "",
+        )
         .replaceAll("</script></body></html>", "")
         .replaceAll("window.script_muti_get_var_store=", "");
     if (response.requestOptions.path.contains("__lib=noti") &&

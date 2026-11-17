@@ -32,11 +32,7 @@ class TopicReplyCommentItemWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              AvatarWidget(
-                user?.avatar,
-                size: 28,
-                username: user?.username,
-              ),
+              AvatarWidget(user?.avatar, size: 28, username: user?.username),
               const SizedBox(width: 8),
               Expanded(
                 child: UsernameText(

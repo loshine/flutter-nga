@@ -36,7 +36,7 @@ class Conversation {
     this.lastFromUsername,
   );
 
-// final String allUser;
+  // final String allUser;
 
   factory Conversation.fromJson(Map map) {
     int? parseInt(dynamic value) {
@@ -51,18 +51,20 @@ class Conversation {
       }
       return null;
     }
+
     return Conversation(
-        parseInt(map['mid']),
-        parseInt(map['last_modify']),
-        parseInt(map['bit']),
-        map['subject']?.toString(),
-        parseInt(map['from']),
-        parseInt(map['time']),
-        parseInt(map['last_from']),
-        parseInt(map['posts']),
-        parseInt(map['sbit']),
-        map['from_username']?.toString(),
-        map['last_from_username']?.toString());
+      parseInt(map['mid']),
+      parseInt(map['last_modify']),
+      parseInt(map['bit']),
+      map['subject']?.toString(),
+      parseInt(map['from']),
+      parseInt(map['time']),
+      parseInt(map['last_from']),
+      parseInt(map['posts']),
+      parseInt(map['sbit']),
+      map['from_username']?.toString(),
+      map['last_from_username']?.toString(),
+    );
   }
 }
 
@@ -94,14 +96,16 @@ class ConversationListData {
       }
       return null;
     }
+
     Map<String, Conversation> tempMap = {};
     for (MapEntry<String, dynamic> entry
         in map.entries as Iterable<MapEntry<String, dynamic>>) {
       if (entry.key != 'nextPage' &&
           entry.key != 'currentPage' &&
           entry.key != 'rowsPerPage') {
-        tempMap[entry.key] =
-            Conversation.fromJson(asJsonMap(entry.value, 'ConversationListData.${entry.key}'));
+        tempMap[entry.key] = Conversation.fromJson(
+          asJsonMap(entry.value, 'ConversationListData.${entry.key}'),
+        );
       }
     }
     return ConversationListData(

@@ -39,9 +39,7 @@ class SendMessagePage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isNew ? '新建短消息' : '回复消息'),
-      ),
+      appBar: AppBar(title: Text(isNew ? '新建短消息' : '回复消息')),
       body: Padding(
         padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Column(
@@ -49,9 +47,7 @@ class SendMessagePage extends HookConsumerWidget {
             TextField(
               maxLines: 1,
               controller: subjectController,
-              decoration: InputDecoration(
-                labelText: "标题(可选)",
-              ),
+              decoration: InputDecoration(labelText: "标题(可选)"),
               keyboardType: TextInputType.text,
             ),
             if (isNew) ...[
@@ -103,7 +99,8 @@ class SendMessagePage extends HookConsumerWidget {
                             style: TextStyle(color: Colors.white),
                           ),
                           color: WidgetStatePropertyAll(
-                              Theme.of(context).primaryColor),
+                            Theme.of(context).primaryColor,
+                          ),
                           onPressed: () => notifier.remove(contact),
                         );
                       }).toList(),

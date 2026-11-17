@@ -10,4 +10,6 @@ class InputDeletionStatusNotifier extends Notifier<bool> {
 }
 
 final inputDeletionStatusProvider =
-    NotifierProvider<InputDeletionStatusNotifier, bool>(InputDeletionStatusNotifier.new);
+    NotifierProvider<InputDeletionStatusNotifier, bool>(
+      InputDeletionStatusNotifier.new,
+    );

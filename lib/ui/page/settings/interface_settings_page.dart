@@ -30,7 +30,7 @@ class InterfaceSettingsPage extends ConsumerWidget {
                 min: 1.0,
                 max: 2.0,
                 divisions: 10,
-              )
+              ),
             ],
           ),
           Column(
@@ -48,7 +48,7 @@ class InterfaceSettingsPage extends ConsumerWidget {
                 min: 1.0,
                 max: 2.0,
                 divisions: 10,
-              )
+              ),
             ],
           ),
           ListTile(
@@ -63,9 +63,6 @@ class InterfaceSettingsPage extends ConsumerWidget {
   }
 
   void _showLineHeightSelectionDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (_) => LineHeightSelectionDialog(),
-    );
+    showDialog(context: context, builder: (_) => LineHeightSelectionDialog());
   }
 }

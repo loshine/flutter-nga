@@ -137,10 +137,7 @@ class _ColorPicker extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.palette_outlined,
-                color: colorScheme.onSurfaceVariant,
-              ),
+              Icon(Icons.palette_outlined, color: colorScheme.onSurfaceVariant),
               const SizedBox(width: 16),
               Text(
                 "主题色",
@@ -211,7 +208,9 @@ class _ColorCircle extends StatelessWidget {
         child: isSelected
             ? Icon(
                 Icons.check,
-                color: ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+                color:
+                    ThemeData.estimateBrightnessForColor(color) ==
+                        Brightness.dark
                     ? Colors.white
                     : Colors.black,
                 size: 20,
@@ -272,7 +271,9 @@ class _ThemeOption extends StatelessWidget {
                     subtitle,
                     style: textTheme.bodySmall?.copyWith(
                       color: selected
-                          ? colorScheme.onSecondaryContainer.withValues(alpha: 0.8)
+                          ? colorScheme.onSecondaryContainer.withValues(
+                              alpha: 0.8,
+                            )
                           : colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -280,10 +281,7 @@ class _ThemeOption extends StatelessWidget {
               ),
             ),
             if (selected)
-              Icon(
-                Icons.check,
-                color: colorScheme.onSecondaryContainer,
-              ),
+              Icon(Icons.check, color: colorScheme.onSecondaryContainer),
           ],
         ),
       ),

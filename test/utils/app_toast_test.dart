@@ -12,11 +12,7 @@ void main() {
   }
 
   Widget buildApp() {
-    return const ToastificationWrapper(
-      child: MaterialApp(
-        home: Scaffold(),
-      ),
-    );
+    return const ToastificationWrapper(child: MaterialApp(home: Scaffold()));
   }
 
   testWidgets('shows all semantic toast types without context', (tester) async {
@@ -56,10 +52,7 @@ void main() {
       TargetPlatform.windows,
       TargetPlatform.linux,
     ]) {
-      expect(
-        AppToast.alignmentForPlatform(platform),
-        Alignment.topRight,
-      );
+      expect(AppToast.alignmentForPlatform(platform), Alignment.topRight);
     }
   });
 

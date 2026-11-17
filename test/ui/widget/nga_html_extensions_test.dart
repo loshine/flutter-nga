@@ -186,17 +186,24 @@ void main() {
   });
 
   group('nga_emoticon', () {
-    testWidgets('renders 22px inline image', (tester) async {
+    testWidgets('renders inline image at its original height', (tester) async {
       await _pumpHtml(
         tester,
-        "前<nga_emoticon src='https://img4.nga.cn/ngabbs/post/smile/ac0.png'>"
-        '</nga_emoticon>后',
+        "前<nga_emoticon src='https://img4.nga.cn/ngabbs/post/smile/ac0.png'"
+        " height='60' descent='12'></nga_emoticon>后",
       );
 
-      expect(find.byType(InlineCustomWidget), findsOneWidget);
+      final inline = tester.widget<InlineCustomWidget>(
+        find.byType(InlineCustomWidget),
+      );
+      expect(inline.alignment, PlaceholderAlignment.baseline);
+      expect(
+        tester.widget<EmoticonBaseline>(find.byType(EmoticonBaseline)).descent,
+        12,
+      );
       final image = tester.widget<Image>(find.byType(Image));
-      expect(image.width, 22);
-      expect(image.height, 22);
+      expect(image.width, isNull);
+      expect(image.height, 60);
       expect((image.image as NetworkImage).url, endsWith('ac0.png'));
       expect(_richText('前'), findsOneWidget);
     });
@@ -206,6 +213,53 @@ void main() {
 
       expect(find.byType(Image), findsNothing);
       expect(find.text('[表情]'), findsOneWidget);
+    });
+
+    Future<void> pumpBaselineRow(WidgetTester tester, List<Widget> children) {
+      return tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: children,
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('image bottom sinks descent below the baseline', (
+      tester,
+    ) async {
+      await pumpBaselineRow(tester, const [
+        EmoticonBaseline(
+          descent: 0,
+          child: SizedBox(key: Key('flush'), width: 10, height: 60),
+        ),
+        EmoticonBaseline(
+          descent: 12,
+          child: SizedBox(key: Key('sunk'), width: 10, height: 60),
+        ),
+      ]);
+
+      final flush = tester.getBottomLeft(find.byKey(const Key('flush')));
+      final sunk = tester.getBottomLeft(find.byKey(const Key('sunk')));
+      expect(sunk.dy - flush.dy, 12);
+    });
+
+    testWidgets('child with its own baseline keeps it', (tester) async {
+      await pumpBaselineRow(tester, const [
+        Text('字', key: Key('plain')),
+        EmoticonBaseline(descent: 12, child: Text('字', key: Key('wrapped'))),
+      ]);
+
+      expect(
+        tester.getTopLeft(find.byKey(const Key('wrapped'))).dy,
+        tester.getTopLeft(find.byKey(const Key('plain'))).dy,
+      );
     });
   });
 
@@ -242,7 +296,9 @@ void main() {
   testWidgets('td width hint does not squeeze cell text', (tester) async {
     await _pumpHtml(
       tester,
-      NgaContentParser.parse('[table][tr][td20]二十宽度[/td][td]x[/td][/tr][/table]'),
+      NgaContentParser.parse(
+        '[table][tr][td20]二十宽度[/td][td]x[/td][/tr][/table]',
+      ),
     );
 
     expect(

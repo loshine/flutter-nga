@@ -1,5 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show GlobalCupertinoLocalizations;
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'
@@ -40,10 +41,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _router = GoRouter(
-      routes: buildRoutes(),
-      observers: [appRouteObserver],
-    );
+    _router = GoRouter(routes: buildRoutes(), observers: [appRouteObserver]);
     Routes.configureRoutes(_router);
   }
 
@@ -65,19 +63,20 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
             final appTheme = Theme.of(context);
             final colorScheme = appTheme.colorScheme;
             final isDark = appTheme.brightness == Brightness.dark;
-            final overlayStyle = (isDark
-                    ? SystemUiOverlayStyle.light
-                    : SystemUiOverlayStyle.dark)
-                .copyWith(
-              statusBarColor: Colors.transparent,
-              systemNavigationBarColor: Colors.transparent,
-              systemNavigationBarContrastEnforced: false,
-            );
+            final overlayStyle =
+                (isDark
+                        ? SystemUiOverlayStyle.light
+                        : SystemUiOverlayStyle.dark)
+                    .copyWith(
+                      statusBarColor: Colors.transparent,
+                      systemNavigationBarColor: Colors.transparent,
+                      systemNavigationBarContrastEnforced: false,
+                    );
             EasyRefresh.defaultHeaderBuilder = () => MaterialHeader(
-                  triggerOffset: 50,
-                  color: colorScheme.primary,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                );
+              triggerOffset: 50,
+              color: colorScheme.primary,
+              backgroundColor: colorScheme.surfaceContainerHighest,
+            );
             EasyRefresh.defaultFooterBuilder = () => const ClassicFooter();
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: overlayStyle,
@@ -96,10 +95,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
             GlobalMaterialLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: [
-            const Locale('en'),
-            const Locale('zh', 'CN'),
-          ],
+          supportedLocales: [const Locale('en'), const Locale('zh', 'CN')],
           localeResolutionCallback: (locale, supportedLocales) => locale,
         );
       },

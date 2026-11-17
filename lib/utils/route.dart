@@ -74,10 +74,7 @@ class Routes {
     Object? extra,
   }) {
     final uri = Uri.parse(path);
-    final mergedQueryParams = {
-      ...uri.queryParameters,
-      ...?queryParams,
-    };
+    final mergedQueryParams = {...uri.queryParameters, ...?queryParams};
     final newUri = uri.replace(queryParameters: mergedQueryParams);
 
     if (clearStack) {
@@ -280,9 +277,8 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.SEARCH_FORUM,
       name: Routes.SEARCH_FORUM,
-      builder: (context, state) => SearchForumPage(
-        state.uri.queryParameters["keyword"] ?? "",
-      ),
+      builder: (context, state) =>
+          SearchForumPage(state.uri.queryParameters["keyword"] ?? ""),
     ),
     GoRoute(
       path: Routes.SEARCH_TOPIC_LIST,
@@ -311,7 +307,7 @@ List<GoRoute> buildRoutes() {
         url: state.uri.queryParameters["url"] ?? "",
         screenWidth:
             double.tryParse(state.uri.queryParameters["screenWidth"] ?? "") ??
-                0,
+            0,
       ),
     ),
     GoRoute(

@@ -29,13 +29,15 @@ BlockFilter _filter({
   bool details = true,
   BlockMode mode = BlockMode.COLLAPSE,
 }) {
-  return BlockFilter.fromSettings(BlocklistSettingsState(
-    clientBlockEnabled: client,
-    listBlockEnabled: list,
-    detailsBlockEnabled: details,
-    blockMode: mode,
-    blockUserList: const ['坏人'],
-  ));
+  return BlockFilter.fromSettings(
+    BlocklistSettingsState(
+      clientBlockEnabled: client,
+      listBlockEnabled: list,
+      detailsBlockEnabled: details,
+      blockMode: mode,
+      blockUserList: const ['坏人'],
+    ),
+  );
 }
 
 void main() {
@@ -63,13 +65,18 @@ void main() {
   });
 
   test('gone mode removes blocked topics, other modes keep them', () {
-    expect(_filter(mode: BlockMode.GONE).visibleTopics([_blocked, _normal]),
-        [_normal]);
-    expect(_filter(mode: BlockMode.ALPHA).visibleTopics([_blocked, _normal]),
-        [_blocked, _normal]);
+    expect(_filter(mode: BlockMode.GONE).visibleTopics([_blocked, _normal]), [
+      _normal,
+    ]);
+    expect(_filter(mode: BlockMode.ALPHA).visibleTopics([_blocked, _normal]), [
+      _blocked,
+      _normal,
+    ]);
     expect(
-      _filter(mode: BlockMode.GONE, list: false)
-          .visibleTopics([_blocked, _normal]),
+      _filter(
+        mode: BlockMode.GONE,
+        list: false,
+      ).visibleTopics([_blocked, _normal]),
       [_blocked, _normal],
     );
   });

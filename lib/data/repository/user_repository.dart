@@ -84,9 +84,7 @@ class UserDataRepository implements UserRepository {
   Future<CacheUser?> getDefaultUser() async {
     final record = await _store.findFirst(
       database,
-      finder: Finder(
-        filter: Filter.equals('enabled', true),
-      ),
+      finder: Finder(filter: Filter.equals('enabled', true)),
     );
     if (record != null) {
       return CacheUser.fromJson(record.value);
@@ -111,7 +109,8 @@ class UserDataRepository implements UserRepository {
     try {
       final encodedUsername = code_utils.urlEncode(username!);
       Response<Map<String, dynamic>> response = await _dio.get(
-          "nuke.php?__lib=ucp&__act=get&__output=8&username=$encodedUsername");
+        "nuke.php?__lib=ucp&__act=get&__output=8&username=$encodedUsername",
+      );
       // {"0": { userinfo }};
       Map<String, dynamic> userInfoMap = response.data!["0"];
       return UserInfo.fromJson(userInfoMap);
@@ -123,8 +122,9 @@ class UserDataRepository implements UserRepository {
   @override
   Future<UserInfo> getUserInfoByUid(String? uid) async {
     try {
-      Response<Map<String, dynamic>> response =
-          await _dio.get("nuke.php?__lib=ucp&__act=get&__output=8&uid=$uid");
+      Response<Map<String, dynamic>> response = await _dio.get(
+        "nuke.php?__lib=ucp&__act=get&__output=8&uid=$uid",
+      );
       // {"0": { userinfo }};
       Map<String, dynamic> userInfoMap = response.data!["0"];
       return UserInfo.fromJson(userInfoMap);
@@ -141,17 +141,21 @@ class UserDataRepository implements UserRepository {
         return false;
       }
       await saveCacheUser(
-          CacheUser(preUser.uid, preUser.cid, preUser.nickname, false));
+        CacheUser(preUser.uid, preUser.cid, preUser.nickname, false),
+      );
     }
     await saveCacheUser(
-        CacheUser(cacheUser.uid, cacheUser.cid, cacheUser.nickname, true));
+      CacheUser(cacheUser.uid, cacheUser.cid, cacheUser.nickname, true),
+    );
     return true;
   }
 
   Future<CacheUser> saveCacheUser(CacheUser user) async {
     final finder = Finder(filter: Filter.equals('uid', user.uid));
-    List<RecordSnapshot<int, dynamic>> list =
-        await _store.find(database, finder: finder);
+    List<RecordSnapshot<int, dynamic>> list = await _store.find(
+      database,
+      finder: finder,
+    );
     // 有以前登陆过的就把以前登陆过的删除
     if (list.isNotEmpty) {
       await _store.delete(database, finder: finder);
@@ -162,8 +166,10 @@ class UserDataRepository implements UserRepository {
 
   @override
   Future<bool> deleteCacheUser(CacheUser cacheUser) async {
-    final count = await _store.delete(database,
-        finder: Finder(filter: Filter.equals('uid', cacheUser.uid)));
+    final count = await _store.delete(
+      database,
+      finder: Finder(filter: Filter.equals('uid', cacheUser.uid)),
+    );
     final defaultUser = await getDefaultUser();
     final totalCount = await _store.count(database);
     if (defaultUser == null && totalCount > 0) {
@@ -171,7 +177,8 @@ class UserDataRepository implements UserRepository {
       if (record != null) {
         final firstUser = CacheUser.fromJson(record.value);
         await saveCacheUser(
-            CacheUser(firstUser.uid, firstUser.cid, firstUser.nickname, true));
+          CacheUser(firstUser.uid, firstUser.cid, firstUser.nickname, true),
+        );
       }
     }
     return count > 0;
@@ -181,14 +188,18 @@ class UserDataRepository implements UserRepository {
   Future<BlockInfoData> getBlockInfo() async {
     try {
       final cacheUser = await getDefaultUser();
-      final postData = "__lib=ucp&__act=get_block_word"
+      final postData =
+          "__lib=ucp&__act=get_block_word"
           "&__output=8"
           "&uid=${cacheUser?.uid}";
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
       options.headers = {"Referer": _dio.options.baseUrl};
-      Response<Map<String, dynamic>> response =
-          await _dio.post("nuke.php", data: postData, options: options);
+      Response<Map<String, dynamic>> response = await _dio.post(
+        "nuke.php",
+        data: postData,
+        options: options,
+      );
       return BlockInfoData.fromJson(response.data!);
     } catch (err) {
       rethrow;
@@ -203,8 +214,11 @@ class UserDataRepository implements UserRepository {
       final options = Options()
         ..contentType = Headers.formUrlEncodedContentType;
       options.headers = {"Referer": _dio.options.baseUrl};
-      Response<Map<String, dynamic>> response =
-          await _dio.post("nuke.php", data: postData, options: options);
+      Response<Map<String, dynamic>> response = await _dio.post(
+        "nuke.php",
+        data: postData,
+        options: options,
+      );
       return response.data!["0"];
     } catch (err) {
       rethrow;

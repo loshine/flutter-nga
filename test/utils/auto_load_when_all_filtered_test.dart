@@ -54,37 +54,42 @@ void main() {
     int visibleCount = 0,
     bool canLoadMore = true,
   }) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: _Harness(
-          rawItems: rawItems,
-          visibleCount: visibleCount,
-          canLoadMore: canLoadMore,
-          onLoad: onLoad,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: _Harness(
+            rawItems: rawItems,
+            visibleCount: visibleCount,
+            canLoadMore: canLoadMore,
+            onLoad: onLoad,
+          ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
   }
 
   setUp(() => loads = 0);
 
-  testWidgets('loads the next page when every item is filtered',
-      (tester) async {
+  testWidgets('loads the next page when every item is filtered', (
+    tester,
+  ) async {
     await pump(tester, rawItems: [1, 2]);
     expect(loads, 1);
   });
 
-  testWidgets('does not load when something is visible or no more pages',
-      (tester) async {
+  testWidgets('does not load when something is visible or no more pages', (
+    tester,
+  ) async {
     await pump(tester, rawItems: [1, 2], visibleCount: 1);
     await pump(tester, rawItems: [3, 4], canLoadMore: false);
     await pump(tester, rawItems: const []);
     expect(loads, 0);
   });
 
-  testWidgets('stops after max consecutive attempts and resets on content',
-      (tester) async {
+  testWidgets('stops after max consecutive attempts and resets on content', (
+    tester,
+  ) async {
     await pump(tester, rawItems: [1]);
     await pump(tester, rawItems: [1, 2]);
     await pump(tester, rawItems: [1, 2, 3]);

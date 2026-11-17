@@ -15,10 +15,7 @@ class ChildForumItemWidget extends ConsumerWidget {
     final tid = childForum.tid;
     final subscriptionKey = tid == null
         ? null
-        : ChildForumSubscriptionKey(
-            tid,
-            initialSelected: childForum.selected,
-          );
+        : ChildForumSubscriptionKey(tid, initialSelected: childForum.selected);
     final subscribed = subscriptionKey == null
         ? false
         : ref.watch(childForumSubscriptionProvider(subscriptionKey));

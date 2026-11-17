@@ -225,9 +225,8 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
               children: [
                 Text(
                   _expanded ? '收起' : '展开全部',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: colorScheme.primary,
-                      ),
+                  style: Theme.of(context).textTheme.labelMedium
+                      ?.copyWith(color: colorScheme.primary),
                 ),
                 Icon(
                   _expanded ? Icons.expand_less : Icons.expand_more,

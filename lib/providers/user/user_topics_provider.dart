@@ -18,12 +18,12 @@ class UserTopicsState {
   });
 
   factory UserTopicsState.initial() => const UserTopicsState(
-        size: 35,
-        page: 1,
-        maxPage: 1,
-        enablePullUp: false,
-        list: [],
-      );
+    size: 35,
+    page: 1,
+    maxPage: 1,
+    enablePullUp: false,
+    list: [],
+  );
 
   UserTopicsState copyWith({
     int? size,
@@ -53,8 +53,10 @@ class UserTopicsNotifier extends Notifier<UserTopicsState> {
   Future<UserTopicsState> refresh() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
-      TopicListData data =
-          await repository.getTopicList(authorid: authorid, page: 1);
+      TopicListData data = await repository.getTopicList(
+        authorid: authorid,
+        page: 1,
+      );
       state = UserTopicsState(
         size: data.topicRows,
         page: 1,
@@ -71,8 +73,10 @@ class UserTopicsNotifier extends Notifier<UserTopicsState> {
   Future<UserTopicsState> loadMore() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
-      TopicListData data =
-          await repository.getTopicList(authorid: authorid, page: state.page + 1);
+      TopicListData data = await repository.getTopicList(
+        authorid: authorid,
+        page: state.page + 1,
+      );
       final newList = List<Topic>.from(state.list)
         ..addAll(data.topicList.values);
       state = UserTopicsState(
@@ -91,4 +95,5 @@ class UserTopicsNotifier extends Notifier<UserTopicsState> {
 
 final userTopicsProvider =
     NotifierProvider.family<UserTopicsNotifier, UserTopicsState, int>(
-        UserTopicsNotifier.new);
+      UserTopicsNotifier.new,
+    );

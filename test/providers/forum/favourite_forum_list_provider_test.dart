@@ -29,8 +29,9 @@ void main() {
       container.dispose();
     });
 
-    final refresh =
-        container.read(favouriteForumListProvider.notifier).refresh();
+    final refresh = container
+        .read(favouriteForumListProvider.notifier)
+        .refresh();
     await Future<void>.delayed(Duration.zero);
 
     final cachedState = container.read(favouriteForumListProvider);
@@ -92,50 +93,54 @@ void main() {
 
     final firstDelete = notifier.delete(forum);
     await Future<void>.delayed(Duration.zero);
-    expect(container.read(favouriteForumListProvider).isBusy(forum.identity),
-        isTrue);
+    expect(
+      container.read(favouriteForumListProvider).isBusy(forum.identity),
+      isTrue,
+    );
 
     await notifier.delete(forum);
     expect(repository.deleteCalls, 1);
 
     deleteGate.complete();
     await firstDelete;
-    expect(container.read(favouriteForumListProvider).isBusy(forum.identity),
-        isFalse);
+    expect(
+      container.read(favouriteForumListProvider).isBusy(forum.identity),
+      isFalse,
+    );
   });
 
-  test('account change clears stale state and reloads the current cache',
-      () async {
-    const first = Forum(1, '账号一');
-    const second = Forum(2, '账号二');
-    final repository = _FakeForumRepository(
-      cached: [first],
-      synced: [first],
-    );
-    final container = _container(repository);
-    final subscription = container.listen(
-      favouriteForumListProvider,
-      (_, _) {},
-    );
-    addTearDown(() {
-      subscription.close();
-      container.dispose();
-    });
-    final notifier = container.read(favouriteForumListProvider.notifier);
-    await notifier.refresh();
+  test(
+    'account change clears stale state and reloads the current cache',
+    () async {
+      const first = Forum(1, '账号一');
+      const second = Forum(2, '账号二');
+      final repository = _FakeForumRepository(cached: [first], synced: [first]);
+      final container = _container(repository);
+      final subscription = container.listen(
+        favouriteForumListProvider,
+        (_, _) {},
+      );
+      addTearDown(() {
+        subscription.close();
+        container.dispose();
+      });
+      final notifier = container.read(favouriteForumListProvider.notifier);
+      await notifier.refresh();
 
-    repository
-      ..cached = [second]
-      ..synced = [second];
-    notifier.onAccountChanged();
-    await Future<void>.delayed(Duration.zero);
-    await Future<void>.delayed(Duration.zero);
+      repository
+        ..cached = [second]
+        ..synced = [second];
+      notifier.onAccountChanged();
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
 
-    expect(container.read(favouriteForumListProvider).forums, [second]);
-  });
+      expect(container.read(favouriteForumListProvider).forums, [second]);
+    },
+  );
 
-  testWidgets('forum buttons derive fid and stid stars from the shared list',
-      (tester) async {
+  testWidgets('forum buttons derive fid and stid stars from the shared list', (
+    tester,
+  ) async {
     const special = Forum(7, '特殊版块', type: 1);
     final repository = _FakeForumRepository(
       cached: [special],
@@ -144,19 +149,13 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          forumRepositoryProvider.overrideWithValue(repository),
-        ],
+        overrides: [forumRepositoryProvider.overrideWithValue(repository)],
         child: const MaterialApp(
           home: Scaffold(
             body: Row(
               children: [
                 ForumFavouriteButtonWidget(fid: 7, name: '普通版块'),
-                ForumFavouriteButtonWidget(
-                  fid: 7,
-                  name: '特殊版块',
-                  type: 1,
-                ),
+                ForumFavouriteButtonWidget(fid: 7, name: '特殊版块', type: 1),
               ],
             ),
           ),
@@ -172,9 +171,7 @@ void main() {
 
 ProviderContainer _container(ForumRepository repository) {
   return ProviderContainer(
-    overrides: [
-      forumRepositoryProvider.overrideWithValue(repository),
-    ],
+    overrides: [forumRepositoryProvider.overrideWithValue(repository)],
   );
 }
 

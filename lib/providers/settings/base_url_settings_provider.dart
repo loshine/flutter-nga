@@ -101,8 +101,8 @@ class BaseUrlSettingsNotifier extends Notifier<BaseUrlSettingsState> {
 /// BaseUrl 设置 Provider
 final baseUrlSettingsProvider =
     NotifierProvider<BaseUrlSettingsNotifier, BaseUrlSettingsState>(
-  BaseUrlSettingsNotifier.new,
-);
+      BaseUrlSettingsNotifier.new,
+    );
 
 /// 当前 baseUrl Provider (便于直接监听)
 final currentBaseUrlProvider = Provider<String>((ref) {

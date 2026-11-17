@@ -18,7 +18,8 @@ class MinePage extends HookConsumerWidget {
 
     useEffect(() {
       Future.microtask(
-          () => ref.read(homeDrawerHeaderProvider.notifier).refresh());
+        () => ref.read(homeDrawerHeaderProvider.notifier).refresh(),
+      );
       return null;
     }, []);
 
@@ -141,10 +142,7 @@ class _UserHeaderCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
               ],
             ),
           ),
@@ -261,10 +259,7 @@ class _EntryTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
               ],
             ),
           ),

@@ -52,10 +52,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
             itemCount: forums.length,
             itemBuilder: (_, index) => ForumGridItemWidget(
               forums[index],
-              onLongPress: () => _showDeleteDialog(
-                notifier,
-                forums[index],
-              ),
+              onLongPress: () => _showDeleteDialog(notifier, forums[index]),
             ),
           ),
         ),
@@ -65,10 +62,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
     );
   }
 
-  void _showDeleteDialog(
-    FavouriteForumListNotifier notifier,
-    Forum forum,
-  ) {
+  void _showDeleteDialog(FavouriteForumListNotifier notifier, Forum forum) {
     showDialog(
       context: context,
       builder: (dialogContext) => Consumer(

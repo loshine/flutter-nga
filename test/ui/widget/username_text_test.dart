@@ -25,15 +25,14 @@ void main() {
     expect(_badgeBackground(tester, 0), isNot(_badgeBackground(tester, 2)));
   });
 
-  testWidgets('keeps username colors readable in both brightness modes',
-      (tester) async {
+  testWidgets('keeps username colors readable in both brightness modes', (
+    tester,
+  ) async {
     for (final brightness in Brightness.values) {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(brightness: brightness),
-          home: const Scaffold(
-            body: UsernameText(username: '测试用户', uid: 123),
-          ),
+          home: const Scaffold(body: UsernameText(username: '测试用户', uid: 123)),
         ),
       );
 
@@ -45,8 +44,9 @@ void main() {
     }
   });
 
-  testWidgets('keeps the first grapheme intact and exposes the full name',
-      (tester) async {
+  testWidgets('keeps the first grapheme intact and exposes the full name', (
+    tester,
+  ) async {
     const username = '👩‍💻Alice';
     final semantics = tester.ensureSemantics();
 
@@ -61,8 +61,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('highlights the last four nickname graphemes after UID:',
-      (tester) async {
+  testWidgets('highlights the last four nickname graphemes after UID:', (
+    tester,
+  ) async {
     const username = 'UID:甲乙👩‍💻丁戊';
     final semantics = tester.ensureSemantics();
 
@@ -86,8 +87,9 @@ void main() {
     expect(navigation.queryParameters, {'uid': '42'});
   });
 
-  testWidgets('falls back to username navigation when uid is absent',
-      (tester) async {
+  testWidgets('falls back to username navigation when uid is absent', (
+    tester,
+  ) async {
     final navigation = await _tapUsername(
       tester,
       const UsernameText(username: 'Alice Smith'),

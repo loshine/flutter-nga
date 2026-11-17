@@ -9,11 +9,7 @@ import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 
 class _PendingTopicSinglePageNotifier extends TopicSinglePageNotifier {
-  _PendingTopicSinglePageNotifier(
-    super.key,
-    this.completer,
-    this.started,
-  );
+  _PendingTopicSinglePageNotifier(super.key, this.completer, this.started);
 
   final Completer<TopicSinglePageState> completer;
   final Completer<void> started;
@@ -46,14 +42,18 @@ class _TopicRequestHarness {
     for (var i = 0; i < 50 && !started.isCompleted; i++) {
       await tester.pump(const Duration(milliseconds: 50));
     }
-    expect(started.isCompleted, isTrue,
-        reason: 'Initial refresh did not start.');
+    expect(
+      started.isCompleted,
+      isTrue,
+      reason: 'Initial refresh did not start.',
+    );
   }
 }
 
 void main() {
-  testWidgets('new topic starts with its route title and first page',
-      (tester) async {
+  testWidgets('new topic starts with its route title and first page', (
+    tester,
+  ) async {
     final harness = _TopicRequestHarness();
     final container = ProviderContainer(
       overrides: [
@@ -67,7 +67,9 @@ void main() {
       oldSubscription.close();
       container.dispose();
     });
-    container.read(oldProvider.notifier).updateMetadata(
+    container
+        .read(oldProvider.notifier)
+        .updateMetadata(
           maxPage: 5,
           maxFloor: 100,
           topic: const Topic(tid: 1, subject: '旧标题'),
@@ -77,9 +79,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(
-          home: TopicDetailPage(2, 10, subject: '新标题'),
-        ),
+        child: const MaterialApp(home: TopicDetailPage(2, 10, subject: '新标题')),
       ),
     );
 
@@ -105,9 +105,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(
-          home: TopicDetailPage(2, 10),
-        ),
+        child: const MaterialApp(home: TopicDetailPage(2, 10)),
       ),
     );
     await harness.waitForRefreshStart(tester, requestKey);
@@ -129,8 +127,9 @@ void main() {
     expect(find.text('1/4'), findsOneWidget);
   });
 
-  testWidgets('a completed request does not update a disposed detail page',
-      (tester) async {
+  testWidgets('a completed request does not update a disposed detail page', (
+    tester,
+  ) async {
     final harness = _TopicRequestHarness();
     final container = ProviderContainer(
       overrides: [
@@ -143,9 +142,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(
-          home: TopicDetailPage(2, 10),
-        ),
+        child: const MaterialApp(home: TopicDetailPage(2, 10)),
       ),
     );
     await harness.waitForRefreshStart(tester, requestKey);

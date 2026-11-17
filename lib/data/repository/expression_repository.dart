@@ -18,6 +18,8 @@ class EmoticonDataRepository implements EmoticonRepository {
           Emoticon(
             content: code.isEmpty ? '[s:$key]' : '[s:$code:$key]',
             url: '$emoticonImageBase$file',
+            height: code.isEmpty ? _classicHeight : _stickerHeight,
+            descent: code.isEmpty ? _classicDescent : _stickerDescent,
           ),
       ]),
   ];
@@ -25,6 +27,16 @@ class EmoticonDataRepository implements EmoticonRepository {
   @override
   List<EmoticonGroup> getEmoticonGroups() => _groups;
 }
+
+/// 默认分组为 19×19 的小图；其余分组高度统一为 60，宽度 46～81 不等。
+const double _classicHeight = 19;
+const double _stickerHeight = 60;
+
+/// 网页版样式表 `css_default.css`：`.smile { vertical-align: -4px }`，
+/// `.smile_ac, .smile_a2, .smile_dt, .smile_pg, .smile_pst { vertical-align: -12px }`。
+/// 网页漏了 NG娘（`.smile_ng`，底边贴基线），这里与其他大表情统一。
+const double _classicDescent = 4;
+const double _stickerDescent = 12;
 
 /// (分组名, UBB 分组代码, [(表情名, 图片文件名)])。
 ///

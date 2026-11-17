@@ -31,15 +31,12 @@ class SearchForumPage extends HookConsumerWidget {
     useInitialRefresh(refreshController);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("搜索板块:$keyword"),
-      ),
+      appBar: AppBar(title: Text("搜索板块:$keyword")),
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
         child: ListView.builder(
-          itemBuilder: (_, index) =>
-              _buildForumWidget(context, forums[index]),
+          itemBuilder: (_, index) => _buildForumWidget(context, forums[index]),
           itemCount: forums.length,
         ),
       ),
@@ -51,10 +48,7 @@ class SearchForumPage extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(forum.name),
-          ),
+          Padding(padding: EdgeInsets.all(16), child: Text(forum.name)),
           Divider(height: 1),
         ],
       ),

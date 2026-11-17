@@ -45,4 +45,14 @@ void main() {
     expect(urlByCode['[s:pst:脸红2]'], '${emoticonImageBase}pt55.png');
     expect(urlByCode['[s:pg:转身]'], '${emoticonImageBase}pg15.png');
   });
+
+  test('sizes and alignment match NGA web', () {
+    for (final group in groups) {
+      final classic = group.name == '默认';
+      for (final emoticon in group.expressionList) {
+        expect(emoticon.height, classic ? 19 : 60, reason: emoticon.content);
+        expect(emoticon.descent, classic ? 4 : 12, reason: emoticon.content);
+      }
+    }
+  });
 }

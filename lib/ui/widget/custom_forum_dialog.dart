@@ -52,10 +52,7 @@ class CustomForumDialog extends HookConsumerWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(Dimen.radiusS),
-                  borderSide: BorderSide(
-                    color: colorScheme.primary,
-                    width: 2,
-                  ),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
                 ),
                 prefixIcon: Icon(
                   Icons.tag,
@@ -80,10 +77,7 @@ class CustomForumDialog extends HookConsumerWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(Dimen.radiusS),
-                  borderSide: BorderSide(
-                    color: colorScheme.primary,
-                    width: 2,
-                  ),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
                 ),
                 prefixIcon: Icon(
                   Icons.forum_outlined,
@@ -136,8 +130,9 @@ class CustomForumDialog extends HookConsumerWidget {
     }
 
     try {
-      final added =
-          await ref.read(favouriteForumListProvider.notifier).add(fid, name);
+      final added = await ref
+          .read(favouriteForumListProvider.notifier)
+          .add(fid, name);
       if (!added || !context.mounted) return;
       AppToast.success('添加成功');
       Routes.pop(context);

@@ -61,4 +61,6 @@ class TopicReplyNotifier extends Notifier<TopicReplyState> {
 }
 
 final topicReplyProvider =
-    NotifierProvider.family<TopicReplyNotifier, TopicReplyState, int?>(TopicReplyNotifier.new);
+    NotifierProvider.family<TopicReplyNotifier, TopicReplyState, int?>(
+      TopicReplyNotifier.new,
+    );

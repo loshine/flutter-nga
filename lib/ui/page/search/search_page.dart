@@ -94,10 +94,7 @@ class SearchPage extends HookConsumerWidget {
         borderRadius: BorderRadius.circular(_searchBarRadius),
         // 焦点状态边框
         border: isFocused
-            ? Border.all(
-                color: colorScheme.primary,
-                width: 2,
-              )
+            ? Border.all(color: colorScheme.primary, width: 2)
             : null,
       ),
       child: Row(
@@ -147,8 +144,9 @@ class SearchPage extends HookConsumerWidget {
             Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => WidgetsBinding.instance
-                    .addPostFrameCallback((_) => controller.clear()),
+                onTap: () => WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => controller.clear(),
+                ),
                 borderRadius: BorderRadius.circular(_searchBarRadius),
                 child: Padding(
                   padding: const EdgeInsets.all(Dimen.spacingM),
@@ -319,7 +317,11 @@ class SearchPage extends HookConsumerWidget {
   }
 
   void _onSearch(
-      BuildContext context, String text, SearchOptionsState state, int? fid) {
+    BuildContext context,
+    String text,
+    SearchOptionsState state,
+    int? fid,
+  ) {
     if (state.firstRadio == FIRST_RADIO_TOPIC) {
       if (fid == null) {
         Routes.navigateTo(

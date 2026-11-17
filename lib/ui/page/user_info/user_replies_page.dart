@@ -10,11 +10,7 @@ class UserRepliesPage extends HookConsumerWidget {
   final int uid;
   final String username;
 
-  const UserRepliesPage({
-    super.key,
-    required this.uid,
-    required this.username,
-  });
+  const UserRepliesPage({super.key, required this.uid, required this.username});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

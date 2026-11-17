@@ -7,11 +7,13 @@ import 'package:flutter_nga/ui/page/forum_group/forum_category_page.dart';
 
 void main() {
   Future<void> pumpPage(WidgetTester tester, ForumCategory category) {
-    return tester.pumpWidget(ProviderScope(
-      child: MaterialApp(
-        home: Scaffold(body: ForumCategoryPage(category: category)),
+    return tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(body: ForumCategoryPage(category: category)),
+        ),
       ),
-    ));
+    );
   }
 
   testWidgets('tapping a group header collapses and expands its forums', (

@@ -91,7 +91,8 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
     final detailsBlockEnabled =
         settings.getBool(PrefsKeys.blocklistDetailsBlockEnabled) ?? true;
     final blockModeIndex =
-        settings.getInt(PrefsKeys.blocklistBlockMode) ?? BlockMode.COLLAPSE.index;
+        settings.getInt(PrefsKeys.blocklistBlockMode) ??
+        BlockMode.COLLAPSE.index;
 
     state = state.copyWith(
       clientBlockEnabled: clientBlockEnabled,
@@ -103,16 +104,18 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   void loopSyncBlockList() {
     Future.delayed(Duration(), () async {
-      debugPrint('定时任务');
-      if (await Data().userRepository.getDefaultUser() != null) {
-        await load();
-      }
-    }).whenComplete(() {
-      _syncTimer?.cancel();
-      _syncTimer = Timer(Duration(minutes: 5), () => loopSyncBlockList());
-    }).catchError((err) {
-      debugPrint(err.toString());
-    });
+          debugPrint('定时任务');
+          if (await Data().userRepository.getDefaultUser() != null) {
+            await load();
+          }
+        })
+        .whenComplete(() {
+          _syncTimer?.cancel();
+          _syncTimer = Timer(Duration(minutes: 5), () => loopSyncBlockList());
+        })
+        .catchError((err) {
+          debugPrint(err.toString());
+        });
   }
 
   Future<void> setClientBlockEnabled(bool enabled) async {
@@ -148,9 +151,9 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   Future<String> addUser(String user) async {
     try {
       var submitUsers = <String>[...state.blockUserList, user];
-      final content = await Data()
-          .userRepository
-          .setBlockInfo(BlockInfoData(submitUsers, state.blockWordList));
+      final content = await Data().userRepository.setBlockInfo(
+        BlockInfoData(submitUsers, state.blockWordList),
+      );
       state = state.copyWith(blockUserList: submitUsers);
       return content;
     } catch (err) {
@@ -160,11 +163,10 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<String> deleteUser(String user) async {
     try {
-      var submitUsers =
-          state.blockUserList.where((e) => e != user).toList();
-      final content = await Data()
-          .userRepository
-          .setBlockInfo(BlockInfoData(submitUsers, state.blockWordList));
+      var submitUsers = state.blockUserList.where((e) => e != user).toList();
+      final content = await Data().userRepository.setBlockInfo(
+        BlockInfoData(submitUsers, state.blockWordList),
+      );
       state = state.copyWith(blockUserList: submitUsers);
       return content;
     } catch (err) {
@@ -174,9 +176,9 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<String> deleteAllUsers() async {
     try {
-      final content = await Data()
-          .userRepository
-          .setBlockInfo(BlockInfoData([], state.blockWordList));
+      final content = await Data().userRepository.setBlockInfo(
+        BlockInfoData([], state.blockWordList),
+      );
       state = state.copyWith(blockUserList: []);
       return content;
     } catch (err) {
@@ -187,9 +189,9 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   Future<String> addWord(String word) async {
     try {
       var submitWords = <String>[...state.blockWordList, word];
-      final content = await Data()
-          .userRepository
-          .setBlockInfo(BlockInfoData(state.blockUserList, submitWords));
+      final content = await Data().userRepository.setBlockInfo(
+        BlockInfoData(state.blockUserList, submitWords),
+      );
       state = state.copyWith(blockWordList: submitWords);
       return content;
     } catch (err) {
@@ -199,11 +201,10 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<String> deleteWord(String word) async {
     try {
-      var submitWords =
-          state.blockWordList.where((e) => e != word).toList();
-      final content = await Data()
-          .userRepository
-          .setBlockInfo(BlockInfoData(state.blockUserList, submitWords));
+      var submitWords = state.blockWordList.where((e) => e != word).toList();
+      final content = await Data().userRepository.setBlockInfo(
+        BlockInfoData(state.blockUserList, submitWords),
+      );
       state = state.copyWith(blockWordList: submitWords);
       return content;
     } catch (err) {
@@ -213,9 +214,9 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<String> deleteAllWords() async {
     try {
-      final content = await Data()
-          .userRepository
-          .setBlockInfo(BlockInfoData(state.blockUserList, []));
+      final content = await Data().userRepository.setBlockInfo(
+        BlockInfoData(state.blockUserList, []),
+      );
       state = state.copyWith(blockWordList: []);
       return content;
     } catch (err) {
@@ -249,7 +250,8 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
 final blocklistSettingsProvider =
     NotifierProvider<BlocklistSettingsNotifier, BlocklistSettingsState>(
-        BlocklistSettingsNotifier.new);
+      BlocklistSettingsNotifier.new,
+    );
 
 /// 屏蔽判定结果：组合开关、屏蔽模式与匹配规则，UI 只按返回的 [BlockMode] 渲染
 class BlockFilter {

@@ -25,21 +25,20 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
         actions: [
           IconButton(
             onPressed: () => _deleteAll(notifier),
-            icon: Icon(
-              Icons.delete_forever,
-              color: Colors.white,
-            ),
+            icon: Icon(Icons.delete_forever, color: Colors.white),
             tooltip: "删除所有屏蔽关键词",
           ),
         ],
       ),
       body: ListView(
         children: state.blockWordList
-            .map((e) => ListTile(
-                  title: Text(code_utils.unescapeHtml(e)),
-                  trailing: Icon(Icons.delete),
-                  onTap: () => _delete(notifier, e),
-                ))
+            .map(
+              (e) => ListTile(
+                title: Text(code_utils.unescapeHtml(e)),
+                trailing: Icon(Icons.delete),
+                onTap: () => _delete(notifier, e),
+              ),
+            )
             .toList(),
       ),
       floatingActionButton: FloatingActionButton(
@@ -58,10 +57,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
     }
   }
 
-  Future<void> _delete(
-    BlocklistSettingsNotifier notifier,
-    String word,
-  ) async {
+  Future<void> _delete(BlocklistSettingsNotifier notifier, String word) async {
     try {
       AppToast.success(await notifier.deleteWord(word));
     } catch (e) {
@@ -69,10 +65,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
     }
   }
 
-  Future<void> _add(
-    BlocklistSettingsNotifier notifier,
-    String word,
-  ) async {
+  Future<void> _add(BlocklistSettingsNotifier notifier, String word) async {
     try {
       AppToast.success(await notifier.addWord(word));
     } catch (e) {
@@ -85,13 +78,14 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
     BlocklistSettingsNotifier notifier,
   ) {
     showDialog(
-        context: context,
-        builder: (_) {
-          return BlocklistEditDialog(
-            title: "添加屏蔽词语",
-            inputHint: "需要屏蔽的关键词",
-            callback: (word) => _add(notifier, word),
-          );
-        });
+      context: context,
+      builder: (_) {
+        return BlocklistEditDialog(
+          title: "添加屏蔽词语",
+          inputHint: "需要屏蔽的关键词",
+          callback: (word) => _add(notifier, word),
+        );
+      },
+    );
   }
 }

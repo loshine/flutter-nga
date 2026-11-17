@@ -149,7 +149,10 @@ class UserInfo {
 
   factory UserInfo.fromJson(Map map) {
     List<ForumReputation> reputationList = [];
-    final reputationMap = asJsonMapOrNull(map['reputation'], 'UserInfo.reputation');
+    final reputationMap = asJsonMapOrNull(
+      map['reputation'],
+      'UserInfo.reputation',
+    );
     if (reputationMap != null) {
       reputationMap.forEach((k, v) {
         final item = asJsonMap(v, 'UserInfo.reputation.$k');
@@ -172,8 +175,9 @@ class UserInfo {
       posts: map['posts'],
       fame: map['fame'],
       money: map['money'],
-      adminForums:
-          adminForums is Map ? adminForums as Map<String, dynamic>? : null,
+      adminForums: adminForums is Map
+          ? adminForums as Map<String, dynamic>?
+          : null,
       userForum: userForum is Map ? userForum as Map<String, dynamic>? : null,
       reputation: reputationList,
     );
@@ -181,12 +185,7 @@ class UserInfo {
 }
 
 class ForumReputation {
-  const ForumReputation({
-    this.id,
-    this.name,
-    this.value,
-    this.description,
-  });
+  const ForumReputation({this.id, this.name, this.value, this.description});
 
   final int? id;
   final String? name;

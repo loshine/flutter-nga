@@ -91,19 +91,11 @@ class UsernameText extends StatelessWidget {
 
   void _navigateToUser(BuildContext context) {
     if (_hasValidUid) {
-      Routes.navigateTo(
-        context,
-        Routes.USER,
-        queryParams: {'uid': '$uid'},
-      );
+      Routes.navigateTo(context, Routes.USER, queryParams: {'uid': '$uid'});
       return;
     }
 
-    Routes.navigateTo(
-      context,
-      Routes.USER,
-      queryParams: {'name': username},
-    );
+    Routes.navigateTo(context, Routes.USER, queryParams: {'name': username});
   }
 }
 
@@ -151,10 +143,12 @@ class _UsernameParts {
     final nickname = characters.skip('UID:'.length);
     final highlightedLength = nickname.length > 4 ? 4 : nickname.length;
     return _UsernameParts(
-      leading:
-          characters.take(characters.length - highlightedLength).toString(),
-      highlighted:
-          nickname.skip(nickname.length - highlightedLength).toString(),
+      leading: characters
+          .take(characters.length - highlightedLength)
+          .toString(),
+      highlighted: nickname
+          .skip(nickname.length - highlightedLength)
+          .toString(),
       trailing: '',
     );
   }

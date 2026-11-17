@@ -42,8 +42,9 @@ class ForumCategoryListNotifier extends Notifier<ForumCategoryListState> {
     if (state.isInitialized || state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final cached =
-          await ref.read(forumRepositoryProvider).getCachedForumCategories();
+      final cached = await ref
+          .read(forumRepositoryProvider)
+          .getCachedForumCategories();
       if (cached != null && cached.isNotEmpty) {
         state = state.copyWith(categories: cached, isInitialized: true);
       }
@@ -60,8 +61,9 @@ class ForumCategoryListNotifier extends Notifier<ForumCategoryListState> {
   Future<void> refresh() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final categories =
-          await ref.read(forumRepositoryProvider).fetchForumCategories();
+      final categories = await ref
+          .read(forumRepositoryProvider)
+          .fetchForumCategories();
       state = state.copyWith(
         categories: categories,
         isInitialized: true,
@@ -80,5 +82,5 @@ class ForumCategoryListNotifier extends Notifier<ForumCategoryListState> {
 
 final forumCategoryListProvider =
     NotifierProvider<ForumCategoryListNotifier, ForumCategoryListState>(
-  ForumCategoryListNotifier.new,
-);
+      ForumCategoryListNotifier.new,
+    );

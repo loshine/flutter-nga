@@ -14,9 +14,9 @@ class _FakeBaseUrlSettingsNotifier extends BaseUrlSettingsNotifier {
 
   @override
   BaseUrlSettingsState build() => BaseUrlSettingsState(
-        currentConfig: BaseUrlPresets.ngaOfficial,
-        isLoading: isLoading,
-      );
+    currentConfig: BaseUrlPresets.ngaOfficial,
+    isLoading: isLoading,
+  );
 
   @override
   Future<void> setBaseUrlConfig(BaseUrlConfig config) async {
@@ -32,17 +32,16 @@ Future<_FakeBaseUrlSettingsNotifier> _pumpDialog(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [baseUrlSettingsProvider.overrideWith(() => notifier)],
-      child: const MaterialApp(
-        home: Scaffold(body: BaseUrlSelectionDialog()),
-      ),
+      child: const MaterialApp(home: Scaffold(body: BaseUrlSelectionDialog())),
     ),
   );
   return notifier;
 }
 
 void main() {
-  testWidgets('RadioGroup marks the current config as selected',
-      (tester) async {
+  testWidgets('RadioGroup marks the current config as selected', (
+    tester,
+  ) async {
     await _pumpDialog(tester);
 
     final group = tester.widget<RadioGroup<BaseUrlConfig>>(

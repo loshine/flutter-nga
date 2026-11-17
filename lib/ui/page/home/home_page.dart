@@ -45,10 +45,7 @@ class _HomePageContent extends HookConsumerWidget {
   static const double _railBreakpoint = 600.0;
 
   List<Widget> _buildPageList() {
-    return [
-      const ForumGroupTabsPage(),
-      const MinePage(),
-    ];
+    return [const ForumGroupTabsPage(), const MinePage()];
   }
 
   String _getTitleText(int index) {
@@ -57,22 +54,27 @@ class _HomePageContent extends HookConsumerWidget {
   }
 
   List<Widget> _getActionsByPage(
-      BuildContext context, WidgetRef ref, int index) {
+    BuildContext context,
+    WidgetRef ref,
+    int index,
+  ) {
     return switch (index) {
       0 => [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
-          ),
-        ],
+        IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
+        ),
+      ],
       _ => const [],
     };
   }
 
   Widget _getFloatingActionButton(
-      BuildContext context, WidgetRef ref, int index) {
-    final fabVisible =
-        index == 0 && ref.watch(forumGroupFabVisibleProvider);
+    BuildContext context,
+    WidgetRef ref,
+    int index,
+  ) {
+    final fabVisible = index == 0 && ref.watch(forumGroupFabVisibleProvider);
     return AnimatedSwitcher(
       duration: Motion.durationShort4,
       switchInCurve: Motion.emphasizedDecelerate,
@@ -132,10 +134,7 @@ class _HomePageContent extends HookConsumerWidget {
           child: child,
         ),
       ),
-      child: KeyedSubtree(
-        key: ValueKey(index),
-        child: pageList[index],
-      ),
+      child: KeyedSubtree(key: ValueKey(index), child: pageList[index]),
     );
   }
 
@@ -143,10 +142,7 @@ class _HomePageContent extends HookConsumerWidget {
   Widget _buildAnimatedTitle(int index) {
     return AnimatedSwitcher(
       duration: Motion.durationShort4,
-      child: Text(
-        _getTitleText(index),
-        key: ValueKey(index),
-      ),
+      child: Text(_getTitleText(index), key: ValueKey(index)),
     );
   }
 
@@ -191,11 +187,13 @@ class _HomePageContent extends HookConsumerWidget {
               ref.read(homeIndexProvider.notifier).setIndex(i),
           labelType: NavigationRailLabelType.all,
           destinations: _destinations
-              .map((d) => NavigationRailDestination(
-                    icon: d.icon,
-                    selectedIcon: d.selectedIcon,
-                    label: Text(d.label),
-                  ))
+              .map(
+                (d) => NavigationRailDestination(
+                  icon: d.icon,
+                  selectedIcon: d.selectedIcon,
+                  label: Text(d.label),
+                ),
+              )
               .toList(),
         ),
         const VerticalDivider(thickness: 1, width: 1),

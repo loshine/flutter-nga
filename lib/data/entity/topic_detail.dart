@@ -50,20 +50,24 @@ class TopicDetailData {
         if ("__GROUPS" == entry.key) {
           final groups = asJsonMap(entry.value, 'TopicDetailData.__U.__GROUPS');
           for (final m in groups.entries) {
-            tempGroupMap[m.key] =
-                Group.fromJson(asJsonMap(m.value, 'TopicDetailData.__U.__GROUPS.${m.key}'));
+            tempGroupMap[m.key] = Group.fromJson(
+              asJsonMap(m.value, 'TopicDetailData.__U.__GROUPS.${m.key}'),
+            );
           }
         } else if ("__MEDALS" == entry.key) {
           // __MEDALS 奖牌
           final medals = asJsonMap(entry.value, 'TopicDetailData.__U.__MEDALS');
           for (final m in medals.entries) {
-            tempMedalMap[m.key] =
-                Medal.fromJson(asJsonMap(m.value, 'TopicDetailData.__U.__MEDALS.${m.key}'));
+            tempMedalMap[m.key] = Medal.fromJson(
+              asJsonMap(m.value, 'TopicDetailData.__U.__MEDALS.${m.key}'),
+            );
           }
         } else if ("__REPUTATIONS" == entry.key) {
           // __REPUTATIONS 威望
-          final reputations =
-              asJsonMap(entry.value, 'TopicDetailData.__U.__REPUTATIONS');
+          final reputations = asJsonMap(
+            entry.value,
+            'TopicDetailData.__U.__REPUTATIONS',
+          );
           for (final m in reputations.entries) {
             tempReputationMap[m.key] = Reputation.fromJson(
               asJsonMap(m.value, 'TopicDetailData.__U.__REPUTATIONS.${m.key}'),
@@ -85,7 +89,8 @@ class TopicDetailData {
         asJsonMap(entry.value, 'TopicDetailData.__R.${entry.key}'),
       );
     }
-    final topicMisc = asJsonMapOrNull(
+    final topicMisc =
+        asJsonMapOrNull(
           topicInfoMap["post_misc_var"],
           'TopicDetailData.__T.post_misc_var',
         ) ??
@@ -93,12 +98,14 @@ class TopicDetailData {
     List<int> hotReplies = [];
     if (topicMisc.containsKey("17")) {
       String hots = topicMisc["17"];
-      hotReplies.addAll(hots
-          .split(",")
-          .where((e) => e.isNotEmpty)
-          .map((e) => int.tryParse(e))
-          .where((e) => e != null)
-          .cast());
+      hotReplies.addAll(
+        hots
+            .split(",")
+            .where((e) => e.isNotEmpty)
+            .map((e) => int.tryParse(e))
+            .where((e) => e != null)
+            .cast(),
+      );
     }
     return TopicDetailData(
       global: map["__GLOBAL"],
@@ -162,17 +169,20 @@ class Reply {
     List<Reply> commentList = [];
     if (commentData is Map) {
       final comments = asJsonMap(commentData, 'Reply.comment');
-      comments.forEach((k, v) => commentList.add(
-            Reply.fromJson(asJsonMap(v, 'Reply.comment.$k')),
-          ));
+      comments.forEach(
+        (k, v) =>
+            commentList.add(Reply.fromJson(asJsonMap(v, 'Reply.comment.$k'))),
+      );
     }
     dynamic attachmentData = map["attachs"];
     List<Attachment> attachmentList = [];
     if (attachmentData is Map) {
       final attachments = asJsonMap(attachmentData, 'Reply.attachs');
-      attachments.forEach((k, v) => attachmentList.add(
-            Attachment.fromJson(asJsonMap(v, 'Reply.attachs.$k')),
-          ));
+      attachments.forEach(
+        (k, v) => attachmentList.add(
+          Attachment.fromJson(asJsonMap(v, 'Reply.attachs.$k')),
+        ),
+      );
     }
     return Reply(
       content: map["content"] == null ? "" : map["content"].toString(),
@@ -189,8 +199,8 @@ class Reply {
       pid: map["pid"],
       recommend: map["recommend"],
       lou: map["lou"],
-// 实际上无用属性，还可能是字符串，干脆不要了
-//      contentLength: int.tryParse(map["content_length"]) ?? 0,
+      // 实际上无用属性，还可能是字符串，干脆不要了
+      //      contentLength: int.tryParse(map["content_length"]) ?? 0,
       postDateTimestamp: map["postdatetimestamp"],
       commentList: commentList,
       attachmentList: attachmentList,

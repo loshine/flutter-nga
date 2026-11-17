@@ -13,10 +13,7 @@ abstract class LinkRoute {
 class TopicLinkRoute extends LinkRoute {
   @override
   void handleMatch(BuildContext context, Match match) {
-    Routes.navigateTo(
-      context,
-      "${Routes.TOPIC_DETAIL}?tid=${match.group(1)}",
-    );
+    Routes.navigateTo(context, "${Routes.TOPIC_DETAIL}?tid=${match.group(1)}");
   }
 
   @override
@@ -32,19 +29,14 @@ class UserLinkRoute extends LinkRoute {
     final uid = match.group(1);
     final username = match.group(2);
     if (uid != null && uid.isNotEmpty) {
-      Routes.navigateTo(
-        context,
-        "${Routes.USER}?uid=$uid",
-      );
+      Routes.navigateTo(context, "${Routes.USER}?uid=$uid");
       return;
     }
     if (username != null && username.isNotEmpty) {
-      final encoded =
-          Uri.encodeQueryComponent(Uri.decodeQueryComponent(username));
-      Routes.navigateTo(
-        context,
-        "${Routes.USER}?name=$encoded",
+      final encoded = Uri.encodeQueryComponent(
+        Uri.decodeQueryComponent(username),
       );
+      Routes.navigateTo(context, "${Routes.USER}?name=$encoded");
     }
   }
 
@@ -59,8 +51,9 @@ class ReplyLinkRoute extends LinkRoute {
   @override
   void handleMatch(BuildContext context, Match match) {
     showDialog(
-        context: context,
-        builder: (_) => ReplyDetailDialog(pid: int.tryParse(match.group(1)!)));
+      context: context,
+      builder: (_) => ReplyDetailDialog(pid: int.tryParse(match.group(1)!)),
+    );
   }
 
   @override

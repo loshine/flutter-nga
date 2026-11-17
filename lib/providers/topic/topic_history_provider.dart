@@ -11,5 +11,6 @@ class TopicHistoryNotifier extends Notifier<void> {
   }
 }
 
-final topicHistoryProvider =
-    NotifierProvider<TopicHistoryNotifier, void>(TopicHistoryNotifier.new);
+final topicHistoryProvider = NotifierProvider<TopicHistoryNotifier, void>(
+  TopicHistoryNotifier.new,
+);

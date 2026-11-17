@@ -13,11 +13,7 @@ import 'package:flutter_nga/utils/theme_builder.dart';
 /// 因此冷启动时 [themeProvider] 必须在首帧前就持有已保存的主题色，
 /// 由 `main()` 通过 [ThemeNotifier.loadSaved] 预读并注入。
 class AppAdaptiveTheme extends ConsumerWidget {
-  const AppAdaptiveTheme({
-    super.key,
-    this.initialMode,
-    required this.builder,
-  });
+  const AppAdaptiveTheme({super.key, this.initialMode, required this.builder});
 
   final AdaptiveThemeMode? initialMode;
   final AdaptiveThemeBuilder builder;

@@ -36,8 +36,13 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 标题
-                _buildTitle(context, topicHistory!, interfaceState, textTheme,
-                    colorScheme),
+                _buildTitle(
+                  context,
+                  topicHistory!,
+                  interfaceState,
+                  textTheme,
+                  colorScheme,
+                ),
                 const SizedBox(height: 8),
                 // 元信息行
                 Row(
@@ -86,12 +91,15 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
           color: topicHistory.getSubjectColor() ?? textTheme.bodyLarge?.color,
-          fontWeight:
-              topicHistory.isBold() ? FontWeight.bold : FontWeight.normal,
-          fontStyle:
-              topicHistory.isItalic() ? FontStyle.italic : FontStyle.normal,
-          decoration:
-              topicHistory.isUnderline() ? TextDecoration.underline : null,
+          fontWeight: topicHistory.isBold()
+              ? FontWeight.bold
+              : FontWeight.normal,
+          fontStyle: topicHistory.isItalic()
+              ? FontStyle.italic
+              : FontStyle.normal,
+          decoration: topicHistory.isUnderline()
+              ? TextDecoration.underline
+              : null,
           height: interfaceState.lineHeight.size,
         ),
         children: [
@@ -142,7 +150,10 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
   }
 
   void _goTopicDetail(
-      BuildContext context, TopicHistory topicHistory, WidgetRef ref) {
+    BuildContext context,
+    TopicHistory topicHistory,
+    WidgetRef ref,
+  ) {
     ref
         .read(topicHistoryProvider.notifier)
         .insertHistory(topicHistory.createNewHistory());

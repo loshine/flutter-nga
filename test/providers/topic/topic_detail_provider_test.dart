@@ -18,7 +18,9 @@ void main() {
       container.dispose();
     });
 
-    container.read(topicA.notifier).updateMetadata(
+    container
+        .read(topicA.notifier)
+        .updateMetadata(
           maxPage: 5,
           maxFloor: 100,
           topic: const Topic(tid: 1, subject: '帖子 A'),
@@ -68,7 +70,9 @@ void main() {
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
 
-    container.read(provider.notifier).updateMetadata(
+    container
+        .read(provider.notifier)
+        .updateMetadata(
           maxPage: 4,
           maxFloor: 80,
           topic: const Topic(tid: 1, subject: '帖子'),

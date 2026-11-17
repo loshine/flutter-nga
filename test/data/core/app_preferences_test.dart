@@ -65,10 +65,7 @@ void main() {
     expect(prefs.getInt(PrefsKeys.blocklistBlockMode), 2);
 
     final async = SharedPreferencesAsync();
-    expect(
-      await async.getBool(AppPreferences.migrationCompletedKey),
-      isTrue,
-    );
+    expect(await async.getBool(AppPreferences.migrationCompletedKey), isTrue);
     // 新存储中的 key 不带 flutter. 前缀。
     expect(
       (await async.getKeys()).where((key) => key.startsWith('flutter.')),
@@ -110,20 +107,21 @@ void main() {
     expect(keys, containsAll(PrefsKeys.all));
   });
 
-  test('migrates adaptive theme mode only when the new store lacks it',
-      () async {
-    const legacyTheme = '{"theme_mode":1,"default_theme_mode":0}';
-    setUpTestPreferences(
-      legacy: {AppPreferences.adaptiveThemePrefKey: legacyTheme},
-    );
+  test(
+    'migrates adaptive theme mode only when the new store lacks it',
+    () async {
+      const legacyTheme = '{"theme_mode":1,"default_theme_mode":0}';
+      setUpTestPreferences(
+        legacy: {AppPreferences.adaptiveThemePrefKey: legacyTheme},
+      );
 
-    await AppPreferences.ensureMigrated();
+      await AppPreferences.ensureMigrated();
 
-    expect(await AdaptiveTheme.getThemeMode(), AdaptiveThemeMode.dark);
-  });
+      expect(await AdaptiveTheme.getThemeMode(), AdaptiveThemeMode.dark);
+    },
+  );
 
-  test('keeps the adaptive theme mode already saved by the new API',
-      () async {
+  test('keeps the adaptive theme mode already saved by the new API', () async {
     const legacyTheme = '{"theme_mode":1,"default_theme_mode":0}';
     const currentTheme = '{"theme_mode":2,"default_theme_mode":0}';
     setUpTestPreferences(

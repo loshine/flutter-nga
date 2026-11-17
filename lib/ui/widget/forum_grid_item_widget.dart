@@ -53,8 +53,9 @@ class ForumGridItemWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               forum.name,
-              style:
-                  textTheme.titleSmall?.copyWith(color: colorScheme.onSurface),
+              style: textTheme.titleSmall?.copyWith(
+                color: colorScheme.onSurface,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,

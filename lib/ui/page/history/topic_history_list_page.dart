@@ -56,7 +56,8 @@ class TopicHistoryListPage extends HookConsumerWidget {
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: '清空浏览历史',
-            onPressed: () => _showCleanDialog(context, notifier, refreshController),
+            onPressed: () =>
+                _showCleanDialog(context, notifier, refreshController),
           ),
         ],
       ),
@@ -96,31 +97,32 @@ class TopicHistoryListPage extends HookConsumerWidget {
     EasyRefreshController refreshController,
   ) {
     showDialog(
-        context: context,
-        builder: (_) {
-          return AlertDialog(
-            title: Text("提示"),
-            content: Text("是否删除所有浏览历史"),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Routes.pop(context),
-                child: Text("取消"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Routes.pop(context);
-                  notifier.clean().catchError((err) {
-                    AppToast.error(err);
-                    return 0;
-                  }).whenComplete(() {
-                    refreshController.callRefresh();
-                  });
-                },
-                child: Text("确认"),
-              ),
-            ],
-          );
-        });
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text("提示"),
+          content: Text("是否删除所有浏览历史"),
+          actions: <Widget>[
+            TextButton(onPressed: () => Routes.pop(context), child: Text("取消")),
+            TextButton(
+              onPressed: () {
+                Routes.pop(context);
+                notifier
+                    .clean()
+                    .catchError((err) {
+                      AppToast.error(err);
+                      return 0;
+                    })
+                    .whenComplete(() {
+                      refreshController.callRefresh();
+                    });
+              },
+              child: Text("确认"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showDeleteDialog(
@@ -129,26 +131,24 @@ class TopicHistoryListPage extends HookConsumerWidget {
     int id,
   ) {
     showDialog(
-        context: context,
-        builder: (_) {
-          return AlertDialog(
-            title: Text("提示"),
-            content: Text("是否删除该浏览历史"),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Routes.pop(context),
-                child: Text("取消"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Routes.pop(context);
-                  notifier.delete(id);
-                },
-                child: Text("确认"),
-              ),
-            ],
-          );
-        });
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text("提示"),
+          content: Text("是否删除该浏览历史"),
+          actions: <Widget>[
+            TextButton(onPressed: () => Routes.pop(context), child: Text("取消")),
+            TextButton(
+              onPressed: () {
+                Routes.pop(context);
+                notifier.delete(id);
+              },
+              child: Text("确认"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildChild(

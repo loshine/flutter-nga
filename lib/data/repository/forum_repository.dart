@@ -51,10 +51,8 @@ class ForumDataRepository implements ForumRepository {
   final Map<String, Future<List<Forum>>> _syncFutures = {};
   final Map<String, Future<void>> _accountOperationTails = {};
 
-  StoreRef<int, dynamic> _favouriteStore(String? uid) =>
-      intMapStoreFactory.store(
-        uid == null ? _guestStoreName : '$_accountStorePrefix$uid',
-      );
+  StoreRef<int, dynamic> _favouriteStore(String? uid) => intMapStoreFactory
+      .store(uid == null ? _guestStoreName : '$_accountStorePrefix$uid');
 
   StoreRef<String, dynamic> get _pendingAddStore =>
       stringMapStoreFactory.store(_pendingAddStoreName);
@@ -159,11 +157,7 @@ class ForumDataRepository implements ForumRepository {
     final store = _favouriteStore(user?.uid);
     if (user == null) {
       await database.transaction((transaction) async {
-        await _deleteLocalFavourite(
-          transaction,
-          store,
-          forum.identity,
-        );
+        await _deleteLocalFavourite(transaction, store, forum.identity);
       });
       return;
     }
@@ -183,11 +177,7 @@ class ForumDataRepository implements ForumRepository {
         );
         if (currentVersion != pendingVersion) return;
 
-        await _deleteLocalFavourite(
-          transaction,
-          store,
-          forum.identity,
-        );
+        await _deleteLocalFavourite(transaction, store, forum.identity);
         await pendingRecord.delete(transaction);
       });
     });
@@ -222,14 +212,13 @@ class ForumDataRepository implements ForumRepository {
     if (runningSync != null) return runningSync;
 
     late final Future<List<Forum>> future;
-    future = _runAccountOperation(
-      user.uid,
-      () => _syncUser(user),
-    ).whenComplete(() {
-      if (identical(_syncFutures[user.uid], future)) {
-        _syncFutures.remove(user.uid);
-      }
-    });
+    future = _runAccountOperation(user.uid, () => _syncUser(user)).whenComplete(
+      () {
+        if (identical(_syncFutures[user.uid], future)) {
+          _syncFutures.remove(user.uid);
+        }
+      },
+    );
     _syncFutures[user.uid] = future;
     return future;
   }
@@ -295,25 +284,28 @@ class ForumDataRepository implements ForumRepository {
     CacheUser user,
     List<Forum> remoteForums,
   ) async {
-    final remoteIdentities =
-        remoteForums.map((forum) => forum.identity).toSet();
+    final remoteIdentities = remoteForums
+        .map((forum) => forum.identity)
+        .toSet();
     await database.transaction((transaction) async {
-      final migration =
-          await _metadataStore.record(_legacyMigrationKey).get(transaction);
+      final migration = await _metadataStore
+          .record(_legacyMigrationKey)
+          .get(transaction);
       if (migration != null) return;
 
-      final legacyForums =
-          await _readForums(transaction, _favouriteStore(null));
+      final legacyForums = await _readForums(
+        transaction,
+        _favouriteStore(null),
+      );
       final accountStore = _favouriteStore(user.uid);
       for (final forum in legacyForums) {
         if (remoteIdentities.contains(forum.identity)) continue;
         await _upsertFavourite(transaction, accountStore, forum);
         await _putPendingAdd(transaction, user.uid, forum);
       }
-      await _metadataStore.record(_legacyMigrationKey).put(
-        transaction,
-        {'uid': user.uid},
-      );
+      await _metadataStore.record(_legacyMigrationKey).put(transaction, {
+        'uid': user.uid,
+      });
     });
   }
 
@@ -321,8 +313,9 @@ class ForumDataRepository implements ForumRepository {
     CacheUser user,
     List<Forum> remoteForums,
   ) async {
-    final remoteIdentities =
-        remoteForums.map((forum) => forum.identity).toSet();
+    final remoteIdentities = remoteForums
+        .map((forum) => forum.identity)
+        .toSet();
     var remoteChanged = false;
 
     while (true) {
@@ -367,10 +360,7 @@ class ForumDataRepository implements ForumRepository {
     String action,
     int fid,
   ) async {
-    await _postFavourite(user, {
-      'action': action,
-      'fid': fid.toString(),
-    });
+    await _postFavourite(user, {'action': action, 'fid': fid.toString()});
   }
 
   Future<Response<dynamic>> _postFavourite(
@@ -382,9 +372,9 @@ class ForumDataRepository implements ForumRepository {
       'access_token': user.cid,
       'access_uid': user.uid,
     });
-    final options = Options(headers: {
-      'Cookie': '$TAG_UID=${user.uid};$TAG_CID=${user.cid}',
-    });
+    final options = Options(
+      headers: {'Cookie': '$TAG_UID=${user.uid};$TAG_CID=${user.cid}'},
+    );
     return _dio.post<dynamic>(
       _favouriteApiPath,
       data: formData,
@@ -455,8 +445,9 @@ class ForumDataRepository implements ForumRepository {
   ) async {
     final record = _pendingAddStore.record(_pendingAddKey(uid, forum.identity));
     final existing = await record.get(client);
-    final previousVersion =
-        existing is Map ? _parseStoredInt(existing['version']) ?? 0 : 0;
+    final previousVersion = existing is Map
+        ? _parseStoredInt(existing['version']) ?? 0
+        : 0;
     await record.put(client, {
       ...forum.toJson(),
       'uid': uid,
@@ -504,8 +495,9 @@ class ForumDataRepository implements ForumRepository {
   @override
   Future<List<Forum>> getForumByName(String keyword) async {
     try {
-      Response<Map<String, dynamic>> response = await _dio
-          .get("forum.php?&__output=8&key=${code_utils.urlEncode(keyword)}");
+      Response<Map<String, dynamic>> response = await _dio.get(
+        "forum.php?&__output=8&key=${code_utils.urlEncode(keyword)}",
+      );
       Map<String, dynamic> map = response.data!;
       List<Forum> forums = [];
       map.forEach((k, v) {
@@ -526,8 +518,9 @@ class ForumDataRepository implements ForumRepository {
         "info": "add_to_block_tids",
       });
       Response<Map<String, dynamic>> response = await _dio.post(
-          "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
-          data: formData);
+        "nuke.php?__lib=user_option&__act=set&raw=3&del=$fid",
+        data: formData,
+      );
       return response.data!["0"];
     } catch (err) {
       rethrow;
@@ -543,8 +536,9 @@ class ForumDataRepository implements ForumRepository {
         "info": "add_to_block_tids",
       });
       Response<Map<String, dynamic>> response = await _dio.post(
-          "nuke.php?__lib=user_option&__act=set&raw=3&add=$fid",
-          data: formData);
+        "nuke.php?__lib=user_option&__act=set&raw=3&add=$fid",
+        data: formData,
+      );
       return response.data!["0"];
     } catch (err) {
       rethrow;

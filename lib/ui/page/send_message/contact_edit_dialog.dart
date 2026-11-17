@@ -18,9 +18,7 @@ class ContactEditDialog extends HookWidget {
       content: TextField(
         maxLines: 1,
         controller: controller,
-        decoration: InputDecoration(
-          labelText: "UID 或 用户名",
-        ),
+        decoration: InputDecoration(labelText: "UID 或 用户名"),
         keyboardType: TextInputType.text,
       ),
       actions: [
@@ -28,8 +26,9 @@ class ContactEditDialog extends HookWidget {
           onPressed: () => Routes.pop(context),
           child: Text(
             '取消',
-            style:
-                TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
           ),
         ),
         TextButton(
@@ -38,7 +37,7 @@ class ContactEditDialog extends HookWidget {
             Routes.pop(context);
           },
           child: Text('确定'),
-        )
+        ),
       ],
     );
   }

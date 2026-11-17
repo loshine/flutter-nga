@@ -31,9 +31,7 @@ class PhotoPreviewPage extends HookConsumerWidget {
         title: Text("查看图片"),
         actions: [
           IconButton(
-            icon: Icon(
-              CommunityMaterialIcons.content_save,
-            ),
+            icon: Icon(CommunityMaterialIcons.content_save),
             onPressed: () => _save(),
             tooltip: "保存",
           ),
@@ -43,7 +41,8 @@ class PhotoPreviewPage extends HookConsumerWidget {
           ? Center(child: CircularProgressIndicator())
           : PhotoView(
               imageProvider: CachedNetworkImageProvider(
-                  picture_utils.getOriginalUrl(url!)),
+                picture_utils.getOriginalUrl(url!),
+              ),
               minScale: minScale,
             ),
     );
@@ -51,9 +50,9 @@ class PhotoPreviewPage extends HookConsumerWidget {
 
   Future<void> _save() async {
     try {
-      await Data()
-          .resourceRepository
-          .saveImageToGallery(picture_utils.getOriginalUrl(url!));
+      await Data().resourceRepository.saveImageToGallery(
+        picture_utils.getOriginalUrl(url!),
+      );
       AppToast.success("保存到相册成功");
     } catch (e) {
       AppToast.error(e);

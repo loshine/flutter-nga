@@ -51,10 +51,12 @@ class M3Dialog extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: actions!
-                    .map((action) => Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: action,
-                        ))
+                    .map(
+                      (action) => Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: action,
+                      ),
+                    )
                     .toList(),
               ),
             ],
@@ -92,9 +94,8 @@ class M3ConfirmDialog extends StatelessWidget {
       title: title,
       content: Text(
         content,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+        style: Theme.of(context).textTheme.bodyMedium
+            ?.copyWith(color: colorScheme.onSurfaceVariant),
       ),
       actions: [
         TextButton(

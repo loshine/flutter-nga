@@ -4,7 +4,10 @@ import 'package:flutter_nga/ui/widget/font_color_dialog.dart';
 import 'package:flutter_nga/ui/widget/font_size_dialog.dart';
 
 typedef InputCallback = void Function(
-    String startTag, String endTag, bool hasEnd);
+  String startTag,
+  String endTag,
+  bool hasEnd,
+);
 
 class FontStyleWidget extends StatelessWidget {
   const FontStyleWidget({this.callback, super.key});

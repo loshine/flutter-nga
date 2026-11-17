@@ -19,11 +19,7 @@ class DisplayModeState {
   final DisplayMode? active;
   final DisplayMode? preferred;
 
-  DisplayModeState({
-    this.modes = const [],
-    this.active,
-    this.preferred,
-  });
+  DisplayModeState({this.modes = const [], this.active, this.preferred});
 
   String get modeName => "标准模式";
 
@@ -58,12 +54,12 @@ class DisplayModeNotifier extends Notifier<DisplayModeState> {
 
   Future<bool> isLowRefreshRate() async => false;
 
-  Future<DisplayMode> getHighRefreshRate() async =>
-      DisplayMode(0, 0, 0, 60.0);
+  Future<DisplayMode> getHighRefreshRate() async => DisplayMode(0, 0, 0, 60.0);
 
-  Future<DisplayMode> getLowRefreshRate() async =>
-      DisplayMode(0, 0, 0, 60.0);
+  Future<DisplayMode> getLowRefreshRate() async => DisplayMode(0, 0, 0, 60.0);
 }
 
 final displayModeProvider =
-    NotifierProvider<DisplayModeNotifier, DisplayModeState>(DisplayModeNotifier.new);
+    NotifierProvider<DisplayModeNotifier, DisplayModeState>(
+      DisplayModeNotifier.new,
+    );

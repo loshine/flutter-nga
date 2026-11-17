@@ -15,12 +15,8 @@ class UserRepliesState {
     this.list = const [],
   });
 
-  factory UserRepliesState.initial() => const UserRepliesState(
-        size: 20,
-        page: 1,
-        enablePullUp: false,
-        list: [],
-      );
+  factory UserRepliesState.initial() =>
+      const UserRepliesState(size: 20, page: 1, enablePullUp: false, list: []);
 
   UserRepliesState copyWith({
     int? size,
@@ -64,8 +60,10 @@ class UserRepliesNotifier extends Notifier<UserRepliesState> {
   Future<UserRepliesState> loadMore() async {
     try {
       final repository = ref.read(topicRepositoryProvider);
-      TopicListData data =
-          await repository.getUserReplies(authorid, state.page + 1);
+      TopicListData data = await repository.getUserReplies(
+        authorid,
+        state.page + 1,
+      );
       final newList = List<Topic>.from(state.list)
         ..addAll(data.topicList.values);
       state = UserRepliesState(
@@ -83,4 +81,5 @@ class UserRepliesNotifier extends Notifier<UserRepliesState> {
 
 final userRepliesProvider =
     NotifierProvider.family<UserRepliesNotifier, UserRepliesState, int>(
-        UserRepliesNotifier.new);
+      UserRepliesNotifier.new,
+    );

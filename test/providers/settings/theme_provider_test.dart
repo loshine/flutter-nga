@@ -12,9 +12,7 @@ import '../../test_utils/preferences.dart';
 /// 模拟冷启动前新存储（SharedPreferencesWithCache）里已保存的主题色。
 void _mockSavedSeedColor(Color? color) {
   setUpTestPreferences(
-    current: {
-      if (color != null) PrefsKeys.seedColorValue: color.toARGB32(),
-    },
+    current: {if (color != null) PrefsKeys.seedColorValue: color.toARGB32()},
   );
 }
 

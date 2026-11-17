@@ -45,12 +45,16 @@ class NotificationListPage extends HookConsumerWidget {
   }
 
   Widget _itemBuilder(
-      BuildContext context, int index, NotificationListState state) {
+    BuildContext context,
+    int index,
+    NotificationListState state,
+  ) {
     if (index == 0) {
       return _titleBuilder('回复通知');
     } else if (index < state.replyNotificationList.length + 1) {
       return ReplyNotificationItemWidget(
-          notification: state.replyNotificationList[index - 1]);
+        notification: state.replyNotificationList[index - 1],
+      );
     } else if (index == state.replyNotificationList.length + 1) {
       return _titleBuilder('消息通知');
     } else if (index <
@@ -65,10 +69,12 @@ class NotificationListPage extends HookConsumerWidget {
       return _titleBuilder('系统通知');
     } else {
       return SystemNotificationItemWidget(
-          notification: state.systemNotificationList[index -
-              state.replyNotificationList.length -
-              state.messageNotificationList.length -
-              3]);
+        notification:
+            state.systemNotificationList[index -
+                state.replyNotificationList.length -
+                state.messageNotificationList.length -
+                3],
+      );
     }
   }
 

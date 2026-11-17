@@ -50,9 +50,7 @@ class ConversationDetailPage extends HookConsumerWidget {
     useInitialRefresh(refreshController);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('消息详情'),
-      ),
+      appBar: AppBar(title: Text('消息详情')),
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
@@ -65,10 +63,8 @@ class ConversationDetailPage extends HookConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: '回复',
-        onPressed: () => Routes.navigateTo(
-          context,
-          "${Routes.SEND_MESSAGE}?mid=$mid",
-        ),
+        onPressed: () =>
+            Routes.navigateTo(context, "${Routes.SEND_MESSAGE}?mid=$mid"),
         child: Icon(Icons.reply),
       ),
     );

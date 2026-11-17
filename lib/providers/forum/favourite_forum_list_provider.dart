@@ -67,10 +67,7 @@ class FavouriteForumListNotifier extends Notifier<FavouriteForumListState> {
     try {
       final cachedForums = await repository.getFavouriteList();
       if (generation != _accountGeneration) return;
-      state = state.copyWith(
-        forums: cachedForums,
-        isInitialized: true,
-      );
+      state = state.copyWith(forums: cachedForums, isInitialized: true);
 
       final syncedForums = await repository.syncFavouriteList();
       if (generation != _accountGeneration) return;
@@ -92,12 +89,7 @@ class FavouriteForumListNotifier extends Notifier<FavouriteForumListState> {
     }
   }
 
-  Future<bool> add(
-    int fid,
-    String name, {
-    int type = 0,
-    int? iconId,
-  }) async {
+  Future<bool> add(int fid, String name, {int type = 0, int? iconId}) async {
     final generation = _accountGeneration;
     final forum = Forum(fid, name, type: type, iconId: iconId);
     final repository = ref.read(forumRepositoryProvider);
@@ -163,10 +155,7 @@ class FavouriteForumListNotifier extends Notifier<FavouriteForumListState> {
     unawaited(_refreshQuietly());
   }
 
-  Future<void> _saveLocalAndScheduleSync(
-    Forum forum,
-    int generation,
-  ) async {
+  Future<void> _saveLocalAndScheduleSync(Forum forum, int generation) async {
     await ref.read(forumRepositoryProvider).saveFavourite(forum);
     if (generation != _accountGeneration) return;
     await _reloadCachedForums(generation);
@@ -176,8 +165,9 @@ class FavouriteForumListNotifier extends Notifier<FavouriteForumListState> {
   Future<void> _syncAfterLocalAdd(int generation) async {
     state = state.copyWith(isSyncing: true, clearError: true);
     try {
-      final forums =
-          await ref.read(forumRepositoryProvider).syncFavouriteList();
+      final forums = await ref
+          .read(forumRepositoryProvider)
+          .syncFavouriteList();
       if (generation != _accountGeneration) return;
       state = state.copyWith(
         forums: forums,
@@ -186,10 +176,7 @@ class FavouriteForumListNotifier extends Notifier<FavouriteForumListState> {
       );
     } catch (error) {
       if (generation != _accountGeneration) return;
-      state = state.copyWith(
-        isSyncing: false,
-        error: errorMessage(error),
-      );
+      state = state.copyWith(isSyncing: false, error: errorMessage(error));
       AppToast.warning('已保存到本地，将稍后同步');
     }
   }
@@ -225,5 +212,5 @@ class FavouriteForumListNotifier extends Notifier<FavouriteForumListState> {
 
 final favouriteForumListProvider =
     NotifierProvider<FavouriteForumListNotifier, FavouriteForumListState>(
-  FavouriteForumListNotifier.new,
-);
+      FavouriteForumListNotifier.new,
+    );

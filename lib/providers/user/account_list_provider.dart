@@ -7,16 +7,10 @@ import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 class AccountListState {
   final List<CacheUser> list;
 
-  const AccountListState({
-    this.list = const [],
-  });
+  const AccountListState({this.list = const []});
 
-  AccountListState copyWith({
-    List<CacheUser>? list,
-  }) {
-    return AccountListState(
-      list: list ?? this.list,
-    );
+  AccountListState copyWith({List<CacheUser>? list}) {
+    return AccountListState(list: list ?? this.list);
   }
 }
 
@@ -58,4 +52,5 @@ class AccountListNotifier extends Notifier<AccountListState> {
 
 final accountListProvider =
     NotifierProvider<AccountListNotifier, AccountListState>(
-        AccountListNotifier.new);
+      AccountListNotifier.new,
+    );
