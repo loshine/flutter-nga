@@ -111,5 +111,7 @@ Riverpod 3.x + flutter_hooks。Provider 全部基于 `Notifier` / `NotifierProvi
 
 ## CI
 
-- PR 触发 `.github/workflows/check.yml`：在 ubuntu / windows / macos 上运行 `fvm flutter test`。
+- PR 触发 `.github/workflows/check.yml`：
+  - `lint` job（仅 ubuntu）：`fvm dart format --output=none --set-exit-if-changed lib test tool` 检查格式，`fvm flutter analyze --no-pub` 要求 0 条问题（info 也会让 job 失败）。新增存放 Dart 源码的目录时，要同步加入格式检查的路径。
+  - `check` job：在 ubuntu / windows / macos 上运行 `fvm flutter test`。
 - Tag 推送触发 `build.yml`：测试后构建 APK 与 AAB 并发布。
