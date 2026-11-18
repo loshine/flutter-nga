@@ -41,6 +41,21 @@ class PublishPage extends HookWidget {
     final attachments = useRef(StringBuffer());
     final attachmentsCheck = useRef(StringBuffer());
     final wasKeyboardVisible = useRef(false);
+    final submitting = useState(false);
+    final hasAttachments = useState(false);
+
+    // 标题、标签、附件有内容，或正文与带入的初始内容（引用 / 回复）不同，
+    // 视为有未提交的编辑，返回前需要确认。
+    final initialContent = content ?? "";
+    final textEdited = useListenableSelector(
+      Listenable.merge([subjectController, contentController]),
+      () =>
+          subjectController.text.trim().isNotEmpty ||
+          (contentController.text != initialContent &&
+              contentController.text.trim().isNotEmpty),
+    );
+    final hasEdits =
+        textEdited || selectedTags.value.isNotEmpty || hasAttachments.value;
 
     final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
     final isWide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
@@ -116,6 +131,7 @@ class PublishPage extends HookWidget {
       attachments.value.write(code_utils.urlEncode(att));
       attachmentsCheck.value.write(tab);
       attachmentsCheck.value.write(code_utils.urlEncode(attCheck));
+      hasAttachments.value = true;
     }
 
     Widget panelChild(_BottomPanel panel) => switch (panel) {
@@ -171,12 +187,14 @@ class PublishPage extends HookWidget {
     }
 
     Future<void> publish() async {
+      if (submitting.value) return;
       final body = contentController.text;
       final len = body.codeUnits.length;
       if (len < 6 || len > 65530) {
         AppToast.warning("内容过短或过长(6~65530 byte)");
         return;
       }
+      submitting.value = true;
       try {
         final String message;
         if (tid != null) {
@@ -205,7 +223,34 @@ class PublishPage extends HookWidget {
         if (context.mounted) Routes.pop(context);
       } catch (err) {
         AppToast.error(err);
+      } finally {
+        if (context.mounted) submitting.value = false;
       }
+    }
+
+    Future<void> confirmDiscard() async {
+      final discard = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text("放弃编辑？"),
+          content: const Text("已输入的内容不会保存。"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text("继续编辑"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(dialogContext).colorScheme.error,
+              ),
+              child: const Text("放弃"),
+            ),
+          ],
+        ),
+      );
+      // Navigator.pop 不经过 PopScope 拦截，直接关闭页面。
+      if (discard == true && context.mounted) Navigator.of(context).pop();
     }
 
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
@@ -213,10 +258,14 @@ class PublishPage extends HookWidget {
     final panelOpen = openPanel.value != null;
 
     return PopScope(
-      canPop: !panelOpen,
+      canPop: !panelOpen && !hasEdits,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (panelOpen) openPanel.value = null;
+        if (panelOpen) {
+          openPanel.value = null;
+        } else {
+          confirmDiscard();
+        }
       },
       child: Scaffold(
         appBar: AppBar(title: Text(tid != null ? "回帖" : "发帖")),
@@ -356,8 +405,13 @@ class PublishPage extends HookWidget {
         ),
         floatingActionButton: FloatingActionButton(
           tooltip: '发送',
-          onPressed: publish,
-          child: const Icon(Icons.send),
+          onPressed: submitting.value ? null : publish,
+          child: submitting.value
+              ? const SizedBox.square(
+                  dimension: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.send),
         ),
       ),
     );
