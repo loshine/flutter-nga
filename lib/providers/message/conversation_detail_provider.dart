@@ -55,7 +55,8 @@ class ConversationDetailState {
   }
 }
 
-/// 以 mid 分桶，避免切换对话时串用上一个对话的内容。
+/// 以 mid 分桶，避免切换对话时串用上一个对话的内容；离开页面即释放，
+/// 切换账号后不会显示上一个账号的缓存。
 class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
   ConversationDetailNotifier(this.mid);
 
@@ -66,9 +67,10 @@ class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
 
   Future<ConversationDetailState> refresh() async {
     final repository = ref.read(messageRepositoryProvider);
+    final userRepository = ref.read(userRepositoryProvider);
     final data = await repository.getMessageList(mid, 1);
-    final user = await ref.read(userRepositoryProvider).getDefaultUser();
-    state = ConversationDetailState(
+    final user = await userRepository.getDefaultUser();
+    final result = ConversationDetailState(
       page: 1,
       enablePullUp: data.hasNext,
       list: data.messageList.toList(),
@@ -77,19 +79,22 @@ class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
       currentUid: int.tryParse(user?.uid ?? ''),
       isIsolated: data.isIsolated,
     );
-    return state;
+    if (ref.mounted) state = result;
+    return result;
   }
 
   Future<ConversationDetailState> loadMore() async {
     final repository = ref.read(messageRepositoryProvider);
-    final data = await repository.getMessageList(mid, state.page + 1);
-    state = state.copyWith(
-      page: state.page + 1,
+    final current = state;
+    final data = await repository.getMessageList(mid, current.page + 1);
+    final result = current.copyWith(
+      page: current.page + 1,
       enablePullUp: data.hasNext,
-      list: [...state.list, ...data.messageList],
+      list: [...current.list, ...data.messageList],
       participants: data.participants.isEmpty ? null : data.participants,
     );
-    return state;
+    if (ref.mounted) state = result;
+    return result;
   }
 
   /// 邀请用户加入对话，成功后刷新参与者。
@@ -97,7 +102,7 @@ class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
     final message = await ref
         .read(messageRepositoryProvider)
         .inviteToConversation(mid, users);
-    await refresh();
+    if (ref.mounted) await refresh();
     return message;
   }
 
@@ -106,6 +111,7 @@ class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
     final message = await ref
         .read(messageRepositoryProvider)
         .leaveConversation(mid, participant.uid);
+    if (!ref.mounted) return message;
     state = state.copyWith(
       participants: state.participants
           .where((p) => p.uid != participant.uid)
@@ -116,19 +122,17 @@ class ConversationDetailNotifier extends Notifier<ConversationDetailState> {
 
   /// 自己退出对话。
   Future<String?> leave() async {
+    final messageRepository = ref.read(messageRepositoryProvider);
+    final userRepository = ref.read(userRepositoryProvider);
     final uid =
         state.currentUid ??
-        int.tryParse(
-          (await ref.read(userRepositoryProvider).getDefaultUser())?.uid ?? '',
-        );
+        int.tryParse((await userRepository.getDefaultUser())?.uid ?? '');
     if (uid == null) throw StateError('未登录');
-    return ref.read(messageRepositoryProvider).leaveConversation(mid, uid);
+    return messageRepository.leaveConversation(mid, uid);
   }
 }
 
-final conversationDetailProvider =
-    NotifierProvider.family<
-      ConversationDetailNotifier,
-      ConversationDetailState,
-      int
-    >(ConversationDetailNotifier.new);
+final conversationDetailProvider = NotifierProvider.autoDispose
+    .family<ConversationDetailNotifier, ConversationDetailState, int>(
+      ConversationDetailNotifier.new,
+    );

@@ -3,20 +3,25 @@ import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
 
 /// 短消息屏蔽列表：被屏蔽的用户无法与你对话。
+///
+/// 离开页面即释放（autoDispose），切换账号后重新进入不会显示上一个账号的列表。
 class MessageBlockListNotifier extends Notifier<List<MessageParticipant>> {
   @override
   List<MessageParticipant> build() => const [];
 
   Future<List<MessageParticipant>> refresh() async {
-    state = await ref.read(messageRepositoryProvider).getMessageBlockList();
-    return state;
+    final users = await ref
+        .read(messageRepositoryProvider)
+        .getMessageBlockList();
+    if (ref.mounted) state = users;
+    return users;
   }
 
   Future<String?> add(List<String> users) async {
     final message = await ref
         .read(messageRepositoryProvider)
         .addMessageBlock(users);
-    await refresh();
+    if (ref.mounted) await refresh();
     return message;
   }
 
@@ -24,12 +29,13 @@ class MessageBlockListNotifier extends Notifier<List<MessageParticipant>> {
     final message = await ref
         .read(messageRepositoryProvider)
         .removeMessageBlock(user.uid);
-    state = state.where((e) => e.uid != user.uid).toList();
+    if (ref.mounted) state = state.where((e) => e.uid != user.uid).toList();
     return message;
   }
 }
 
 final messageBlockListProvider =
-    NotifierProvider<MessageBlockListNotifier, List<MessageParticipant>>(
-      MessageBlockListNotifier.new,
-    );
+    NotifierProvider.autoDispose<
+      MessageBlockListNotifier,
+      List<MessageParticipant>
+    >(MessageBlockListNotifier.new);

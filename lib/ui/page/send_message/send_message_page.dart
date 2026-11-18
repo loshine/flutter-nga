@@ -75,81 +75,83 @@ class SendMessagePage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(isNew ? '新建短消息' : '回复消息')),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Column(
-          children: [
-            TextField(
-              maxLines: 1,
-              controller: subjectController,
-              decoration: InputDecoration(labelText: isNew ? '标题' : '标题(可选)'),
-              keyboardType: TextInputType.text,
+      // 整页可滚动：小屏打开键盘时内容框不会被挤没，可以滚到输入位置。
+      body: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        // 底部留出 FAB 的空间，避免遮住内容末尾
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+        children: [
+          TextField(
+            maxLines: 1,
+            controller: subjectController,
+            decoration: InputDecoration(labelText: isNew ? '标题' : '标题(可选)'),
+            keyboardType: TextInputType.text,
+          ),
+          if (isNew) ...[
+            InkWell(
+              onTap: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (_) => ContactEditDialog(callback: notifier.add),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.supervisor_account_rounded,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '添加收信人(UID 或 用户名)',
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            if (isNew) ...[
-              InkWell(
-                onTap: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (_) => ContactEditDialog(callback: notifier.add),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Row(
+            if (state.contacts.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
                     children: [
-                      Icon(
-                        Icons.supervisor_account_rounded,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '添加收信人(UID 或 用户名)',
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
-                      ),
+                      for (final contact in state.contacts)
+                        InputChip(
+                          label: Text(contact),
+                          onDeleted: () => notifier.remove(contact),
+                          deleteButtonTooltipMessage: '移除',
+                        ),
                     ],
                   ),
                 ),
               ),
-              if (state.contacts.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Wrap(
-                      spacing: 8.0,
-                      runSpacing: 4.0,
-                      children: [
-                        for (final contact in state.contacts)
-                          InputChip(
-                            label: Text(contact),
-                            onDeleted: () => notifier.remove(contact),
-                            deleteButtonTooltipMessage: '移除',
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('对话参与者只能看到自己的回复'),
-                subtitle: const Text('每条回复只有发起人和回复者自己可见'),
-                value: state.isolate,
-                onChanged: notifier.setIsolate,
-              ),
-            ],
-            Expanded(
-              child: TextField(
-                maxLines: null,
-                controller: contentController,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  labelText: '消息内容',
-                ),
-                keyboardType: TextInputType.multiline,
-              ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('对话参与者只能看到自己的回复'),
+              subtitle: const Text('每条回复只有发起人和回复者自己可见'),
+              value: state.isolate,
+              onChanged: notifier.setIsolate,
             ),
           ],
-        ),
+          TextField(
+            key: const ValueKey('send_message_content'),
+            minLines: 8,
+            maxLines: null,
+            controller: contentController,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              labelText: '消息内容',
+              alignLabelWithHint: true,
+            ),
+            keyboardType: TextInputType.multiline,
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: '发送',

@@ -41,40 +41,45 @@ class ConversationListNotifier extends Notifier<ConversationListState> {
     try {
       ConversationListData data = await Data().messageRepository
           .getConversationList(1);
-      state = ConversationListState(
+      final result = ConversationListState(
         page: 1,
         enablePullUp: data.hasNext,
         list: data.conversationList.toList(),
         isLoading: false,
       );
-      return state;
+      if (ref.mounted) state = result;
+      return result;
     } catch (err) {
-      state = state.copyWith(isLoading: false);
+      if (ref.mounted) state = state.copyWith(isLoading: false);
       rethrow;
     }
   }
 
   Future<ConversationListState> loadMore() async {
     if (state.isLoading) return state;
-    state = state.copyWith(isLoading: true);
+    final current = state;
+    state = current.copyWith(isLoading: true);
     try {
       ConversationListData data = await Data().messageRepository
-          .getConversationList(state.page + 1);
-      state = ConversationListState(
-        page: state.page + 1,
+          .getConversationList(current.page + 1);
+      final result = ConversationListState(
+        page: current.page + 1,
         enablePullUp: data.hasNext,
-        list: [...state.list, ...data.conversationList],
+        list: [...current.list, ...data.conversationList],
         isLoading: false,
       );
-      return state;
+      if (ref.mounted) state = result;
+      return result;
     } catch (err) {
-      state = state.copyWith(isLoading: false);
+      if (ref.mounted) state = state.copyWith(isLoading: false);
       rethrow;
     }
   }
 }
 
+/// 离开页面即释放，避免切换账号后显示上一个账号的对话列表。
 final conversationListProvider =
-    NotifierProvider<ConversationListNotifier, ConversationListState>(
-      ConversationListNotifier.new,
-    );
+    NotifierProvider.autoDispose<
+      ConversationListNotifier,
+      ConversationListState
+    >(ConversationListNotifier.new);

@@ -39,17 +39,18 @@ class NotificationListNotifier extends Notifier<NotificationListState> {
   Future<NotificationListState> refresh() async {
     final repository = ref.read(messageRepositoryProvider);
     final data = await repository.getNotificationList();
-    state = NotificationListState(
+    final result = NotificationListState(
       notifications: data.notifications,
       unread: data.unread ?? 0,
     );
-    return state;
+    if (ref.mounted) state = result;
+    return result;
   }
 
   /// 清空服务端信箱并清空本地列表。
   Future<void> clear() async {
     await ref.read(messageRepositoryProvider).clearNotifications();
-    state = const NotificationListState();
+    if (ref.mounted) state = const NotificationListState();
   }
 
   /// 不再提示该主题 / 回复的回复或评论。
@@ -60,7 +61,9 @@ class NotificationListNotifier extends Notifier<NotificationListState> {
   }
 }
 
+/// 离开页面即释放，避免切换账号后显示上一个账号的提醒。
 final notificationListProvider =
-    NotifierProvider<NotificationListNotifier, NotificationListState>(
-      NotificationListNotifier.new,
-    );
+    NotifierProvider.autoDispose<
+      NotificationListNotifier,
+      NotificationListState
+    >(NotificationListNotifier.new);
