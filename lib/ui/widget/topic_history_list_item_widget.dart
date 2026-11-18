@@ -85,8 +85,8 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     TextTheme textTheme,
     ColorScheme colorScheme,
   ) {
-    return RichText(
-      text: TextSpan(
+    return Text.rich(
+      TextSpan(
         text: code_utils.unescapeHtml(topicHistory.subject),
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
@@ -124,6 +124,8 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
                       fontSize: 10,
                       height: 1,
                     ),
+                    // WidgetSpan 已随外层 Text.rich 整体缩放，这里不再重复缩放。
+                    textScaler: TextScaler.noScaling,
                   ),
                 ),
               ),

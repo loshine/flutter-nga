@@ -33,8 +33,8 @@ class ConversationItemWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 标题
-                RichText(
-                  text: TextSpan(
+                Text.rich(
+                  TextSpan(
                     text: conversation!.subject,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: conversation!.isUnread
