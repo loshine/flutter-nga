@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -190,6 +191,55 @@ void main() {
       await _settle(tester);
       expect(repository.deletes, ['1@1']);
     });
+
+    testWidgets(
+      'swipe gives haptic feedback only when crossing the threshold',
+      (tester) async {
+        final haptics = <Object?>[];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (call) async {
+            if (call.method == 'HapticFeedback.vibrate') {
+              haptics.add(call.arguments);
+            }
+            return null;
+          },
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          ),
+        );
+        final repository = await pump(tester);
+
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.text('收藏1')),
+        );
+        await gesture.moveBy(const Offset(-100, 0));
+        await tester.pump();
+        expect(haptics, isEmpty);
+
+        // 越过 40% 宽度的删除阈值
+        await gesture.moveBy(const Offset(-300, 0));
+        await tester.pump();
+        await gesture.moveBy(const Offset(-50, 0));
+        await tester.pump();
+        expect(haptics, ['HapticFeedbackType.selectionClick']);
+
+        // 退回阈值内后松手，条目保留
+        await gesture.moveBy(const Offset(300, 0));
+        await tester.pump();
+        await gesture.up();
+        await _settle(tester);
+        expect(haptics, [
+          'HapticFeedbackType.selectionClick',
+          'HapticFeedbackType.selectionClick',
+        ]);
+        expect(find.text('收藏1'), findsOneWidget);
+        expect(repository.deletes, isEmpty);
+      },
+    );
 
     testWidgets('leaving the page commits pending deletions', (tester) async {
       final repository = await pump(tester);

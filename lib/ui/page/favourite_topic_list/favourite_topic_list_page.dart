@@ -9,6 +9,7 @@ import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_snack_bar.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 
@@ -144,6 +145,7 @@ class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
     return Dismissible(
       key: ValueKey('dismiss-${widget.topic.tid}'),
       direction: DismissDirection.endToStart,
+      onUpdate: AppHaptics.onDismissUpdate,
       onDismissed: (_) => widget.onRemove(),
       background: Container(
         color: colorScheme.errorContainer,

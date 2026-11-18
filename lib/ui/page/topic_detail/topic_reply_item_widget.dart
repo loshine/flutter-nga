@@ -20,6 +20,7 @@ import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
+import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/nga_links.dart';
 import 'package:flutter_nga/utils/parser/plain_text.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -446,6 +447,7 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
           widget.reply.recommend = 0;
         }
       });
+      AppHaptics.reactionSucceeded();
       AppToast.success(reaction.message);
     } catch (err) {
       debugPrint(err.toString());
@@ -472,6 +474,7 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
           widget.reply.recommend = 0;
         }
       });
+      AppHaptics.reactionSucceeded();
       AppToast.success(reaction.message);
     } catch (err) {
       debugPrint(err.toString());
