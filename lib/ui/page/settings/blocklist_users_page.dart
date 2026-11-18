@@ -25,7 +25,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
         actions: [
           IconButton(
             onPressed: () => _deleteAll(notifier),
-            icon: Icon(Icons.delete_forever, color: Colors.white),
+            icon: Icon(Icons.delete_forever),
             tooltip: "删除所有屏蔽用户",
           ),
         ],

@@ -46,7 +46,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
         actions: [
           IconButton(
             onPressed: () => _quitAll(notifier),
-            icon: Icon(Icons.delete_forever, color: Colors.white),
+            icon: Icon(Icons.delete_forever),
             tooltip: "退出所有账号",
           ),
         ],
