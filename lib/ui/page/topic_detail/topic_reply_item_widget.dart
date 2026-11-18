@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/data.dart';
@@ -11,15 +13,33 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/blocked_content.dart';
 import 'package:flutter_nga/ui/widget/dash.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/ui/widget/username_text.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
+import 'package:flutter_nga/utils/nga_links.dart';
+import 'package:flutter_nga/utils/parser/plain_text.dart';
 import 'package:flutter_nga/utils/route.dart';
 
-class TopicReplyItemWidget extends StatefulWidget {
+/// 楼层右上角菜单项
+enum ReplyMenuAction {
+  quote('引用'),
+  reply('回复'),
+  onlyAuthor('只看他'),
+  copyContent('复制内容'),
+  copyLink('复制楼层链接'),
+  viewUser('查看用户'),
+  blockUser('屏蔽该用户');
+
+  const ReplyMenuAction(this.label);
+
+  final String label;
+}
+
+class TopicReplyItemWidget extends ConsumerStatefulWidget {
   final Reply reply;
   final User? user;
   final Group? group;
@@ -52,16 +72,28 @@ class TopicReplyItemWidget extends StatefulWidget {
   });
 
   @override
-  State<TopicReplyItemWidget> createState() => _TopicReplyItemState();
+  ConsumerState<TopicReplyItemWidget> createState() => _TopicReplyItemState();
 }
 
-class _TopicReplyItemState extends State<TopicReplyItemWidget> {
+class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
   bool _attachmentsExpanded = false;
 
   /// 点赞 / 点踩请求进行中，期间忽略重复点击。
   bool _reacting = false;
 
-  final _actions = const ["引用", "回复", "只看他"];
+  /// 匿名用户没有可访问的主页，也无法按用户名屏蔽。
+  bool get _isAnonymous =>
+      (widget.user?.username ?? '').startsWith('#anony_') ||
+      (widget.user?.uid ?? 0) <= 0;
+
+  List<ReplyMenuAction> get _actions => [
+    ReplyMenuAction.quote,
+    ReplyMenuAction.reply,
+    ReplyMenuAction.onlyAuthor,
+    ReplyMenuAction.copyContent,
+    ReplyMenuAction.copyLink,
+    if (!_isAnonymous) ...[ReplyMenuAction.viewUser, ReplyMenuAction.blockUser],
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +125,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(top: 8, right: 16),
+                padding: EdgeInsets.only(top: 4, right: 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -112,17 +144,18 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                             ),
                           ),
                         ),
-                        PopupMenuButton(
+                        // 用 icon 参数让菜单按钮拥有 48dp 触控区。
+                        PopupMenuButton<ReplyMenuAction>(
+                          tooltip: '楼层操作',
+                          icon: const Icon(Icons.more_vert),
                           onSelected: _onMenuSelected,
-                          itemBuilder: (BuildContext context) {
-                            return _actions.map((String choice) {
-                              return PopupMenuItem<String>(
-                                value: choice,
-                                child: Text(choice),
-                              );
-                            }).toList();
-                          },
-                          child: Icon(Icons.more_vert),
+                          itemBuilder: (BuildContext context) => [
+                            for (final action in _actions)
+                              PopupMenuItem<ReplyMenuAction>(
+                                value: action,
+                                child: Text(action.label),
+                              ),
+                          ],
                         ),
                       ],
                     ),
@@ -170,7 +203,7 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
                       ],
                     ),
                     Padding(
-                      padding: EdgeInsets.only(top: 6),
+                      padding: EdgeInsets.only(top: 6, right: 12),
                       child: Wrap(children: _getMedalListWidgets()),
                     ),
                   ],
@@ -245,14 +278,17 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           width: double.infinity,
           child: Padding(
             padding: EdgeInsets.only(left: 16, right: 16),
-            child: NgaHtmlContentWidget(
-              content: contentReply.content,
-              authorId: contentReply.authorId,
-              tid: contentReply.tid,
-              pid: contentReply.pid,
-              postDateTimestamp: contentReply.postDateTimestamp,
-              quoteBodyByPid: widget.quoteBodyByPid,
-              textDecoration: blockDecoration,
+            // 长按选择、复制正文；链接、图片、折叠块等点击手势照常生效。
+            child: SelectionArea(
+              child: NgaHtmlContentWidget(
+                content: contentReply.content,
+                authorId: contentReply.authorId,
+                tid: contentReply.tid,
+                pid: contentReply.pid,
+                postDateTimestamp: contentReply.postDateTimestamp,
+                quoteBodyByPid: widget.quoteBodyByPid,
+                textDecoration: blockDecoration,
+              ),
             ),
           ),
         ),
@@ -470,31 +506,99 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     }
   }
 
-  void _onMenuSelected(String action) {
+  void _onMenuSelected(ReplyMenuAction action) {
     final displayName = name_utils.getShowName(widget.user!.username ?? '');
-    if (action == _actions[0]) {
-      // 引用
-      String quoteContent =
-          "[quote][pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] [b]Post by [uid=${widget.user!.uid}]$displayName[/uid] (${widget.reply.postDate}):[/b]\n\n${widget.reply.quoteContent}[/quote]";
-      Routes.navigateTo(
-        context,
-        "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
-        extra: quoteContent,
-      );
-    } else if (action == _actions[1]) {
-      // 回复
-      String replyContent =
-          "[b]Reply to [pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] Post by [uid=${widget.user!.uid}]$displayName[/uid] (${widget.reply.postDate})[/b]";
-      Routes.navigateTo(
-        context,
-        "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
-        extra: replyContent,
-      );
-    } else if (action == _actions[2]) {
-      Routes.navigateTo(
-        context,
-        "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}&authorid=${widget.reply.authorId}",
-      );
+    switch (action) {
+      case ReplyMenuAction.quote:
+        String quoteContent =
+            "[quote][pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] [b]Post by [uid=${widget.user!.uid}]$displayName[/uid] (${widget.reply.postDate}):[/b]\n\n${widget.reply.quoteContent}[/quote]";
+        Routes.navigateTo(
+          context,
+          "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
+          extra: quoteContent,
+        );
+      case ReplyMenuAction.reply:
+        String replyContent =
+            "[b]Reply to [pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] Post by [uid=${widget.user!.uid}]$displayName[/uid] (${widget.reply.postDate})[/b]";
+        Routes.navigateTo(
+          context,
+          "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
+          extra: replyContent,
+        );
+      case ReplyMenuAction.onlyAuthor:
+        Routes.navigateTo(
+          context,
+          "${Routes.TOPIC_DETAIL}?tid=${widget.reply.tid}&fid=${widget.reply.fid}&authorid=${widget.reply.authorId}",
+        );
+      case ReplyMenuAction.copyContent:
+        _copyContent();
+      case ReplyMenuAction.copyLink:
+        _copyToClipboard(
+          replyWebUrl(tid: widget.reply.tid, pid: widget.reply.pid),
+          '已复制楼层链接',
+        );
+      case ReplyMenuAction.viewUser:
+        Routes.navigateTo(
+          context,
+          Routes.USER,
+          queryParams: {'uid': '${widget.user!.uid}'},
+        );
+      case ReplyMenuAction.blockUser:
+        _confirmBlockUser(displayName);
+    }
+  }
+
+  void _copyContent() {
+    final contentReply = widget.commentSource ?? widget.reply;
+    final text = ngaContentToPlainText(
+      contentReply.content,
+      authorId: contentReply.authorId,
+      tid: contentReply.tid,
+      pid: contentReply.pid,
+      postDateTimestamp: contentReply.postDateTimestamp,
+    );
+    if (text.isEmpty) {
+      AppToast.info('该楼层没有可复制的文字');
+      return;
+    }
+    _copyToClipboard(text, '已复制楼层内容');
+  }
+
+  Future<void> _copyToClipboard(String text, String message) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    AppToast.success(message);
+  }
+
+  void _confirmBlockUser(String displayName) {
+    final username = widget.user!.username ?? '';
+    if (username.isEmpty) return;
+    showDialog(
+      context: context,
+      builder: (_) => M3ConfirmDialog(
+        title: '屏蔽用户',
+        content: '确定屏蔽「$displayName」吗？屏蔽名单与网页版同步，可在「设置 - 屏蔽设置」中移除。',
+        confirmText: '屏蔽',
+        destructive: true,
+        onConfirm: () => _blockUser(username),
+      ),
+    );
+  }
+
+  Future<void> _blockUser(String username) async {
+    final notifier = ref.read(blocklistSettingsProvider.notifier);
+    try {
+      // 名单整体提交到服务端，先同步一次，避免用本地旧名单覆盖网页端的改动。
+      await notifier.load();
+      final settings = ref.read(blocklistSettingsProvider);
+      if (settings.blockUserList.contains(username)) {
+        AppToast.info('该用户已在屏蔽名单中');
+        return;
+      }
+      final message = await notifier.addUser(username);
+      final enabled = ref.read(blocklistSettingsProvider).clientBlockEnabled;
+      AppToast.success(enabled ? message : '$message（客户端屏蔽未开启，开启后生效）');
+    } catch (err) {
+      AppToast.error(err);
     }
   }
 
