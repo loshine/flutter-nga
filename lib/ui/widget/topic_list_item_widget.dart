@@ -118,8 +118,8 @@ class TopicListItemWidget extends ConsumerWidget {
     final isPaintBlockMode = blockMode == BlockMode.PAINT;
     final isDeleteBlockMode = blockMode == BlockMode.DELETE_LINE;
 
-    return RichText(
-      text: TextSpan(
+    return Text.rich(
+      TextSpan(
         text: topicSubject,
         style: textTheme.titleMedium?.copyWith(
           fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
@@ -160,6 +160,8 @@ class TopicListItemWidget extends ConsumerWidget {
                       fontSize: 10,
                       height: 1,
                     ),
+                    // WidgetSpan 已随外层 Text.rich 整体缩放，这里不再重复缩放。
+                    textScaler: TextScaler.noScaling,
                   ),
                 ),
               ),

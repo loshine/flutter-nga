@@ -64,6 +64,8 @@ class UsernameText extends StatelessWidget {
                     color: colors.foreground,
                     fontWeight: textStyle.fontWeight ?? FontWeight.w600,
                   ),
+                  // WidgetSpan 已随外层 Text.rich 整体缩放，这里不再重复缩放。
+                  textScaler: TextScaler.noScaling,
                 ),
               ),
             ),

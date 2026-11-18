@@ -58,6 +58,9 @@ class TopicReplyItemWidget extends StatefulWidget {
 class _TopicReplyItemState extends State<TopicReplyItemWidget> {
   bool _attachmentsExpanded = false;
 
+  /// 点赞 / 点踩请求进行中，期间忽略重复点击。
+  bool _reacting = false;
+
   final _actions = const ["引用", "回复", "只看他"];
 
   @override
@@ -294,57 +297,56 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(8, 4, 16, 4),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: thumbBg,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                  child: Row(
+              // 按钮保留 48dp 触控区，底色胶囊只画在图标与分数周围，外观保持紧凑。
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned.fill(
+                    left: 8,
+                    right: 8,
+                    top: 13,
+                    bottom: 13,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: thumbBg,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      GestureDetector(
-                        onTap: _toggleLike,
-                        child: Icon(
-                          isLiked
-                              ? CommunityMaterialIcons.thumb_up
-                              : CommunityMaterialIcons.thumb_up_outline,
-                          color: isLiked ? thumbFgActive : thumbFgInactive,
-                          size: 14,
+                      _reactionButton(
+                        tooltip: "点赞",
+                        icon: isLiked
+                            ? CommunityMaterialIcons.thumb_up
+                            : CommunityMaterialIcons.thumb_up_outline,
+                        color: isLiked ? thumbFgActive : thumbFgInactive,
+                        onPressed: _toggleLike,
+                      ),
+                      Text(
+                        "${contentReply.score}",
+                        style: TextStyle(
+                          fontSize: Dimen.bodySmall,
+                          color: isLiked || isDisliked
+                              ? thumbFgActive
+                              : thumbFgInactive,
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 8),
-                        child: Text(
-                          "${contentReply.score}",
-                          style: TextStyle(
-                            fontSize: Dimen.bodySmall,
-                            color: isLiked || isDisliked
-                                ? thumbFgActive
-                                : thumbFgInactive,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 8),
-                        child: GestureDetector(
-                          onTap: _toggleDislike,
-                          child: Icon(
-                            isDisliked
-                                ? CommunityMaterialIcons.thumb_down
-                                : CommunityMaterialIcons.thumb_down_outline,
-                            color: isDisliked ? thumbFgActive : thumbFgInactive,
-                            size: 14,
-                          ),
-                        ),
+                      _reactionButton(
+                        tooltip: "点踩",
+                        icon: isDisliked
+                            ? CommunityMaterialIcons.thumb_down
+                            : CommunityMaterialIcons.thumb_down_outline,
+                        color: isDisliked ? thumbFgActive : thumbFgInactive,
+                        onPressed: _toggleDislike,
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
               Spacer(),
               Text(
@@ -401,12 +403,30 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     }).toList();
   }
 
+  Widget _reactionButton({
+    required String tooltip,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon, size: 14),
+      color: color,
+      style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.padded),
+    );
+  }
+
   Future<void> _toggleLike() async {
+    if (_reacting) return;
+    _reacting = true;
     try {
       final reaction = await Data().topicRepository.likeReply(
         widget.reply.tid,
         widget.reply.pid,
       );
+      if (!mounted) return;
       setState(() {
         widget.reply.score += reaction.countChange;
         if (reaction.countChange > 0) {
@@ -419,15 +439,20 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     } catch (err) {
       debugPrint(err.toString());
       AppToast.error(err);
+    } finally {
+      _reacting = false;
     }
   }
 
   Future<void> _toggleDislike() async {
+    if (_reacting) return;
+    _reacting = true;
     try {
       final reaction = await Data().topicRepository.dislikeReply(
         widget.reply.tid,
         widget.reply.pid,
       );
+      if (!mounted) return;
       setState(() {
         widget.reply.score += reaction.countChange;
         if (reaction.countChange < 0) {
@@ -440,6 +465,8 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
     } catch (err) {
       debugPrint(err.toString());
       AppToast.error(err);
+    } finally {
+      _reacting = false;
     }
   }
 
@@ -553,19 +580,32 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             child: SizedBox(
               width: 120,
               height: 120,
-              child: CachedNetworkImage(
-                imageUrl: attachment.realUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Image.asset(
-                  'images/default_forum_icon.png',
-                  width: 48,
-                  height: 48,
-                ),
-                errorWidget: (context, url, err) => Image.asset(
-                  'images/default_forum_icon.png',
-                  width: 48,
-                  height: 48,
-                ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: attachment.realUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Image.asset(
+                      'images/default_forum_icon.png',
+                      width: 48,
+                      height: 48,
+                    ),
+                    errorWidget: (context, url, err) => Image.asset(
+                      'images/default_forum_icon.png',
+                      width: 48,
+                      height: 48,
+                    ),
+                  ),
+                  // 水波纹盖在图片上方，点击查看大图。
+                  Material(
+                    type: MaterialType.transparency,
+                    child: InkWell(
+                      onTap: () =>
+                          Routes.openPhotoPreview(context, attachment.realUrl),
+                    ),
+                  ),
+                ],
               ),
             ),
           );

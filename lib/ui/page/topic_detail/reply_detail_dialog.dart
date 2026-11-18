@@ -104,7 +104,9 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
             Expanded(
               child: Text(
                 name_utils.getShowName(widget.user.username ?? ''),
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
           ],

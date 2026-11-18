@@ -109,6 +109,14 @@ class Routes {
     );
   }
 
+  /// 打开图片预览页。[url] 作为查询参数编码，可含中文与 `?`、`&` 等字符。
+  static Future openPhotoPreview(BuildContext context, String url) {
+    return navigateToWithParams(context, PHOTO_PREVIEW, {
+      'url': url,
+      'screenWidth': '${MediaQuery.sizeOf(context).width}',
+    });
+  }
+
   /// 简单的页面跳转（无参数）
   static Future push(BuildContext context, String path, {Object? extra}) {
     return context.push(path, extra: extra);
