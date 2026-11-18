@@ -248,13 +248,13 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                         vertical: 0,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF909090),
+                        color: colorScheme.secondaryContainer,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
+                      child: Text(
                         "评论",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: colorScheme.onSecondaryContainer,
                           fontSize: Dimen.labelSmall,
                         ),
                       ),
@@ -323,10 +323,7 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                 padding: EdgeInsets.only(top: 16),
                 child: Opacity(
                   opacity: 0.5,
-                  child: Dash(
-                    dashColor: Theme.of(context).dividerColor,
-                    length: MediaQuery.sizeOf(context).width,
-                  ),
+                  child: Dash(length: MediaQuery.sizeOf(context).width),
                 ),
               ),
               Padding(

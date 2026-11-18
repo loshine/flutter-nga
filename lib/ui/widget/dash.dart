@@ -4,7 +4,7 @@ class Dash extends StatelessWidget {
   const Dash({
     super.key,
     this.direction = Axis.horizontal,
-    this.dashColor = Colors.black,
+    this.dashColor,
     this.length = 200,
     this.dashGap = 3,
     this.dashLength = 6,
@@ -13,7 +13,9 @@ class Dash extends StatelessWidget {
   });
 
   final Axis direction;
-  final Color dashColor;
+
+  /// 为空时使用主题的 [ColorScheme.outlineVariant]。
+  final Color? dashColor;
   final double length;
   final double dashGap;
   final double dashLength;
@@ -22,12 +24,13 @@ class Dash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = dashColor ?? Theme.of(context).colorScheme.outlineVariant;
     var dashes = <Widget>[];
     double n = (length + dashGap) / (dashGap + dashLength);
     int newN = n.round();
     double newDashGap = (length - dashLength * newN) / (newN - 1);
     for (var i = newN; i > 0; i--) {
-      dashes.add(step(i, newDashGap));
+      dashes.add(step(i, newDashGap, color));
     }
     if (direction == Axis.horizontal) {
       return SizedBox(
@@ -39,7 +42,7 @@ class Dash extends StatelessWidget {
     }
   }
 
-  Widget step(int index, double newDashGap) {
+  Widget step(int index, double newDashGap, Color color) {
     bool isHorizontal = direction == Axis.horizontal;
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -53,7 +56,7 @@ class Dash extends StatelessWidget {
         height: isHorizontal ? dashThickness : dashLength,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: dashColor,
+            color: color,
             borderRadius: BorderRadius.all(Radius.circular(dashBorderRadius)),
           ),
         ),

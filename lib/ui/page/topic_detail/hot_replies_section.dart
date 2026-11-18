@@ -41,7 +41,7 @@ class HotRepliesSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.whatshot, size: 18, color: Colors.deepOrange),
+              Icon(Icons.whatshot, size: 18, color: colorScheme.primary),
               const SizedBox(width: 4),
               Text(
                 '热点回复',
@@ -183,7 +183,7 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
                   child: Text(
                     '[原帖]',
                     style: textTheme.labelMedium?.copyWith(
-                      color: const Color(0xFF888888),
+                      color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
