@@ -404,6 +404,26 @@ class NgaHtmlWidgetFactory extends WidgetFactory {
     }
   }
 
+  /// 正文 `<img>` 点击打开大图预览。表情是 `nga_emoticon` 自定义组件，不经过
+  /// 这里；放在链接里的图片（`[url][img]…[/img][/url]`）保留链接跳转。
+  ///
+  /// 不用 [HtmlWidget.onTapImage]：它会给所有图片加手势，盖过外层链接。
+  @override
+  Widget? buildImage(BuildTree tree, ImageMetadata data) {
+    final built = super.buildImage(tree, data);
+    final url = data.sources.isEmpty ? null : data.sources.first.url;
+    if (built == null || url == null || url.isEmpty) return built;
+    if (_isInsideLink(tree.element)) return built;
+    return _NgaPreviewableImage(url: url, child: built);
+  }
+
+  static bool _isInsideLink(dom.Element element) {
+    for (var e = element.parent; e != null; e = e.parent) {
+      if (e.localName == 'a' && e.attributes.containsKey('href')) return true;
+    }
+    return false;
+  }
+
   static Map<String, String> _attributesOf(BuildTree tree) => {
     for (final entry in tree.element.attributes.entries)
       '${entry.key}': entry.value,
@@ -440,6 +460,30 @@ class NgaHtmlWidgetFactory extends WidgetFactory {
     return Icon(
       Icons.broken_image_outlined,
       color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
+  }
+}
+
+/// 点击后打开 [Routes.PHOTO_PREVIEW] 查看 [url] 的大图。
+class _NgaPreviewableImage extends StatelessWidget {
+  const _NgaPreviewableImage({required this.url, required this.child});
+
+  final String url;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      hint: '查看大图',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Routes.openPhotoPreview(context, url),
+          child: child,
+        ),
+      ),
     );
   }
 }

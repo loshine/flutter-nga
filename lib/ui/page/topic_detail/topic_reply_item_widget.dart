@@ -553,19 +553,32 @@ class _TopicReplyItemState extends State<TopicReplyItemWidget> {
             child: SizedBox(
               width: 120,
               height: 120,
-              child: CachedNetworkImage(
-                imageUrl: attachment.realUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Image.asset(
-                  'images/default_forum_icon.png',
-                  width: 48,
-                  height: 48,
-                ),
-                errorWidget: (context, url, err) => Image.asset(
-                  'images/default_forum_icon.png',
-                  width: 48,
-                  height: 48,
-                ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: attachment.realUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Image.asset(
+                      'images/default_forum_icon.png',
+                      width: 48,
+                      height: 48,
+                    ),
+                    errorWidget: (context, url, err) => Image.asset(
+                      'images/default_forum_icon.png',
+                      width: 48,
+                      height: 48,
+                    ),
+                  ),
+                  // 水波纹盖在图片上方，点击查看大图。
+                  Material(
+                    type: MaterialType.transparency,
+                    child: InkWell(
+                      onTap: () =>
+                          Routes.openPhotoPreview(context, attachment.realUrl),
+                    ),
+                  ),
+                ],
               ),
             ),
           );
