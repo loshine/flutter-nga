@@ -3,8 +3,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/user/user_replies_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 
 class UserRepliesPage extends HookConsumerWidget {
   final int uid;
@@ -15,6 +17,7 @@ class UserRepliesPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
+    final loadStatus = useListLoadStatus();
     final state = ref.watch(userRepliesProvider(uid));
     final notifier = ref.read(userRepliesProvider(uid).notifier);
 
@@ -22,12 +25,14 @@ class UserRepliesPage extends HookConsumerWidget {
       try {
         await notifier.refresh();
         if (!context.mounted) return;
+        loadStatus.succeed();
         refreshController.finishRefresh();
         refreshController.resetFooter();
       } catch (err) {
         if (!context.mounted) return;
         refreshController.finishRefresh(IndicatorResult.fail);
-        AppToast.error(err);
+        final hasData = ref.read(userRepliesProvider(uid)).list.isNotEmpty;
+        if (!loadStatus.fail(err, hasData: hasData)) AppToast.error(err);
       }
     }
 
@@ -56,10 +61,17 @@ class UserRepliesPage extends HookConsumerWidget {
         controller: refreshController,
         onRefresh: onRefresh,
         onLoad: state.enablePullUp ? onLoading : null,
-        child: ListView.builder(
-          itemCount: state.list.length,
-          itemBuilder: (context, index) =>
-              TopicListItemWidget(topic: state.list[index]),
+        child: ListStatusSwitcher(
+          status: loadStatus,
+          isEmpty: state.list.isEmpty,
+          emptyMessage: '暂无回复',
+          emptyIcon: Icons.chat_bubble_outline,
+          onRetry: refreshController.callRefresh,
+          child: ListView.builder(
+            itemCount: state.list.length,
+            itemBuilder: (context, index) =>
+                TopicListItemWidget(topic: state.list[index]),
+          ),
         ),
       ),
     );

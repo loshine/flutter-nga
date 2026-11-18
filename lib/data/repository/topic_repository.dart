@@ -76,6 +76,9 @@ abstract class TopicRepository {
 
   Future<List<TopicHistory>> getTopicHistories(int limit, int offset);
 
+  /// 浏览历史中出现过的全部 tid，用于列表标记已读
+  Future<Set<int>> getHistoryTopicIds();
+
   Future deleteTopicHistoryById(int id);
 
   Future<int> deleteAllTopicHistory();
@@ -460,6 +463,16 @@ class TopicDataRepository implements TopicRepository {
     return results
         .map((map) => TopicHistory.fromJson(map.value)..id = map.key)
         .toList();
+  }
+
+  @override
+  Future<Set<int>> getHistoryTopicIds() async {
+    final records = await _store.find(database);
+    return {
+      for (final record in records)
+        if (record.value is Map && record.value['tid'] is int)
+          record.value['tid'] as int,
+    };
   }
 
   @override

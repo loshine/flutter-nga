@@ -3,7 +3,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/search/search_forum_provider.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class SearchForumPage extends HookConsumerWidget {
@@ -14,6 +17,7 @@ class SearchForumPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController();
+    final loadStatus = useListLoadStatus();
     final forums = ref.watch(searchForumProvider);
     final notifier = ref.read(searchForumProvider.notifier);
 
@@ -21,10 +25,13 @@ class SearchForumPage extends HookConsumerWidget {
       try {
         await notifier.search(keyword);
         if (!context.mounted) return;
+        loadStatus.succeed();
         refreshController.finishRefresh();
-      } catch (_) {
+      } catch (err) {
         if (!context.mounted) return;
         refreshController.finishRefresh(IndicatorResult.fail);
+        final hasData = ref.read(searchForumProvider).isNotEmpty;
+        if (!loadStatus.fail(err, hasData: hasData)) AppToast.error(err);
       }
     }
 
@@ -35,9 +42,17 @@ class SearchForumPage extends HookConsumerWidget {
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
-        child: ListView.builder(
-          itemBuilder: (_, index) => _buildForumWidget(context, forums[index]),
-          itemCount: forums.length,
+        child: ListStatusSwitcher(
+          status: loadStatus,
+          isEmpty: forums.isEmpty,
+          emptyMessage: '暂无匹配的版块',
+          emptyIcon: Icons.search_off_outlined,
+          onRetry: refreshController.callRefresh,
+          child: ListView.builder(
+            itemBuilder: (_, index) =>
+                _buildForumWidget(context, forums[index]),
+            itemCount: forums.length,
+          ),
         ),
       ),
     );

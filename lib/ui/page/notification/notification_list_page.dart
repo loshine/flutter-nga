@@ -1,11 +1,12 @@
 import 'package:easy_refresh/easy_refresh.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 import 'notification_item_widget.dart';
@@ -16,7 +17,7 @@ class NotificationListPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController();
-    final loaded = useState(false);
+    final loadStatus = useListLoadStatus();
     final state = ref.watch(notificationListProvider);
     final notifier = ref.read(notificationListProvider.notifier);
 
@@ -24,12 +25,16 @@ class NotificationListPage extends HookConsumerWidget {
       try {
         await notifier.refresh();
         if (!context.mounted) return;
-        loaded.value = true;
+        loadStatus.succeed();
         refreshController.finishRefresh();
       } catch (err) {
         if (!context.mounted) return;
         refreshController.finishRefresh(IndicatorResult.fail);
-        AppToast.error(err);
+        final hasData = ref
+            .read(notificationListProvider)
+            .notifications
+            .isNotEmpty;
+        if (!loadStatus.fail(err, hasData: hasData)) AppToast.error(err);
       }
     }
 
@@ -64,39 +69,26 @@ class NotificationListPage extends HookConsumerWidget {
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
-        child: entries.isEmpty
-            ? ListView(
-                children: [
-                  if (loaded.value)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 120),
-                      child: Center(
-                        child: Text(
-                          '暂无提醒',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                        ),
-                      ),
-                    ),
-                ],
-              )
-            : ListView.builder(
-                itemCount: entries.length,
-                itemBuilder: (context, index) {
-                  final entry = entries[index];
-                  if (entry is NotificationCategory) {
-                    return _SectionHeader(category: entry);
-                  }
-                  return NotificationItemWidget(
-                    notification: entry as NgaNotification,
-                    onNoHint: onNoHint,
-                  );
-                },
-              ),
+        child: ListStatusSwitcher(
+          status: loadStatus,
+          isEmpty: entries.isEmpty,
+          emptyMessage: '暂无提醒',
+          emptyIcon: Icons.notifications_none_outlined,
+          onRetry: refreshController.callRefresh,
+          child: ListView.builder(
+            itemCount: entries.length,
+            itemBuilder: (context, index) {
+              final entry = entries[index];
+              if (entry is NotificationCategory) {
+                return _SectionHeader(category: entry);
+              }
+              return NotificationItemWidget(
+                notification: entry as NgaNotification,
+                onNoHint: onNoHint,
+              );
+            },
+          ),
+        ),
       ),
     );
   }

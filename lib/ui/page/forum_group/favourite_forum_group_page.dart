@@ -7,10 +7,13 @@ import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class FavouriteForumGroupPage extends StatefulHookConsumerWidget {
-  const FavouriteForumGroupPage({super.key});
+  const FavouriteForumGroupPage({super.key, this.scrollToTop});
+
+  final ScrollToTopSignal? scrollToTop;
 
   @override
   ConsumerState<FavouriteForumGroupPage> createState() =>
@@ -21,6 +24,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
   @override
   Widget build(BuildContext context) {
     final notifier = ref.read(favouriteForumListProvider.notifier);
+    final scrollController = useScrollToTopController(widget.scrollToTop);
     usePostFrameEffect(() {
       notifier.refresh().catchError(AppToast.error);
     });
@@ -44,6 +48,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
             }
           },
           child: GridView.builder(
+            controller: scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,

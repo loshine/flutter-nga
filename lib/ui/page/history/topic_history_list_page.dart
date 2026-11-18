@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
 import 'package:flutter_nga/ui/widget/topic_history_list_item_widget.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -163,20 +164,12 @@ class TopicHistoryListPage extends HookConsumerWidget {
             _buildListItem(context, historyState.list[position], notifier),
       );
     } else {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.6,
-            child: Center(
-              child: Text(
-                "暂无浏览历史",
-                style: TextStyle(
-                  fontSize: Dimen.titleMedium,
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
-                ),
-              ),
-            ),
+      return const CustomScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: ListStatusView(icon: Icons.history, message: '暂无浏览历史'),
           ),
         ],
       );

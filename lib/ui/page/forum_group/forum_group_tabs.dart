@@ -11,11 +11,15 @@ import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
+import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 
 import 'forum_category_page.dart';
 
 class ForumGroupTabsPage extends HookConsumerWidget {
-  const ForumGroupTabsPage({super.key});
+  const ForumGroupTabsPage({super.key, this.scrollToTop});
+
+  /// 首页触发「回到顶部」时，滚动当前 Tab
+  final ScrollToTopSignal? scrollToTop;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,10 +29,15 @@ class ForumGroupTabsPage extends HookConsumerWidget {
 
     final categoryState = ref.watch(forumCategoryListProvider);
     final categories = categoryState.categories;
+    final tabSignals = useScrollToTopSignals(
+      1 + (categories.isEmpty ? 1 : categories.length),
+    );
 
     List<Tab> tabs = [const Tab(text: "我的收藏")];
     List<Widget> tabBarViews = [
-      KeepAliveTabView(child: FavouriteForumGroupPage()),
+      KeepAliveTabView(
+        child: FavouriteForumGroupPage(scrollToTop: tabSignals[0]),
+      ),
     ];
 
     if (categories.isEmpty) {
@@ -38,9 +47,13 @@ class ForumGroupTabsPage extends HookConsumerWidget {
     } else {
       tabs.addAll(categories.map((category) => Tab(text: category.name)));
       tabBarViews.addAll(
-        categories.map(
-          (category) =>
-              KeepAliveTabView(child: ForumCategoryPage(category: category)),
+        categories.indexed.map(
+          (e) => KeepAliveTabView(
+            child: ForumCategoryPage(
+              category: e.$2,
+              scrollToTop: tabSignals[e.$1 + 1],
+            ),
+          ),
         ),
       );
     }
@@ -67,6 +80,14 @@ class ForumGroupTabsPage extends HookConsumerWidget {
       Future.microtask(() => listener());
       return () => tabController.removeListener(listener);
     }, [tabController]);
+
+    useEffect(() {
+      final signal = scrollToTop;
+      if (signal == null) return null;
+      void listener() => tabSignals[tabController.index].fire();
+      signal.addListener(listener);
+      return () => signal.removeListener(listener);
+    }, [scrollToTop, tabSignals, tabController]);
 
     return Scaffold(
       appBar: PreferredSize(

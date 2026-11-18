@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
+import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/motion.dart';
@@ -15,11 +16,41 @@ class MinePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userInfo = ref.watch(homeDrawerHeaderProvider);
+    // 未登录不显示角标，计数不属于当前账号时也不显示
+    ref.watch(unreadCountProvider);
+    final unread = ref
+        .read(unreadCountProvider.notifier)
+        .countsFor(userInfo?.uid);
+
+    void refreshUnread() {
+      if (!context.mounted) return;
+      if (ref.read(homeDrawerHeaderProvider) == null) {
+        ref.read(unreadCountProvider.notifier).clear();
+      } else {
+        ref.read(unreadCountProvider.notifier).refresh();
+      }
+    }
+
+    // 登录、退出或切换账号后为新账号重新获取（旧账号的计数不会显示）
+    ref.listen(homeDrawerHeaderProvider.select((user) => user?.uid), (
+      previous,
+      next,
+    ) {
+      if (previous != next) refreshUnread();
+    });
 
     useEffect(() {
-      Future.microtask(
-        () => ref.read(homeDrawerHeaderProvider.notifier).refresh(),
-      );
+      Future.microtask(() async {
+        final before = ref.read(homeDrawerHeaderProvider)?.uid;
+        try {
+          await ref.read(homeDrawerHeaderProvider.notifier).refresh();
+        } catch (_) {
+          // 用户信息刷新失败时仍按当前账号刷新角标
+        }
+        if (!context.mounted) return;
+        // 账号变化时由上面的监听负责，避免重复请求
+        if (ref.read(homeDrawerHeaderProvider)?.uid == before) refreshUnread();
+      });
       return null;
     }, []);
 
@@ -55,17 +86,26 @@ class MinePage extends HookConsumerWidget {
                 subtitle: '最近浏览的贴子',
                 onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
               ),
+              // 从短消息 / 提醒页返回后刷新角标
               _EntryTile(
                 icon: Icons.mail_outlined,
                 title: '短消息',
                 subtitle: '私信会话',
-                onTap: () => Routes.navigateTo(context, Routes.CONVERSATIONS),
+                badgeCount: unread.messages,
+                onTap: () => Routes.navigateTo(
+                  context,
+                  Routes.CONVERSATIONS,
+                ).whenComplete(refreshUnread),
               ),
               _EntryTile(
                 icon: Icons.notifications_outlined,
                 title: '提醒信息',
                 subtitle: '回复与系统通知',
-                onTap: () => Routes.navigateTo(context, Routes.NOTIFICATIONS),
+                badgeCount: unread.notifications,
+                onTap: () => Routes.navigateTo(
+                  context,
+                  Routes.NOTIFICATIONS,
+                ).whenComplete(refreshUnread),
               ),
             ],
           ),
@@ -201,11 +241,15 @@ class _EntryTile extends StatelessWidget {
   final String subtitle;
   final VoidCallback? onTap;
 
+  /// 未读数，大于 0 时在图标上显示角标
+  final int badgeCount;
+
   const _EntryTile({
     required this.icon,
     required this.title,
     required this.subtitle,
     this.onTap,
+    this.badgeCount = 0,
   });
 
   @override
@@ -225,17 +269,21 @@ class _EntryTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(Dimen.radiusS),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: colorScheme.onPrimaryContainer,
-                    size: Dimen.iconSmall,
+                Badge.count(
+                  count: badgeCount,
+                  isLabelVisible: badgeCount > 0,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(Dimen.radiusS),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: colorScheme.onPrimaryContainer,
+                      size: Dimen.iconSmall,
+                    ),
                   ),
                 ),
                 const SizedBox(width: Dimen.spacingL),
