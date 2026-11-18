@@ -1,4 +1,15 @@
-import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
+int? _parseInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
+}
+
+String? _parseString(dynamic value) {
+  if (value == null) return null;
+  final text = value.toString();
+  return text.isEmpty ? null : text;
+}
 
 class NotificationInfo {
   final bool? hasUnreadMessage;
@@ -17,354 +28,456 @@ class NotificationInfo {
 
   factory NotificationInfo.fromJson(Map<String, dynamic> map) {
     return NotificationInfo(
-      hasUnreadMessage: int.tryParse(map['0'])! > 0,
-      lastTime: int.tryParse(map['1']),
-      unreadReplyCount: int.tryParse(map['2']),
-      unreadMessageCount: int.tryParse(map['3']),
-      unreadSystemNotificationCount: int.tryParse(map['4']),
+      hasUnreadMessage: (_parseInt(map['0']) ?? 0) > 0,
+      lastTime: _parseInt(map['1']),
+      unreadReplyCount: _parseInt(map['2']),
+      unreadMessageCount: _parseInt(map['3']),
+      unreadSystemNotificationCount: _parseInt(map['4']),
     );
+  }
+}
+
+/// 提醒在列表页中的分组，按类型划分（服务端的 0/1/2 分桶与类型并不一一对应，
+/// 例如举报提醒在网页版中是放在消息分桶里返回的）。
+enum NotificationCategory {
+  reply('回复与提及'),
+  message('短消息'),
+  moderation('版务'),
+  system('系统');
+
+  const NotificationCategory(this.label);
+
+  final String label;
+}
+
+/// 点击提醒后的跳转目标。
+sealed class NotificationTarget {
+  const NotificationTarget();
+}
+
+class TopicTarget extends NotificationTarget {
+  final int tid;
+
+  const TopicTarget(this.tid);
+
+  @override
+  bool operator ==(Object other) => other is TopicTarget && other.tid == tid;
+
+  @override
+  int get hashCode => tid.hashCode;
+
+  @override
+  String toString() => 'TopicTarget($tid)';
+}
+
+class ReplyTarget extends NotificationTarget {
+  final int tid;
+  final int pid;
+
+  const ReplyTarget(this.tid, this.pid);
+
+  @override
+  bool operator ==(Object other) =>
+      other is ReplyTarget && other.tid == tid && other.pid == pid;
+
+  @override
+  int get hashCode => Object.hash(tid, pid);
+
+  @override
+  String toString() => 'ReplyTarget($tid, $pid)';
+}
+
+class ConversationTarget extends NotificationTarget {
+  final int mid;
+
+  const ConversationTarget(this.mid);
+
+  @override
+  bool operator ==(Object other) =>
+      other is ConversationTarget && other.mid == mid;
+
+  @override
+  int get hashCode => mid.hashCode;
+
+  @override
+  String toString() => 'ConversationTarget($mid)';
+}
+
+class ForumTarget extends NotificationTarget {
+  final int fid;
+
+  const ForumTarget(this.fid);
+
+  @override
+  bool operator ==(Object other) => other is ForumTarget && other.fid == fid;
+
+  @override
+  int get hashCode => fid.hashCode;
+
+  @override
+  String toString() => 'ForumTarget($fid)';
+}
+
+/// 「不再提示」的作用对象：pid 为 0 时表示整个主题。
+class NoHintTarget {
+  final int tid;
+  final int pid;
+
+  const NoHintTarget(this.tid, this.pid);
+
+  bool get isTopic => pid == 0;
+
+  @override
+  bool operator ==(Object other) =>
+      other is NoHintTarget && other.tid == tid && other.pid == pid;
+
+  @override
+  int get hashCode => Object.hash(tid, pid);
+
+  @override
+  String toString() => 'NoHintTarget($tid, $pid)';
+}
+
+/// 列表展示用的文案：[actor] 加粗显示，[detail] 作为第二行（主题标题、举报理由等）。
+class NotificationDescription {
+  final String? actor;
+  final String action;
+  final String? detail;
+
+  const NotificationDescription({
+    this.actor,
+    required this.action,
+    this.detail,
+  });
+}
+
+/// NGA 提醒（`__lib=noti&__act=get_all`），字段下标与类型取自网页版
+/// `js_notification.js` 的 `KEY` 定义。
+class NgaNotification {
+  static const TYPE_REPLY_TOPIC = 1;
+  static const TYPE_REPLY_REPLY = 2;
+  static const TYPE_COMMENT_TOPIC = 3;
+  static const TYPE_COMMENT_REPLY = 4;
+  static const TYPE_KEYWORD_WATCH_TOPIC = 5;
+  static const TYPE_KEYWORD_WATCH_REPLY = 6;
+  static const TYPE_MENTION_TOPIC = 7;
+  static const TYPE_MENTION_REPLY = 8;
+  static const TYPE_IP_CHANGE = 9;
+  static const TYPE_MESSAGE_NEW = 10;
+  static const TYPE_MESSAGE_REPLY = 11;
+  static const TYPE_MESSAGE_ADD = 12;
+  static const TYPE_REPORT_TOPIC = 13;
+  static const TYPE_REPORT_REPLY = 14;
+  static const TYPE_RECOMMEND_POST = 15;
+  static const TYPE_KEYWORD_WATCH = 16;
+  static const TYPE_UPVOTE = 17;
+
+  /// 0 类型
+  final int type;
+
+  /// 1 来源 uid
+  final int? fromUid;
+
+  /// 2 来源用户名
+  final String? fromUsername;
+
+  /// 3 目标 uid
+  final int? toUid;
+
+  /// 4 目标用户名
+  final String? toUsername;
+
+  /// 5 文本，一般是主题标题
+  final String? text;
+
+  /// 6 关联 id：主题 tid；短消息为 mid；类型 16 为 fid
+  final int aboutId;
+
+  /// 7 关联 id 2：一般是触发提醒的回复 pid
+  final int aboutId2;
+
+  /// 8 关联 id 3：一般是被回复 / 评论 / 评价的「你的回复」pid
+  final int aboutId3;
+
+  /// 9 时间（秒）
+  final int time;
+
+  /// 10 关联 id 4：回复所在页数
+  final int aboutId4;
+
+  /// 11 文本 2：举报理由
+  final String? text2;
+
+  /// 13 文本 3：举报分类
+  final String? text3;
+
+  const NgaNotification({
+    required this.type,
+    this.fromUid,
+    this.fromUsername,
+    this.toUid,
+    this.toUsername,
+    this.text,
+    this.aboutId = 0,
+    this.aboutId2 = 0,
+    this.aboutId3 = 0,
+    this.time = 0,
+    this.aboutId4 = 0,
+    this.text2,
+    this.text3,
+  });
+
+  factory NgaNotification.fromJson(Map map) {
+    return NgaNotification(
+      type: _parseInt(map['0']) ?? 0,
+      fromUid: _parseInt(map['1']),
+      fromUsername: _parseString(map['2']),
+      toUid: _parseInt(map['3']),
+      toUsername: _parseString(map['4']),
+      text: _parseString(map['5']),
+      aboutId: _parseInt(map['6']) ?? 0,
+      aboutId2: _parseInt(map['7']) ?? 0,
+      aboutId3: _parseInt(map['8']) ?? 0,
+      time: _parseInt(map['9']) ?? 0,
+      aboutId4: _parseInt(map['10']) ?? 0,
+      text2: _parseString(map['11']),
+      text3: _parseString(map['13']),
+    );
+  }
+
+  bool get hasActor => fromUid != null && fromUid! > 0;
+
+  NotificationCategory get category {
+    switch (type) {
+      case TYPE_REPLY_TOPIC:
+      case TYPE_REPLY_REPLY:
+      case TYPE_COMMENT_TOPIC:
+      case TYPE_COMMENT_REPLY:
+      case TYPE_MENTION_TOPIC:
+      case TYPE_MENTION_REPLY:
+      case TYPE_RECOMMEND_POST:
+      case TYPE_UPVOTE:
+        return NotificationCategory.reply;
+      case TYPE_MESSAGE_NEW:
+      case TYPE_MESSAGE_REPLY:
+      case TYPE_MESSAGE_ADD:
+        return NotificationCategory.message;
+      case TYPE_KEYWORD_WATCH_TOPIC:
+      case TYPE_KEYWORD_WATCH_REPLY:
+      case TYPE_KEYWORD_WATCH:
+      case TYPE_REPORT_TOPIC:
+      case TYPE_REPORT_REPLY:
+        return NotificationCategory.moderation;
+      default:
+        return NotificationCategory.system;
+    }
+  }
+
+  NotificationDescription describe() {
+    final actor = hasActor ? (fromUsername ?? 'UID:$fromUid') : null;
+    final subject = text;
+    switch (type) {
+      case TYPE_REPLY_TOPIC:
+        return NotificationDescription(
+          actor: actor,
+          action: '回复了你的主题',
+          detail: subject,
+        );
+      case TYPE_REPLY_REPLY:
+        return NotificationDescription(
+          actor: actor,
+          action: '回复了你在主题中的回复',
+          detail: subject,
+        );
+      case TYPE_COMMENT_TOPIC:
+        return NotificationDescription(
+          actor: actor,
+          action: '评论了你的主题',
+          detail: subject,
+        );
+      case TYPE_COMMENT_REPLY:
+        return NotificationDescription(
+          actor: actor,
+          action: '评论了你在主题中的回复',
+          detail: subject,
+        );
+      case TYPE_MENTION_TOPIC:
+        return NotificationDescription(
+          actor: actor,
+          action: '在主题中提到了你',
+          detail: subject,
+        );
+      case TYPE_MENTION_REPLY:
+        return NotificationDescription(
+          actor: actor,
+          action: '在主题中的回复中提到了你',
+          detail: subject,
+        );
+      case TYPE_RECOMMEND_POST:
+        return NotificationDescription(
+          actor: actor,
+          action: aboutId2 != 0 ? '评价了你在主题中的回复并使用了道具' : '评价了你在主题中的发言并使用了道具',
+          detail: subject,
+        );
+      case TYPE_UPVOTE:
+        return NotificationDescription(
+          action: aboutId2 != 0 ? '你在主题中的回复获得了支持或反对' : '你的主题获得了支持或反对',
+          detail: subject,
+        );
+      case TYPE_MESSAGE_NEW:
+        return NotificationDescription(
+          actor: actor,
+          action: '发起了新的对话',
+          detail: subject,
+        );
+      case TYPE_MESSAGE_REPLY:
+        return NotificationDescription(
+          actor: actor,
+          action: '回复了对话',
+          detail: subject,
+        );
+      case TYPE_MESSAGE_ADD:
+        return NotificationDescription(
+          actor: actor,
+          action: '邀请了新用户加入对话',
+          detail: subject,
+        );
+      case TYPE_KEYWORD_WATCH_TOPIC:
+        return NotificationDescription(
+          actor: actor,
+          action: '发布的主题触发了关键词监视',
+          detail: subject,
+        );
+      case TYPE_KEYWORD_WATCH_REPLY:
+        return NotificationDescription(
+          actor: actor,
+          action: '在主题中的回复触发了关键词监视',
+          detail: subject,
+        );
+      case TYPE_KEYWORD_WATCH:
+        return NotificationDescription(action: 'FID:$aboutId 中的发帖触发了关键词监视');
+      case TYPE_REPORT_TOPIC:
+        return NotificationDescription(
+          actor: actor,
+          action: '举报了主题',
+          detail: _reportDetail(),
+        );
+      case TYPE_REPORT_REPLY:
+        return NotificationDescription(
+          actor: actor,
+          action: '举报了主题中的回复',
+          detail: _reportDetail(),
+        );
+      case TYPE_IP_CHANGE:
+        return const NotificationDescription(
+          action: '你的账号可能记录到新的 IP',
+          detail: '可在网页版「访问记录」中查看详细信息',
+        );
+      default:
+        return NotificationDescription(
+          actor: actor,
+          action: '未知提醒（类型 $type）',
+          detail: subject,
+        );
+    }
+  }
+
+  String? _reportDetail() {
+    final buffer = StringBuffer();
+    if (text3 != null) buffer.write('[$text3] ');
+    if (text != null) buffer.write(text);
+    if (text2 != null) {
+      if (buffer.isNotEmpty) buffer.write('\n');
+      buffer.write('理由：$text2');
+    }
+    return buffer.isEmpty ? null : buffer.toString();
+  }
+
+  /// 点击后的跳转目标，与网页版提醒中的主链接一致。
+  NotificationTarget? get target {
+    switch (type) {
+      case TYPE_REPLY_TOPIC:
+      case TYPE_REPLY_REPLY:
+      case TYPE_MENTION_REPLY:
+      case TYPE_KEYWORD_WATCH_REPLY:
+      case TYPE_REPORT_REPLY:
+      case TYPE_RECOMMEND_POST:
+      case TYPE_UPVOTE:
+        if (aboutId2 != 0) return ReplyTarget(aboutId, aboutId2);
+        return aboutId != 0 ? TopicTarget(aboutId) : null;
+      case TYPE_COMMENT_REPLY:
+        // 评论挂在被评论的回复下，网页版链接到 aboutId3
+        if (aboutId3 != 0) return ReplyTarget(aboutId, aboutId3);
+        return aboutId != 0 ? TopicTarget(aboutId) : null;
+      case TYPE_COMMENT_TOPIC:
+      case TYPE_MENTION_TOPIC:
+      case TYPE_KEYWORD_WATCH_TOPIC:
+      case TYPE_REPORT_TOPIC:
+        return aboutId != 0 ? TopicTarget(aboutId) : null;
+      case TYPE_MESSAGE_NEW:
+      case TYPE_MESSAGE_REPLY:
+      case TYPE_MESSAGE_ADD:
+        return aboutId != 0 ? ConversationTarget(aboutId) : null;
+      case TYPE_KEYWORD_WATCH:
+        return aboutId != 0 ? ForumTarget(aboutId) : null;
+      default:
+        return null;
+    }
+  }
+
+  /// 主题 tid（有主题关联时），用于长按菜单中的「进入主题」。
+  int? get topicId {
+    switch (category) {
+      case NotificationCategory.reply:
+      case NotificationCategory.moderation:
+        if (type == TYPE_KEYWORD_WATCH) return null;
+        return aboutId != 0 ? aboutId : null;
+      default:
+        return null;
+    }
+  }
+
+  /// 「不再提示此主题 / 回复的回复或评论」的对象，对应网页版的 `_TNO` / `_RNO`。
+  NoHintTarget? get noHintTarget {
+    if (aboutId == 0) return null;
+    switch (type) {
+      case TYPE_REPLY_TOPIC:
+      case TYPE_COMMENT_TOPIC:
+        return NoHintTarget(aboutId, 0);
+      case TYPE_REPLY_REPLY:
+      case TYPE_COMMENT_REPLY:
+      case TYPE_RECOMMEND_POST:
+        return aboutId3 != 0 ? NoHintTarget(aboutId, aboutId3) : null;
+      case TYPE_UPVOTE:
+        return NoHintTarget(aboutId, aboutId2);
+      default:
+        return null;
+    }
   }
 }
 
 class NotificationInfoListData {
-  final List<ReplyNotification>? replyNotificationList;
-  final List<MessageNotification>? messageNotificationList;
-  final List<SystemNotification>? systemNotificationList;
+  /// 按时间倒序排列的全部提醒。
+  final List<NgaNotification> notifications;
   final int? unread;
 
-  NotificationInfoListData({
-    this.replyNotificationList,
-    this.messageNotificationList,
-    this.systemNotificationList,
-    this.unread,
-  });
+  const NotificationInfoListData({this.notifications = const [], this.unread});
 
   factory NotificationInfoListData.fromJson(Map<String, dynamic> map) {
-    final replyNotificationList = <ReplyNotification>[];
-    if (map['0'] != null) {
-      for (var element in (map['0'] as List<dynamic>)) {
-        replyNotificationList.add(ReplyNotification.fromJson(element));
+    final notifications = <NgaNotification>[];
+    for (final key in const ['0', '1', '2']) {
+      final list = map[key];
+      if (list is! List) continue;
+      for (final element in list) {
+        if (element is Map) {
+          notifications.add(NgaNotification.fromJson(element));
+        }
       }
-      replyNotificationList.sort((a, b) => a.getTime() - b.getTime());
     }
-    final messageNotificationList = <MessageNotification>[];
-    if (map['1'] != null) {
-      for (var element in (map['1'] as List<dynamic>)) {
-        messageNotificationList.add(MessageNotification.fromJson(element));
-      }
-      messageNotificationList.sort((a, b) => a.getTime() - b.getTime());
-    }
-    final systemNotificationList = <SystemNotification>[];
-    if (map['2'] != null) {
-      for (var element in (map['2'] as List<dynamic>)) {
-        systemNotificationList.add(SystemNotification.fromJson(element));
-      }
-      systemNotificationList.sort((a, b) => a.getTime() - b.getTime());
-    }
+    notifications.sort((a, b) => b.time.compareTo(a.time));
     return NotificationInfoListData(
-      replyNotificationList: replyNotificationList,
-      messageNotificationList: messageNotificationList,
-      systemNotificationList: systemNotificationList,
-      unread: map['unread'],
+      notifications: notifications,
+      unread: _parseInt(map['unread']),
     );
-  }
-}
-
-abstract class NgaNotification {
-  int? getType();
-
-  int? getSourceUid();
-
-  String? getSourceUsername();
-
-  int getTime();
-
-  String getNotificationMessage();
-}
-
-class ReplyNotification implements NgaNotification {
-  /// 回复主题
-  static const TYPE_REPLY_TOPIC = 1;
-
-  /// 回复回复
-  static const TYPE_REPLY_REPLY = 2;
-
-  /// 评论主题
-  static const TYPE_COMMENT_TOPIC = 3;
-
-  /// 评论回复
-  static const TYPE_COMMENT_REPLY = 4;
-
-  /// 在主题中被 @
-  static const TYPE_AT_IN_TOPIC = 7;
-
-  /// 在回复中被 @
-  static const TYPE_AT_IN_REPLY = 8;
-
-  /// 主题或回复被评价并使用道具(对主题时回复id为0)
-  static const TYPE_RATED = 15;
-
-  /// 0
-  final int? type;
-
-  /// 1 来源 uid
-  final int? sourceUid;
-
-  /// 2 来源 username
-  final String? sourceUsername;
-
-  /// 3 目标 uid
-  final int? targetUid;
-
-  /// 4 目标 username
-  final String? targetUsername;
-
-  /// 5 相关主题标题
-  final String? topicSubject;
-
-  /// 6 相关id1  类别是1 2 3 4 7 8 15时是主题tid
-  final int? tid;
-
-  /// 7 相关 id2 类别是1 2 4 8 时是回复pid
-  final int? pid;
-
-  /// 8 相关 id3 类别是2 4 15时是被回复或评论或评价 的 回复pid
-  final int? targetReplyPid;
-
-  /// 9 时间
-  final int? time;
-
-  /// 10 类别是1 2 4 8时是回复所在的页数
-  final int? page;
-
-  ReplyNotification({
-    this.type,
-    this.sourceUid,
-    this.sourceUsername,
-    this.targetUid,
-    this.targetUsername,
-    this.topicSubject,
-    this.tid,
-    this.pid,
-    this.targetReplyPid,
-    this.time,
-    this.page,
-  });
-
-  factory ReplyNotification.fromJson(Map<String, dynamic> map) {
-    return ReplyNotification(
-      type: map['0'],
-      sourceUid: map['1'],
-      sourceUsername: map['2'],
-      targetUid: map['3'],
-      targetUsername: map['4'],
-      topicSubject: map['5'],
-      tid: map['6'],
-      pid: map['7'],
-      targetReplyPid: map['8'],
-      time: map['9'],
-      page: map['10'],
-    );
-  }
-
-  @override
-  int? getSourceUid() => sourceUid;
-
-  @override
-  String? getSourceUsername() => sourceUsername;
-
-  @override
-  int getTime() => time ?? 0;
-
-  @override
-  int? getType() => type;
-
-  @override
-  String getNotificationMessage() {
-    final time = code_utils.formatPostDate(getTime() * 1000);
-    if (type == ReplyNotification.TYPE_REPLY_TOPIC) {
-      // 5分钟前 楼上的你妈妈叫你吃饭 回复 了你的主题 测试测试测试测试测试测试
-      return "$time $sourceUsername 回复了你的主题 $topicSubject";
-    } else if (type == ReplyNotification.TYPE_REPLY_REPLY) {
-      // 刚才 楼上的你妈妈叫你吃饭 回复 了你在主题 测试测试测试测试测试测试 中的 回复
-      return "$time $sourceUsername 回复了你在主题 $topicSubject 中的回复";
-    } else if (type == ReplyNotification.TYPE_AT_IN_REPLY) {
-      // 刚才 楼上的你妈妈叫你吃饭 在主题 测试测试 中的 回复 中提到了你
-      return "$time $sourceUsername 在主题 $topicSubject 中的回复中提到了你";
-    } else if (type == ReplyNotification.TYPE_AT_IN_TOPIC) {
-      // 刚才 楼上的你妈妈叫你吃饭 在主题 测试测试 中提到了你
-      return "$time $sourceUsername 在主题 $topicSubject 中提到了你";
-    } else if (type == ReplyNotification.TYPE_COMMENT_TOPIC) {
-      // 5分钟前 楼上的你妈妈叫你吃饭 评论 了你的主题 测试测试测试测试测试测试
-      return "$time $sourceUsername 评论了你的主题 $topicSubject";
-    } else if (type == ReplyNotification.TYPE_COMMENT_REPLY) {
-      // 刚才 楼上的你妈妈叫你吃饭 评论 了你在主题 测试测试测试测试测试测试 中的 回复
-      return "$time $sourceUsername 评论了你在主题 $topicSubject 中的回复";
-    } else if (type == ReplyNotification.TYPE_RATED) {
-      if (targetReplyPid == 0) {
-        return "$time 你在主题 $topicSubject 中的回复被评分";
-      } else {
-        return "$time 你的主题 $topicSubject 被评分";
-      }
-    } else {
-      return "未知回复消息类型";
-    }
-  }
-}
-
-class MessageNotification implements NgaNotification {
-  /// 新短消息
-  static const TYPE_NEW = 10;
-
-  /// 短消息回复
-  static const TYPE_REPLY = 11;
-
-  /// 被加入到多人消息中
-  static const TYPE_ADDED_MULTI = 12;
-
-  /// 0 类型
-  final int? type;
-
-  /// 1 来源 uid
-  final int? sourceUid;
-
-  /// 2 来源 username
-  final String? sourceUsername;
-
-  /// 6 mid
-  final int? mid;
-
-  /// 9 时间
-  final int? time;
-
-  MessageNotification({
-    this.type,
-    this.sourceUid,
-    this.sourceUsername,
-    this.mid,
-    this.time,
-  });
-
-  factory MessageNotification.fromJson(Map<String, dynamic> map) {
-    return MessageNotification(
-      type: map['0'],
-      sourceUid: map['1'],
-      sourceUsername: map['2'],
-      mid: map['6'],
-      time: map['9'],
-    );
-  }
-
-  @override
-  int? getSourceUid() => sourceUid;
-
-  @override
-  String? getSourceUsername() => sourceUsername;
-
-  @override
-  int getTime() => time ?? 0;
-
-  @override
-  int? getType() => type;
-
-  @override
-  String getNotificationMessage() {
-    return toString();
-  }
-}
-
-class SystemNotification implements NgaNotification {
-  /// 主题关键词触发，版主功能
-  static const TYPE_TOPIC_KEYWORD = 5;
-
-  /// 回复关键词触发，版主功能
-  static const TYPE_REPLY_KEYWORD = 6;
-
-  /// ip 变化
-  static const TYPE_IP_CHANGED = 9;
-
-  /// 举报主题, 版主功能
-  static const TYPE_REPORT_TOPIC = 13;
-
-  /// 举报回复, 版主功能
-  static const TYPE_REPORT_REPLY = 14;
-
-  /// 关键词监视, 版主功能
-  static const TYPE_SELF_KEYWORD = 16;
-
-  /// 0
-  final int? type;
-
-  /// 1 来源 uid
-  final int? sourceUid;
-
-  /// 2 来源 username
-  final String? sourceUsername;
-
-  /// 5 相关主题标题
-  final String? topicSubject;
-
-  /// 6 相关id1  类别是1 2 3 4 7 8 15时是主题tid
-  final int? tid;
-
-  /// 7 相关 id2 类别是1 2 4 8 时是回复pid
-  final int? pid;
-
-  /// 9 时间
-  final int? time;
-
-  /// 10 类别是1 2 4 8时是回复所在的页数
-  final int? page;
-
-  SystemNotification({
-    this.type,
-    this.sourceUid,
-    this.sourceUsername,
-    this.topicSubject,
-    this.tid,
-    this.pid,
-    this.time,
-    this.page,
-  });
-
-  factory SystemNotification.fromJson(Map<String, dynamic> map) {
-    return SystemNotification(
-      type: map['0'],
-      sourceUid: map['1'],
-      sourceUsername: map['2'],
-      topicSubject: map['5'],
-      tid: map['6'],
-      pid: map['7'],
-      time: map['9'],
-      page: map['10'],
-    );
-  }
-
-  @override
-  int? getSourceUid() => sourceUid;
-
-  @override
-  String? getSourceUsername() => sourceUsername;
-
-  @override
-  int getTime() => time ?? 0;
-
-  @override
-  int? getType() => type;
-
-  @override
-  String toString() {
-    return 'SystemNotification{type: $type, sourceUid: $sourceUid, sourceUsername: $sourceUsername, topicSubject: $topicSubject, tid: $tid, pid: $pid, time: $time, page: $page}';
-  }
-
-  @override
-  String getNotificationMessage() {
-    if (type == SystemNotification.TYPE_SELF_KEYWORD) {
-      // pid 是跳转或查询的 reply id
-      // 今天 12:55 FID:-3355501中的发帖触发了关键词监视 查看详细信息
-      return "${code_utils.formatPostDate(getTime() * 1000)} FID:$tid中的发帖触发了关键词监视";
-    } else {
-      return toString();
-    }
   }
 }

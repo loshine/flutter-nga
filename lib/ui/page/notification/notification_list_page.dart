@@ -1,10 +1,12 @@
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 import 'notification_item_widget.dart';
 
@@ -14,6 +16,7 @@ class NotificationListPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController();
+    final loaded = useState(false);
     final state = ref.watch(notificationListProvider);
     final notifier = ref.read(notificationListProvider.notifier);
 
@@ -21,6 +24,7 @@ class NotificationListPage extends HookConsumerWidget {
       try {
         await notifier.refresh();
         if (!context.mounted) return;
+        loaded.value = true;
         refreshController.finishRefresh();
       } catch (err) {
         if (!context.mounted) return;
@@ -29,62 +33,117 @@ class NotificationListPage extends HookConsumerWidget {
       }
     }
 
+    Future<void> onNoHint(NoHintTarget target) async {
+      try {
+        await notifier.setNoHint(target);
+        AppToast.success(target.isTopic ? '已不再提示此主题' : '已不再提示此回复');
+      } catch (err) {
+        AppToast.error(err);
+      }
+    }
+
     useInitialRefresh(refreshController);
 
+    final entries = <Object>[
+      for (final section in state.sections) ...[section.key, ...section.value],
+    ];
+
     return Scaffold(
-      appBar: AppBar(title: const Text('提醒信息')),
+      appBar: AppBar(
+        title: const Text('提醒信息'),
+        actions: [
+          IconButton(
+            tooltip: '清空提醒',
+            icon: const Icon(Icons.delete_sweep_outlined),
+            onPressed: state.notifications.isEmpty
+                ? null
+                : () => _confirmClear(context, notifier),
+          ),
+        ],
+      ),
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
-        child: ListView.builder(
-          itemCount: state.count,
-          itemBuilder: (context, index) => _itemBuilder(context, index, state),
-        ),
+        child: entries.isEmpty
+            ? ListView(
+                children: [
+                  if (loaded.value)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 120),
+                      child: Center(
+                        child: Text(
+                          '暂无提醒',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                    ),
+                ],
+              )
+            : ListView.builder(
+                itemCount: entries.length,
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  if (entry is NotificationCategory) {
+                    return _SectionHeader(category: entry);
+                  }
+                  return NotificationItemWidget(
+                    notification: entry as NgaNotification,
+                    onNoHint: onNoHint,
+                  );
+                },
+              ),
       ),
     );
   }
 
-  Widget _itemBuilder(
-    BuildContext context,
-    int index,
-    NotificationListState state,
-  ) {
-    if (index == 0) {
-      return _titleBuilder('回复通知');
-    } else if (index < state.replyNotificationList.length + 1) {
-      return ReplyNotificationItemWidget(
-        notification: state.replyNotificationList[index - 1],
-      );
-    } else if (index == state.replyNotificationList.length + 1) {
-      return _titleBuilder('消息通知');
-    } else if (index <
-        state.replyNotificationList.length +
-            state.messageNotificationList.length +
-            2) {
-      return Text('111');
-    } else if (index ==
-        state.replyNotificationList.length +
-            state.messageNotificationList.length +
-            2) {
-      return _titleBuilder('系统通知');
-    } else {
-      return SystemNotificationItemWidget(
-        notification:
-            state.systemNotificationList[index -
-                state.replyNotificationList.length -
-                state.messageNotificationList.length -
-                3],
-      );
-    }
+  void _confirmClear(BuildContext context, NotificationListNotifier notifier) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('清空提醒'),
+        content: const Text('将删除信箱中的全部提醒，清空后无法恢复。'),
+        actions: [
+          TextButton(
+            onPressed: () => Routes.pop(dialogContext),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Routes.pop(dialogContext);
+              try {
+                await notifier.clear();
+                AppToast.success('已清空提醒');
+              } catch (err) {
+                AppToast.error(err);
+              }
+            },
+            child: const Text('清空'),
+          ),
+        ],
+      ),
+    );
   }
+}
 
-  Widget _titleBuilder(String name) {
+class _SectionHeader extends StatelessWidget {
+  final NotificationCategory category;
+
+  const _SectionHeader({required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
       child: Text(
-        name,
-        style: TextStyle(
-          fontSize: Dimen.titleMedium,
+        category.label,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: theme.colorScheme.primary,
           fontWeight: FontWeight.bold,
         ),
       ),

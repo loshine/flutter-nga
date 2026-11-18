@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
+import 'package:flutter_nga/ui/page/conversation/message_block_list_page.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_detail_page.dart';
 import 'package:flutter_nga/ui/page/history/topic_history_list_page.dart';
@@ -57,6 +58,7 @@ class Routes {
   static const String FAVOURITE_TOPICS = "/favourite_topics";
   static const String TOPIC_HISTORY = "/topic_history";
   static const String CONVERSATIONS = "/conversations";
+  static const String MESSAGE_BLOCKLIST = "/conversations/blocklist";
   static const String NOTIFICATIONS = "/notifications";
 
   /// 初始化路由
@@ -118,9 +120,9 @@ class Routes {
     return Future.value();
   }
 
-  /// 返回上一页
-  static void pop(BuildContext context) {
-    context.pop();
+  /// 返回上一页，可带回 [result]
+  static void pop<T extends Object?>(BuildContext context, [T? result]) {
+    context.pop(result);
   }
 
   /// 处理 html 控件中超链接点击事件
@@ -317,6 +319,11 @@ List<GoRoute> buildRoutes() {
       builder: (context, state) => ConversationDetailPage(
         mid: int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0,
       ),
+    ),
+    GoRoute(
+      path: Routes.MESSAGE_BLOCKLIST,
+      name: Routes.MESSAGE_BLOCKLIST,
+      builder: (context, state) => const MessageBlockListPage(),
     ),
     GoRoute(
       path: Routes.SEND_MESSAGE,

@@ -73,4 +73,75 @@ void main() {
       ]);
     });
   });
+
+  group('参与者与位标志', () {
+    test('parseMessageParticipants 解析 tab 分隔的 uid/用户名', () {
+      expect(parseMessageParticipants('1\talice\t2\tbob'), const [
+        MessageParticipant(1, 'alice'),
+        MessageParticipant(2, 'bob'),
+      ]);
+      expect(parseMessageParticipants(null), isEmpty);
+      expect(parseMessageParticipants('x\ty\t3'), isEmpty);
+    });
+
+    test('隐藏位与 IP（整数或点分形式）', () {
+      final hidden = Message.fromJson({
+        'from': 100,
+        'bit': '512',
+        'data': {'1': 3232235777},
+      }, const []);
+      expect(hidden.isHidden, isTrue);
+      expect(hidden.ip, '192.168.1.1');
+
+      // 有符号 32 位整数也按无符号处理
+      final negative = Message.fromJson({
+        'from': 100,
+        'data': [null, -1062731519],
+      }, const []);
+      expect(negative.isHidden, isFalse);
+      expect(negative.ip, '192.168.1.1');
+
+      final dotted = Message.fromJson({
+        'from': 100,
+        'data': {'1': '10.0.0.1'},
+      }, const []);
+      expect(dotted.ip, '10.0.0.1');
+      expect(Message.fromJson({'from': 1}, const []).ip, isNull);
+    });
+
+    test('系统消息修正主题链接写法', () {
+      final message = Message.fromJson({
+        'from': 0,
+        'content': '[url]/read.php?tid=123][b]标题[/b][/url]',
+      }, const []);
+      expect(message.content, '[url=/read.php?tid=123][b]标题[/b][/url]');
+    });
+
+    test('MessageListData 读取 allUsers、隔离位，缺失时回退到首条 data[2]', () {
+      final data = MessageListData.fromJson({
+        'subjectBit': 32,
+        'starterUid': '1',
+        'allUsers': '1\talice\t2\tbob',
+        'allmsgs': {
+          '0': {'id': 1, 'from': 1, 'content': 'x'},
+        },
+      });
+      expect(data.isIsolated, isTrue);
+      expect(data.starterUid, 1);
+      expect(data.participants, hasLength(2));
+
+      final fallback = MessageListData.fromJson({
+        'allmsgs': {
+          '0': {
+            'id': 1,
+            'from': 1,
+            'content': 'x',
+            'data': {'2': '3\tcarol'},
+          },
+        },
+      });
+      expect(fallback.isIsolated, isFalse);
+      expect(fallback.participants, const [MessageParticipant(3, 'carol')]);
+    });
+  });
 }
