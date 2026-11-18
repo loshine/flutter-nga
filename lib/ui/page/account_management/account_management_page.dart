@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/user/account_list_provider.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -45,7 +46,7 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
         title: Text("账号管理"),
         actions: [
           IconButton(
-            onPressed: () => _quitAll(notifier),
+            onPressed: () => _confirmQuitAll(notifier),
             icon: Icon(Icons.delete_forever),
             tooltip: "退出所有账号",
           ),
@@ -103,6 +104,19 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
   @override
   void didPopNext() {
     _refreshController.callRefresh();
+  }
+
+  void _confirmQuitAll(AccountListNotifier notifier) {
+    showDialog(
+      context: context,
+      builder: (_) => M3ConfirmDialog(
+        title: "退出所有账号",
+        content: "将退出并移除本机保存的全部账号，此操作不可恢复。",
+        confirmText: "全部退出",
+        destructive: true,
+        onConfirm: () => _quitAll(notifier),
+      ),
+    );
   }
 
   void _quitAll(AccountListNotifier notifier) async {
