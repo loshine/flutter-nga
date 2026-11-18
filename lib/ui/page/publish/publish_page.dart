@@ -42,6 +42,7 @@ class PublishPage extends HookWidget {
     final attachmentsCheck = useRef(StringBuffer());
     final wasKeyboardVisible = useRef(false);
     final submitting = useState(false);
+    final pageRoute = ModalRoute.of(context);
     final hasAttachments = useState(false);
 
     // 标题、标签、附件有内容，或正文与带入的初始内容（引用 / 回复）不同，
@@ -220,7 +221,13 @@ class PublishPage extends HookWidget {
           return;
         }
         AppToast.success(message);
-        if (context.mounted) Routes.pop(context);
+        // 提交期间可能打开了标签、面板等对话框，先关掉它们再关闭编辑页，
+        // 避免只关掉对话框、内容留在页面上被再次提交。
+        if (context.mounted) {
+          final navigator = Navigator.of(context);
+          if (pageRoute != null) navigator.popUntil((r) => r == pageRoute);
+          navigator.pop();
+        }
       } catch (err) {
         AppToast.error(err);
       } finally {
@@ -258,9 +265,10 @@ class PublishPage extends HookWidget {
     final panelOpen = openPanel.value != null;
 
     return PopScope(
-      canPop: !panelOpen && !hasEdits,
+      // 提交中不允许返回：请求结束后会自动关闭页面或恢复编辑。
+      canPop: !submitting.value && !panelOpen && !hasEdits,
       onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
+        if (didPop || submitting.value) return;
         if (panelOpen) {
           openPanel.value = null;
         } else {
