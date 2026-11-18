@@ -6,6 +6,7 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/ui/widget/topic_history_list_item_widget.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
+import 'package:flutter_nga/ui/widget/username_text.dart';
 
 const _scale = 2.0;
 
@@ -79,5 +80,17 @@ void main() {
       );
       expect(_paintedRect(tester, '版块').width, closeTo(2 * 10 * _scale, 4));
     });
+  });
+
+  testWidgets('UID 用户名高亮部分只缩放一次', (tester) async {
+    await _pumpScaled(
+      tester,
+      const UsernameText(
+        username: 'UID:12345678',
+        style: TextStyle(fontSize: 10),
+      ),
+    );
+
+    expect(_paintedRect(tester, '5678').width, closeTo(4 * 10 * _scale, 4));
   });
 }
