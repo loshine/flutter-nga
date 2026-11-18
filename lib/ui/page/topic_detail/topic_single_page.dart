@@ -226,10 +226,18 @@ class TopicSinglePage extends HookConsumerWidget {
         commentSource: commentSource,
         blockMode: blockMode,
         commentBlockModes: commentBlockModes,
+        isTopicAuthor: _isTopicAuthor(state, reply),
       );
       replyWidgetCache[uniqueId] = cached;
       return cached;
     }
+  }
+
+  /// 楼主 uid 取自帖子信息；匿名帖的 authorid 可能是字符串，统一按字符串比较。
+  bool _isTopicAuthor(TopicSinglePageState state, Reply reply) {
+    final topicAuthor = state.topic?.authorId?.toString() ?? '';
+    if (topicAuthor.isEmpty || topicAuthor == '0') return false;
+    return topicAuthor == reply.authorId?.toString();
   }
 
   User? _findUser(TopicSinglePageState state, int? uid) {

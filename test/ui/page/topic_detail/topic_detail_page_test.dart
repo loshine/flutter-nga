@@ -159,4 +159,77 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('bottom bar has tooltips and really disables page buttons', (
+    tester,
+  ) async {
+    final harness = _TopicRequestHarness();
+    final container = ProviderContainer(
+      overrides: [
+        topicSinglePageProvider.overrideWith2(harness.createNotifier),
+      ],
+    );
+    addTearDown(container.dispose);
+    const detailKey = TopicDetailKey(tid: 2);
+    final detail = container.listen(topicDetailProvider(detailKey), (_, _) {});
+    addTearDown(detail.close);
+    container
+        .read(topicDetailProvider(detailKey).notifier)
+        .updateMetadata(maxPage: 3, maxFloor: 60, topic: null);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: TopicDetailPage(2, 10)),
+      ),
+    );
+    await harness.waitForRefreshStart(
+      tester,
+      const TopicSinglePageKey(tid: 2, page: 1),
+    );
+
+    IconButton button(String tooltip) => tester.widget<IconButton>(
+      find.ancestor(
+        of: find.byTooltip(tooltip),
+        matching: find.byType(IconButton),
+      ),
+    );
+    expect(button('上一页').onPressed, isNull);
+    expect(button('下一页').onPressed, isNotNull);
+    expect(find.byTooltip('切换到夜间模式'), findsOneWidget);
+    expect(find.byTooltip('收藏'), findsOneWidget);
+    expect(find.byTooltip('回复'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('更多'));
+    // 首次刷新挂起时 EasyRefresh 指示器一直在动，不能 pumpAndSettle。
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('复制帖子链接'), findsOneWidget);
+    expect(find.text('在浏览器中打开'), findsOneWidget);
+  });
+
+  testWidgets('dark theme offers switching to light', (tester) async {
+    final harness = _TopicRequestHarness();
+    final container = ProviderContainer(
+      overrides: [
+        topicSinglePageProvider.overrideWith2(harness.createNotifier),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: ThemeData(brightness: Brightness.dark),
+          home: const TopicDetailPage(2, 10),
+        ),
+      ),
+    );
+    await harness.waitForRefreshStart(
+      tester,
+      const TopicSinglePageKey(tid: 2, page: 1),
+    );
+    expect(find.byTooltip('切换到日间模式'), findsOneWidget);
+  });
 }

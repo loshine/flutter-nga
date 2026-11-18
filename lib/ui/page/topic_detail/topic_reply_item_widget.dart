@@ -58,6 +58,9 @@ class TopicReplyItemWidget extends ConsumerStatefulWidget {
   /// 与 [Reply.commentList] 一一对应的评论屏蔽模式；null 表示均不屏蔽
   final List<BlockMode?>? commentBlockModes;
 
+  /// 是否为楼主发的楼层，用户名旁显示「楼主」标记
+  final bool isTopicAuthor;
+
   const TopicReplyItemWidget({
     super.key,
     required this.reply,
@@ -69,6 +72,7 @@ class TopicReplyItemWidget extends ConsumerStatefulWidget {
     this.commentSource,
     this.blockMode,
     this.commentBlockModes,
+    this.isTopicAuthor = false,
   });
 
   @override
@@ -132,16 +136,26 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                     Row(
                       children: [
                         Expanded(
-                          child: UsernameText(
-                            username: widget.user!.username ?? '',
-                            uid: widget.user!.uid,
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.color,
-                              decoration: blockDecoration,
-                            ),
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: UsernameText(
+                                  username: widget.user!.username ?? '',
+                                  uid: widget.user!.uid,
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color,
+                                    decoration: blockDecoration,
+                                  ),
+                                ),
+                              ),
+                              if (widget.isTopicAuthor) ...[
+                                const SizedBox(width: 6),
+                                _TopicAuthorBadge(),
+                              ],
+                            ],
                           ),
                         ),
                         // 用 icon 参数让菜单按钮拥有 48dp 触控区。
@@ -720,6 +734,29 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: columnWidgets,
+    );
+  }
+}
+
+/// 楼主标记：主题色描边小标签
+class _TopicAuthorBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.primary),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        '楼主',
+        style: TextStyle(
+          color: colorScheme.primary,
+          fontSize: Dimen.labelSmall,
+          height: 1.4,
+        ),
+      ),
     );
   }
 }

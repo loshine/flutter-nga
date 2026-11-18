@@ -1,15 +1,29 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
+import 'package:flutter_nga/utils/nga_links.dart';
 import 'package:flutter_nga/utils/route.dart';
+
+/// 帖子详情 AppBar 溢出菜单
+enum TopicDetailMenuAction {
+  copyLink('复制帖子链接'),
+  openInBrowser('在浏览器中打开');
+
+  const TopicDetailMenuAction(this.label);
+
+  final String label;
+}
 
 class TopicDetailPage extends HookConsumerWidget {
   const TopicDetailPage(
@@ -96,9 +110,31 @@ class TopicDetailPage extends HookConsumerWidget {
           const SizedBox.shrink(),
     ];
 
+    void goToPage(int target) {
+      if (!visitedPages.value.contains(target)) {
+        visitedPages.value = {...visitedPages.value, target};
+      }
+      tabController.animateTo(target);
+    }
+
+    final hasPrevious = state.currentPage > 1;
+    final hasNext = state.currentPage < state.maxPage;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final favourited = state.favourite == FavouriteStatus.favourited;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(code_utils.unescapeHtml(state.subject ?? subject ?? "")),
+        actions: [
+          PopupMenuButton<TopicDetailMenuAction>(
+            tooltip: '更多',
+            onSelected: (action) => _onMenuSelected(action),
+            itemBuilder: (context) => [
+              for (final action in TopicDetailMenuAction.values)
+                PopupMenuItem(value: action, child: Text(action.label)),
+            ],
+          ),
+        ],
       ),
       body: TabBarView(
         physics: NeverScrollableScrollPhysics(),
@@ -109,105 +145,93 @@ class TopicDetailPage extends HookConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Opacity(
-              opacity: state.currentPage != 1 ? 1 : 0.3,
-              child: IconButton(
-                icon: Icon(Icons.chevron_left),
-                onPressed: () {
-                  if (state.currentPage != 1) {
-                    final target = tabController.index - 1;
-                    if (!visitedPages.value.contains(target)) {
-                      visitedPages.value = {...visitedPages.value, target};
-                    }
-                    tabController.animateTo(target);
-                  }
-                },
-              ),
+            IconButton(
+              tooltip: '上一页',
+              icon: Icon(Icons.chevron_left),
+              onPressed: hasPrevious
+                  ? () => goToPage(tabController.index - 1)
+                  : null,
             ),
-            InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => TopicPageSelectDialog(
-                    currentPage: state.currentPage,
-                    maxPage: state.maxPage,
-                    maxFloor: state.maxFloor,
-                    pageSelectedCallback: (isPage, target) {
-                      final index = isPage
-                          ? target - 1
-                          : (target / 20 - 1).ceil();
-                      final clamped = index
-                          .clamp(0, tabController.length - 1)
-                          .toInt();
-                      if (!visitedPages.value.contains(clamped)) {
-                        visitedPages.value = {...visitedPages.value, clamped};
-                      }
-                      tabController.animateTo(clamped);
-                    },
+            Tooltip(
+              message: '跳转页码',
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => TopicPageSelectDialog(
+                      currentPage: state.currentPage,
+                      maxPage: state.maxPage,
+                      maxFloor: state.maxFloor,
+                      pageSelectedCallback: (isPage, target) {
+                        final index = isPage
+                            ? target - 1
+                            : (target / 20 - 1).ceil();
+                        goToPage(
+                          index.clamp(0, tabController.length - 1).toInt(),
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                child: Text(
-                  "${state.currentPage}/${state.maxPage}",
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                  child: Text(
+                    "${state.currentPage}/${state.maxPage}",
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ),
             ),
-            Opacity(
-              opacity: state.maxPage != state.currentPage ? 1 : 0.3,
-              child: IconButton(
-                icon: Icon(Icons.chevron_right),
-                onPressed: () {
-                  if (state.maxPage != state.currentPage) {
-                    final target = tabController.index + 1;
-                    if (!visitedPages.value.contains(target)) {
-                      visitedPages.value = {...visitedPages.value, target};
-                    }
-                    tabController.animateTo(target);
-                  }
-                },
-              ),
+            IconButton(
+              tooltip: '下一页',
+              icon: Icon(Icons.chevron_right),
+              onPressed: hasNext
+                  ? () => goToPage(tabController.index + 1)
+                  : null,
             ),
             Spacer(flex: 1),
+            // 按当前实际亮度在日间 / 夜间之间切换，图标与提示显示切换目标。
             IconButton(
-              icon: Icon(CommunityMaterialIcons.weather_night),
-              onPressed: () async {
-                AdaptiveTheme.of(context).toggleThemeMode();
-                final mode = await AdaptiveTheme.getThemeMode();
-                String modeName;
-                if (mode == AdaptiveThemeMode.light) {
-                  modeName = "日间模式";
-                } else if (mode == AdaptiveThemeMode.dark) {
-                  modeName = "黑暗模式";
-                } else {
-                  modeName = "跟随系统";
-                }
-                AppToast.info("已切换到 $modeName");
-              },
+              tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
+              icon: Icon(
+                isDark
+                    ? CommunityMaterialIcons.weather_sunny
+                    : CommunityMaterialIcons.weather_night,
+              ),
+              onPressed: () => ref
+                  .read(themeProvider.notifier)
+                  .update(
+                    context,
+                    isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
+                  ),
             ),
             IconButton(
+              tooltip: favourited ? '取消收藏' : '收藏',
+              isSelected: favourited,
               icon: Icon(CommunityMaterialIcons.heart_outline),
-              onPressed: () {
-                notifier
-                    .addFavourite(tid)
-                    .then((message) {
-                      AppToast.success(message.toString());
-                    })
-                    .catchError((e) {
-                      AppToast.error(e);
-                    });
-              },
+              selectedIcon: Icon(CommunityMaterialIcons.heart),
+              onPressed: state.favouriteBusy
+                  ? null
+                  : () {
+                      notifier
+                          .toggleFavourite()
+                          .then((message) {
+                            if (message != null) AppToast.success(message);
+                          })
+                          .catchError((e) {
+                            AppToast.error(e);
+                          });
+                    },
             ),
             IconButton(
+              tooltip: '回复',
               icon: Icon(CommunityMaterialIcons.comment_outline),
               onPressed: () {
                 if (fid == null && state.topic == null) return;
@@ -221,5 +245,20 @@ class TopicDetailPage extends HookConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _onMenuSelected(TopicDetailMenuAction action) {
+    final url = topicWebUrl(tid!);
+    switch (action) {
+      case TopicDetailMenuAction.copyLink:
+        Clipboard.setData(ClipboardData(text: url))
+            .then((_) => AppToast.success('已复制帖子链接'));
+      case TopicDetailMenuAction.openInBrowser:
+        launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication).then((
+          opened,
+        ) {
+          if (!opened) AppToast.error('无法打开浏览器');
+        }, onError: (Object e) => AppToast.error('无法打开浏览器'));
+    }
   }
 }
