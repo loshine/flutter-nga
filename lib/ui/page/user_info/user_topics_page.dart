@@ -2,6 +2,7 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/user/user_topics_provider.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -65,10 +66,13 @@ class UserTopicsPage extends HookConsumerWidget {
           emptyMessage: '暂无主题',
           emptyIcon: Icons.article_outlined,
           onRetry: refreshController.callRefresh,
-          child: ListView.builder(
-            itemCount: state.list.length,
-            itemBuilder: (context, index) =>
-                TopicListItemWidget(topic: state.list[index]),
+          child: ReadableListPadding(
+            builder: (context, padding) => ListView.builder(
+              padding: padding,
+              itemCount: state.list.length,
+              itemBuilder: (context, index) =>
+                  TopicListItemWidget(topic: state.list[index]),
+            ),
           ),
         ),
       ),

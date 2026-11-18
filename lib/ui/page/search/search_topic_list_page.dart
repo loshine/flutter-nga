@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/search/search_topic_list_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -84,19 +85,23 @@ class SearchTopicListPage extends HookConsumerWidget {
           emptyMessage: '暂无搜索结果',
           emptyIcon: Icons.search_off_outlined,
           onRetry: refreshController.callRefresh,
-          child: ListView.separated(
+          child: ReadableListPadding(
             padding: EdgeInsets.fromLTRB(
               mediaPadding.left,
               Dimen.spacingS,
               mediaPadding.right,
               Dimen.spacingS + mediaPadding.bottom,
             ),
-            itemBuilder: (_, index) => TopicListItemWidget(
-              topic: topics[index],
-              blockMode: blockFilter.topicMode(topics[index]),
+            builder: (context, padding) => ListView.separated(
+              padding: padding,
+              itemBuilder: (_, index) => TopicListItemWidget(
+                topic: topics[index],
+                blockMode: blockFilter.topicMode(topics[index]),
+              ),
+              separatorBuilder: (_, _) =>
+                  const SizedBox(height: Dimen.spacingXS),
+              itemCount: topics.length,
             ),
-            separatorBuilder: (_, _) => const SizedBox(height: Dimen.spacingXS),
-            itemCount: topics.length,
           ),
         ),
       ),

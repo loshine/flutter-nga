@@ -4,6 +4,7 @@ import 'package:flutter_nga/providers/settings/base_url_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/settings/user_agent_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/base_url_selection_dialog.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/user_agent_selection_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -29,83 +30,86 @@ class SettingsPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text("设置")),
-      body: ListView(
+      body: ReadableListPadding(
         padding: EdgeInsets.fromLTRB(
           mediaPadding.left,
           8,
           mediaPadding.right,
           8 + mediaPadding.bottom,
         ),
-        children: [
-          _SettingsGroup(
-            title: "账户",
-            children: [
-              _SettingsTile(
-                icon: Icons.person_outline,
-                title: "账号管理",
-                subtitle: "管理您的账号",
-                onTap: () =>
-                    Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
-              ),
-            ],
-          ),
-          _SettingsGroup(
-            title: "网络",
-            children: [
-              _SettingsTile(
-                icon: Icons.dns_outlined,
-                title: "服务器设置",
-                subtitle: "当前: ${baseUrlState.currentConfig.name}",
-                onTap: () => showDialog(
-                  context: context,
-                  builder: (_) => const BaseUrlSelectionDialog(),
+        builder: (context, padding) => ListView(
+          padding: padding,
+          children: [
+            _SettingsGroup(
+              title: "账户",
+              children: [
+                _SettingsTile(
+                  icon: Icons.person_outline,
+                  title: "账号管理",
+                  subtitle: "管理您的账号",
+                  onTap: () =>
+                      Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
                 ),
-              ),
-              _SettingsTile(
-                icon: Icons.devices_outlined,
-                title: "User-Agent 设置",
-                subtitle: "当前: ${userAgentState.currentConfig.name}",
-                onTap: () => showDialog(
-                  context: context,
-                  builder: (_) => const UserAgentSelectionDialog(),
+              ],
+            ),
+            _SettingsGroup(
+              title: "网络",
+              children: [
+                _SettingsTile(
+                  icon: Icons.dns_outlined,
+                  title: "服务器设置",
+                  subtitle: "当前: ${baseUrlState.currentConfig.name}",
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (_) => const BaseUrlSelectionDialog(),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          _SettingsGroup(
-            title: "外观",
-            children: [
-              _SettingsTile(
-                icon: Icons.palette_outlined,
-                title: "主题模式",
-                subtitle: "当前: ${themeState.modeName}",
-                onTap: () => showDialog(
-                  context: context,
-                  builder: (_) => const ThemeSelectionDialog(),
+                _SettingsTile(
+                  icon: Icons.devices_outlined,
+                  title: "User-Agent 设置",
+                  subtitle: "当前: ${userAgentState.currentConfig.name}",
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (_) => const UserAgentSelectionDialog(),
+                  ),
                 ),
-              ),
-              _SettingsTile(
-                icon: Icons.text_fields,
-                title: "界面设置",
-                subtitle: "文字大小等界面元素",
-                onTap: () =>
-                    Routes.navigateTo(context, Routes.INTERFACE_SETTINGS),
-              ),
-            ],
-          ),
-          _SettingsGroup(
-            title: "内容",
-            children: [
-              _SettingsTile(
-                icon: Icons.block_outlined,
-                title: "屏蔽设置",
-                subtitle: "屏蔽用户、关键词",
-                onTap: () =>
-                    Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            _SettingsGroup(
+              title: "外观",
+              children: [
+                _SettingsTile(
+                  icon: Icons.palette_outlined,
+                  title: "主题模式",
+                  subtitle: "当前: ${themeState.modeName}",
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (_) => const ThemeSelectionDialog(),
+                  ),
+                ),
+                _SettingsTile(
+                  icon: Icons.text_fields,
+                  title: "界面设置",
+                  subtitle: "文字大小等界面元素",
+                  onTap: () =>
+                      Routes.navigateTo(context, Routes.INTERFACE_SETTINGS),
+                ),
+              ],
+            ),
+            _SettingsGroup(
+              title: "内容",
+              children: [
+                _SettingsTile(
+                  icon: Icons.block_outlined,
+                  title: "屏蔽设置",
+                  subtitle: "屏蔽用户、关键词",
+                  onTap: () =>
+                      Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

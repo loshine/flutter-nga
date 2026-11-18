@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/user/account_list_provider.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -54,17 +55,20 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
       body: EasyRefresh(
         controller: _refreshController,
         onRefresh: onRefresh,
-        child: ListView.builder(
-          itemCount: state.list.length,
-          itemBuilder: (context, position) {
-            final user = state.list[position];
-            return _AccountItem(
-              key: ValueKey(user.uid),
-              user: user,
-              onSetDefault: () => _setDefault(notifier, user),
-              onDelete: () => _confirmDelete(notifier, state.list, user),
-            );
-          },
+        child: ReadableListPadding(
+          builder: (context, padding) => ListView.builder(
+            padding: padding,
+            itemCount: state.list.length,
+            itemBuilder: (context, position) {
+              final user = state.list[position];
+              return _AccountItem(
+                key: ValueKey(user.uid),
+                user: user,
+                onSetDefault: () => _setDefault(notifier, user),
+                onDelete: () => _confirmDelete(notifier, state.list, user),
+              );
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

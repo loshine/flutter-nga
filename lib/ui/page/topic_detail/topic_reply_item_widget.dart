@@ -321,10 +321,7 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.only(top: 16),
-                child: Opacity(
-                  opacity: 0.5,
-                  child: Dash(length: MediaQuery.sizeOf(context).width),
-                ),
+                child: Opacity(opacity: 0.5, child: const Dash()),
               ),
               Padding(
                 padding: EdgeInsets.all(16),

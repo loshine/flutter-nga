@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_history_list_item_widget.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -158,10 +159,13 @@ class TopicHistoryListPage extends HookConsumerWidget {
     TopicHistoryListNotifier notifier,
   ) {
     if (historyState.list.isNotEmpty) {
-      return ListView.builder(
-        itemCount: historyState.list.length,
-        itemBuilder: (_, position) =>
-            _buildListItem(context, historyState.list[position], notifier),
+      return ReadableListPadding(
+        builder: (context, padding) => ListView.builder(
+          padding: padding,
+          itemCount: historyState.list.length,
+          itemBuilder: (_, position) =>
+              _buildListItem(context, historyState.list[position], notifier),
+        ),
       );
     } else {
       return const CustomScrollView(

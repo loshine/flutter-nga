@@ -5,6 +5,7 @@ import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/providers/message/conversation_detail_provider.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -151,21 +152,24 @@ class ConversationDetailPage extends HookConsumerWidget {
         controller: refreshController,
         onRefresh: onRefresh,
         onLoad: state.enablePullUp ? onLoading : null,
-        child: ListView.builder(
-          itemCount: state.list.length + (hasHeader ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (hasHeader && index == 0) {
-              return ConversationParticipantsHeader(
-                participants: state.participants,
-                isIsolated: state.isIsolated,
-                canRemove: state.canRemove,
-                onRemove: removeParticipant,
+        child: ReadableListPadding(
+          builder: (context, padding) => ListView.builder(
+            padding: padding,
+            itemCount: state.list.length + (hasHeader ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (hasHeader && index == 0) {
+                return ConversationParticipantsHeader(
+                  participants: state.participants,
+                  isIsolated: state.isIsolated,
+                  canRemove: state.canRemove,
+                  onRemove: removeParticipant,
+                );
+              }
+              return MessageItemWidget(
+                message: state.list[index - (hasHeader ? 1 : 0)],
               );
-            }
-            return MessageItemWidget(
-              message: state.list[index - (hasHeader ? 1 : 0)],
-            );
-          },
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

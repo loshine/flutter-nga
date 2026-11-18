@@ -6,6 +6,7 @@ import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -127,12 +128,15 @@ class ForumDetailPage extends HookConsumerWidget {
                   emptyMessage: '暂无帖子',
                   emptyIcon: Icons.article_outlined,
                   onRetry: refreshController.callRefresh,
-                  child: ListView.builder(
-                    controller: latestScrollController,
-                    itemCount: topics.length,
-                    itemBuilder: (context, index) => TopicListItemWidget(
-                      topic: topics[index],
-                      blockMode: blockFilter.topicMode(topics[index]),
+                  child: ReadableListPadding(
+                    builder: (context, padding) => ListView.builder(
+                      padding: padding,
+                      controller: latestScrollController,
+                      itemCount: topics.length,
+                      itemBuilder: (context, index) => TopicListItemWidget(
+                        topic: topics[index],
+                        blockMode: blockFilter.topicMode(topics[index]),
+                      ),
                     ),
                   ),
                 ),

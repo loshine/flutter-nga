@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/search/input_deletion_status_provider.dart';
 import 'package:flutter_nga/providers/search/search_options_provider.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 
@@ -176,49 +177,98 @@ class SearchPage extends HookConsumerWidget {
 
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    return ListView(
+    return ReadableListPadding(
       padding: EdgeInsets.fromLTRB(
         Dimen.spacingL + mediaPadding.left,
         Dimen.spacingL,
         Dimen.spacingL + mediaPadding.right,
         Dimen.spacingL + mediaPadding.bottom,
       ),
-      children: [
-        // 搜索类型分组
-        _buildOptionSection(
-          context: context,
-          title: '搜索类型',
-          colorScheme: colorScheme,
-          textTheme: textTheme,
-          child: Wrap(
-            spacing: Dimen.spacingS,
-            runSpacing: Dimen.spacingS,
-            children: [
-              ChoiceChip(
-                label: const Text('主题'),
-                selected: state.firstRadio == FIRST_RADIO_TOPIC,
-                onSelected: (_) => notifier.checkFirstRadio(FIRST_RADIO_TOPIC),
-              ),
-              ChoiceChip(
-                label: const Text('版块'),
-                selected: state.firstRadio == FIRST_RADIO_FORUM,
-                onSelected: (_) => notifier.checkFirstRadio(FIRST_RADIO_FORUM),
-              ),
-              ChoiceChip(
-                label: const Text('用户'),
-                selected: state.firstRadio == FIRST_RADIO_USER,
-                onSelected: (_) => notifier.checkFirstRadio(FIRST_RADIO_USER),
-              ),
-            ],
+      builder: (context, padding) => ListView(
+        padding: padding,
+        children: [
+          // 搜索类型分组
+          _buildOptionSection(
+            context: context,
+            title: '搜索类型',
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+            child: Wrap(
+              spacing: Dimen.spacingS,
+              runSpacing: Dimen.spacingS,
+              children: [
+                ChoiceChip(
+                  label: const Text('主题'),
+                  selected: state.firstRadio == FIRST_RADIO_TOPIC,
+                  onSelected: (_) =>
+                      notifier.checkFirstRadio(FIRST_RADIO_TOPIC),
+                ),
+                ChoiceChip(
+                  label: const Text('版块'),
+                  selected: state.firstRadio == FIRST_RADIO_FORUM,
+                  onSelected: (_) =>
+                      notifier.checkFirstRadio(FIRST_RADIO_FORUM),
+                ),
+                ChoiceChip(
+                  label: const Text('用户'),
+                  selected: state.firstRadio == FIRST_RADIO_USER,
+                  onSelected: (_) => notifier.checkFirstRadio(FIRST_RADIO_USER),
+                ),
+              ],
+            ),
           ),
-        ),
 
-        // 主题搜索选项
-        if (state.firstRadio == FIRST_RADIO_TOPIC) ...[
-          if (fid != null)
+          // 主题搜索选项
+          if (state.firstRadio == FIRST_RADIO_TOPIC) ...[
+            if (fid != null)
+              _buildOptionSection(
+                context: context,
+                title: '搜索范围',
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+                child: Wrap(
+                  spacing: Dimen.spacingS,
+                  runSpacing: Dimen.spacingS,
+                  children: [
+                    ChoiceChip(
+                      label: const Text('当前版块'),
+                      selected: state.topicRadio == TOPIC_RADIO_CURRENT_FORUM,
+                      onSelected: (_) =>
+                          notifier.checkTopicRadio(TOPIC_RADIO_CURRENT_FORUM),
+                    ),
+                    ChoiceChip(
+                      label: const Text('全部版块'),
+                      selected: state.topicRadio == TOPIC_RADIO_ALL_FORUM,
+                      onSelected: (_) =>
+                          notifier.checkTopicRadio(TOPIC_RADIO_ALL_FORUM),
+                    ),
+                  ],
+                ),
+              ),
             _buildOptionSection(
               context: context,
-              title: '搜索范围',
+              title: '搜索选项',
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+              child: Wrap(
+                spacing: Dimen.spacingS,
+                runSpacing: Dimen.spacingS,
+                children: [
+                  FilterChip(
+                    label: const Text('包括正文'),
+                    selected: state.content,
+                    onSelected: (selected) => notifier.checkContent(selected),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // 用户搜索选项
+          if (state.firstRadio == FIRST_RADIO_USER)
+            _buildOptionSection(
+              context: context,
+              title: '搜索方式',
               colorScheme: colorScheme,
               textTheme: textTheme,
               child: Wrap(
@@ -226,64 +276,20 @@ class SearchPage extends HookConsumerWidget {
                 runSpacing: Dimen.spacingS,
                 children: [
                   ChoiceChip(
-                    label: const Text('当前版块'),
-                    selected: state.topicRadio == TOPIC_RADIO_CURRENT_FORUM,
-                    onSelected: (_) =>
-                        notifier.checkTopicRadio(TOPIC_RADIO_CURRENT_FORUM),
+                    label: const Text('用户名'),
+                    selected: state.userRadio == USER_RADIO_NAME,
+                    onSelected: (_) => notifier.checkUserRadio(USER_RADIO_NAME),
                   ),
                   ChoiceChip(
-                    label: const Text('全部版块'),
-                    selected: state.topicRadio == TOPIC_RADIO_ALL_FORUM,
-                    onSelected: (_) =>
-                        notifier.checkTopicRadio(TOPIC_RADIO_ALL_FORUM),
+                    label: const Text('用户ID'),
+                    selected: state.userRadio == USER_RADIO_UID,
+                    onSelected: (_) => notifier.checkUserRadio(USER_RADIO_UID),
                   ),
                 ],
               ),
             ),
-          _buildOptionSection(
-            context: context,
-            title: '搜索选项',
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            child: Wrap(
-              spacing: Dimen.spacingS,
-              runSpacing: Dimen.spacingS,
-              children: [
-                FilterChip(
-                  label: const Text('包括正文'),
-                  selected: state.content,
-                  onSelected: (selected) => notifier.checkContent(selected),
-                ),
-              ],
-            ),
-          ),
         ],
-
-        // 用户搜索选项
-        if (state.firstRadio == FIRST_RADIO_USER)
-          _buildOptionSection(
-            context: context,
-            title: '搜索方式',
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            child: Wrap(
-              spacing: Dimen.spacingS,
-              runSpacing: Dimen.spacingS,
-              children: [
-                ChoiceChip(
-                  label: const Text('用户名'),
-                  selected: state.userRadio == USER_RADIO_NAME,
-                  onSelected: (_) => notifier.checkUserRadio(USER_RADIO_NAME),
-                ),
-                ChoiceChip(
-                  label: const Text('用户ID'),
-                  selected: state.userRadio == USER_RADIO_UID,
-                  onSelected: (_) => notifier.checkUserRadio(USER_RADIO_UID),
-                ),
-              ],
-            ),
-          ),
-      ],
+      ),
     );
   }
 

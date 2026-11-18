@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/search/search_forum_provider.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
@@ -48,10 +49,13 @@ class SearchForumPage extends HookConsumerWidget {
           emptyMessage: '暂无匹配的版块',
           emptyIcon: Icons.search_off_outlined,
           onRetry: refreshController.callRefresh,
-          child: ListView.builder(
-            itemBuilder: (_, index) =>
-                _buildForumWidget(context, forums[index]),
-            itemCount: forums.length,
+          child: ReadableListPadding(
+            builder: (context, padding) => ListView.builder(
+              padding: padding,
+              itemBuilder: (_, index) =>
+                  _buildForumWidget(context, forums[index]),
+              itemCount: forums.length,
+            ),
           ),
         ),
       ),

@@ -5,7 +5,7 @@ class Dash extends StatelessWidget {
     super.key,
     this.direction = Axis.horizontal,
     this.dashColor,
-    this.length = 200,
+    this.length,
     this.dashGap = 3,
     this.dashLength = 6,
     this.dashThickness = 1,
@@ -16,7 +16,9 @@ class Dash extends StatelessWidget {
 
   /// 为空时使用主题的 [ColorScheme.outlineVariant]。
   final Color? dashColor;
-  final double length;
+
+  /// 虚线长度；为空时横向虚线撑满父组件给出的宽度。
+  final double? length;
   final double dashGap;
   final double dashLength;
   final double dashThickness;
@@ -25,6 +27,17 @@ class Dash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = dashColor ?? Theme.of(context).colorScheme.outlineVariant;
+    final length = this.length;
+    if (length == null && direction == Axis.horizontal) {
+      return LayoutBuilder(
+        builder: (context, constraints) =>
+            _buildDashes(constraints.maxWidth, color),
+      );
+    }
+    return _buildDashes(length ?? 200, color);
+  }
+
+  Widget _buildDashes(double length, Color color) {
     var dashes = <Widget>[];
     double n = (length + dashGap) / (dashGap + dashLength);
     int newN = n.round();

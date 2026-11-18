@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -31,16 +32,19 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        children: state.blockWordList
-            .map(
-              (e) => ListTile(
-                title: Text(code_utils.unescapeHtml(e)),
-                trailing: Icon(Icons.delete),
-                onTap: () => _delete(notifier, e),
-              ),
-            )
-            .toList(),
+      body: ReadableListPadding(
+        builder: (context, padding) => ListView(
+          padding: padding,
+          children: state.blockWordList
+              .map(
+                (e) => ListTile(
+                  title: Text(code_utils.unescapeHtml(e)),
+                  trailing: Icon(Icons.delete),
+                  onTap: () => _delete(notifier, e),
+                ),
+              )
+              .toList(),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: "添加屏蔽关键词",
