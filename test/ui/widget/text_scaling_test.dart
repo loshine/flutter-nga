@@ -4,9 +4,11 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
+import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
 import 'package:flutter_nga/ui/widget/topic_history_list_item_widget.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/ui/widget/username_text.dart';
+import 'package:flutter_nga/utils/parser/nga_crypt.dart';
 
 const _scale = 2.0;
 
@@ -31,6 +33,26 @@ RichText _richTextOf(WidgetTester tester, String text) =>
 /// [text] 所在 RichText 在屏幕上的实际区域（包含 WidgetSpan 的缩放变换）。
 Rect _paintedRect(WidgetTester tester, String text) =>
     tester.getRect(find.text(text, findRichText: true).first);
+
+double? _fontSizeOf(WidgetTester tester, String text) {
+  double? found;
+  void visit(InlineSpan span, TextStyle? inherited) {
+    final style = inherited?.merge(span.style) ?? span.style;
+    if (span is TextSpan) {
+      if (found == null && (span.text ?? '').contains(text)) {
+        found = style?.fontSize;
+      }
+      for (final child in span.children ?? const <InlineSpan>[]) {
+        visit(child, style);
+      }
+    }
+  }
+
+  for (final richText in tester.widgetList<RichText>(find.byType(RichText))) {
+    visit(richText.text, null);
+  }
+  return found;
+}
 
 void main() {
   group('标题跟随系统文字缩放', () {
@@ -92,5 +114,22 @@ void main() {
     );
 
     expect(_paintedRect(tester, '5678').width, closeTo(4 * 10 * _scale, 4));
+  });
+
+  testWidgets('加密内容解密后与正文字号一致', (tester) async {
+    final hex = NgaCrypt.toHex(NgaCrypt.encrypt('pw', '内部文字'));
+    await _pumpScaled(
+      tester,
+      NgaHtml(
+        "外部文字<nga_crypt data='$hex'></nga_crypt>",
+        textStyle: const TextStyle(fontSize: 14),
+      ),
+    );
+    await tester.enterText(find.byType(TextField), 'pw');
+    await tester.tap(find.text('确认'));
+    await tester.pump();
+
+    expect(_fontSizeOf(tester, '外部文字'), 14 * _scale);
+    expect(_fontSizeOf(tester, '内部文字'), 14 * _scale);
   });
 }

@@ -312,7 +312,7 @@ class NgaHtmlWidgetFactory extends WidgetFactory {
                 pid: intAttr('pid'),
                 postDateTimestamp: intAttr('date'),
                 textStyleOf: (context) =>
-                    resolvers.resolve(context).prepareTextStyle(),
+                    _unscaledTextStyle(resolvers.resolve(context)),
               );
             },
           ),
@@ -422,6 +422,16 @@ class NgaHtmlWidgetFactory extends WidgetFactory {
       if (e.localName == 'a' && e.attributes.containsKey('href')) return true;
     }
     return false;
+  }
+
+  /// fwfh 解析出的文字样式已乘过系统文字缩放；交给嵌套的 [HtmlWidget] 前
+  /// 还原字号，否则会被再缩放一次。
+  static TextStyle _unscaledTextStyle(InheritedProperties resolved) {
+    final style = resolved.prepareTextStyle();
+    final scale = resolved.get<TextScaleFactor>()?.value ?? 1;
+    final fontSize = style.fontSize;
+    if (fontSize == null || scale == 1 || scale <= 0) return style;
+    return style.copyWith(fontSize: fontSize / scale);
   }
 
   static Map<String, String> _attributesOf(BuildTree tree) => {
