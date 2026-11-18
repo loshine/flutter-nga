@@ -113,6 +113,7 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
         ? TextDecoration.lineThrough
         : null;
     final visibleComments = _visibleComments();
+    final headerStats = replyHeaderStats(widget.user, widget.group);
 
     final floor = Column(
       mainAxisSize: MainAxisSize.min,
@@ -173,53 +174,30 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                         ),
                       ],
                     ),
-                    Wrap(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: Text(
-                            "级别: ${widget.group == null ? "" : widget.group!.name}",
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.color,
-                              fontSize: Dimen.bodySmall,
+                    if (headerStats.isNotEmpty)
+                      Wrap(
+                        children: [
+                          for (final stat in headerStats)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 16),
+                              child: Text(
+                                stat,
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.color,
+                                  fontSize: Dimen.bodySmall,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: Text(
-                            "威望: ${widget.user!.getShowReputation()}",
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.color,
-                              fontSize: Dimen.bodySmall,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: Text(
-                            "发帖: ${widget.user!.postNum ?? 0}",
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.color,
-                              fontSize: Dimen.bodySmall,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 6, right: 12),
-                      child: Wrap(children: _getMedalListWidgets()),
-                    ),
+                        ],
+                      ),
+                    if (widget.medalList?.isNotEmpty ?? false)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6, right: 12),
+                        child: Wrap(children: _getMedalListWidgets()),
+                      ),
                   ],
                 ),
               ),
@@ -423,17 +401,6 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
   }
 
   List<Widget> _getMedalListWidgets() {
-    if (widget.medalList!.isEmpty) {
-      return [
-        Text(
-          "-",
-          style: TextStyle(
-            fontSize: Dimen.bodySmall,
-            color: Theme.of(context).textTheme.bodyMedium?.color,
-          ),
-        ),
-      ];
-    }
     return widget.medalList!.map((medal) {
       return Padding(
         padding: EdgeInsets.only(right: 4),
@@ -698,16 +665,10 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                   CachedNetworkImage(
                     imageUrl: attachment.realUrl,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Image.asset(
-                      'images/default_forum_icon.png',
-                      width: 48,
-                      height: 48,
-                    ),
-                    errorWidget: (context, url, err) => Image.asset(
-                      'images/default_forum_icon.png',
-                      width: 48,
-                      height: 48,
-                    ),
+                    placeholder: (context, url) =>
+                        const AttachmentPlaceholder(),
+                    errorWidget: (context, url, err) =>
+                        const AttachmentPlaceholder(failed: true),
                   ),
                   // 水波纹盖在图片上方，点击查看大图。
                   Material(
@@ -728,6 +689,39 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: columnWidgets,
+    );
+  }
+}
+
+/// 楼层头部的「级别 / 威望 / 发帖」，没有数据的项不显示。
+List<String> replyHeaderStats(User? user, Group? group) {
+  final groupName = group?.name?.trim() ?? '';
+  return [
+    if (groupName.isNotEmpty) '级别: $groupName',
+    if (user?.rvrc != null) '威望: ${user!.getShowReputation()}',
+    if (user?.postNum != null) '发帖: ${user!.postNum}',
+  ];
+}
+
+/// 附件缩略图的加载 / 失败占位：中性底色加图片图标。
+class AttachmentPlaceholder extends StatelessWidget {
+  const AttachmentPlaceholder({super.key, this.failed = false});
+
+  /// 加载失败时显示破损图片图标。
+  final bool failed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return ColoredBox(
+      color: colorScheme.surfaceContainerHighest,
+      child: Center(
+        child: Icon(
+          failed ? Icons.broken_image_outlined : Icons.image_outlined,
+          size: 32,
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
     );
   }
 }
