@@ -7,8 +7,10 @@ import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart'
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 import 'package:flutter_nga/utils/hooks/scroll_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -28,6 +30,7 @@ class ForumDetailPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
+    final loadStatus = useListLoadStatus();
     final tabController = useMaterialTabController(initialLength: _tabs.length);
     final fabScroll = useScrollFabVisibility();
 
@@ -43,12 +46,14 @@ class ForumDetailPage extends HookConsumerWidget {
       try {
         await notifier.refresh(false, type);
         if (!context.mounted) return;
+        loadStatus.succeed();
         refreshController.finishRefresh();
         refreshController.resetFooter();
       } catch (err) {
         if (!context.mounted) return;
         refreshController.finishRefresh(IndicatorResult.fail);
-        AppToast.error(err);
+        final hasData = ref.read(forumDetailProvider(fid)).list.isNotEmpty;
+        if (!loadStatus.fail(err, hasData: hasData)) AppToast.error(err);
       }
     }
 
@@ -108,11 +113,18 @@ class ForumDetailPage extends HookConsumerWidget {
                 controller: refreshController,
                 onRefresh: onRefresh,
                 onLoad: state.enablePullUp ? onLoading : null,
-                child: ListView.builder(
-                  itemCount: topics.length,
-                  itemBuilder: (context, index) => TopicListItemWidget(
-                    topic: topics[index],
-                    blockMode: blockFilter.topicMode(topics[index]),
+                child: ListStatusSwitcher(
+                  status: loadStatus,
+                  isEmpty: topics.isEmpty,
+                  emptyMessage: '暂无帖子',
+                  emptyIcon: Icons.article_outlined,
+                  onRetry: refreshController.callRefresh,
+                  child: ListView.builder(
+                    itemCount: topics.length,
+                    itemBuilder: (context, index) => TopicListItemWidget(
+                      topic: topics[index],
+                      blockMode: blockFilter.topicMode(topics[index]),
+                    ),
                   ),
                 ),
               ),
