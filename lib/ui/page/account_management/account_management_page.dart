@@ -1,4 +1,3 @@
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -57,40 +56,15 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
         onRefresh: onRefresh,
         child: ListView.builder(
           itemCount: state.list.length,
-          itemBuilder: (context, position) => Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => _setDefault(notifier, state.list[position]),
-              onLongPress: () =>
-                  _showDeleteDialog(notifier, state.list[position]),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(
-                    title: Text(
-                      state.list[position].nickname,
-                      style: TextStyle(
-                        color: state.list[position].enabled
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    subtitle: Text(
-                      "UID:${state.list[position].uid}",
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                    trailing: Icon(
-                      CommunityMaterialIcons.check,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  Divider(height: 1),
-                ],
-              ),
-            ),
-          ),
+          itemBuilder: (context, position) {
+            final user = state.list[position];
+            return _AccountItem(
+              key: ValueKey(user.uid),
+              user: user,
+              onSetDefault: () => _setDefault(notifier, user),
+              onDelete: () => _confirmDelete(notifier, state.list, user),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -131,27 +105,101 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
     notifier.setDefault(user).then((_) => _refreshController.callRefresh());
   }
 
-  void _showDeleteDialog(AccountListNotifier notifier, CacheUser user) {
+  /// 删除只移除本机保存的登录信息，不会让服务端会话失效，所以文案不说「退出登录」。
+  void _confirmDelete(
+    AccountListNotifier notifier,
+    List<CacheUser> accounts,
+    CacheUser user,
+  ) {
     showDialog(
       context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: Text("提示"),
-          content: Text("是否删除该登录用户"),
-          actions: <Widget>[
-            TextButton(onPressed: () => Routes.pop(context), child: Text("取消")),
-            TextButton(
-              onPressed: () {
-                Routes.pop(context);
-                notifier
-                    .delete(user)
-                    .then((_) => _refreshController.callRefresh());
-              },
-              child: Text("确认"),
+      builder: (_) => M3ConfirmDialog(
+        title: "删除账号",
+        content: deleteAccountMessage(accounts, user),
+        confirmText: "删除",
+        destructive: true,
+        onConfirm: () => notifier
+            .delete(user)
+            .then((_) => _refreshController.callRefresh())
+            .catchError((err) => AppToast.error(err)),
+      ),
+    );
+  }
+}
+
+/// 删除账号确认文案：区分普通账号、默认账号与最后一个账号。
+@visibleForTesting
+String deleteAccountMessage(List<CacheUser> accounts, CacheUser user) {
+  final others = accounts.where((u) => u.uid != user.uid).toList();
+  final base = "删除「${user.nickname}」在本机保存的登录信息，之后需要重新登录才能使用该账号。";
+  if (others.isEmpty) return "$base\n删除后将处于未登录状态。";
+  if (user.enabled) return "$base\n将自动切换到「${others.first.nickname}」。";
+  return base;
+}
+
+/// 账号条目：点击设为默认；行尾菜单与长按提供「设为默认 / 删除」。
+class _AccountItem extends StatefulWidget {
+  const _AccountItem({
+    super.key,
+    required this.user,
+    required this.onSetDefault,
+    required this.onDelete,
+  });
+
+  final CacheUser user;
+  final VoidCallback onSetDefault;
+  final VoidCallback onDelete;
+
+  @override
+  State<_AccountItem> createState() => _AccountItemState();
+}
+
+class _AccountItemState extends State<_AccountItem> {
+  final _menuKey = GlobalKey<PopupMenuButtonState<String>>();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final user = widget.user;
+    return Column(
+      children: [
+        ListTile(
+          onTap: widget.onSetDefault,
+          onLongPress: () => _menuKey.currentState?.showButtonMenu(),
+          // 只有默认账号显示选中标记
+          leading: Icon(
+            user.enabled ? Icons.check_circle : Icons.circle_outlined,
+            color: user.enabled ? colorScheme.primary : colorScheme.outline,
+            semanticLabel: user.enabled ? '当前账号' : null,
+          ),
+          title: Text(
+            user.nickname,
+            style: TextStyle(
+              color: user.enabled
+                  ? colorScheme.primary
+                  : Theme.of(context).textTheme.bodyLarge?.color,
             ),
-          ],
-        );
-      },
+          ),
+          subtitle: Text(
+            "UID:${user.uid}",
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+          ),
+          trailing: PopupMenuButton<String>(
+            key: _menuKey,
+            tooltip: '更多操作',
+            onSelected: (action) =>
+                action == 'default' ? widget.onSetDefault() : widget.onDelete(),
+            itemBuilder: (_) => [
+              if (!user.enabled)
+                const PopupMenuItem(value: 'default', child: Text('设为默认')),
+              const PopupMenuItem(value: 'delete', child: Text('删除')),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+      ],
     );
   }
 }

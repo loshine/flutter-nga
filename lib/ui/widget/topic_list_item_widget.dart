@@ -15,6 +15,7 @@ class TopicListItemWidget extends ConsumerWidget {
     required this.topic,
     this.blockMode,
     this.onLongPress,
+    this.trailing,
   });
 
   final Topic topic;
@@ -22,6 +23,9 @@ class TopicListItemWidget extends ConsumerWidget {
   /// 主题被屏蔽时的展示模式，由页面通过 [BlockFilter] 判定；null 表示正常展示
   final BlockMode? blockMode;
   final GestureLongPressCallback? onLongPress;
+
+  /// 行尾操作区（如「更多」菜单按钮），显示在标题右侧
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -57,26 +61,33 @@ class TopicListItemWidget extends ConsumerWidget {
           child: Opacity(
             opacity: alpha,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 标题
-                  _buildTitle(
-                    context,
-                    topic,
-                    topicSubject,
-                    interfaceState,
-                    textTheme,
-                    colorScheme,
-                    isRead: isRead,
-                  ),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                trailing == null ? 16 : 4,
+                16,
+              ),
+              child: _withTrailing(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 标题
+                    _buildTitle(
+                      context,
+                      topic,
+                      topicSubject,
+                      interfaceState,
+                      textTheme,
+                      colorScheme,
+                      isRead: isRead,
+                    ),
 
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  // 元信息行
-                  _buildMetaRow(context, colorScheme, textTheme),
-                ],
+                    // 元信息行
+                    _buildMetaRow(context, colorScheme, textTheme),
+                  ],
+                ),
               ),
             ),
           ),
@@ -86,6 +97,18 @@ class TopicListItemWidget extends ConsumerWidget {
           thickness: 1,
           color: colorScheme.surfaceContainerHighest,
         ),
+      ],
+    );
+  }
+
+  Widget _withTrailing(Widget content) {
+    final trailing = this.trailing;
+    if (trailing == null) return content;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: content),
+        trailing,
       ],
     );
   }
