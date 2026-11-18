@@ -13,6 +13,7 @@ import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 import 'package:flutter_nga/utils/hooks/scroll_hooks.dart';
+import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 import 'child_forum_list_page.dart';
@@ -33,6 +34,8 @@ class ForumDetailPage extends HookConsumerWidget {
     final loadStatus = useListLoadStatus();
     final tabController = useMaterialTabController(initialLength: _tabs.length);
     final fabScroll = useScrollFabVisibility();
+    final tabSignals = useScrollToTopSignals(_tabs.length);
+    final latestScrollController = useScrollToTopController(tabSignals[0]);
 
     useListenable(tabController);
     final mainPage = tabController.index == 0;
@@ -82,7 +85,12 @@ class ForumDetailPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(name!),
+        // 点击标题让当前 Tab 回到顶部
+        title: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => tabSignals[tabController.index].fire(),
+          child: Text(name!),
+        ),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(56),
           child: Align(
@@ -120,6 +128,7 @@ class ForumDetailPage extends HookConsumerWidget {
                   emptyIcon: Icons.article_outlined,
                   onRetry: refreshController.callRefresh,
                   child: ListView.builder(
+                    controller: latestScrollController,
                     itemCount: topics.length,
                     itemBuilder: (context, index) => TopicListItemWidget(
                       topic: topics[index],
@@ -130,7 +139,13 @@ class ForumDetailPage extends HookConsumerWidget {
               ),
             ),
           ),
-          KeepAliveTabView(child: ForumRecommendTopicListPage(fid, type: type)),
+          KeepAliveTabView(
+            child: ForumRecommendTopicListPage(
+              fid,
+              type: type,
+              scrollToTop: tabSignals[1],
+            ),
+          ),
           KeepAliveTabView(child: ChildForumListPage(state.info)),
         ],
       ),

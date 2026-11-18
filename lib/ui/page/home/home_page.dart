@@ -1,3 +1,4 @@
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/home/home_provider.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/mine/mine_page.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
 
@@ -44,8 +46,11 @@ class _HomePageContent extends HookConsumerWidget {
   /// 响应式断点：大于此宽度使用 NavigationRail
   static const double _railBreakpoint = 600.0;
 
-  List<Widget> _buildPageList() {
-    return [const ForumGroupTabsPage(), const MinePage()];
+  List<Widget> _buildPageList(ScrollToTopSignal communityScrollToTop) {
+    return [
+      ForumGroupTabsPage(scrollToTop: communityScrollToTop),
+      const MinePage(),
+    ];
   }
 
   String _getTitleText(int index) {
@@ -99,9 +104,25 @@ class _HomePageContent extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(homeIndexProvider);
-    final pageList = _buildPageList();
+    final scrollToTop = useMemoized(ScrollToTopSignal.new);
+    useEffect(() => scrollToTop.dispose, [scrollToTop]);
+    final doubleTap = useMemoized(DoubleTapDetector.new);
+    final pageList = _buildPageList(scrollToTop);
     final width = MediaQuery.sizeOf(context).width;
     final isLargeScreen = width >= _railBreakpoint;
+
+    // 双击当前导航项回到顶部，点击其他项正常切换
+    void onDestinationSelected(int i) {
+      if (i != index) {
+        doubleTap.reset();
+        ref.read(homeIndexProvider.notifier).setIndex(i);
+      } else if (doubleTap.tap() && i == 0) {
+        scrollToTop.fire();
+      }
+    }
+
+    // 点击社区页标题回到顶部
+    final onTitleTap = index == 0 ? scrollToTop.fire : null;
 
     return PopScope(
       canPop: index == 0,
@@ -113,8 +134,22 @@ class _HomePageContent extends HookConsumerWidget {
         }
       },
       child: isLargeScreen
-          ? _buildLargeScreenLayout(context, ref, index, pageList)
-          : _buildMobileLayout(context, ref, index, pageList),
+          ? _buildLargeScreenLayout(
+              context,
+              ref,
+              index,
+              pageList,
+              onDestinationSelected,
+              onTitleTap,
+            )
+          : _buildMobileLayout(
+              context,
+              ref,
+              index,
+              pageList,
+              onDestinationSelected,
+              onTitleTap,
+            ),
     );
   }
 
@@ -138,11 +173,15 @@ class _HomePageContent extends HookConsumerWidget {
     );
   }
 
-  /// AppBar 标题随标签页切换淡入淡出
-  Widget _buildAnimatedTitle(int index) {
-    return AnimatedSwitcher(
-      duration: Motion.durationShort4,
-      child: Text(_getTitleText(index), key: ValueKey(index)),
+  /// AppBar 标题随标签页切换淡入淡出，[onTap] 用于点击标题回到顶部
+  Widget _buildAnimatedTitle(int index, VoidCallback? onTap) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedSwitcher(
+        duration: Motion.durationShort4,
+        child: Text(_getTitleText(index), key: ValueKey(index)),
+      ),
     );
   }
 
@@ -152,10 +191,12 @@ class _HomePageContent extends HookConsumerWidget {
     WidgetRef ref,
     int index,
     List<Widget> pageList,
+    ValueChanged<int> onDestinationSelected,
+    VoidCallback? onTitleTap,
   ) {
     return Scaffold(
       appBar: AppBar(
-        title: _buildAnimatedTitle(index),
+        title: _buildAnimatedTitle(index, onTitleTap),
         scrolledUnderElevation: index == 0 ? 0 : 2,
         actions: _getActionsByPage(context, ref, index),
         automaticallyImplyLeading: false,
@@ -163,8 +204,7 @@ class _HomePageContent extends HookConsumerWidget {
       body: _buildAnimatedBody(index, pageList),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
-        onDestinationSelected: (i) =>
-            ref.read(homeIndexProvider.notifier).setIndex(i),
+        onDestinationSelected: onDestinationSelected,
         destinations: _destinations,
       ),
       floatingActionButton: _getFloatingActionButton(context, ref, index),
@@ -177,14 +217,15 @@ class _HomePageContent extends HookConsumerWidget {
     WidgetRef ref,
     int index,
     List<Widget> pageList,
+    ValueChanged<int> onDestinationSelected,
+    VoidCallback? onTitleTap,
   ) {
     return Row(
       children: [
         // NavigationRail 独立于 Scaffold，占据全屏高度
         NavigationRail(
           selectedIndex: index,
-          onDestinationSelected: (i) =>
-              ref.read(homeIndexProvider.notifier).setIndex(i),
+          onDestinationSelected: onDestinationSelected,
           labelType: NavigationRailLabelType.all,
           destinations: _destinations
               .map(
@@ -201,7 +242,7 @@ class _HomePageContent extends HookConsumerWidget {
         Expanded(
           child: Scaffold(
             appBar: AppBar(
-              title: _buildAnimatedTitle(index),
+              title: _buildAnimatedTitle(index, onTitleTap),
               scrolledUnderElevation: index == 0 ? 0 : 2,
               actions: _getActionsByPage(context, ref, index),
               automaticallyImplyLeading: false,

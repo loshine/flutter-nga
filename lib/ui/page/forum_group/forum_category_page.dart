@@ -7,16 +7,23 @@ import 'package:flutter_nga/providers/forum/forum_category_list_provider.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 
 /// 单个版块分类页：按版块组分段展示，组标题下为三列网格，点击组标题可折叠
 class ForumCategoryPage extends HookConsumerWidget {
-  const ForumCategoryPage({required this.category, super.key});
+  const ForumCategoryPage({
+    required this.category,
+    super.key,
+    this.scrollToTop,
+  });
 
   final ForumCategory category;
+  final ScrollToTopSignal? scrollToTop;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final collapsedGroups = useState(<int>{});
+    final scrollController = useScrollToTopController(scrollToTop);
 
     final double itemHeight = 108;
     final double itemWidth = MediaQuery.sizeOf(context).width / 3;
@@ -42,6 +49,7 @@ class ForumCategoryPage extends HookConsumerWidget {
         }
       },
       child: CustomScrollView(
+        controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           for (final (index, group) in category.groups.indexed)

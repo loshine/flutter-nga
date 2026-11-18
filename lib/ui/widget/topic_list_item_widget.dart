@@ -30,6 +30,10 @@ class TopicListItemWidget extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final topicSubject = code_utils.unescapeHtml(topic.subject);
+    // select 只在本帖已读状态变化时重建，集合查找为 O(1)
+    final isRead = ref.watch(
+      readTopicIdsProvider.select((ids) => ids.contains(topic.tid)),
+    );
 
     // 折叠模式
     if (blockMode == BlockMode.COLLAPSE) {
@@ -65,6 +69,7 @@ class TopicListItemWidget extends ConsumerWidget {
                     interfaceState,
                     textTheme,
                     colorScheme,
+                    isRead: isRead,
                   ),
 
                   const SizedBox(height: 8),
@@ -113,9 +118,15 @@ class TopicListItemWidget extends ConsumerWidget {
     String topicSubject,
     InterfaceSettingsState interfaceState,
     TextTheme textTheme,
-    ColorScheme colorScheme,
-  ) {
+    ColorScheme colorScheme, {
+    required bool isRead,
+  }) {
     final isPaintBlockMode = blockMode == BlockMode.PAINT;
+    final subjectColor = topic.getSubjectColor();
+    // 已读：有标题色的保留色相、降低不透明度，普通标题改用弱色
+    final titleColor = isRead
+        ? subjectColor?.withValues(alpha: 0.6) ?? colorScheme.onSurfaceVariant
+        : subjectColor ?? textTheme.bodyLarge?.color;
     final isDeleteBlockMode = blockMode == BlockMode.DELETE_LINE;
 
     return Text.rich(
@@ -126,9 +137,7 @@ class TopicListItemWidget extends ConsumerWidget {
           backgroundColor: isPaintBlockMode
               ? textTheme.bodyMedium?.color
               : null,
-          color: isPaintBlockMode
-              ? Colors.transparent
-              : topic.getSubjectColor() ?? textTheme.bodyLarge?.color,
+          color: isPaintBlockMode ? Colors.transparent : titleColor,
           fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,
           fontStyle: topic.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration: isDeleteBlockMode

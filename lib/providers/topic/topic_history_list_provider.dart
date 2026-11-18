@@ -1,5 +1,6 @@
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
+import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -105,10 +106,13 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
       }
     });
     state = state.copyWith(dateTopicHistoryMap: map);
+    ref.read(readTopicIdsProvider.notifier).reload();
   }
 
-  Future<int> clean() {
-    return Data().topicRepository.deleteAllTopicHistory();
+  Future<int> clean() async {
+    final count = await Data().topicRepository.deleteAllTopicHistory();
+    ref.read(readTopicIdsProvider.notifier).reload();
+    return count;
   }
 }
 

@@ -8,17 +8,25 @@ import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
+import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 
 class ForumRecommendTopicListPage extends HookConsumerWidget {
   final int fid;
   final int? type;
+  final ScrollToTopSignal? scrollToTop;
 
-  const ForumRecommendTopicListPage(this.fid, {super.key, this.type});
+  const ForumRecommendTopicListPage(
+    this.fid, {
+    super.key,
+    this.type,
+    this.scrollToTop,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final loadStatus = useListLoadStatus();
+    final scrollController = useScrollToTopController(scrollToTop);
     final state = ref.watch(forumRecommendProvider(fid));
     final notifier = ref.read(forumRecommendProvider(fid).notifier);
     final blockFilter = ref.watch(blockFilterProvider);
@@ -73,6 +81,7 @@ class ForumRecommendTopicListPage extends HookConsumerWidget {
         emptyIcon: Icons.star_outline,
         onRetry: refreshController.callRefresh,
         child: ListView.builder(
+          controller: scrollController,
           itemCount: topics.length,
           itemBuilder: (context, index) => TopicListItemWidget(
             topic: topics[index],
