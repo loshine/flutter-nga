@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -35,15 +37,22 @@ class _FakeRepository implements TopicRepository {
     1: [_topic(1), _topic(2), _topic(3)],
   };
   bool failDelete = false;
+  Completer<void>? deleteGate;
+  final events = <String>[];
 
   @override
-  Future<TopicListData> getFavouriteTopicList(int page) async =>
-      _data(pages[page] ?? const []);
+  Future<TopicListData> getFavouriteTopicList(int page) async {
+    events.add('list $page');
+    return _data(pages[page] ?? const []);
+  }
 
   @override
   Future<String?> deleteFavouriteTopic(int? tid, int? page) async {
+    events.add('delete start $tid');
+    await deleteGate?.future;
     if (failDelete) throw Exception('删除失败');
     deletes.add('$tid@$page');
+    events.add('delete done $tid');
     return '操作成功';
   }
 
@@ -108,6 +117,24 @@ void main() {
       await notifier.refresh();
       expect(repository.deletes, ['3@1']);
       expect(_tids(container), [1, 2]);
+    });
+
+    test('refresh waits for a deletion already in flight', () async {
+      repository.deleteGate = Completer<void>();
+      notifier.removeLocally(_topic(2));
+      final commit = notifier.commitDeletion(2);
+      repository.pages[1] = [_topic(1), _topic(3)];
+      repository.events.clear();
+
+      final refresh = notifier.refresh();
+      await Future<void>.delayed(Duration.zero);
+      expect(repository.events, isNot(contains('list 1')));
+
+      repository.deleteGate!.complete();
+      await commit;
+      await refresh;
+      expect(repository.events, ['delete done 2', 'list 1']);
+      expect(_tids(container), [1, 3]);
     });
 
     test('load more skips topics already in the list', () async {

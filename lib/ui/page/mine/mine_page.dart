@@ -16,10 +16,11 @@ class MinePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userInfo = ref.watch(homeDrawerHeaderProvider);
-    // 未登录不显示角标
-    final unread = userInfo == null
-        ? UnreadCounts.none
-        : ref.watch(unreadCountProvider);
+    // 未登录不显示角标，计数不属于当前账号时也不显示
+    ref.watch(unreadCountProvider);
+    final unread = ref
+        .read(unreadCountProvider.notifier)
+        .countsFor(userInfo?.uid);
 
     void refreshUnread() {
       if (!context.mounted) return;
@@ -30,13 +31,26 @@ class MinePage extends HookConsumerWidget {
       }
     }
 
+    // 登录、退出或切换账号后为新账号重新获取（旧账号的计数不会显示）
+    ref.listen(homeDrawerHeaderProvider.select((user) => user?.uid), (
+      previous,
+      next,
+    ) {
+      if (previous != next) refreshUnread();
+    });
+
     useEffect(() {
-      Future.microtask(
-        () => ref
-            .read(homeDrawerHeaderProvider.notifier)
-            .refresh()
-            .then((_) => refreshUnread(), onError: (_) => refreshUnread()),
-      );
+      Future.microtask(() async {
+        final before = ref.read(homeDrawerHeaderProvider)?.uid;
+        try {
+          await ref.read(homeDrawerHeaderProvider.notifier).refresh();
+        } catch (_) {
+          // 用户信息刷新失败时仍按当前账号刷新角标
+        }
+        if (!context.mounted) return;
+        // 账号变化时由上面的监听负责，避免重复请求
+        if (ref.read(homeDrawerHeaderProvider)?.uid == before) refreshUnread();
+      });
       return null;
     }, []);
 

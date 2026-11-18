@@ -56,6 +56,10 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
   /// 这样撤销能真正恢复原状（重新收藏会改变排序和所在收藏夹）。
   final _pending = <int, _PendingDeletion>{};
 
+  /// 已发出、尚未返回的删除请求。刷新前必须等它们完成，否则服务端还没删掉，
+  /// 刷新结果会把条目带回来，之后删除成功也不会再移除。
+  final _inFlight = <Future<void>>{};
+
   @override
   FavouriteTopicListState build() => FavouriteTopicListState.initial();
 
@@ -81,18 +85,24 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
   Future<String?> commitDeletion(int tid) async {
     final pending = _pending.remove(tid);
     if (pending == null) return null;
+    // page 用移除时条目自带的收藏列表页码，与网页版删除参数一致。
+    final request = ref
+        .read(topicRepositoryProvider)
+        .deleteFavouriteTopic(tid, pending.topic.page);
+    final tracked = request.then<void>((_) {}, onError: (_) {});
+    _inFlight.add(tracked);
     try {
-      // page 用移除时条目自带的收藏列表页码，与网页版删除参数一致。
-      return await ref
-          .read(topicRepositoryProvider)
-          .deleteFavouriteTopic(tid, pending.topic.page);
+      return await request;
     } catch (err) {
       if (ref.mounted) _restore(pending);
       rethrow;
+    } finally {
+      _inFlight.remove(tracked);
     }
   }
 
-  /// 提交全部待删条目，返回第一个错误（全部成功为 null）。
+  /// 提交全部待删条目，并等待已在进行中的删除请求结束；
+  /// 返回本次提交的第一个错误（全部成功为 null）。
   Future<Object?> commitAllDeletions() async {
     Object? firstError;
     for (final tid in [..._pending.keys]) {
@@ -102,6 +112,7 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
         firstError ??= err;
       }
     }
+    await Future.wait([..._inFlight]);
     return firstError;
   }
 
