@@ -5,9 +5,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_snack_bar.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 
@@ -99,16 +101,19 @@ class FavouriteTopicListPage extends HookConsumerWidget {
           emptyMessage: '暂无收藏',
           emptyIcon: Icons.favorite_border,
           onRetry: refreshController.callRefresh,
-          child: ListView.builder(
-            itemCount: state.list.length,
-            itemBuilder: (context, index) {
-              final topic = state.list[index];
-              return _FavouriteTopicItem(
-                key: ValueKey(topic.tid),
-                topic: topic,
-                onRemove: () => remove(topic),
-              );
-            },
+          child: ReadableListPadding(
+            builder: (context, padding) => ListView.builder(
+              padding: padding,
+              itemCount: state.list.length,
+              itemBuilder: (context, index) {
+                final topic = state.list[index];
+                return _FavouriteTopicItem(
+                  key: ValueKey(topic.tid),
+                  topic: topic,
+                  onRemove: () => remove(topic),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -140,6 +145,7 @@ class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
     return Dismissible(
       key: ValueKey('dismiss-${widget.topic.tid}'),
       direction: DismissDirection.endToStart,
+      onUpdate: AppHaptics.onDismissUpdate,
       onDismissed: (_) => widget.onRemove(),
       background: Container(
         color: colorScheme.errorContainer,

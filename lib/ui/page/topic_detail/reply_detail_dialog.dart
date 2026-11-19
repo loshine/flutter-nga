@@ -10,6 +10,7 @@ import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/route.dart';
@@ -223,6 +224,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           widget.reply.recommend = 0;
         }
       });
+      AppHaptics.reactionSucceeded();
       AppToast.success(reaction.message);
     } catch (err) {
       debugPrint(err.toString());
@@ -244,6 +246,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           widget.reply.recommend = 0;
         }
       });
+      AppHaptics.reactionSucceeded();
       AppToast.success(reaction.message);
     } catch (err) {
       debugPrint(err.toString());

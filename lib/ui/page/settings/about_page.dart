@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
 /// 应用信息 Provider
@@ -26,148 +27,151 @@ class AboutPage extends HookConsumerWidget {
       body: appInfoAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('加载失败: $error')),
-        data: (appInfo) => ListView(
+        data: (appInfo) => ReadableListPadding(
           padding: EdgeInsets.fromLTRB(
             mediaPadding.left,
             16,
             mediaPadding.right,
             16 + mediaPadding.bottom,
           ),
-          children: [
-            // 应用信息区
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(20),
+          builder: (context, padding) => ListView(
+            padding: padding,
+            children: [
+              // 应用信息区
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Icon(
+                        Icons.forum,
+                        size: 48,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.forum,
-                      size: 48,
-                      color: colorScheme.onPrimaryContainer,
+                    const SizedBox(height: 16),
+                    Text(
+                      appInfo.appName,
+                      style: textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    appInfo.appName,
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: 4),
+                    Text(
+                      '版本 ${appInfo.version} (Build ${appInfo.buildNumber})',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '版本 ${appInfo.version} (Build ${appInfo.buildNumber})',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                    const SizedBox(height: 8),
+                    Text(
+                      '艾泽拉斯国家地理论坛客户端',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '艾泽拉斯国家地理论坛客户端',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-            // 技术栈区
-            const _SectionHeader(title: '技术栈'),
-            // flutter run / build 会自动注入 FLUTTER_VERSION，无需手动维护版本号。
-            const _InfoTile(
-              title: 'Flutter',
-              subtitle: FlutterVersion.version ?? '未知',
-              icon: Icons.flutter_dash,
-            ),
-            const _InfoTile(
-              title: '状态管理',
-              subtitle: 'Riverpod 3.x + flutter_hooks',
-              icon: Icons.timeline,
-            ),
-            const _InfoTile(
-              title: '路由',
-              subtitle: 'go_router',
-              icon: Icons.route,
-            ),
-            const _InfoTile(
-              title: '网络',
-              subtitle: 'Dio',
-              icon: Icons.cloud_outlined,
-            ),
-            const _InfoTile(
-              title: '本地存储',
-              subtitle: 'Sembast',
-              icon: Icons.storage_outlined,
-            ),
-
-            const SizedBox(height: 16),
-
-            // 链接区
-            const _SectionHeader(title: '相关链接'),
-            const _LinkTile(
-              title: 'GitHub 仓库',
-              subtitle: '查看源代码、参与贡献',
-              icon: Icons.code,
-              url: 'https://github.com/loshine/flutter-nga',
-            ),
-            const _LinkTile(
-              title: '问题反馈',
-              subtitle: '报告 Bug 或提出建议',
-              icon: Icons.bug_report_outlined,
-              url: 'https://github.com/loshine/flutter-nga/issues',
-            ),
-            const _LinkTile(
-              title: 'NGA 官网',
-              subtitle: 'bbs.nga.cn',
-              icon: Icons.language,
-              url: 'https://bbs.nga.cn',
-            ),
-
-            const SizedBox(height: 16),
-
-            // 其他信息区
-            const _SectionHeader(title: '其他信息'),
-            const _InfoTile(
-              title: '开源协议',
-              subtitle: 'Apache License 2.0',
-              icon: Icons.description_outlined,
-            ),
-
-            const SizedBox(height: 32),
-
-            // 版权声明
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  Text(
-                    '© ${DateTime.now().year} ${appInfo.appName}',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '本应用为第三方客户端，与 NGA 官方无关\n使用时请遵守论坛相关规定',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              // 技术栈区
+              const _SectionHeader(title: '技术栈'),
+              // flutter run / build 会自动注入 FLUTTER_VERSION，无需手动维护版本号。
+              const _InfoTile(
+                title: 'Flutter',
+                subtitle: FlutterVersion.version ?? '未知',
+                icon: Icons.flutter_dash,
               ),
-            ),
+              const _InfoTile(
+                title: '状态管理',
+                subtitle: 'Riverpod 3.x + flutter_hooks',
+                icon: Icons.timeline,
+              ),
+              const _InfoTile(
+                title: '路由',
+                subtitle: 'go_router',
+                icon: Icons.route,
+              ),
+              const _InfoTile(
+                title: '网络',
+                subtitle: 'Dio',
+                icon: Icons.cloud_outlined,
+              ),
+              const _InfoTile(
+                title: '本地存储',
+                subtitle: 'Sembast',
+                icon: Icons.storage_outlined,
+              ),
 
-            const SizedBox(height: 16),
-          ],
+              const SizedBox(height: 16),
+
+              // 链接区
+              const _SectionHeader(title: '相关链接'),
+              const _LinkTile(
+                title: 'GitHub 仓库',
+                subtitle: '查看源代码、参与贡献',
+                icon: Icons.code,
+                url: 'https://github.com/loshine/flutter-nga',
+              ),
+              const _LinkTile(
+                title: '问题反馈',
+                subtitle: '报告 Bug 或提出建议',
+                icon: Icons.bug_report_outlined,
+                url: 'https://github.com/loshine/flutter-nga/issues',
+              ),
+              const _LinkTile(
+                title: 'NGA 官网',
+                subtitle: 'bbs.nga.cn',
+                icon: Icons.language,
+                url: 'https://bbs.nga.cn',
+              ),
+
+              const SizedBox(height: 16),
+
+              // 其他信息区
+              const _SectionHeader(title: '其他信息'),
+              const _InfoTile(
+                title: '开源协议',
+                subtitle: 'Apache License 2.0',
+                icon: Icons.description_outlined,
+              ),
+
+              const SizedBox(height: 32),
+
+              // 版权声明
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    Text(
+                      '© ${DateTime.now().year} ${appInfo.appName}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '本应用为第三方客户端，与 NGA 官方无关\n使用时请遵守论坛相关规定',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );

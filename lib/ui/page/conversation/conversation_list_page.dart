@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
@@ -74,11 +75,14 @@ class ConversationListPage extends HookConsumerWidget {
           emptyMessage: '暂无短消息',
           emptyIcon: Icons.mail_outline,
           onRetry: refreshController.callRefresh,
-          child: ListView.builder(
-            itemCount: state.list.length,
-            itemBuilder: (context, index) => ConversationItemWidget(
-              conversation: state.list[index],
-              onLeft: refreshController.callRefresh,
+          child: ReadableListPadding(
+            builder: (context, padding) => ListView.builder(
+              padding: padding,
+              itemCount: state.list.length,
+              itemBuilder: (context, index) => ConversationItemWidget(
+                conversation: state.list[index],
+                onLeft: refreshController.callRefresh,
+              ),
             ),
           ),
         ),

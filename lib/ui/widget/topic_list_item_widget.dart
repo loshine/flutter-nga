@@ -202,7 +202,7 @@ class TopicListItemWidget extends ConsumerWidget {
             TextSpan(
               text: " [锁定]",
               style: textTheme.labelMedium?.copyWith(
-                color: Colors.red.shade300,
+                color: colorScheme.error,
                 fontWeight: FontWeight.normal,
               ),
             ),
@@ -210,7 +210,7 @@ class TopicListItemWidget extends ConsumerWidget {
             TextSpan(
               text: " [合集]",
               style: textTheme.labelMedium?.copyWith(
-                color: Colors.blue.shade300,
+                color: colorScheme.tertiary,
                 fontWeight: FontWeight.normal,
               ),
             ),

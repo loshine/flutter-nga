@@ -8,6 +8,7 @@ import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
@@ -280,61 +281,59 @@ class PublishPage extends HookWidget {
         body: Column(
           children: [
             Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    child: Column(
-                      children: [
-                        TextField(
-                          maxLines: 1,
-                          controller: subjectController,
-                          decoration: InputDecoration(
-                            labelText: "标题(可选)",
-                            suffixIcon: IconButton(
-                              tooltip: '选择标签',
-                              icon: const Icon(
-                                CommunityMaterialIcons.tag_multiple,
-                              ),
-                              onPressed: showTagDialog,
+              child: ReadableWidth(
+                maxWidth: _contentMaxWidth,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Column(
+                    children: [
+                      TextField(
+                        maxLines: 1,
+                        controller: subjectController,
+                        decoration: InputDecoration(
+                          labelText: "标题(可选)",
+                          suffixIcon: IconButton(
+                            tooltip: '选择标签',
+                            icon: const Icon(
+                              CommunityMaterialIcons.tag_multiple,
                             ),
-                          ),
-                          keyboardType: TextInputType.text,
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: Wrap(
-                            spacing: 8.0,
-                            runSpacing: 4.0,
-                            children: selectedTags.value.map((tag) {
-                              return InputChip(
-                                label: Text(tag),
-                                onDeleted: () {
-                                  selectedTags.value = selectedTags.value
-                                      .where((t) => t != tag)
-                                      .toList();
-                                },
-                              );
-                            }).toList(),
+                            onPressed: showTagDialog,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: TextField(
-                            maxLines: null,
-                            expands: true,
-                            textAlignVertical: TextAlignVertical.top,
-                            controller: contentController,
-                            decoration: const InputDecoration(
-                              labelText: "回复内容",
-                              alignLabelWithHint: true,
-                            ),
-                            keyboardType: TextInputType.multiline,
-                          ),
+                        keyboardType: TextInputType.text,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Wrap(
+                          spacing: 8.0,
+                          runSpacing: 4.0,
+                          children: selectedTags.value.map((tag) {
+                            return InputChip(
+                              label: Text(tag),
+                              onDeleted: () {
+                                selectedTags.value = selectedTags.value
+                                    .where((t) => t != tag)
+                                    .toList();
+                              },
+                            );
+                          }).toList(),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: TextField(
+                          maxLines: null,
+                          expands: true,
+                          textAlignVertical: TextAlignVertical.top,
+                          controller: contentController,
+                          decoration: const InputDecoration(
+                            labelText: "回复内容",
+                            alignLabelWithHint: true,
+                          ),
+                          keyboardType: TextInputType.multiline,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

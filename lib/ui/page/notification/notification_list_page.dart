@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
@@ -75,18 +76,21 @@ class NotificationListPage extends HookConsumerWidget {
           emptyMessage: '暂无提醒',
           emptyIcon: Icons.notifications_none_outlined,
           onRetry: refreshController.callRefresh,
-          child: ListView.builder(
-            itemCount: entries.length,
-            itemBuilder: (context, index) {
-              final entry = entries[index];
-              if (entry is NotificationCategory) {
-                return _SectionHeader(category: entry);
-              }
-              return NotificationItemWidget(
-                notification: entry as NgaNotification,
-                onNoHint: onNoHint,
-              );
-            },
+          child: ReadableListPadding(
+            builder: (context, padding) => ListView.builder(
+              padding: padding,
+              itemCount: entries.length,
+              itemBuilder: (context, index) {
+                final entry = entries[index];
+                if (entry is NotificationCategory) {
+                  return _SectionHeader(category: entry);
+                }
+                return NotificationItemWidget(
+                  notification: entry as NgaNotification,
+                  onNoHint: onNoHint,
+                );
+              },
+            ),
           ),
         ),
       ),

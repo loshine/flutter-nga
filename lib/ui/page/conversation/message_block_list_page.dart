@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/message/message_block_list_provider.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -61,48 +62,54 @@ class MessageBlockListPage extends HookConsumerWidget {
         controller: refreshController,
         onRefresh: onRefresh,
         child: users.isEmpty
-            ? ListView(
-                children: [
-                  if (loaded.value)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 120,
-                        horizontal: 32,
-                      ),
-                      child: Text(
-                        '未屏蔽任何用户\n被屏蔽的用户无法与你发起或回复对话',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+            ? ReadableListPadding(
+                builder: (context, padding) => ListView(
+                  padding: padding,
+                  children: [
+                    if (loaded.value)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 120,
+                          horizontal: 32,
+                        ),
+                        child: Text(
+                          '未屏蔽任何用户\n被屏蔽的用户无法与你发起或回复对话',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               )
-            : ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  final user = users[index];
-                  return ListTile(
-                    title: Text(user.username),
-                    subtitle: Text('UID: ${user.uid}'),
-                    onTap: () => Routes.navigateTo(
-                      context,
-                      "${Routes.USER}?uid=${user.uid}",
-                    ),
-                    trailing: TextButton(
-                      onPressed: () async {
-                        try {
-                          final message = await notifier.remove(user);
-                          AppToast.success(message ?? '已解除屏蔽');
-                        } catch (err) {
-                          AppToast.error(err);
-                        }
-                      },
-                      child: const Text('解除屏蔽'),
-                    ),
-                  );
-                },
+            : ReadableListPadding(
+                builder: (context, padding) => ListView.builder(
+                  padding: padding,
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    final user = users[index];
+                    return ListTile(
+                      title: Text(user.username),
+                      subtitle: Text('UID: ${user.uid}'),
+                      onTap: () => Routes.navigateTo(
+                        context,
+                        "${Routes.USER}?uid=${user.uid}",
+                      ),
+                      trailing: TextButton(
+                        onPressed: () async {
+                          try {
+                            final message = await notifier.remove(user);
+                            AppToast.success(message ?? '已解除屏蔽');
+                          } catch (err) {
+                            AppToast.error(err);
+                          }
+                        },
+                        child: const Text('解除屏蔽'),
+                      ),
+                    );
+                  },
+                ),
               ),
       ),
       floatingActionButton: FloatingActionButton(

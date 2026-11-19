@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
 import 'child_forum_item_widget.dart';
@@ -29,12 +30,15 @@ class _ChildForumListPage extends State<ChildForumListPage> {
                 ),
               ),
             )
-          : ListView.builder(
-              itemCount: widget.forumInfo == null
-                  ? 0
-                  : widget.forumInfo!.subForums!.length,
-              itemBuilder: (_, index) =>
-                  ChildForumItemWidget(widget.forumInfo!.subForums![index]),
+          : ReadableListPadding(
+              builder: (context, padding) => ListView.builder(
+                padding: padding,
+                itemCount: widget.forumInfo == null
+                    ? 0
+                    : widget.forumInfo!.subForums!.length,
+                itemBuilder: (_, index) =>
+                    ChildForumItemWidget(widget.forumInfo!.subForums![index]),
+              ),
             ),
     );
   }
