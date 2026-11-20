@@ -8,4 +8,4 @@ script = ""
 [[actions]]
 name = "Run macOS"
 icon = "run"
-command = "fvm flutter run -d macos"
+command = "mise exec -- flutter run -d macos"

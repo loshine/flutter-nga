@@ -14,8 +14,8 @@ final _background = ColorRgba8(0xF5, 0xE8, 0xCB, 0xFF);
 /// Regenerates launcher icons and the shared splash asset from [_svgPath].
 ///
 /// 需在 macOS 上运行（借助 `tool/render_svg.swift` 用 AppKit 光栅化 SVG）：
-/// `fvm dart run tool/generate_launcher_icons.dart`，
-/// 然后执行 `fvm dart run flutter_native_splash:create` 刷新原生启动屏。
+/// `mise exec -- dart run tool/generate_launcher_icons.dart`，
+/// 然后执行 `mise exec -- dart run flutter_native_splash:create` 刷新原生启动屏。
 Future<void> main() async {
   const size = 1024;
   final svg = File(_svgPath).readAsStringSync();

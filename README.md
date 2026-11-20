@@ -39,7 +39,7 @@
 
 | 分类     | 技术方案                     |
 | -------- | ---------------------------- |
-| 框架     | Flutter stable 3.50.0 (FVM)  |
+| 框架     | Flutter stable 3.50.0 (mise) |
 | 状态管理 | Riverpod 3.x + flutter_hooks |
 | 路由     | go_router                    |
 | 网络     | Dio                          |
@@ -51,7 +51,7 @@
 
 ### 环境要求
 
-- Flutter stable 3.50.0 (推荐使用 [FVM](https://fvm.app) 管理版本)
+- [mise](https://mise.jdx.dev/installing-mise.html)，用于安装 `.tool-versions` 固定的 Flutter SDK（当前 3.50.0）
 - Dart SDK >=3.13.0 <4.0.0
 - Android SDK / Xcode (取决于目标平台)
 
@@ -80,30 +80,27 @@ cd android
 git clone https://github.com/loshine/flutter-nga.git
 cd flutter-nga
 
-# 安装 FVM (如未安装)
-dart pub global activate fvm
-
-# 使用指定 Flutter stable 版本
-fvm install
+# 安装 .tool-versions 指定的 Flutter SDK
+mise install
 
 # 获取依赖
-fvm flutter pub get
+mise exec -- flutter pub get
 
 # 运行应用
-fvm flutter run
+mise exec -- flutter run
 ```
 
 ### 构建发布版本
 
 ```bash
 # Android APK
-fvm flutter build apk
+mise exec -- flutter build apk
 
 # Android App Bundle
-fvm flutter build appbundle
+mise exec -- flutter build appbundle
 
 # iOS (无签名)
-fvm flutter build ios --no-codesign
+mise exec -- flutter build ios --no-codesign
 ```
 
 复制签名配置示例并填写实际值：
@@ -130,10 +127,10 @@ Release 回退到 debug 签名；填写后必须提供其余三个字段，文�
 
 ```bash
 # 运行所有测试
-fvm flutter test
+mise exec -- flutter test
 
 # 静态分析
-fvm flutter analyze
+mise exec -- flutter analyze
 ```
 
 ## 项目结构

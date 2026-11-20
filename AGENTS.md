@@ -6,11 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 环境准备
 
-通过 [FVM](https://fvm.app) 锁定 Flutter stable 版本（以 `.fvmrc` 为准，当前 3.50.0），所有 flutter 命令用 `fvm flutter` 前缀执行。
+通过 [mise](https://mise.jdx.dev) 安装 `.tool-versions` 固定的 Flutter SDK，当前版本为 3.50.0。
 
 ```bash
-dart pub global activate fvm   # 安装 FVM（如未安装）
-fvm install                    # 安装 .fvmrc 指定版本
+mise install
 ```
 
 默认分支为 `main`。鸿蒙（OHOS）适配在 `feature/ohos` 分支维护，`main` 不包含 `ohos/` 目录和原生登录插件。
@@ -18,13 +17,13 @@ fvm install                    # 安装 .fvmrc 指定版本
 ## 构建与测试
 
 ```bash
-fvm flutter pub get
-fvm flutter analyze
-fvm flutter test                                    # 全部测试
-fvm flutter test test/utils/json_cast_test.dart     # 单个文件
-fvm flutter test --name "Substring test"            # 按名称匹配
-fvm flutter build apk
-fvm flutter build ios --no-codesign
+mise exec -- flutter pub get
+mise exec -- flutter analyze
+mise exec -- flutter test                                    # 全部测试
+mise exec -- flutter test test/utils/json_cast_test.dart     # 单个文件
+mise exec -- flutter test --name "Substring test"            # 按名称匹配
+mise exec -- flutter build apk
+mise exec -- flutter build ios --no-codesign
 ```
 
 Android 构建（详见 README）：
@@ -40,7 +39,7 @@ iOS 构建（最低 iOS 15.0）：
 - 插件依赖由 Swift Package Manager 管理（Flutter 3.50 默认开启，无需配置）。`flutter build ios` / `flutter run` 会生成 `ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` 并被 Xcode 工程引用；ephemeral 目录不入库。
 - `flutter_inappwebview_ios` 1.1.2 不支持 SPM，仍通过 CocoaPods 集成（连带 `OrderedSet`），所以保留 `ios/Podfile`，`ios/Podfile.lock` 需入库。上游稳定版支持 SPM 后可移除 CocoaPods。
 - 若 `pod install` 报 `Unicode Normalization not appropriate for ASCII-8BIT`，设置 `LANG=en_US.UTF-8` 后重试。
-- 原生单元测试在 `ios/RunnerTests/`（Swift Testing，以 Runner.app 为 `TEST_HOST`），已加入 Runner scheme 的 Test。先 `fvm flutter build ios --simulator --debug` 生成 Pods 与 SPM 包，再运行 `xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination 'platform=iOS Simulator,name=<机型>'`。
+- 原生单元测试在 `ios/RunnerTests/`（Swift Testing，以 Runner.app 为 `TEST_HOST`），已加入 Runner scheme 的 Test。先 `mise exec -- flutter build ios --simulator --debug` 生成 Pods 与 SPM 包，再运行 `xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination 'platform=iOS Simulator,name=<机型>'`。
 
 ## 核心架构
 
@@ -103,8 +102,8 @@ Riverpod 3.x + flutter_hooks。Provider 全部基于 `Notifier` / `NotifierProvi
 
 ## 代码风格
 
-- Lint：`package:flutter_lints/flutter.yaml`；analyzer 排除各平台原生目录。关闭了 `constant_identifier_names`，因为路由常量、通知类型、主题掩码、设置枚举值等沿用 SCREAMING_SNAKE_CASE。`fvm flutter analyze` 须保持 0 条问题，不用 `// ignore` 压制（`State` 子类私有时，`createState()` 返回类型写 `State<Xxx>`）。
-- 格式：提交前运行 `fvm dart format lib test tool`。
+- Lint：`package:flutter_lints/flutter.yaml`；analyzer 排除各平台原生目录。关闭了 `constant_identifier_names`，因为路由常量、通知类型、主题掩码、设置枚举值等沿用 SCREAMING_SNAKE_CASE。`mise exec -- flutter analyze` 须保持 0 条问题，不用 `// ignore` 压制（`State` 子类私有时，`createState()` 返回类型写 `State<Xxx>`）。
+- 格式：提交前运行 `mise exec -- dart format lib test tool`。
 - 导入顺序：`dart:` → 第三方包（含 `material_ui`）→ `package:flutter_nga/`。
 - Provider 命名：小驼峰 + `Provider` 后缀。
 - Repository：抽象类定义接口，实现类 `XxxDataRepository`，通过 `Data()` 访问。
@@ -113,6 +112,6 @@ Riverpod 3.x + flutter_hooks。Provider 全部基于 `Notifier` / `NotifierProvi
 ## CI
 
 - PR 触发 `.github/workflows/check.yml`：
-  - `lint` job（仅 ubuntu）：`fvm dart format --output=none --set-exit-if-changed lib test tool` 检查格式，`fvm flutter analyze --no-pub` 要求 0 条问题（info 也会让 job 失败）。新增存放 Dart 源码的目录时，要同步加入格式检查的路径。
-  - `check` job：在 ubuntu / windows / macos 上运行 `fvm flutter test`。
+  - `lint` job（仅 ubuntu）：`dart format --output=none --set-exit-if-changed lib test tool` 检查格式，`flutter analyze --no-pub` 要求 0 条问题（info 也会让 job 失败）。新增存放 Dart 源码的目录时，要同步加入格式检查的路径。
+  - `check` job：在 ubuntu / windows / macos 上运行 `flutter test --no-pub test/`。
 - Tag 推送触发 `build.yml`：测试后构建 APK 与 AAB 并发布。
