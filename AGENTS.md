@@ -114,4 +114,4 @@ Riverpod 3.x + flutter_hooks。Provider 全部基于 `Notifier` / `NotifierProvi
 - PR 触发 `.github/workflows/check.yml`：
   - `lint` job（仅 ubuntu）：`dart format --output=none --set-exit-if-changed lib test tool` 检查格式，`flutter analyze --no-pub` 要求 0 条问题（info 也会让 job 失败）。新增存放 Dart 源码的目录时，要同步加入格式检查的路径。
   - `check` job：在 ubuntu / windows / macos 上运行 `flutter test --no-pub test/`。
-- `build.yml` 在发版相关 PR 中验证 Android、iOS、macOS、Windows、Linux 和 Web 构建。推送版本 tag 时校验 `pubspec.yaml` 版本名，Android job 用 Environment「Android Build」的 `JKS`（base64）/ `STORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD` 还原签名配置。所有平台产物生成后由 Release job 统一上传。缺少 Android 签名 Secrets 时构建失败。各平台产物和发版步骤见 README「发布新版本」。
+- `build.yml` 在发版相关 PR 中验证 Android、iOS、macOS、Windows、Linux 和 Web 构建。Web 仅通过 PR job 提供构建产物。推送版本 tag 时校验 `pubspec.yaml` 版本名，Android job 用 Environment「Android Build」的 `JKS`（base64）/ `STORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD` 还原签名配置。原生平台产物生成后由 Release job 统一上传。缺少 Android 签名 Secrets 时构建失败。各平台产物和发版步骤见 README「发布新版本」。

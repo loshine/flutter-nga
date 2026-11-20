@@ -3,7 +3,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.50.0-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Desktop-lightgrey)]()
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Desktop-lightgrey)]()
 [![GitHub stars](https://img.shields.io/github/stars/loshine/flutter-nga?style=social)](https://github.com/loshine/flutter-nga)
 
 > 一个使用 Flutter 开发的 [NGA](https://bbs.nga.cn) (艾泽拉斯国家地理) 论坛客户端。
@@ -126,7 +126,7 @@ Release 回退到 debug 签名；填写后必须提供其余三个字段，文�
 ### 发布新版本
 
 改动构建配置、SDK 版本、依赖或平台工程的 PR 会触发 `.github/workflows/build.yml` 验证各平台构建。
-推送 `v*.*.*` tag 后，所有平台构建通过才会创建 GitHub Release 并上传以下产物。更新说明根据合并的 PR 自动生成。
+推送 `v*.*.*` tag 后，下列平台构建通过才会创建 GitHub Release 并上传产物。更新说明根据合并的 PR 自动生成。
 
 | 平台 | Release 产物 |
 | --- | --- |
@@ -135,7 +135,8 @@ Release 回退到 debug 签名；填写后必须提供其余三个字段，文�
 | macOS | 包含 `FNGA.app` 的 ZIP，使用临时签名，未做 Apple 公证 |
 | Windows | x64 程序目录 ZIP，解压后运行 `flutter_nga.exe` |
 | Linux | x64 程序目录 tar.gz，解压后运行 `flutter_nga` |
-| Web | 静态站点 ZIP，解压后部署到 Web 服务器 |
+
+Web 目前只在发版相关 PR 中验证编译。浏览器存储适配完成后再纳入正式发布。
 
 1. 签名 Secrets 配置在仓库 Settings → Environments →「Android Build」中（只需一次）：
 
@@ -207,7 +208,6 @@ lib/
 - macOS
 - Linux
 - Windows
-- Web
 
 鸿蒙（HarmonyOS）适配在 [`feature/ohos`](https://github.com/loshine/flutter-nga/tree/feature/ohos) 分支维护。
 
