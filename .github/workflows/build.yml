@@ -15,17 +15,14 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-      - uses: subosito/flutter-action@v2
+      - uses: jdx/mise-action@v4
         with:
-          flutter-version: '3.50.0'
-          channel: 'stable'
-      - run: dart pub global activate fvm
-      - run: fvm install
-      - run: fvm flutter --version
-      - run: fvm flutter pub get
-      - run: fvm flutter test
-      - run: fvm flutter build apk
-      - run: fvm flutter build appbundle
+          version: "2026.11.10"
+      - run: flutter --version
+      - run: flutter pub get
+      - run: flutter test
+      - run: flutter build apk
+      - run: flutter build appbundle
       - uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
