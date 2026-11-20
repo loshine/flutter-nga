@@ -39,7 +39,7 @@
 
 | 分类     | 技术方案                     |
 | -------- | ---------------------------- |
-| 框架     | Flutter stable 3.50.0 (mise) |
+| 框架     | Flutter stable 3.50.0 (FVM)  |
 | 状态管理 | Riverpod 3.x + flutter_hooks |
 | 路由     | go_router                    |
 | 网络     | Dio                          |
@@ -122,6 +122,40 @@ keyPassword=your-key-password
 Release 回退到 debug 签名；填写后必须提供其余三个字段，文件不存在或签名信息错误会报错，不回退。
 `key.properties` 已被 Git 忽略；`key.example.properties` 仅保存示例，不要在其中填写真实密码或提交 keystore。
 `key.properties` 不存在时也会回退到 debug 签名。
+
+### 发布新版本
+
+改动构建配置、SDK 版本、依赖或平台工程的 PR 会触发 `.github/workflows/build.yml` 验证各平台构建。
+推送 `v*.*.*` tag 后，所有平台构建通过才会创建 GitHub Release 并上传以下产物。更新说明根据合并的 PR 自动生成。
+
+| 平台 | Release 产物 |
+| --- | --- |
+| Android | 正式签名的 APK 和 AAB |
+| iOS | 未签名的 `Runner.app` ZIP，需另行签名才能在设备上安装 |
+| macOS | 包含 `FNGA.app` 的 ZIP，使用临时签名，未做 Apple 公证 |
+| Windows | x64 程序目录 ZIP，解压后运行 `flutter_nga.exe` |
+| Linux | x64 程序目录 tar.gz，解压后运行 `flutter_nga` |
+| Web | 静态站点 ZIP，解压后部署到 Web 服务器 |
+
+1. 签名 Secrets 配置在仓库 Settings → Environments →「Android Build」中（只需一次）：
+
+   | Secret | 内容 |
+   | --- | --- |
+   | `JKS` | keystore 文件的 base64，可用 `base64 -i upload-keystore.jks \| pbcopy` 获取 |
+   | `STORE_PASSWORD` | 对应 `storePassword` |
+   | `KEY_ALIAS` | 对应 `keyAlias` |
+   | `KEY_PASSWORD` | 对应 `keyPassword` |
+
+   缺少任一 Secret、JKS 无法解码或密码 / 别名不匹配时构建直接失败，不会发布 debug 签名的包。
+   构建日志会打印证书 SHA-1 / SHA-256 指纹，可与本地 `keytool -list -v -keystore <jks>` 的结果对照。
+   Release 上传使用内置 `GITHUB_TOKEN`。
+2. 修改 `pubspec.yaml` 的 `version`（如 `1.1.0+10100`，构建号为 `主*10000 + 次*100 + 修订`），合入 `main`。
+3. 在 `main` 上打 tag 并推送，tag 必须与 `version` 的版本名一致，否则构建失败：
+
+   ```bash
+   git tag v1.1.0
+   git push origin v1.1.0
+   ```
 
 ### 测试
 

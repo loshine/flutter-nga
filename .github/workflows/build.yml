@@ -1,13 +1,137 @@
 name: Build
 
-# 推送版本 tag（如 v1.2.3）时运行测试，构建 APK 与 AAB 并发布到 GitHub Release。
+# 发版相关 PR 验证各平台构建。推送版本 tag 时发布全部产物。
+# 签名使用 Environment「Android Build」的 Secrets：JKS（keystore 的 base64）、STORE_PASSWORD、KEY_ALIAS、KEY_PASSWORD。
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/build.yml"
+      - ".tool-versions"
+      - "pubspec.*"
+      - "android/**"
+      - "ios/**"
+      - "linux/**"
+      - "macos/**"
+      - "web/**"
+      - "windows/**"
   push:
     tags:
-      - "v*.*.*" # on every version tag will build a new android artifact.
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  build:
-    name: Build App Bundle
+  version:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version from pubspec
+        id: version
+        run: |
+          version="$(sed -n 's/^version:[[:space:]]*\([^+[:space:]]*\).*/\1/p' pubspec.yaml)"
+          tag="v$version"
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "$GITHUB_REF_NAME" != "$tag" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} 与 pubspec.yaml 的 version ${version} 不一致"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  android:
+    name: Build signed Android packages
+    if: github.ref_type == 'tag'
+    needs: version
+    runs-on: ubuntu-latest
+    environment: Android Build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+      - uses: jdx/mise-action@v4
+        with:
+          version: "2026.11.10"
+      - run: flutter --version
+      - run: flutter pub get
+      - run: flutter test --no-pub
+
+      # 缺少签名 Secrets 时直接失败，避免发布回退到 debug 签名的安装包。
+      - name: Restore release keystore
+        env:
+          JKS: ${{ secrets.JKS }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          for name in JKS STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::缺少签名 Secret ${name}（Environment「Android Build」）"
+              exit 1
+            fi
+          done
+          keystore="$RUNNER_TEMP/upload-keystore.jks"
+          if ! printf '%s' "$JKS" | base64 --decode --ignore-garbage > "$keystore"; then
+            echo "::error::Secret JKS 不是有效的 base64，请用 base64 -i <keystore>.jks 的输出重新填写"
+            exit 1
+          fi
+          # 校验密码与别名，并打印证书指纹，便于与本地 keystore 对照（指纹不是敏感信息）。
+          if ! keytool -list -v -keystore "$keystore" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" \
+              | grep -E 'SHA(1|256):'; then
+            echo "::error::无法用 STORE_PASSWORD / KEY_ALIAS 读取 JKS，请检查这三个 Secret"
+            exit 1
+          fi
+          {
+            echo "storeFile=$keystore"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      # Maven Central 偶尔返回 429，失败后等待重试。
+      - name: Build APK and App Bundle
+        run: |
+          retry() {
+            for attempt in 1 2 3; do
+              "$@" && return 0
+              echo "第 ${attempt} 次构建失败：$*"
+              [ "$attempt" -lt 3 ] && sleep $((attempt * 60))
+            done
+            return 1
+          }
+          retry flutter build apk --no-pub
+          retry flutter build appbundle --no-pub
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/flutter-nga-${GITHUB_REF_NAME}.apk"
+          cp build/app/outputs/bundle/release/app-release.aab "dist/flutter-nga-${GITHUB_REF_NAME}.aab"
+          ls -l dist
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: flutter-nga-android
+          path: dist/*
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Clean up signing files
+        if: always()
+        run: rm -f android/key.properties "$RUNNER_TEMP/upload-keystore.jks"
+
+  android-check:
+    name: Check Android release builds
+    if: github.event_name == 'pull_request'
+    needs: version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,18 +139,101 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
       - uses: jdx/mise-action@v4
         with:
           version: "2026.11.10"
-      - run: flutter --version
       - run: flutter pub get
-      - run: flutter test
-      - run: flutter build apk
-      - run: flutter build appbundle
-      - uses: xresloader/upload-to-github-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      - run: flutter build apk --release --no-pub
+      - run: flutter build appbundle --release --no-pub
+
+  platforms:
+    name: Build ${{ matrix.target }}
+    needs: version
+    runs-on: ${{ matrix.os }}
+    env:
+      RELEASE_TAG: ${{ needs.version.outputs.tag }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: ios
+            os: macos-latest
+          - target: macos
+            os: macos-latest
+          - target: windows
+            os: windows-latest
+          - target: linux
+            os: ubuntu-latest
+          - target: web
+            os: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v4
         with:
-          file: "*.apk,*.aab"
-          tags: false
-          draft: false
+          version: "2026.11.10"
+      - name: Install Linux build dependencies
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libstdc++-12-dev
+      - run: flutter pub get
+      - name: Build iOS app
+        if: matrix.target == 'ios'
+        env:
+          LANG: en_US.UTF-8
+        run: flutter build ios --release --no-codesign --no-pub
+      - name: Build ${{ matrix.target }} app
+        if: matrix.target != 'ios'
+        run: flutter build ${{ matrix.target }} --release --no-pub
+      - name: Package iOS app
+        if: matrix.target == 'ios'
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent build/ios/iphoneos/Runner.app "dist/flutter-nga-${RELEASE_TAG}-ios-unsigned.zip"
+      - name: Package macOS app
+        if: matrix.target == 'macos'
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent build/macos/Build/Products/Release/FNGA.app "dist/flutter-nga-${RELEASE_TAG}-macos.zip"
+      - name: Package Windows app
+        if: matrix.target == 'windows'
+        run: |
+          New-Item -ItemType Directory -Force dist
+          Compress-Archive -Path 'build/windows/x64/runner/Release/*' -DestinationPath "dist/flutter-nga-${env:RELEASE_TAG}-windows-x64.zip"
+      - name: Package Linux app
+        if: matrix.target == 'linux'
+        run: |
+          mkdir -p dist
+          tar -C build/linux/x64/release/bundle -czf "dist/flutter-nga-${RELEASE_TAG}-linux-x64.tar.gz" .
+      - name: Package web app
+        if: matrix.target == 'web'
+        run: |
+          mkdir -p dist
+          cd build/web
+          zip -qr "$GITHUB_WORKSPACE/dist/flutter-nga-${RELEASE_TAG}-web.zip" .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: flutter-nga-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+          compression-level: 0
+
+  release:
+    name: Publish GitHub Release
+    if: github.ref_type == 'tag'
+    needs: [android, platforms]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: flutter-nga-*
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
