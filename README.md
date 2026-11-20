@@ -131,12 +131,11 @@ Release 回退到 debug 签名；填写后必须提供其余三个字段，文�
 | 平台 | Release 产物 |
 | --- | --- |
 | Android | 正式签名的 APK 和 AAB |
-| iOS | 未签名的 `Runner.app` ZIP，需另行签名才能在设备上安装 |
 | macOS | 包含 `FNGA.app` 的 ZIP，使用临时签名，未做 Apple 公证 |
 | Windows | x64 程序目录 ZIP，解压后运行 `flutter_nga.exe` |
 | Linux | x64 程序目录 tar.gz，解压后运行 `flutter_nga` |
 
-Web 目前只在发版相关 PR 中验证编译。浏览器存储适配完成后再纳入正式发布。
+iOS 只在发版相关 PR 中做无签名编译检查。Web 只在同类 PR 中生成预览产物，浏览器存储适配完成后再纳入正式发布。
 
 1. 签名 Secrets 配置在仓库 Settings → Environments →「Android Build」中（只需一次）：
 
