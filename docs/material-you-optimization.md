@@ -25,7 +25,7 @@
   - `FavouriteForumGroupPage` 与 `ForumCategoryPage` 改用 `SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 120, mainAxisExtent: 108)`，解决宽屏/横屏下固定 3 列严重拉伸的问题，并保留底部安全区。
   - 为 `MinePage` 与 `SendMessagePage` 补齐 `ReadableListPadding` 居中阅读宽度约束。
 
-- [ ] **P0-5 屏蔽列表与浏览历史支持左滑删除与 SnackBar 撤销**
+- [x] **P0-5 屏蔽列表与浏览历史支持左滑删除与 SnackBar 撤销**
   - `BlocklistUsersPage` 与 `BlocklistKeywordsPage` 移除点击整行直接删除的误触隐患，改为左滑 `Dismissible`（带阈值触感）+ 行尾 `IconButton` + `AppSnackBar.undo` 乐观删除/撤销，并补充 `ListStatusView` 空状态。
   - `TopicHistoryListPage` 单条历史删除对齐「左滑 + 行尾菜单 + SnackBar 撤销」，清空历史确认改用 `M3ConfirmDialog`。
 

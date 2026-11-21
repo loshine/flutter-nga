@@ -68,6 +68,11 @@ class BlocklistSettingsState {
 class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   SharedPreferencesWithCache? _prefs;
   Timer? _syncTimer;
+  final _pendingUsers = <String, int>{};
+  final _pendingWords = <String, int>{};
+
+  bool get hasPendingUserDeletion => _pendingUsers.isNotEmpty;
+  bool get hasPendingWordDeletion => _pendingWords.isNotEmpty;
 
   @override
   BlocklistSettingsState build() {
@@ -161,6 +166,58 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
     }
   }
 
+  /// 先从本地列表移除，等待 [commitUserDeletion] 或 [undoUserDeletion]。
+  void removeUserLocally(String user) {
+    final index = state.blockUserList.indexOf(user);
+    if (index < 0) return;
+    _pendingUsers[user] = index;
+    state = state.copyWith(
+      blockUserList: [...state.blockUserList]..removeAt(index),
+    );
+  }
+
+  /// 撤销屏蔽用户移除，按原位插回。
+  void undoUserDeletion(String user) {
+    final index = _pendingUsers.remove(user);
+    if (index == null) return;
+    _restoreUser(user, index);
+  }
+
+  /// 提交待删屏蔽用户到服务端；失败时插回列表并抛出错误。
+  Future<String?> commitUserDeletion(String user) async {
+    final index = _pendingUsers.remove(user);
+    if (index == null) return null;
+    try {
+      return await Data().userRepository.setBlockInfo(
+        BlockInfoData(state.blockUserList, state.blockWordList),
+      );
+    } catch (err) {
+      if (ref.mounted) _restoreUser(user, index);
+      rethrow;
+    }
+  }
+
+  /// 离开页面时立即提交全部待删屏蔽用户。
+  Future<Object?> commitAllPendingUserDeletions() async {
+    Object? firstError;
+    for (final user in [..._pendingUsers.keys]) {
+      try {
+        await commitUserDeletion(user);
+      } catch (err) {
+        firstError ??= err;
+      }
+    }
+    return firstError;
+  }
+
+  void _restoreUser(String user, int index) {
+    if (state.blockUserList.contains(user)) return;
+    final clamped = index.clamp(0, state.blockUserList.length);
+    state = state.copyWith(
+      blockUserList: [...state.blockUserList]..insert(clamped, user),
+    );
+  }
+
   Future<String> deleteUser(String user) async {
     try {
       var submitUsers = state.blockUserList.where((e) => e != user).toList();
@@ -176,6 +233,7 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<String> deleteAllUsers() async {
     try {
+      _pendingUsers.clear();
       final content = await Data().userRepository.setBlockInfo(
         BlockInfoData([], state.blockWordList),
       );
@@ -199,6 +257,58 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
     }
   }
 
+  /// 先从本地列表移除，等待 [commitWordDeletion] 或 [undoWordDeletion]。
+  void removeWordLocally(String word) {
+    final index = state.blockWordList.indexOf(word);
+    if (index < 0) return;
+    _pendingWords[word] = index;
+    state = state.copyWith(
+      blockWordList: [...state.blockWordList]..removeAt(index),
+    );
+  }
+
+  /// 撤销屏蔽关键词移除，按原位插回。
+  void undoWordDeletion(String word) {
+    final index = _pendingWords.remove(word);
+    if (index == null) return;
+    _restoreWord(word, index);
+  }
+
+  /// 提交待删屏蔽关键词到服务端；失败时插回列表并抛出错误。
+  Future<String?> commitWordDeletion(String word) async {
+    final index = _pendingWords.remove(word);
+    if (index == null) return null;
+    try {
+      return await Data().userRepository.setBlockInfo(
+        BlockInfoData(state.blockUserList, state.blockWordList),
+      );
+    } catch (err) {
+      if (ref.mounted) _restoreWord(word, index);
+      rethrow;
+    }
+  }
+
+  /// 离开页面时立即提交全部待删屏蔽关键词。
+  Future<Object?> commitAllPendingWordDeletions() async {
+    Object? firstError;
+    for (final word in [..._pendingWords.keys]) {
+      try {
+        await commitWordDeletion(word);
+      } catch (err) {
+        firstError ??= err;
+      }
+    }
+    return firstError;
+  }
+
+  void _restoreWord(String word, int index) {
+    if (state.blockWordList.contains(word)) return;
+    final clamped = index.clamp(0, state.blockWordList.length);
+    state = state.copyWith(
+      blockWordList: [...state.blockWordList]..insert(clamped, word),
+    );
+  }
+
   Future<String> deleteWord(String word) async {
     try {
       var submitWords = state.blockWordList.where((e) => e != word).toList();
@@ -214,6 +324,7 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<String> deleteAllWords() async {
     try {
+      _pendingWords.clear();
       final content = await Data().userRepository.setBlockInfo(
         BlockInfoData(state.blockUserList, []),
       );

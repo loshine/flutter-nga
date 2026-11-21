@@ -43,9 +43,20 @@ class TopicHistoryListState {
   );
 }
 
+class _PendingHistoryDeletion {
+  const _PendingHistoryDeletion(this.dateKey, this.history, this.index);
+
+  final String dateKey;
+  final TopicHistory history;
+  final int index;
+}
+
 class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
   final _limit = 20;
   final _formatter = DateFormat('yyyy-MM-dd');
+  final _pending = <int, _PendingHistoryDeletion>{};
+
+  bool get hasPendingDeletion => _pending.isNotEmpty;
 
   @override
   TopicHistoryListState build() => TopicHistoryListState.initial();
@@ -53,6 +64,7 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
   int get _offset => state.page * 20;
 
   Future<TopicHistoryListState> refresh() async {
+    await commitAllDeletions();
     List<TopicHistory> histories = await Data().topicRepository
         .getTopicHistories(_limit, 0);
     Map<String, List<TopicHistory>> map = {};
@@ -92,6 +104,73 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
     return state;
   }
 
+  /// 先从本地列表移除，等待 [commitDeletion] 或 [undoDeletion]。
+  void removeLocally(TopicHistory history) {
+    final id = history.id;
+    if (id == null) return;
+    final map = <String, List<TopicHistory>>{};
+    for (final entry in state.dateTopicHistoryMap.entries) {
+      final index = entry.value.indexWhere((it) => it.id == id);
+      if (index > -1) {
+        _pending[id] = _PendingHistoryDeletion(entry.key, history, index);
+        if (entry.value.length > 1) {
+          map[entry.key] = entry.value.where((it) => it.id != id).toList();
+        }
+      } else {
+        map[entry.key] = entry.value;
+      }
+    }
+    state = state.copyWith(dateTopicHistoryMap: map);
+  }
+
+  /// 撤销单条历史删除，按原日期组与位置插回。
+  void undoDeletion(int id) {
+    final pending = _pending.remove(id);
+    if (pending == null) return;
+    _restore(pending);
+  }
+
+  /// 提交单条历史删除到本地数据库；失败时插回列表并抛出错误。
+  Future<void> commitDeletion(int id) async {
+    final pending = _pending.remove(id);
+    if (pending == null) return;
+    try {
+      await Data().topicRepository.deleteTopicHistoryById(id);
+      if (ref.mounted) {
+        ref.read(readTopicIdsProvider.notifier).reload();
+      }
+    } catch (_) {
+      if (ref.mounted) _restore(pending);
+      rethrow;
+    }
+  }
+
+  /// 离开页面时立即提交全部待删历史。
+  Future<Object?> commitAllDeletions() async {
+    Object? firstError;
+    for (final id in [..._pending.keys]) {
+      try {
+        await commitDeletion(id);
+      } catch (err) {
+        firstError ??= err;
+      }
+    }
+    return firstError;
+  }
+
+  void _restore(_PendingHistoryDeletion pending) {
+    final map = <String, List<TopicHistory>>{
+      for (final entry in state.dateTopicHistoryMap.entries)
+        entry.key: [...entry.value],
+    };
+    final list = map.putIfAbsent(pending.dateKey, () => []);
+    if (!list.any((it) => it.id == pending.history.id)) {
+      final index = pending.index.clamp(0, list.length);
+      list.insert(index, pending.history);
+    }
+    state = state.copyWith(dateTopicHistoryMap: map);
+  }
+
   Future<void> delete(int id) async {
     await Data().topicRepository.deleteTopicHistoryById(id);
     Map<String, List<TopicHistory>> map = {};
@@ -110,6 +189,7 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
   }
 
   Future<int> clean() async {
+    _pending.clear();
     final count = await Data().topicRepository.deleteAllTopicHistory();
     ref.read(readTopicIdsProvider.notifier).reload();
     return count;
