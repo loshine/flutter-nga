@@ -166,6 +166,12 @@ class ThemeBuilder {
         trackGap: 6,
         trackShape: const GappedSliderTrackShape(),
         thumbShape: const HandleThumbShape(),
+        thumbSize: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.dragged)) {
+            return const Size(2, 44);
+          }
+          return const Size(4, 44);
+        }),
         valueIndicatorShape: const RoundedRectSliderValueIndicatorShape(),
         showValueIndicator: ShowValueIndicator.onDrag,
         activeTrackColor: colorScheme.primary,

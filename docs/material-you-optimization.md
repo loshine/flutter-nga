@@ -34,7 +34,7 @@
 - [x] **P1-1 启用 M3 新版控件主题（Slider、ProgressIndicator、Switch、SnackBar）**
   - 在 `ThemeBuilder` 配置非弃用的 2024 M3 `SliderThemeData`（`GappedSliderTrackShape`、`HandleThumbShape`、轨道间隙）、`ProgressIndicatorThemeData`（圆角端点、轨道间隙与停顿点）、`SwitchThemeData`（`thumbIcon` ✓/✕）、`SnackBarThemeData`（floating 圆角与 `inverseSurface`）。
 
-- [ ] **P1-2 统一 M3 分组设置卡片组件并升级个人/设置/关于页**
+- [x] **P1-2 统一 M3 分组设置卡片组件并升级个人/设置/关于页**
   - 抽象通用 `M3SettingsGroup` / `M3SettingsTile` / `M3SettingsSwitchTile` / `M3SettingsInfoTile`（`surfaceContainerLow` 圆角分组卡片 + 组内细分割线）。
   - 统一重构 `SettingsPage`（主题设置副标题与尾部显示当前主题色预览）、`MinePage`、`InterfaceSettingsPage`（增加顶部**实时排版预览卡片**与 Slider 数值气泡）、`BlocklistSettingsPage` 与 `AboutPage`（使用真实应用图标 `images/launcher/icon_1024.png`，开源协议接入 `showLicensePage`）。
 
