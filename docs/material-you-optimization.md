@@ -6,7 +6,7 @@
 
 ### P0：核心规范补齐与高收益修复
 
-- [ ] **P0-1 Android 原生预测性返回手势（Predictive Back）**
+- [x] **P0-1 Android 原生预测性返回手势（Predictive Back）**
   - 在 `android/app/src/main/AndroidManifest.xml` 的 `<application>` 启用 `android:enableOnBackInvokedCallback="true"`，使 `ThemeBuilder` 中已配置的 `PredictiveBackPageTransitionsBuilder` 在 Android 13–15 上真正生效。
 
 - [ ] **P0-2 系统动态取色、默认跟随系统与高对比度主题**
