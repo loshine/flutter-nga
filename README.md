@@ -126,11 +126,10 @@ Release 回退到 debug 签名；填写后必须提供其余三个字段，文�
 ### 发布新版本
 
 改动构建配置、SDK 版本、依赖或平台工程的 PR 会触发 `.github/workflows/build.yml` 验证各平台构建。
-推送 `v*.*.*` tag 后，下列平台构建通过才会创建 GitHub Release 并上传产物。更新说明根据合并的 PR 自动生成。
+推送 `v*.*.*` tag 后，Android 正式签名构建通过才会创建 GitHub Release 并上传 APK 和 AAB。更新说明根据合并的 PR 自动生成。
 
-| 平台 | Release 产物 |
+| 平台 | PR 构建产物 |
 | --- | --- |
-| Android | 正式签名的 APK 和 AAB |
 | macOS | 包含 `FNGA.app` 的 ZIP，使用临时签名，未做 Apple 公证 |
 | Windows | x64 程序目录 ZIP，解压后运行 `flutter_nga.exe` |
 | Linux | x64 程序目录 tar.gz，解压后运行 `flutter_nga` |

@@ -1,6 +1,6 @@
 name: Build
 
-# 发版相关 PR 验证各平台构建。推送版本 tag 时发布 Android、macOS、Windows 和 Linux 产物。
+# 发版相关 PR 验证各平台构建。推送版本 tag 时发布 Android 签名 APK 和 AAB。
 # 签名使用 Environment「Android Build」的 Secrets：JKS（keystore 的 base64）、STORE_PASSWORD、KEY_ALIAS、KEY_PASSWORD。
 on:
   pull_request:
@@ -149,6 +149,7 @@ jobs:
 
   platforms:
     name: Build ${{ matrix.target }}
+    if: github.event_name == 'pull_request'
     needs: version
     runs-on: ${{ matrix.os }}
     env:
@@ -233,16 +234,15 @@ jobs:
   release:
     name: Publish GitHub Release
     if: github.ref_type == 'tag'
-    needs: [android, platforms]
+    needs: android
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v8
         with:
-          pattern: flutter-nga-*
+          name: flutter-nga-android
           path: dist
-          merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
