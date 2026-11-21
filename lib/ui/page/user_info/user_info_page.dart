@@ -124,18 +124,20 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
           children: [
             Builder(
               builder: (context) {
-                final entry = userInfo.personalForum!.entries.toList()[0];
-                return GestureDetector(
-                  onTap: () => Routes.navigateTo(
-                    context,
-                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
-                  ),
-                  child: Text(
-                    "[${entry.value}]",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
+                final entry = userInfo.personalForum!.entries.first;
+                return Wrap(
+                  spacing: Dimen.spacingS,
+                  runSpacing: Dimen.spacingXS,
+                  children: [
+                    ActionChip(
+                      avatar: const Icon(Icons.forum_outlined, size: 16),
+                      label: Text(entry.value),
+                      onPressed: () => Routes.navigateTo(
+                        context,
+                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
+                      ),
                     ),
-                  ),
+                  ],
                 );
               },
             ),
@@ -151,29 +153,25 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
   List<Widget> _getAdminForumWidgets(UserInfoState userInfo) {
     if (userInfo.moderatorForums != null &&
         userInfo.moderatorForums!.isNotEmpty) {
-      return userInfo.moderatorForums!.entries
-          .map(
-            (entry) => Builder(
-              builder: (context) => GestureDetector(
-                onTap: () => Routes.navigateTo(
-                  context,
-                  "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: Dimen.spacingXS,
-                  ),
-                  child: Text(
-                    "[${entry.value}]",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+      return [
+        Builder(
+          builder: (context) => Wrap(
+            spacing: Dimen.spacingS,
+            runSpacing: Dimen.spacingXS,
+            children: [
+              for (final entry in userInfo.moderatorForums!.entries)
+                ActionChip(
+                  avatar: const Icon(Icons.shield_outlined, size: 16),
+                  label: Text(entry.value),
+                  onPressed: () => Routes.navigateTo(
+                    context,
+                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
                   ),
                 ),
-              ),
-            ),
-          )
-          .toList();
+            ],
+          ),
+        ),
+      ];
     }
     return [const InfoWidget(title: "", subTitle: "无管理版块")];
   }

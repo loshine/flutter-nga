@@ -5,10 +5,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_nga/data/core/app_preferences.dart';
-import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/providers/core/repository_providers.dart';
 
 enum BlockMode { COLLAPSE, PAINT, ALPHA, DELETE_LINE, GONE }
 
@@ -68,6 +68,51 @@ class BlocklistSettingsState {
 class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   SharedPreferencesWithCache? _prefs;
   Timer? _syncTimer;
+  final _pendingUsers = <String, int>{};
+  final _pendingWords = <String, int>{};
+  final _queuedUserCommits = <String, int>{};
+  final _queuedWordCommits = <String, int>{};
+  Future<void> _writeTail = Future<void>.value();
+
+  bool get hasPendingUserDeletion => _pendingUsers.isNotEmpty;
+  bool get hasPendingWordDeletion => _pendingWords.isNotEmpty;
+
+  /// 串行化提交到服务端的写请求，避免并发提交导致旧快照覆盖新结果。
+  Future<T> _enqueueWrite<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+    _writeTail = _writeTail.then((_) async {
+      try {
+        completer.complete(await action());
+      } catch (err, st) {
+        completer.completeError(err, st);
+      }
+    });
+    return completer.future;
+  }
+
+  /// 构造应提交给服务端的名单：将仍处于撤销窗口或排在后面的待删项按逆序插回，
+  /// 确保本次提交不会顺带删掉其他尚未确认删除的条目。
+  List<String> _listWithPending(
+    List<String> current,
+    Map<String, int> pending,
+    Map<String, int> queued,
+  ) {
+    if (pending.isEmpty && queued.isEmpty) return current;
+    final result = [...current];
+    final combined = [...queued.entries, ...pending.entries].reversed;
+    for (final entry in combined) {
+      if (result.contains(entry.key)) continue;
+      final clamped = entry.value.clamp(0, result.length);
+      result.insert(clamped, entry.key);
+    }
+    return result;
+  }
+
+  List<String> _serverUsers() =>
+      _listWithPending(state.blockUserList, _pendingUsers, _queuedUserCommits);
+
+  List<String> _serverWords() =>
+      _listWithPending(state.blockWordList, _pendingWords, _queuedWordCommits);
 
   @override
   BlocklistSettingsState build() {
@@ -105,7 +150,7 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   void loopSyncBlockList() {
     Future.delayed(Duration(), () async {
           debugPrint('定时任务');
-          if (await Data().userRepository.getDefaultUser() != null) {
+          if (await ref.read(userRepositoryProvider).getDefaultUser() != null) {
             await load();
           }
         })
@@ -138,90 +183,216 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<void> load() async {
     try {
-      final blockInfo = await Data().userRepository.getBlockInfo();
+      final blockInfo = await ref.read(userRepositoryProvider).getBlockInfo();
+      final hiddenUsers = {..._pendingUsers.keys, ..._queuedUserCommits.keys};
+      final hiddenWords = {..._pendingWords.keys, ..._queuedWordCommits.keys};
       state = state.copyWith(
-        blockUserList: blockInfo.blockUserList,
-        blockWordList: blockInfo.blockWordList,
+        blockUserList: blockInfo.blockUserList
+            .where((u) => !hiddenUsers.contains(u))
+            .toList(),
+        blockWordList: blockInfo.blockWordList
+            .where((w) => !hiddenWords.contains(w))
+            .toList(),
       );
     } catch (err) {
       rethrow;
     }
   }
 
-  Future<String> addUser(String user) async {
-    try {
-      var submitUsers = <String>[...state.blockUserList, user];
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(submitUsers, state.blockWordList),
-      );
-      state = state.copyWith(blockUserList: submitUsers);
+  Future<String> addUser(String user) {
+    return _enqueueWrite(() async {
+      final submitUsers = <String>[..._serverUsers(), user];
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(submitUsers, _serverWords()));
+      if (ref.mounted && !state.blockUserList.contains(user)) {
+        state = state.copyWith(blockUserList: [...state.blockUserList, user]);
+      }
       return content;
-    } catch (err) {
-      rethrow;
-    }
+    });
   }
 
-  Future<String> deleteUser(String user) async {
-    try {
-      var submitUsers = state.blockUserList.where((e) => e != user).toList();
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(submitUsers, state.blockWordList),
-      );
-      state = state.copyWith(blockUserList: submitUsers);
-      return content;
-    } catch (err) {
-      rethrow;
-    }
+  /// 先从本地列表移除，等待 [commitUserDeletion] 或 [undoUserDeletion]。
+  void removeUserLocally(String user) {
+    final index = state.blockUserList.indexOf(user);
+    if (index < 0) return;
+    _pendingUsers[user] = index;
+    state = state.copyWith(
+      blockUserList: [...state.blockUserList]..removeAt(index),
+    );
   }
 
-  Future<String> deleteAllUsers() async {
-    try {
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData([], state.blockWordList),
-      );
-      state = state.copyWith(blockUserList: []);
-      return content;
-    } catch (err) {
-      rethrow;
-    }
+  /// 撤销屏蔽用户移除，按原位插回。
+  void undoUserDeletion(String user) {
+    final index = _pendingUsers.remove(user);
+    if (index == null) return;
+    _restoreUser(user, index);
   }
 
-  Future<String> addWord(String word) async {
-    try {
-      var submitWords = <String>[...state.blockWordList, word];
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(state.blockUserList, submitWords),
-      );
-      state = state.copyWith(blockWordList: submitWords);
-      return content;
-    } catch (err) {
-      rethrow;
-    }
+  /// 提交待删屏蔽用户到服务端；失败时插回列表并抛出错误。
+  Future<String?> commitUserDeletion(String user) async {
+    final index = _pendingUsers.remove(user);
+    if (index == null) return null;
+    _queuedUserCommits[user] = index;
+    return _enqueueWrite(() async {
+      _queuedUserCommits.remove(user);
+      try {
+        return await ref
+            .read(userRepositoryProvider)
+            .setBlockInfo(BlockInfoData(_serverUsers(), _serverWords()));
+      } catch (err) {
+        if (ref.mounted) _restoreUser(user, index);
+        rethrow;
+      }
+    });
   }
 
-  Future<String> deleteWord(String word) async {
-    try {
-      var submitWords = state.blockWordList.where((e) => e != word).toList();
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(state.blockUserList, submitWords),
-      );
-      state = state.copyWith(blockWordList: submitWords);
-      return content;
-    } catch (err) {
-      rethrow;
+  /// 离开页面时立即提交全部待删屏蔽用户。
+  Future<Object?> commitAllPendingUserDeletions() async {
+    Object? firstError;
+    for (final user in [..._pendingUsers.keys]) {
+      try {
+        await commitUserDeletion(user);
+      } catch (err) {
+        firstError ??= err;
+      }
     }
+    return firstError;
   }
 
-  Future<String> deleteAllWords() async {
-    try {
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(state.blockUserList, []),
-      );
-      state = state.copyWith(blockWordList: []);
+  void _restoreUser(String user, int index) {
+    if (state.blockUserList.contains(user)) return;
+    final clamped = index.clamp(0, state.blockUserList.length);
+    state = state.copyWith(
+      blockUserList: [...state.blockUserList]..insert(clamped, user),
+    );
+  }
+
+  Future<String> deleteUser(String user) {
+    return _enqueueWrite(() async {
+      final submitUsers = _serverUsers().where((e) => e != user).toList();
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(submitUsers, _serverWords()));
+      if (ref.mounted) {
+        state = state.copyWith(
+          blockUserList: state.blockUserList.where((e) => e != user).toList(),
+        );
+      }
       return content;
-    } catch (err) {
-      rethrow;
+    });
+  }
+
+  Future<String> deleteAllUsers() {
+    _pendingUsers.clear();
+    _queuedUserCommits.clear();
+    return _enqueueWrite(() async {
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(const [], _serverWords()));
+      if (ref.mounted) {
+        state = state.copyWith(blockUserList: []);
+      }
+      return content;
+    });
+  }
+
+  Future<String> addWord(String word) {
+    return _enqueueWrite(() async {
+      final submitWords = <String>[..._serverWords(), word];
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(_serverUsers(), submitWords));
+      if (ref.mounted && !state.blockWordList.contains(word)) {
+        state = state.copyWith(blockWordList: [...state.blockWordList, word]);
+      }
+      return content;
+    });
+  }
+
+  /// 先从本地列表移除，等待 [commitWordDeletion] 或 [undoWordDeletion]。
+  void removeWordLocally(String word) {
+    final index = state.blockWordList.indexOf(word);
+    if (index < 0) return;
+    _pendingWords[word] = index;
+    state = state.copyWith(
+      blockWordList: [...state.blockWordList]..removeAt(index),
+    );
+  }
+
+  /// 撤销屏蔽关键词移除，按原位插回。
+  void undoWordDeletion(String word) {
+    final index = _pendingWords.remove(word);
+    if (index == null) return;
+    _restoreWord(word, index);
+  }
+
+  /// 提交待删屏蔽关键词到服务端；失败时插回列表并抛出错误。
+  Future<String?> commitWordDeletion(String word) async {
+    final index = _pendingWords.remove(word);
+    if (index == null) return null;
+    _queuedWordCommits[word] = index;
+    return _enqueueWrite(() async {
+      _queuedWordCommits.remove(word);
+      try {
+        return await ref
+            .read(userRepositoryProvider)
+            .setBlockInfo(BlockInfoData(_serverUsers(), _serverWords()));
+      } catch (err) {
+        if (ref.mounted) _restoreWord(word, index);
+        rethrow;
+      }
+    });
+  }
+
+  /// 离开页面时立即提交全部待删屏蔽关键词。
+  Future<Object?> commitAllPendingWordDeletions() async {
+    Object? firstError;
+    for (final word in [..._pendingWords.keys]) {
+      try {
+        await commitWordDeletion(word);
+      } catch (err) {
+        firstError ??= err;
+      }
     }
+    return firstError;
+  }
+
+  void _restoreWord(String word, int index) {
+    if (state.blockWordList.contains(word)) return;
+    final clamped = index.clamp(0, state.blockWordList.length);
+    state = state.copyWith(
+      blockWordList: [...state.blockWordList]..insert(clamped, word),
+    );
+  }
+
+  Future<String> deleteWord(String word) {
+    return _enqueueWrite(() async {
+      final submitWords = _serverWords().where((e) => e != word).toList();
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(_serverUsers(), submitWords));
+      if (ref.mounted) {
+        state = state.copyWith(
+          blockWordList: state.blockWordList.where((e) => e != word).toList(),
+        );
+      }
+      return content;
+    });
+  }
+
+  Future<String> deleteAllWords() {
+    _pendingWords.clear();
+    _queuedWordCommits.clear();
+    return _enqueueWrite(() async {
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(_serverUsers(), const []));
+      if (ref.mounted) {
+        state = state.copyWith(blockWordList: []);
+      }
+      return content;
+    });
   }
 
   Future<void> updateBlockMode(BlockMode mode) async {

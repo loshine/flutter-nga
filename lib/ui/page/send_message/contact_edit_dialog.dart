@@ -1,6 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_nga/utils/route.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 
 typedef EditCallback = void Function(String text);
 
@@ -17,11 +17,11 @@ class ContactEditDialog extends HookWidget {
 
     void submit() {
       callback?.call(controller.text);
-      Routes.pop(context);
+      Navigator.of(context).pop();
     }
 
-    return AlertDialog(
-      title: Text(title),
+    return M3Dialog(
+      title: title,
       content: TextField(
         autofocus: true,
         maxLines: 1,
@@ -35,10 +35,10 @@ class ContactEditDialog extends HookWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => Routes.pop(context),
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('取消'),
         ),
-        TextButton(onPressed: submit, child: const Text('确定')),
+        FilledButton(onPressed: submit, child: const Text('确定')),
       ],
     );
   }

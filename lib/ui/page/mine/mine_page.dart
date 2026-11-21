@@ -5,8 +5,9 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
+import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 /// 【我的】页面：集中收藏、历史、消息、提醒以及设置、关于入口
@@ -56,38 +57,35 @@ class MinePage extends HookConsumerWidget {
 
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    return ListView(
+    return ReadableListPadding(
       padding: EdgeInsets.fromLTRB(
         mediaPadding.left,
         Dimen.spacingS,
         mediaPadding.right,
-        Dimen.spacingS + mediaPadding.bottom,
+        Dimen.spacingL + mediaPadding.bottom,
       ),
-      children: [
-        _EntranceAnimation(
-          index: 0,
-          child: _UserHeaderCard(userInfo: userInfo),
-        ),
-        _EntranceAnimation(
-          index: 1,
-          child: _EntryGroup(
+      builder: (context, padding) => ListView(
+        padding: padding,
+        children: [
+          _UserHeaderCard(userInfo: userInfo),
+          M3SettingsGroup(
             title: '社区',
             children: [
-              _EntryTile(
+              M3SettingsTile(
                 icon: Icons.bookmark_outline,
                 title: '贴子收藏',
                 subtitle: '收藏的贴子',
                 onTap: () =>
                     Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
               ),
-              _EntryTile(
+              M3SettingsTile(
                 icon: Icons.history_outlined,
                 title: '浏览历史',
                 subtitle: '最近浏览的贴子',
                 onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
               ),
               // 从短消息 / 提醒页返回后刷新角标
-              _EntryTile(
+              M3SettingsTile(
                 icon: Icons.mail_outlined,
                 title: '短消息',
                 subtitle: '私信会话',
@@ -97,7 +95,7 @@ class MinePage extends HookConsumerWidget {
                   Routes.CONVERSATIONS,
                 ).whenComplete(refreshUnread),
               ),
-              _EntryTile(
+              M3SettingsTile(
                 icon: Icons.notifications_outlined,
                 title: '提醒信息',
                 subtitle: '回复与系统通知',
@@ -109,19 +107,16 @@ class MinePage extends HookConsumerWidget {
               ),
             ],
           ),
-        ),
-        _EntranceAnimation(
-          index: 2,
-          child: _EntryGroup(
+          M3SettingsGroup(
             title: '应用',
             children: [
-              _EntryTile(
+              M3SettingsTile(
                 icon: Icons.settings_outlined,
                 title: '设置',
                 subtitle: '主题、网络与屏蔽',
                 onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
               ),
-              _EntryTile(
+              M3SettingsTile(
                 icon: Icons.info_outline,
                 title: '关于',
                 subtitle: '版本与开源信息',
@@ -129,8 +124,8 @@ class MinePage extends HookConsumerWidget {
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -200,148 +195,5 @@ class _UserHeaderCard extends ConsumerWidget {
         ref.read(homeDrawerHeaderProvider.notifier).refresh();
       });
     }
-  }
-}
-
-/// 入口分组
-class _EntryGroup extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-
-  const _EntryGroup({required this.title, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            title,
-            style: textTheme.titleSmall?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        ...children,
-      ],
-    );
-  }
-}
-
-/// 入口项，样式与设置页保持一致
-class _EntryTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback? onTap;
-
-  /// 未读数，大于 0 时在图标上显示角标
-  final int badgeCount;
-
-  const _EntryTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.onTap,
-    this.badgeCount = 0,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(Dimen.radiusM),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(Dimen.radiusM),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Badge.count(
-                  count: badgeCount,
-                  isLabelVisible: badgeCount > 0,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(Dimen.radiusS),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: colorScheme.onPrimaryContainer,
-                      size: Dimen.iconSmall,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: Dimen.spacingL),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 分组进场动画：按序号错峰淡入 + 上移
-class _EntranceAnimation extends StatelessWidget {
-  /// 共享实例，避免 TweenAnimationBuilder 因 tween 引用变化而重启动画
-  static final Tween<double> _tween = Tween(begin: 0, end: 1);
-
-  final int index;
-  final Widget child;
-
-  const _EntranceAnimation({required this.index, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final begin = (index * 0.12).clamp(0.0, 0.6);
-    return TweenAnimationBuilder<double>(
-      tween: _tween,
-      duration: Motion.durationExtraLong1,
-      curve: Interval(begin, 1, curve: Motion.emphasizedDecelerate),
-      builder: (context, value, child) => Opacity(
-        opacity: value,
-        child: Transform.translate(
-          offset: Offset(0, 24 * (1 - value)),
-          child: child,
-        ),
-      ),
-      child: child,
-    );
   }
 }

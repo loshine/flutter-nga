@@ -5,10 +5,10 @@ import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
-import 'package:flutter_nga/utils/route.dart';
 
 class FavouriteForumGroupPage extends StatefulHookConsumerWidget {
   const FavouriteForumGroupPage({super.key, this.scrollToTop});
@@ -31,11 +31,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
 
     final state = ref.watch(favouriteForumListProvider);
     final forums = state.forums;
-    final size = MediaQuery.sizeOf(context);
-
-    /*24 is for notification bar on Android*/
-    final double itemHeight = 108;
-    final double itemWidth = size.width / 3;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return Stack(
       children: [
@@ -50,9 +46,10 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
           child: GridView.builder(
             controller: scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: itemWidth / itemHeight,
+            padding: EdgeInsets.only(bottom: bottomPadding + 88),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 120,
+              mainAxisExtent: 108,
             ),
             itemCount: forums.length,
             itemBuilder: (_, index) => ForumGridItemWidget(
@@ -73,28 +70,39 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
       builder: (dialogContext) => Consumer(
         builder: (context, ref, _) {
           final isBusy = ref.watch(favouriteForumBusyProvider(forum.identity));
-          return AlertDialog(
-            title: const Text('提示'),
-            content: const Text('是否删除该版面'),
-            actions: <Widget>[
+          final colorScheme = Theme.of(context).colorScheme;
+          return M3Dialog(
+            title: '移除收藏版面',
+            content: Text(
+              '确定从我的收藏中移除「${forum.name}」吗？',
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: colorScheme.onSurfaceVariant),
+            ),
+            actions: [
               TextButton(
-                onPressed: isBusy ? null : () => Routes.pop(dialogContext),
+                onPressed: isBusy
+                    ? null
+                    : () => Navigator.of(dialogContext).pop(),
                 child: const Text('取消'),
               ),
-              TextButton(
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: colorScheme.error,
+                  foregroundColor: colorScheme.onError,
+                ),
                 onPressed: isBusy
                     ? null
                     : () async {
                         try {
                           await notifier.delete(forum);
                           if (dialogContext.mounted) {
-                            Routes.pop(dialogContext);
+                            Navigator.of(dialogContext).pop();
                           }
                         } catch (error) {
                           AppToast.error(error);
                         }
                       },
-                child: const Text('确认'),
+                child: const Text('移除'),
               ),
             ],
           );

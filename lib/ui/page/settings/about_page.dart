@@ -3,8 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
-import 'package:flutter_nga/utils/dimen.dart';
 
 /// 应用信息 Provider
 final appInfoProvider = FutureProvider<PackageInfo>((ref) async {
@@ -19,7 +19,6 @@ class AboutPage extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final appInfoAsync = ref.watch(appInfoProvider);
-
     final mediaPadding = MediaQuery.paddingOf(context);
 
     return Scaffold(
@@ -32,7 +31,7 @@ class AboutPage extends HookConsumerWidget {
             mediaPadding.left,
             16,
             mediaPadding.right,
-            16 + mediaPadding.bottom,
+            24 + mediaPadding.bottom,
           ),
           builder: (context, padding) => ListView(
             padding: padding,
@@ -41,17 +40,13 @@ class AboutPage extends HookConsumerWidget {
               Center(
                 child: Column(
                   children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Icon(
-                        Icons.forum,
-                        size: 48,
-                        color: colorScheme.onPrimaryContainer,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        'images/launcher/icon_1024.png',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -79,71 +74,102 @@ class AboutPage extends HookConsumerWidget {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
 
               // 技术栈区
-              const _SectionHeader(title: '技术栈'),
-              // flutter run / build 会自动注入 FLUTTER_VERSION，无需手动维护版本号。
-              const _InfoTile(
-                title: 'Flutter',
-                subtitle: FlutterVersion.version ?? '未知',
-                icon: Icons.flutter_dash,
+              const M3SettingsGroup(
+                title: '技术栈',
+                children: [
+                  // flutter run / build 会自动注入 FLUTTER_VERSION，无需手动维护版本号。
+                  M3SettingsInfoTile(
+                    title: 'Flutter',
+                    subtitle: FlutterVersion.version ?? '未知',
+                    icon: Icons.flutter_dash,
+                  ),
+                  M3SettingsInfoTile(
+                    title: '状态管理',
+                    subtitle: 'Riverpod 3.x + flutter_hooks',
+                    icon: Icons.timeline,
+                  ),
+                  M3SettingsInfoTile(
+                    title: '路由',
+                    subtitle: 'go_router',
+                    icon: Icons.route,
+                  ),
+                  M3SettingsInfoTile(
+                    title: '网络',
+                    subtitle: 'Dio',
+                    icon: Icons.cloud_outlined,
+                  ),
+                  M3SettingsInfoTile(
+                    title: '本地存储',
+                    subtitle: 'Sembast',
+                    icon: Icons.storage_outlined,
+                  ),
+                ],
               ),
-              const _InfoTile(
-                title: '状态管理',
-                subtitle: 'Riverpod 3.x + flutter_hooks',
-                icon: Icons.timeline,
-              ),
-              const _InfoTile(
-                title: '路由',
-                subtitle: 'go_router',
-                icon: Icons.route,
-              ),
-              const _InfoTile(
-                title: '网络',
-                subtitle: 'Dio',
-                icon: Icons.cloud_outlined,
-              ),
-              const _InfoTile(
-                title: '本地存储',
-                subtitle: 'Sembast',
-                icon: Icons.storage_outlined,
-              ),
-
-              const SizedBox(height: 16),
 
               // 链接区
-              const _SectionHeader(title: '相关链接'),
-              const _LinkTile(
-                title: 'GitHub 仓库',
-                subtitle: '查看源代码、参与贡献',
-                icon: Icons.code,
-                url: 'https://github.com/loshine/flutter-nga',
+              M3SettingsGroup(
+                title: '相关链接',
+                children: [
+                  M3SettingsTile(
+                    title: 'GitHub 仓库',
+                    subtitle: '查看源代码、参与贡献',
+                    icon: Icons.code,
+                    trailingIcon: Icons.open_in_new,
+                    onTap: () =>
+                        _launchUrl('https://github.com/loshine/flutter-nga'),
+                  ),
+                  M3SettingsTile(
+                    title: '问题反馈',
+                    subtitle: '报告 Bug 或提出建议',
+                    icon: Icons.bug_report_outlined,
+                    trailingIcon: Icons.open_in_new,
+                    onTap: () => _launchUrl(
+                      'https://github.com/loshine/flutter-nga/issues',
+                    ),
+                  ),
+                  M3SettingsTile(
+                    title: 'NGA 官网',
+                    subtitle: 'bbs.nga.cn',
+                    icon: Icons.language,
+                    trailingIcon: Icons.open_in_new,
+                    onTap: () => _launchUrl('https://bbs.nga.cn'),
+                  ),
+                ],
               ),
-              const _LinkTile(
-                title: '问题反馈',
-                subtitle: '报告 Bug 或提出建议',
-                icon: Icons.bug_report_outlined,
-                url: 'https://github.com/loshine/flutter-nga/issues',
-              ),
-              const _LinkTile(
-                title: 'NGA 官网',
-                subtitle: 'bbs.nga.cn',
-                icon: Icons.language,
-                url: 'https://bbs.nga.cn',
-              ),
-
-              const SizedBox(height: 16),
 
               // 其他信息区
-              const _SectionHeader(title: '其他信息'),
-              const _InfoTile(
-                title: '开源协议',
-                subtitle: 'Apache License 2.0',
-                icon: Icons.description_outlined,
+              M3SettingsGroup(
+                title: '其他信息',
+                children: [
+                  M3SettingsTile(
+                    title: '开源协议与许可',
+                    subtitle: 'Apache License 2.0 · 查看第三方开源许可',
+                    icon: Icons.description_outlined,
+                    onTap: () => showLicensePage(
+                      context: context,
+                      applicationName: appInfo.appName,
+                      applicationVersion:
+                          '${appInfo.version} (Build ${appInfo.buildNumber})',
+                      applicationIcon: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            'images/launcher/icon_1024.png',
+                            width: 64,
+                            height: 64,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               // 版权声明
               Padding(
@@ -168,169 +194,7 @@ class AboutPage extends HookConsumerWidget {
                   ],
                 ),
               ),
-
-              const SizedBox(height: 16),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 分组标题
-class _SectionHeader extends StatelessWidget {
-  final String title;
-
-  const _SectionHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: textTheme.titleSmall?.copyWith(
-          color: colorScheme.primary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-/// 信息展示项
-class _InfoTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-
-  const _InfoTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(Dimen.radiusS),
-            ),
-            child: Icon(icon, color: colorScheme.onSurface, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 可点击链接项
-class _LinkTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final String url;
-
-  const _LinkTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.url,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(Dimen.radiusM),
-        child: InkWell(
-          onTap: () => _launchUrl(url),
-          borderRadius: BorderRadius.circular(Dimen.radiusM),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(Dimen.radiusS),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: colorScheme.onPrimaryContainer,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.open_in_new,
-                  color: colorScheme.onSurfaceVariant,
-                  size: 16,
-                ),
-              ],
-            ),
           ),
         ),
       ),

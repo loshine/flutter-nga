@@ -15,6 +15,7 @@ abstract final class PrefsKeys {
 
   // ThemeNotifier
   static const seedColorValue = 'seed_color_value';
+  static const useDynamicColor = 'use_dynamic_color';
 
   // InterfaceSettingsNotifier
   static const uiContentSizeMultiple = 'ui_contentSizeMultiple';
@@ -33,6 +34,7 @@ abstract final class PrefsKeys {
     userAgentConfigKey,
     customUserAgentValue,
     seedColorValue,
+    useDynamicColor,
     uiContentSizeMultiple,
     uiTitleSizeMultiple,
     uiLineHeight,

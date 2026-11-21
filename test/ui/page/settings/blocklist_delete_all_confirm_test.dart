@@ -11,6 +11,8 @@ import 'package:flutter_nga/ui/page/settings/blocklist_users_page.dart';
 class _FakeBlocklistNotifier extends BlocklistSettingsNotifier {
   int deleteAllUsersCalls = 0;
   int deleteAllWordsCalls = 0;
+  final List<String> committedUsers = [];
+  final List<String> committedWords = [];
 
   @override
   BlocklistSettingsState build() => const BlocklistSettingsState(
@@ -20,6 +22,18 @@ class _FakeBlocklistNotifier extends BlocklistSettingsNotifier {
 
   @override
   Future<void> load() async {}
+
+  @override
+  Future<String?> commitUserDeletion(String user) async {
+    committedUsers.add(user);
+    return '操作成功';
+  }
+
+  @override
+  Future<String?> commitWordDeletion(String word) async {
+    committedWords.add(word);
+    return '操作成功';
+  }
 
   @override
   Future<String> deleteAllUsers() async {
@@ -79,6 +93,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(notifier.deleteAllUsersCalls, 1);
     expect(find.text('用户A'), findsNothing);
+    expect(find.text('暂无屏蔽用户'), findsOneWidget);
 
     await _cleanUpToasts(tester);
   });
@@ -94,6 +109,43 @@ void main() {
     await tester.tap(find.text('全部删除'));
     await tester.pumpAndSettle();
     expect(notifier.deleteAllWordsCalls, 1);
+    expect(find.text('暂无屏蔽关键词'), findsOneWidget);
+
+    await _cleanUpToasts(tester);
+  });
+
+  testWidgets('点击屏蔽用户行文本不会误删，点删除按钮支持撤销', (tester) async {
+    final notifier = await _pump(tester, const BlocklistUsersPage());
+
+    await tester.tap(find.text('用户A'));
+    await tester.pumpAndSettle();
+    expect(find.text('用户A'), findsOneWidget);
+    expect(notifier.committedUsers, isEmpty);
+
+    await tester.tap(find.byTooltip('移除屏蔽'));
+    await tester.pumpAndSettle();
+    expect(find.text('用户A'), findsNothing);
+    expect(find.text('撤销'), findsOneWidget);
+
+    await tester.tap(find.text('撤销'));
+    await tester.pumpAndSettle();
+    expect(find.text('用户A'), findsOneWidget);
+    expect(notifier.committedUsers, isEmpty);
+
+    await _cleanUpToasts(tester);
+  });
+
+  testWidgets('左滑移除屏蔽关键词并在超时后提交', (tester) async {
+    final notifier = await _pump(tester, const BlocklistKeywordsPage());
+
+    await tester.drag(find.text('关键词A'), const Offset(-600, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('关键词A'), findsNothing);
+    expect(notifier.committedWords, isEmpty);
+
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(notifier.committedWords, ['关键词A']);
 
     await _cleanUpToasts(tester);
   });

@@ -13,16 +13,54 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     super.key,
     this.topicHistory,
     this.onLongPress,
+    this.trailing,
   });
 
   final TopicHistory? topicHistory;
   final GestureLongPressCallback? onLongPress;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final interfaceState = ref.watch(interfaceSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 标题
+        _buildTitle(
+          context,
+          topicHistory!,
+          interfaceState,
+          textTheme,
+          colorScheme,
+        ),
+        const SizedBox(height: 8),
+        // 元信息行
+        Row(
+          children: [
+            Icon(
+              Icons.person_outline,
+              size: 14,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                name_utils.getShowName(topicHistory!.author ?? ''),
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -31,42 +69,16 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
           onTap: () => _goTopicDetail(context, topicHistory!, ref),
           onLongPress: onLongPress,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 标题
-                _buildTitle(
-                  context,
-                  topicHistory!,
-                  interfaceState,
-                  textTheme,
-                  colorScheme,
-                ),
-                const SizedBox(height: 8),
-                // 元信息行
-                Row(
-                  children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 14,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        name_utils.getShowName(topicHistory!.author ?? ''),
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            padding: EdgeInsets.fromLTRB(16, 16, trailing == null ? 16 : 4, 16),
+            child: trailing == null
+                ? content
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: content),
+                      trailing!,
+                    ],
+                  ),
           ),
         ),
         Divider(

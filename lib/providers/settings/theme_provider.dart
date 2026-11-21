@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/core/app_preferences.dart';
+import 'package:flutter_nga/utils/dynamic_color_service.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
 const String _keySeedColorValue = PrefsKeys.seedColorValue;
+const String _keyUseDynamicColor = PrefsKeys.useDynamicColor;
 
 /// 预设主题色列表
 class ThemeColors {
@@ -41,9 +43,25 @@ class ThemeColors {
 class ThemeState {
   final AdaptiveThemeMode? mode;
   final Color seedColor;
+  final bool useDynamicColor;
+  final Color? dynamicSeedColor;
 
-  ThemeState({this.mode, Color? seedColor})
-    : seedColor = seedColor ?? ThemeColors.defaultColor;
+  ThemeState({
+    this.mode,
+    Color? seedColor,
+    this.useDynamicColor = false,
+    this.dynamicSeedColor,
+  }) : seedColor = seedColor ?? ThemeColors.defaultColor;
+
+  /// 当前平台是否提供系统动态强调色
+  bool get isDynamicColorAvailable => dynamicSeedColor != null;
+
+  /// 动态配色已开启且平台返回了有效强调色
+  bool get isDynamicColorActive => useDynamicColor && dynamicSeedColor != null;
+
+  /// 实际生效的主题种子色
+  Color get effectiveSeedColor =>
+      isDynamicColorActive ? dynamicSeedColor! : seedColor;
 
   String get modeName {
     switch (mode) {
@@ -52,9 +70,8 @@ class ThemeState {
       case AdaptiveThemeMode.dark:
         return "暗色主题";
       case AdaptiveThemeMode.system:
+      case null:
         return "跟随系统";
-      default:
-        return "亮色主题";
     }
   }
 
@@ -66,10 +83,20 @@ class ThemeState {
     return "自定义";
   }
 
-  ThemeState copyWith({AdaptiveThemeMode? mode, Color? seedColor}) {
+  /// 当前颜色方案展示名（动态配色优先）
+  String get colorDisplayName => isDynamicColorActive ? "动态配色" : seedColorName;
+
+  ThemeState copyWith({
+    AdaptiveThemeMode? mode,
+    Color? seedColor,
+    bool? useDynamicColor,
+    Color? dynamicSeedColor,
+  }) {
     return ThemeState(
       mode: mode ?? this.mode,
       seedColor: seedColor ?? this.seedColor,
+      useDynamicColor: useDynamicColor ?? this.useDynamicColor,
+      dynamicSeedColor: dynamicSeedColor ?? this.dynamicSeedColor,
     );
   }
 }
@@ -84,14 +111,21 @@ class ThemeNotifier extends Notifier<ThemeState> {
   @override
   ThemeState build() => _initialState ?? ThemeState();
 
-  /// 读取已保存的主题模式与主题色，可在 `runApp` 前调用。
+  /// 读取已保存的主题模式、主题色与系统动态配色，可在 `runApp` 前调用。
   static Future<ThemeState> loadSaved() async {
     // 先取 AppPreferences：它会等待旧版设置迁移完成（含 adaptive_theme 的
     // 亮/暗模式），再读主题模式才不会读到迁移前的空值。
     final prefs = await AppPreferences.instance();
     final mode = await AdaptiveTheme.getThemeMode();
     final seedColor = seedColorFromValue(prefs.getInt(_keySeedColorValue));
-    return ThemeState(mode: mode, seedColor: seedColor);
+    final useDynamicColor = prefs.getBool(_keyUseDynamicColor) ?? false;
+    final dynamicSeedColor = await DynamicColorService.getSystemAccentColor();
+    return ThemeState(
+      mode: mode,
+      seedColor: seedColor,
+      useDynamicColor: useDynamicColor,
+      dynamicSeedColor: dynamicSeedColor,
+    );
   }
 
   /// 把保存的 ARGB 值还原为颜色。
@@ -110,12 +144,20 @@ class ThemeNotifier extends Notifier<ThemeState> {
 
   Future<void> refresh() async {
     final saved = await loadSaved();
-    state = state.copyWith(mode: saved.mode, seedColor: saved.seedColor);
+    state = saved;
   }
 
   void update(BuildContext context, AdaptiveThemeMode adaptiveThemeMode) {
     AdaptiveTheme.of(context).setThemeMode(adaptiveThemeMode);
     state = state.copyWith(mode: adaptiveThemeMode);
+  }
+
+  Future<void> setUseDynamicColor(BuildContext context, bool enabled) async {
+    final adaptiveTheme = AdaptiveTheme.of(context);
+    final prefs = await AppPreferences.instance();
+    await prefs.setBool(_keyUseDynamicColor, enabled);
+    state = state.copyWith(useDynamicColor: enabled);
+    _applyThemeWithRef(adaptiveTheme, state);
   }
 
   Future<void> setSeedColor(BuildContext context, Color color) async {
@@ -124,19 +166,22 @@ class ThemeNotifier extends Notifier<ThemeState> {
 
     final prefs = await AppPreferences.instance();
     await prefs.setInt(_keySeedColorValue, color.toARGB32());
-    state = state.copyWith(seedColor: color);
+    await prefs.setBool(_keyUseDynamicColor, false);
+    state = state.copyWith(seedColor: color, useDynamicColor: false);
 
     // Apply theme using AdaptiveTheme API
-    _applyThemeWithRef(adaptiveTheme, color);
+    _applyThemeWithRef(adaptiveTheme, state);
   }
 
   void _applyThemeWithRef(
     AdaptiveThemeManager<ThemeData> adaptiveTheme,
-    Color seedColor,
+    ThemeState next,
   ) {
+    final seed = next.effectiveSeedColor;
+    final isDynamic = next.isDynamicColorActive;
     adaptiveTheme.setTheme(
-      light: ThemeBuilder.buildLightTheme(seedColor),
-      dark: ThemeBuilder.buildDarkTheme(seedColor),
+      light: ThemeBuilder.buildLightTheme(seed, isDynamic: isDynamic),
+      dark: ThemeBuilder.buildDarkTheme(seed, isDynamic: isDynamic),
     );
   }
 }

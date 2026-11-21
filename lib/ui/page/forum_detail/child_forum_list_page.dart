@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
-import 'package:flutter_nga/utils/dimen.dart';
 
 import 'child_forum_item_widget.dart';
 
@@ -17,27 +17,18 @@ class ChildForumListPage extends StatefulWidget {
 class _ChildForumListPage extends State<ChildForumListPage> {
   @override
   Widget build(BuildContext context) {
+    final subForums = widget.forumInfo?.subForums;
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: widget.forumInfo == null || widget.forumInfo!.subForums!.isEmpty
-          ? Center(
-              child: Text(
-                "暂无子版块",
-                style: TextStyle(
-                  fontSize: Dimen.titleMedium,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
+      child: subForums == null || subForums.isEmpty
+          ? const ListStatusView(icon: Icons.forum_outlined, message: '暂无子版块')
           : ReadableListPadding(
               builder: (context, padding) => ListView.builder(
                 padding: padding,
-                itemCount: widget.forumInfo == null
-                    ? 0
-                    : widget.forumInfo!.subForums!.length,
+                itemCount: subForums.length,
                 itemBuilder: (_, index) =>
-                    ChildForumItemWidget(widget.forumInfo!.subForums![index]),
+                    ChildForumItemWidget(subForums[index]),
               ),
             ),
     );

@@ -35,7 +35,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('PrefsKeys.all covers every legacy setting', () {
-    expect(PrefsKeys.all, _legacySettings.keys.toSet());
+    expect(PrefsKeys.all, containsAll(_legacySettings.keys));
   });
 
   test('adaptive theme key matches AdaptiveTheme.prefKey', () {
@@ -104,7 +104,7 @@ void main() {
     final keys = await SharedPreferencesAsync().getKeys();
     expect(keys, isNot(contains('some_plugin_value')));
     expect(keys, isNot(contains('some_plugin_list')));
-    expect(keys, containsAll(PrefsKeys.all));
+    expect(keys, containsAll(_legacySettings.keys));
   });
 
   test(

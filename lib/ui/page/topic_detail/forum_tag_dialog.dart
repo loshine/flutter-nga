@@ -2,8 +2,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/providers/forum/forum_tag_list_provider.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 
 typedef TagSelectedCallback = void Function(String tag);
@@ -16,11 +16,36 @@ class ForumTagDialog extends HookConsumerWidget {
     this.tagList = const [],
     this.onSelected,
     this.onLoadComplete,
+    this.embedded = false,
   });
+
   final int fid;
   final List<TopicTag> tagList;
   final TagSelectedCallback? onSelected;
   final TagLoadCompleteCallback? onLoadComplete;
+  final bool embedded;
+
+  static Future<void> show(
+    BuildContext context, {
+    required int fid,
+    List<TopicTag> tagList = const [],
+    TagSelectedCallback? onSelected,
+    TagLoadCompleteCallback? onLoadComplete,
+  }) {
+    return showM3SelectionSheet<void>(
+      context: context,
+      builder: (sheetContext) => ForumTagDialog(
+        fid: fid,
+        tagList: tagList,
+        embedded: true,
+        onSelected: (tag) {
+          onSelected?.call(tag);
+          Navigator.of(sheetContext).pop();
+        },
+        onLoadComplete: onLoadComplete,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,36 +66,73 @@ class ForumTagDialog extends HookConsumerWidget {
     }, [fid]);
 
     final tags = ref.watch(forumTagListProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    return AlertDialog(
-      title: Text("主题分类"),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: tags.length,
-          itemBuilder: (context, position) {
-            final tag = tags[position].content;
-            return InkWell(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  tag,
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                    fontSize: Dimen.titleMedium,
-                  ),
+    final content = tags.isEmpty
+        ? Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text(
+                '暂无可用主题分类',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
-              onTap: () {
-                if (onSelected != null) {
-                  onSelected!(tag);
-                }
-              },
-            );
-          },
+            ),
+          )
+        : Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final tag in tags)
+                ActionChip(
+                  label: Text(tag.content),
+                  onPressed: () => onSelected?.call(tag.content),
+                ),
+            ],
+          );
+
+    if (embedded) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '主题分类',
+              style: textTheme.headlineSmall?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Flexible(child: SingleChildScrollView(child: content)),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('关闭'),
+                ),
+              ],
+            ),
+          ],
         ),
-      ),
+      );
+    }
+
+    return M3Dialog(
+      title: '主题分类',
+      scrollable: true,
+      content: content,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('关闭'),
+        ),
+      ],
     );
   }
 }

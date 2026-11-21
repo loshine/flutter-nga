@@ -89,18 +89,21 @@ class ForumGroupTabsPage extends HookConsumerWidget {
       return () => signal.removeListener(listener);
     }, [scrollToTop, tabSignals, tabController]);
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: AppBar(
-          bottom: TabBar(
+    return Column(
+      children: [
+        Material(
+          color: Theme.of(context).colorScheme.surface,
+          child: TabBar(
             controller: tabController,
             isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: tabs,
           ),
         ),
-      ),
-      body: TabBarView(controller: tabController, children: tabBarViews),
+        Expanded(
+          child: TabBarView(controller: tabController, children: tabBarViews),
+        ),
+      ],
     );
   }
 }
