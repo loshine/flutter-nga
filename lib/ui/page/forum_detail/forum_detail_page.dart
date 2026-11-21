@@ -92,16 +92,11 @@ class ForumDetailPage extends HookConsumerWidget {
           onTap: () => tabSignals[tabController.index].fire(),
           child: Text(name!),
         ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(56),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: TabBar(
-              controller: tabController,
-              tabs: _tabs,
-              isScrollable: true,
-            ),
-          ),
+        bottom: TabBar(
+          controller: tabController,
+          tabs: _tabs,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
         ),
         actions: [
           ForumFavouriteButtonWidget(fid: fid, name: name, type: type),

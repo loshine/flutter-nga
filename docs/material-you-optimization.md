@@ -15,7 +15,7 @@
   - 首次安装默认主题模式改为 `AdaptiveThemeMode.system`（跟随系统深浅色），保留已保存的用户设置。
   - 优化 `ThemeBuilder`：经典棕色主题保持暗金辅色，动态配色与其他种子色保留 M3 原生和谐 `secondary` 色阶；新增 `buildHighContrastLightTheme` / `buildHighContrastDarkTheme`（`contrastLevel: 1.0`）并接入 `MaterialApp.router`。
 
-- [ ] **P0-3 首页导航栏未读角标、大屏展开态与 TabBar 层级整理**
+- [x] **P0-3 首页导航栏未读角标、大屏展开态与 TabBar 层级整理**
   - `NavigationBarThemeData` 背景色改为 `colorScheme.surfaceContainer`，与正文 `surface` 形成清晰色调分离。
   - 首页底部 `NavigationBar` 与侧边 `NavigationRail` 的「我的」目的地增加聚合未读 `Badge.count`，并在首页启动/账号切换时同步刷新未读数。
   - 宽屏（≥ 840dp，M3 Expanded 断点）支持 `NavigationRail(extended: true)` 并将 FAB 放入 `NavigationRail.leading`。

@@ -18,6 +18,9 @@ class UnreadCounts {
   /// 短消息
   final int messages;
 
+  /// 总未读数，用于首页底部/侧边导航栏聚合角标
+  int get total => notifications + messages;
+
   static const none = UnreadCounts();
 
   factory UnreadCounts.fromInfo(NotificationInfo info, {required int uid}) {
