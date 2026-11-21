@@ -9,7 +9,7 @@
 - [x] **P0-1 Android 原生预测性返回手势（Predictive Back）**
   - 在 `android/app/src/main/AndroidManifest.xml` 的 `<application>` 启用 `android:enableOnBackInvokedCallback="true"`，使 `ThemeBuilder` 中已配置的 `PredictiveBackPageTransitionsBuilder` 在 Android 13–15 上真正生效。
 
-- [ ] **P0-2 系统动态取色、默认跟随系统与高对比度主题**
+- [x] **P0-2 系统动态取色、默认跟随系统与高对比度主题**
   - 通过原生 `MethodChannel` 读取 Android 12+ 系统壁纸动态主色（`system_accent1_500`）与 macOS 系统强调色（`controlAccentColor`），零外部插件依赖、兼容 AGP 9 与 SPM。
   - 在 `PrefsKeys` 新增 `useDynamicColor`，支持在主题设置中开启/关闭动态配色。
   - 首次安装默认主题模式改为 `AdaptiveThemeMode.system`（跟随系统深浅色），保留已保存的用户设置。

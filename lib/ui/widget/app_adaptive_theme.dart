@@ -20,11 +20,16 @@ class AppAdaptiveTheme extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final seedColor = ref.watch(themeProvider.select((s) => s.seedColor));
+    final seedColor = ref.watch(
+      themeProvider.select((s) => s.effectiveSeedColor),
+    );
+    final isDynamic = ref.watch(
+      themeProvider.select((s) => s.isDynamicColorActive),
+    );
     return AdaptiveTheme(
-      light: ThemeBuilder.buildLightTheme(seedColor),
-      dark: ThemeBuilder.buildDarkTheme(seedColor),
-      initial: initialMode ?? AdaptiveThemeMode.light,
+      light: ThemeBuilder.buildLightTheme(seedColor, isDynamic: isDynamic),
+      dark: ThemeBuilder.buildDarkTheme(seedColor, isDynamic: isDynamic),
+      initial: initialMode ?? AdaptiveThemeMode.system,
       builder: builder,
     );
   }

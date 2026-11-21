@@ -8,26 +8,27 @@ class ThemeBuilder {
   // 经典暗金/琥珀色：与棕色 primary 完美协调，更贴近 NGA 的经典质感，同时提供足够的亮度。
   static const _secondarySeed = Color(0xFFDCA965);
 
-  static Color getSecondaryForSeed(Color seed) {
-    if (seed == Colors.brown) return const Color(0xFFDCA965);
-    if (seed == Colors.blue) return Colors.lightBlue;
-    if (seed == Colors.teal) return Colors.cyan;
-    if (seed == Colors.green) return Colors.lightGreen;
-    if (seed == Colors.purple) return Colors.deepPurpleAccent;
-    if (seed == Colors.pink) return Colors.purpleAccent;
-    if (seed == Colors.orange) return Colors.amber;
-    if (seed == Colors.red) return Colors.deepOrange;
-    if (seed == Colors.indigo) return Colors.blueAccent;
-    if (seed == Colors.cyan) return Colors.lightBlueAccent;
-    return _secondarySeed;
+  /// 仅为经典棕色主题提供暗金辅色；其他预设与系统动态配色保留 M3 原生和谐的
+  /// tonal secondary 色阶，避免选中胶囊与 primaryContainer 争夺焦点。
+  static Color? getSecondaryForSeed(Color seed, {bool isDynamic = false}) {
+    if (isDynamic) return null;
+    if (seed == Colors.brown) return _secondarySeed;
+    return null;
   }
 
   /// 从 ColorScheme 构建 ThemeData
   static ThemeData buildTheme(
     ColorScheme baseColorScheme, [
     Color? secondarySeed,
+    double contrastLevel = 0.0,
   ]) {
-    final colorScheme = _withRefinedSecondary(baseColorScheme, secondarySeed);
+    final colorScheme = secondarySeed == null
+        ? baseColorScheme
+        : _withRefinedSecondary(
+            baseColorScheme,
+            secondarySeed,
+            contrastLevel: contrastLevel,
+          );
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -163,13 +164,14 @@ class ThemeBuilder {
   }
 
   static ColorScheme _withRefinedSecondary(
-    ColorScheme base, [
-    Color? secondarySeed,
-  ]) {
-    final seed = secondarySeed ?? _secondarySeed;
+    ColorScheme base,
+    Color secondarySeed, {
+    double contrastLevel = 0.0,
+  }) {
     final accent = ColorScheme.fromSeed(
-      seedColor: seed,
+      seedColor: secondarySeed,
       brightness: base.brightness,
+      contrastLevel: contrastLevel,
     );
     return base.copyWith(
       secondary: accent.primary,
@@ -184,20 +186,54 @@ class ThemeBuilder {
   }
 
   /// 从种子色构建亮色主题
-  static ThemeData buildLightTheme(Color seedColor) {
+  static ThemeData buildLightTheme(
+    Color seedColor, {
+    bool isDynamic = false,
+    double contrastLevel = 0.0,
+  }) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.light,
+      contrastLevel: contrastLevel,
     );
-    return buildTheme(colorScheme, getSecondaryForSeed(seedColor));
+    return buildTheme(
+      colorScheme,
+      getSecondaryForSeed(seedColor, isDynamic: isDynamic),
+      contrastLevel,
+    );
   }
 
   /// 从种子色构建暗色主题
-  static ThemeData buildDarkTheme(Color seedColor) {
+  static ThemeData buildDarkTheme(
+    Color seedColor, {
+    bool isDynamic = false,
+    double contrastLevel = 0.0,
+  }) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.dark,
+      contrastLevel: contrastLevel,
     );
-    return buildTheme(colorScheme, getSecondaryForSeed(seedColor));
+    return buildTheme(
+      colorScheme,
+      getSecondaryForSeed(seedColor, isDynamic: isDynamic),
+      contrastLevel,
+    );
+  }
+
+  /// 高对比度亮色主题（响应系统高对比度无障碍设置）
+  static ThemeData buildHighContrastLightTheme(
+    Color seedColor, {
+    bool isDynamic = false,
+  }) {
+    return buildLightTheme(seedColor, isDynamic: isDynamic, contrastLevel: 1.0);
+  }
+
+  /// 高对比度暗色主题（响应系统高对比度无障碍设置）
+  static ThemeData buildHighContrastDarkTheme(
+    Color seedColor, {
+    bool isDynamic = false,
+  }) {
+    return buildDarkTheme(seedColor, isDynamic: isDynamic, contrastLevel: 1.0);
   }
 }

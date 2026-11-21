@@ -11,11 +11,13 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/ui/widget/app_adaptive_theme.dart';
 import 'package:flutter_nga/ui/widget/legacy_theme_bridge.dart';
 import 'package:flutter_nga/ui/widget/simple_scroll_behavior.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/route_observer.dart';
+import 'package:flutter_nga/utils/theme_builder.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   final AdaptiveThemeMode? savedThemeMode;
@@ -54,6 +56,12 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final seedColor = ref.watch(
+      themeProvider.select((s) => s.effectiveSeedColor),
+    );
+    final isDynamic = ref.watch(
+      themeProvider.select((s) => s.isDynamicColorActive),
+    );
     return AppAdaptiveTheme(
       initialMode: widget.savedThemeMode,
       builder: (theme, darkTheme) {
@@ -90,6 +98,14 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
           },
           theme: theme,
           darkTheme: darkTheme,
+          highContrastTheme: ThemeBuilder.buildHighContrastLightTheme(
+            seedColor,
+            isDynamic: isDynamic,
+          ),
+          highContrastDarkTheme: ThemeBuilder.buildHighContrastDarkTheme(
+            seedColor,
+            isDynamic: isDynamic,
+          ),
           localizationsDelegates: [
             GlobalWidgetsLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
