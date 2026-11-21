@@ -52,7 +52,7 @@
 - [x] **P2-1 搜索页升级为 M3 SearchBar 风格与 SegmentedButton**
   - `SearchPage` 进入自动聚焦，消除框内与 AppBar 双重搜索图标冗余；将互斥单选项（搜索类型、搜索范围、搜索方式）从 `ChoiceChip` 升级为 `SegmentedButton`。
 
-- [ ] **P2-2 沉浸式图片预览页**
+- [x] **P2-2 沉浸式图片预览页**
   - `PhotoPreviewPage` 改为纯黑沉浸背景 + 渐变半透明悬浮顶栏（`extendBodyBehindAppBar: true`），支持点击显隐工具栏与标准 Material 下载图标。
 
 - [ ] **P2-3 动效适配系统减弱动画设置与微交互完善**
