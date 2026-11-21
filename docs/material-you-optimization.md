@@ -49,7 +49,7 @@
 
 ### P2：细节打磨与无障碍完善
 
-- [ ] **P2-1 搜索页升级为 M3 SearchBar 风格与 SegmentedButton**
+- [x] **P2-1 搜索页升级为 M3 SearchBar 风格与 SegmentedButton**
   - `SearchPage` 进入自动聚焦，消除框内与 AppBar 双重搜索图标冗余；将互斥单选项（搜索类型、搜索范围、搜索方式）从 `ChoiceChip` 升级为 `SegmentedButton`。
 
 - [ ] **P2-2 沉浸式图片预览页**
