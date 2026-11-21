@@ -38,7 +38,7 @@
   - 抽象通用 `M3SettingsGroup` / `M3SettingsTile` / `M3SettingsSwitchTile` / `M3SettingsInfoTile`（`surfaceContainerLow` 圆角分组卡片 + 组内细分割线）。
   - 统一重构 `SettingsPage`（主题设置副标题与尾部显示当前主题色预览）、`MinePage`、`InterfaceSettingsPage`（增加顶部**实时排版预览卡片**与 Slider 数值气泡）、`BlocklistSettingsPage` 与 `AboutPage`（使用真实应用图标 `images/launcher/icon_1024.png`，开源协议接入 `showLicensePage`）。
 
-- [ ] **P1-3 统一确认对话框与响应式 Modal Bottom Sheet 选择面板**
+- [x] **P1-3 统一确认对话框与响应式 Modal Bottom Sheet 选择面板**
   - 抽象 `showM3SelectionSheet`：窄屏（< 600dp）使用 `showModalBottomSheet(showDragHandle: true)` 便于单手操作，宽屏自动切换为居中 M3 `Dialog`。
   - 升级 `ThemeSelectionDialog`（新增动态配色开关、M3 三色调色盘色块、`InkResponse` 48dp 触控区与读屏语义）、`LineHeightSelectionDialog`、`BlockModeSelectionDialog`、`BaseUrlSelectionDialog`、`UserAgentSelectionDialog`、`ForumTagDialog`；清理绕过封装的 `ScaffoldMessenger.showSnackBar`。
   - 其余确认/输入弹窗（`FavouriteForumGroupPage`、`NotificationListPage`、`ConversationDetailPage`、`PublishPage`、`BlocklistEditDialog`、`ContactEditDialog`）统一改为 `M3ConfirmDialog` / `M3Dialog`，消除泛泛的「提示」标题。

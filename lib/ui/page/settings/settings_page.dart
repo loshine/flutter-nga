@@ -59,19 +59,13 @@ class SettingsPage extends HookConsumerWidget {
                   icon: Icons.dns_outlined,
                   title: "服务器设置",
                   subtitle: "当前: ${baseUrlState.currentConfig.name}",
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (_) => const BaseUrlSelectionDialog(),
-                  ),
+                  onTap: () => BaseUrlSelectionDialog.show(context),
                 ),
                 M3SettingsTile(
                   icon: Icons.devices_outlined,
                   title: "User-Agent 设置",
                   subtitle: "当前: ${userAgentState.currentConfig.name}",
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (_) => const UserAgentSelectionDialog(),
-                  ),
+                  onTap: () => UserAgentSelectionDialog.show(context),
                 ),
               ],
             ),
@@ -95,10 +89,7 @@ class SettingsPage extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (_) => const ThemeSelectionDialog(),
-                  ),
+                  onTap: () => ThemeSelectionDialog.show(context),
                 ),
                 M3SettingsTile(
                   icon: Icons.text_fields,

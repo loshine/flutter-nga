@@ -77,10 +77,7 @@ class BlocklistSettingsPage extends HookConsumerWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (_) => const BlockModeSelectionDialog(),
-                  ),
+                  onTap: () => BlockModeSelectionDialog.show(context),
                 ),
                 M3SettingsTile(
                   icon: Icons.person_off_outlined,

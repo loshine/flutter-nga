@@ -75,10 +75,7 @@ class InterfaceSettingsPage extends ConsumerWidget {
   }
 
   void _showLineHeightSelectionDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => const LineHeightSelectionDialog(),
-    );
+    LineHeightSelectionDialog.show(context);
   }
 }
 

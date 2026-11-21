@@ -8,12 +8,12 @@ import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/motion.dart';
-import 'package:flutter_nga/utils/route.dart';
 
 enum _BottomPanel { emoticon, font, attachment }
 
@@ -170,21 +170,16 @@ class PublishPage extends HookWidget {
     }
 
     void showTagDialog() {
-      showDialog(
-        context: context,
-        builder: (dialogContext) {
-          return ForumTagDialog(
-            fid: fid!,
-            tagList: tagList.value,
-            onSelected: (tag) {
-              if (!selectedTags.value.contains(tag)) {
-                selectedTags.value = [...selectedTags.value, tag];
-              }
-              Routes.pop(dialogContext);
-            },
-            onLoadComplete: (list) => tagList.value = list,
-          );
+      ForumTagDialog.show(
+        context,
+        fid: fid!,
+        tagList: tagList.value,
+        onSelected: (tag) {
+          if (!selectedTags.value.contains(tag)) {
+            selectedTags.value = [...selectedTags.value, tag];
+          }
         },
+        onLoadComplete: (list) => tagList.value = list,
       );
     }
 
@@ -239,22 +234,12 @@ class PublishPage extends HookWidget {
     Future<void> confirmDiscard() async {
       final discard = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text("放弃编辑？"),
-          content: const Text("已输入的内容不会保存。"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text("继续编辑"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(dialogContext).colorScheme.error,
-              ),
-              child: const Text("放弃"),
-            ),
-          ],
+        builder: (_) => const M3ConfirmDialog(
+          title: '放弃编辑？',
+          content: '已输入的内容不会保存。',
+          cancelText: '继续编辑',
+          confirmText: '放弃',
+          destructive: true,
         ),
       );
       // Navigator.pop 不经过 PopScope 拦截，直接关闭页面。
