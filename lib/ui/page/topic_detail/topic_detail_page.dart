@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -197,9 +196,7 @@ class TopicDetailPage extends HookConsumerWidget {
             IconButton(
               tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
               icon: Icon(
-                isDark
-                    ? CommunityMaterialIcons.weather_sunny
-                    : CommunityMaterialIcons.weather_night,
+                isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
               ),
               onPressed: () => ref
                   .read(themeProvider.notifier)
@@ -211,8 +208,11 @@ class TopicDetailPage extends HookConsumerWidget {
             IconButton(
               tooltip: favourited ? '取消收藏' : '收藏',
               isSelected: favourited,
-              icon: Icon(CommunityMaterialIcons.heart_outline),
-              selectedIcon: Icon(CommunityMaterialIcons.heart),
+              icon: const Icon(Icons.favorite_border),
+              selectedIcon: Icon(
+                Icons.favorite,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               onPressed: state.favouriteBusy
                   ? null
                   : () {
@@ -230,7 +230,7 @@ class TopicDetailPage extends HookConsumerWidget {
             const SizedBox(width: 4),
             IconButton.filledTonal(
               tooltip: '回复',
-              icon: Icon(CommunityMaterialIcons.comment_outline),
+              icon: const Icon(Icons.chat_bubble_outline),
               onPressed: () {
                 if (fid == null && state.topic == null) return;
                 Routes.navigateTo(

@@ -59,7 +59,7 @@
   - `Motion` 新增 `Motion.resolveDuration(context, duration)` 尊重 `MediaQuery.disableAnimationsOf(context)`。
   - 优化 `MinePage` 过长的 700ms 错峰位移入场动画，为 `ForumDetailPage` FAB 补齐缩放淡入动效，扩展 `AppHaptics` 覆盖收藏/发布等关键操作，整理 `EasyRefresh` 默认头尾配置位置。
 
-- [ ] **P2-4 统一 Material 图标风格、触控热区、空状态与排版 Token**
+- [x] **P2-4 统一 Material 图标风格、触控热区、空状态与排版 Token**
   - 用原生 Material Icons 替换常用位置的旧版 `CommunityMaterialIcons`（日夜切换、收藏、评论、点赞/点踩、保存等）。
   - 提升小触控区交互：`HotRepliesSection` `[原帖]` 改用 `TextButton`、`UserInfoPage` 个人版面/管理版块改用 `ActionChip`；补全缺失的 `tooltip` 与收藏高亮态。
   - 为 `ChildForumListPage`、`AccountManagementPage` 空列表接入 `ListStatusView`；将 `TopicReplyItemWidget`、`TopicHistoryListPage` 等处的硬编码 `TextStyle(fontSize: ...)` 改为从 `textTheme` 派生。

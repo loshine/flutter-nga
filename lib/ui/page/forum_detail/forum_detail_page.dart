@@ -102,6 +102,7 @@ class ForumDetailPage extends HookConsumerWidget {
         actions: [
           ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
           IconButton(
+            tooltip: '搜索',
             icon: const Icon(Icons.search),
             onPressed: () =>
                 Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),

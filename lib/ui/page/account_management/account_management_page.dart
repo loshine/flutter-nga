@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/user/account_list_provider.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -43,11 +44,13 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("账号管理"),
+        title: const Text("账号管理"),
         actions: [
           IconButton(
-            onPressed: () => _confirmQuitAll(notifier),
-            icon: Icon(Icons.delete_forever),
+            onPressed: state.list.isEmpty
+                ? null
+                : () => _confirmQuitAll(notifier),
+            icon: const Icon(Icons.delete_forever),
             tooltip: "退出所有账号",
           ),
         ],
@@ -55,21 +58,35 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
       body: EasyRefresh(
         controller: _refreshController,
         onRefresh: onRefresh,
-        child: ReadableListPadding(
-          builder: (context, padding) => ListView.builder(
-            padding: padding,
-            itemCount: state.list.length,
-            itemBuilder: (context, position) {
-              final user = state.list[position];
-              return _AccountItem(
-                key: ValueKey(user.uid),
-                user: user,
-                onSetDefault: () => _setDefault(notifier, user),
-                onDelete: () => _confirmDelete(notifier, state.list, user),
-              );
-            },
-          ),
-        ),
+        child: state.list.isEmpty
+            ? const CustomScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: ListStatusView(
+                      icon: Icons.person_outline,
+                      message: '暂未登录账号',
+                    ),
+                  ),
+                ],
+              )
+            : ReadableListPadding(
+                builder: (context, padding) => ListView.builder(
+                  padding: padding,
+                  itemCount: state.list.length,
+                  itemBuilder: (context, position) {
+                    final user = state.list[position];
+                    return _AccountItem(
+                      key: ValueKey(user.uid),
+                      user: user,
+                      onSetDefault: () => _setDefault(notifier, user),
+                      onDelete: () =>
+                          _confirmDelete(notifier, state.list, user),
+                    );
+                  },
+                ),
+              ),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: "添加账号",
