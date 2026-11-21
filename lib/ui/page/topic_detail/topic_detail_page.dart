@@ -154,37 +154,32 @@ class TopicDetailPage extends HookConsumerWidget {
             ),
             Tooltip(
               message: '跳转页码',
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => TopicPageSelectDialog(
-                      currentPage: state.currentPage,
-                      maxPage: state.maxPage,
-                      maxFloor: state.maxFloor,
-                      pageSelectedCallback: (isPage, target) {
-                        final index = isPage
-                            ? target - 1
-                            : (target / 20 - 1).ceil();
-                        goToPage(
-                          index.clamp(0, tabController.length - 1).toInt(),
-                        );
-                      },
-                    ),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+                onPressed: () {
+                  TopicPageSelectDialog.show(
+                    context,
+                    currentPage: state.currentPage,
+                    maxPage: state.maxPage,
+                    maxFloor: state.maxFloor,
+                    pageSelectedCallback: (isPage, target) {
+                      final index = isPage
+                          ? target - 1
+                          : (target / 20 - 1).ceil();
+                      goToPage(
+                        index.clamp(0, tabController.length - 1).toInt(),
+                      );
+                    },
                   );
                 },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    "${state.currentPage}/${state.maxPage}",
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                child: Text(
+                  "${state.currentPage}/${state.maxPage}",
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -230,7 +225,8 @@ class TopicDetailPage extends HookConsumerWidget {
                           });
                     },
             ),
-            IconButton(
+            const SizedBox(width: 4),
+            IconButton.filledTonal(
               tooltip: '回复',
               icon: Icon(CommunityMaterialIcons.comment_outline),
               onPressed: () {

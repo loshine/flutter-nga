@@ -43,7 +43,7 @@
   - 升级 `ThemeSelectionDialog`（新增动态配色开关、M3 三色调色盘色块、`InkResponse` 48dp 触控区与读屏语义）、`LineHeightSelectionDialog`、`BlockModeSelectionDialog`、`BaseUrlSelectionDialog`、`UserAgentSelectionDialog`、`ForumTagDialog`；清理绕过封装的 `ScaffoldMessenger.showSnackBar`。
   - 其余确认/输入弹窗（`FavouriteForumGroupPage`、`NotificationListPage`、`ConversationDetailPage`、`PublishPage`、`BlocklistEditDialog`、`ContactEditDialog`）统一改为 `M3ConfirmDialog` / `M3Dialog`，消除泛泛的「提示」标题。
 
-- [ ] **P1-4 帖子详情页底栏主操作层级与页码/楼层精准跳转**
+- [x] **P1-4 帖子详情页底栏主操作层级与页码/楼层精准跳转**
   - `TopicDetailPage` 底栏将「回复」升级为强调态主操作（`IconButton.filledTonal`），页码指示改为标准 `TextButton`（保证 48dp 触控高度）。
   - `TopicPageSelectDialog` 升级为响应式 Bottom Sheet / Dialog：补全 `Slider` 气泡标签、`max == 1` 安全处理、新增 +/- 步进按钮与数字直输框，便于高楼帖精准跳转。
 
