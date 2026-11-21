@@ -87,6 +87,33 @@ void main() {
       ),
     );
   });
+
+  test(
+    'configures M3 slider, progress indicator, switch, and snackbar themes',
+    () {
+      final theme = ThemeBuilder.buildLightTheme(Colors.brown);
+
+      expect(theme.sliderTheme.trackShape, isA<GappedSliderTrackShape>());
+      expect(theme.sliderTheme.thumbShape, isA<HandleThumbShape>());
+      expect(theme.sliderTheme.showValueIndicator, ShowValueIndicator.onDrag);
+
+      expect(theme.progressIndicatorTheme.strokeCap, StrokeCap.round);
+      expect(theme.progressIndicatorTheme.trackGap, 4);
+
+      final selectedIcon = theme.switchTheme.thumbIcon?.resolve({
+        WidgetState.selected,
+      });
+      final unselectedIcon = theme.switchTheme.thumbIcon?.resolve({});
+      expect(selectedIcon?.icon, Icons.check);
+      expect(unselectedIcon?.icon, Icons.close);
+
+      expect(theme.snackBarTheme.behavior, SnackBarBehavior.floating);
+      expect(
+        theme.snackBarTheme.backgroundColor,
+        theme.colorScheme.inverseSurface,
+      );
+    },
+  );
 }
 
 double _contrastRatio(Color first, Color second) {

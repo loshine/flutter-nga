@@ -31,7 +31,7 @@
 
 ### P1：视觉语言与交互模式统一
 
-- [ ] **P1-1 启用 M3 新版控件主题（Slider、ProgressIndicator、Switch、SnackBar）**
+- [x] **P1-1 启用 M3 新版控件主题（Slider、ProgressIndicator、Switch、SnackBar）**
   - 在 `ThemeBuilder` 配置非弃用的 2024 M3 `SliderThemeData`（`GappedSliderTrackShape`、`HandleThumbShape`、轨道间隙）、`ProgressIndicatorThemeData`（圆角端点、轨道间隙与停顿点）、`SwitchThemeData`（`thumbIcon` ✓/✕）、`SnackBarThemeData`（floating 圆角与 `inverseSurface`）。
 
 - [ ] **P1-2 统一 M3 分组设置卡片组件并升级个人/设置/关于页**

@@ -160,6 +160,50 @@ class ThemeBuilder {
           color: colorScheme.onSurfaceVariant,
         ),
       ),
+      // M3 2024+ Slider 样式：垂直手柄 + 轨道间隙 + 拖动数值气泡
+      sliderTheme: SliderThemeData(
+        trackHeight: 16,
+        trackGap: 6,
+        trackShape: const GappedSliderTrackShape(),
+        thumbShape: const HandleThumbShape(),
+        valueIndicatorShape: const RoundedRectSliderValueIndicatorShape(),
+        showValueIndicator: ShowValueIndicator.onDrag,
+        activeTrackColor: colorScheme.primary,
+        inactiveTrackColor: colorScheme.secondaryContainer,
+        thumbColor: colorScheme.primary,
+        valueIndicatorColor: colorScheme.inverseSurface,
+        valueIndicatorTextStyle: TextStyle(
+          color: colorScheme.onInverseSurface,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      // M3 2024+ 进度条样式：圆角端点、轨道间隙与停顿点
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: colorScheme.primary,
+        linearTrackColor: colorScheme.secondaryContainer,
+        circularTrackColor: colorScheme.secondaryContainer,
+        stopIndicatorColor: colorScheme.primary,
+        strokeCap: StrokeCap.round,
+        trackGap: 4,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      // M3 Switch：选中/未选中滑块图标，提升辨识度与色弱友好度
+      switchTheme: SwitchThemeData(
+        thumbIcon: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const Icon(Icons.check);
+          }
+          return const Icon(Icons.close);
+        }),
+      ),
+      // M3 SnackBar：悬浮圆角 + inverseSurface 色阶
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: colorScheme.inverseSurface,
+        contentTextStyle: TextStyle(color: colorScheme.onInverseSurface),
+        actionTextColor: colorScheme.inversePrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
