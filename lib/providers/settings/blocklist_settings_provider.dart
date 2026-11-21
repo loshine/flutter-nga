@@ -5,10 +5,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_nga/data/core/app_preferences.dart';
-import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/block.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
+import 'package:flutter_nga/providers/core/repository_providers.dart';
 
 enum BlockMode { COLLAPSE, PAINT, ALPHA, DELETE_LINE, GONE }
 
@@ -70,9 +70,49 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   Timer? _syncTimer;
   final _pendingUsers = <String, int>{};
   final _pendingWords = <String, int>{};
+  final _queuedUserCommits = <String, int>{};
+  final _queuedWordCommits = <String, int>{};
+  Future<void> _writeTail = Future<void>.value();
 
   bool get hasPendingUserDeletion => _pendingUsers.isNotEmpty;
   bool get hasPendingWordDeletion => _pendingWords.isNotEmpty;
+
+  /// 串行化提交到服务端的写请求，避免并发提交导致旧快照覆盖新结果。
+  Future<T> _enqueueWrite<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+    _writeTail = _writeTail.then((_) async {
+      try {
+        completer.complete(await action());
+      } catch (err, st) {
+        completer.completeError(err, st);
+      }
+    });
+    return completer.future;
+  }
+
+  /// 构造应提交给服务端的名单：将仍处于撤销窗口或排在后面的待删项按逆序插回，
+  /// 确保本次提交不会顺带删掉其他尚未确认删除的条目。
+  List<String> _listWithPending(
+    List<String> current,
+    Map<String, int> pending,
+    Map<String, int> queued,
+  ) {
+    if (pending.isEmpty && queued.isEmpty) return current;
+    final result = [...current];
+    final combined = [...queued.entries, ...pending.entries].reversed;
+    for (final entry in combined) {
+      if (result.contains(entry.key)) continue;
+      final clamped = entry.value.clamp(0, result.length);
+      result.insert(clamped, entry.key);
+    }
+    return result;
+  }
+
+  List<String> _serverUsers() =>
+      _listWithPending(state.blockUserList, _pendingUsers, _queuedUserCommits);
+
+  List<String> _serverWords() =>
+      _listWithPending(state.blockWordList, _pendingWords, _queuedWordCommits);
 
   @override
   BlocklistSettingsState build() {
@@ -110,7 +150,7 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   void loopSyncBlockList() {
     Future.delayed(Duration(), () async {
           debugPrint('定时任务');
-          if (await Data().userRepository.getDefaultUser() != null) {
+          if (await ref.read(userRepositoryProvider).getDefaultUser() != null) {
             await load();
           }
         })
@@ -143,27 +183,33 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
 
   Future<void> load() async {
     try {
-      final blockInfo = await Data().userRepository.getBlockInfo();
+      final blockInfo = await ref.read(userRepositoryProvider).getBlockInfo();
+      final hiddenUsers = {..._pendingUsers.keys, ..._queuedUserCommits.keys};
+      final hiddenWords = {..._pendingWords.keys, ..._queuedWordCommits.keys};
       state = state.copyWith(
-        blockUserList: blockInfo.blockUserList,
-        blockWordList: blockInfo.blockWordList,
+        blockUserList: blockInfo.blockUserList
+            .where((u) => !hiddenUsers.contains(u))
+            .toList(),
+        blockWordList: blockInfo.blockWordList
+            .where((w) => !hiddenWords.contains(w))
+            .toList(),
       );
     } catch (err) {
       rethrow;
     }
   }
 
-  Future<String> addUser(String user) async {
-    try {
-      var submitUsers = <String>[...state.blockUserList, user];
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(submitUsers, state.blockWordList),
-      );
-      state = state.copyWith(blockUserList: submitUsers);
+  Future<String> addUser(String user) {
+    return _enqueueWrite(() async {
+      final submitUsers = <String>[..._serverUsers(), user];
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(submitUsers, _serverWords()));
+      if (ref.mounted && !state.blockUserList.contains(user)) {
+        state = state.copyWith(blockUserList: [...state.blockUserList, user]);
+      }
       return content;
-    } catch (err) {
-      rethrow;
-    }
+    });
   }
 
   /// 先从本地列表移除，等待 [commitUserDeletion] 或 [undoUserDeletion]。
@@ -187,14 +233,18 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   Future<String?> commitUserDeletion(String user) async {
     final index = _pendingUsers.remove(user);
     if (index == null) return null;
-    try {
-      return await Data().userRepository.setBlockInfo(
-        BlockInfoData(state.blockUserList, state.blockWordList),
-      );
-    } catch (err) {
-      if (ref.mounted) _restoreUser(user, index);
-      rethrow;
-    }
+    _queuedUserCommits[user] = index;
+    return _enqueueWrite(() async {
+      _queuedUserCommits.remove(user);
+      try {
+        return await ref
+            .read(userRepositoryProvider)
+            .setBlockInfo(BlockInfoData(_serverUsers(), _serverWords()));
+      } catch (err) {
+        if (ref.mounted) _restoreUser(user, index);
+        rethrow;
+      }
+    });
   }
 
   /// 离开页面时立即提交全部待删屏蔽用户。
@@ -218,43 +268,46 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
     );
   }
 
-  Future<String> deleteUser(String user) async {
-    try {
-      var submitUsers = state.blockUserList.where((e) => e != user).toList();
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(submitUsers, state.blockWordList),
-      );
-      state = state.copyWith(blockUserList: submitUsers);
+  Future<String> deleteUser(String user) {
+    return _enqueueWrite(() async {
+      final submitUsers = _serverUsers().where((e) => e != user).toList();
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(submitUsers, _serverWords()));
+      if (ref.mounted) {
+        state = state.copyWith(
+          blockUserList: state.blockUserList.where((e) => e != user).toList(),
+        );
+      }
       return content;
-    } catch (err) {
-      rethrow;
-    }
+    });
   }
 
-  Future<String> deleteAllUsers() async {
-    try {
-      _pendingUsers.clear();
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData([], state.blockWordList),
-      );
-      state = state.copyWith(blockUserList: []);
+  Future<String> deleteAllUsers() {
+    _pendingUsers.clear();
+    _queuedUserCommits.clear();
+    return _enqueueWrite(() async {
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(const [], _serverWords()));
+      if (ref.mounted) {
+        state = state.copyWith(blockUserList: []);
+      }
       return content;
-    } catch (err) {
-      rethrow;
-    }
+    });
   }
 
-  Future<String> addWord(String word) async {
-    try {
-      var submitWords = <String>[...state.blockWordList, word];
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(state.blockUserList, submitWords),
-      );
-      state = state.copyWith(blockWordList: submitWords);
+  Future<String> addWord(String word) {
+    return _enqueueWrite(() async {
+      final submitWords = <String>[..._serverWords(), word];
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(_serverUsers(), submitWords));
+      if (ref.mounted && !state.blockWordList.contains(word)) {
+        state = state.copyWith(blockWordList: [...state.blockWordList, word]);
+      }
       return content;
-    } catch (err) {
-      rethrow;
-    }
+    });
   }
 
   /// 先从本地列表移除，等待 [commitWordDeletion] 或 [undoWordDeletion]。
@@ -278,14 +331,18 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
   Future<String?> commitWordDeletion(String word) async {
     final index = _pendingWords.remove(word);
     if (index == null) return null;
-    try {
-      return await Data().userRepository.setBlockInfo(
-        BlockInfoData(state.blockUserList, state.blockWordList),
-      );
-    } catch (err) {
-      if (ref.mounted) _restoreWord(word, index);
-      rethrow;
-    }
+    _queuedWordCommits[word] = index;
+    return _enqueueWrite(() async {
+      _queuedWordCommits.remove(word);
+      try {
+        return await ref
+            .read(userRepositoryProvider)
+            .setBlockInfo(BlockInfoData(_serverUsers(), _serverWords()));
+      } catch (err) {
+        if (ref.mounted) _restoreWord(word, index);
+        rethrow;
+      }
+    });
   }
 
   /// 离开页面时立即提交全部待删屏蔽关键词。
@@ -309,30 +366,33 @@ class BlocklistSettingsNotifier extends Notifier<BlocklistSettingsState> {
     );
   }
 
-  Future<String> deleteWord(String word) async {
-    try {
-      var submitWords = state.blockWordList.where((e) => e != word).toList();
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(state.blockUserList, submitWords),
-      );
-      state = state.copyWith(blockWordList: submitWords);
+  Future<String> deleteWord(String word) {
+    return _enqueueWrite(() async {
+      final submitWords = _serverWords().where((e) => e != word).toList();
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(_serverUsers(), submitWords));
+      if (ref.mounted) {
+        state = state.copyWith(
+          blockWordList: state.blockWordList.where((e) => e != word).toList(),
+        );
+      }
       return content;
-    } catch (err) {
-      rethrow;
-    }
+    });
   }
 
-  Future<String> deleteAllWords() async {
-    try {
-      _pendingWords.clear();
-      final content = await Data().userRepository.setBlockInfo(
-        BlockInfoData(state.blockUserList, []),
-      );
-      state = state.copyWith(blockWordList: []);
+  Future<String> deleteAllWords() {
+    _pendingWords.clear();
+    _queuedWordCommits.clear();
+    return _enqueueWrite(() async {
+      final content = await ref
+          .read(userRepositoryProvider)
+          .setBlockInfo(BlockInfoData(_serverUsers(), const []));
+      if (ref.mounted) {
+        state = state.copyWith(blockWordList: []);
+      }
       return content;
-    } catch (err) {
-      rethrow;
-    }
+    });
   }
 
   Future<void> updateBlockMode(BlockMode mode) async {
