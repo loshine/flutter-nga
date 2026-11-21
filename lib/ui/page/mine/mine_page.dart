@@ -5,6 +5,7 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -56,81 +57,84 @@ class MinePage extends HookConsumerWidget {
 
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    return ListView(
+    return ReadableListPadding(
       padding: EdgeInsets.fromLTRB(
         mediaPadding.left,
         Dimen.spacingS,
         mediaPadding.right,
         Dimen.spacingS + mediaPadding.bottom,
       ),
-      children: [
-        _EntranceAnimation(
-          index: 0,
-          child: _UserHeaderCard(userInfo: userInfo),
-        ),
-        _EntranceAnimation(
-          index: 1,
-          child: _EntryGroup(
-            title: '社区',
-            children: [
-              _EntryTile(
-                icon: Icons.bookmark_outline,
-                title: '贴子收藏',
-                subtitle: '收藏的贴子',
-                onTap: () =>
-                    Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
-              ),
-              _EntryTile(
-                icon: Icons.history_outlined,
-                title: '浏览历史',
-                subtitle: '最近浏览的贴子',
-                onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
-              ),
-              // 从短消息 / 提醒页返回后刷新角标
-              _EntryTile(
-                icon: Icons.mail_outlined,
-                title: '短消息',
-                subtitle: '私信会话',
-                badgeCount: unread.messages,
-                onTap: () => Routes.navigateTo(
-                  context,
-                  Routes.CONVERSATIONS,
-                ).whenComplete(refreshUnread),
-              ),
-              _EntryTile(
-                icon: Icons.notifications_outlined,
-                title: '提醒信息',
-                subtitle: '回复与系统通知',
-                badgeCount: unread.notifications,
-                onTap: () => Routes.navigateTo(
-                  context,
-                  Routes.NOTIFICATIONS,
-                ).whenComplete(refreshUnread),
-              ),
-            ],
+      builder: (context, padding) => ListView(
+        padding: padding,
+        children: [
+          _EntranceAnimation(
+            index: 0,
+            child: _UserHeaderCard(userInfo: userInfo),
           ),
-        ),
-        _EntranceAnimation(
-          index: 2,
-          child: _EntryGroup(
-            title: '应用',
-            children: [
-              _EntryTile(
-                icon: Icons.settings_outlined,
-                title: '设置',
-                subtitle: '主题、网络与屏蔽',
-                onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
-              ),
-              _EntryTile(
-                icon: Icons.info_outline,
-                title: '关于',
-                subtitle: '版本与开源信息',
-                onTap: () => Routes.navigateTo(context, Routes.ABOUT),
-              ),
-            ],
+          _EntranceAnimation(
+            index: 1,
+            child: _EntryGroup(
+              title: '社区',
+              children: [
+                _EntryTile(
+                  icon: Icons.bookmark_outline,
+                  title: '贴子收藏',
+                  subtitle: '收藏的贴子',
+                  onTap: () =>
+                      Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
+                ),
+                _EntryTile(
+                  icon: Icons.history_outlined,
+                  title: '浏览历史',
+                  subtitle: '最近浏览的贴子',
+                  onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
+                ),
+                // 从短消息 / 提醒页返回后刷新角标
+                _EntryTile(
+                  icon: Icons.mail_outlined,
+                  title: '短消息',
+                  subtitle: '私信会话',
+                  badgeCount: unread.messages,
+                  onTap: () => Routes.navigateTo(
+                    context,
+                    Routes.CONVERSATIONS,
+                  ).whenComplete(refreshUnread),
+                ),
+                _EntryTile(
+                  icon: Icons.notifications_outlined,
+                  title: '提醒信息',
+                  subtitle: '回复与系统通知',
+                  badgeCount: unread.notifications,
+                  onTap: () => Routes.navigateTo(
+                    context,
+                    Routes.NOTIFICATIONS,
+                  ).whenComplete(refreshUnread),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          _EntranceAnimation(
+            index: 2,
+            child: _EntryGroup(
+              title: '应用',
+              children: [
+                _EntryTile(
+                  icon: Icons.settings_outlined,
+                  title: '设置',
+                  subtitle: '主题、网络与屏蔽',
+                  onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
+                ),
+                _EntryTile(
+                  icon: Icons.info_outline,
+                  title: '关于',
+                  subtitle: '版本与开源信息',
+                  onTap: () => Routes.navigateTo(context, Routes.ABOUT),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

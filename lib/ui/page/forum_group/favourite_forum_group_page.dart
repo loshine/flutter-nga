@@ -31,11 +31,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
 
     final state = ref.watch(favouriteForumListProvider);
     final forums = state.forums;
-    final size = MediaQuery.sizeOf(context);
-
-    /*24 is for notification bar on Android*/
-    final double itemHeight = 108;
-    final double itemWidth = size.width / 3;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return Stack(
       children: [
@@ -50,9 +46,10 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
           child: GridView.builder(
             controller: scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: itemWidth / itemHeight,
+            padding: EdgeInsets.only(bottom: bottomPadding + 88),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 120,
+              mainAxisExtent: 108,
             ),
             itemCount: forums.length,
             itemBuilder: (_, index) => ForumGridItemWidget(

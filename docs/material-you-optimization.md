@@ -21,7 +21,7 @@
   - 宽屏（≥ 840dp，M3 Expanded 断点）支持 `NavigationRail(extended: true)` 并将 FAB 放入 `NavigationRail.leading`。
   - 去除 `ForumGroupTabsPage` 内部冗余的嵌套 `AppBar`，改为 `Material` + `TabBar(tabAlignment: TabAlignment.start)`；`ForumDetailPage` 的 `TabBar` 同步简化为 `tabAlignment: TabAlignment.start`。
 
-- [ ] **P0-4 版块网格自适应列数与补齐页面阅读宽度约束**
+- [x] **P0-4 版块网格自适应列数与补齐页面阅读宽度约束**
   - `FavouriteForumGroupPage` 与 `ForumCategoryPage` 改用 `SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 120, mainAxisExtent: 108)`，解决宽屏/横屏下固定 3 列严重拉伸的问题，并保留底部安全区。
   - 为 `MinePage` 与 `SendMessagePage` 补齐 `ReadableListPadding` 居中阅读宽度约束。
 
