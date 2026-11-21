@@ -55,7 +55,7 @@
 - [x] **P2-2 沉浸式图片预览页**
   - `PhotoPreviewPage` 改为纯黑沉浸背景 + 渐变半透明悬浮顶栏（`extendBodyBehindAppBar: true`），支持点击显隐工具栏与标准 Material 下载图标。
 
-- [ ] **P2-3 动效适配系统减弱动画设置与微交互完善**
+- [x] **P2-3 动效适配系统减弱动画设置与微交互完善**
   - `Motion` 新增 `Motion.resolveDuration(context, duration)` 尊重 `MediaQuery.disableAnimationsOf(context)`。
   - 优化 `MinePage` 过长的 700ms 错峰位移入场动画，为 `ForumDetailPage` FAB 补齐缩放淡入动效，扩展 `AppHaptics` 覆盖收藏/发布等关键操作，整理 `EasyRefresh` 默认头尾配置位置。
 

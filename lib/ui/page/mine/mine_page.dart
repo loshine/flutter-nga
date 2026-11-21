@@ -8,7 +8,6 @@ import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 /// 【我的】页面：集中收藏、历史、消息、提醒以及设置、关于入口
@@ -68,71 +67,62 @@ class MinePage extends HookConsumerWidget {
       builder: (context, padding) => ListView(
         padding: padding,
         children: [
-          _EntranceAnimation(
-            index: 0,
-            child: _UserHeaderCard(userInfo: userInfo),
+          _UserHeaderCard(userInfo: userInfo),
+          M3SettingsGroup(
+            title: '社区',
+            children: [
+              M3SettingsTile(
+                icon: Icons.bookmark_outline,
+                title: '贴子收藏',
+                subtitle: '收藏的贴子',
+                onTap: () =>
+                    Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
+              ),
+              M3SettingsTile(
+                icon: Icons.history_outlined,
+                title: '浏览历史',
+                subtitle: '最近浏览的贴子',
+                onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
+              ),
+              // 从短消息 / 提醒页返回后刷新角标
+              M3SettingsTile(
+                icon: Icons.mail_outlined,
+                title: '短消息',
+                subtitle: '私信会话',
+                badgeCount: unread.messages,
+                onTap: () => Routes.navigateTo(
+                  context,
+                  Routes.CONVERSATIONS,
+                ).whenComplete(refreshUnread),
+              ),
+              M3SettingsTile(
+                icon: Icons.notifications_outlined,
+                title: '提醒信息',
+                subtitle: '回复与系统通知',
+                badgeCount: unread.notifications,
+                onTap: () => Routes.navigateTo(
+                  context,
+                  Routes.NOTIFICATIONS,
+                ).whenComplete(refreshUnread),
+              ),
+            ],
           ),
-          _EntranceAnimation(
-            index: 1,
-            child: M3SettingsGroup(
-              title: '社区',
-              children: [
-                M3SettingsTile(
-                  icon: Icons.bookmark_outline,
-                  title: '贴子收藏',
-                  subtitle: '收藏的贴子',
-                  onTap: () =>
-                      Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
-                ),
-                M3SettingsTile(
-                  icon: Icons.history_outlined,
-                  title: '浏览历史',
-                  subtitle: '最近浏览的贴子',
-                  onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
-                ),
-                // 从短消息 / 提醒页返回后刷新角标
-                M3SettingsTile(
-                  icon: Icons.mail_outlined,
-                  title: '短消息',
-                  subtitle: '私信会话',
-                  badgeCount: unread.messages,
-                  onTap: () => Routes.navigateTo(
-                    context,
-                    Routes.CONVERSATIONS,
-                  ).whenComplete(refreshUnread),
-                ),
-                M3SettingsTile(
-                  icon: Icons.notifications_outlined,
-                  title: '提醒信息',
-                  subtitle: '回复与系统通知',
-                  badgeCount: unread.notifications,
-                  onTap: () => Routes.navigateTo(
-                    context,
-                    Routes.NOTIFICATIONS,
-                  ).whenComplete(refreshUnread),
-                ),
-              ],
-            ),
-          ),
-          _EntranceAnimation(
-            index: 2,
-            child: M3SettingsGroup(
-              title: '应用',
-              children: [
-                M3SettingsTile(
-                  icon: Icons.settings_outlined,
-                  title: '设置',
-                  subtitle: '主题、网络与屏蔽',
-                  onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
-                ),
-                M3SettingsTile(
-                  icon: Icons.info_outline,
-                  title: '关于',
-                  subtitle: '版本与开源信息',
-                  onTap: () => Routes.navigateTo(context, Routes.ABOUT),
-                ),
-              ],
-            ),
+          M3SettingsGroup(
+            title: '应用',
+            children: [
+              M3SettingsTile(
+                icon: Icons.settings_outlined,
+                title: '设置',
+                subtitle: '主题、网络与屏蔽',
+                onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
+              ),
+              M3SettingsTile(
+                icon: Icons.info_outline,
+                title: '关于',
+                subtitle: '版本与开源信息',
+                onTap: () => Routes.navigateTo(context, Routes.ABOUT),
+              ),
+            ],
           ),
         ],
       ),
@@ -205,34 +195,5 @@ class _UserHeaderCard extends ConsumerWidget {
         ref.read(homeDrawerHeaderProvider.notifier).refresh();
       });
     }
-  }
-}
-
-/// 分组进场动画：按序号错峰淡入 + 上移
-class _EntranceAnimation extends StatelessWidget {
-  /// 共享实例，避免 TweenAnimationBuilder 因 tween 引用变化而重启动画
-  static final Tween<double> _tween = Tween(begin: 0, end: 1);
-
-  final int index;
-  final Widget child;
-
-  const _EntranceAnimation({required this.index, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final begin = (index * 0.12).clamp(0.0, 0.6);
-    return TweenAnimationBuilder<double>(
-      tween: _tween,
-      duration: Motion.durationExtraLong1,
-      curve: Interval(begin, 1, curve: Motion.emphasizedDecelerate),
-      builder: (context, value, child) => Opacity(
-        opacity: value,
-        child: Transform.translate(
-          offset: Offset(0, 24 * (1 - value)),
-          child: child,
-        ),
-      ),
-      child: child,
-    );
   }
 }

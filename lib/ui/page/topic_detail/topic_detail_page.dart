@@ -11,6 +11,7 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
+import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 import 'package:flutter_nga/utils/nga_links.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -218,6 +219,7 @@ class TopicDetailPage extends HookConsumerWidget {
                       notifier
                           .toggleFavourite()
                           .then((message) {
+                            AppHaptics.selectionChanged();
                             if (message != null) AppToast.success(message);
                           })
                           .catchError((e) {

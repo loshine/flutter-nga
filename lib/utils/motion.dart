@@ -100,4 +100,9 @@ class Motion {
     duration: durationShort4,
     curve: emphasizedAccelerate,
   );
+
+  /// 尊重系统「减弱动态效果（Reduced Motion）」设置：开启时返回 [Duration.zero]。
+  static Duration resolveDuration(BuildContext context, Duration duration) {
+    return MediaQuery.disableAnimationsOf(context) ? Duration.zero : duration;
+  }
 }

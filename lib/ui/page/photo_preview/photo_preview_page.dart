@@ -20,7 +20,6 @@ class PhotoPreviewPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final minScale = ref.watch(photoMinScaleProvider);
     final showChrome = useState(true);
-    final disableAnimations = MediaQuery.disableAnimationsOf(context);
 
     useEffect(() {
       Future.microtask(() {
@@ -63,9 +62,10 @@ class PhotoPreviewPage extends HookConsumerWidget {
                 ignoring: !showChrome.value,
                 child: AnimatedOpacity(
                   opacity: showChrome.value ? 1.0 : 0.0,
-                  duration: disableAnimations
-                      ? Duration.zero
-                      : Motion.durationShort4,
+                  duration: Motion.resolveDuration(
+                    context,
+                    Motion.durationShort4,
+                  ),
                   curve: Motion.emphasized,
                   child: DecoratedBox(
                     decoration: const BoxDecoration(

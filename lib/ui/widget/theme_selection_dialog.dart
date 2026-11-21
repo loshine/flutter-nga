@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
+import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
 class ThemeSelectionDialog extends ConsumerWidget {
@@ -230,7 +231,10 @@ class _PaletteSwatch extends StatelessWidget {
               radius: 24,
               child: Center(
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                  duration: Motion.resolveDuration(
+                    context,
+                    Motion.durationShort4,
+                  ),
                   width: 40,
                   height: 40,
                   padding: EdgeInsets.all(isSelected ? 2 : 0),

@@ -8,6 +8,7 @@ import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
+import 'package:flutter_nga/utils/motion.dart';
 
 /// 单个版块分类页：按版块组分段展示，组标题下为自适应列数网格，点击组标题可折叠
 class ForumCategoryPage extends HookConsumerWidget {
@@ -110,7 +111,8 @@ class _ForumGroupHeader extends StatelessWidget {
         ),
         trailing: AnimatedRotation(
           turns: expanded ? 0 : -0.25,
-          duration: const Duration(milliseconds: 200),
+          duration: Motion.resolveDuration(context, Motion.durationShort4),
+          curve: Motion.emphasized,
           child: Icon(Icons.expand_more, color: colorScheme.onSurfaceVariant),
         ),
         onTap: onTap,

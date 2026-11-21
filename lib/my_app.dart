@@ -30,6 +30,7 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   late final GoRouter _router;
+  (int, int)? _lastRefreshColors;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -80,12 +81,19 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
                       systemNavigationBarColor: Colors.transparent,
                       systemNavigationBarContrastEnforced: false,
                     );
-            EasyRefresh.defaultHeaderBuilder = () => MaterialHeader(
-              triggerOffset: 50,
-              color: colorScheme.primary,
-              backgroundColor: colorScheme.surfaceContainerHighest,
+            final refreshColors = (
+              colorScheme.primary.toARGB32(),
+              colorScheme.surfaceContainerHighest.toARGB32(),
             );
-            EasyRefresh.defaultFooterBuilder = () => const ClassicFooter();
+            if (_lastRefreshColors != refreshColors) {
+              _lastRefreshColors = refreshColors;
+              EasyRefresh.defaultHeaderBuilder = () => MaterialHeader(
+                triggerOffset: 50,
+                color: colorScheme.primary,
+                backgroundColor: colorScheme.surfaceContainerHighest,
+              );
+              EasyRefresh.defaultFooterBuilder = () => const ClassicFooter();
+            }
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: overlayStyle,
               child: LegacyThemeBridge(

@@ -324,7 +324,7 @@ class PublishPage extends HookWidget {
               ),
             ),
             AnimatedSize(
-              duration: Motion.durationMedium2,
+              duration: Motion.resolveDuration(context, Motion.durationMedium2),
               curve: Motion.emphasized,
               alignment: Alignment.topCenter,
               child: Column(

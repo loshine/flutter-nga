@@ -132,7 +132,7 @@ class _HomePageContent extends HookConsumerWidget {
       );
     }
     return AnimatedSwitcher(
-      duration: Motion.durationShort4,
+      duration: Motion.resolveDuration(context, Motion.durationShort4),
       switchInCurve: Motion.emphasizedDecelerate,
       switchOutCurve: Motion.emphasizedAccelerate,
       transitionBuilder: (child, animation) => ScaleTransition(
@@ -207,17 +207,21 @@ class _HomePageContent extends HookConsumerWidget {
     );
   }
 
-  /// 切换标签页时的过渡动画：淡入淡出 + 轻微上移
-  Widget _buildAnimatedBody(int index, List<Widget> pageList) {
+  /// 切换标签页时的过渡动画：M3 Fade Through，遵循系统减弱动画设置
+  Widget _buildAnimatedBody(
+    BuildContext context,
+    int index,
+    List<Widget> pageList,
+  ) {
     return AnimatedSwitcher(
-      duration: Motion.durationMedium2,
+      duration: Motion.resolveDuration(context, Motion.durationMedium1),
       switchInCurve: Motion.emphasizedDecelerate,
       switchOutCurve: Motion.emphasizedAccelerate,
       transitionBuilder: (child, animation) => FadeTransition(
         opacity: animation,
         child: SlideTransition(
           position: Tween<Offset>(
-            begin: const Offset(0, 0.02),
+            begin: const Offset(0, 0.015),
             end: Offset.zero,
           ).animate(animation),
           child: child,
@@ -228,12 +232,16 @@ class _HomePageContent extends HookConsumerWidget {
   }
 
   /// AppBar 标题随标签页切换淡入淡出，[onTap] 用于点击标题回到顶部
-  Widget _buildAnimatedTitle(int index, VoidCallback? onTap) {
+  Widget _buildAnimatedTitle(
+    BuildContext context,
+    int index,
+    VoidCallback? onTap,
+  ) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: AnimatedSwitcher(
-        duration: Motion.durationShort4,
+        duration: Motion.resolveDuration(context, Motion.durationShort4),
         child: Text(_getTitleText(index), key: ValueKey(index)),
       ),
     );
@@ -251,12 +259,12 @@ class _HomePageContent extends HookConsumerWidget {
   ) {
     return Scaffold(
       appBar: AppBar(
-        title: _buildAnimatedTitle(index, onTitleTap),
+        title: _buildAnimatedTitle(context, index, onTitleTap),
         scrolledUnderElevation: index == 0 ? 0 : 2,
         actions: _getActionsByPage(context, ref, index),
         automaticallyImplyLeading: false,
       ),
-      body: _buildAnimatedBody(index, pageList),
+      body: _buildAnimatedBody(context, index, pageList),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: onDestinationSelected,
@@ -312,12 +320,12 @@ class _HomePageContent extends HookConsumerWidget {
         Expanded(
           child: Scaffold(
             appBar: AppBar(
-              title: _buildAnimatedTitle(index, onTitleTap),
+              title: _buildAnimatedTitle(context, index, onTitleTap),
               scrolledUnderElevation: index == 0 ? 0 : 2,
               actions: _getActionsByPage(context, ref, index),
               automaticallyImplyLeading: false,
             ),
-            body: _buildAnimatedBody(index, pageList),
+            body: _buildAnimatedBody(context, index, pageList),
           ),
         ),
       ],
