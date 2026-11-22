@@ -18,7 +18,7 @@
 - [x] **P0-3 首页导航栏未读角标、大屏展开态与 TabBar 层级整理**
   - `NavigationBarThemeData` 背景色改为 `colorScheme.surfaceContainer`，与正文 `surface` 形成清晰色调分离。
   - 首页底部 `NavigationBar` 与侧边 `NavigationRail` 的「我的」目的地增加聚合未读 `Badge.count`，并在首页启动/账号切换时同步刷新未读数。
-  - 宽屏（≥ 840dp，M3 Expanded 断点）支持 `NavigationRail(extended: true)` 并将 FAB 放入 `NavigationRail.leading`。
+  - 宽屏（≥ 840dp，M3 Expanded 断点）支持 `NavigationRail(extended: true)`，FAB 仍保持在内容区右下角。
   - 去除 `ForumGroupTabsPage` 内部冗余的嵌套 `AppBar`，改为 `Material` + `TabBar(tabAlignment: TabAlignment.start)`；`ForumDetailPage` 的 `TabBar` 同步简化为 `tabAlignment: TabAlignment.start`。
 
 - [x] **P0-4 版块网格自适应列数与补齐页面阅读宽度约束**

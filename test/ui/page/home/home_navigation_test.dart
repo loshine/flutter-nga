@@ -132,29 +132,40 @@ void main() {
     },
   );
 
-  testWidgets('medium screen uses collapsed NavigationRail with leading FAB', (
-    tester,
-  ) async {
-    await _pumpHome(
-      tester,
-      size: const Size(700, 800),
-      user: const UserInfo(uid: 1, username: '测试用户'),
-    );
+  testWidgets(
+    'medium screen uses collapsed NavigationRail with bottom-right FAB',
+    (tester) async {
+      await _pumpHome(
+        tester,
+        size: const Size(700, 800),
+        user: const UserInfo(uid: 1, username: '测试用户'),
+      );
 
-    final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-    expect(rail.extended, isFalse);
-    expect(rail.labelType, NavigationRailLabelType.all);
-    expect(
-      find.descendant(
-        of: find.byType(NavigationRail),
-        matching: find.byTooltip('添加自定义版面'),
-      ),
-      findsOneWidget,
-    );
-  });
+      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+      expect(rail.extended, isFalse);
+      expect(rail.labelType, NavigationRailLabelType.all);
+      expect(
+        find.descendant(
+          of: find.byType(NavigationRail),
+          matching: find.byTooltip('添加自定义版面'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(Scaffold),
+          matching: find.byTooltip('添加自定义版面'),
+        ),
+        findsOneWidget,
+      );
+      final fabRect = tester.getRect(find.byTooltip('添加自定义版面'));
+      expect(fabRect.right, greaterThan(500));
+      expect(fabRect.bottom, greaterThan(600));
+    },
+  );
 
   testWidgets(
-    'expanded screen uses extended NavigationRail with extended FAB',
+    'expanded screen uses extended NavigationRail with bottom-right FAB',
     (tester) async {
       await _pumpHome(
         tester,
@@ -165,7 +176,21 @@ void main() {
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
       expect(rail.extended, isTrue);
       expect(rail.labelType, NavigationRailLabelType.none);
-      expect(find.text('添加版面'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(NavigationRail),
+          matching: find.byTooltip('添加自定义版面'),
+        ),
+        findsNothing,
+      );
+      final fabFinder = find.descendant(
+        of: find.byType(Scaffold),
+        matching: find.byTooltip('添加自定义版面'),
+      );
+      expect(fabFinder, findsOneWidget);
+      final fabRect = tester.getRect(fabFinder);
+      expect(fabRect.right, greaterThan(800));
+      expect(fabRect.bottom, greaterThan(600));
     },
   );
 

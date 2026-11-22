@@ -108,29 +108,17 @@ class _HomePageContent extends HookConsumerWidget {
   Widget _getFloatingActionButton(
     BuildContext context,
     WidgetRef ref,
-    int index, {
-    bool extended = false,
-  }) {
+    int index,
+  ) {
     final fabVisible = index == 0 && ref.watch(forumGroupFabVisibleProvider);
-    final Widget? fab;
-    if (!fabVisible) {
-      fab = null;
-    } else if (extended) {
-      fab = FloatingActionButton.extended(
-        key: const ValueKey('home_fab_extended'),
-        tooltip: '添加自定义版面',
-        onPressed: () => _openCustomForumDialog(context),
-        icon: const Icon(Icons.add),
-        label: const Text('添加版面'),
-      );
-    } else {
-      fab = FloatingActionButton(
-        key: const ValueKey('home_fab'),
-        tooltip: '添加自定义版面',
-        onPressed: () => _openCustomForumDialog(context),
-        child: const Icon(Icons.add),
-      );
-    }
+    final Widget? fab = fabVisible
+        ? FloatingActionButton(
+            key: const ValueKey('home_fab'),
+            tooltip: '添加自定义版面',
+            onPressed: () => _openCustomForumDialog(context),
+            child: const Icon(Icons.add),
+          )
+        : null;
     return AnimatedSwitcher(
       duration: Motion.resolveDuration(context, Motion.durationShort4),
       switchInCurve: Motion.emphasizedDecelerate,
@@ -274,7 +262,7 @@ class _HomePageContent extends HookConsumerWidget {
     );
   }
 
-  /// 大屏布局：NavigationRail 延伸全屏高度，FAB 置于 Rail 顶部 leading 区域
+  /// 大屏布局：NavigationRail 延伸全屏高度，FAB 保持在右下角
   Widget _buildLargeScreenLayout(
     BuildContext context,
     WidgetRef ref,
@@ -285,12 +273,6 @@ class _HomePageContent extends HookConsumerWidget {
     VoidCallback? onTitleTap, {
     required bool isExpanded,
   }) {
-    final railFab = _getFloatingActionButton(
-      context,
-      ref,
-      index,
-      extended: isExpanded,
-    );
     return Row(
       children: [
         // NavigationRail 独立于 Scaffold，占据全屏高度
@@ -301,10 +283,6 @@ class _HomePageContent extends HookConsumerWidget {
           labelType: isExpanded
               ? NavigationRailLabelType.none
               : NavigationRailLabelType.all,
-          leading: Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 12),
-            child: railFab,
-          ),
           destinations: destinations
               .map(
                 (d) => NavigationRailDestination(
@@ -316,7 +294,7 @@ class _HomePageContent extends HookConsumerWidget {
               .toList(),
         ),
         const VerticalDivider(thickness: 1, width: 1),
-        // 内容区域包含 AppBar
+        // 内容区域包含 AppBar 与右下角 FAB
         Expanded(
           child: Scaffold(
             appBar: AppBar(
@@ -326,6 +304,7 @@ class _HomePageContent extends HookConsumerWidget {
               automaticallyImplyLeading: false,
             ),
             body: _buildAnimatedBody(context, index, pageList),
+            floatingActionButton: _getFloatingActionButton(context, ref, index),
           ),
         ),
       ],
