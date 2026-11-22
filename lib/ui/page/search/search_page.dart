@@ -40,12 +40,18 @@ class SearchPage extends HookConsumerWidget {
       _ => '搜索主题关键词...',
     };
 
+    final hasBackButton =
+        ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 68,
         titleSpacing: 0,
         title: Padding(
-          padding: const EdgeInsets.only(right: Dimen.spacingM),
+          padding: EdgeInsets.only(
+            left: hasBackButton ? Dimen.spacingXS : Dimen.spacingL,
+            right: Dimen.spacingL,
+          ),
           child: SearchBar(
             controller: searchQuery,
             focusNode: focusNode,
