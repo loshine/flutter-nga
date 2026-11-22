@@ -1,5 +1,6 @@
 package io.github.loshine.flutternga
 
+import android.app.UiModeManager
 import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -23,10 +24,32 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            NATIVE_THEME_CHANNEL,
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "setNightMode" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val mode = when (call.arguments as? String) {
+                            "light" -> UiModeManager.MODE_NIGHT_NO
+                            "dark" -> UiModeManager.MODE_NIGHT_YES
+                            else -> UiModeManager.MODE_NIGHT_AUTO
+                        }
+                        getSystemService(UiModeManager::class.java)
+                            ?.setApplicationNightMode(mode)
+                    }
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
 
     companion object {
         private const val DYNAMIC_COLOR_CHANNEL =
             "io.github.loshine.flutternga/dynamic_color"
+        private const val NATIVE_THEME_CHANNEL =
+            "io.github.loshine.flutternga/native_theme"
     }
 }

@@ -11,6 +11,13 @@ const _svgPath = 'images/launcher/icon_foreground.svg';
 /// `icon_background_color` 保持一致。
 final _background = ColorRgba8(0xF5, 0xE8, 0xCB, 0xFF);
 
+/// 暗色启动页图标背景色，需与 `flutter_native_splash.yaml` 的
+/// `icon_background_color_dark` 保持一致。
+final _darkSplashBackground = ColorRgba8(0x2B, 0x22, 0x1E, 0xFF);
+
+/// 暗色启动页图标前景着色（暖奶油色，保证在暗底上的对比度）。
+final _darkSplashForeground = ColorRgba8(0xF5, 0xE8, 0xCB, 0xFF);
+
 /// Regenerates launcher icons and the shared splash asset from [_svgPath].
 ///
 /// 需在 macOS 上运行（借助 `tool/render_svg.swift` 用 AppKit 光栅化 SVG）：
@@ -28,8 +35,16 @@ Future<void> main() async {
   compositeImage(full, foreground);
   final round = _circularMask(full);
 
+  final darkSplash = Image(width: size, height: size, numChannels: 4);
+  fill(darkSplash, color: _darkSplashBackground);
+  compositeImage(
+    darkSplash,
+    _tintForeground(foreground, _darkSplashForeground),
+  );
+
   _writePng('images/launcher/icon_1024.png', full);
   _writePng('images/launcher/splash_icon_1024.png', full);
+  _writePng('images/launcher/splash_icon_dark_1024.png', darkSplash);
 
   // Legacy launcher icons (< API 26). API 26+ uses the adaptive icon whose
   // foreground / monochrome layers are the generated vector drawables.
@@ -173,6 +188,18 @@ Image _decode(String path) {
 
 void _writePng(String path, Image image) {
   File(path).writeAsBytesSync(encodePng(image));
+}
+
+Image _tintForeground(Image src, ColorRgba8 color) {
+  final out = Image.from(src);
+  for (final p in out) {
+    if (p.a > 0) {
+      p.r = color.r;
+      p.g = color.g;
+      p.b = color.b;
+    }
+  }
+  return out;
 }
 
 Image _circularMask(Image src) {

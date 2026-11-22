@@ -1,3 +1,5 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_nga/data/core/app_preferences.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/ui/widget/app_adaptive_theme.dart';
 import 'package:flutter_nga/utils/dynamic_color_service.dart';
+import 'package:flutter_nga/utils/native_theme_service.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
 import '../../test_utils/preferences.dart';
@@ -26,6 +29,8 @@ void main() {
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(DynamicColorService.channel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(NativeThemeService.channel, null);
   });
 
   group('ThemeNotifier.seedColorFromValue', () {
@@ -146,5 +151,69 @@ void main() {
     expect(appliedTheme.colorScheme.primary, expected.primary);
     expect(appliedTheme.colorScheme.secondary, expected.secondary);
     expect(appliedTheme.colorScheme.primary, isNot(fallback.primary));
+  });
+
+  group('NativeThemeService.setNightMode', () {
+    test('将主题模式映射为原生层约定参数', () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(NativeThemeService.channel, (call) async {
+            calls.add(call);
+            return null;
+          });
+
+      await NativeThemeService.setNightMode(AdaptiveThemeMode.light);
+      await NativeThemeService.setNightMode(AdaptiveThemeMode.dark);
+      await NativeThemeService.setNightMode(AdaptiveThemeMode.system);
+      await NativeThemeService.setNightMode(null);
+
+      expect(calls.map((c) => c.method), everyElement('setNightMode'));
+      expect(calls.map((c) => c.arguments), [
+        'light',
+        'dark',
+        'system',
+        'system',
+      ]);
+    });
+
+    testWidgets('ThemeNotifier.update 会同步调用原生夜间模式设置', (tester) async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(NativeThemeService.channel, (call) async {
+            calls.add(call);
+            return null;
+          });
+      _mockSavedTheme();
+
+      late BuildContext capturedContext;
+      late WidgetRef capturedRef;
+      await tester.pumpWidget(
+        ProviderScope(
+          child: AppAdaptiveTheme(
+            initialMode: AdaptiveThemeMode.system,
+            builder: (light, dark) => MaterialApp(
+              theme: light,
+              darkTheme: dark,
+              home: Consumer(
+                builder: (context, ref, _) {
+                  capturedContext = context;
+                  capturedRef = ref;
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      capturedRef
+          .read(themeProvider.notifier)
+          .update(capturedContext, AdaptiveThemeMode.dark);
+      await tester.pump();
+
+      expect(calls, hasLength(1));
+      expect(calls.single.method, 'setNightMode');
+      expect(calls.single.arguments, 'dark');
+    });
   });
 }

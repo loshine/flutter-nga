@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/core/app_preferences.dart';
 import 'package:flutter_nga/utils/dynamic_color_service.dart';
+import 'package:flutter_nga/utils/native_theme_service.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
 const String _keySeedColorValue = PrefsKeys.seedColorValue;
@@ -150,6 +153,7 @@ class ThemeNotifier extends Notifier<ThemeState> {
   void update(BuildContext context, AdaptiveThemeMode adaptiveThemeMode) {
     AdaptiveTheme.of(context).setThemeMode(adaptiveThemeMode);
     state = state.copyWith(mode: adaptiveThemeMode);
+    unawaited(NativeThemeService.setNightMode(adaptiveThemeMode));
   }
 
   Future<void> setUseDynamicColor(BuildContext context, bool enabled) async {
