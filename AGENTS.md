@@ -6,13 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 环境准备
 
-通过 [mise](https://mise.jdx.dev) 安装 `.tool-versions` 固定的 Flutter SDK，当前版本为 3.50.0。
+本分支通过 [mise](https://mise.jdx.dev) 管理 `.tool-versions` 固定的 Flutter OHOS SDK（当前为 `3.50.0+ohos-0.0.1-pre`）。因鸿蒙版来自第三方 fork（`CPF-Flutter/flutter_flutter`），需先 clone 再用 `mise link` 挂载：
 
 ```bash
-mise install
+git clone --depth 1 --branch 3.50.0+ohos-0.0.1-pre https://gitcode.com/CPF-Flutter/flutter_flutter.git ~/.local/share/flutter-sdks/3.50.0+ohos-0.0.1-pre
+mise link flutter@3.50.0+ohos-0.0.1-pre ~/.local/share/flutter-sdks/3.50.0+ohos-0.0.1-pre
 ```
 
-默认分支为 `main`。鸿蒙（OHOS）适配在 `feature/ohos` 分支维护，`main` 不包含 `ohos/` 目录和原生登录插件。
+默认分支为 `main`（使用 `mise` 管理官方 Flutter 3.50.0）。鸿蒙（OHOS）适配在 `feature/ohos` 分支维护，保留 `ohos/` 目录、CPF-Flutter 插件来源及原生登录/相册保存适配。
 
 ## 构建与测试
 
@@ -24,6 +25,7 @@ mise exec -- flutter test test/utils/json_cast_test.dart     # 单个文件
 mise exec -- flutter test --name "Substring test"            # 按名称匹配
 mise exec -- flutter build apk
 mise exec -- flutter build ios --no-codesign
+mise exec -- flutter build hap --debug --no-codesign         # 构建未签名鸿蒙 HAP（需 DevEco SDK）
 ```
 
 Android 构建（详见 README）：

@@ -1,5 +1,6 @@
 name: flutter_nga
 description: A new Flutter project.
+publish_to: none
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -37,23 +38,70 @@ dependencies:
   timeago: ^3.7.1
   intl: ^0.20.3
   adaptive_theme: ^3.8.0
-  material_ui: ^1.11.0
-  cupertino_ui: ^1.1.6
   photo_view: ^0.15.0
-  easy_refresh: ^4.0.0
+  # easy_refresh >=3.5.0 在 Dart 3 下对 TargetPlatform 做穷举 switch，缺少 TargetPlatform.ohos
+  easy_refresh: 3.4.0
   collection: ^1.19.1
   cached_network_image: ^4.0.7
-  path_provider: ^2.1.6
-  device_info_plus: ^13.3.0
-  flutter_inappwebview: ^6.1.5
-  image_picker: ^1.2.4
   toastification: ^3.2.2
-  url_launcher: ^6.3.3
-  shared_preferences: ^2.5.6
-  package_info_plus: ^10.2.2
   flutter_native_splash: ^2.4.8
   gal: ^3.0.1
   path: ^1.9.1
+
+  # ====== 鸿蒙适配依赖 (OpenHarmony) - 3.50.0+ohos-0.0.1-pre ======
+  material_ui:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/material_ui
+      ref: oh-3.47.7-dev
+
+  cupertino_ui:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/cupertino_ui
+      ref: oh-3.47.7-dev
+
+  path_provider:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/path_provider/path_provider
+      ref: br_path_provider-v2.1.5_ohos
+
+  device_info_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/device_info_plus/device_info_plus
+      ref: br_device_info_plus-v12.3.0_ohos
+
+  package_info_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/package_info_plus/package_info_plus
+      ref: br_package_info_plus-v9.0.0_ohos
+
+  flutter_inappwebview:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_inappwebview.git
+      path: flutter_inappwebview
+      ref: br_v6.1.5_ohos
+
+  image_picker:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/image_picker/image_picker
+      ref: br_image_picker-v1.2.1_ohos
+
+  url_launcher:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/url_launcher/url_launcher
+      ref: br_url_launcher-v6.3.2_ohos
+
+  shared_preferences:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences
+      ref: br_shared_preferences-v2.5.4_ohos
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +109,38 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   shared_preferences_platform_interface: ^2.4.2
   image: ^4.13.1
+
+dependency_overrides:
+  material_ui:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/material_ui
+      ref: oh-3.47.7-dev
+  cupertino_ui:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/cupertino_ui
+      ref: oh-3.47.7-dev
+  path_provider:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/path_provider/path_provider
+      ref: br_path_provider-v2.1.5_ohos
+  shared_preferences:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences
+      ref: br_shared_preferences-v2.5.4_ohos
+  flutter_inappwebview_platform_interface:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_inappwebview.git
+      path: flutter_inappwebview_platform_interface
+      ref: br_v6.1.5_ohos
+  sqflite:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_sqflite.git
+      path: sqflite
+      ref: br_v2.4.2_ohos
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

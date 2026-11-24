@@ -5,11 +5,20 @@ jobs:
   lint:
     name: Format & Analyze
     runs-on: ubuntu-latest
+    env:
+      # The plugin's example LFS assets are not needed by this application.
+      GIT_LFS_SKIP_SMUDGE: "1"
     steps:
       - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v4
-        with:
-          version: "2026.11.10"
+      - name: Install OpenHarmony Flutter SDK
+        shell: bash
+        run: |
+          FLUTTER_VERSION=$(awk '$1 == "flutter" { print $2 }' .tool-versions | tr -d '\r')
+          FLUTTER_SDK="$RUNNER_TEMP/flutter-$FLUTTER_VERSION"
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://gitcode.com/CPF-Flutter/flutter_flutter.git "$FLUTTER_SDK"
+          echo "$FLUTTER_SDK/bin" >> "$GITHUB_PATH"
+      # Host lint/analyze does not require a DevEco SDK or HAP artifacts.
+      - run: flutter config --no-enable-ohos
       - run: flutter pub get
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed lib test tool
@@ -19,6 +28,9 @@ jobs:
   check:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      # The plugin's example LFS assets are not needed by this application.
+      GIT_LFS_SKIP_SMUDGE: "1"
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -28,8 +40,14 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "17"
-      - uses: jdx/mise-action@v4
-        with:
-          version: "2026.11.10"
+      - name: Install OpenHarmony Flutter SDK
+        shell: bash
+        run: |
+          FLUTTER_VERSION=$(awk '$1 == "flutter" { print $2 }' .tool-versions | tr -d '\r')
+          FLUTTER_SDK="$RUNNER_TEMP/flutter-$FLUTTER_VERSION"
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://gitcode.com/CPF-Flutter/flutter_flutter.git "$FLUTTER_SDK"
+          echo "$FLUTTER_SDK/bin" >> "$GITHUB_PATH"
+      # Host unit/widget tests do not require a DevEco SDK or HAP artifacts.
+      - run: flutter config --no-enable-ohos
       - run: flutter pub get
       - run: flutter test --no-pub test/
