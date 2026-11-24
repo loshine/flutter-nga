@@ -93,8 +93,11 @@ mise exec -- flutter run
 ### 构建发布版本
 
 ```bash
-# Android APK
+# Android APK（Universal）
 mise exec -- flutter build apk
+
+# Android 分 ABI APK（arm64-v8a / armeabi-v7a / x86_64）
+mise exec -- flutter build apk --split-per-abi
 
 # Android App Bundle
 mise exec -- flutter build appbundle
@@ -126,7 +129,7 @@ Release 回退到 debug 签名；填写后必须提供其余三个字段，文�
 ### 发布新版本
 
 改动构建配置、SDK 版本、依赖或平台工程的 PR 会触发 `.github/workflows/build.yml` 验证各平台构建。
-推送 `v*.*.*` tag 后，Android 正式签名构建通过才会创建 GitHub Release 并上传 APK 和 AAB。更新说明根据合并的 PR 自动生成。
+推送 `v*.*.*` tag 后，Android 正式签名构建通过才会创建 GitHub Release 并上传分 ABI APK（`arm64-v8a`、`armeabi-v7a`、`x86_64`）、Universal APK 和 AAB。更新说明根据合并的 PR 自动生成。
 
 | 平台 | PR 构建产物 |
 | --- | --- |
