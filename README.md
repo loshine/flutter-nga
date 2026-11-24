@@ -1,9 +1,9 @@
 # Flutter NGA
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.50.0-02569B?logo=flutter)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.50.0%2Bohos--0.0.1--pre-02569B?logo=flutter)](https://gitcode.com/CPF-Flutter/flutter_flutter)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Desktop-lightgrey)]()
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20HarmonyOS%20%7C%20Desktop-lightgrey)]()
 [![GitHub stars](https://img.shields.io/github/stars/loshine/flutter-nga?style=social)](https://github.com/loshine/flutter-nga)
 
 > 一个使用 Flutter 开发的 [NGA](https://bbs.nga.cn) (艾泽拉斯国家地理) 论坛客户端。
@@ -39,7 +39,7 @@
 
 | 分类     | 技术方案                     |
 | -------- | ---------------------------- |
-| 框架     | Flutter stable 3.50.0 (FVM)  |
+| 框架     | Flutter OHOS 3.50.0+ohos-0.0.1-pre (mise) |
 | 状态管理 | Riverpod 3.x + flutter_hooks |
 | 路由     | go_router                    |
 | 网络     | Dio                          |
@@ -51,9 +51,9 @@
 
 ### 环境要求
 
-- [mise](https://mise.jdx.dev/installing-mise.html)，用于安装 `.tool-versions` 固定的 Flutter SDK（当前 3.50.0）
+- [mise](https://mise.jdx.dev/installing-mise.html)，用于管理 `.tool-versions` 固定的鸿蒙 Flutter SDK（当前 `3.50.0+ohos-0.0.1-pre`，通过 `mise link` 挂载）
 - Dart SDK >=3.13.0 <4.0.0
-- Android SDK / Xcode (取决于目标平台)
+- DevEco Studio / HarmonyOS SDK（构建鸿蒙 HAP 时需要）、Android SDK / Xcode（取决于目标平台）
 
 Android 构建使用 Gradle 9.9.1、AGP 9.5.1、Kotlin 2.4.21。
 通过 Foojay 和 `android/gradle/gradle-daemon-jvm.properties`
@@ -76,12 +76,13 @@ cd android
 ### 安装与运行
 
 ```bash
-# 克隆项目
-git clone https://github.com/loshine/flutter-nga.git
+# 克隆项目并切换到鸿蒙分支
+git clone -b feature/ohos https://github.com/loshine/flutter-nga.git
 cd flutter-nga
 
-# 安装 .tool-versions 指定的 Flutter SDK
-mise install
+# 克隆鸿蒙版 Flutter SDK 并通过 mise link 挂载到 .tool-versions 对应版本
+git clone --depth 1 --branch 3.50.0+ohos-0.0.1-pre https://gitcode.com/CPF-Flutter/flutter_flutter.git ~/.local/share/flutter-sdks/3.50.0+ohos-0.0.1-pre
+mise link flutter@3.50.0+ohos-0.0.1-pre ~/.local/share/flutter-sdks/3.50.0+ohos-0.0.1-pre
 
 # 获取依赖
 mise exec -- flutter pub get
@@ -93,6 +94,12 @@ mise exec -- flutter run
 ### 构建发布版本
 
 ```bash
+# HarmonyOS HAP（未签名 Debug 包，需 DevEco SDK）
+mise exec -- flutter build hap --debug --no-codesign
+
+# HarmonyOS HAP（Release 包，需配置 ohos/build-profile.json5 签名）
+mise exec -- flutter build hap --release
+
 # Android APK（Universal）
 mise exec -- flutter build apk
 
@@ -180,6 +187,7 @@ lib/
 │   ├── entity/            # 数据实体
 │   ├── repository/        # 数据仓库
 │   └── core/              # Dio 配置与仓库装配
+├── plugins/               # 鸿蒙原生登录与相册保存插件通道
 ├── providers/             # Riverpod Providers
 │   ├── common/            # 通用 Provider
 │   ├── core/              # 核心 Provider
@@ -204,13 +212,14 @@ lib/
 
 ## 支持平台
 
+- HarmonyOS（当前分支 `feature/ohos`，依赖 `CPF-Flutter` 鸿蒙 SDK 与适配插件）
 - Android
 - iOS（15.0+）
 - macOS
 - Linux
 - Windows
 
-鸿蒙（HarmonyOS）适配在 [`feature/ohos`](https://github.com/loshine/flutter-nga/tree/feature/ohos) 分支维护。
+通用上游版本在 [`main`](https://github.com/loshine/flutter-nga/tree/main) 分支维护。
 
 ## 开源协议
 

@@ -43,6 +43,12 @@ iOS 构建（最低 iOS 15.0）：
 - 若 `pod install` 报 `Unicode Normalization not appropriate for ASCII-8BIT`，设置 `LANG=en_US.UTF-8` 后重试。
 - 原生单元测试在 `ios/RunnerTests/`（Swift Testing，以 Runner.app 为 `TEST_HOST`），已加入 Runner scheme 的 Test。先 `mise exec -- flutter build ios --simulator --debug` 生成 Pods 与 SPM 包，再运行 `xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination 'platform=iOS Simulator,name=<机型>'`。
 
+HarmonyOS（OHOS）构建与适配：
+- `ohos/build-profile.json5` 不写死 `compileSdkVersion`，默认使用当前 DevEco Studio 内置 SDK；构建 HAP 需设置 `DEVECO_SDK_HOME` 并将 DevEco 的 `ohpm`/`hvigor`/`node` 加入 `PATH`。仅跑宿主单元测试时可执行 `flutter config --no-enable-ohos`。
+- Dart 层判断鸿蒙平台统一使用 `Platform.operatingSystem == 'ohos'`（涉及 Web 时加 `!kIsWeb`），不要使用 `Platform.isOhos`——`3.50.0+ohos-0.0.1-pre` 宿主 `flutter_tester` 的预编译 dill 不含该 getter，单测会抛 `NoSuchMethodError`。
+- 平台插件与 UI 基础库来自 `CPF-Flutter` GitCode 仓库（`material_ui`、`cupertino_ui`、`path_provider`、`image_picker`、`url_launcher`、`shared_preferences`、`device_info_plus`、`package_info_plus`、`flutter_inappwebview`、`sqflite`）。`gal` 暂无鸿蒙实现，鸿蒙端保存图片走 `lib/plugins/gallery_saver.dart` → `FlutterGallerySaverPlugin.ets`；登录页额外保留 `lib/plugins/login.dart` → `FlutterLoginPlugin.ets` 原生登录入口。
+- `easy_refresh` 暂锁 `3.4.0`：`>=3.5.0` 在 Dart 3 下对 `TargetPlatform` 做穷举 `switch` 缺少 `TargetPlatform.ohos`，且上游暂无鸿蒙适配。
+
 ## 核心架构
 
 ### Data() 单例（lib/data/data.dart）
@@ -89,8 +95,8 @@ NGA 帖子使用 UBB 标签，`NgaContentParser.parse()` 将其转为 HTML：
 
 ### Material UI 迁移
 
-应用代码统一从 `package:material_ui/material_ui.dart` / `package:cupertino_ui/cupertino_ui.dart` 导入，lib 下不再使用 `package:flutter/material.dart`。
-photo_view、toastification 尚未迁移，依赖旧版主题，由 `LegacyThemeBridge`（`MaterialUiCompatibilityBridge`）提供；`test/utils/material_ui_migration_test.dart` 覆盖这一桥接。
+应用代码统一从 `package:material_ui/material_ui.dart` / `package:cupertino_ui/cupertino_ui.dart` 导入，lib 下不再使用 `package:flutter/material.dart`。本分支的 `material_ui` / `cupertino_ui` 需通过 `pubspec.yaml` 指向 `CPF-Flutter/flutter_packages`（`oh-3.47.7-dev`）以兼容 `TargetPlatform.ohos`，不能直接切回 pub.dev 官方包。
+photo_view、toastification 及本分支锁定的 easy_refresh 3.4.0 依赖旧版主题，由 `LegacyThemeBridge`（`MaterialUiCompatibilityBridge`）提供；`test/utils/material_ui_migration_test.dart` 覆盖这一桥接。
 
 ### 路由（lib/utils/route.dart, lib/utils/linkroute/）
 
@@ -113,7 +119,7 @@ Riverpod 3.x + flutter_hooks。Provider 全部基于 `Notifier` / `NotifierProvi
 
 ## CI
 
-- PR 触发 `.github/workflows/check.yml`：
+- PR 触发 `.github/workflows/check.yml`（读取 `.tool-versions` 后直接 `git clone` `CPF-Flutter/flutter_flutter` 并执行 `flutter config --no-enable-ohos`，同时设置 `GIT_LFS_SKIP_SMUDGE=1`）：
   - `lint` job（仅 ubuntu）：`dart format --output=none --set-exit-if-changed lib test tool` 检查格式，`flutter analyze --no-pub` 要求 0 条问题（info 也会让 job 失败）。新增存放 Dart 源码的目录时，要同步加入格式检查的路径。
   - `check` job：在 ubuntu / windows / macos 上运行 `flutter test --no-pub test/`。
 - `build.yml` 在发版相关 PR 中验证 Android（Universal APK、分 ABI APK、AAB）、iOS、macOS、Windows、Linux 和 Web 构建。iOS 只做无签名编译检查，Web 只在 PR 中提供预览产物。推送版本 tag 时校验 `pubspec.yaml` 版本名，Android job 用 Environment「Android Build」的 `JKS`（base64）/ `STORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD` 还原签名配置。Release job 只上传 Android 签名分 ABI APK（`arm64-v8a` / `armeabi-v7a` / `x86_64`）、Universal APK 和 AAB。缺少 Android 签名 Secrets 时构建失败。各平台产物和发版步骤见 README「发布新版本」。
