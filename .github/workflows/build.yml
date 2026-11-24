@@ -1,6 +1,6 @@
 name: Build
 
-# 发版相关 PR 验证各平台构建。推送版本 tag 时发布 Android 签名 APK 和 AAB。
+# 发版相关 PR 验证各平台构建。推送版本 tag 时发布 Android 签名分 ABI APK、Universal APK 和 AAB。
 # 签名使用 Environment「Android Build」的 Secrets：JKS（keystore 的 base64）、STORE_PASSWORD、KEY_ALIAS、KEY_PASSWORD。
 on:
   pull_request:
@@ -97,7 +97,8 @@ jobs:
           } > android/key.properties
 
       # Maven Central 偶尔返回 429，失败后等待重试。
-      - name: Build APK and App Bundle
+      # 每次构建后立即收集对应产物，避免后续 flutter build apk 覆盖或清理输出目录。
+      - name: Build Android packages and collect artifacts
         run: |
           retry() {
             for attempt in 1 2 3; do
@@ -107,15 +108,16 @@ jobs:
             done
             return 1
           }
-          retry flutter build apk --no-pub
-          retry flutter build appbundle --no-pub
-
-      - name: Collect artifacts
-        run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/flutter-nga-${GITHUB_REF_NAME}.apk"
+          retry flutter build apk --release --no-pub
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/flutter-nga-${GITHUB_REF_NAME}-universal.apk"
+          retry flutter build apk --release --split-per-abi --no-pub
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            cp "build/app/outputs/flutter-apk/app-${abi}-release.apk" "dist/flutter-nga-${GITHUB_REF_NAME}-${abi}.apk"
+          done
+          retry flutter build appbundle --release --no-pub
           cp build/app/outputs/bundle/release/app-release.aab "dist/flutter-nga-${GITHUB_REF_NAME}.aab"
-          ls -l dist
+          ls -lh dist
 
       - uses: actions/upload-artifact@v7
         with:
@@ -144,8 +146,20 @@ jobs:
         with:
           version: "2026.11.10"
       - run: flutter pub get
-      - run: flutter build apk --release --no-pub
-      - run: flutter build appbundle --release --no-pub
+      - name: Build Universal APK
+        run: |
+          flutter build apk --release --no-pub
+          test -f build/app/outputs/flutter-apk/app-release.apk
+      - name: Build per-ABI APKs
+        run: |
+          flutter build apk --release --split-per-abi --no-pub
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            test -f "build/app/outputs/flutter-apk/app-${abi}-release.apk"
+          done
+      - name: Build App Bundle
+        run: |
+          flutter build appbundle --release --no-pub
+          test -f build/app/outputs/bundle/release/app-release.aab
 
   platforms:
     name: Build ${{ matrix.target }}
