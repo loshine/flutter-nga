@@ -8,8 +8,9 @@ import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
+import 'package:flutter_nga/utils/motion.dart';
 
-/// 单个版块分类页：按版块组分段展示，组标题下为三列网格，点击组标题可折叠
+/// 单个版块分类页：按版块组分段展示，组标题下为自适应列数网格，点击组标题可折叠
 class ForumCategoryPage extends HookConsumerWidget {
   const ForumCategoryPage({
     required this.category,
@@ -24,12 +25,11 @@ class ForumCategoryPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final collapsedGroups = useState(<int>{});
     final scrollController = useScrollToTopController(scrollToTop);
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
-    final double itemHeight = 108;
-    final double itemWidth = MediaQuery.sizeOf(context).width / 3;
-    final gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 3,
-      childAspectRatio: itemWidth / itemHeight,
+    const gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: 120,
+      mainAxisExtent: 108,
     );
     // 只有一个组时组名通常与分类名相同，不再重复展示，也无需折叠
     final showGroupName = category.groups.length > 1;
@@ -75,6 +75,8 @@ class ForumCategoryPage extends HookConsumerWidget {
                 ),
               ],
             ),
+          if (bottomPadding > 0)
+            SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
         ],
       ),
     );
@@ -109,7 +111,8 @@ class _ForumGroupHeader extends StatelessWidget {
         ),
         trailing: AnimatedRotation(
           turns: expanded ? 0 : -0.25,
-          duration: const Duration(milliseconds: 200),
+          duration: Motion.resolveDuration(context, Motion.durationShort4),
+          curve: Motion.emphasized,
           child: Icon(Icons.expand_more, color: colorScheme.onSurfaceVariant),
         ),
         onTap: onTap,

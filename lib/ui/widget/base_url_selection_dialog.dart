@@ -3,10 +3,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/base_url_config.dart';
 import 'package:flutter_nga/providers/settings/base_url_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
-/// BaseUrl 选择对话框
+/// BaseUrl 选择对话框 / 底部面板
 class BaseUrlSelectionDialog extends ConsumerWidget {
-  const BaseUrlSelectionDialog({super.key});
+  const BaseUrlSelectionDialog({super.key, this.embedded = false});
+
+  final bool embedded;
+
+  static Future<void> show(BuildContext context) {
+    return showM3SelectionSheet<void>(
+      context: context,
+      builder: (_) => const BaseUrlSelectionDialog(embedded: true),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,45 +34,81 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
         )
         .toList();
 
+    final radioList = RadioGroup<BaseUrlConfig>(
+      groupValue: state.currentConfig,
+      onChanged: (value) {
+        if (value == null || state.isLoading) return;
+        _onSelectConfig(context, ref, state, value);
+      },
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: options.length,
+        itemBuilder: (context, index) {
+          final config = options[index];
+
+          return RadioListTile<BaseUrlConfig>(
+            title: Text(
+              config.name,
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+            ),
+            subtitle: Text(
+              config.url.isEmpty ? '点击后输入自定义地址' : config.url,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            value: config,
+            enabled: !state.isLoading,
+            activeColor: colorScheme.primary,
+            contentPadding: embedded
+                ? const EdgeInsets.symmetric(horizontal: 16)
+                : EdgeInsets.zero,
+            dense: true,
+          );
+        },
+      ),
+    );
+
+    if (embedded) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                '选择服务器',
+                style: textTheme.headlineSmall?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Flexible(child: radioList),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('取消'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return AlertDialog(
       title: const Text('选择服务器'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: RadioGroup<BaseUrlConfig>(
-          groupValue: state.currentConfig,
-          onChanged: (value) {
-            if (value == null || state.isLoading) return;
-            _onSelectConfig(context, ref, state, value);
-          },
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: options.length,
-            itemBuilder: (context, index) {
-              final config = options[index];
-
-              return RadioListTile<BaseUrlConfig>(
-                title: Text(
-                  config.name,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                subtitle: Text(
-                  config.url.isEmpty ? '点击后输入自定义地址' : config.url,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                value: config,
-                enabled: !state.isLoading,
-                activeColor: colorScheme.primary,
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              );
-            },
-          ),
-        ),
-      ),
+      content: SizedBox(width: double.maxFinite, child: radioList),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -104,21 +151,23 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
         return HookBuilder(
           builder: (context) {
             final controller = useTextEditingController(text: initialValue);
-            return AlertDialog(
-              title: const Text('自定义服务器地址'),
+            return M3Dialog(
+              title: '自定义服务器地址',
               content: TextField(
                 controller: controller,
                 autofocus: true,
                 decoration: const InputDecoration(
                   hintText: 'https://example.com/',
                 ),
+                onSubmitted: (_) =>
+                    Navigator.of(dialogContext).pop(controller.text),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
                   child: const Text('取消'),
                 ),
-                TextButton(
+                FilledButton(
                   onPressed: () =>
                       Navigator.of(dialogContext).pop(controller.text),
                   child: const Text('确定'),
@@ -129,13 +178,10 @@ class BaseUrlSelectionDialog extends ConsumerWidget {
         );
       },
     );
-    final normalized = _normalizeBaseUrl(value ?? '');
+    if (value == null) return null;
+    final normalized = _normalizeBaseUrl(value);
     if (normalized == null) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('请输入有效的 http/https 地址')));
-      }
+      AppToast.warning('请输入有效的 http/https 地址');
       return null;
     }
     return normalized;

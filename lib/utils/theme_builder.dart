@@ -8,26 +8,27 @@ class ThemeBuilder {
   // 经典暗金/琥珀色：与棕色 primary 完美协调，更贴近 NGA 的经典质感，同时提供足够的亮度。
   static const _secondarySeed = Color(0xFFDCA965);
 
-  static Color getSecondaryForSeed(Color seed) {
-    if (seed == Colors.brown) return const Color(0xFFDCA965);
-    if (seed == Colors.blue) return Colors.lightBlue;
-    if (seed == Colors.teal) return Colors.cyan;
-    if (seed == Colors.green) return Colors.lightGreen;
-    if (seed == Colors.purple) return Colors.deepPurpleAccent;
-    if (seed == Colors.pink) return Colors.purpleAccent;
-    if (seed == Colors.orange) return Colors.amber;
-    if (seed == Colors.red) return Colors.deepOrange;
-    if (seed == Colors.indigo) return Colors.blueAccent;
-    if (seed == Colors.cyan) return Colors.lightBlueAccent;
-    return _secondarySeed;
+  /// 仅为经典棕色主题提供暗金辅色；其他预设与系统动态配色保留 M3 原生和谐的
+  /// tonal secondary 色阶，避免选中胶囊与 primaryContainer 争夺焦点。
+  static Color? getSecondaryForSeed(Color seed, {bool isDynamic = false}) {
+    if (isDynamic) return null;
+    if (seed == Colors.brown) return _secondarySeed;
+    return null;
   }
 
   /// 从 ColorScheme 构建 ThemeData
   static ThemeData buildTheme(
     ColorScheme baseColorScheme, [
     Color? secondarySeed,
+    double contrastLevel = 0.0,
   ]) {
-    final colorScheme = _withRefinedSecondary(baseColorScheme, secondarySeed);
+    final colorScheme = secondarySeed == null
+        ? baseColorScheme
+        : _withRefinedSecondary(
+            baseColorScheme,
+            secondarySeed,
+            contrastLevel: contrastLevel,
+          );
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -138,7 +139,7 @@ class ThemeBuilder {
       ),
       // M3 NavigationBar Theme
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: colorScheme.surfaceContainer,
         indicatorColor: colorScheme.secondaryContainer,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         height: 80,
@@ -159,17 +160,68 @@ class ThemeBuilder {
           color: colorScheme.onSurfaceVariant,
         ),
       ),
+      // M3 2024+ Slider 样式：垂直手柄 + 轨道间隙 + 拖动数值气泡
+      sliderTheme: SliderThemeData(
+        trackHeight: 16,
+        trackGap: 6,
+        trackShape: const GappedSliderTrackShape(),
+        thumbShape: const HandleThumbShape(),
+        thumbSize: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.dragged)) {
+            return const Size(2, 44);
+          }
+          return const Size(4, 44);
+        }),
+        valueIndicatorShape: const RoundedRectSliderValueIndicatorShape(),
+        showValueIndicator: ShowValueIndicator.onDrag,
+        activeTrackColor: colorScheme.primary,
+        inactiveTrackColor: colorScheme.secondaryContainer,
+        thumbColor: colorScheme.primary,
+        valueIndicatorColor: colorScheme.inverseSurface,
+        valueIndicatorTextStyle: TextStyle(
+          color: colorScheme.onInverseSurface,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      // M3 2024+ 进度条样式：圆角端点、轨道间隙与停顿点
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: colorScheme.primary,
+        linearTrackColor: colorScheme.secondaryContainer,
+        circularTrackColor: colorScheme.secondaryContainer,
+        stopIndicatorColor: colorScheme.primary,
+        strokeCap: StrokeCap.round,
+        trackGap: 4,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      // M3 Switch：选中/未选中滑块图标，提升辨识度与色弱友好度
+      switchTheme: SwitchThemeData(
+        thumbIcon: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const Icon(Icons.check);
+          }
+          return const Icon(Icons.close);
+        }),
+      ),
+      // M3 SnackBar：悬浮圆角 + inverseSurface 色阶
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: colorScheme.inverseSurface,
+        contentTextStyle: TextStyle(color: colorScheme.onInverseSurface),
+        actionTextColor: colorScheme.inversePrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
   static ColorScheme _withRefinedSecondary(
-    ColorScheme base, [
-    Color? secondarySeed,
-  ]) {
-    final seed = secondarySeed ?? _secondarySeed;
+    ColorScheme base,
+    Color secondarySeed, {
+    double contrastLevel = 0.0,
+  }) {
     final accent = ColorScheme.fromSeed(
-      seedColor: seed,
+      seedColor: secondarySeed,
       brightness: base.brightness,
+      contrastLevel: contrastLevel,
     );
     return base.copyWith(
       secondary: accent.primary,
@@ -184,20 +236,54 @@ class ThemeBuilder {
   }
 
   /// 从种子色构建亮色主题
-  static ThemeData buildLightTheme(Color seedColor) {
+  static ThemeData buildLightTheme(
+    Color seedColor, {
+    bool isDynamic = false,
+    double contrastLevel = 0.0,
+  }) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.light,
+      contrastLevel: contrastLevel,
     );
-    return buildTheme(colorScheme, getSecondaryForSeed(seedColor));
+    return buildTheme(
+      colorScheme,
+      getSecondaryForSeed(seedColor, isDynamic: isDynamic),
+      contrastLevel,
+    );
   }
 
   /// 从种子色构建暗色主题
-  static ThemeData buildDarkTheme(Color seedColor) {
+  static ThemeData buildDarkTheme(
+    Color seedColor, {
+    bool isDynamic = false,
+    double contrastLevel = 0.0,
+  }) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.dark,
+      contrastLevel: contrastLevel,
     );
-    return buildTheme(colorScheme, getSecondaryForSeed(seedColor));
+    return buildTheme(
+      colorScheme,
+      getSecondaryForSeed(seedColor, isDynamic: isDynamic),
+      contrastLevel,
+    );
+  }
+
+  /// 高对比度亮色主题（响应系统高对比度无障碍设置）
+  static ThemeData buildHighContrastLightTheme(
+    Color seedColor, {
+    bool isDynamic = false,
+  }) {
+    return buildLightTheme(seedColor, isDynamic: isDynamic, contrastLevel: 1.0);
+  }
+
+  /// 高对比度暗色主题（响应系统高对比度无障碍设置）
+  static ThemeData buildHighContrastDarkTheme(
+    Color seedColor, {
+    bool isDynamic = false,
+  }) {
+    return buildDarkTheme(seedColor, isDynamic: isDynamic, contrastLevel: 1.0);
   }
 }

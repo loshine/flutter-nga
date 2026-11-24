@@ -4,11 +4,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
-import 'package:flutter_nga/utils/route.dart';
 
 import 'notification_item_widget.dart';
 
@@ -100,27 +100,19 @@ class NotificationListPage extends HookConsumerWidget {
   void _confirmClear(BuildContext context, NotificationListNotifier notifier) {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('清空提醒'),
-        content: const Text('将删除信箱中的全部提醒，清空后无法恢复。'),
-        actions: [
-          TextButton(
-            onPressed: () => Routes.pop(dialogContext),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Routes.pop(dialogContext);
-              try {
-                await notifier.clear();
-                AppToast.success('已清空提醒');
-              } catch (err) {
-                AppToast.error(err);
-              }
-            },
-            child: const Text('清空'),
-          ),
-        ],
+      builder: (_) => M3ConfirmDialog(
+        title: '清空提醒',
+        content: '将删除信箱中的全部提醒，清空后无法恢复。',
+        confirmText: '清空',
+        destructive: true,
+        onConfirm: () async {
+          try {
+            await notifier.clear();
+            AppToast.success('已清空提醒');
+          } catch (err) {
+            AppToast.error(err);
+          }
+        },
       ),
     );
   }

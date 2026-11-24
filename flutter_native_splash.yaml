@@ -1,9 +1,14 @@
 flutter_native_splash:
   color: "#FFF9E3"
+  color_dark: "#181210"
   # Pre-Android 12 / iOS：可用完整 logo
   image: images/launcher/icon_1024.png
+  image_dark: images/launcher/splash_icon_dark_1024.png
   android_12:
     color: "#FFF9E3"
+    color_dark: "#181210"
     # Android 12+ 圆形裁切，需使用留白更大的专用图
     image: images/launcher/splash_icon_1024.png
+    image_dark: images/launcher/splash_icon_dark_1024.png
     icon_background_color: "#F5E8CB"
+    icon_background_color_dark: "#2B221E"

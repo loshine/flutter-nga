@@ -54,4 +54,26 @@ void main() {
     expect(find.byType(ListTile), findsNothing);
     expect(find.text('炉石传说'), findsOneWidget);
   });
+
+  testWidgets('wide viewport adapts grid columns beyond 3', (tester) async {
+    tester.view.physicalSize = const Size(960, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await pumpPage(
+      tester,
+      const ForumCategory('trad', '传统游戏', [
+        ForumGroup('传统游戏', [
+          Forum(1, '版块1'),
+          Forum(2, '版块2'),
+          Forum(3, '版块3'),
+          Forum(4, '版块4'),
+        ]),
+      ]),
+    );
+
+    final firstTop = tester.getTopLeft(find.text('版块1')).dy;
+    final fourthTop = tester.getTopLeft(find.text('版块4')).dy;
+    expect(fourthTop, equals(firstTop));
+  });
 }

@@ -13,6 +13,9 @@ abstract final class AppHaptics {
   /// 点赞 / 点踩成功。
   static Future<void> reactionSucceeded() => HapticFeedback.lightImpact();
 
+  /// 收藏 / 关键开关状态切换成功。
+  static Future<void> selectionChanged() => HapticFeedback.selectionClick();
+
   /// 滑动操作越过或退回触发阈值。
   static Future<void> swipeThresholdChanged() =>
       HapticFeedback.selectionClick();

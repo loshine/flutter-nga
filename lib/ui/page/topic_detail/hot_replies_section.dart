@@ -177,13 +177,17 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
                 ),
               // pid 优先打开原回复，缺失时回退到楼层跳转
               if (canJump)
-                GestureDetector(
-                  onTap: _jumpToOriginal,
-                  behavior: HitTestBehavior.opaque,
+                TextButton(
+                  onPressed: _jumpToOriginal,
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(48, 36),
+                  ),
                   child: Text(
                     '[原帖]',
                     style: textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -205,7 +209,7 @@ class _HotReplyItemCardState extends State<_HotReplyItemCard> {
       children: [
         ClipRect(
           child: AnimatedSize(
-            duration: Motion.durationMedium2,
+            duration: Motion.resolveDuration(context, Motion.durationMedium2),
             curve: Motion.emphasized,
             alignment: Alignment.topCenter,
             child: ConstrainedBox(

@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -11,6 +10,7 @@ import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
+import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 import 'package:flutter_nga/utils/nga_links.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -154,37 +154,32 @@ class TopicDetailPage extends HookConsumerWidget {
             ),
             Tooltip(
               message: '跳转页码',
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => TopicPageSelectDialog(
-                      currentPage: state.currentPage,
-                      maxPage: state.maxPage,
-                      maxFloor: state.maxFloor,
-                      pageSelectedCallback: (isPage, target) {
-                        final index = isPage
-                            ? target - 1
-                            : (target / 20 - 1).ceil();
-                        goToPage(
-                          index.clamp(0, tabController.length - 1).toInt(),
-                        );
-                      },
-                    ),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+                onPressed: () {
+                  TopicPageSelectDialog.show(
+                    context,
+                    currentPage: state.currentPage,
+                    maxPage: state.maxPage,
+                    maxFloor: state.maxFloor,
+                    pageSelectedCallback: (isPage, target) {
+                      final index = isPage
+                          ? target - 1
+                          : (target / 20 - 1).ceil();
+                      goToPage(
+                        index.clamp(0, tabController.length - 1).toInt(),
+                      );
+                    },
                   );
                 },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    "${state.currentPage}/${state.maxPage}",
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                child: Text(
+                  "${state.currentPage}/${state.maxPage}",
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -201,9 +196,7 @@ class TopicDetailPage extends HookConsumerWidget {
             IconButton(
               tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
               icon: Icon(
-                isDark
-                    ? CommunityMaterialIcons.weather_sunny
-                    : CommunityMaterialIcons.weather_night,
+                isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
               ),
               onPressed: () => ref
                   .read(themeProvider.notifier)
@@ -215,14 +208,18 @@ class TopicDetailPage extends HookConsumerWidget {
             IconButton(
               tooltip: favourited ? '取消收藏' : '收藏',
               isSelected: favourited,
-              icon: Icon(CommunityMaterialIcons.heart_outline),
-              selectedIcon: Icon(CommunityMaterialIcons.heart),
+              icon: const Icon(Icons.favorite_border),
+              selectedIcon: Icon(
+                Icons.favorite,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               onPressed: state.favouriteBusy
                   ? null
                   : () {
                       notifier
                           .toggleFavourite()
                           .then((message) {
+                            AppHaptics.selectionChanged();
                             if (message != null) AppToast.success(message);
                           })
                           .catchError((e) {
@@ -230,9 +227,10 @@ class TopicDetailPage extends HookConsumerWidget {
                           });
                     },
             ),
-            IconButton(
+            const SizedBox(width: 4),
+            IconButton.filledTonal(
               tooltip: '回复',
-              icon: Icon(CommunityMaterialIcons.comment_outline),
+              icon: const Icon(Icons.chat_bubble_outline),
               onPressed: () {
                 if (fid == null && state.topic == null) return;
                 Routes.navigateTo(

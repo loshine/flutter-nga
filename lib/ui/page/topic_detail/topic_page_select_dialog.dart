@@ -1,6 +1,7 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/route.dart';
 
 typedef PageSelectedCallback = Function(bool, int);
 
@@ -9,6 +10,7 @@ class TopicPageSelectDialog extends StatefulWidget {
   final int maxPage;
   final int maxFloor;
   final PageSelectedCallback? pageSelectedCallback;
+  final bool embedded;
 
   const TopicPageSelectDialog({
     super.key,
@@ -16,34 +18,86 @@ class TopicPageSelectDialog extends StatefulWidget {
     required this.maxFloor,
     required this.currentPage,
     this.pageSelectedCallback,
+    this.embedded = false,
   });
+
+  static Future<void> show(
+    BuildContext context, {
+    required int currentPage,
+    required int maxPage,
+    required int maxFloor,
+    PageSelectedCallback? pageSelectedCallback,
+  }) {
+    return showM3SelectionSheet<void>(
+      context: context,
+      builder: (_) => TopicPageSelectDialog(
+        currentPage: currentPage,
+        maxPage: maxPage,
+        maxFloor: maxFloor,
+        pageSelectedCallback: pageSelectedCallback,
+        embedded: true,
+      ),
+    );
+  }
 
   @override
   State<TopicPageSelectDialog> createState() => _TopicPageSelectState();
 }
 
 class _TopicPageSelectState extends State<TopicPageSelectDialog> {
-  int _currentVal = 1;
+  late int _currentVal;
+  late TextEditingController _inputController;
   bool _isPage = true;
+
+  int get _maxVal {
+    final raw = _isPage ? widget.maxPage : widget.maxFloor;
+    return raw < 1 ? 1 : raw;
+  }
 
   @override
   void initState() {
-    _currentVal = widget.currentPage;
     super.initState();
+    _currentVal = widget.currentPage.clamp(1, _maxVal);
+    _inputController = TextEditingController(text: '$_currentVal');
+  }
+
+  @override
+  void dispose() {
+    _inputController.dispose();
+    super.dispose();
+  }
+
+  void _setValue(int next, {bool updateText = true}) {
+    final clamped = next.clamp(1, _maxVal);
+    setState(() {
+      _currentVal = clamped;
+      if (updateText) {
+        final text = '$clamped';
+        _inputController.value = TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        );
+      }
+    });
+  }
+
+  void _submit() {
+    final parsed = int.tryParse(_inputController.text.trim());
+    final target = (parsed ?? _currentVal).clamp(1, _maxVal);
+    widget.pageSelectedCallback?.call(_isPage, target);
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final maxVal = _maxVal;
+    final unit = _isPage ? '页' : '楼';
 
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Dimen.radiusXL),
-      ),
-      backgroundColor: colorScheme.surfaceContainerHigh,
+    final body = SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.fromLTRB(24, widget.embedded ? 4 : 24, 24, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,89 +109,129 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
               ),
             ),
             const SizedBox(height: 16),
+            // 精确步进与数字直输，高楼帖无需反复微调滑块
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton.filledTonal(
+                  tooltip: '减少',
+                  icon: const Icon(Icons.remove),
+                  onPressed: _currentVal > 1
+                      ? () => _setValue(_currentVal - 1)
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 112,
+                  child: TextField(
+                    key: const ValueKey('page_jump_input'),
+                    controller: _inputController,
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.go,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    style: textTheme.titleLarge?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      prefixText: '第 ',
+                      suffixText: ' $unit',
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 10,
+                      ),
+                    ),
+                    onChanged: (text) {
+                      final parsed = int.tryParse(text);
+                      if (parsed != null) {
+                        _setValue(parsed, updateText: false);
+                      }
+                    },
+                    onSubmitted: (_) => _submit(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                IconButton.filledTonal(
+                  tooltip: '增加',
+                  icon: const Icon(Icons.add),
+                  onPressed: _currentVal < maxVal
+                      ? () => _setValue(_currentVal + 1)
+                      : null,
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
             Center(
               child: Text(
-                "第 $_currentVal ${_isPage ? "页" : "楼"}",
-                style: textTheme.titleLarge?.copyWith(
-                  color: colorScheme.primary,
+                '共 $maxVal $unit',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
             const SizedBox(height: 8),
             Slider(
-              value: _currentVal.toDouble(),
+              value: _currentVal.clamp(1, maxVal).toDouble(),
               min: 1,
-              max: _isPage
-                  ? widget.maxPage.toDouble()
-                  : widget.maxFloor.toDouble(),
-              divisions: _calcDivision(),
-              onChanged: (double newValue) {
-                setState(() {
-                  _currentVal = newValue.round();
-                });
-              },
+              max: maxVal > 1 ? maxVal.toDouble() : 2.0,
+              divisions: maxVal > 1 ? maxVal - 1 : 1,
+              label: '第 $_currentVal $unit',
+              onChanged: maxVal > 1
+                  ? (double newValue) => _setValue(newValue.round())
+                  : null,
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment<bool>(
-                      value: true,
-                      label: Text('页码'),
-                      icon: Icon(Icons.pages),
-                    ),
-                    ButtonSegment<bool>(
-                      value: false,
-                      label: Text('楼层'),
-                      icon: Icon(Icons.layers),
-                    ),
-                  ],
-                  selected: {_isPage},
-                  onSelectionChanged: (Set<bool> newSelection) {
-                    setState(() {
-                      _isPage = newSelection.first;
-                      // Reset value when switching mode to avoid out of bounds or confusion
-                      if (_isPage) {
-                        _currentVal = widget.currentPage;
-                      } else {
-                        _currentVal = 1;
-                      }
-                    });
-                  },
-                ),
-              ],
+            const SizedBox(height: 12),
+            Center(
+              child: SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment<bool>(
+                    value: true,
+                    label: Text('页码'),
+                    icon: Icon(Icons.pages),
+                  ),
+                  ButtonSegment<bool>(
+                    value: false,
+                    label: Text('楼层'),
+                    icon: Icon(Icons.layers),
+                  ),
+                ],
+                selected: {_isPage},
+                onSelectionChanged: (Set<bool> newSelection) {
+                  _isPage = newSelection.first;
+                  _setValue(_isPage ? widget.currentPage : 1);
+                },
+              ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
                   child: const Text("取消"),
-                  onPressed: () => Routes.pop(context),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
                 const SizedBox(width: 8),
-                FilledButton(
-                  child: const Text("确认"),
-                  onPressed: () {
-                    widget.pageSelectedCallback?.call(_isPage, _currentVal);
-                    Routes.pop(context);
-                  },
-                ),
+                FilledButton(onPressed: _submit, child: const Text("确认")),
               ],
             ),
           ],
         ),
       ),
     );
-  }
 
-  int _calcDivision() {
-    if (_isPage) {
-      return widget.maxPage > 1 ? widget.maxPage - 1 : 1;
-    } else {
-      return widget.maxFloor > 1 ? widget.maxFloor - 1 : 1;
-    }
+    if (widget.embedded) return body;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Dimen.radiusXL),
+      ),
+      backgroundColor: colorScheme.surfaceContainerHigh,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440),
+        child: body,
+      ),
+    );
   }
 }

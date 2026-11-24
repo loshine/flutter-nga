@@ -3,8 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/search/input_deletion_status_provider.dart';
 import 'package:flutter_nga/providers/search/search_options_provider.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/ui/widget/readable_width.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/route.dart';
 
@@ -13,17 +13,10 @@ class SearchPage extends HookConsumerWidget {
 
   const SearchPage({this.fid, super.key});
 
-  /// M3 SearchBar 推荐高度
-  static const double _searchBarHeight = 56.0;
-
-  /// M3 SearchBar 推荐圆角
-  static const double _searchBarRadius = 28.0;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = useTextEditingController();
     final focusNode = useFocusNode();
-    final isFocused = useState(false);
     final inputVisible = ref.watch(inputDeletionStatusProvider);
     final searchOptions = ref.watch(searchOptionsProvider(fid));
     final searchOptionsNotifier = ref.read(searchOptionsProvider(fid).notifier);
@@ -36,145 +29,80 @@ class SearchPage extends HookConsumerWidget {
             .setVisible(searchQuery.text.isNotEmpty);
       }
 
-      void focusListener() {
-        isFocused.value = focusNode.hasFocus;
-      }
-
       searchQuery.addListener(textListener);
-      focusNode.addListener(focusListener);
-      return () {
-        searchQuery.removeListener(textListener);
-        focusNode.removeListener(focusListener);
-      };
+      return () => searchQuery.removeListener(textListener);
     }, []);
+
+    final hintText = switch (searchOptions.firstRadio) {
+      FIRST_RADIO_FORUM => '搜索版块名称...',
+      FIRST_RADIO_USER =>
+        searchOptions.userRadio == USER_RADIO_UID ? '输入用户 ID...' : '输入用户名...',
+      _ => '搜索主题关键词...',
+    };
+
+    final hasBackButton =
+        ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 68,
         titleSpacing: 0,
-        title: _buildSearchBar(
-          context: context,
-          controller: searchQuery,
-          focusNode: focusNode,
-          isFocused: isFocused.value,
-          inputVisible: inputVisible,
-          colorScheme: colorScheme,
-          searchOptions: searchOptions,
+        title: Padding(
+          padding: EdgeInsets.only(
+            left: hasBackButton ? Dimen.spacingXS : Dimen.spacingL,
+            right: Dimen.spacingL,
+          ),
+          child: SearchBar(
+            controller: searchQuery,
+            focusNode: focusNode,
+            autoFocus: true,
+            hintText: hintText,
+            elevation: const WidgetStatePropertyAll(0),
+            backgroundColor: WidgetStatePropertyAll(
+              colorScheme.surfaceContainerHigh,
+            ),
+            constraints: const BoxConstraints(minHeight: 48, maxHeight: 52),
+            padding: const WidgetStatePropertyAll(
+              EdgeInsets.only(left: 16, right: 4),
+            ),
+            textInputAction: TextInputAction.search,
+            keyboardType:
+                searchOptions.firstRadio == FIRST_RADIO_USER &&
+                    searchOptions.userRadio == USER_RADIO_UID
+                ? TextInputType.number
+                : TextInputType.text,
+            onSubmitted: (text) => _onSearch(context, text, searchOptions, fid),
+            trailing: [
+              if (inputVisible)
+                IconButton(
+                  tooltip: '清除',
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    searchQuery.clear();
+                    focusNode.requestFocus();
+                  },
+                ),
+              IconButton(
+                tooltip: '搜索',
+                icon: const Icon(Icons.search),
+                onPressed: () =>
+                    _onSearch(context, searchQuery.text, searchOptions, fid),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            tooltip: '搜索',
-            onPressed: () =>
-                _onSearch(context, searchQuery.text, searchOptions, fid),
-          ),
-        ],
       ),
-      body: _buildBody(context, ref, searchOptions, searchOptionsNotifier),
-    );
-  }
-
-  /// M3 风格的搜索输入框
-  Widget _buildSearchBar({
-    required BuildContext context,
-    required TextEditingController controller,
-    required FocusNode focusNode,
-    required bool isFocused,
-    required bool inputVisible,
-    required ColorScheme colorScheme,
-    required SearchOptionsState searchOptions,
-  }) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      height: _searchBarHeight,
-      margin: const EdgeInsets.only(right: Dimen.spacingS),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(_searchBarRadius),
-        // 焦点状态边框
-        border: isFocused
-            ? Border.all(color: colorScheme.primary, width: 2)
-            : null,
-      ),
-      child: Row(
-        children: [
-          // 搜索图标
-          Padding(
-            padding: const EdgeInsets.only(left: Dimen.spacingL),
-            child: Icon(
-              Icons.search,
-              size: Dimen.iconMedium,
-              color: isFocused
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-            ),
-          ),
-          // 输入框
-          Expanded(
-            child: TextField(
-              controller: controller,
-              focusNode: focusNode,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (text) =>
-                  _onSearch(context, text, searchOptions, fid),
-              maxLines: 1,
-              style: textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurface,
-              ),
-              cursorColor: colorScheme.primary,
-              decoration: InputDecoration(
-                hintText: '搜索...',
-                hintStyle: textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: Dimen.spacingM,
-                  vertical: Dimen.spacingL,
-                ),
-                isDense: true,
-              ),
-            ),
-          ),
-          // 清除按钮
-          if (inputVisible)
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => controller.clear(),
-                ),
-                borderRadius: BorderRadius.circular(_searchBarRadius),
-                child: Padding(
-                  padding: const EdgeInsets.all(Dimen.spacingM),
-                  child: Icon(
-                    Icons.close,
-                    size: Dimen.iconMedium,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            )
-          else
-            const SizedBox(width: Dimen.spacingL),
-        ],
-      ),
+      body: _buildBody(context, searchOptions, searchOptionsNotifier),
     );
   }
 
   Widget _buildBody(
     BuildContext context,
-    WidgetRef ref,
     SearchOptionsState state,
     SearchOptionsNotifier notifier,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
     final mediaPadding = MediaQuery.paddingOf(context);
 
     return ReadableListPadding(
@@ -189,32 +117,33 @@ class SearchPage extends HookConsumerWidget {
         children: [
           // 搜索类型分组
           _buildOptionSection(
-            context: context,
             title: '搜索类型',
             colorScheme: colorScheme,
             textTheme: textTheme,
-            child: Wrap(
-              spacing: Dimen.spacingS,
-              runSpacing: Dimen.spacingS,
-              children: [
-                ChoiceChip(
-                  label: const Text('主题'),
-                  selected: state.firstRadio == FIRST_RADIO_TOPIC,
-                  onSelected: (_) =>
-                      notifier.checkFirstRadio(FIRST_RADIO_TOPIC),
-                ),
-                ChoiceChip(
-                  label: const Text('版块'),
-                  selected: state.firstRadio == FIRST_RADIO_FORUM,
-                  onSelected: (_) =>
-                      notifier.checkFirstRadio(FIRST_RADIO_FORUM),
-                ),
-                ChoiceChip(
-                  label: const Text('用户'),
-                  selected: state.firstRadio == FIRST_RADIO_USER,
-                  onSelected: (_) => notifier.checkFirstRadio(FIRST_RADIO_USER),
-                ),
-              ],
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<int>(
+                segments: const [
+                  ButtonSegment(
+                    value: FIRST_RADIO_TOPIC,
+                    label: Text('主题'),
+                    icon: Icon(Icons.article_outlined),
+                  ),
+                  ButtonSegment(
+                    value: FIRST_RADIO_FORUM,
+                    label: Text('版块'),
+                    icon: Icon(Icons.forum_outlined),
+                  ),
+                  ButtonSegment(
+                    value: FIRST_RADIO_USER,
+                    label: Text('用户'),
+                    icon: Icon(Icons.person_outline),
+                  ),
+                ],
+                selected: {state.firstRadio},
+                onSelectionChanged: (selected) =>
+                    notifier.checkFirstRadio(selected.first),
+              ),
             ),
           ),
 
@@ -222,31 +151,29 @@ class SearchPage extends HookConsumerWidget {
           if (state.firstRadio == FIRST_RADIO_TOPIC) ...[
             if (fid != null)
               _buildOptionSection(
-                context: context,
                 title: '搜索范围',
                 colorScheme: colorScheme,
                 textTheme: textTheme,
-                child: Wrap(
-                  spacing: Dimen.spacingS,
-                  runSpacing: Dimen.spacingS,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('当前版块'),
-                      selected: state.topicRadio == TOPIC_RADIO_CURRENT_FORUM,
-                      onSelected: (_) =>
-                          notifier.checkTopicRadio(TOPIC_RADIO_CURRENT_FORUM),
-                    ),
-                    ChoiceChip(
-                      label: const Text('全部版块'),
-                      selected: state.topicRadio == TOPIC_RADIO_ALL_FORUM,
-                      onSelected: (_) =>
-                          notifier.checkTopicRadio(TOPIC_RADIO_ALL_FORUM),
-                    ),
-                  ],
+                child: SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment(
+                        value: TOPIC_RADIO_CURRENT_FORUM,
+                        label: Text('当前版块'),
+                      ),
+                      ButtonSegment(
+                        value: TOPIC_RADIO_ALL_FORUM,
+                        label: Text('全部版块'),
+                      ),
+                    ],
+                    selected: {state.topicRadio},
+                    onSelectionChanged: (selected) =>
+                        notifier.checkTopicRadio(selected.first),
+                  ),
                 ),
               ),
             _buildOptionSection(
-              context: context,
               title: '搜索选项',
               colorScheme: colorScheme,
               textTheme: textTheme,
@@ -257,7 +184,7 @@ class SearchPage extends HookConsumerWidget {
                   FilterChip(
                     label: const Text('包括正文'),
                     selected: state.content,
-                    onSelected: (selected) => notifier.checkContent(selected),
+                    onSelected: notifier.checkContent,
                   ),
                 ],
               ),
@@ -267,25 +194,20 @@ class SearchPage extends HookConsumerWidget {
           // 用户搜索选项
           if (state.firstRadio == FIRST_RADIO_USER)
             _buildOptionSection(
-              context: context,
               title: '搜索方式',
               colorScheme: colorScheme,
               textTheme: textTheme,
-              child: Wrap(
-                spacing: Dimen.spacingS,
-                runSpacing: Dimen.spacingS,
-                children: [
-                  ChoiceChip(
-                    label: const Text('用户名'),
-                    selected: state.userRadio == USER_RADIO_NAME,
-                    onSelected: (_) => notifier.checkUserRadio(USER_RADIO_NAME),
-                  ),
-                  ChoiceChip(
-                    label: const Text('用户ID'),
-                    selected: state.userRadio == USER_RADIO_UID,
-                    onSelected: (_) => notifier.checkUserRadio(USER_RADIO_UID),
-                  ),
-                ],
+              child: SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<int>(
+                  segments: const [
+                    ButtonSegment(value: USER_RADIO_NAME, label: Text('用户名')),
+                    ButtonSegment(value: USER_RADIO_UID, label: Text('用户ID')),
+                  ],
+                  selected: {state.userRadio},
+                  onSelectionChanged: (selected) =>
+                      notifier.checkUserRadio(selected.first),
+                ),
               ),
             ),
         ],
@@ -295,7 +217,6 @@ class SearchPage extends HookConsumerWidget {
 
   /// 构建搜索选项分组卡片
   Widget _buildOptionSection({
-    required BuildContext context,
     required String title,
     required ColorScheme colorScheme,
     required TextTheme textTheme,
@@ -311,7 +232,8 @@ class SearchPage extends HookConsumerWidget {
             Text(
               title,
               style: textTheme.titleSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: Dimen.spacingM),
@@ -329,7 +251,9 @@ class SearchPage extends HookConsumerWidget {
     int? fid,
   ) {
     if (state.firstRadio == FIRST_RADIO_TOPIC) {
-      if (fid == null) {
+      final useCurrentForum =
+          fid != null && state.topicRadio == TOPIC_RADIO_CURRENT_FORUM;
+      if (!useCurrentForum) {
         Routes.navigateTo(
           context,
           "${Routes.SEARCH_TOPIC_LIST}?keyword=${code_utils.encodeParam(text)}&content=${state.content ? 1 : 0}",

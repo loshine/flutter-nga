@@ -5,6 +5,7 @@ import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/motion.dart';
 
@@ -32,8 +33,10 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
     final notifier = ref.read(favouriteForumListProvider.notifier);
 
     return IconButton(
+      tooltip: isFavourite ? '取消收藏版面' : '收藏版面',
+      isSelected: isFavourite,
       icon: AnimatedSwitcher(
-        duration: Motion.durationShort4,
+        duration: Motion.resolveDuration(context, Motion.durationShort4),
         switchInCurve: Motion.emphasizedDecelerate,
         switchOutCurve: Motion.emphasizedAccelerate,
         transitionBuilder: (child, animation) => ScaleTransition(
@@ -43,6 +46,7 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
         child: Icon(
           isFavourite ? Icons.star : Icons.star_border,
           key: ValueKey(isFavourite),
+          color: isFavourite ? Theme.of(context).colorScheme.primary : null,
         ),
       ),
       onPressed: isBusy
@@ -50,6 +54,7 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
           : () async {
               try {
                 await notifier.toggle(forum);
+                AppHaptics.selectionChanged();
               } catch (error) {
                 AppToast.error(error);
               }

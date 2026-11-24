@@ -5,6 +5,7 @@ import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/providers/message/conversation_detail_provider.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -188,19 +189,11 @@ class ConversationDetailPage extends HookConsumerWidget {
   }) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Routes.pop(dialogContext, false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Routes.pop(dialogContext, true),
-            child: Text(action),
-          ),
-        ],
+      builder: (_) => M3ConfirmDialog(
+        title: title,
+        content: content,
+        confirmText: action,
+        destructive: true,
       ),
     );
     return result == true;

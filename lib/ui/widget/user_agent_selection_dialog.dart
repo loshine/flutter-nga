@@ -3,10 +3,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user_agent_config.dart';
 import 'package:flutter_nga/providers/settings/user_agent_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 
-/// UserAgent 选择对话框
+/// UserAgent 选择对话框 / 底部面板
 class UserAgentSelectionDialog extends ConsumerWidget {
-  const UserAgentSelectionDialog({super.key});
+  const UserAgentSelectionDialog({super.key, this.embedded = false});
+
+  final bool embedded;
+
+  static Future<void> show(BuildContext context) {
+    return showM3SelectionSheet<void>(
+      context: context,
+      builder: (_) => const UserAgentSelectionDialog(embedded: true),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,57 +34,93 @@ class UserAgentSelectionDialog extends ConsumerWidget {
         )
         .toList();
 
+    final radioList = RadioGroup<UserAgentConfig>(
+      groupValue: state.currentConfig,
+      onChanged: (value) {
+        if (value == null || state.isLoading) return;
+        _onSelectConfig(context, ref, state, value);
+      },
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: options.length,
+        itemBuilder: (context, index) {
+          final config = options[index];
+
+          return RadioListTile<UserAgentConfig>(
+            title: Text(
+              config.name,
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+            ),
+            subtitle: config.isDeviceSpecific
+                ? Text(
+                    '根据当前设备自动选择',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  )
+                : Text(
+                    config.userAgent.isEmpty
+                        ? '点击后输入自定义 User-Agent'
+                        : config.userAgent,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+            value: config,
+            enabled: !state.isLoading,
+            activeColor: colorScheme.primary,
+            contentPadding: embedded
+                ? const EdgeInsets.symmetric(horizontal: 16)
+                : EdgeInsets.zero,
+            dense: true,
+          );
+        },
+      ),
+    );
+
+    if (embedded) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                '选择 User-Agent',
+                style: textTheme.headlineSmall?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Flexible(child: radioList),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('取消'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return AlertDialog(
       title: const Text('选择 User-Agent'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: RadioGroup<UserAgentConfig>(
-          groupValue: state.currentConfig,
-          onChanged: (value) {
-            if (value == null || state.isLoading) return;
-            _onSelectConfig(context, ref, state, value);
-          },
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: options.length,
-            itemBuilder: (context, index) {
-              final config = options[index];
-
-              return RadioListTile<UserAgentConfig>(
-                title: Text(
-                  config.name,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                subtitle: config.isDeviceSpecific
-                    ? Text(
-                        '根据当前设备自动选择',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      )
-                    : Text(
-                        config.userAgent.isEmpty
-                            ? '点击后输入自定义 User-Agent'
-                            : config.userAgent,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 11,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                value: config,
-                enabled: !state.isLoading,
-                activeColor: colorScheme.primary,
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              );
-            },
-          ),
-        ),
-      ),
+      content: SizedBox(width: double.maxFinite, child: radioList),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -118,8 +165,8 @@ class UserAgentSelectionDialog extends ConsumerWidget {
         return HookBuilder(
           builder: (context) {
             final controller = useTextEditingController(text: initialValue);
-            return AlertDialog(
-              title: const Text('自定义 User-Agent'),
+            return M3Dialog(
+              title: '自定义 User-Agent',
               content: TextField(
                 controller: controller,
                 autofocus: true,
@@ -131,7 +178,7 @@ class UserAgentSelectionDialog extends ConsumerWidget {
                   onPressed: () => Navigator.of(dialogContext).pop(),
                   child: const Text('取消'),
                 ),
-                TextButton(
+                FilledButton(
                   onPressed: () =>
                       Navigator.of(dialogContext).pop(controller.text),
                   child: const Text('确定'),
@@ -142,12 +189,10 @@ class UserAgentSelectionDialog extends ConsumerWidget {
         );
       },
     );
-    final trimmed = (value ?? '').trim();
+    if (value == null) return null;
+    final trimmed = value.trim();
     if (trimmed.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('User-Agent 不能为空')));
-      }
+      AppToast.warning('User-Agent 不能为空');
       return null;
     }
     return trimmed;

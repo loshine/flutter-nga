@@ -15,6 +15,7 @@ import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 import 'package:flutter_nga/utils/hooks/scroll_hooks.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
+import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 import 'child_forum_list_page.dart';
@@ -92,20 +93,16 @@ class ForumDetailPage extends HookConsumerWidget {
           onTap: () => tabSignals[tabController.index].fire(),
           child: Text(name!),
         ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(56),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: TabBar(
-              controller: tabController,
-              tabs: _tabs,
-              isScrollable: true,
-            ),
-          ),
+        bottom: TabBar(
+          controller: tabController,
+          tabs: _tabs,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
         ),
         actions: [
           ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
           IconButton(
+            tooltip: '搜索',
             icon: const Icon(Icons.search),
             onPressed: () =>
                 Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
@@ -153,15 +150,26 @@ class ForumDetailPage extends HookConsumerWidget {
           KeepAliveTabView(child: ChildForumListPage(state.info)),
         ],
       ),
-      floatingActionButton: fabScroll.visible && mainPage
-          ? FloatingActionButton(
-              onPressed: () => Routes.navigateTo(
-                context,
-                "${Routes.TOPIC_PUBLISH}?fid=$fid",
-              ),
-              child: const Icon(Icons.edit),
-            )
-          : null,
+      floatingActionButton: AnimatedSwitcher(
+        duration: Motion.resolveDuration(context, Motion.durationShort4),
+        switchInCurve: Motion.emphasizedDecelerate,
+        switchOutCurve: Motion.emphasizedAccelerate,
+        transitionBuilder: (child, animation) => ScaleTransition(
+          scale: animation,
+          child: FadeTransition(opacity: animation, child: child),
+        ),
+        child: fabScroll.visible && mainPage
+            ? FloatingActionButton(
+                key: const ValueKey('forum_publish_fab'),
+                tooltip: '发帖',
+                onPressed: () => Routes.navigateTo(
+                  context,
+                  "${Routes.TOPIC_PUBLISH}?fid=$fid",
+                ),
+                child: const Icon(Icons.edit),
+              )
+            : null,
+      ),
     );
   }
 }
