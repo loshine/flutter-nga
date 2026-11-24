@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/plugins/login.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -144,6 +148,25 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   InAppWebViewController? _webViewController;
+  StreamSubscription<dynamic>? _cookieSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb && Platform.operatingSystem == 'ohos') {
+      _cookieSubscription = Login.cookieStream.listen((event) {
+        if (event is String) {
+          _processCookieJson(event);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _cookieSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +196,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         leading: BackButton(onPressed: _handleBack),
         title: Text("登录"),
         actions: <Widget>[
+          if (!kIsWeb && Platform.operatingSystem == 'ohos')
+            IconButton(
+              tooltip: "原生登录",
+              onPressed: _startNativeLogin,
+              icon: const Icon(Icons.open_in_browser),
+            ),
           IconButton(
             tooltip: "导入 Cookies",
             onPressed: _showImportCookiesDialog,
@@ -327,6 +356,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         );
       },
     );
+  }
+
+  Future<void> _startNativeLogin() async {
+    try {
+      await Login.startLogin();
+    } catch (error) {
+      AppToast.error(error);
+    }
   }
 
   void _showImportCookiesDialog() {

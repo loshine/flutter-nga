@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:gal/gal.dart';
 
 import 'package:flutter_nga/data/core/nga_dio_configurator.dart';
+import 'package:flutter_nga/plugins/gallery_saver.dart';
 
 /// 从图片缓存读取 [url] 对应的原始字节，未命中返回 null。
 typedef CachedImageBytesLoader = Future<Uint8List?> Function(String url);
@@ -47,6 +49,20 @@ class ResourceDataRepository implements ResourceRepository {
 
   @override
   Future<void> saveImageToGallery(String url) async {
+    if (!kIsWeb && Platform.operatingSystem == 'ohos') {
+      try {
+        final saved = await GallerySaver.save(url);
+        if (!saved) {
+          throw const SaveImageException('保存到相册失败');
+        }
+        return;
+      } on SaveImageException {
+        rethrow;
+      } catch (e) {
+        debugPrint(e.toString());
+        throw const SaveImageException('保存到相册失败');
+      }
+    }
     try {
       await _ensurePermission();
       final bytes = await _loadBytes(url);
