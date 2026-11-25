@@ -160,6 +160,7 @@ class TopicDetailPage extends HookConsumerWidget {
       ),
       bottomNavigationBar: BottomAppBar(
         child: ReadableWidth(
+          alignment: Alignment.center,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

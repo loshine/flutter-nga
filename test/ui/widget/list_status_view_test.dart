@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:toastification/toastification.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class _FlakyFavouriteNotifier extends FavouriteTopicListNotifier {
   int refreshCalls = 0;
@@ -75,6 +78,62 @@ void main() {
       expect(find.textContaining('连接超时'), findsOneWidget);
       expect(find.text('重试'), findsOneWidget);
     });
+
+    testWidgets(
+      'shows login button for unauthenticated error and retries after pop',
+      (tester) async {
+        var retryCount = 0;
+        final status = ListLoadStatus()
+          ..fail(
+            DioException(
+              requestOptions: RequestOptions(path: '/thread.php'),
+              error: '未登录',
+            ),
+            hasData: false,
+          );
+
+        final router = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, _) => Scaffold(
+                body: ListStatusSwitcher(
+                  status: status,
+                  isEmpty: true,
+                  emptyMessage: '暂无帖子',
+                  onRetry: () => retryCount++,
+                  child: const Text('列表'),
+                ),
+              ),
+            ),
+            GoRoute(
+              path: Routes.LOGIN,
+              builder: (context, _) => Scaffold(
+                body: TextButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('模拟登录完成'),
+                ),
+              ),
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+
+        expect(find.text('未登录'), findsOneWidget);
+        expect(find.text('去登录'), findsOneWidget);
+        expect(find.text('重试'), findsNothing);
+
+        await tester.tap(find.text('去登录'));
+        await tester.pumpAndSettle();
+        expect(find.text('模拟登录完成'), findsOneWidget);
+
+        await tester.tap(find.text('模拟登录完成'));
+        await tester.pumpAndSettle();
+        expect(retryCount, 1);
+      },
+    );
 
     testWidgets('keeps the list when it has data', (tester) async {
       final status = ListLoadStatus()..fail(Exception('连接超时'), hasData: false);

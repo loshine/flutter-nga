@@ -339,6 +339,7 @@ class PublishPage extends HookWidget {
                     color: colorScheme.surfaceContainer,
                     child: ReadableWidth(
                       maxWidth: _contentMaxWidth,
+                      alignment: Alignment.center,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
