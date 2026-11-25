@@ -128,21 +128,27 @@ class _NativeLiquidGlassContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius.topLeft.x;
+    final tintArgb = tintColor?.toARGB32();
     final creationParams = <String, Object?>{
       'cornerRadius': radius,
       'variant': variant.name,
       'isDark': isDark,
       'interactive': interactive,
-      if (tintColor != null) 'tintColor': tintColor!.toARGB32(),
+      'tintColor': ?tintArgb,
     };
+    // 原生 PlatformView 仅在创建时读取 creationParams，明暗模式、材质或着色变化时
+    // 通过 ValueKey 强制重建以同步原生外观。
+    final viewKey = ValueKey((isDark, variant, tintArgb, radius, interactive));
 
     final platformView = switch (defaultTargetPlatform) {
       TargetPlatform.iOS => UiKitView(
+        key: viewKey,
         viewType: AppleNativeService.liquidGlassViewType,
         creationParams: creationParams,
         creationParamsCodec: const StandardMessageCodec(),
       ),
       TargetPlatform.macOS => AppKitView(
+        key: viewKey,
         viewType: AppleNativeService.liquidGlassViewType,
         creationParams: creationParams,
         creationParamsCodec: const StandardMessageCodec(),

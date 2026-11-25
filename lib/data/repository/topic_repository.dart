@@ -101,6 +101,7 @@ class TopicDataRepository implements TopicRepository {
     r'<title>([\s\S]*?)</title>',
     caseSensitive: false,
   );
+  static final _titleSuccessPattern = RegExp(r'发[贴帖]完毕|发表成功|修改完毕|回复成功|操作成功');
   static final _htmlCommentOrTagPattern = RegExp(r'<!--[\s\S]*?-->|<[^>]+>');
 
   TopicDataRepository(this.database, this._dio);
@@ -377,7 +378,9 @@ class TopicDataRepository implements TopicRepository {
   /// 解析 `post.php` 返回的 HTML 结果页：
   /// - 兼容新版 `<!--msginfostart-->...<!--msginfoend-->`、`<span class='sub'>&gt;</span>`
   ///   与旧版 `<span style='color:#aaa'>&gt;</span>`，以及 `<title>` 兜底；
-  /// - 检测到 `(ERROR:` 或非 0 的 `<!--msgcodestart-->` 时标记为错误，避免失败被当成成功。
+  /// - 检测到 `(ERROR:` 或非 0 的 `<!--msgcodestart-->` 时标记为错误；
+  /// - 仅命中 `<title>` 兜底（无结构化结果标记）时，只有明确包含已知成功文案才视为成功，
+  ///   避免登录跳转/验证码等非结果 HTML 页被误判为发帖成功。
   @visibleForTesting
   static ({bool isError, String message}) parsePostResultHtml(String html) {
     String? clean(String? raw) {
@@ -388,10 +391,11 @@ class TopicDataRepository implements TopicRepository {
       return stripped.isEmpty ? null : stripped;
     }
 
-    final message =
-        clean(_msgInfoPattern.firstMatch(html)?.group(1)) ??
-        clean(_spanMessagePattern.firstMatch(html)?.group(1)) ??
-        clean(_titlePattern.firstMatch(html)?.group(1));
+    final msgInfo = clean(_msgInfoPattern.firstMatch(html)?.group(1));
+    final spanMessage = clean(_spanMessagePattern.firstMatch(html)?.group(1));
+    final titleMessage = clean(_titlePattern.firstMatch(html)?.group(1));
+    final structuredMessage = msgInfo ?? spanMessage;
+    final message = structuredMessage ?? titleMessage;
 
     if (message == null) {
       return (isError: true, message: '发帖失败');
@@ -399,7 +403,12 @@ class TopicDataRepository implements TopicRepository {
 
     final code = _msgCodePattern.firstMatch(html)?.group(1);
     final hasErrorPrefix = html.contains('(ERROR:');
-    final isError = hasErrorPrefix || (code != null && code != '0');
+    final isUnverifiedTitleFallback =
+        structuredMessage == null && !_titleSuccessPattern.hasMatch(message);
+    final isError =
+        hasErrorPrefix ||
+        (code != null && code != '0') ||
+        isUnverifiedTitleFallback;
     return (isError: isError, message: message);
   }
 

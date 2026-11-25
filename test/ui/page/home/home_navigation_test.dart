@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -7,18 +9,22 @@ import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/message_repository.dart';
+import 'package:flutter_nga/my_app.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/forum_category_list_provider.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
+import 'package:flutter_nga/providers/home/home_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_detail_page.dart';
+import 'package:flutter_nga/ui/page/home/apple_workspace_shell.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
+import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
 class _FakeHeaderNotifier extends HomeDrawerHeaderNotifier {
@@ -421,6 +427,179 @@ void main() {
 
       // 让 EasyRefresh 完成态的默认 1s 计时器走完，避免 teardown 残留 pending timer
       await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'iPhone landscape keeps Apple 4-tab layout instead of switching to AppleWorkspaceShell',
+    (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      await _pumpHome(
+        tester,
+        size: const Size(932, 430),
+        user: const UserInfo(uid: 1, username: '测试用户'),
+        style: AppDesignStyle.apple,
+      );
+
+      expect(find.byType(AppleWorkspaceShell), findsNothing);
+      expect(find.byType(NavigationDrawer), findsNothing);
+      expect(find.byType(LiquidGlassSurface), findsWidgets);
+      expect(find.text('版块'), findsOneWidget);
+      expect(find.text('收藏'), findsOneWidget);
+      expect(find.text('消息'), findsOneWidget);
+      expect(find.text('我的'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'AppleWorkspaceShell respects left safe area padding in sidebar',
+    (tester) async {
+      tester.view.padding = const FakeViewPadding(left: 44);
+      await _pumpHome(
+        tester,
+        size: const Size(1100, 800),
+        user: const UserInfo(uid: 1, username: '测试用户'),
+        style: AppDesignStyle.apple,
+      );
+
+      expect(find.byType(AppleWorkspaceShell), findsOneWidget);
+      final favTopicsRect = tester.getRect(find.text('贴子收藏'));
+      expect(favTopicsRect.left, greaterThanOrEqualTo(44));
+    },
+  );
+
+  testWidgets(
+    'dispatchNativeMenuNavigate deduplicates imperative pushes, delegates workspace items, and ignores while modal is open',
+    (tester) async {
+      final observer = TopRouteObserver();
+      final workspaceMenu = WorkspaceMenuController();
+      late BuildContext homeContext;
+
+      final router = GoRouter(
+        initialLocation: Routes.HOME,
+        observers: [observer],
+        routes: [
+          GoRoute(
+            path: Routes.HOME,
+            builder: (context, _) {
+              homeContext = context;
+              return const Scaffold(body: Text('HOME_PAGE'));
+            },
+          ),
+          GoRoute(
+            path: Routes.SEARCH,
+            builder: (_, _) => const Scaffold(body: Text('SEARCH_PAGE')),
+          ),
+          GoRoute(
+            path: Routes.SETTINGS,
+            builder: (_, _) => const Scaffold(body: Text('SETTINGS_PAGE')),
+          ),
+          GoRoute(
+            path: Routes.TOPIC_PUBLISH,
+            builder: (_, _) => const Scaffold(body: Text('PUBLISH_PAGE')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      // 1. 连续触发两次 /search 不会重复压栈，pop 一次即回到首页
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.SEARCH,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('SEARCH_PAGE'), findsOneWidget);
+
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.SEARCH,
+      );
+      await tester.pumpAndSettle();
+
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('HOME_PAGE'), findsOneWidget);
+      expect(router.canPop(), isFalse);
+
+      // 2. 工作区活跃时，⌘1~⌘4 与 ⌘, 交由工作区处理而不压栈；在二级页触发时先回首页
+      final handledPaths = <String>[];
+      bool handler(String path) {
+        handledPaths.add(path);
+        return true;
+      }
+
+      workspaceMenu.register(handler);
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.FAVOURITE_TOPICS,
+      );
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.TOPIC_HISTORY,
+      );
+      await tester.pumpAndSettle();
+      expect(handledPaths, [Routes.FAVOURITE_TOPICS, Routes.TOPIC_HISTORY]);
+      expect(router.canPop(), isFalse);
+
+      // 从 /search 触发工作区目标会先 pop 回 /home
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.SEARCH,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('SEARCH_PAGE'), findsOneWidget);
+
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.SETTINGS,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('HOME_PAGE'), findsOneWidget);
+      expect(handledPaths.last, Routes.SETTINGS);
+
+      // 3. 模态弹窗打开时忽略菜单快捷键
+      showDialog<void>(
+        context: homeContext,
+        builder: (_) => const AlertDialog(content: Text('MODAL_OPEN')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('MODAL_OPEN'), findsOneWidget);
+
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.SEARCH,
+      );
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.SETTINGS,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('SEARCH_PAGE'), findsNothing);
+      expect(handledPaths.length, 3);
+
+      Navigator.of(homeContext).pop();
       await tester.pumpAndSettle();
     },
   );

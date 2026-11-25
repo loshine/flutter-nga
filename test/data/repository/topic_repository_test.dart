@@ -51,6 +51,22 @@ void main() {
       ));
     });
 
+    test('非结果 HTML 页的未知 title 兜底返回错误，避免误报成功', () {
+      const redirectHtml =
+          '<html><head><title>NGA玩家社区</title></head><body><div>请重新登录</div></body></html>';
+      expect(TopicDataRepository.parsePostResultHtml(redirectHtml), (
+        isError: true,
+        message: 'NGA玩家社区',
+      ));
+
+      const loginTitleHtml =
+          '<html><head><title>登录</title></head><body></body></html>';
+      expect(TopicDataRepository.parsePostResultHtml(loginTitleHtml), (
+        isError: true,
+        message: '登录',
+      ));
+    });
+
     test('空响应或无法识别结构返回错误', () {
       expect(
         TopicDataRepository.parsePostResultHtml('<html><body></body></html>'),

@@ -114,6 +114,38 @@ void main() {
       );
     },
   );
+
+  test('Apple high contrast theme preserves high contrast surfaces and solid borders', () {
+    for (final isDark in [false, true]) {
+      final baseHighContrast = isDark
+          ? ThemeBuilder.buildHighContrastDarkTheme(Colors.blue)
+          : ThemeBuilder.buildHighContrastLightTheme(Colors.blue);
+      final appleHighContrast = ThemeBuilder.applyDesignStyle(
+        baseHighContrast,
+        isAppleStyle: true,
+        isMacDesktop: true,
+        isHighContrast: true,
+      );
+
+      expect(
+        appleHighContrast.colorScheme.surface,
+        baseHighContrast.colorScheme.surface,
+      );
+      expect(
+        appleHighContrast.colorScheme.surfaceContainerLow,
+        baseHighContrast.colorScheme.surfaceContainerLow,
+      );
+      expect(
+        appleHighContrast.colorScheme.outlineVariant,
+        baseHighContrast.colorScheme.outline,
+      );
+      expect(appleHighContrast.dividerTheme.thickness, 1.0);
+      expect(
+        appleHighContrast.colorScheme.outlineVariant.a,
+        closeTo(1.0, 0.001),
+      );
+    }
+  });
 }
 
 double _contrastRatio(Color first, Color second) {

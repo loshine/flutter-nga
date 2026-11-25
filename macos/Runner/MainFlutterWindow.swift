@@ -241,7 +241,6 @@ private final class MacOSLiquidGlassViewFactory: NSObject, FlutterPlatformViewFa
     let params = args as? [String: Any]
     let cornerRadius = (params?["cornerRadius"] as? NSNumber)?.doubleValue ?? 0
     let variant = params?["variant"] as? String ?? "regular"
-    let interactive = params?["interactive"] as? Bool ?? false
     let tintValue = (params?["tintColor"] as? NSNumber)?.uint32Value
     let isDark = params?["isDark"] as? Bool ?? false
 
@@ -252,9 +251,6 @@ private final class MacOSLiquidGlassViewFactory: NSObject, FlutterPlatformViewFa
         glassView.cornerRadius = CGFloat(cornerRadius)
         if let tintValue {
           glassView.tintColor = Self.colorFromARGB(tintValue)
-        }
-        if #available(macOS 27.0, *) {
-          glassView.effectIsInteractive = interactive
         }
         glassView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
         return glassView

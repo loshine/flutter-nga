@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -156,13 +157,21 @@ class _HomePageContent extends HookConsumerWidget {
     final doubleTap = useMemoized(DoubleTapDetector.new);
     final pageList = _buildPageList(scrollToTop);
     final safeIndex = index.clamp(0, pageList.length - 1);
-    final sizeClass = WindowSizeClass.of(context);
+    final size = MediaQuery.sizeOf(context);
+    final sizeClass = WindowSizeClass.fromWidth(size.width);
     final isLargeScreen = sizeClass.isMediumOrLarger;
     final isExpanded = sizeClass.isExpandedOrLarger;
     final isApple = context.isAppleStyle;
+    final isDesktopPlatform =
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux;
+    final isTabletOrDesktop =
+        isDesktopPlatform || size.shortestSide >= kCompactBreakpoint;
 
-    // Apple 风格大屏（macOS / iPadOS 横屏）采用完整的三栏 Source List 工作区
-    if (isApple && isLargeScreen) {
+    // Apple 风格大屏（macOS / 桌面端或 iPad 等平板设备）采用完整的三栏 Source List 工作区；
+    // iPhone 横屏虽然宽度 >= 600，但 shortestSide < 600，继续保持 Apple 4-Tab 移动端布局。
+    if (isApple && isLargeScreen && isTabletOrDesktop) {
       return const AppleWorkspaceShell();
     }
 
@@ -188,8 +197,8 @@ class _HomePageContent extends HookConsumerWidget {
           ref.read(homeIndexProvider.notifier).setIndex(0);
         }
       },
-      child: isLargeScreen
-          ? _buildLargeScreenLayout(
+      child: isApple
+          ? _buildAppleMobileLayout(
               context,
               ref,
               safeIndex,
@@ -197,10 +206,9 @@ class _HomePageContent extends HookConsumerWidget {
               pageList,
               onDestinationSelected,
               onTitleTap,
-              isExpanded: isExpanded,
             )
-          : (isApple
-                ? _buildAppleMobileLayout(
+          : (isLargeScreen
+                ? _buildLargeScreenLayout(
                     context,
                     ref,
                     safeIndex,
@@ -208,6 +216,7 @@ class _HomePageContent extends HookConsumerWidget {
                     pageList,
                     onDestinationSelected,
                     onTitleTap,
+                    isExpanded: isExpanded,
                   )
                 : _buildMobileLayout(
                     context,
