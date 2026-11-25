@@ -1,11 +1,19 @@
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutter_nga/data/entity/topic_history.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
+import 'package:flutter_nga/utils/nga_links.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class TopicHistoryListItemWidget extends ConsumerWidget {
@@ -34,6 +42,17 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     final interfaceState = ref.watch(interfaceSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    if (context.isAppleStyle) {
+      return _buildAppleItem(
+        context,
+        ref,
+        history: topicHistory!,
+        interfaceState: interfaceState,
+        colorScheme: colorScheme,
+        textTheme: textTheme,
+      );
+    }
 
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,22 +137,167 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     );
   }
 
+  Widget _buildAppleItem(
+    BuildContext context,
+    WidgetRef ref, {
+    required TopicHistory history,
+    required InterfaceSettingsState interfaceState,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+  }) {
+    final isMac = context.isMacDesktopAppleStyle;
+    final selectedBg = isMac
+        ? colorScheme.primary.withValues(alpha: 0.14)
+        : colorScheme.primary.withValues(alpha: 0.10);
+    final subjectText = code_utils.unescapeHtml(history.subject);
+    final metaStyle = textTheme.bodySmall?.copyWith(
+      fontSize: isMac ? 11.5 : 12,
+      color: colorScheme.onSurfaceVariant,
+    );
+
+    Future<void> showContextMenu(Offset position) async {
+      final tid = history.tid;
+      final action = await showAppActionMenu<String>(
+        context: context,
+        globalPosition: position,
+        title: subjectText,
+        actions: const [
+          AppMenuAction(
+            value: 'copy_link',
+            label: '复制帖子链接',
+            icon: CupertinoIcons.link,
+          ),
+          AppMenuAction(
+            value: 'open_browser',
+            label: '在浏览器中打开',
+            icon: CupertinoIcons.compass,
+          ),
+        ],
+      );
+      if (action == null) return;
+      final url = topicWebUrl(tid);
+      if (action == 'copy_link') {
+        await Clipboard.setData(ClipboardData(text: url));
+        AppToast.success('已复制帖子链接');
+      } else if (action == 'open_browser') {
+        final opened = await launchUrl(
+          Uri.parse(url),
+          mode: LaunchMode.externalApplication,
+        );
+        if (!opened) AppToast.error('无法打开浏览器');
+      }
+    }
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTitle(
+          context,
+          history,
+          interfaceState,
+          textTheme,
+          colorScheme,
+          appleCompact: isMac,
+        ),
+        SizedBox(height: isMac ? 5 : 6),
+        Text(
+          name_utils.getShowName(history.author ?? ''),
+          style: metaStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
+    final rowBody = Padding(
+      padding: EdgeInsets.fromLTRB(
+        isMac ? 10 : 16,
+        isMac ? 9 : 12,
+        trailing == null ? (isMac ? 10 : 16) : 4,
+        isMac ? 9 : 12,
+      ),
+      child: trailing == null
+          ? content
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: content),
+                trailing!,
+              ],
+            ),
+    );
+
+    if (isMac) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            child: GestureDetector(
+              onSecondaryTapDown: (d) => showContextMenu(d.globalPosition),
+              child: Material(
+                color: selected ? selectedBg : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => _handleTap(context, history, ref),
+                  onLongPress: onLongPress,
+                  child: rowBody,
+                ),
+              ),
+            ),
+          ),
+          if (!selected)
+            Divider(
+              height: 0.5,
+              thickness: 0.5,
+              indent: 18,
+              endIndent: 18,
+              color: colorScheme.outlineVariant,
+            ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          color: selected ? selectedBg : Colors.transparent,
+          child: InkWell(
+            onTap: () => _handleTap(context, history, ref),
+            onLongPress: onLongPress,
+            child: rowBody,
+          ),
+        ),
+        Divider(
+          height: 0.5,
+          thickness: 0.5,
+          indent: 16,
+          color: colorScheme.outlineVariant,
+        ),
+      ],
+    );
+  }
+
   Widget _buildTitle(
     BuildContext context,
     TopicHistory topicHistory,
     InterfaceSettingsState interfaceState,
     TextTheme textTheme,
-    ColorScheme colorScheme,
-  ) {
+    ColorScheme colorScheme, {
+    bool appleCompact = false,
+  }) {
+    final baseFontSize = appleCompact ? 13.5 : Dimen.titleMedium;
     return Text.rich(
       TextSpan(
         text: code_utils.unescapeHtml(topicHistory.subject),
         style: textTheme.titleMedium?.copyWith(
-          fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
+          fontSize: baseFontSize * interfaceState.titleSizeMultiple,
           color: topicHistory.getSubjectColor() ?? textTheme.bodyLarge?.color,
           fontWeight: topicHistory.isBold()
-              ? FontWeight.bold
-              : FontWeight.normal,
+              ? FontWeight.w600
+              : (appleCompact ? FontWeight.w500 : FontWeight.normal),
           fontStyle: topicHistory.isItalic()
               ? FontStyle.italic
               : FontStyle.normal,
