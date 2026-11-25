@@ -37,12 +37,8 @@ class TopicSinglePage extends HookConsumerWidget {
     final refreshController = useEasyRefreshController();
     final loadStatus = useListLoadStatus();
     final replyWidgetCache = useRef(<String, Widget>{});
-    final detailProviderKey = TopicDetailKey(tid: tid);
-    final providerKey = TopicSinglePageKey(
-      tid: tid,
-      page: page,
-      authorid: authorid,
-    );
+    final detailProviderKey = (tid: tid);
+    final providerKey = (tid: tid, page: page, authorid: authorid);
     final state = ref.watch(topicSinglePageProvider(providerKey));
     final blockFilter = ref.watch(blockFilterProvider);
 

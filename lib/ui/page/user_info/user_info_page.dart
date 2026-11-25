@@ -30,8 +30,7 @@ class UserInfoPage extends StatefulHookConsumerWidget {
 }
 
 class _UserInfoPageState extends ConsumerState<UserInfoPage> {
-  UserInfoKey get _query =>
-      UserInfoKey(uid: widget.uid, username: widget.username);
+  UserInfoKey get _query => (uid: widget.uid, username: widget.username);
 
   @override
   Widget build(BuildContext context) {

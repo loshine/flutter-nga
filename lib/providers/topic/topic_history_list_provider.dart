@@ -43,13 +43,11 @@ class TopicHistoryListState {
   );
 }
 
-class _PendingHistoryDeletion {
-  const _PendingHistoryDeletion(this.dateKey, this.history, this.index);
-
-  final String dateKey;
-  final TopicHistory history;
-  final int index;
-}
+typedef _PendingHistoryDeletion = ({
+  String dateKey,
+  TopicHistory history,
+  int index,
+});
 
 class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
   final _limit = 20;
@@ -112,7 +110,7 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
     for (final entry in state.dateTopicHistoryMap.entries) {
       final index = entry.value.indexWhere((it) => it.id == id);
       if (index > -1) {
-        _pending[id] = _PendingHistoryDeletion(entry.key, history, index);
+        _pending[id] = (dateKey: entry.key, history: history, index: index);
         if (entry.value.length > 1) {
           map[entry.key] = entry.value.where((it) => it.id != id).toList();
         }

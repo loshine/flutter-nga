@@ -56,7 +56,7 @@ class TopicDetailPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final providerKey = TopicDetailKey(tid: tid!);
+    final providerKey = (tid: tid!);
     final state = ref.watch(topicDetailProvider(providerKey));
     final notifier = ref.read(topicDetailProvider(providerKey).notifier);
 

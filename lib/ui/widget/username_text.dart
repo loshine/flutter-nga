@@ -32,12 +32,12 @@ class UsernameText extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayName = name_utils.getShowName(username);
     final visibleText = '$displayName$suffix';
-    final nameParts = _UsernameParts.from(
+    final nameParts = _splitUsernameParts(
       displayName,
       highlightLastFour: username.startsWith('UID:'),
     );
     final textStyle = DefaultTextStyle.of(context).style.merge(style);
-    final colors = _UsernameColors.fromSeed(
+    final colors = _usernameColorsFromSeed(
       _colorSeed,
       Theme.of(context).brightness,
     );
@@ -101,59 +101,44 @@ class UsernameText extends StatelessWidget {
   }
 }
 
-class _UsernameColors {
-  const _UsernameColors(this.background, this.foreground);
+typedef _UsernameColors = ({Color background, Color foreground});
 
-  final Color background;
-  final Color foreground;
-
-  factory _UsernameColors.fromSeed(String seed, Brightness brightness) {
-    final hue = _stableHash(seed) % 360;
-    final seedColor = HSLColor.fromAHSL(1, hue.toDouble(), 0.56, 0.5).toColor();
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: brightness,
-    );
-    return _UsernameColors(scheme.primary, scheme.onPrimary);
-  }
+_UsernameColors _usernameColorsFromSeed(String seed, Brightness brightness) {
+  final hue = _stableHash(seed) % 360;
+  final seedColor = HSLColor.fromAHSL(1, hue.toDouble(), 0.56, 0.5).toColor();
+  final scheme = ColorScheme.fromSeed(
+    seedColor: seedColor,
+    brightness: brightness,
+  );
+  return (background: scheme.primary, foreground: scheme.onPrimary);
 }
 
-class _UsernameParts {
-  const _UsernameParts({
-    required this.leading,
-    required this.highlighted,
-    required this.trailing,
-  });
+typedef _UsernameParts = ({
+  String leading,
+  String highlighted,
+  String trailing,
+});
 
-  final String leading;
-  final String highlighted;
-  final String trailing;
-
-  factory _UsernameParts.from(
-    String displayName, {
-    required bool highlightLastFour,
-  }) {
-    final characters = displayName.characters;
-    if (!highlightLastFour) {
-      return _UsernameParts(
-        leading: '',
-        highlighted: characters.take(1).toString(),
-        trailing: characters.skip(1).toString(),
-      );
-    }
-
-    final nickname = characters.skip('UID:'.length);
-    final highlightedLength = nickname.length > 4 ? 4 : nickname.length;
-    return _UsernameParts(
-      leading: characters
-          .take(characters.length - highlightedLength)
-          .toString(),
-      highlighted: nickname
-          .skip(nickname.length - highlightedLength)
-          .toString(),
-      trailing: '',
+_UsernameParts _splitUsernameParts(
+  String displayName, {
+  required bool highlightLastFour,
+}) {
+  final characters = displayName.characters;
+  if (!highlightLastFour) {
+    return (
+      leading: '',
+      highlighted: characters.take(1).toString(),
+      trailing: characters.skip(1).toString(),
     );
   }
+
+  final nickname = characters.skip('UID:'.length);
+  final highlightedLength = nickname.length > 4 ? 4 : nickname.length;
+  return (
+    leading: characters.take(characters.length - highlightedLength).toString(),
+    highlighted: nickname.skip(nickname.length - highlightedLength).toString(),
+    trailing: '',
+  );
 }
 
 int _stableHash(String value) {

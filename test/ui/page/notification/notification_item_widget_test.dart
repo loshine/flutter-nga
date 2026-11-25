@@ -60,6 +60,6 @@ void main() {
 
     await tester.tap(find.text('不再提示此主题的回复或评论'));
     await tester.pumpAndSettle();
-    expect(received, const NoHintTarget(100, 0));
+    expect(received, (tid: 100, pid: 0));
   });
 }

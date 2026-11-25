@@ -99,10 +99,11 @@ class TopicHistoryListPage extends HookConsumerWidget {
     }
 
     void selectHistory(TopicHistory history) {
-      selectedTopic.value = SelectedTopic(
+      selectedTopic.value = (
         tid: history.tid,
         fid: history.fid,
         subject: history.subject,
+        authorid: null,
       );
     }
 

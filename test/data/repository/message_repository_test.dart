@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/data/repository/message_repository.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 
@@ -90,8 +89,8 @@ void main() {
       },
     };
     expect(await repository.getMessageBlockList(), const [
-      MessageParticipant(7, 'bob'),
-      MessageParticipant(8, 'UID:8'),
+      (uid: 7, username: 'bob'),
+      (uid: 8, username: 'UID:8'),
     ]);
 
     api.response = {'0': '没有屏蔽的用户'};

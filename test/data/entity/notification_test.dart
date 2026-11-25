@@ -147,13 +147,13 @@ void main() {
 
   group('noHintTarget', () {
     test('与网页版 _TNO / _RNO 对应', () {
-      expect(_n(1).noHintTarget, const NoHintTarget(100, 0));
-      expect(_n(3).noHintTarget, const NoHintTarget(100, 0));
-      expect(_n(2, id3: 8).noHintTarget, const NoHintTarget(100, 8));
-      expect(_n(4, id3: 8).noHintTarget, const NoHintTarget(100, 8));
-      expect(_n(15, id3: 8).noHintTarget, const NoHintTarget(100, 8));
-      expect(_n(17, id2: 7).noHintTarget, const NoHintTarget(100, 7));
-      expect(_n(17).noHintTarget, const NoHintTarget(100, 0));
+      expect(_n(1).noHintTarget, (tid: 100, pid: 0));
+      expect(_n(3).noHintTarget, (tid: 100, pid: 0));
+      expect(_n(2, id3: 8).noHintTarget, (tid: 100, pid: 8));
+      expect(_n(4, id3: 8).noHintTarget, (tid: 100, pid: 8));
+      expect(_n(15, id3: 8).noHintTarget, (tid: 100, pid: 8));
+      expect(_n(17, id2: 7).noHintTarget, (tid: 100, pid: 7));
+      expect(_n(17).noHintTarget, (tid: 100, pid: 0));
     });
 
     test('提及、短消息、系统提醒不支持', () {

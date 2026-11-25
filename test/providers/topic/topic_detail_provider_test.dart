@@ -30,7 +30,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [topicRepositoryProvider.overrideWithValue(repository)],
     );
-    const key = TopicDetailKey(tid: 9);
+    const key = (tid: 9);
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
     addTearDown(() {
@@ -53,7 +53,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [topicRepositoryProvider.overrideWithValue(repository)],
     );
-    const key = TopicDetailKey(tid: 9);
+    const key = (tid: 9);
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
     addTearDown(() {
@@ -70,8 +70,8 @@ void main() {
 
   test('different topics keep independent detail state', () {
     final container = ProviderContainer();
-    const topicAKey = TopicDetailKey(tid: 1);
-    const topicBKey = TopicDetailKey(tid: 2);
+    const topicAKey = (tid: 1);
+    const topicBKey = (tid: 2);
     final topicA = topicDetailProvider(topicAKey);
     final topicB = topicDetailProvider(topicBKey);
     final topicASubscription = container.listen(topicA, (_, _) {});
@@ -99,7 +99,7 @@ void main() {
 
   test('metadata update clamps the current page atomically', () {
     final container = ProviderContainer();
-    const key = TopicDetailKey(tid: 1);
+    const key = (tid: 1);
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
     addTearDown(() {
@@ -130,7 +130,7 @@ void main() {
   test('detail state resets after its last listener is removed', () async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
-    const key = TopicDetailKey(tid: 1);
+    const key = (tid: 1);
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
 

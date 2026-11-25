@@ -41,15 +41,8 @@ class FavouriteTopicListState {
   factory FavouriteTopicListState.initial() => const FavouriteTopicListState();
 }
 
-/// 已从列表移除、等待提交到服务端的收藏删除
-class _PendingDeletion {
-  const _PendingDeletion(this.topic, this.index);
-
-  final Topic topic;
-
-  /// 移除前在列表中的位置，撤销或提交失败时按原位插回
-  final int index;
-}
+/// 已从列表移除、等待提交到服务端的收藏删除（`index` 为移除前位置，撤销或失败时按原位插回）
+typedef _PendingDeletion = ({Topic topic, int index});
 
 class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
   /// tid → 待提交的删除。删除先只改本地列表，撤销窗口结束后再调接口，
@@ -71,7 +64,7 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
     if (tid == null) return;
     final index = state.list.indexWhere((t) => t.tid == tid);
     if (index < 0) return;
-    _pending[tid] = _PendingDeletion(topic, index);
+    _pending[tid] = (topic: topic, index: index);
     state = state.copyWith(list: [...state.list]..removeAt(index));
   }
 

@@ -119,37 +119,18 @@ class ForumTarget extends NotificationTarget {
 }
 
 /// 「不再提示」的作用对象：pid 为 0 时表示整个主题。
-class NoHintTarget {
-  final int tid;
-  final int pid;
+typedef NoHintTarget = ({int tid, int pid});
 
-  const NoHintTarget(this.tid, this.pid);
-
+extension NoHintTargetX on NoHintTarget {
   bool get isTopic => pid == 0;
-
-  @override
-  bool operator ==(Object other) =>
-      other is NoHintTarget && other.tid == tid && other.pid == pid;
-
-  @override
-  int get hashCode => Object.hash(tid, pid);
-
-  @override
-  String toString() => 'NoHintTarget($tid, $pid)';
 }
 
-/// 列表展示用的文案：[actor] 加粗显示，[detail] 作为第二行（主题标题、举报理由等）。
-class NotificationDescription {
-  final String? actor;
-  final String action;
-  final String? detail;
-
-  const NotificationDescription({
-    this.actor,
-    required this.action,
-    this.detail,
-  });
-}
+/// 列表展示用的文案：`actor` 加粗显示，`detail` 作为第二行（主题标题、举报理由等）。
+typedef NotificationDescription = ({
+  String? actor,
+  String action,
+  String? detail,
+});
 
 /// NGA 提醒（`__lib=noti&__act=get_all`），字段下标与类型取自网页版
 /// `js_notification.js` 的 `KEY` 定义。
@@ -276,110 +257,70 @@ class NgaNotification {
   NotificationDescription describe() {
     final actor = hasActor ? (fromUsername ?? 'UID:$fromUid') : null;
     final subject = text;
-    switch (type) {
-      case TYPE_REPLY_TOPIC:
-        return NotificationDescription(
-          actor: actor,
-          action: '回复了你的主题',
-          detail: subject,
-        );
-      case TYPE_REPLY_REPLY:
-        return NotificationDescription(
-          actor: actor,
-          action: '回复了你在主题中的回复',
-          detail: subject,
-        );
-      case TYPE_COMMENT_TOPIC:
-        return NotificationDescription(
-          actor: actor,
-          action: '评论了你的主题',
-          detail: subject,
-        );
-      case TYPE_COMMENT_REPLY:
-        return NotificationDescription(
-          actor: actor,
-          action: '评论了你在主题中的回复',
-          detail: subject,
-        );
-      case TYPE_MENTION_TOPIC:
-        return NotificationDescription(
-          actor: actor,
-          action: '在主题中提到了你',
-          detail: subject,
-        );
-      case TYPE_MENTION_REPLY:
-        return NotificationDescription(
-          actor: actor,
-          action: '在主题中的回复中提到了你',
-          detail: subject,
-        );
-      case TYPE_RECOMMEND_POST:
-        return NotificationDescription(
-          actor: actor,
-          action: aboutId2 != 0 ? '评价了你在主题中的回复并使用了道具' : '评价了你在主题中的发言并使用了道具',
-          detail: subject,
-        );
-      case TYPE_UPVOTE:
-        return NotificationDescription(
-          action: aboutId2 != 0 ? '你在主题中的回复获得了支持或反对' : '你的主题获得了支持或反对',
-          detail: subject,
-        );
-      case TYPE_MESSAGE_NEW:
-        return NotificationDescription(
-          actor: actor,
-          action: '发起了新的对话',
-          detail: subject,
-        );
-      case TYPE_MESSAGE_REPLY:
-        return NotificationDescription(
-          actor: actor,
-          action: '回复了对话',
-          detail: subject,
-        );
-      case TYPE_MESSAGE_ADD:
-        return NotificationDescription(
-          actor: actor,
-          action: '邀请了新用户加入对话',
-          detail: subject,
-        );
-      case TYPE_KEYWORD_WATCH_TOPIC:
-        return NotificationDescription(
-          actor: actor,
-          action: '发布的主题触发了关键词监视',
-          detail: subject,
-        );
-      case TYPE_KEYWORD_WATCH_REPLY:
-        return NotificationDescription(
-          actor: actor,
-          action: '在主题中的回复触发了关键词监视',
-          detail: subject,
-        );
-      case TYPE_KEYWORD_WATCH:
-        return NotificationDescription(action: 'FID:$aboutId 中的发帖触发了关键词监视');
-      case TYPE_REPORT_TOPIC:
-        return NotificationDescription(
-          actor: actor,
-          action: '举报了主题',
-          detail: _reportDetail(),
-        );
-      case TYPE_REPORT_REPLY:
-        return NotificationDescription(
-          actor: actor,
-          action: '举报了主题中的回复',
-          detail: _reportDetail(),
-        );
-      case TYPE_IP_CHANGE:
-        return const NotificationDescription(
-          action: '你的账号可能记录到新的 IP',
-          detail: '可在网页版「访问记录」中查看详细信息',
-        );
-      default:
-        return NotificationDescription(
-          actor: actor,
-          action: '未知提醒（类型 $type）',
-          detail: subject,
-        );
-    }
+    return switch (type) {
+      TYPE_REPLY_TOPIC => (actor: actor, action: '回复了你的主题', detail: subject),
+      TYPE_REPLY_REPLY => (
+        actor: actor,
+        action: '回复了你在主题中的回复',
+        detail: subject,
+      ),
+      TYPE_COMMENT_TOPIC => (actor: actor, action: '评论了你的主题', detail: subject),
+      TYPE_COMMENT_REPLY => (
+        actor: actor,
+        action: '评论了你在主题中的回复',
+        detail: subject,
+      ),
+      TYPE_MENTION_TOPIC => (actor: actor, action: '在主题中提到了你', detail: subject),
+      TYPE_MENTION_REPLY => (
+        actor: actor,
+        action: '在主题中的回复中提到了你',
+        detail: subject,
+      ),
+      TYPE_RECOMMEND_POST => (
+        actor: actor,
+        action: aboutId2 != 0 ? '评价了你在主题中的回复并使用了道具' : '评价了你在主题中的发言并使用了道具',
+        detail: subject,
+      ),
+      TYPE_UPVOTE => (
+        actor: null,
+        action: aboutId2 != 0 ? '你在主题中的回复获得了支持或反对' : '你的主题获得了支持或反对',
+        detail: subject,
+      ),
+      TYPE_MESSAGE_NEW => (actor: actor, action: '发起了新的对话', detail: subject),
+      TYPE_MESSAGE_REPLY => (actor: actor, action: '回复了对话', detail: subject),
+      TYPE_MESSAGE_ADD => (actor: actor, action: '邀请了新用户加入对话', detail: subject),
+      TYPE_KEYWORD_WATCH_TOPIC => (
+        actor: actor,
+        action: '发布的主题触发了关键词监视',
+        detail: subject,
+      ),
+      TYPE_KEYWORD_WATCH_REPLY => (
+        actor: actor,
+        action: '在主题中的回复触发了关键词监视',
+        detail: subject,
+      ),
+      TYPE_KEYWORD_WATCH => (
+        actor: null,
+        action: 'FID:$aboutId 中的发帖触发了关键词监视',
+        detail: null,
+      ),
+      TYPE_REPORT_TOPIC => (
+        actor: actor,
+        action: '举报了主题',
+        detail: _reportDetail(),
+      ),
+      TYPE_REPORT_REPLY => (
+        actor: actor,
+        action: '举报了主题中的回复',
+        detail: _reportDetail(),
+      ),
+      TYPE_IP_CHANGE => (
+        actor: null,
+        action: '你的账号可能记录到新的 IP',
+        detail: '可在网页版「访问记录」中查看详细信息',
+      ),
+      _ => (actor: actor, action: '未知提醒（类型 $type）', detail: subject),
+    };
   }
 
   String? _reportDetail() {
@@ -443,13 +384,13 @@ class NgaNotification {
     switch (type) {
       case TYPE_REPLY_TOPIC:
       case TYPE_COMMENT_TOPIC:
-        return NoHintTarget(aboutId, 0);
+        return (tid: aboutId, pid: 0);
       case TYPE_REPLY_REPLY:
       case TYPE_COMMENT_REPLY:
       case TYPE_RECOMMEND_POST:
-        return aboutId3 != 0 ? NoHintTarget(aboutId, aboutId3) : null;
+        return aboutId3 != 0 ? (tid: aboutId, pid: aboutId3) : null;
       case TYPE_UPVOTE:
-        return NoHintTarget(aboutId, aboutId2);
+        return (tid: aboutId, pid: aboutId2);
       default:
         return null;
     }

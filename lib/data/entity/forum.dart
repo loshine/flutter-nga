@@ -9,7 +9,7 @@ class Forum {
   final int type;
   final int? iconId;
 
-  ForumIdentity get identity => ForumIdentity(fid, type);
+  ForumIdentity get identity => (id: fid, type: type);
 
   factory Forum.fromJson(Map map) {
     final stid = _parseNonZeroInt(map['stid']);
@@ -42,24 +42,11 @@ class Forum {
   }
 }
 
-class ForumIdentity {
-  const ForumIdentity(this.id, this.type);
+/// 版块唯一标识（按 type 区分普通版块 fid 与合集/子版 stid）。
+typedef ForumIdentity = ({int id, int type});
 
-  final int id;
-  final int type;
-
+extension ForumIdentityX on ForumIdentity {
   String get storageKey => '$type:$id';
-
-  @override
-  bool operator ==(Object other) {
-    return other is ForumIdentity && other.id == id && other.type == type;
-  }
-
-  @override
-  int get hashCode => Object.hash(id, type);
-
-  @override
-  String toString() => 'ForumIdentity($storageKey)';
 }
 
 /// 版块组实体类

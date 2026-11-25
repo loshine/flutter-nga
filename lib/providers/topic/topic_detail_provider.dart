@@ -2,18 +2,7 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TopicDetailKey {
-  const TopicDetailKey({required this.tid});
-
-  final int tid;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is TopicDetailKey && tid == other.tid;
-
-  @override
-  int get hashCode => tid.hashCode;
-}
+typedef TopicDetailKey = ({int tid});
 
 /// 帖子收藏状态。帖子详情接口不返回是否已收藏，进入页面时为 [unknown]。
 enum FavouriteStatus { unknown, favourited, notFavourited }

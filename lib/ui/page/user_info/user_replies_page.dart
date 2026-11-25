@@ -64,10 +64,11 @@ class UserRepliesPage extends HookConsumerWidget {
     void selectTopic(Topic topic) {
       final tid = topic.tid;
       if (tid == null) return;
-      selectedTopic.value = SelectedTopic(
+      selectedTopic.value = (
         tid: tid,
         fid: topic.fid,
         subject: topic.subject,
+        authorid: null,
       );
     }
 

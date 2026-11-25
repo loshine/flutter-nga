@@ -227,7 +227,7 @@ class TopicDataRepository implements TopicRepository {
       List<TopicTag> list = [];
       Map<String, dynamic> tagMap = response.data!["0"];
       tagMap.forEach((k, v) {
-        list.add(TopicTag(id: int.tryParse(k)!, content: v["0"]));
+        list.add((id: int.tryParse(k)!, content: v["0"]));
       });
       return list;
     } catch (err) {

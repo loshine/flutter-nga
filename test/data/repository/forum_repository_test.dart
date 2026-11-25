@@ -19,14 +19,14 @@ void main() {
         'name': '特殊版块',
       });
 
-      expect(forum.identity, const ForumIdentity(7, 0));
-      expect(special.identity, const ForumIdentity(8, 1));
+      expect(forum.identity, (id: 7, type: 0));
+      expect(special.identity, (id: 8, type: 1));
       expect(special.iconId, 80);
       expect(special.getIconUrl(), endsWith('/80.png'));
     });
 
     test('keeps fid and stid with the same value distinct', () {
-      expect(const ForumIdentity(7, 0), isNot(const ForumIdentity(7, 1)));
+      expect((id: 7, type: 0), isNot((id: 7, type: 1)));
     });
   });
 
@@ -78,11 +78,7 @@ void main() {
 
     test('sync sends exact endpoint, auth form, and stable cookie', () async {
       currentUser = _user('1', 'token-1');
-      api.remoteFor('1')[const ForumIdentity(7, 0)] = const Forum(
-        7,
-        '议事厅',
-        iconId: 70,
-      );
+      api.remoteFor('1')[(id: 7, type: 0)] = const Forum(7, '议事厅', iconId: 70);
 
       final forums = await repository.syncFavouriteList();
 
@@ -126,11 +122,11 @@ void main() {
 
     test('account caches are isolated by uid', () async {
       currentUser = _user('1', 'token-1');
-      api.remoteFor('1')[const ForumIdentity(1, 0)] = const Forum(1, '账号一');
+      api.remoteFor('1')[(id: 1, type: 0)] = const Forum(1, '账号一');
       await repository.syncFavouriteList();
 
       currentUser = _user('2', 'token-2');
-      api.remoteFor('2')[const ForumIdentity(2, 0)] = const Forum(2, '账号二');
+      api.remoteFor('2')[(id: 2, type: 0)] = const Forum(2, '账号二');
       await repository.syncFavouriteList();
       expect((await repository.getFavouriteList()).single.fid, 2);
 
@@ -169,12 +165,12 @@ void main() {
       'remote refresh failure preserves the confirmed local cache',
       () async {
         currentUser = _user('1', 'token-1');
-        api.remoteFor('1')[const ForumIdentity(1, 0)] = const Forum(1, '旧数据');
+        api.remoteFor('1')[(id: 1, type: 0)] = const Forum(1, '旧数据');
         await repository.syncFavouriteList();
 
         api.remoteFor('1')
           ..clear()
-          ..[const ForumIdentity(2, 0)] = const Forum(2, '新数据');
+          ..[(id: 2, type: 0)] = const Forum(2, '新数据');
         api.failGet = true;
         await expectLater(
           repository.syncFavouriteList(),
@@ -190,7 +186,7 @@ void main() {
       'malformed remote response preserves the confirmed local cache',
       () async {
         currentUser = _user('1', 'token-1');
-        api.remoteFor('1')[const ForumIdentity(1, 0)] = const Forum(1, '旧数据');
+        api.remoteFor('1')[(id: 1, type: 0)] = const Forum(1, '旧数据');
         await repository.syncFavouriteList();
 
         api.invalidGetResponse = true;
@@ -341,17 +337,17 @@ void main() {
       expect(other.name, '网事杂谈');
       expect(other.groups.map((group) => group.name), ['网事杂谈', 'IT软硬件']);
       expect(other.groups.first.forumList.map((forum) => forum.identity), [
-        const ForumIdentity(-7, 0),
-        const ForumIdentity(39827852, 1),
+        (id: -7, type: 0),
+        (id: 39827852, type: 1),
       ]);
       expect(other.groups.first.forumList.last.iconId, 39827852);
 
       // 缺少 fid 但带 stid 的版块可用；缺少名称的脏数据被跳过，空组和空分类被丢弃
       final mobi = categories.last;
-      expect(
-        mobi.groups.single.forumList.single.identity,
-        const ForumIdentity(29182350, 1),
-      );
+      expect(mobi.groups.single.forumList.single.identity, (
+        id: 29182350,
+        type: 1,
+      ));
     });
 
     test(
@@ -556,7 +552,7 @@ class _FakeFavouriteApi {
     final fid = int.parse(fields['fid']!);
     if (action == 'add') {
       final type = addAsSpecial ? 1 : 0;
-      final identity = ForumIdentity(fid, type);
+      final identity = (id: fid, type: type);
       remoteFor(uid)
           .putIfAbsent(identity, () => Forum(fid, '远程版块 $fid', type: type));
       return [];

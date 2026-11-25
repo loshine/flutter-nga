@@ -49,30 +49,7 @@ double masterPaneWidthFor(double availableWidth) {
 }
 
 /// 双栏布局中当前选中的帖子描述信息。
-class SelectedTopic {
-  const SelectedTopic({
-    required this.tid,
-    this.fid,
-    this.subject,
-    this.authorid,
-  });
-
-  final int tid;
-  final int? fid;
-  final String? subject;
-  final int? authorid;
-
-  @override
-  bool operator ==(Object other) =>
-      other is SelectedTopic &&
-      other.tid == tid &&
-      other.fid == fid &&
-      other.subject == subject &&
-      other.authorid == authorid;
-
-  @override
-  int get hashCode => Object.hash(tid, fid, subject, authorid);
-}
+typedef SelectedTopic = ({int tid, int? fid, String? subject, int? authorid});
 
 /// 通用响应式左右双栏（List-Detail / Master-Detail）布局容器。
 ///

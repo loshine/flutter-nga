@@ -116,37 +116,31 @@ class NotificationItemWidget extends StatelessWidget {
     final actions = <_MenuAction>[];
     final topicId = notification.topicId;
     if (topicId != null && notification.target is! TopicTarget) {
-      actions.add(
-        _MenuAction(
-          icon: Icons.article_outlined,
-          label: '进入主题',
-          onTap: () =>
-              Routes.navigateTo(context, "${Routes.TOPIC_DETAIL}?tid=$topicId"),
-        ),
-      );
+      actions.add((
+        icon: Icons.article_outlined,
+        label: '进入主题',
+        onTap: () =>
+            Routes.navigateTo(context, "${Routes.TOPIC_DETAIL}?tid=$topicId"),
+      ));
     }
     if (notification.hasActor) {
       final name = notification.fromUsername ?? 'UID:${notification.fromUid}';
-      actions.add(
-        _MenuAction(
-          icon: Icons.person_outline,
-          label: '查看 $name 的主页',
-          onTap: () => Routes.navigateTo(
-            context,
-            "${Routes.USER}?uid=${notification.fromUid}",
-          ),
+      actions.add((
+        icon: Icons.person_outline,
+        label: '查看 $name 的主页',
+        onTap: () => Routes.navigateTo(
+          context,
+          "${Routes.USER}?uid=${notification.fromUid}",
         ),
-      );
+      ));
     }
     final noHint = notification.noHintTarget;
     if (noHint != null && onNoHint != null) {
-      actions.add(
-        _MenuAction(
-          icon: Icons.notifications_off_outlined,
-          label: noHint.isTopic ? '不再提示此主题的回复或评论' : '不再提示此回复的回复或评论',
-          onTap: () => onNoHint!(noHint),
-        ),
-      );
+      actions.add((
+        icon: Icons.notifications_off_outlined,
+        label: noHint.isTopic ? '不再提示此主题的回复或评论' : '不再提示此回复的回复或评论',
+        onTap: () => onNoHint!(noHint),
+      ));
     }
     return actions;
   }
@@ -201,17 +195,7 @@ void openNotificationTarget(
   }
 }
 
-class _MenuAction {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _MenuAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-}
+typedef _MenuAction = ({IconData icon, String label, VoidCallback onTap});
 
 class _NotificationIcon extends StatelessWidget {
   final NgaNotification notification;

@@ -65,20 +65,7 @@ class UserInfoState {
 }
 
 /// 用户主页查询身份：按 uid 或用户名分桶，避免不同用户共用一份缓存
-class UserInfoKey {
-  final String? uid;
-  final String? username;
-
-  const UserInfoKey({this.uid, this.username});
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UserInfoKey && uid == other.uid && username == other.username;
-
-  @override
-  int get hashCode => Object.hash(uid, username);
-}
+typedef UserInfoKey = ({String? uid, String? username});
 
 class UserInfoNotifier extends Notifier<UserInfoState> {
   UserInfoNotifier(this.query);

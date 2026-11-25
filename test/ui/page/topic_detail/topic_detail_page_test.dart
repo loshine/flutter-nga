@@ -60,7 +60,7 @@ void main() {
         topicSinglePageProvider.overrideWith2(harness.createNotifier),
       ],
     );
-    const oldKey = TopicDetailKey(tid: 1);
+    const oldKey = (tid: 1);
     final oldProvider = topicDetailProvider(oldKey);
     final oldSubscription = container.listen(oldProvider, (_, _) {});
     addTearDown(() {
@@ -86,10 +86,11 @@ void main() {
     expect(find.text('新标题'), findsOneWidget);
     expect(find.text('旧标题'), findsNothing);
     expect(find.text('1/1'), findsOneWidget);
-    await harness.waitForRefreshStart(
-      tester,
-      const TopicSinglePageKey(tid: 2, page: 1),
-    );
+    await harness.waitForRefreshStart(tester, (
+      tid: 2,
+      page: 1,
+      authorid: null,
+    ));
   });
 
   testWidgets('network title replaces an empty route title', (tester) async {
@@ -100,7 +101,7 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-    const requestKey = TopicSinglePageKey(tid: 2, page: 1);
+    const requestKey = (tid: 2, page: 1, authorid: null);
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -137,7 +138,7 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-    const requestKey = TopicSinglePageKey(tid: 2, page: 1);
+    const requestKey = (tid: 2, page: 1, authorid: null);
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -170,7 +171,7 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-    const detailKey = TopicDetailKey(tid: 2);
+    const detailKey = (tid: 2);
     final detail = container.listen(topicDetailProvider(detailKey), (_, _) {});
     addTearDown(detail.close);
     container
@@ -183,10 +184,11 @@ void main() {
         child: const MaterialApp(home: TopicDetailPage(2, 10)),
       ),
     );
-    await harness.waitForRefreshStart(
-      tester,
-      const TopicSinglePageKey(tid: 2, page: 1),
-    );
+    await harness.waitForRefreshStart(tester, (
+      tid: 2,
+      page: 1,
+      authorid: null,
+    ));
 
     IconButton button(String tooltip) => tester.widget<IconButton>(
       find.ancestor(
@@ -226,10 +228,11 @@ void main() {
         ),
       ),
     );
-    await harness.waitForRefreshStart(
-      tester,
-      const TopicSinglePageKey(tid: 2, page: 1),
-    );
+    await harness.waitForRefreshStart(tester, (
+      tid: 2,
+      page: 1,
+      authorid: null,
+    ));
     expect(find.byTooltip('切换到日间模式'), findsOneWidget);
   });
 }

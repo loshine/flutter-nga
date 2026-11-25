@@ -346,8 +346,8 @@ void main() {
     'switching favourite forums in AppleWorkspaceShell creates distinct ForumDetailPage keys and auto-refreshes each forum',
     (tester) async {
       expect(
-        const ForumIdentity(-7, 0).toString(),
-        isNot(equals(const ForumIdentity(334, 0).toString())),
+        (id: -7, type: 0).toString(),
+        isNot(equals((id: 334, type: 0).toString())),
       );
 
       final refreshedFids = <int>[];
