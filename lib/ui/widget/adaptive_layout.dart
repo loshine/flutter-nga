@@ -1,4 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
@@ -91,15 +93,25 @@ class MasterDetailLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMacApple = context.isMacDesktopAppleStyle;
+    // 在 macOS 三栏工作区中，外层侧边栏已占用 244pt，允许在稍窄的剩余宽度（700pt）
+    // 即展开中栏列表 + 右栏详情，确保常规 1000~1280pt 桌面窗口完整呈现三栏。
+    final effectiveBreakpoint = isMacApple && breakpoint == kExpandedBreakpoint
+        ? 680.0
+        : breakpoint;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isTwoPane = constraints.maxWidth >= breakpoint;
+        final isTwoPane = constraints.maxWidth >= effectiveBreakpoint;
         if (!isTwoPane) {
           return masterBuilder(context, false);
         }
 
         final paneWidth =
-            masterWidth ?? masterPaneWidthFor(constraints.maxWidth);
+            masterWidth ??
+            (isMacApple
+                ? (constraints.maxWidth * 0.36).clamp(300.0, 380.0)
+                : masterPaneWidthFor(constraints.maxWidth));
         return Row(
           children: [
             SizedBox(
@@ -111,8 +123,8 @@ class MasterDetailLayout extends StatelessWidget {
               ),
             ),
             VerticalDivider(
-              width: 1,
-              thickness: 1,
+              width: isMacApple ? 0.5 : 1,
+              thickness: isMacApple ? 0.5 : 1,
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
             Expanded(
@@ -183,6 +195,7 @@ class MasterDetailEmptyPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Scaffold(
       body: Center(
@@ -191,20 +204,29 @@ class MasterDetailEmptyPlaceholder extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(Dimen.radiusXL),
+              if (isApple)
+                Icon(
+                  icon,
+                  size: 40,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+                )
+              else
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(Dimen.radiusXL),
+                  ),
+                  child: Icon(icon, size: 32, color: colorScheme.primary),
                 ),
-                child: Icon(icon, size: 32, color: colorScheme.primary),
-              ),
               const SizedBox(height: Dimen.spacingL),
               Text(
                 title,
                 style: textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
+                  color: isApple
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
@@ -214,7 +236,9 @@ class MasterDetailEmptyPlaceholder extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant.withValues(
+                      alpha: isApple ? 0.8 : 1.0,
+                    ),
                   ),
                   textAlign: TextAlign.center,
                 ),

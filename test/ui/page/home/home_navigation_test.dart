@@ -192,12 +192,12 @@ void main() {
       );
       expect(drawer.selectedIndex, 0);
 
-      // 选中胶囊同时包裹图标和文字
+      // 选中胶囊同时包裹图标和文字（4 个顶级导航项：版块、收藏、消息、我的）
       final indicatorFinder = find.descendant(
         of: find.byType(NavigationDrawer),
         matching: find.byType(NavigationIndicator),
       );
-      expect(indicatorFinder, findsNWidgets(2));
+      expect(indicatorFinder, findsNWidgets(4));
       final indicatorRect = tester.getRect(indicatorFinder.first);
       final iconRect = tester.getRect(
         find.descendant(
@@ -208,7 +208,7 @@ void main() {
       final labelRect = tester.getRect(
         find.descendant(
           of: find.byType(NavigationDrawer),
-          matching: find.text('社区'),
+          matching: find.text('版块'),
         ),
       );
       expect(indicatorRect.left, lessThanOrEqualTo(iconRect.left));
@@ -230,7 +230,7 @@ void main() {
       expect(fabRect.right, greaterThan(800));
       expect(fabRect.bottom, greaterThan(600));
 
-      // 点击「我的」切换到第二个目标，选中胶囊随之切换
+      // 点击「我的」切换到第四个目标，选中胶囊随之切换
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationDrawer),
@@ -242,7 +242,7 @@ void main() {
         tester
             .widget<NavigationDrawer>(find.byType(NavigationDrawer))
             .selectedIndex,
-        1,
+        3,
       );
     },
   );
@@ -274,27 +274,32 @@ void main() {
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(find.byType(LiquidGlassSurface), findsWidgets);
       expect(find.byTooltip('添加自定义版面'), findsOneWidget);
-      expect(find.text('社区'), findsOneWidget);
+      expect(find.text('版块'), findsOneWidget);
+      expect(find.text('收藏'), findsOneWidget);
+      expect(find.text('消息'), findsOneWidget);
       expect(find.text('我的'), findsOneWidget);
     },
   );
 
   testWidgets(
-    'Apple large layout uses collapsible LiquidGlass sidebar without FAB',
+    'Apple large layout uses AppleWorkspaceShell source list without FAB',
     (tester) async {
       await _pumpHome(
         tester,
-        size: const Size(1000, 800),
+        size: const Size(1100, 800),
         user: const UserInfo(uid: 1, username: '测试用户'),
         style: AppDesignStyle.apple,
-        macTitlebarInset: 28,
+        macTitlebarInset: 52,
       );
 
       expect(find.byType(NavigationDrawer), findsNothing);
       expect(find.byType(NavigationRail), findsNothing);
       expect(find.byType(FloatingActionButton), findsNothing);
+      expect(find.text('贴子收藏'), findsOneWidget);
+      expect(find.text('浏览历史'), findsOneWidget);
+      expect(find.text('短消息'), findsOneWidget);
+      expect(find.text('提醒信息'), findsOneWidget);
       expect(find.byTooltip('收起侧边栏'), findsOneWidget);
-      expect(find.byTooltip('添加自定义版面'), findsOneWidget);
 
       await tester.tap(find.byTooltip('收起侧边栏'));
       await tester.pumpAndSettle();

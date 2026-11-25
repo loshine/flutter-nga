@@ -1,14 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/blocked_content.dart';
 import 'package:flutter_nga/ui/widget/dash.dart';
@@ -81,6 +86,7 @@ class TopicReplyItemWidget extends ConsumerStatefulWidget {
 
 class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
   bool _attachmentsExpanded = false;
+  bool _hovered = false;
 
   /// 点赞 / 点踩请求进行中，期间忽略重复点击。
   bool _reacting = false;
@@ -98,6 +104,36 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
     ReplyMenuAction.copyLink,
     if (!_isAnonymous) ...[ReplyMenuAction.viewUser, ReplyMenuAction.blockUser],
   ];
+
+  Future<void> _openAppleFloorMenu(
+    BuildContext context, {
+    Offset? globalPosition,
+  }) async {
+    IconData iconFor(ReplyMenuAction a) => switch (a) {
+      ReplyMenuAction.quote => CupertinoIcons.quote_bubble,
+      ReplyMenuAction.reply => CupertinoIcons.reply,
+      ReplyMenuAction.onlyAuthor => CupertinoIcons.person_crop_circle,
+      ReplyMenuAction.copyContent => CupertinoIcons.doc_on_doc,
+      ReplyMenuAction.copyLink => CupertinoIcons.link,
+      ReplyMenuAction.viewUser => CupertinoIcons.person,
+      ReplyMenuAction.blockUser => CupertinoIcons.nosign,
+    };
+    final selected = await showAppActionMenu<ReplyMenuAction>(
+      context: context,
+      title: '第 ${widget.reply.lou} 楼',
+      globalPosition: globalPosition,
+      actions: [
+        for (final action in _actions)
+          AppMenuAction(
+            value: action,
+            label: action.label,
+            icon: iconFor(action),
+            destructive: action == ReplyMenuAction.blockUser,
+          ),
+      ],
+    );
+    if (selected != null && mounted) _onMenuSelected(selected);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,19 +196,72 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                             ],
                           ),
                         ),
-                        // 用 icon 参数让菜单按钮拥有 48dp 触控区。
-                        PopupMenuButton<ReplyMenuAction>(
-                          tooltip: '楼层操作',
-                          icon: const Icon(Icons.more_vert),
-                          onSelected: _onMenuSelected,
-                          itemBuilder: (BuildContext context) => [
-                            for (final action in _actions)
-                              PopupMenuItem<ReplyMenuAction>(
-                                value: action,
-                                child: Text(action.label),
+                        // Apple 风格：iOS 弹出原生 ActionSheet，macOS 悬停展示快捷引用/回复与紧凑菜单；
+                        // Material 风格：保留 48dp 触控区 PopupMenuButton。
+                        if (context.isAppleStyle)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (context.isMacDesktopAppleStyle &&
+                                  _hovered) ...[
+                                IconButton(
+                                  tooltip: '引用',
+                                  icon: const Icon(
+                                    CupertinoIcons.quote_bubble,
+                                    size: 15,
+                                  ),
+                                  onPressed: () =>
+                                      _onMenuSelected(ReplyMenuAction.quote),
+                                ),
+                                IconButton(
+                                  tooltip: '回复',
+                                  icon: const Icon(
+                                    CupertinoIcons.reply,
+                                    size: 15,
+                                  ),
+                                  onPressed: () =>
+                                      _onMenuSelected(ReplyMenuAction.reply),
+                                ),
+                              ],
+                              Builder(
+                                builder: (btnContext) => IconButton(
+                                  tooltip: '楼层操作',
+                                  icon: Icon(
+                                    AppIcons.more(context),
+                                    size: context.isMacDesktopAppleStyle
+                                        ? 16
+                                        : 20,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  onPressed: () {
+                                    final box =
+                                        btnContext.findRenderObject()
+                                            as RenderBox?;
+                                    final pos = box?.localToGlobal(
+                                      Offset(box.size.width, box.size.height),
+                                    );
+                                    _openAppleFloorMenu(
+                                      context,
+                                      globalPosition: pos,
+                                    );
+                                  },
+                                ),
                               ),
-                          ],
-                        ),
+                            ],
+                          )
+                        else
+                          PopupMenuButton<ReplyMenuAction>(
+                            tooltip: '楼层操作',
+                            icon: const Icon(Icons.more_vert),
+                            onSelected: _onMenuSelected,
+                            itemBuilder: (BuildContext context) => [
+                              for (final action in _actions)
+                                PopupMenuItem<ReplyMenuAction>(
+                                  value: action,
+                                  child: Text(action.label),
+                                ),
+                            ],
+                          ),
                       ],
                     ),
                     if (headerStats.isNotEmpty)
@@ -337,9 +426,13 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                     children: <Widget>[
                       _reactionButton(
                         tooltip: "点赞",
-                        icon: isLiked
-                            ? Icons.thumb_up
-                            : Icons.thumb_up_outlined,
+                        icon: context.isAppleStyle
+                            ? (isLiked
+                                  ? CupertinoIcons.hand_thumbsup_fill
+                                  : CupertinoIcons.hand_thumbsup)
+                            : (isLiked
+                                  ? Icons.thumb_up
+                                  : Icons.thumb_up_outlined),
                         color: isLiked ? thumbFgActive : thumbFgInactive,
                         onPressed: _toggleLike,
                       ),
@@ -353,9 +446,13 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                       ),
                       _reactionButton(
                         tooltip: "点踩",
-                        icon: isDisliked
-                            ? Icons.thumb_down
-                            : Icons.thumb_down_outlined,
+                        icon: context.isAppleStyle
+                            ? (isDisliked
+                                  ? CupertinoIcons.hand_thumbsdown_fill
+                                  : CupertinoIcons.hand_thumbsdown)
+                            : (isDisliked
+                                  ? Icons.thumb_down
+                                  : Icons.thumb_down_outlined),
                         color: isDisliked ? thumbFgActive : thumbFgInactive,
                         onPressed: _toggleDislike,
                       ),
@@ -373,11 +470,29 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
             ],
           ),
         ),
-        Divider(height: 1),
+        Divider(
+          height: context.isAppleStyle ? 0.5 : 1,
+          thickness: context.isAppleStyle ? 0.5 : 1,
+        ),
       ],
     );
 
-    return BlockedContent(mode: widget.blockMode, child: floor);
+    final wrapped = context.isMacDesktopAppleStyle
+        ? MouseRegion(
+            onEnter: (_) => setState(() => _hovered = true),
+            onExit: (_) => setState(() => _hovered = false),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onSecondaryTapDown: (d) => _openAppleFloorMenu(
+                context,
+                globalPosition: d.globalPosition,
+              ),
+              child: floor,
+            ),
+          )
+        : floor;
+
+    return BlockedContent(mode: widget.blockMode, child: wrapped);
   }
 
   /// 隐藏模式的评论直接移除，其余评论连同各自的屏蔽模式一起返回

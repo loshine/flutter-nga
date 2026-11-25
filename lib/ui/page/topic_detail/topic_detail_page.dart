@@ -4,11 +4,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
@@ -135,6 +137,177 @@ class TopicDetailPage extends HookConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final favourited = state.favourite == FavouriteStatus.favourited;
     final isApple = context.isAppleStyle;
+    final isMacDesktop = context.isMacDesktopAppleStyle;
+
+    void openPageSelector() {
+      TopicPageSelectDialog.show(
+        context,
+        currentPage: state.currentPage,
+        maxPage: state.maxPage,
+        maxFloor: state.maxFloor,
+        pageSelectedCallback: (isPage, target) {
+          final index = isPage ? target - 1 : (target / 20 - 1).ceil();
+          goToPage(index.clamp(0, tabController.length - 1).toInt());
+        },
+      );
+    }
+
+    void toggleFavourite() {
+      notifier
+          .toggleFavourite()
+          .then((message) {
+            AppHaptics.selectionChanged();
+            if (message != null) AppToast.success(message);
+          })
+          .catchError((e) {
+            AppToast.error(e);
+          });
+    }
+
+    void openReply() {
+      if (fid == null && state.topic == null) return;
+      Routes.navigateTo(
+        context,
+        "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
+      );
+    }
+
+    Future<void> openAppleMoreMenu(BuildContext btnContext) async {
+      final box = btnContext.findRenderObject() as RenderBox?;
+      final pos = box?.localToGlobal(Offset(box.size.width, box.size.height));
+      final selected = await showAppActionMenu<TopicDetailMenuAction>(
+        context: context,
+        globalPosition: pos,
+        actions: const [
+          AppMenuAction(
+            value: TopicDetailMenuAction.copyLink,
+            label: '复制帖子链接',
+            icon: CupertinoIcons.link,
+          ),
+          AppMenuAction(
+            value: TopicDetailMenuAction.openInBrowser,
+            label: '在浏览器中打开',
+            icon: CupertinoIcons.compass,
+          ),
+        ],
+      );
+      if (selected != null) _onMenuSelected(selected);
+    }
+
+    final moreActionWidget = isApple
+        ? Builder(
+            builder: (btnContext) => IconButton(
+              tooltip: '更多',
+              icon: Icon(AppIcons.more(context)),
+              onPressed: () => openAppleMoreMenu(btnContext),
+            ),
+          )
+        : PopupMenuButton<TopicDetailMenuAction>(
+            tooltip: '更多',
+            onSelected: (action) => _onMenuSelected(action),
+            itemBuilder: (context) => [
+              for (final action in TopicDetailMenuAction.values)
+                PopupMenuItem(value: action, child: Text(action.label)),
+            ],
+          );
+
+    // macOS 桌面阅读器：把翻页、收藏、回复、日夜间全部整合进顶部 52pt Toolbar，取消手机底栏
+    if (isMacDesktop) {
+      final colorScheme = Theme.of(context).colorScheme;
+      return AppScaffold(
+        embedded: embedded,
+        title: Text(code_utils.unescapeHtml(state.subject ?? subject ?? "")),
+        actions: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(color: colorScheme.outlineVariant, width: 0.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  tooltip: '上一页',
+                  icon: Icon(AppIcons.chevronLeft(context), size: 15),
+                  onPressed: hasPrevious
+                      ? () => goToPage(tabController.index - 1)
+                      : null,
+                ),
+                Tooltip(
+                  message: '跳转页码',
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(5),
+                    onTap: openPageSelector,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      child: Text(
+                        "${state.currentPage}/${state.maxPage}",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: '下一页',
+                  icon: Icon(AppIcons.chevronRight(context), size: 15),
+                  onPressed: hasNext
+                      ? () => goToPage(tabController.index + 1)
+                      : null,
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
+            icon: Icon(
+              isDark ? AppIcons.lightMode(context) : AppIcons.darkMode(context),
+            ),
+            onPressed: () => ref
+                .read(themeProvider.notifier)
+                .update(
+                  context,
+                  isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
+                ),
+          ),
+          IconButton(
+            tooltip: favourited ? '取消收藏' : '收藏',
+            icon: Icon(
+              AppIcons.favorite(context, filled: favourited),
+              color: favourited ? colorScheme.primary : null,
+            ),
+            onPressed: state.favouriteBusy ? null : toggleFavourite,
+          ),
+          IconButton(
+            tooltip: '回复',
+            color: colorScheme.primary,
+            icon: Icon(AppIcons.reply(context)),
+            onPressed: openReply,
+          ),
+          moreActionWidget,
+          if (embedded && onClose != null)
+            IconButton(
+              tooltip: '关闭',
+              icon: Icon(AppIcons.close(context)),
+              onPressed: onClose,
+            ),
+        ],
+        body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: tabController,
+          children: widgets,
+        ),
+      );
+    }
 
     final toolbarRow = ReadableWidth(
       alignment: Alignment.center,
@@ -155,20 +328,7 @@ class TopicDetailPage extends HookConsumerWidget {
                 minimumSize: const Size(48, 44),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
               ),
-              onPressed: () {
-                TopicPageSelectDialog.show(
-                  context,
-                  currentPage: state.currentPage,
-                  maxPage: state.maxPage,
-                  maxFloor: state.maxFloor,
-                  pageSelectedCallback: (isPage, target) {
-                    final index = isPage
-                        ? target - 1
-                        : (target / 20 - 1).ceil();
-                    goToPage(index.clamp(0, tabController.length - 1).toInt());
-                  },
-                );
-              },
+              onPressed: openPageSelector,
               child: Text(
                 "${state.currentPage}/${state.maxPage}",
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -205,19 +365,7 @@ class TopicDetailPage extends HookConsumerWidget {
               AppIcons.favorite(context, filled: true),
               color: Theme.of(context).colorScheme.primary,
             ),
-            onPressed: state.favouriteBusy
-                ? null
-                : () {
-                    notifier
-                        .toggleFavourite()
-                        .then((message) {
-                          AppHaptics.selectionChanged();
-                          if (message != null) AppToast.success(message);
-                        })
-                        .catchError((e) {
-                          AppToast.error(e);
-                        });
-                  },
+            onPressed: state.favouriteBusy ? null : toggleFavourite,
           ),
           const SizedBox(width: 4),
           isApple
@@ -225,24 +373,12 @@ class TopicDetailPage extends HookConsumerWidget {
                   tooltip: '回复',
                   color: Theme.of(context).colorScheme.primary,
                   icon: Icon(AppIcons.reply(context)),
-                  onPressed: () {
-                    if (fid == null && state.topic == null) return;
-                    Routes.navigateTo(
-                      context,
-                      "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
-                    );
-                  },
+                  onPressed: openReply,
                 )
               : IconButton.filledTonal(
                   tooltip: '回复',
                   icon: const Icon(Icons.chat_bubble_outline),
-                  onPressed: () {
-                    if (fid == null && state.topic == null) return;
-                    Routes.navigateTo(
-                      context,
-                      "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
-                    );
-                  },
+                  onPressed: openReply,
                 ),
         ],
       ),
@@ -252,15 +388,7 @@ class TopicDetailPage extends HookConsumerWidget {
       embedded: embedded,
       title: Text(code_utils.unescapeHtml(state.subject ?? subject ?? "")),
       actions: [
-        PopupMenuButton<TopicDetailMenuAction>(
-          tooltip: '更多',
-          icon: Icon(AppIcons.more(context)),
-          onSelected: (action) => _onMenuSelected(action),
-          itemBuilder: (context) => [
-            for (final action in TopicDetailMenuAction.values)
-              PopupMenuItem(value: action, child: Text(action.label)),
-          ],
-        ),
+        moreActionWidget,
         if (embedded && onClose != null)
           IconButton(
             tooltip: '关闭',
