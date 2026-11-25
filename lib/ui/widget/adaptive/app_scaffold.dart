@@ -262,25 +262,38 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     if (resolvedLeading == null && automaticallyImplyLeading && canPop) {
       resolvedLeading = Tooltip(
         message: '返回',
-        child: CupertinoButton(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          minimumSize: const Size(34, 34),
-          onPressed: () => Navigator.of(context).maybePop(),
-          child: Icon(
-            CupertinoIcons.back,
-            size: isMacDesktop ? 17 : 22,
-            color: isMacDesktop
-                ? colorScheme.onSurfaceVariant
-                : colorScheme.primary,
-          ),
-        ),
+        child: isMacDesktop
+            ? IconButton(
+                icon: Icon(
+                  CupertinoIcons.back,
+                  size: 16,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                onPressed: () => Navigator.of(context).maybePop(),
+              )
+            : CupertinoButton(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                minimumSize: const Size(34, 34),
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: Icon(
+                  CupertinoIcons.back,
+                  size: 22,
+                  color: colorScheme.primary,
+                ),
+              ),
       );
     }
 
     if (reserveTrafficLights) {
       resolvedLeading = Row(
         mainAxisSize: MainAxisSize.min,
-        children: [const SizedBox(width: 72), ?resolvedLeading],
+        children: [
+          const SizedBox(width: 70),
+          if (resolvedLeading != null) ...[
+            const SizedBox(width: 4),
+            resolvedLeading,
+          ],
+        ],
       );
     }
 
@@ -296,8 +309,48 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
             );
 
     final actionRow = actions != null && actions!.isNotEmpty
-        ? Row(mainAxisSize: MainAxisSize.min, children: actions!)
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: isMacDesktop ? 2 : 0,
+            children: actions!,
+          )
         : null;
+
+    final styledTitle = title != null
+        ? DefaultTextStyle.merge(
+            style: titleStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            child: title!,
+          )
+        : null;
+
+    final Widget toolbarContent;
+    if (isMacDesktop && !centerTitle) {
+      toolbarContent = Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (resolvedLeading != null) ...[
+            resolvedLeading,
+            const SizedBox(width: 6),
+          ],
+          Expanded(
+            child: styledTitle != null
+                ? Align(alignment: Alignment.centerLeft, child: styledTitle)
+                : const SizedBox.shrink(),
+          ),
+          if (actionRow != null) ...[const SizedBox(width: 6), actionRow],
+        ],
+      );
+    } else {
+      toolbarContent = NavigationToolbar(
+        leading: resolvedLeading,
+        middle: styledTitle,
+        trailing: actionRow,
+        centerMiddle: centerTitle,
+        middleSpacing: 8,
+      );
+    }
 
     return LiquidGlassSurface(
       variant: LiquidGlassVariant.bar,
@@ -318,22 +371,9 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                 height: _baseHeight,
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMacDesktop ? 12 : 8,
+                    horizontal: isMacDesktop ? 10 : 8,
                   ),
-                  child: NavigationToolbar(
-                    leading: resolvedLeading,
-                    middle: title != null
-                        ? DefaultTextStyle.merge(
-                            style: titleStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            child: title!,
-                          )
-                        : null,
-                    trailing: actionRow,
-                    centerMiddle: centerTitle,
-                    middleSpacing: 8,
-                  ),
+                  child: toolbarContent,
                 ),
               ),
               ?bottom,

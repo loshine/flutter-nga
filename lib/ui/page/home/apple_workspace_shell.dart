@@ -172,16 +172,21 @@ class AppleWorkspaceShell extends HookConsumerWidget {
       }
     }
 
-    // 侧边栏折叠时，在右侧工作区顶栏左侧显示展开按钮（含 macOS 红绿灯安全区）
+    // 侧边栏折叠时，在右侧工作区顶栏左侧紧贴红绿灯右侧放紧凑的展开按钮
     Widget? collapsedToggleLeading({Widget? extra}) {
       if (!sidebarCollapsed.value) return extra;
       return Row(
         mainAxisSize: MainAxisSize.min,
+        spacing: 2,
         children: [
-          if (hasTrafficLights) const SizedBox(width: 72),
+          if (hasTrafficLights) const SizedBox(width: 68),
           IconButton(
             tooltip: '展开侧边栏',
-            icon: Icon(AppIcons.sidebar(context), size: 17),
+            icon: Icon(
+              AppIcons.sidebar(context),
+              size: 16,
+              color: colorScheme.onSurfaceVariant,
+            ),
             onPressed: () => sidebarCollapsed.value = false,
           ),
           ?extra,
@@ -207,15 +212,15 @@ class AppleWorkspaceShell extends HookConsumerWidget {
             type: openedForum.type,
             embedded: true,
             leading: collapsedToggleLeading(
-              extra: TextButton.icon(
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  minimumSize: const Size(0, 30),
+              extra: IconButton(
+                tooltip: '返回全部版块',
+                icon: Icon(
+                  CupertinoIcons.back,
+                  size: 16,
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 onPressed: () =>
                     destination.value = const _AllForumsDestination(),
-                icon: const Icon(CupertinoIcons.back, size: 16),
-                label: const Text('全部版块', style: TextStyle(fontSize: 13)),
               ),
             ),
           ),
@@ -279,6 +284,8 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                           right: 8,
                         ),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 2,
                           children: [
                             if (!hasTrafficLights)
                               Text(
@@ -294,7 +301,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                               tooltip: '添加自定义版面',
                               icon: Icon(
                                 AppIcons.add(context),
-                                size: 17,
+                                size: 16,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                               onPressed: () => showDialog<void>(
@@ -306,7 +313,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                               tooltip: '收起侧边栏',
                               icon: Icon(
                                 AppIcons.sidebar(context),
-                                size: 17,
+                                size: 16,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                               onPressed: () => sidebarCollapsed.value = true,
