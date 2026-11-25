@@ -2,6 +2,8 @@ import Cocoa
 import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
+  private static let goMenuItemTag = 9001
+
   private var appleNativeChannel: FlutterMethodChannel?
   private var isAppleWindowStyle = false
 
@@ -94,10 +96,88 @@ class MainFlutterWindow: NSWindow {
     )
 
     super.awakeFromNib()
+
+    DispatchQueue.main.async { [weak self] in
+      self?.configureMainMenu()
+    }
   }
 
   deinit {
     NotificationCenter.default.removeObserver(self)
+  }
+
+  /// 在保留 MainMenu.xib 原生 Edit 菜单（保证 WKWebView 粘贴/复制/全选/撤销与系统自动填充菜单可用）
+  /// 的前提下，增量接入 FNGA 的「关于」「设置…」「前往」导航菜单项。
+  private func configureMainMenu() {
+    guard let mainMenu = NSApp.mainMenu else { return }
+
+    if let appSubmenu = mainMenu.items.first?.submenu {
+      for item in appSubmenu.items {
+        if item.action == #selector(NSApplication.orderFrontStandardAboutPanel(_:)) {
+          item.title = "关于 FNGA"
+          item.target = self
+          item.action = #selector(handleMenuNavigate(_:))
+          item.representedObject = "/about"
+        } else if item.keyEquivalent == "," {
+          item.title = "设置…"
+          item.target = self
+          item.action = #selector(handleMenuNavigate(_:))
+          item.representedObject = "/settings"
+        }
+      }
+    }
+
+    // 避免 Edit → Find → Find… 的 ⌘F 与「前往 → 搜索…」冲突，同时保留 Edit 下全部编辑与自动填充项。
+    if mainMenu.items.count > 1, let editSubmenu = mainMenu.items[1].submenu {
+      clearFindShortcut(in: editSubmenu)
+    }
+
+    if mainMenu.item(withTag: Self.goMenuItemTag) == nil {
+      let goMenu = NSMenu(title: "前往")
+      goMenu.addItem(makeNavigateItem(title: "搜索…", keyEquivalent: "f", route: "/search"))
+      goMenu.addItem(.separator())
+      goMenu.addItem(makeNavigateItem(title: "贴子收藏", keyEquivalent: "1", route: "/favourite_topics"))
+      goMenu.addItem(makeNavigateItem(title: "浏览历史", keyEquivalent: "2", route: "/topic_history"))
+      goMenu.addItem(makeNavigateItem(title: "短消息", keyEquivalent: "3", route: "/conversations"))
+      goMenu.addItem(makeNavigateItem(title: "提醒信息", keyEquivalent: "4", route: "/notifications"))
+
+      let goMenuItem = NSMenuItem(title: "前往", action: nil, keyEquivalent: "")
+      goMenuItem.tag = Self.goMenuItemTag
+      goMenuItem.submenu = goMenu
+      let insertIndex = min(2, mainMenu.items.count)
+      mainMenu.insertItem(goMenuItem, at: insertIndex)
+    }
+  }
+
+  private func clearFindShortcut(in menu: NSMenu) {
+    for item in menu.items {
+      if item.keyEquivalent == "f" && item.keyEquivalentModifierMask == [.command] {
+        item.keyEquivalent = ""
+      }
+      if let submenu = item.submenu {
+        clearFindShortcut(in: submenu)
+      }
+    }
+  }
+
+  private func makeNavigateItem(
+    title: String,
+    keyEquivalent: String,
+    route: String
+  ) -> NSMenuItem {
+    let item = NSMenuItem(
+      title: title,
+      action: #selector(handleMenuNavigate(_:)),
+      keyEquivalent: keyEquivalent
+    )
+    item.target = self
+    item.representedObject = route
+    return item
+  }
+
+  @objc private func handleMenuNavigate(_ sender: NSMenuItem) {
+    guard let route = sender.representedObject as? String else { return }
+    appleNativeChannel?.invokeMethod("onMenuNavigate", arguments: route)
   }
 
   @objc private func handleFullScreenChange(_ notification: Notification) {

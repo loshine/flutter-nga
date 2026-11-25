@@ -92,8 +92,11 @@ const _loginPagePatchScript = r'''
       var main = d.getElementById('main');
       if (main) {
         hideLoginTitle(main);
-        new w.MutationObserver(function () { hideLoginTitle(main); })
-          .observe(main, { childList: true });
+        enhanceAutoFill(main);
+        new w.MutationObserver(function () {
+          hideLoginTitle(main);
+          enhanceAutoFill(main);
+        }).observe(main, { childList: true, subtree: true });
       }
       w.__client = (w.__client | 16384) & ~1024;
       if (/^\?login(&|$)/.test(w.location.search)) {
@@ -119,6 +122,26 @@ const _loginPagePatchScript = r'''
     title.style.display = 'none';
     for (var n = title.nextElementSibling; n && n.tagName === 'BR'; n = n.nextElementSibling) {
       n.style.display = 'none';
+    }
+  }
+
+  // 为密码登录输入框补充标准 autocomplete 属性，便于系统「编辑 → 自动填充」与密码管理器识别
+  function enhanceAutoFill(root) {
+    var pwd = root.querySelector('input[type="password"]');
+    if (!pwd) return;
+    if (!pwd.getAttribute('autocomplete')) {
+      pwd.setAttribute('autocomplete', 'current-password');
+    }
+    var inputs = root.querySelectorAll('input');
+    for (var i = 0; i < inputs.length; i++) {
+      var input = inputs[i];
+      if (input === pwd) break;
+      if (input.type === 'text' || input.type === 'email' || input.type === 'tel') {
+        if (!input.getAttribute('autocomplete')) {
+          input.setAttribute('autocomplete', 'username');
+        }
+        break;
+      }
     }
   }
 

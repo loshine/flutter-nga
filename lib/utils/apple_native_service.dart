@@ -15,6 +15,7 @@ abstract final class AppleNativeService {
 
   static bool? _cachedLiquidGlassSupported;
   static ValueChanged<double>? _trafficLightInsetListener;
+  static ValueChanged<String>? _menuNavigateListener;
 
   @visibleForTesting
   static bool? debugOverrideLiquidGlassSupported;
@@ -22,16 +23,34 @@ abstract final class AppleNativeService {
   /// 监听 macOS 窗口进入/退出全屏导致的红绿灯水平安全区宽度变化。
   static void setTrafficLightInsetListener(ValueChanged<double>? listener) {
     _trafficLightInsetListener = listener;
+    _syncMethodCallHandler();
+  }
+
+  /// 监听 macOS 原生系统菜单栏触发的页面跳转路径。
+  static void setMenuNavigateListener(ValueChanged<String>? listener) {
+    _menuNavigateListener = listener;
+    _syncMethodCallHandler();
+  }
+
+  static void _syncMethodCallHandler() {
     if (!isRealMacOS) return;
+    final hasListener =
+        _trafficLightInsetListener != null || _menuNavigateListener != null;
     channel.setMethodCallHandler(
-      listener == null
-          ? null
-          : (call) async {
-              if (call.method == 'onTrafficLightInsetChanged') {
-                final inset = (call.arguments as num?)?.toDouble() ?? 0.0;
-                _trafficLightInsetListener?.call(inset);
+      hasListener
+          ? (call) async {
+              switch (call.method) {
+                case 'onTrafficLightInsetChanged':
+                  final inset = (call.arguments as num?)?.toDouble() ?? 0.0;
+                  _trafficLightInsetListener?.call(inset);
+                case 'onMenuNavigate':
+                  final path = call.arguments as String?;
+                  if (path != null && path.isNotEmpty) {
+                    _menuNavigateListener?.call(path);
+                  }
               }
-            },
+            }
+          : null,
     );
   }
 
@@ -98,6 +117,8 @@ abstract final class AppleNativeService {
   @visibleForTesting
   static void resetForTesting() {
     _cachedLiquidGlassSupported = null;
+    _trafficLightInsetListener = null;
+    _menuNavigateListener = null;
     debugOverrideLiquidGlassSupported = null;
   }
 }
