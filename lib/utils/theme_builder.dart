@@ -405,6 +405,22 @@ class ThemeBuilder {
           side: BorderSide(color: separatorColor, width: 0.5),
         ),
       ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        elevation: 4,
+        backgroundColor: isDark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFDFDFF),
+        contentTextStyle: TextStyle(
+          fontSize: isMacDesktop ? 13 : 14,
+          color: colorScheme.onSurface,
+        ),
+        actionTextColor: colorScheme.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: separatorColor, width: 0.5),
+        ),
+      ),
       appBarTheme: AppBarTheme(
         centerTitle: !isMacDesktop,
         elevation: 0,

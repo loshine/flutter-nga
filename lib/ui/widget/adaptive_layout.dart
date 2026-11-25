@@ -97,7 +97,12 @@ class MasterDetailLayout extends StatelessWidget {
               child: MediaQuery.removePadding(
                 context: context,
                 removeRight: true,
-                child: masterBuilder(context, true),
+                // 为列表栏提供独立 ScaffoldMessenger，使撤销提示胶囊就近浮在操作栏底部
+                child: ScaffoldMessenger(
+                  child: Builder(
+                    builder: (paneContext) => masterBuilder(paneContext, true),
+                  ),
+                ),
               ),
             ),
             VerticalDivider(

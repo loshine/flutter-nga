@@ -26,30 +26,33 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
 
     final state = ref.watch(blocklistSettingsProvider);
     final notifier = ref.read(blocklistSettingsProvider.notifier);
-    final messenger = ScaffoldMessenger.of(context);
+    final activeUndo = useRef<UndoSnackBarHandle?>(null);
     final colorScheme = Theme.of(context).colorScheme;
 
     useEffect(() {
       return () {
         if (!notifier.hasPendingWordDeletion) return;
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
         notifier.commitAllPendingWordDeletions().then((err) {
           if (err != null) AppToast.error(err);
         });
       };
-    }, [notifier, messenger]);
+    }, [notifier]);
 
     useOnAppLifecycleStateChange((_, lifecycle) {
-      if (lifecycle == AppLifecycleState.paused &&
+      if ((lifecycle == AppLifecycleState.paused ||
+              lifecycle == AppLifecycleState.hidden) &&
           notifier.hasPendingWordDeletion) {
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
       }
     });
 
     void remove(String word) {
       final displayWord = code_utils.unescapeHtml(word);
       notifier.removeWordLocally(word);
-      AppSnackBar.undo(
+      activeUndo.value = AppSnackBar.undo(
         context,
         message: '已移除屏蔽关键词「$displayWord」',
         onUndo: () => notifier.undoWordDeletion(word),

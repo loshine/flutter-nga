@@ -129,9 +129,11 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                     width: 0.5,
                   ),
                 ),
-                child: SettingsPage(
-                  embedded: true,
-                  onClose: () => Navigator.of(sheetContext).pop(),
+                child: ScaffoldMessenger(
+                  child: SettingsPage(
+                    embedded: true,
+                    onClose: () => Navigator.of(sheetContext).pop(),
+                  ),
                 ),
               ),
             ),

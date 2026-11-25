@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,8 +10,11 @@ import 'package:toastification/toastification.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 import 'package:flutter_nga/ui/page/favourite_topic_list/favourite_topic_list_page.dart';
+import 'package:flutter_nga/utils/app_snack_bar.dart';
+import 'package:flutter_nga/utils/theme_builder.dart';
 
 Topic _topic(int tid, {int page = 1}) => Topic(
   tid: tid,
@@ -253,5 +257,66 @@ void main() {
       await tester.pump();
       expect(repository.deletes, ['1@1']);
     });
+
+    testWidgets(
+      'desktop two-pane layout anchors compact undo pill inside master pane and commits on hidden',
+      (tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          debugDefaultTargetPlatformOverride = null;
+          tester.view.reset();
+        });
+
+        final repository = _FakeRepository();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [topicRepositoryProvider.overrideWithValue(repository)],
+            child: AppDesignStyleScope(
+              style: AppDesignStyle.apple,
+              nativeLiquidGlassSupported: false,
+              macTitlebarInset: 52,
+              child: ToastificationWrapper(
+                child: MaterialApp(
+                  theme: ThemeBuilder.applyDesignStyle(
+                    ThemeBuilder.buildLightTheme(Colors.brown),
+                    isAppleStyle: true,
+                    isMacDesktop: true,
+                  ),
+                  home: const FavouriteTopicListPage(),
+                ),
+              ),
+            ),
+          ),
+        );
+        await _settle(tester);
+
+        // 删除第一条后，紧凑胶囊位于左侧列表栏底部且宽度不超过 360
+        await tester.tap(find.byTooltip('更多操作').first);
+        await _settle(tester);
+        await tester.tap(find.text('取消收藏'));
+        await _settle(tester);
+
+        final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+        expect(snackBar.width, isNotNull);
+        expect(snackBar.width!, lessThanOrEqualTo(AppSnackBar.maxDesktopWidth));
+        final snackRect = tester.getRect(find.byType(SnackBar));
+        // 1280 宽窗口在 macOS 下列表栏最大 380px，提示胶囊应完全落在列表栏范围内
+        expect(snackRect.right, lessThanOrEqualTo(400));
+
+        // 连续删除第二条：第一条立刻提交，第二条仍可撤销
+        await tester.tap(find.byTooltip('更多操作').first);
+        await _settle(tester);
+        await tester.tap(find.text('取消收藏'));
+        await _settle(tester);
+        expect(repository.deletes, ['1@1']);
+
+        // 桌面应用隐藏（AppLifecycleState.hidden）立即结算且不重复提交
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+        await _settle(tester);
+        expect(repository.deletes, ['1@1', '2@1']);
+      },
+    );
   });
 }

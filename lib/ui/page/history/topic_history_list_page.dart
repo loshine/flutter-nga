@@ -34,7 +34,6 @@ class TopicHistoryListPage extends HookConsumerWidget {
     final selectedTopic = useState<SelectedTopic?>(null);
     final historyState = ref.watch(topicHistoryListProvider);
     final notifier = ref.read(topicHistoryListProvider.notifier);
-    final messenger = ScaffoldMessenger.of(context);
 
     Future<void> onRefresh() async {
       try {
@@ -67,29 +66,34 @@ class TopicHistoryListPage extends HookConsumerWidget {
 
     useInitialRefresh(refreshController);
 
+    final activeUndo = useRef<UndoSnackBarHandle?>(null);
+
     useEffect(() {
       return () {
         if (!notifier.hasPendingDeletion) return;
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
         notifier.commitAllDeletions().then((err) {
           if (err != null) AppToast.error(err);
         });
       };
-    }, [notifier, messenger]);
+    }, [notifier]);
 
     useOnAppLifecycleStateChange((_, lifecycle) {
-      if (lifecycle == AppLifecycleState.paused &&
+      if ((lifecycle == AppLifecycleState.paused ||
+              lifecycle == AppLifecycleState.hidden) &&
           notifier.hasPendingDeletion) {
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
       }
     });
 
-    void remove(TopicHistory history) {
+    void remove(BuildContext hostContext, TopicHistory history) {
       final id = history.id;
       if (id == null) return;
       notifier.removeLocally(history);
-      AppSnackBar.undo(
-        context,
+      activeUndo.value = AppSnackBar.undo(
+        hostContext,
         message: '已删除浏览记录',
         onUndo: () => notifier.undoDeletion(id),
         onCommit: () => notifier.commitDeletion(id).catchError((err) {
@@ -108,19 +112,19 @@ class TopicHistoryListPage extends HookConsumerWidget {
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => AppScaffold(
+      masterBuilder: (paneContext, isTwoPane) => AppScaffold(
         embedded: embedded,
         showAppBar: showAppBar,
         leading: leading,
         title: const Text('浏览历史'),
         actions: [
           IconButton(
-            icon: Icon(AppIcons.delete(context)),
+            icon: Icon(AppIcons.delete(paneContext)),
             tooltip: '清空浏览历史',
             onPressed: historyState.list.isEmpty
                 ? null
                 : () => _showCleanDialog(
-                    context,
+                    paneContext,
                     notifier,
                     refreshController,
                     onCleaned: () => selectedTopic.value = null,
@@ -132,9 +136,9 @@ class TopicHistoryListPage extends HookConsumerWidget {
           onRefresh: onRefresh,
           onLoad: historyState.enablePullUp ? onLoading : null,
           child: _buildChild(
-            context,
+            paneContext,
             historyState,
-            remove,
+            (history) => remove(paneContext, history),
             selectedTid: isTwoPane ? selectedTopic.value?.tid : null,
             onSelect: isTwoPane ? selectHistory : null,
           ),

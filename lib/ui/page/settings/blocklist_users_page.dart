@@ -26,30 +26,33 @@ class BlocklistUsersPage extends HookConsumerWidget {
 
     final state = ref.watch(blocklistSettingsProvider);
     final notifier = ref.read(blocklistSettingsProvider.notifier);
-    final messenger = ScaffoldMessenger.of(context);
+    final activeUndo = useRef<UndoSnackBarHandle?>(null);
     final colorScheme = Theme.of(context).colorScheme;
 
     useEffect(() {
       return () {
         if (!notifier.hasPendingUserDeletion) return;
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
         notifier.commitAllPendingUserDeletions().then((err) {
           if (err != null) AppToast.error(err);
         });
       };
-    }, [notifier, messenger]);
+    }, [notifier]);
 
     useOnAppLifecycleStateChange((_, lifecycle) {
-      if (lifecycle == AppLifecycleState.paused &&
+      if ((lifecycle == AppLifecycleState.paused ||
+              lifecycle == AppLifecycleState.hidden) &&
           notifier.hasPendingUserDeletion) {
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
       }
     });
 
     void remove(String user) {
       final displayName = code_utils.unescapeHtml(user);
       notifier.removeUserLocally(user);
-      AppSnackBar.undo(
+      activeUndo.value = AppSnackBar.undo(
         context,
         message: '已移除屏蔽用户「$displayName」',
         onUndo: () => notifier.undoUserDeletion(user),

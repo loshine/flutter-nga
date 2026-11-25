@@ -67,31 +67,34 @@ class FavouriteTopicListPage extends HookConsumerWidget {
 
     useInitialRefresh(refreshController);
 
-    final messenger = ScaffoldMessenger.of(context);
+    final activeUndo = useRef<UndoSnackBarHandle?>(null);
 
-    // 离开页面、App 退到后台时关掉撤销提示，使待删条目立即提交
+    // 离开页面、App 退到后台/隐藏时关掉撤销提示，使待删条目立即提交
     useEffect(() {
       return () {
         if (!notifier.hasPendingDeletion) return;
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
         notifier.commitAllDeletions().then((err) {
           if (err != null) AppToast.error(err);
         });
       };
-    }, [notifier, messenger]);
+    }, [notifier]);
     useOnAppLifecycleStateChange((_, lifecycle) {
-      if (lifecycle == AppLifecycleState.paused &&
+      if ((lifecycle == AppLifecycleState.paused ||
+              lifecycle == AppLifecycleState.hidden) &&
           notifier.hasPendingDeletion) {
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
       }
     });
 
-    void remove(Topic topic) {
+    void remove(BuildContext hostContext, Topic topic) {
       final tid = topic.tid;
       if (tid == null) return;
       notifier.removeLocally(topic);
-      AppSnackBar.undo(
-        context,
+      activeUndo.value = AppSnackBar.undo(
+        hostContext,
         message: '已取消收藏',
         onUndo: () => notifier.undoDeletion(tid),
         onCommit: () => notifier.commitDeletion(tid).catchError((err) {
@@ -113,7 +116,7 @@ class FavouriteTopicListPage extends HookConsumerWidget {
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => AppScaffold(
+      masterBuilder: (paneContext, isTwoPane) => AppScaffold(
         embedded: embedded,
         showAppBar: showAppBar,
         leading: leading,
@@ -140,7 +143,7 @@ class FavouriteTopicListPage extends HookConsumerWidget {
                     selected:
                         isTwoPane && selectedTopic.value?.tid == topic.tid,
                     onTap: isTwoPane ? () => selectTopic(topic) : null,
-                    onRemove: () => remove(topic),
+                    onRemove: () => remove(paneContext, topic),
                   );
                 },
               ),
