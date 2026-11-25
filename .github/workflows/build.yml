@@ -1,6 +1,6 @@
 name: Build
 
-# 发版相关 PR 验证各平台构建。推送版本 tag 时发布 Android 签名分 ABI APK、Universal APK 和 AAB。
+# 发版相关 PR 验证各平台构建。推送版本 tag 时发布 Android 签名分 ABI APK、Universal APK、AAB 以及 macOS 桌面包（DMG + ZIP）。
 # 签名使用 Environment「Android Build」的 Secrets：JKS（keystore 的 base64）、STORE_PASSWORD、KEY_ALIAS、KEY_PASSWORD。
 on:
   pull_request:
@@ -130,6 +130,42 @@ jobs:
         if: always()
         run: rm -f android/key.properties "$RUNNER_TEMP/upload-keystore.jks"
 
+  macos:
+    name: Build macOS desktop package
+    if: github.ref_type == 'tag'
+    needs: version
+    runs-on: macos-latest
+    env:
+      RELEASE_TAG: ${{ needs.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v4
+        with:
+          version: "2026.11.10"
+      - run: flutter --version
+      - run: flutter pub get
+      - run: flutter test --no-pub
+      - name: Build macOS release app
+        run: flutter build macos --release --no-pub
+      - name: Package macOS app (DMG & ZIP)
+        run: |
+          mkdir -p dist
+          APP_PATH="build/macos/Build/Products/Release/FNGA.app"
+          ditto -c -k --keepParent "$APP_PATH" "dist/flutter-nga-${RELEASE_TAG}-macos.zip"
+          DMG_STAGE="$RUNNER_TEMP/dmg-stage"
+          rm -rf "$DMG_STAGE"
+          mkdir -p "$DMG_STAGE"
+          cp -R "$APP_PATH" "$DMG_STAGE/"
+          ln -s /Applications "$DMG_STAGE/Applications"
+          hdiutil create -volname "FNGA" -srcfolder "$DMG_STAGE" -ov -format UDZO "dist/flutter-nga-${RELEASE_TAG}-macos.dmg"
+          ls -lh dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: flutter-nga-macos
+          path: dist/*
+          if-no-files-found: error
+          compression-level: 0
+
   android-check:
     name: Check Android release builds
     if: github.event_name == 'pull_request'
@@ -195,7 +231,14 @@ jobs:
         if: matrix.target == 'macos'
         run: |
           mkdir -p dist
-          ditto -c -k --keepParent build/macos/Build/Products/Release/FNGA.app "dist/flutter-nga-${RELEASE_TAG}-macos.zip"
+          APP_PATH="build/macos/Build/Products/Release/FNGA.app"
+          ditto -c -k --keepParent "$APP_PATH" "dist/flutter-nga-${RELEASE_TAG}-macos.zip"
+          DMG_STAGE="$RUNNER_TEMP/dmg-stage"
+          rm -rf "$DMG_STAGE"
+          mkdir -p "$DMG_STAGE"
+          cp -R "$APP_PATH" "$DMG_STAGE/"
+          ln -s /Applications "$DMG_STAGE/Applications"
+          hdiutil create -volname "FNGA" -srcfolder "$DMG_STAGE" -ov -format UDZO "dist/flutter-nga-${RELEASE_TAG}-macos.dmg"
       - name: Package Windows app
         if: matrix.target == 'windows'
         run: |
@@ -248,7 +291,7 @@ jobs:
   release:
     name: Publish GitHub Release
     if: github.ref_type == 'tag'
-    needs: android
+    needs: [android, macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -256,6 +299,10 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: flutter-nga-android
+          path: dist
+      - uses: actions/download-artifact@v8
+        with:
+          name: flutter-nga-macos
           path: dist
       - uses: softprops/action-gh-release@v2
         with:
