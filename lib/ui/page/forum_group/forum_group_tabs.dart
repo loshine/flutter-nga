@@ -20,13 +20,25 @@ import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 import 'forum_category_page.dart';
 
 class ForumGroupTabsPage extends HookConsumerWidget {
-  const ForumGroupTabsPage({super.key, this.scrollToTop, this.onForumTap});
+  const ForumGroupTabsPage({
+    super.key,
+    this.scrollToTop,
+    this.onForumTap,
+    this.initialIndex = 0,
+    this.onTabChanged,
+  });
 
   /// 首页触发「回到顶部」时，滚动当前 Tab
   final ScrollToTopSignal? scrollToTop;
 
   /// 自定义点击版块回调（供 macOS 三栏工作区在不离开侧边栏的情况下打开版块）
   final ValueChanged<Forum>? onForumTap;
+
+  /// 初始选中的分类 Tab 下标（用于从版块详情返回时恢复分类位置）
+  final int initialIndex;
+
+  /// 分类 Tab 切换时的回调
+  final ValueChanged<int>? onTabChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -73,8 +85,9 @@ class ForumGroupTabsPage extends HookConsumerWidget {
     }
 
     // 分类数量变化时会重建 controller，尽量保留当前选中的 Tab
-    final selectedIndex = useRef(0);
-    final activeIndex = useState(0);
+    final clampedInitial = min(initialIndex, tabs.length - 1);
+    final selectedIndex = useRef(clampedInitial);
+    final activeIndex = useState(clampedInitial);
     final tabController = useMaterialTabController(
       initialLength: tabs.length,
       initialIndex: min(selectedIndex.value, tabs.length - 1),
@@ -85,6 +98,7 @@ class ForumGroupTabsPage extends HookConsumerWidget {
       void listener() {
         selectedIndex.value = tabController.index;
         activeIndex.value = tabController.index;
+        onTabChanged?.call(tabController.index);
         // 更新 FAB 可见性：只有第一个 tab (我的收藏) 才显示
         ref
             .read(forumGroupFabVisibleProvider.notifier)
