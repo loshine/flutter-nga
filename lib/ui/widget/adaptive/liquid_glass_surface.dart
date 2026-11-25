@@ -74,8 +74,15 @@ class LiquidGlassSurface extends StatelessWidget {
       );
     }
 
+    // 仅在真正悬浮于滚动内容或底层视图之上的容器（regular / clear）启用原生
+    // PlatformView，避免把 AppKitView/UiKitView 铺满在纯色背景的通栏顶栏/侧边栏上
+    // 产生发灰割裂感。
+    final supportsNativeVariant =
+        variant == LiquidGlassVariant.regular ||
+        variant == LiquidGlassVariant.clear;
     final useNative =
         useNativeView &&
+        supportsNativeVariant &&
         AppleNativeService.isRealApplePlatform &&
         context.supportsNativeLiquidGlass;
 
@@ -178,25 +185,36 @@ class _FlutterLiquidGlassContainer extends StatelessWidget {
     final sigma = switch (variant) {
       LiquidGlassVariant.regular => 24.0,
       LiquidGlassVariant.clear => 16.0,
-      LiquidGlassVariant.sidebar => 28.0,
-      LiquidGlassVariant.bar => 22.0,
+      LiquidGlassVariant.sidebar => 20.0,
+      LiquidGlassVariant.bar => 18.0,
     };
 
     final baseAlpha = switch (variant) {
-      LiquidGlassVariant.regular => isDark ? 0.56 : 0.72,
-      LiquidGlassVariant.clear => isDark ? 0.36 : 0.48,
-      LiquidGlassVariant.sidebar => isDark ? 0.68 : 0.78,
-      LiquidGlassVariant.bar => isDark ? 0.62 : 0.76,
+      LiquidGlassVariant.regular => isDark ? 0.72 : 0.84,
+      LiquidGlassVariant.clear => isDark ? 0.42 : 0.56,
+      LiquidGlassVariant.sidebar => isDark ? 0.94 : 0.94,
+      LiquidGlassVariant.bar => isDark ? 0.88 : 0.90,
     };
 
     final baseFill =
-        tintColor ?? (isDark ? const Color(0xFF1C1C1E) : Colors.white);
+        tintColor ??
+        switch (variant) {
+          LiquidGlassVariant.sidebar =>
+            isDark ? const Color(0xFF232326) : const Color(0xFFF4F4F6),
+          LiquidGlassVariant.bar =>
+            isDark ? const Color(0xFF1D1D20) : const Color(0xFFFAFAFC),
+          _ => isDark ? const Color(0xFF242427) : const Color(0xFFFFFFFF),
+        };
     final rimLight = isDark
-        ? Colors.white.withValues(alpha: 0.16)
-        : Colors.white.withValues(alpha: 0.75);
+        ? Colors.white.withValues(alpha: 0.14)
+        : Colors.white.withValues(alpha: 0.85);
     final rimBottom = isDark
-        ? Colors.white.withValues(alpha: 0.06)
-        : Colors.black.withValues(alpha: 0.08);
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.09);
+
+    final isFullBleed =
+        variant == LiquidGlassVariant.sidebar ||
+        variant == LiquidGlassVariant.bar;
 
     final glass = ClipRRect(
       borderRadius: borderRadius,
@@ -205,35 +223,41 @@ class _FlutterLiquidGlassContainer extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: borderRadius,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                baseFill.withValues(alpha: (baseAlpha + 0.08).clamp(0.0, 1.0)),
-                baseFill.withValues(alpha: baseAlpha),
-              ],
-            ),
-            border: Border.all(
-              color: isDark ? rimLight : rimBottom,
-              width: 0.75,
-            ),
+            color: isFullBleed ? baseFill.withValues(alpha: baseAlpha) : null,
+            gradient: isFullBleed
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      baseFill.withValues(
+                        alpha: (baseAlpha + 0.06).clamp(0.0, 1.0),
+                      ),
+                      baseFill.withValues(alpha: baseAlpha),
+                    ],
+                  ),
+            border: isFullBleed
+                ? null
+                : Border.all(color: isDark ? rimLight : rimBottom, width: 0.75),
           ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.0, 0.22, 1.0],
-                colors: [
-                  rimLight.withValues(alpha: isDark ? 0.10 : 0.45),
-                  Colors.transparent,
-                  Colors.transparent,
-                ],
-              ),
-            ),
-            child: child,
-          ),
+          child: isFullBleed
+              ? child
+              : DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: borderRadius,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: const [0.0, 0.20, 1.0],
+                      colors: [
+                        rimLight.withValues(alpha: isDark ? 0.09 : 0.45),
+                        Colors.transparent,
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                  child: child,
+                ),
         ),
       ),
     );

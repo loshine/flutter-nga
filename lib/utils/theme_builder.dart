@@ -308,47 +308,64 @@ class ThemeBuilder {
   }
 
   /// 根据当前生效的设计风格调整 [ThemeData]：
-  /// Apple 风格下关闭水波纹、改用苹果系统分组背景与细分割线，并同步 [CupertinoThemeData]。
+  /// Apple 风格下关闭水波纹、精校 macOS / iOS 系统色阶、紧凑桌面密度与细分割线，
+  /// 并同步 [CupertinoThemeData]。
   static ThemeData applyDesignStyle(
     ThemeData base, {
     required bool isAppleStyle,
+    bool isMacDesktop = false,
   }) {
-    final cupertinoTheme = buildCupertinoTheme(base.colorScheme);
+    final cupertinoTheme = buildCupertinoTheme(
+      base.colorScheme,
+      isMacDesktop: isMacDesktop,
+    );
     if (!isAppleStyle) {
       return base.copyWith(cupertinoOverrideTheme: cupertinoTheme);
     }
 
     final isDark = base.brightness == Brightness.dark;
-    final groupedBackground = isDark
-        ? const Color(0xFF000000)
-        : const Color(0xFFF2F2F7);
-    final groupedSurface = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    // macOS：内容区纯白/深炭灰 + 柔和浅灰侧边栏；iOS：标准系统分组灰底 + 卡片白底
+    final canvasBg = isMacDesktop
+        ? (isDark ? const Color(0xFF1A1A1C) : const Color(0xFFFFFFFF))
+        : (isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7));
+    final sidebarOrCardBg = isMacDesktop
+        ? (isDark ? const Color(0xFF232326) : const Color(0xFFF4F4F6))
+        : (isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFFFFFF));
+    final elevatedBg = isMacDesktop
+        ? (isDark ? const Color(0xFF2B2B2E) : const Color(0xFFF7F7F9))
+        : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFFFFFFF));
     final separatorColor = isDark
-        ? const Color(0xFF38383A)
-        : const Color(0xFFC6C6C8);
+        ? Colors.white.withValues(alpha: 0.11)
+        : Colors.black.withValues(alpha: 0.09);
 
     final colorScheme = base.colorScheme.copyWith(
-      surface: groupedBackground,
-      surfaceContainerLow: groupedSurface,
+      surface: canvasBg,
+      surfaceContainerLow: sidebarOrCardBg,
       surfaceContainer: isDark
-          ? const Color(0xFF1C1C1E)
-          : const Color(0xFFF9F9FB),
-      surfaceContainerHigh: isDark
-          ? const Color(0xFF2C2C2E)
-          : const Color(0xFFFFFFFF),
+          ? const Color(0xFF222225)
+          : const Color(0xFFF6F6F8),
+      surfaceContainerHigh: elevatedBg,
       surfaceContainerHighest: isDark
-          ? const Color(0xFF3A3A3C)
-          : const Color(0xFFE5E5EA),
+          ? const Color(0xFF343438)
+          : const Color(0xFFE8E8ED),
       outlineVariant: separatorColor,
     );
 
+    final density = isMacDesktop
+        ? const VisualDensity(horizontal: -2, vertical: -2)
+        : VisualDensity.standard;
+
     return base.copyWith(
       colorScheme: colorScheme,
-      cupertinoOverrideTheme: buildCupertinoTheme(colorScheme),
-      scaffoldBackgroundColor: groupedBackground,
+      visualDensity: density,
+      cupertinoOverrideTheme: buildCupertinoTheme(
+        colorScheme,
+        isMacDesktop: isMacDesktop,
+      ),
+      scaffoldBackgroundColor: canvasBg,
       splashFactory: NoSplash.splashFactory,
-      highlightColor: colorScheme.onSurface.withValues(alpha: 0.06),
-      hoverColor: colorScheme.onSurface.withValues(alpha: 0.04),
+      highlightColor: colorScheme.onSurface.withValues(alpha: 0.05),
+      hoverColor: colorScheme.onSurface.withValues(alpha: 0.045),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: CupertinoPageTransitionsBuilder(),
@@ -362,32 +379,58 @@ class ThemeBuilder {
       dividerTheme: DividerThemeData(color: separatorColor, thickness: 0.5),
       cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        color: groupedSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(isMacDesktop ? 10 : 12),
+          side: BorderSide(color: separatorColor, width: 0.5),
+        ),
+        color: sidebarOrCardBg,
+      ),
+      iconButtonTheme: isMacDesktop
+          ? IconButtonThemeData(
+              style: IconButton.styleFrom(
+                minimumSize: const Size(30, 30),
+                padding: const EdgeInsets.all(6),
+                iconSize: 17,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            )
+          : null,
+      popupMenuTheme: PopupMenuThemeData(
+        elevation: 6,
+        color: isDark ? const Color(0xFF2A2A2D) : const Color(0xFFFBFBFD),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: separatorColor, width: 0.5),
+        ),
       ),
       appBarTheme: AppBarTheme(
-        centerTitle: true,
+        centerTitle: !isMacDesktop,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: groupedBackground,
+        backgroundColor: canvasBg,
         foregroundColor: colorScheme.onSurface,
       ),
     );
   }
 
   /// 构建与当前配色方案同步的 [CupertinoThemeData]。
-  static CupertinoThemeData buildCupertinoTheme(ColorScheme colorScheme) {
+  static CupertinoThemeData buildCupertinoTheme(
+    ColorScheme colorScheme, {
+    bool isMacDesktop = false,
+  }) {
     final isDark = colorScheme.brightness == Brightness.dark;
     return CupertinoThemeData(
       brightness: colorScheme.brightness,
       primaryColor: colorScheme.primary,
       primaryContrastingColor: colorScheme.onPrimary,
-      scaffoldBackgroundColor: isDark
-          ? const Color(0xFF000000)
-          : const Color(0xFFF2F2F7),
+      scaffoldBackgroundColor: isMacDesktop
+          ? (isDark ? const Color(0xFF1A1A1C) : const Color(0xFFFFFFFF))
+          : (isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7)),
       barBackgroundColor: isDark
-          ? const Color(0xB81C1C1E)
-          : const Color(0xCCF9F9F9),
+          ? const Color(0xCC1E1E20)
+          : const Color(0xDDF9F9FB),
     );
   }
 

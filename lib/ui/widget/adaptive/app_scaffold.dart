@@ -116,9 +116,13 @@ class AppScaffold extends StatelessWidget {
         _buildApplePrimaryAction(context, primaryAction!),
     ];
 
-    final topPadding = MediaQuery.paddingOf(context).top;
-    final macInset = includeMacTitlebarInset ? context.macTitlebarInset : 0.0;
-    final extraTopInset = macInset > topPadding ? macInset - topPadding : 0.0;
+    final isMacDesktop = context.isMacDesktopAppleStyle;
+    // macOS 融合标题栏采用 52pt 单行统一工具栏：红绿灯与工具栏按钮在同一水平线上，
+    // 当顶部属于窗口最左侧区域（非 embedded 且存在融合标题栏）时左侧水平避让红绿灯（76pt），
+    // 不再垂直叠加 28pt 制造巨厚双层顶栏。
+    final reserveTrafficLights =
+        includeMacTitlebarInset && !embedded && context.macTitlebarInset > 0;
+    final resolvedHeight = toolbarHeight ?? (isMacDesktop ? 52.0 : 48.0);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -128,12 +132,11 @@ class AppScaffold extends StatelessWidget {
               title: title,
               leading: leading,
               automaticallyImplyLeading: automaticallyImplyLeading && !embedded,
-              centerTitle:
-                  centerTitle ?? !(embedded || context.isMacDesktopAppleStyle),
+              centerTitle: centerTitle ?? !(embedded || isMacDesktop),
               actions: mergedActions,
               bottom: bottom,
-              toolbarHeight: toolbarHeight,
-              extraTopInset: extraTopInset,
+              toolbarHeight: resolvedHeight,
+              reserveTrafficLights: reserveTrafficLights,
             )
           : null,
       body: body,
@@ -215,7 +218,7 @@ class AppScaffold extends StatelessWidget {
   }
 }
 
-/// Apple 风格的顶部导航栏 / macOS 紧凑工具栏（带 Liquid Glass 材质底面）。
+/// Apple 风格的顶部导航栏 / macOS 52pt 单行统一工具栏。
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppTopBar({
     super.key,
@@ -226,7 +229,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.bottom,
     this.toolbarHeight,
-    this.extraTopInset = 0.0,
+    this.reserveTrafficLights = false,
   });
 
   final Widget? title;
@@ -237,15 +240,15 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final PreferredSizeWidget? bottom;
   final double? toolbarHeight;
 
-  /// 超出 `MediaQuery.padding.top` 的额外顶部安全区（如 macOS 融合标题栏红绿灯区）。
-  final double extraTopInset;
+  /// 为 true 时在左侧预留 macOS 窗口红绿灯（关闭/最小化/缩放）水平安全区，
+  /// 使返回/侧边栏按钮与红绿灯保持在同一水平线上。
+  final bool reserveTrafficLights;
 
   double get _baseHeight => toolbarHeight ?? 48.0;
 
   @override
-  Size get preferredSize => Size.fromHeight(
-    _baseHeight + extraTopInset + (bottom?.preferredSize.height ?? 0),
-  );
+  Size get preferredSize =>
+      Size.fromHeight(_baseHeight + (bottom?.preferredSize.height ?? 0));
 
   @override
   Widget build(BuildContext context) {
@@ -253,22 +256,31 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     final colorScheme = theme.colorScheme;
     final canPop = ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
     final isMacDesktop = context.isMacDesktopAppleStyle;
-    final effectiveTop = MediaQuery.paddingOf(context).top + extraTopInset;
+    final topPadding = MediaQuery.paddingOf(context).top;
 
     Widget? resolvedLeading = leading;
     if (resolvedLeading == null && automaticallyImplyLeading && canPop) {
       resolvedLeading = Tooltip(
         message: '返回',
         child: CupertinoButton(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          minimumSize: const Size(40, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          minimumSize: const Size(34, 34),
           onPressed: () => Navigator.of(context).maybePop(),
           child: Icon(
             CupertinoIcons.back,
-            size: isMacDesktop ? 19 : 22,
-            color: colorScheme.primary,
+            size: isMacDesktop ? 17 : 22,
+            color: isMacDesktop
+                ? colorScheme.onSurfaceVariant
+                : colorScheme.primary,
           ),
         ),
+      );
+    }
+
+    if (reserveTrafficLights) {
+      resolvedLeading = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [const SizedBox(width: 72), ?resolvedLeading],
       );
     }
 
@@ -279,7 +291,8 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
             ?.copyWith(
               color: colorScheme.onSurface,
               fontWeight: FontWeight.w600,
-              fontSize: isMacDesktop ? 15 : 17,
+              fontSize: isMacDesktop ? 14 : 17,
+              letterSpacing: isMacDesktop ? -0.1 : null,
             );
 
     final actionRow = actions != null && actions!.isNotEmpty
@@ -293,21 +306,20 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.65),
-              width: 0.5,
-            ),
+            bottom: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
           ),
         ),
         child: Padding(
-          padding: EdgeInsets.only(top: effectiveTop),
+          padding: EdgeInsets.only(top: topPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
                 height: _baseHeight,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMacDesktop ? 12 : 8,
+                  ),
                   child: NavigationToolbar(
                     leading: resolvedLeading,
                     middle: title != null

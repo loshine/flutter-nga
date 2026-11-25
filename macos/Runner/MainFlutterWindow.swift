@@ -6,6 +6,7 @@ class MainFlutterWindow: NSWindow {
     let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
+    self.minSize = NSSize(width: 760, height: 520)
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
@@ -72,8 +73,11 @@ class MainFlutterWindow: NSWindow {
       titlebarAppearsTransparent = true
       titleVisibility = .hidden
       isMovableByWindowBackground = true
-      let titlebarHeight = frame.height - contentLayoutRect.height
-      return Double(max(titlebarHeight, 28.0))
+      if #available(macOS 11.0, *) {
+        toolbarStyle = .unified
+      }
+      // 返回标准红绿灯水平安全区标记（单行 52pt 统一工具栏使用，不再额外叠高顶栏）
+      return 52.0
     } else {
       styleMask.remove(.fullSizeContentView)
       titlebarAppearsTransparent = false
