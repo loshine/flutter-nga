@@ -7,6 +7,8 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -168,18 +170,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _buildScaffold() {
-    return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(onPressed: _handleBack),
-        title: Text("登录"),
-        actions: <Widget>[
-          IconButton(
-            tooltip: "导入 Cookies",
-            onPressed: _showImportCookiesDialog,
-            icon: const Icon(Icons.cookie_outlined),
-          ),
-        ],
+    return AppScaffold(
+      leading: IconButton(
+        tooltip: '返回',
+        icon: Icon(AppIcons.back(context)),
+        onPressed: _handleBack,
       ),
+      title: const Text("登录"),
+      actions: <Widget>[
+        IconButton(
+          tooltip: "导入 Cookies",
+          onPressed: _showImportCookiesDialog,
+          icon: const Icon(Icons.cookie_outlined),
+        ),
+      ],
       body: InAppWebView(
         initialUrlRequest: URLRequest(
           url: WebUri.uri(

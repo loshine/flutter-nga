@@ -4,6 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
@@ -96,24 +98,22 @@ class TopicHistoryListPage extends HookConsumerWidget {
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(
-          title: const Text('浏览历史'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: '清空浏览历史',
-              onPressed: historyState.list.isEmpty
-                  ? null
-                  : () => _showCleanDialog(
-                      context,
-                      notifier,
-                      refreshController,
-                      onCleaned: () => selectedTopic.value = null,
-                    ),
-            ),
-          ],
-        ),
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        title: const Text('浏览历史'),
+        actions: [
+          IconButton(
+            icon: Icon(AppIcons.delete(context)),
+            tooltip: '清空浏览历史',
+            onPressed: historyState.list.isEmpty
+                ? null
+                : () => _showCleanDialog(
+                    context,
+                    notifier,
+                    refreshController,
+                    onCleaned: () => selectedTopic.value = null,
+                  ),
+          ),
+        ],
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,

@@ -8,6 +8,7 @@ import 'package:flutter_nga/providers/search/search_options_provider.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
@@ -50,91 +51,92 @@ class SearchPage extends HookConsumerWidget {
 
     final isApple = context.isAppleStyle;
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: isApple ? 56 : 68,
-        titleSpacing: 0,
-        title: Padding(
-          padding: EdgeInsets.only(
-            left: hasBackButton ? Dimen.spacingXS : Dimen.spacingL,
-            right: Dimen.spacingL,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: kReadableMaxWidth),
-              child: isApple
-                  ? CupertinoSearchTextField(
-                      controller: searchQuery,
-                      focusNode: focusNode,
-                      autofocus: true,
-                      placeholder: hintText,
-                      keyboardType:
-                          searchOptions.firstRadio == FIRST_RADIO_USER &&
-                              searchOptions.userRadio == USER_RADIO_UID
-                          ? TextInputType.number
-                          : TextInputType.text,
-                      onSubmitted: (text) =>
-                          _onSearch(context, text, searchOptions, fid),
-                    )
-                  : SearchBar(
-                      controller: searchQuery,
-                      focusNode: focusNode,
-                      autoFocus: true,
-                      hintText: hintText,
-                      elevation: const WidgetStatePropertyAll(0),
-                      backgroundColor: WidgetStatePropertyAll(
-                        colorScheme.surfaceContainerHigh,
-                      ),
-                      constraints: const BoxConstraints(
-                        minHeight: 48,
-                        maxHeight: 52,
-                      ),
-                      padding: const WidgetStatePropertyAll(
-                        EdgeInsets.only(left: 16, right: 4),
-                      ),
-                      textInputAction: TextInputAction.search,
-                      keyboardType:
-                          searchOptions.firstRadio == FIRST_RADIO_USER &&
-                              searchOptions.userRadio == USER_RADIO_UID
-                          ? TextInputType.number
-                          : TextInputType.text,
-                      onSubmitted: (text) =>
-                          _onSearch(context, text, searchOptions, fid),
-                      trailing: [
-                        if (inputVisible)
-                          IconButton(
-                            tooltip: '清除',
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              searchQuery.clear();
-                              focusNode.requestFocus();
-                            },
-                          ),
-                        IconButton(
-                          tooltip: '搜索',
-                          icon: const Icon(Icons.search),
-                          onPressed: () => _onSearch(
-                            context,
-                            searchQuery.text,
-                            searchOptions,
-                            fid,
-                          ),
-                        ),
-                      ],
+    return AppScaffold(
+      toolbarHeight: isApple ? 54 : 68,
+      titleSpacing: 0,
+      centerTitle: false,
+      title: Padding(
+        padding: EdgeInsets.only(
+          left: isApple
+              ? 0
+              : (hasBackButton ? Dimen.spacingXS : Dimen.spacingL),
+          right: isApple ? 0 : Dimen.spacingL,
+        ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: kReadableMaxWidth),
+            child: isApple
+                ? CupertinoSearchTextField(
+                    controller: searchQuery,
+                    focusNode: focusNode,
+                    autofocus: true,
+                    placeholder: hintText,
+                    keyboardType:
+                        searchOptions.firstRadio == FIRST_RADIO_USER &&
+                            searchOptions.userRadio == USER_RADIO_UID
+                        ? TextInputType.number
+                        : TextInputType.text,
+                    onSubmitted: (text) =>
+                        _onSearch(context, text, searchOptions, fid),
+                  )
+                : SearchBar(
+                    controller: searchQuery,
+                    focusNode: focusNode,
+                    autoFocus: true,
+                    hintText: hintText,
+                    elevation: const WidgetStatePropertyAll(0),
+                    backgroundColor: WidgetStatePropertyAll(
+                      colorScheme.surfaceContainerHigh,
                     ),
-            ),
+                    constraints: const BoxConstraints(
+                      minHeight: 48,
+                      maxHeight: 52,
+                    ),
+                    padding: const WidgetStatePropertyAll(
+                      EdgeInsets.only(left: 16, right: 4),
+                    ),
+                    textInputAction: TextInputAction.search,
+                    keyboardType:
+                        searchOptions.firstRadio == FIRST_RADIO_USER &&
+                            searchOptions.userRadio == USER_RADIO_UID
+                        ? TextInputType.number
+                        : TextInputType.text,
+                    onSubmitted: (text) =>
+                        _onSearch(context, text, searchOptions, fid),
+                    trailing: [
+                      if (inputVisible)
+                        IconButton(
+                          tooltip: '清除',
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            searchQuery.clear();
+                            focusNode.requestFocus();
+                          },
+                        ),
+                      IconButton(
+                        tooltip: '搜索',
+                        icon: const Icon(Icons.search),
+                        onPressed: () => _onSearch(
+                          context,
+                          searchQuery.text,
+                          searchOptions,
+                          fid,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
-        actions: isApple
-            ? [
-                TextButton(
-                  onPressed: () =>
-                      _onSearch(context, searchQuery.text, searchOptions, fid),
-                  child: const Text('搜索'),
-                ),
-              ]
-            : null,
       ),
+      actions: isApple
+          ? [
+              TextButton(
+                onPressed: () =>
+                    _onSearch(context, searchQuery.text, searchOptions, fid),
+                child: const Text('搜索'),
+              ),
+            ]
+          : null,
       body: _buildBody(context, searchOptions, searchOptionsNotifier),
     );
   }

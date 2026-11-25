@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -26,12 +27,9 @@ class BlocklistSettingsPage extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !embedded,
-        centerTitle: embedded ? false : null,
-        title: const Text("屏蔽设置"),
-      ),
+    return AppScaffold(
+      embedded: embedded,
+      title: const Text("屏蔽设置"),
       body: ReadableListPadding(
         padding: EdgeInsets.fromLTRB(
           mediaPadding.left,

@@ -6,6 +6,8 @@ import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
@@ -69,23 +71,21 @@ class NotificationListPage extends HookConsumerWidget {
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(
-          title: const Text('提醒信息'),
-          actions: [
-            IconButton(
-              tooltip: '清空提醒',
-              icon: const Icon(Icons.delete_sweep_outlined),
-              onPressed: state.notifications.isEmpty
-                  ? null
-                  : () => _confirmClear(
-                      context,
-                      notifier,
-                      onCleared: () => selectedNotification.value = null,
-                    ),
-            ),
-          ],
-        ),
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        title: const Text('提醒信息'),
+        actions: [
+          IconButton(
+            tooltip: '清空提醒',
+            icon: Icon(AppIcons.delete(context)),
+            onPressed: state.notifications.isEmpty
+                ? null
+                : () => _confirmClear(
+                    context,
+                    notifier,
+                    onCleared: () => selectedNotification.value = null,
+                  ),
+          ),
+        ],
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,

@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/search/search_forum_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -40,8 +41,8 @@ class SearchForumPage extends HookConsumerWidget {
 
     useInitialRefresh(refreshController);
 
-    return Scaffold(
-      appBar: AppBar(title: Text("搜索板块:$keyword")),
+    return AppScaffold(
+      title: Text("搜索板块:$keyword"),
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -102,8 +103,8 @@ class FavouriteTopicListPage extends HookConsumerWidget {
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(title: const Text('贴子收藏')),
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        title: const Text('贴子收藏'),
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,

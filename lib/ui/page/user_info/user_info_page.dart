@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/user/user_info_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
@@ -62,7 +63,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
       ],
     );
 
-    return Scaffold(
+    return AppScaffold(
+      title: Text(userInfo.username ?? ""),
       // 应用栏保持全宽，其余内容在大屏下分左右两栏，中小屏居中收窄。
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -73,7 +75,6 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
           );
           return CustomScrollView(
             slivers: [
-              SliverAppBar(pinned: true, title: Text(userInfo.username ?? "")),
               SliverPadding(
                 padding: padding,
                 sliver: isWide

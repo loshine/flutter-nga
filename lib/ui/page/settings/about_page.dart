@@ -3,6 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -23,10 +25,10 @@ class AboutPage extends HookConsumerWidget {
     final appInfoAsync = ref.watch(appInfoProvider);
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('关于')),
+    return AppScaffold(
+      title: const Text('关于'),
       body: appInfoAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: AppActivityIndicator()),
         error: (error, stack) => Center(child: Text('加载失败: $error')),
         data: (appInfo) {
           final brandHeader = Column(

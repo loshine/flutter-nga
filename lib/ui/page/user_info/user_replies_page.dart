@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/user/user_replies_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
@@ -71,8 +72,8 @@ class UserRepliesPage extends HookConsumerWidget {
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(title: Text("$username发布的回复")),
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        title: Text("$username发布的回复"),
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,
