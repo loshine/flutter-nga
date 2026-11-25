@@ -96,7 +96,7 @@ abstract final class AppleNativeService {
   }
 
   /// 动态同步 macOS 窗口标题栏形态：
-  /// - [appleStyle] 为 true 时开启融合透明标题栏并返回顶部红绿灯安全区高度；
+  /// - [appleStyle] 为 true 时开启融合透明标题栏并返回左上角红绿灯水平安全区宽度；
   /// - 为 false 时恢复标准标题栏并返回 0。
   ///
   /// 非 macOS 平台直接返回 0。
@@ -106,7 +106,7 @@ abstract final class AppleNativeService {
       final inset = await channel.invokeMethod<num>('setWindowStyle', {
         'appleStyle': appleStyle,
       });
-      return inset?.toDouble() ?? (appleStyle ? 28.0 : 0.0);
+      return inset?.toDouble() ?? (appleStyle ? 72.0 : 0.0);
     } on MissingPluginException {
       return 0;
     } on PlatformException {

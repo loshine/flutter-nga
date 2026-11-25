@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -345,17 +346,22 @@ void main() {
       await tester.tap(find.byTooltip('展开侧边栏'));
       await tester.pumpAndSettle();
       expect(find.byTooltip('收起侧边栏'), findsOneWidget);
+
+      // ⌃⌘S 快捷键切换侧边栏收起与展开
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyS);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('展开侧边栏'), findsOneWidget);
     },
   );
 
   testWidgets(
     'switching favourite forums in AppleWorkspaceShell creates distinct ForumDetailPage keys and auto-refreshes each forum',
     (tester) async {
-      expect(
-        (id: -7, type: 0).toString(),
-        isNot(equals((id: 334, type: 0).toString())),
-      );
-
       final refreshedFids = <int>[];
       const forumA = Forum(-7, '大漩涡');
       const forumB = Forum(334, '硬件区');

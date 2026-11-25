@@ -47,7 +47,7 @@ class DesignStyleState {
   /// 当前运行宿主是否支持原生 Liquid Glass（iOS 26+ / macOS 26+）。
   final bool nativeLiquidGlassSupported;
 
-  /// macOS 启用融合标题栏时的顶部红绿灯安全区高度（非 macOS 或 Material 模式为 0）。
+  /// macOS 启用融合标题栏时左上角红绿灯预留的水平安全区宽度（全屏、非 macOS 或 Material 模式为 0）。
   final double macTitlebarInset;
 
   /// 按指定平台解析生效的设计风格。

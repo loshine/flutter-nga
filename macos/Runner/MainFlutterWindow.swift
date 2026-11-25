@@ -224,6 +224,9 @@ class MainFlutterWindow: NSWindow {
       titlebarAppearsTransparent = false
       titleVisibility = .visible
       isMovableByWindowBackground = false
+      if #available(macOS 11.0, *) {
+        toolbarStyle = .automatic
+      }
       return 0.0
     }
   }

@@ -88,4 +88,36 @@ void main() {
       expect(tintedView.key, isNot(equals(darkView.key)));
     },
   );
+
+  testWidgets(
+    'native LiquidGlassSurface uses UiKitView on iOS and updates key on brightness change',
+    (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      Widget buildApp(Brightness brightness) {
+        return AppDesignStyleScope(
+          style: AppDesignStyle.apple,
+          nativeLiquidGlassSupported: true,
+          macTitlebarInset: 0,
+          child: MaterialApp(
+            theme: ThemeData(brightness: brightness),
+            home: const Scaffold(
+              body: LiquidGlassSurface(child: Text('iOS 玻璃')),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(Brightness.light));
+      final lightView = tester.widget<UiKitView>(find.byType(UiKitView));
+      expect((lightView.creationParams as Map)['isDark'], isFalse);
+
+      await tester.pumpWidget(buildApp(Brightness.dark));
+      await tester.pumpAndSettle();
+      final darkView = tester.widget<UiKitView>(find.byType(UiKitView));
+      expect((darkView.creationParams as Map)['isDark'], isTrue);
+      expect(darkView.key, isNot(equals(lightView.key)));
+    },
+  );
 }
