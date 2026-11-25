@@ -31,12 +31,15 @@ class ImportCookiesDialog extends HookWidget {
       submitting.value = true;
       try {
         await cookiesCallback(trimmed);
-        if (context.mounted) {
+        if (context.mounted && (ModalRoute.of(context)?.isCurrent ?? false)) {
           Navigator.of(context).pop(true);
         }
       } catch (err) {
         if (context.mounted) {
-          errorText.value = '$err'.replaceFirst(RegExp(r'^Exception:\s*'), '');
+          errorText.value = '$err'.replaceFirst(
+            RegExp(r'^(FormatException|Exception):\s*'),
+            '',
+          );
           submitting.value = false;
         }
       }
@@ -44,63 +47,66 @@ class ImportCookiesDialog extends HookWidget {
 
     final borderRadius = BorderRadius.circular(isApple ? 10 : Dimen.radiusS);
 
-    return M3Dialog(
-      title: '导入 Cookies',
-      scrollable: true,
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        enabled: !submitting.value,
-        minLines: 3,
-        maxLines: 6,
-        keyboardType: TextInputType.multiline,
-        onChanged: (_) {
-          if (errorText.value != null) errorText.value = null;
-        },
-        decoration: InputDecoration(
-          labelText: 'Cookies',
-          hintText: '粘贴包含 ngaPassportUid / ngaPassportCid 的 Cookies',
-          errorText: errorText.value,
-          errorMaxLines: 3,
-          filled: true,
-          fillColor: isApple
-              ? colorScheme.surfaceContainerLow
-              : colorScheme.surfaceContainerHighest,
-          border: OutlineInputBorder(
-            borderRadius: borderRadius,
-            borderSide: isApple
-                ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
-                : BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: borderRadius,
-            borderSide: isApple
-                ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
-                : BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: borderRadius,
-            borderSide: BorderSide(
-              color: colorScheme.primary,
-              width: isApple ? 1.5 : 2,
+    return PopScope(
+      canPop: !submitting.value,
+      child: M3Dialog(
+        title: '导入 Cookies',
+        scrollable: true,
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          enabled: !submitting.value,
+          minLines: 3,
+          maxLines: 6,
+          keyboardType: TextInputType.multiline,
+          onChanged: (_) {
+            if (errorText.value != null) errorText.value = null;
+          },
+          decoration: InputDecoration(
+            labelText: 'Cookies',
+            hintText: '粘贴包含 ngaPassportUid、ngaPassportCid、ngaPassportUrlencodedUname 的 Cookies',
+            errorText: errorText.value,
+            errorMaxLines: 3,
+            filled: true,
+            fillColor: isApple
+                ? colorScheme.surfaceContainerLow
+                : colorScheme.surfaceContainerHighest,
+            border: OutlineInputBorder(
+              borderRadius: borderRadius,
+              borderSide: isApple
+                  ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
+                  : BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: borderRadius,
+              borderSide: isApple
+                  ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
+                  : BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: borderRadius,
+              borderSide: BorderSide(
+                color: colorScheme.primary,
+                width: isApple ? 1.5 : 2,
+              ),
             ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: submitting.value
+                ? null
+                : () => Navigator.of(context).pop(false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: submitting.value ? null : submit,
+            child: submitting.value
+                ? const AppActivityIndicator(radius: 8, strokeWidth: 2)
+                : const Text('确定'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: submitting.value
-              ? null
-              : () => Navigator.of(context).pop(false),
-          child: const Text('取消'),
-        ),
-        FilledButton(
-          onPressed: submitting.value ? null : submit,
-          child: submitting.value
-              ? const AppActivityIndicator(radius: 8, strokeWidth: 2)
-              : const Text('确定'),
-        ),
-      ],
     );
   }
 }

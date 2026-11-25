@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -13,7 +15,7 @@ class _PackageLicenseGroup {
   const _PackageLicenseGroup({required this.package, required this.entries});
 
   final String package;
-  final List<List<LicenseParagraph>> entries;
+  final List<LicenseEntry> entries;
 }
 
 /// 平台自适应开源许可页：复用 [AppScaffold] 与 [MasterDetailLayout]，
@@ -93,20 +95,52 @@ class OpenSourceLicensePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupsFuture = useMemoized(
-      () => _loadGroups(licenseStream ?? LicenseRegistry.licenses),
-      [licenseStream],
-    );
-    final snapshot = useFuture(groupsFuture);
-    final selectedIndex = useState(0);
+    final loading = useState(true);
+    final loadError = useState<Object?>(null);
+    final groups = useState<List<_PackageLicenseGroup>>(const []);
+    final selectedPackage = useState<String?>(null);
     final query = useState('');
     final searchController = useTextEditingController();
+
+    // 使用可取消的订阅按包名分组，不提前展开 paragraphs，页面关闭时立刻停止消费流。
+    useEffect(() {
+      var disposed = false;
+      final byPackage = <String, List<LicenseEntry>>{};
+      final stream = licenseStream ?? LicenseRegistry.licenses;
+      final sub = stream.listen(
+        (entry) {
+          for (final pkg in entry.packages) {
+            byPackage.putIfAbsent(pkg, () => []).add(entry);
+          }
+        },
+        onError: (Object err) {
+          if (disposed) return;
+          loadError.value = err;
+          loading.value = false;
+        },
+        onDone: () {
+          if (disposed) return;
+          final names = byPackage.keys.toList()
+            ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+          groups.value = [
+            for (final name in names)
+              _PackageLicenseGroup(package: name, entries: byPackage[name]!),
+          ];
+          loading.value = false;
+        },
+        cancelOnError: true,
+      );
+      return () {
+        disposed = true;
+        unawaited(sub.cancel());
+      };
+    }, [licenseStream]);
 
     final isApple = context.isAppleStyle;
     final isMac = context.isMacDesktopAppleStyle;
     final colorScheme = Theme.of(context).colorScheme;
 
-    final allGroups = snapshot.data ?? const <_PackageLicenseGroup>[];
+    final allGroups = groups.value;
     final trimmedQuery = query.value.trim().toLowerCase();
     final filtered = trimmedQuery.isEmpty
         ? allGroups
@@ -115,9 +149,12 @@ class OpenSourceLicensePage extends HookWidget {
               if (g.package.toLowerCase().contains(trimmedQuery)) g,
           ];
 
-    final effectiveIndex = filtered.isEmpty
-        ? -1
-        : selectedIndex.value.clamp(0, filtered.length - 1);
+    final selectedGroup = filtered.isEmpty
+        ? null
+        : filtered.firstWhere(
+            (g) => g.package == selectedPackage.value,
+            orElse: () => filtered.first,
+          );
 
     final Widget leadingButton = IconButton(
       tooltip: asDialog ? '关闭' : '返回',
@@ -129,10 +166,10 @@ class OpenSourceLicensePage extends HookWidget {
     );
 
     Widget buildBody(bool isTwoPane) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
+      if (loading.value) {
         return const Center(child: AppActivityIndicator());
       }
-      if (snapshot.hasError) {
+      if (loadError.value != null) {
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -209,63 +246,75 @@ class OpenSourceLicensePage extends HookWidget {
         ),
       );
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          searchField,
-          appSummary,
-          Divider(
-            height: isApple ? 0.5 : 1,
-            thickness: isApple ? 0.5 : 1,
-            color: colorScheme.outlineVariant,
-          ),
-          Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Text(
-                      '未找到匹配的依赖包',
-                      style: Theme.of(context).textTheme.bodyMedium
-                          ?.copyWith(color: colorScheme.onSurfaceVariant),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.only(
-                      top: isMac ? 4 : 0,
-                      bottom: 16 + MediaQuery.paddingOf(context).bottom,
-                    ),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final group = filtered[index];
-                      final selected = isTwoPane && index == effectiveIndex;
-                      return _LicensePackageTile(
-                        group: group,
-                        selected: selected,
-                        onTap: () {
-                          if (isTwoPane) {
-                            selectedIndex.value = index;
-                          } else {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => _LicenseDetailPage(
-                                  group: group,
-                                  embedded: false,
+      return SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            searchField,
+            appSummary,
+            Divider(
+              height: isApple ? 0.5 : 1,
+              thickness: isApple ? 0.5 : 1,
+              color: colorScheme.outlineVariant,
+            ),
+            Expanded(
+              child: filtered.isEmpty
+                  ? Center(
+                      child: Text(
+                        '未找到匹配的依赖包',
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: colorScheme.onSurfaceVariant),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.only(
+                        top: isMac ? 4 : 0,
+                        bottom: 16 + MediaQuery.paddingOf(context).bottom,
+                      ),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final group = filtered[index];
+                        final selected =
+                            isTwoPane &&
+                            selectedGroup?.package == group.package;
+                        return _LicensePackageTile(
+                          group: group,
+                          selected: selected,
+                          onTap: () {
+                            if (isTwoPane) {
+                              selectedPackage.value = group.package;
+                            } else {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => _LicenseDetailPage(
+                                    group: group,
+                                    embedded: false,
+                                  ),
                                 ),
-                              ),
-                            );
-                          }
-                        },
-                      );
-                    },
-                  ),
-          ),
-        ],
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       );
     }
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.escape): () =>
-            Navigator.of(context).maybePop(),
+        const SingleActivator(LogicalKeyboardKey.escape): () {
+          if (query.value.isNotEmpty) {
+            searchController.clear();
+            query.value = '';
+          } else {
+            Navigator.of(context).maybePop();
+          }
+        },
       },
       child: Focus(
         autofocus: true,
@@ -277,42 +326,30 @@ class OpenSourceLicensePage extends HookWidget {
             body: buildBody(isTwoPane),
           ),
           detailBuilder: (context) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+            if (loading.value) {
               return const Center(child: AppActivityIndicator());
             }
-            if (effectiveIndex < 0) {
+            if (loadError.value != null) {
+              return const MasterDetailEmptyPlaceholder(
+                icon: Icons.cloud_off_outlined,
+                title: '加载开源许可失败',
+              );
+            }
+            if (selectedGroup == null) {
               return const MasterDetailEmptyPlaceholder(
                 icon: Icons.description_outlined,
                 title: '选择一个依赖包查看许可详情',
               );
             }
             return _LicenseDetailPage(
-              key: ValueKey(filtered[effectiveIndex].package),
-              group: filtered[effectiveIndex],
+              key: ValueKey(selectedGroup.package),
+              group: selectedGroup,
               embedded: true,
             );
           },
         ),
       ),
     );
-  }
-
-  static Future<List<_PackageLicenseGroup>> _loadGroups(
-    Stream<LicenseEntry> stream,
-  ) async {
-    final byPackage = <String, List<List<LicenseParagraph>>>{};
-    await for (final entry in stream) {
-      final paragraphs = entry.paragraphs.toList(growable: false);
-      for (final pkg in entry.packages) {
-        byPackage.putIfAbsent(pkg, () => []).add(paragraphs);
-      }
-    }
-    final names = byPackage.keys.toList()
-      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    return [
-      for (final name in names)
-        _PackageLicenseGroup(package: name, entries: byPackage[name]!),
-    ];
   }
 }
 
@@ -458,7 +495,7 @@ class _LicensePackageTile extends StatelessWidget {
   }
 }
 
-class _LicenseDetailPage extends StatelessWidget {
+class _LicenseDetailPage extends HookWidget {
   const _LicenseDetailPage({
     super.key,
     required this.group,
@@ -472,6 +509,14 @@ class _LicenseDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isApple = context.isAppleStyle;
+    // 仅在打开当前依赖包详情时懒解析段落，避免进入许可页时一次性解析全部正文卡帧。
+    final parsedEntries = useMemoized(
+      () => [
+        for (final entry in group.entries)
+          entry.paragraphs.toList(growable: false),
+      ],
+      [group],
+    );
 
     return AppScaffold(
       embedded: embedded,
@@ -480,7 +525,7 @@ class _LicenseDetailPage extends StatelessWidget {
         child: ReadableListPadding(
           builder: (context, padding) => ListView.separated(
             padding: padding + const EdgeInsets.symmetric(vertical: 16),
-            itemCount: group.entries.length,
+            itemCount: parsedEntries.length,
             separatorBuilder: (_, _) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Divider(
@@ -490,7 +535,7 @@ class _LicenseDetailPage extends StatelessWidget {
               ),
             ),
             itemBuilder: (context, index) {
-              final paragraphs = group.entries[index];
+              final paragraphs = parsedEntries[index];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(

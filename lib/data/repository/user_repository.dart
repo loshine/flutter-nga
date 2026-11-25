@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:sembast/sembast.dart';
 import 'package:flutter_nga/data/entity/block.dart';
 import 'package:flutter_nga/data/entity/user.dart';
@@ -51,27 +50,29 @@ class UserDataRepository implements UserRepository {
     String? uid;
     String? cid;
     String? username;
-    for (String c in cookies.split(";")) {
-      final value = c.trim();
-      debugPrint(value);
-      if (value.contains(TAG_UID)) {
-        uid = value.substring(TAG_UID.length + 1);
-      } else if (c.contains(TAG_CID)) {
-        cid = value.substring(TAG_CID.length + 1);
-      } else if (c.contains(TAG_USER_NAME)) {
-        username = value.substring(TAG_USER_NAME.length + 1);
-        username = code_utils.urlDecode(username);
+    for (final entry in cookies.split(';')) {
+      final value = entry.trim();
+      final eq = value.indexOf('=');
+      if (eq <= 0) continue;
+      final key = value.substring(0, eq).trim();
+      final raw = value.substring(eq + 1).trim();
+      if (key == TAG_UID) {
+        uid = raw;
+      } else if (key == TAG_CID) {
+        cid = raw;
+      } else if (key == TAG_USER_NAME) {
+        username = code_utils.urlDecode(raw);
       }
     }
-    if (cid != null &&
-        cid.isNotEmpty &&
-        uid != null &&
-        uid.isNotEmpty &&
-        username != null &&
-        username.isNotEmpty) {
-      return saveLogin(uid, cid, username);
+    final missing = <String>[
+      if (uid == null || uid.isEmpty) TAG_UID,
+      if (cid == null || cid.isEmpty) TAG_CID,
+      if (username == null || username.isEmpty) TAG_USER_NAME,
+    ];
+    if (missing.isEmpty) {
+      return saveLogin(uid!, cid!, username!);
     }
-    throw "cookies parse error: cookies = $cookies";
+    throw FormatException('Cookies 缺少必要字段：${missing.join('、')}');
   }
 
   @override

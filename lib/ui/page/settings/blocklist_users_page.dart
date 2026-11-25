@@ -147,11 +147,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
   }
 
   Future<void> _add(BlocklistSettingsNotifier notifier, String user) async {
-    try {
-      AppToast.success(await notifier.addUser(user));
-    } catch (e) {
-      AppToast.error(e);
-    }
+    AppToast.success(await notifier.addUser(user));
   }
 
   void _showAddDialog(

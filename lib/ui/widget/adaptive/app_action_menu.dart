@@ -131,24 +131,30 @@ class AppMoreMenuButton<T> extends StatefulWidget {
 
 class AppMoreMenuButtonState<T> extends State<AppMoreMenuButton<T>> {
   final _popupKey = GlobalKey<PopupMenuButtonState<T>>();
+  bool _menuOpen = false;
 
   /// 以当前按钮为锚点弹出菜单（供列表项长按等场景复用）。
   Future<void> showMenu() async {
-    if (!mounted || widget.actions.isEmpty) return;
+    if (!mounted || widget.actions.isEmpty || _menuOpen) return;
     if (!context.isAppleStyle) {
       _popupKey.currentState?.showButtonMenu();
       return;
     }
-    final box = context.findRenderObject() as RenderBox?;
-    final pos = box?.localToGlobal(Offset(box.size.width, box.size.height));
-    final selected = await showAppActionMenu<T>(
-      context: context,
-      title: widget.title,
-      globalPosition: pos,
-      actions: widget.actions,
-    );
-    if (selected != null && mounted) {
-      widget.onSelected(selected);
+    _menuOpen = true;
+    try {
+      final box = context.findRenderObject() as RenderBox?;
+      final pos = box?.localToGlobal(Offset(box.size.width, box.size.height));
+      final selected = await showAppActionMenu<T>(
+        context: context,
+        title: widget.title,
+        globalPosition: pos,
+        actions: widget.actions,
+      );
+      if (selected != null && mounted) {
+        widget.onSelected(selected);
+      }
+    } finally {
+      _menuOpen = false;
     }
   }
 

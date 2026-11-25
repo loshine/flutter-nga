@@ -115,7 +115,12 @@ class ReplyDetailDialog extends HookConsumerWidget {
     VoidCallback onRetry,
   ) {
     if (state.replyList.isNotEmpty) {
-      return _ReplyWidget(reply: state.replyList[0], user: state.userList[0]);
+      final reply = state.replyList[0];
+      final user = state.userList.firstWhere(
+        (u) => u.uid == reply.authorId,
+        orElse: () => state.userList.isNotEmpty ? state.userList[0] : User(),
+      );
+      return _ReplyWidget(reply: reply, user: user);
     }
     if (state.error != null) {
       final colorScheme = Theme.of(context).colorScheme;

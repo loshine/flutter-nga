@@ -90,13 +90,11 @@ class ConversationDetailPage extends HookConsumerWidget {
           title: '邀请用户加入对话',
           callback: (text) async {
             final users = splitMessageUsers(text);
-            if (users.isEmpty) return;
-            try {
-              final message = await notifier.invite(users);
-              AppToast.success(message ?? '已邀请');
-            } catch (err) {
-              AppToast.error(err);
+            if (users.isEmpty) {
+              throw '请输入有效的 UID 或用户名';
             }
+            final message = await notifier.invite(users);
+            AppToast.success(message ?? '已邀请');
           },
         ),
       );

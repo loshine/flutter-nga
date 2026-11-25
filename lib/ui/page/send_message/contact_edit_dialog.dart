@@ -31,7 +31,7 @@ class ContactEditDialog extends HookWidget {
       submitting.value = true;
       try {
         await callback?.call(trimmed);
-        if (context.mounted) {
+        if (context.mounted && (ModalRoute.of(context)?.isCurrent ?? false)) {
           Navigator.of(context).pop();
         }
       } catch (err) {
@@ -42,38 +42,41 @@ class ContactEditDialog extends HookWidget {
       }
     }
 
-    return M3Dialog(
-      title: title,
-      content: TextField(
-        autofocus: true,
-        enabled: !submitting.value,
-        maxLines: 1,
-        controller: controller,
-        onChanged: (_) {
-          if (errorText.value != null) errorText.value = null;
-        },
-        decoration: InputDecoration(
-          labelText: 'UID 或用户名',
-          helperText: '多个用空格或逗号分隔，纯数字用户名前加 \\',
-          errorText: errorText.value,
+    return PopScope(
+      canPop: !submitting.value,
+      child: M3Dialog(
+        title: title,
+        content: TextField(
+          autofocus: true,
+          enabled: !submitting.value,
+          maxLines: 1,
+          controller: controller,
+          onChanged: (_) {
+            if (errorText.value != null) errorText.value = null;
+          },
+          decoration: InputDecoration(
+            labelText: 'UID 或用户名',
+            helperText: '多个用空格或逗号分隔，纯数字用户名前加 \\',
+            errorText: errorText.value,
+          ),
+          keyboardType: TextInputType.text,
+          onSubmitted: (_) => submit(),
         ),
-        keyboardType: TextInputType.text,
-        onSubmitted: (_) => submit(),
+        actions: [
+          TextButton(
+            onPressed: submitting.value
+                ? null
+                : () => Navigator.of(context).pop(),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: submitting.value ? null : submit,
+            child: submitting.value
+                ? const AppActivityIndicator(radius: 8, strokeWidth: 2)
+                : const Text('确定'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: submitting.value
-              ? null
-              : () => Navigator.of(context).pop(),
-          child: const Text('取消'),
-        ),
-        FilledButton(
-          onPressed: submitting.value ? null : submit,
-          child: submitting.value
-              ? const AppActivityIndicator(radius: 8, strokeWidth: 2)
-              : const Text('确定'),
-        ),
-      ],
     );
   }
 }

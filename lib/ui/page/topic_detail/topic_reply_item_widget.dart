@@ -205,38 +205,41 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (context.isMacDesktopAppleStyle)
-                                IgnorePointer(
-                                  ignoring: !_hovered,
-                                  child: AnimatedOpacity(
-                                    opacity: _hovered ? 1.0 : 0.0,
-                                    duration: Motion.resolveDuration(
-                                      context,
-                                      Motion.durationShort2,
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          tooltip: '引用',
-                                          icon: const Icon(
-                                            CupertinoIcons.quote_bubble,
-                                            size: 15,
+                                ExcludeFocus(
+                                  excluding: !_hovered,
+                                  child: IgnorePointer(
+                                    ignoring: !_hovered,
+                                    child: AnimatedOpacity(
+                                      opacity: _hovered ? 1.0 : 0.0,
+                                      duration: Motion.resolveDuration(
+                                        context,
+                                        Motion.durationShort2,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            tooltip: '引用',
+                                            icon: const Icon(
+                                              CupertinoIcons.quote_bubble,
+                                              size: 15,
+                                            ),
+                                            onPressed: () => _onMenuSelected(
+                                              ReplyMenuAction.quote,
+                                            ),
                                           ),
-                                          onPressed: () => _onMenuSelected(
-                                            ReplyMenuAction.quote,
+                                          IconButton(
+                                            tooltip: '回复',
+                                            icon: const Icon(
+                                              CupertinoIcons.reply,
+                                              size: 15,
+                                            ),
+                                            onPressed: () => _onMenuSelected(
+                                              ReplyMenuAction.reply,
+                                            ),
                                           ),
-                                        ),
-                                        IconButton(
-                                          tooltip: '回复',
-                                          icon: const Icon(
-                                            CupertinoIcons.reply,
-                                            size: 15,
-                                          ),
-                                          onPressed: () => _onMenuSelected(
-                                            ReplyMenuAction.reply,
-                                          ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

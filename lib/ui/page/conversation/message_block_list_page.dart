@@ -47,7 +47,9 @@ class MessageBlockListPage extends HookConsumerWidget {
           title: '屏蔽用户',
           callback: (text) async {
             final input = splitMessageUsers(text);
-            if (input.isEmpty) return;
+            if (input.isEmpty) {
+              throw '请输入有效的 UID 或用户名';
+            }
             final message = await notifier.add(input);
             AppToast.success(message ?? '已屏蔽');
           },

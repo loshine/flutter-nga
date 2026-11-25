@@ -138,6 +138,7 @@ class TopicDetailPage extends HookConsumerWidget {
     ];
 
     void goToPage(int target) {
+      if (target < 0 || target >= tabController.length) return;
       if (!visitedPages.value.contains(target)) {
         visitedPages.value = {...visitedPages.value, target};
       }
@@ -234,102 +235,108 @@ class TopicDetailPage extends HookConsumerWidget {
           const SingleActivator(
             LogicalKeyboardKey.bracketLeft,
             meta: true,
-          ): () {
-            if (hasPrevious) goToPage(tabController.index - 1);
-          },
+          ): () =>
+              goToPage(tabController.index - 1),
           const SingleActivator(
             LogicalKeyboardKey.bracketRight,
             meta: true,
-          ): () {
-            if (hasNext) goToPage(tabController.index + 1);
-          },
-          const SingleActivator(LogicalKeyboardKey.keyG, meta: true):
-              openPageSelector,
+          ): () =>
+              goToPage(tabController.index + 1),
+          const SingleActivator(
+            LogicalKeyboardKey.keyG,
+            meta: true,
+            shift: true,
+          ): openPageSelector,
           if (embedded && onClose != null)
             const SingleActivator(LogicalKeyboardKey.escape): onClose!,
         },
-        child: AppScaffold(
-          embedded: embedded,
-          title: Text(code_utils.unescapeHtml(state.subject ?? subject ?? "")),
-          actions: [
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(7),
-                border: Border.all(
-                  color: colorScheme.outlineVariant,
-                  width: 0.5,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    tooltip: '上一页',
-                    icon: Icon(AppIcons.chevronLeft(context), size: 15),
-                    onPressed: hasPrevious
-                        ? () => goToPage(tabController.index - 1)
-                        : null,
+        child: Focus(
+          autofocus: true,
+          child: AppScaffold(
+            embedded: embedded,
+            title: Text(
+              code_utils.unescapeHtml(state.subject ?? subject ?? ""),
+            ),
+            actions: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant,
+                    width: 0.5,
                   ),
-                  Tooltip(
-                    message: '跳转页码',
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(5),
-                      onTap: openPageSelector,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
-                        ),
-                        child: Text(
-                          "${state.currentPage}/${state.maxPage}",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurface,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: '上一页',
+                      icon: Icon(AppIcons.chevronLeft(context), size: 15),
+                      onPressed: hasPrevious
+                          ? () => goToPage(tabController.index - 1)
+                          : null,
+                    ),
+                    Tooltip(
+                      message: '跳转页码',
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(5),
+                        onTap: openPageSelector,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
+                          child: Text(
+                            "${state.currentPage}/${state.maxPage}",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: '下一页',
-                    icon: Icon(AppIcons.chevronRight(context), size: 15),
-                    onPressed: hasNext
-                        ? () => goToPage(tabController.index + 1)
-                        : null,
-                  ),
-                ],
+                    IconButton(
+                      tooltip: '下一页',
+                      icon: Icon(AppIcons.chevronRight(context), size: 15),
+                      onPressed: hasNext
+                          ? () => goToPage(tabController.index + 1)
+                          : null,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              tooltip: favourited ? '取消收藏' : '收藏',
-              icon: Icon(
-                AppIcons.favorite(context, filled: favourited),
-                color: favourited ? colorScheme.primary : null,
-              ),
-              onPressed: state.favouriteBusy ? null : toggleFavourite,
-            ),
-            IconButton(
-              tooltip: '回复',
-              color: colorScheme.primary,
-              icon: Icon(AppIcons.reply(context)),
-              onPressed: openReply,
-            ),
-            moreActionWidget,
-            if (embedded && onClose != null)
               IconButton(
-                tooltip: '关闭',
-                icon: Icon(AppIcons.close(context)),
-                onPressed: onClose,
+                tooltip: favourited ? '取消收藏' : '收藏',
+                icon: Icon(
+                  AppIcons.favorite(context, filled: favourited),
+                  color: favourited ? colorScheme.primary : null,
+                ),
+                onPressed: state.favouriteBusy ? null : toggleFavourite,
               ),
-          ],
-          body: TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
-            controller: tabController,
-            children: widgets,
+              IconButton(
+                tooltip: '回复',
+                color: colorScheme.primary,
+                icon: Icon(AppIcons.reply(context)),
+                onPressed: openReply,
+              ),
+              moreActionWidget,
+              if (embedded && onClose != null)
+                IconButton(
+                  tooltip: '关闭',
+                  icon: Icon(AppIcons.close(context)),
+                  onPressed: onClose,
+                ),
+            ],
+            body: TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: tabController,
+              children: widgets,
+            ),
           ),
         ),
       );

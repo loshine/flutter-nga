@@ -10,13 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
-import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
-import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
-import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
-import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
-import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
+import 'package:flutter_nga/providers/user/account_list_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
@@ -207,8 +202,58 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  static const _initialLoadTimeout = Duration(seconds: 15);
+
   InAppWebViewController? _webViewController;
   bool _isLoading = true;
+  bool _loadFailed = false;
+  Timer? _loadTimeoutTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startLoadTimeout();
+  }
+
+  @override
+  void dispose() {
+    _loadTimeoutTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startLoadTimeout() {
+    _loadTimeoutTimer?.cancel();
+    _loadTimeoutTimer = Timer(_initialLoadTimeout, () {
+      if (!mounted || !_isLoading) return;
+      setState(() {
+        _isLoading = false;
+        _loadFailed = true;
+      });
+    });
+  }
+
+  void _finishLoading({bool failed = false}) {
+    _loadTimeoutTimer?.cancel();
+    if (!mounted) return;
+    if (_isLoading || _loadFailed != failed) {
+      setState(() {
+        _isLoading = false;
+        _loadFailed = failed;
+      });
+    }
+  }
+
+  Future<void> _reloadLoginPage() async {
+    setState(() {
+      _isLoading = true;
+      _loadFailed = false;
+    });
+    _startLoadTimeout();
+    final controller = _webViewController;
+    if (controller != null) {
+      await controller.reload();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -234,14 +279,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildScaffold() {
     final isApple = context.isAppleStyle;
+    final showCloseLeading = widget.asDialog || isApple;
     return AppScaffold(
       embedded: widget.asDialog,
       leading: IconButton(
-        tooltip: widget.asDialog ? '关闭' : '返回',
+        tooltip: showCloseLeading ? '关闭' : '返回',
         icon: Icon(
-          widget.asDialog ? AppIcons.close(context) : AppIcons.back(context),
+          showCloseLeading ? AppIcons.close(context) : AppIcons.back(context),
         ),
-        onPressed: widget.asDialog ? () => Routes.pop(context) : _handleBack,
+        onPressed: showCloseLeading ? () => Routes.pop(context) : _handleBack,
       ),
       title: const Text("登录"),
       actions: <Widget>[
@@ -294,21 +340,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 );
               },
-              onLoadStop: (_, _) {
-                if (mounted && _isLoading) {
-                  setState(() => _isLoading = false);
-                }
-              },
-              onReceivedError: (_, _, _) {
-                if (mounted && _isLoading) {
-                  setState(() => _isLoading = false);
-                }
-              },
-              onReceivedHttpError: (_, _, _) {
-                if (mounted && _isLoading) {
-                  setState(() => _isLoading = false);
-                }
-              },
+              onLoadStop: (_, _) => _finishLoading(),
+              onReceivedError: (_, _, _) => _finishLoading(),
+              onReceivedHttpError: (_, _, _) => _finishLoading(),
+              onWebContentProcessDidTerminate: (_) =>
+                  _finishLoading(failed: true),
               onJsAlert: (controller, request) async {
                 await _showWebMessage(request.message ?? '');
                 return JsAlertResponse(
@@ -345,6 +381,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               const ColoredBox(
                 color: _loginFormBgColor,
                 child: Center(child: AppActivityIndicator()),
+              )
+            else if (_loadFailed)
+              ColoredBox(
+                color: _loginFormBgColor,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          AppIcons.resolve(context, Icons.cloud_off_outlined),
+                          size: 36,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          '登录页加载超时或异常中断',
+                          style: TextStyle(color: Colors.black87, fontSize: 15),
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: _reloadLoginPage,
+                          child: const Text('重新加载'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
           ],
         ),
@@ -352,27 +417,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  void _notifyAccountChanged() {
-    ref.read(accountSessionVersionProvider.notifier).bump();
-    ref.read(unreadCountProvider.notifier).clear();
-    ref.read(favouriteForumListProvider.notifier).onAccountChanged();
-    ref.invalidate(conversationListProvider);
-    ref.invalidate(notificationListProvider);
-    ref.invalidate(favouriteTopicListProvider);
-    unawaited(
-      ref
-          .read(homeDrawerHeaderProvider.notifier)
-          .refresh()
-          .then((_) {
-            if (mounted) {
-              return ref.read(unreadCountProvider.notifier).refresh();
-            }
-          })
-          .catchError((_) {}),
-    );
-  }
-
   Future<void> _processCookieJson(String cookiesJson) async {
+    final accountNotifier = ref.read(accountListProvider.notifier);
     try {
       final map = json.decode(cookiesJson) as Map;
       await Data().userRepository.saveLogin(
@@ -380,7 +426,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         map['token'],
         map['username'],
       );
-      _notifyAccountChanged();
+      accountNotifier.notifyAccountChanged();
       if (mounted) {
         AppToast.success("登录成功");
         Routes.pop(context);
@@ -535,7 +581,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _saveImportedCookies(String cookies) async {
+    final accountNotifier = ref.read(accountListProvider.notifier);
     await Data().userRepository.saveLoginCookies(cookies);
-    _notifyAccountChanged();
+    accountNotifier.notifyAccountChanged();
   }
 }

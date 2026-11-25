@@ -144,11 +144,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
   }
 
   Future<void> _add(BlocklistSettingsNotifier notifier, String word) async {
-    try {
-      AppToast.success(await notifier.addWord(word));
-    } catch (e) {
-      AppToast.error(e);
-    }
+    AppToast.success(await notifier.addWord(word));
   }
 
   void _showAddDialog(

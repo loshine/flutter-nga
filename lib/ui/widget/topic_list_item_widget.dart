@@ -334,11 +334,14 @@ class TopicListItemWidget extends ConsumerWidget {
       children: [
         GestureDetector(
           onSecondaryTapDown: (d) => showContextMenu(d.globalPosition),
+          onLongPressStart: onLongPress != null
+              ? null
+              : (d) => showContextMenu(d.globalPosition),
           child: Material(
             color: selected ? selectedBg : Colors.transparent,
             child: InkWell(
               onTap: () => _handleTap(context, topic, ref),
-              onLongPress: onLongPress ?? () => showContextMenu(null),
+              onLongPress: onLongPress,
               child: rowBody,
             ),
           ),

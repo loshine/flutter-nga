@@ -380,13 +380,13 @@ class ThemeBuilder {
       colorScheme: colorScheme,
       visualDensity: density,
       filledButtonTheme: FilledButtonThemeData(
-        style: base.filledButtonTheme.style?.merge(shapeStyle) ?? shapeStyle,
+        style: shapeStyle.merge(base.filledButtonTheme.style),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: base.outlinedButtonTheme.style?.merge(shapeStyle) ?? shapeStyle,
+        style: shapeStyle.merge(base.outlinedButtonTheme.style),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: base.textButtonTheme.style?.merge(shapeStyle) ?? shapeStyle,
+        style: shapeStyle.merge(base.textButtonTheme.style),
       ),
       cupertinoOverrideTheme: buildCupertinoTheme(
         colorScheme,

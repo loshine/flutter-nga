@@ -3,20 +3,28 @@ import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HomeDrawerHeaderNotifier extends Notifier<UserInfo?> {
+  int _requestSeq = 0;
+
   @override
   UserInfo? build() => null;
 
+  /// 账号切换或退出时同步清空旧页头并作废所有在途请求。
+  void clear() {
+    _requestSeq++;
+    state = null;
+  }
+
   Future<void> refresh() async {
-    try {
-      CacheUser? user = await Data().userRepository.getDefaultUser();
-      if (user != null) {
-        state = await Data().userRepository.getUserInfoByUid(user.uid);
-      } else {
-        state = null;
-      }
-    } catch (err) {
-      rethrow;
+    final seq = ++_requestSeq;
+    final user = await Data().userRepository.getDefaultUser();
+    if (!ref.mounted || seq != _requestSeq) return;
+    if (user == null) {
+      state = null;
+      return;
     }
+    final info = await Data().userRepository.getUserInfoByUid(user.uid);
+    if (!ref.mounted || seq != _requestSeq) return;
+    state = info;
   }
 }
 
