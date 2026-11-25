@@ -237,7 +237,7 @@ class PublishPage extends HookWidget {
         if (context.mounted) {
           final navigator = Navigator.of(context);
           if (pageRoute != null) navigator.popUntil((r) => r == pageRoute);
-          navigator.pop();
+          navigator.pop(true);
         }
       } catch (err) {
         AppToast.error(err);

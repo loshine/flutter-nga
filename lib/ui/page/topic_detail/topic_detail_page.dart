@@ -164,12 +164,15 @@ class TopicDetailPage extends HookConsumerWidget {
           });
     }
 
-    void openReply() {
+    Future<void> openReply() async {
       if (fid == null && state.topic == null) return;
-      Routes.navigateTo(
+      final published = await Routes.navigateTo(
         context,
         "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
       );
+      if (published == true && context.mounted) {
+        notifier.notifyReplyPublished();
+      }
     }
 
     Future<void> openAppleMoreMenu(BuildContext btnContext) async {

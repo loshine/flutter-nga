@@ -17,6 +17,9 @@ class TopicDetailState {
   /// 收藏 / 取消收藏请求进行中
   final bool favouriteBusy;
 
+  /// 回帖成功且处于最后一页时递增，通知当前页自动刷新
+  final int latestPageRefreshTick;
+
   const TopicDetailState({
     this.currentPage = 1,
     this.maxPage = 1,
@@ -24,6 +27,7 @@ class TopicDetailState {
     this.topic,
     this.favourite = FavouriteStatus.unknown,
     this.favouriteBusy = false,
+    this.latestPageRefreshTick = 0,
   });
 
   String? get subject => topic?.subject;
@@ -35,6 +39,7 @@ class TopicDetailState {
     Topic? topic,
     FavouriteStatus? favourite,
     bool? favouriteBusy,
+    int? latestPageRefreshTick,
   }) {
     return TopicDetailState(
       currentPage: currentPage ?? this.currentPage,
@@ -43,6 +48,8 @@ class TopicDetailState {
       topic: topic ?? this.topic,
       favourite: favourite ?? this.favourite,
       favouriteBusy: favouriteBusy ?? this.favouriteBusy,
+      latestPageRefreshTick:
+          latestPageRefreshTick ?? this.latestPageRefreshTick,
     );
   }
 }
@@ -82,6 +89,15 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
       safeCurrentPage = maxPage;
     }
     state = state.copyWith(currentPage: safeCurrentPage);
+  }
+
+  /// 回帖成功后调用：仅当当前正处于最后一页（最新一页）时触发该页自动刷新。
+  void notifyReplyPublished() {
+    if (state.currentPage >= state.maxPage) {
+      state = state.copyWith(
+        latestPageRefreshTick: state.latestPageRefreshTick + 1,
+      );
+    }
   }
 
   /// 已收藏时取消收藏，否则（含状态未知）加入收藏，返回服务端提示。

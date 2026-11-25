@@ -216,8 +216,15 @@ class ForumDetailPage extends HookConsumerWidget {
           visible: fabScroll.visible && mainPage,
           icon: const Icon(Icons.edit),
           appleIcon: Icon(AppIcons.edit(context)),
-          onPressed: () =>
-              Routes.navigateTo(context, "${Routes.TOPIC_PUBLISH}?fid=$fid"),
+          onPressed: () async {
+            final published = await Routes.navigateTo(
+              context,
+              "${Routes.TOPIC_PUBLISH}?fid=$fid",
+            );
+            if (published == true && context.mounted) {
+              refreshController.callRefresh();
+            }
+          },
         ),
       ),
       detailBuilder: (context) => TopicDetailPane(

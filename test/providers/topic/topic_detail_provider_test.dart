@@ -151,4 +151,32 @@ void main() {
     expect(state.maxPage, 1);
     expect(state.subject, isNull);
   });
+
+  test('notifyReplyPublished only ticks when on the latest page', () {
+    final container = ProviderContainer();
+    const key = (tid: 42);
+    final provider = topicDetailProvider(key);
+    final subscription = container.listen(provider, (_, _) {});
+    addTearDown(() {
+      subscription.close();
+      container.dispose();
+    });
+
+    final notifier = container.read(provider.notifier);
+    notifier.updateMetadata(maxPage: 3, maxFloor: 50, topic: null);
+
+    // 不在最后一页时不触发刷新
+    notifier.setCurrentPage(1);
+    notifier.notifyReplyPublished();
+    expect(container.read(provider).latestPageRefreshTick, 0);
+
+    notifier.setCurrentPage(2);
+    notifier.notifyReplyPublished();
+    expect(container.read(provider).latestPageRefreshTick, 0);
+
+    // 处于最后一页时递增刷新信号
+    notifier.setCurrentPage(3);
+    notifier.notifyReplyPublished();
+    expect(container.read(provider).latestPageRefreshTick, 1);
+  });
 }

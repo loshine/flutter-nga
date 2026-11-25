@@ -11,6 +11,7 @@ import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_comment_item_widget.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
@@ -590,25 +591,31 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
     }
   }
 
+  Future<void> _openReplyEditor(String initialContent) async {
+    final replyTid = widget.reply.tid;
+    final published = await Routes.navigateTo(
+      context,
+      "${Routes.TOPIC_PUBLISH}?tid=$replyTid&fid=${widget.reply.fid}",
+      extra: initialContent,
+    );
+    if (published == true && mounted && replyTid != null) {
+      ref
+          .read(topicDetailProvider((tid: replyTid)).notifier)
+          .notifyReplyPublished();
+    }
+  }
+
   void _onMenuSelected(ReplyMenuAction action) {
     final displayName = name_utils.getShowName(widget.user!.username ?? '');
     switch (action) {
       case ReplyMenuAction.quote:
         String quoteContent =
             "[quote][pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] [b]Post by [uid=${widget.user!.uid}]$displayName[/uid] (${widget.reply.postDate}):[/b]\n\n${widget.reply.quoteContent}[/quote]";
-        Routes.navigateTo(
-          context,
-          "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
-          extra: quoteContent,
-        );
+        _openReplyEditor(quoteContent);
       case ReplyMenuAction.reply:
         String replyContent =
             "[b]Reply to [pid=${widget.reply.pid},${widget.reply.tid},1]Reply[/pid] Post by [uid=${widget.user!.uid}]$displayName[/uid] (${widget.reply.postDate})[/b]";
-        Routes.navigateTo(
-          context,
-          "${Routes.TOPIC_PUBLISH}?tid=${widget.reply.tid}&fid=${widget.reply.fid}",
-          extra: replyContent,
-        );
+        _openReplyEditor(replyContent);
       case ReplyMenuAction.onlyAuthor:
         Routes.navigateTo(
           context,

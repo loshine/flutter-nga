@@ -42,6 +42,20 @@ class TopicSinglePage extends HookConsumerWidget {
     final state = ref.watch(topicSinglePageProvider(providerKey));
     final blockFilter = ref.watch(blockFilterProvider);
 
+    ref.listen<int>(
+      topicDetailProvider(detailProviderKey)
+          .select((s) => s.latestPageRefreshTick),
+      (previous, next) {
+        if (previous != null && next != previous) {
+          final detail = ref.read(topicDetailProvider(detailProviderKey));
+          if (page == detail.currentPage &&
+              detail.currentPage >= detail.maxPage) {
+            refreshController.callRefresh();
+          }
+        }
+      },
+    );
+
     Future<void> onRefresh() async {
       replyWidgetCache.value.clear();
       final notifier = ref.read(topicSinglePageProvider(providerKey).notifier);

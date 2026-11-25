@@ -218,9 +218,9 @@ List<GoRoute> buildRoutes() {
                 asDialog: asDialog,
               );
         if (asDialog) {
-          return _DesktopDialogPage<void>(key: state.pageKey, child: page);
+          return _DesktopDialogPage<Object?>(key: state.pageKey, child: page);
         }
-        return MaterialPage<void>(key: state.pageKey, child: page);
+        return MaterialPage<Object?>(key: state.pageKey, child: page);
       },
     ),
     GoRoute(
