@@ -133,7 +133,7 @@ class ConversationListPage extends HookConsumerWidget {
           return const MasterDetailEmptyPlaceholder(
             icon: Icons.mail_outline,
             title: '选择一段对话查看消息',
-            subtitle: '点击左下角按钮可新建短消息',
+            subtitle: '点击新建按钮可发起短消息',
           );
         }
         return ConversationDetailPage(

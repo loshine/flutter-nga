@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
@@ -27,18 +29,18 @@ class _ChildForumListPage extends State<ChildForumListPage> {
           : LayoutBuilder(
               builder: (context, constraints) {
                 if (constraints.maxWidth >= kCompactBreakpoint) {
-                  final bottomPadding = MediaQuery.paddingOf(context).bottom;
+                  final mediaPadding = MediaQuery.paddingOf(context);
                   return GridView.builder(
                     padding: EdgeInsets.fromLTRB(
-                      16,
+                      math.max(16.0, mediaPadding.left),
                       12,
-                      16,
-                      16 + bottomPadding,
+                      math.max(16.0, mediaPadding.right),
+                      16 + mediaPadding.bottom,
                     ),
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 420,
-                          mainAxisExtent: 76,
+                          mainAxisExtent: 84,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 4,
                         ),

@@ -517,9 +517,10 @@ class TopicListItemWidget extends ConsumerWidget {
       onTap!();
       return;
     }
-    Routes.navigateTo(
-      context,
-      "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${topic.subject!}",
-    );
+    Routes.navigateToWithParams(context, Routes.TOPIC_DETAIL, {
+      'tid': '${topic.tid}',
+      'fid': '${topic.fid}',
+      if (topic.subject != null) 'subject': topic.subject!,
+    });
   }
 }

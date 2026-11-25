@@ -83,7 +83,7 @@ class Routes {
     final newUri = uri.replace(queryParameters: mergedQueryParams);
 
     if (clearStack) {
-      context.pushReplacement(newUri.toString(), extra: extra);
+      context.go(newUri.toString(), extra: extra);
       return Future.value();
     } else if (replace) {
       context.replace(newUri.toString(), extra: extra);
@@ -114,10 +114,7 @@ class Routes {
 
   /// 打开图片预览页。[url] 作为查询参数编码，可含中文与 `?`、`&` 等字符。
   static Future openPhotoPreview(BuildContext context, String url) {
-    return navigateToWithParams(context, PHOTO_PREVIEW, {
-      'url': url,
-      'screenWidth': '${MediaQuery.sizeOf(context).width}',
-    });
+    return navigateToWithParams(context, PHOTO_PREVIEW, {'url': url});
   }
 
   /// 简单的页面跳转（无参数）
@@ -328,12 +325,8 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.PHOTO_PREVIEW,
       name: Routes.PHOTO_PREVIEW,
-      builder: (context, state) => PhotoPreviewPage(
-        url: state.uri.queryParameters["url"] ?? "",
-        screenWidth:
-            double.tryParse(state.uri.queryParameters["screenWidth"] ?? "") ??
-            0,
-      ),
+      builder: (context, state) =>
+          PhotoPreviewPage(url: state.uri.queryParameters["url"] ?? ""),
     ),
     GoRoute(
       path: Routes.CONVERSATION_DETAIL,

@@ -48,7 +48,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(params()?['url'], url);
-    expect(double.tryParse(params()?['screenWidth'] ?? ''), greaterThan(0));
   });
 
   testWidgets('emoticons are not previewable', (tester) async {

@@ -69,18 +69,33 @@ class ReadableListPadding extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base =
-        padding ??
-        MediaQuery.paddingOf(context).copyWith(left: 0.0, right: 0.0);
-    return LayoutBuilder(
-      builder: (context, constraints) => builder(
-        context,
-        readableListPadding(
-          constraints.maxWidth,
-          base: base,
-          maxWidth: maxWidth,
+    final explicitPadding = padding;
+    if (explicitPadding != null) {
+      return LayoutBuilder(
+        builder: (context, constraints) => builder(
+          context,
+          readableListPadding(
+            constraints.maxWidth,
+            base: explicitPadding,
+            maxWidth: maxWidth,
+          ),
         ),
-      ),
+      );
+    }
+    final mediaPadding = MediaQuery.paddingOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final inset = math.max(0.0, (constraints.maxWidth - maxWidth) / 2);
+        return builder(
+          context,
+          EdgeInsets.fromLTRB(
+            math.max(inset, mediaPadding.left),
+            mediaPadding.top,
+            math.max(inset, mediaPadding.right),
+            mediaPadding.bottom,
+          ),
+        );
+      },
     );
   }
 }

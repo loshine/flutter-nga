@@ -84,6 +84,26 @@ void main() {
     );
     expect(text.left, content.left);
   });
+
+  testWidgets('shows retry view when loading reply fails', (tester) async {
+    const errorState = TopicReplyState(hasLoaded: true, error: 'network error');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          topicReplyProvider(126)
+              .overrideWith(() => _FakeTopicReplyNotifier(126, errorState)),
+        ],
+        child: const MaterialApp(
+          home: Scaffold(body: ReplyDetailDialog(pid: 126)),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('加载回复失败'), findsOneWidget);
+    expect(find.text('重试'), findsOneWidget);
+  });
 }
 
 class _FakeTopicReplyNotifier extends TopicReplyNotifier {

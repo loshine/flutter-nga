@@ -11,6 +11,8 @@ class TopicReplyState {
   final Set<Group> groupSet;
   final Set<Medal> medalSet;
   final bool isLoading;
+  final bool hasLoaded;
+  final Object? error;
 
   const TopicReplyState({
     this.replyList = const [],
@@ -18,6 +20,8 @@ class TopicReplyState {
     this.groupSet = const {},
     this.medalSet = const {},
     this.isLoading = false,
+    this.hasLoaded = false,
+    this.error,
   });
 
   factory TopicReplyState.initial() {
@@ -38,7 +42,7 @@ class TopicReplyNotifier extends Notifier<TopicReplyState> {
   TopicReplyState build() => TopicReplyState.initial();
 
   Future<TopicReplyState> load() async {
-    state = TopicReplyState(isLoading: true);
+    state = const TopicReplyState(isLoading: true);
     try {
       TopicDetailData data = await Data().topicRepository.getTopicReplies(pid);
       List<Reply> replyList = data.replyList.values.toList();
@@ -51,10 +55,11 @@ class TopicReplyNotifier extends Notifier<TopicReplyState> {
         groupSet: groups,
         medalSet: medals,
         isLoading: false,
+        hasLoaded: true,
       );
       return state;
     } catch (err) {
-      state = TopicReplyState.initial();
+      state = TopicReplyState(isLoading: false, hasLoaded: true, error: err);
       rethrow;
     }
   }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -36,13 +38,16 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
 
     final state = ref.watch(favouriteForumListProvider);
     final forums = state.forums;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final mediaPadding = MediaQuery.paddingOf(context);
 
     final isAppleDesktop = context.isMacDesktopAppleStyle;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= kCompactBreakpoint;
+        final baseHorizontal = isAppleDesktop
+            ? 20.0
+            : (isWide ? Dimen.spacingL : 0.0);
         return Stack(
           children: [
             RefreshIndicator.adaptive(
@@ -57,10 +62,10 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
                 controller: scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(
-                  isAppleDesktop ? 20 : (isWide ? Dimen.spacingL : 0),
+                  math.max(baseHorizontal, mediaPadding.left),
                   isAppleDesktop ? 16 : (isWide ? Dimen.spacingS : 0),
-                  isAppleDesktop ? 20 : (isWide ? Dimen.spacingL : 0),
-                  bottomPadding + (context.isAppleStyle ? 16 : 88),
+                  math.max(baseHorizontal, mediaPadding.right),
+                  mediaPadding.bottom + (context.isAppleStyle ? 16 : 88),
                 ),
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: isAppleDesktop

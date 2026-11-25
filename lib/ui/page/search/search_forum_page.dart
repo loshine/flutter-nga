@@ -143,9 +143,9 @@ class SearchForumPage extends HookConsumerWidget {
   }
 
   void _openForum(BuildContext context, Forum forum) {
-    Routes.navigateTo(
-      context,
-      "${Routes.FORUM_DETAIL}?fid=${forum.fid}&name=${forum.name}",
-    );
+    Routes.navigateToWithParams(context, Routes.FORUM_DETAIL, {
+      'fid': '${forum.fid}',
+      'name': forum.name,
+    });
   }
 }

@@ -31,10 +31,11 @@ class ForumGridItemWidget extends StatelessWidget {
         onTap!();
         return;
       }
-      Routes.navigateTo(
-        context,
-        "${Routes.FORUM_DETAIL}?fid=${forum.fid}&name=${forum.name}&type=${forum.type}",
-      );
+      Routes.navigateToWithParams(context, Routes.FORUM_DETAIL, {
+        'fid': '${forum.fid}',
+        'name': forum.name,
+        'type': '${forum.type}',
+      });
     }
 
     final content = Column(

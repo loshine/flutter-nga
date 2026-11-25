@@ -103,12 +103,15 @@ class AppSegmentedControl<T extends Object> extends StatelessWidget {
     if (context.isAppleStyle) {
       final colorScheme = Theme.of(context).colorScheme;
       final isDark = Theme.of(context).brightness == Brightness.dark;
+      final isHighContrast = MediaQuery.highContrastOf(context);
       final control = CupertinoSlidingSegmentedControl<T>(
         groupValue: selected,
-        backgroundColor: isDark
-            ? const Color(0xFF2C2C2E)
-            : const Color(0xFFE5E5EA),
-        thumbColor: isDark ? const Color(0xFF48484A) : Colors.white,
+        backgroundColor: isHighContrast
+            ? colorScheme.surfaceContainerHighest
+            : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA)),
+        thumbColor: isHighContrast
+            ? colorScheme.surface
+            : (isDark ? const Color(0xFF48484A) : Colors.white),
         onValueChanged: (value) {
           if (value != null) onChanged(value);
         },
@@ -161,16 +164,29 @@ class AppSegmentedControl<T extends Object> extends StatelessWidget {
 
 /// 平台自适应加载指示器。
 class AppActivityIndicator extends StatelessWidget {
-  const AppActivityIndicator({super.key, this.radius = 12, this.strokeWidth});
+  const AppActivityIndicator({
+    super.key,
+    this.radius = 12,
+    this.strokeWidth,
+    this.color,
+  });
 
   final double radius;
   final double? strokeWidth;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     if (context.isAppleStyle) {
-      return CupertinoActivityIndicator(radius: radius);
+      return CupertinoActivityIndicator(radius: radius, color: color);
     }
-    return CircularProgressIndicator(strokeWidth: strokeWidth ?? 4.0);
+    final indicator = CircularProgressIndicator(
+      strokeWidth: strokeWidth ?? (radius <= 10 ? 2.0 : 4.0),
+      color: color,
+    );
+    if (radius != 12) {
+      return SizedBox.square(dimension: radius * 2, child: indicator);
+    }
+    return indicator;
   }
 }

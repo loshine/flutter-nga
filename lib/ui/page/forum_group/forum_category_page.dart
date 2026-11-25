@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -30,7 +32,8 @@ class ForumCategoryPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final collapsedGroups = useState(<int>{});
     final scrollController = useScrollToTopController(scrollToTop);
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final mediaPadding = MediaQuery.paddingOf(context);
+    final bottomPadding = mediaPadding.bottom;
 
     // 只有一个组时组名通常与分类名相同，不再重复展示，也无需折叠
     final showGroupName = category.groups.length > 1;
@@ -46,9 +49,25 @@ class ForumCategoryPage extends HookConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= kCompactBreakpoint;
-        final horizontalPadding = isAppleDesktop
+        final baseGridHorizontal = isAppleDesktop
             ? 20.0
             : (isWide ? Dimen.spacingL : 0.0);
+        final gridLeftPadding = math.max(baseGridHorizontal, mediaPadding.left);
+        final gridRightPadding = math.max(
+          baseGridHorizontal,
+          mediaPadding.right,
+        );
+        final baseHeaderHorizontal = isAppleDesktop
+            ? 20.0
+            : (isWide ? Dimen.spacingXL : Dimen.spacingL);
+        final headerLeftPadding = math.max(
+          baseHeaderHorizontal,
+          mediaPadding.left,
+        );
+        final headerRightPadding = math.max(
+          baseHeaderHorizontal,
+          mediaPadding.right,
+        );
         final gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: isAppleDesktop ? 156 : (isWide ? 136 : 120),
           mainAxisExtent: isAppleDesktop ? 104 : (isWide ? 112 : 108),
@@ -79,9 +98,8 @@ class ForumCategoryPage extends HookConsumerWidget {
                         child: _ForumGroupHeader(
                           group: group,
                           expanded: !collapsedGroups.value.contains(index),
-                          horizontalPadding: isAppleDesktop
-                              ? 20
-                              : (isWide ? Dimen.spacingXL : Dimen.spacingL),
+                          leftPadding: headerLeftPadding,
+                          rightPadding: headerRightPadding,
                           onTap: () => toggleGroup(index),
                         ),
                       ),
@@ -89,9 +107,9 @@ class ForumCategoryPage extends HookConsumerWidget {
                       visible: !collapsedGroups.value.contains(index),
                       sliver: SliverPadding(
                         padding: EdgeInsets.fromLTRB(
-                          horizontalPadding,
+                          gridLeftPadding,
                           isAppleDesktop ? 4 : 0,
-                          horizontalPadding,
+                          gridRightPadding,
                           isAppleDesktop ? 18 : 0,
                         ),
                         sliver: SliverGrid.builder(
@@ -123,13 +141,15 @@ class _ForumGroupHeader extends StatelessWidget {
   const _ForumGroupHeader({
     required this.group,
     required this.expanded,
-    required this.horizontalPadding,
+    required this.leftPadding,
+    required this.rightPadding,
     required this.onTap,
   });
 
   final ForumGroup group;
   final bool expanded;
-  final double horizontalPadding;
+  final double leftPadding;
+  final double rightPadding;
   final VoidCallback onTap;
 
   @override
@@ -145,9 +165,9 @@ class _ForumGroupHeader extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            horizontalPadding,
+            leftPadding,
             isApple ? 14 : 12,
-            horizontalPadding,
+            rightPadding,
             isApple ? 8 : 12,
           ),
           child: Row(

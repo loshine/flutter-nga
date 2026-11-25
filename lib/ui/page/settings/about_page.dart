@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart' show FlutterVersion;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
@@ -17,7 +20,10 @@ final appInfoProvider = FutureProvider<PackageInfo>((ref) async {
 });
 
 class AboutPage extends HookConsumerWidget {
-  const AboutPage({super.key});
+  const AboutPage({super.key, this.embedded = false});
+
+  /// 是否作为大屏双栏设置页的右侧内嵌面板展示
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,6 +33,7 @@ class AboutPage extends HookConsumerWidget {
     final mediaPadding = MediaQuery.paddingOf(context);
 
     return AppScaffold(
+      embedded: embedded,
       title: const Text('关于'),
       body: appInfoAsync.when(
         loading: () => const Center(child: AppActivityIndicator()),
@@ -163,23 +170,7 @@ class AboutPage extends HookConsumerWidget {
                   title: '开源协议与许可',
                   subtitle: 'Apache License 2.0 · 查看第三方开源许可',
                   icon: AppIcons.description(context),
-                  onTap: () => showLicensePage(
-                    context: context,
-                    applicationName: appInfo.appName,
-                    applicationVersion:
-                        '${appInfo.version} (Build ${appInfo.buildNumber})',
-                    applicationIcon: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          'images/launcher/icon_1024.png',
-                          width: 64,
-                          height: 64,
-                        ),
-                      ),
-                    ),
-                  ),
+                  onTap: () => _openLicensePage(context, appInfo),
                 ),
               ],
             ),
@@ -261,6 +252,52 @@ class AboutPage extends HookConsumerWidget {
                 ],
               );
             },
+          );
+        },
+      ),
+    );
+  }
+
+  void _openLicensePage(BuildContext context, PackageInfo appInfo) {
+    final version = '${appInfo.version} (Build ${appInfo.buildNumber})';
+    final appIcon = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.asset(
+          'images/launcher/icon_1024.png',
+          width: 64,
+          height: 64,
+        ),
+      ),
+    );
+    final trafficLightInset = context.macTitlebarInset;
+    if (trafficLightInset <= 0) {
+      showLicensePage(
+        context: context,
+        applicationName: appInfo.appName,
+        applicationVersion: version,
+        applicationIcon: appIcon,
+      );
+      return;
+    }
+    Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute<void>(
+        builder: (licenseContext) {
+          final mediaQuery = MediaQuery.of(licenseContext);
+          final leftInset = math.max(
+            mediaQuery.padding.left,
+            trafficLightInset,
+          );
+          return MediaQuery(
+            data: mediaQuery.copyWith(
+              padding: mediaQuery.padding.copyWith(left: leftInset),
+            ),
+            child: LicensePage(
+              applicationName: appInfo.appName,
+              applicationVersion: version,
+              applicationIcon: appIcon,
+            ),
           );
         },
       ),

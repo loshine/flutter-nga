@@ -138,10 +138,17 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                     width: 0.5,
                   ),
                 ),
-                child: ScaffoldMessenger(
-                  child: SettingsPage(
-                    embedded: true,
-                    onClose: () => Navigator.of(sheetContext).pop(),
+                child: MediaQuery.removePadding(
+                  context: sheetContext,
+                  removeTop: true,
+                  removeBottom: true,
+                  removeLeft: true,
+                  removeRight: true,
+                  child: ScaffoldMessenger(
+                    child: SettingsPage(
+                      embedded: true,
+                      onClose: () => Navigator.of(sheetContext).pop(),
+                    ),
                   ),
                 ),
               ),

@@ -119,11 +119,14 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
     );
   }
 
-  void _quitAll(AccountListNotifier notifier) async {
-    await notifier.quitAll();
-    AppToast.success("成功");
-    if (mounted) {
-      Routes.navigateTo(context, Routes.HOME, clearStack: true);
+  Future<void> _quitAll(AccountListNotifier notifier) async {
+    try {
+      await notifier.quitAll();
+      if (!mounted) return;
+      await notifier.refresh();
+      AppToast.success("已退出所有账号");
+    } catch (err) {
+      AppToast.error(err);
     }
   }
 

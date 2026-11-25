@@ -212,6 +212,10 @@ abstract final class AppIcons {
   static IconData login(BuildContext context) =>
       context.isAppleStyle ? CupertinoIcons.square_arrow_right : Icons.login;
 
+  static IconData download(BuildContext context) => context.isAppleStyle
+      ? CupertinoIcons.arrow_down_to_line
+      : Icons.download_outlined;
+
   /// 将通用组件传入的 Material [IconData] 自动映射为 Apple 风格图标。
   static IconData resolve(BuildContext context, IconData icon) {
     if (!context.isAppleStyle) return icon;
@@ -230,6 +234,16 @@ abstract final class AppIcons {
     if (icon == Icons.notifications_none_outlined ||
         icon == Icons.notifications_outlined) {
       return CupertinoIcons.bell;
+    }
+    if (icon == Icons.notifications_off_outlined) {
+      return CupertinoIcons.bell_slash;
+    }
+    if (icon == Icons.pages) return CupertinoIcons.doc_on_doc;
+    if (icon == Icons.layers) return CupertinoIcons.square_stack_3d_up;
+    if (icon == Icons.whatshot) return CupertinoIcons.flame;
+    if (icon == Icons.image_outlined) return CupertinoIcons.photo;
+    if (icon == Icons.broken_image_outlined) {
+      return CupertinoIcons.exclamationmark_triangle;
     }
     if (icon == Icons.person_outline) return CupertinoIcons.person;
     if (icon == Icons.person_off_outlined) {

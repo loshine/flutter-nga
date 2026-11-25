@@ -367,9 +367,10 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
       onTap!();
       return;
     }
-    Routes.navigateTo(
-      context,
-      "${Routes.TOPIC_DETAIL}?tid=${topicHistory.tid}&fid=${topicHistory.fid}&subject=${topicHistory.subject}",
-    );
+    Routes.navigateToWithParams(context, Routes.TOPIC_DETAIL, {
+      'tid': '${topicHistory.tid}',
+      'fid': '${topicHistory.fid}',
+      'subject': topicHistory.subject,
+    });
   }
 }

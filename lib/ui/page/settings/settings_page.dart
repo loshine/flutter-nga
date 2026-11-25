@@ -6,6 +6,7 @@ import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/settings/user_agent_settings_provider.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
+import 'package:flutter_nga/ui/page/settings/about_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
@@ -20,7 +21,7 @@ import 'package:flutter_nga/ui/widget/user_agent_selection_dialog.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
 
-enum _SettingsDetailPane { account, interface, blocklist }
+enum _SettingsDetailPane { account, interface, blocklist, about }
 
 class SettingsPage extends HookConsumerWidget {
   const SettingsPage({super.key, this.embedded = false, this.onClose});
@@ -47,15 +48,14 @@ class SettingsPage extends HookConsumerWidget {
     return MasterDetailLayout(
       masterBuilder: (context, isTwoPane) => AppScaffold(
         embedded: embedded,
+        leading: onClose != null
+            ? IconButton(
+                tooltip: '关闭',
+                icon: Icon(AppIcons.close(context)),
+                onPressed: onClose,
+              )
+            : null,
         title: const Text("设置"),
-        actions: [
-          if (onClose != null)
-            IconButton(
-              tooltip: '关闭',
-              icon: Icon(AppIcons.close(context)),
-              onPressed: onClose,
-            ),
-        ],
         body: ReadableListPadding(
           padding: EdgeInsets.fromLTRB(
             mediaPadding.left,
@@ -173,6 +173,27 @@ class SettingsPage extends HookConsumerWidget {
                   ),
                 ],
               ),
+              M3SettingsGroup(
+                title: "关于",
+                children: [
+                  M3SettingsTile(
+                    icon: AppIcons.info(context),
+                    title: "关于",
+                    subtitle: "版本信息、相关链接与开源许可",
+                    selected:
+                        isTwoPane &&
+                        selectedPane.value == _SettingsDetailPane.about,
+                    showChevron: !isTwoPane,
+                    onTap: () {
+                      if (isTwoPane) {
+                        selectedPane.value = _SettingsDetailPane.about;
+                      } else {
+                        Routes.navigateTo(context, Routes.ABOUT);
+                      }
+                    },
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -188,6 +209,10 @@ class SettingsPage extends HookConsumerWidget {
         ),
         _SettingsDetailPane.blocklist => const BlocklistSettingsPage(
           key: ValueKey('settings-pane-blocklist'),
+          embedded: true,
+        ),
+        _SettingsDetailPane.about => const AboutPage(
+          key: ValueKey('settings-pane-about'),
           embedded: true,
         ),
       },
