@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -13,11 +14,11 @@ import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/route.dart';
 
-/// NGA 登录页（`nuke.php?__lib=login`）外层页面把 `body` 与登录 iframe `#iff`
-/// 限宽 350px 并居中、背景为灰色；覆盖为 100% 宽并改用表单背景色，让表单撑满屏幕。
+/// 移动端登录页样式：NGA 登录页（`nuke.php?__lib=login`）外层页面把 `body` 与登录 iframe `#iff`
+/// 限宽 350px 并居中、背景为灰色；在移动端覆盖为 100% 宽并改用表单背景色，让表单撑满屏幕。
 /// 内页按自身宽度计算字号，须在 iframe 加载前生效，因此于文档开始时注入。
 /// 同时在 [_loginPagePatchScript] 完成切换前隐藏 iframe，避免闪现扫码界面。
-const _loginPageStyleScript = r'''
+const _mobileLoginPageStyleScript = r'''
 (function () {
   if (!/[?&]__lib=login(&|$)/.test(location.search)) return;
   var style = document.createElement('style');
@@ -28,6 +29,23 @@ const _loginPageStyleScript = r'''
   (document.head || document.documentElement).appendChild(style);
 })();
 ''';
+
+/// 桌面端登录页样式：保持 NGA 网页原生的居中表单尺寸与背景，不强行拉满窗口宽度，
+/// 仅在切换完成前隐藏 iframe 避免闪现。
+const _desktopLoginPageStyleScript = r'''
+(function () {
+  if (!/[?&]__lib=login(&|$)/.test(location.search)) return;
+  var style = document.createElement('style');
+  style.textContent = '#iff:not([data-fnga-ready]) { visibility: hidden; }';
+  (document.head || document.documentElement).appendChild(style);
+})();
+''';
+
+bool get _isDesktopLoginHost =>
+    !kIsWeb &&
+    (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux);
 
 /// 调整 NGA 登录页的交互，于主框架 DOM 解析完成时注入：
 ///
@@ -196,7 +214,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ),
         initialUserScripts: UnmodifiableListView([
           UserScript(
-            source: _loginPageStyleScript,
+            source: _isDesktopLoginHost
+                ? _desktopLoginPageStyleScript
+                : _mobileLoginPageStyleScript,
             injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
           ),
           UserScript(
