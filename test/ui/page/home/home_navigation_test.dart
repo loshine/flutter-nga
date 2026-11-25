@@ -197,18 +197,18 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(NavigationRail),
-          matching: find.byTooltip('添加自定义版面'),
+          matching: find.byTooltip('添加自定义版块'),
         ),
         findsNothing,
       );
       expect(
         find.descendant(
           of: find.byType(Scaffold),
-          matching: find.byTooltip('添加自定义版面'),
+          matching: find.byTooltip('添加自定义版块'),
         ),
         findsOneWidget,
       );
-      final fabRect = tester.getRect(find.byTooltip('添加自定义版面'));
+      final fabRect = tester.getRect(find.byTooltip('添加自定义版块'));
       expect(fabRect.right, greaterThan(500));
       expect(fabRect.bottom, greaterThan(600));
     },
@@ -255,13 +255,13 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(NavigationDrawer),
-          matching: find.byTooltip('添加自定义版面'),
+          matching: find.byTooltip('添加自定义版块'),
         ),
         findsNothing,
       );
       final fabFinder = find.descendant(
         of: find.byType(Scaffold),
-        matching: find.byTooltip('添加自定义版面'),
+        matching: find.byTooltip('添加自定义版块'),
       );
       expect(fabFinder, findsOneWidget);
       final fabRect = tester.getRect(fabFinder);
@@ -311,7 +311,7 @@ void main() {
       expect(find.byType(NavigationBar), findsNothing);
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(find.byType(LiquidGlassSurface), findsWidgets);
-      expect(find.byTooltip('添加自定义版面'), findsOneWidget);
+      expect(find.byTooltip('添加自定义版块'), findsOneWidget);
       expect(find.text('版块'), findsOneWidget);
       expect(find.text('收藏'), findsOneWidget);
       expect(find.text('消息'), findsOneWidget);
@@ -337,7 +337,18 @@ void main() {
       expect(find.text('浏览历史'), findsOneWidget);
       expect(find.text('短消息'), findsOneWidget);
       expect(find.text('提醒信息'), findsOneWidget);
+      expect(find.text('搜索…'), findsOneWidget);
+      expect(find.byTooltip('添加自定义版块'), findsOneWidget);
       expect(find.byTooltip('收起侧边栏'), findsOneWidget);
+
+      // 点击添加自定义版块按钮可打开新版弹窗
+      await tester.tap(find.byTooltip('添加自定义版块'));
+      await tester.pumpAndSettle();
+      expect(find.text('添加自定义版块'), findsOneWidget);
+      expect(find.text('版块 ID (fid)'), findsOneWidget);
+      expect(find.text('版块名称'), findsOneWidget);
+      await tester.tap(find.text('取消'));
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byTooltip('收起侧边栏'));
       await tester.pumpAndSettle();

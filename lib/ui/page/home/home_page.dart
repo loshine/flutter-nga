@@ -236,10 +236,10 @@ class _HomePageContent extends HookConsumerWidget {
     final fabVisible = index == 0 && ref.watch(forumGroupFabVisibleProvider);
     return AppPrimaryAction(
       key: const ValueKey('home_fab'),
-      tooltip: '添加自定义版面',
+      tooltip: '添加自定义版块',
       visible: fabVisible,
       icon: const Icon(Icons.add),
-      appleIcon: Icon(AppIcons.add(context)),
+      appleIcon: Icon(AppIcons.addForum(context)),
       onPressed: () => _openCustomForumDialog(context),
     );
   }

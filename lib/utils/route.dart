@@ -285,13 +285,18 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.SEARCH,
       name: Routes.SEARCH,
-      builder: (context, state) {
-        final fid = state.uri.queryParameters["fid"];
-        if (fid != null && fid.isNotEmpty) {
-          return SearchPage(fid: int.tryParse(fid) ?? 0);
-        } else {
-          return SearchPage();
-        }
+      pageBuilder: (context, state) {
+        final fidStr = state.uri.queryParameters["fid"];
+        final fid = fidStr != null && fidStr.isNotEmpty
+            ? int.tryParse(fidStr) ?? 0
+            : null;
+        return _AdaptiveModalPage<Object?>(
+          key: state.pageKey,
+          maxWidth: 560,
+          maxHeight: 420,
+          shrinkWrapHeight: true,
+          builder: (asDialog) => SearchPage(fid: fid, asDialog: asDialog),
+        );
       },
     ),
     GoRoute(
@@ -401,12 +406,14 @@ class _AdaptiveModalPage<T> extends Page<T> {
     required this.builder,
     this.maxWidth = 680,
     this.maxHeight = 620,
+    this.shrinkWrapHeight = false,
     super.key,
   });
 
   final Widget Function(bool asDialog) builder;
   final double maxWidth;
   final double maxHeight;
+  final bool shrinkWrapHeight;
 
   @override
   Route<T> createRoute(BuildContext context) {
@@ -453,7 +460,12 @@ class _AdaptiveModalPage<T> extends Page<T> {
                   context: dialogContext,
                   removeTop: !isCompact,
                   removeBottom: !isCompact,
-                  child: child,
+                  child: shrinkWrapHeight
+                      ? Material(
+                          type: MaterialType.transparency,
+                          child: SingleChildScrollView(child: child),
+                        )
+                      : child,
                 ),
               ),
             ),

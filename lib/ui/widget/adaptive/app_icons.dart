@@ -37,6 +37,13 @@ abstract final class AppIcons {
   static IconData add(BuildContext context) =>
       context.isAppleStyle ? CupertinoIcons.plus : Icons.add;
 
+  static IconData addForum(BuildContext context) => context.isAppleStyle
+      ? CupertinoIcons.rectangle_stack_badge_plus
+      : Icons.create_new_folder_outlined;
+
+  static IconData tag(BuildContext context) =>
+      context.isAppleStyle ? CupertinoIcons.number : Icons.tag;
+
   static IconData edit(BuildContext context) =>
       context.isAppleStyle ? CupertinoIcons.square_pencil : Icons.edit;
 

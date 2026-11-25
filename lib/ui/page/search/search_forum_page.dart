@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/search/search_forum_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
@@ -42,7 +43,7 @@ class SearchForumPage extends HookConsumerWidget {
     useInitialRefresh(refreshController);
 
     return AppScaffold(
-      title: Text("搜索板块:$keyword"),
+      title: Text("搜索版块: $keyword"),
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
@@ -102,7 +103,11 @@ class SearchForumPage extends HookConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              Icon(Icons.forum_outlined, size: 20, color: colorScheme.primary),
+              Icon(
+                AppIcons.forum(context),
+                size: 20,
+                color: colorScheme.primary,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -113,8 +118,8 @@ class SearchForumPage extends HookConsumerWidget {
                 ),
               ),
               Icon(
-                Icons.chevron_right,
-                size: 20,
+                AppIcons.chevronRight(context),
+                size: 18,
                 color: colorScheme.onSurfaceVariant,
               ),
             ],

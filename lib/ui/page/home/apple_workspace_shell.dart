@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cupertino_ui/cupertino_ui.dart'
-    show CupertinoIcons, CupertinoSearchTextField;
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -27,7 +26,6 @@ import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
-import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -76,7 +74,6 @@ class AppleWorkspaceShell extends HookConsumerWidget {
     final sidebarFocusNode = useFocusScopeNode();
     final favouritesExpanded = useState(true);
     final allForumsTabIndex = useState(0);
-    final searchController = useTextEditingController();
     final destination = useState<_WorkspaceDestination>(
       const _AllForumsDestination(),
     );
@@ -183,23 +180,11 @@ class AppleWorkspaceShell extends HookConsumerWidget {
       return () => controller.unregister(dispatch);
     }, const []);
 
-    void submitQuickSearch(String raw) {
-      final keyword = raw.trim();
-      if (keyword.isEmpty) {
-        Routes.navigateTo(context, Routes.SEARCH);
-        return;
-      }
-      Routes.navigateTo(
-        context,
-        '${Routes.SEARCH_TOPIC_LIST}?keyword=${code_utils.encodeParam(keyword)}&content=0',
-      );
-    }
-
     Future<void> confirmRemoveFavouriteForum(Forum forum) async {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (_) => M3ConfirmDialog(
-          title: '移除收藏版面',
+          title: '移除收藏版块',
           content: '确定从收藏版块中移除「${forum.name}」吗？',
           confirmText: '移除',
           destructive: true,
@@ -408,9 +393,11 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                                                     ),
                                                   const Spacer(),
                                                   IconButton(
-                                                    tooltip: '添加自定义版面',
+                                                    tooltip: '添加自定义版块',
                                                     icon: Icon(
-                                                      AppIcons.add(context),
+                                                      AppIcons.addForum(
+                                                        context,
+                                                      ),
                                                       size: 16,
                                                       color: colorScheme
                                                           .onSurfaceVariant,
@@ -438,7 +425,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                                               ),
                                             ),
                                           ),
-                                          // 紧凑内嵌搜索框
+                                          // 侧边栏搜索触发栏：点击直达完整搜索页（支持主题/正文/版块/用户）
                                           Padding(
                                             padding: const EdgeInsets.fromLTRB(
                                               12,
@@ -446,32 +433,10 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                                               12,
                                               10,
                                             ),
-                                            child: SizedBox(
-                                              height: 30,
-                                              child: CupertinoSearchTextField(
-                                                controller: searchController,
-                                                placeholder: '搜索主题…',
-                                                style: TextStyle(
-                                                  fontSize: 13,
-                                                  color: colorScheme.onSurface,
-                                                ),
-                                                placeholderStyle: TextStyle(
-                                                  fontSize: 13,
-                                                  color: colorScheme
-                                                      .onSurfaceVariant
-                                                      .withValues(alpha: 0.75),
-                                                ),
-                                                prefixInsets:
-                                                    const EdgeInsetsDirectional.fromSTEB(
-                                                      7,
-                                                      0,
-                                                      4,
-                                                      0,
-                                                    ),
-                                                itemSize: 15,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                onSubmitted: submitQuickSearch,
+                                            child: _SidebarSearchButton(
+                                              onTap: () => Routes.navigateTo(
+                                                context,
+                                                Routes.SEARCH,
                                               ),
                                             ),
                                           ),
@@ -947,6 +912,68 @@ class _SidebarRow extends StatelessWidget {
                           ),
                         ),
                       ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarSearchButton extends StatelessWidget {
+  const _SidebarSearchButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Semantics(
+      button: true,
+      label: '搜索主题、版块、用户',
+      child: Tooltip(
+        message: '搜索主题、版块、用户',
+        child: Material(
+          color: colorScheme.surfaceContainerHighest.withValues(
+            alpha: isDark ? 0.55 : 0.72,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              height: 30,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    Icon(
+                      AppIcons.search(context),
+                      size: 14,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '搜索…',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.85,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
