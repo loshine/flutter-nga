@@ -1,6 +1,8 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
@@ -22,20 +24,24 @@ class BlockModeSelectionDialog extends ConsumerWidget {
     final notifier = ref.read(blocklistSettingsProvider.notifier);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     final body = Padding(
       padding: EdgeInsets.fromLTRB(0, embedded ? 4 : 24, 0, 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
               "选择屏蔽模式",
-              style: textTheme.headlineSmall?.copyWith(
-                color: colorScheme.onSurface,
-              ),
+              textAlign: isApple ? TextAlign.center : TextAlign.start,
+              style: (isApple ? textTheme.titleMedium : textTheme.headlineSmall)
+                  ?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: isApple ? FontWeight.w600 : null,
+                  ),
             ),
           ),
           const SizedBox(height: 12),
@@ -97,11 +103,16 @@ class _BlockModeOption extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Material(
-        color: selected ? colorScheme.secondaryContainer : Colors.transparent,
+        color: selected
+            ? (isApple
+                  ? colorScheme.primary.withValues(alpha: 0.12)
+                  : colorScheme.secondaryContainer)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(Dimen.radiusM),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -114,14 +125,24 @@ class _BlockModeOption extends StatelessWidget {
                   child: Text(
                     title,
                     style: textTheme.bodyLarge?.copyWith(
+                      fontSize: isApple ? 15 : null,
+                      fontWeight: isApple && selected ? FontWeight.w600 : null,
                       color: selected
-                          ? colorScheme.onSecondaryContainer
+                          ? (isApple
+                                ? colorScheme.primary
+                                : colorScheme.onSecondaryContainer)
                           : colorScheme.onSurface,
                     ),
                   ),
                 ),
                 if (selected)
-                  Icon(Icons.check, color: colorScheme.onSecondaryContainer),
+                  Icon(
+                    AppIcons.check(context),
+                    size: isApple ? 18 : 24,
+                    color: isApple
+                        ? colorScheme.primary
+                        : colorScheme.onSecondaryContainer,
+                  ),
               ],
             ),
           ),

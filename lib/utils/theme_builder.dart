@@ -369,9 +369,25 @@ class ThemeBuilder {
         ? const VisualDensity(horizontal: -2, vertical: -2)
         : VisualDensity.standard;
 
+    final appleButtonShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(isMacDesktop ? 8 : 10),
+    );
+    final shapeStyle = ButtonStyle(
+      shape: WidgetStatePropertyAll(appleButtonShape),
+    );
+
     return base.copyWith(
       colorScheme: colorScheme,
       visualDensity: density,
+      filledButtonTheme: FilledButtonThemeData(
+        style: base.filledButtonTheme.style?.merge(shapeStyle) ?? shapeStyle,
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: base.outlinedButtonTheme.style?.merge(shapeStyle) ?? shapeStyle,
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: base.textButtonTheme.style?.merge(shapeStyle) ?? shapeStyle,
+      ),
       cupertinoOverrideTheme: buildCupertinoTheme(
         colorScheme,
         isMacDesktop: isMacDesktop,

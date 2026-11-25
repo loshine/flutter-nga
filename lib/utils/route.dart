@@ -175,7 +175,13 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.LOGIN,
       name: Routes.LOGIN,
-      builder: (context, state) => LoginPage(),
+      pageBuilder: (context, state) => _AdaptiveModalPage<Object?>(
+        key: state.pageKey,
+        maxWidth: 520,
+        maxHeight: 640,
+        barrierDismissible: false,
+        builder: (asDialog) => LoginPage(asDialog: asDialog),
+      ),
     ),
     GoRoute(
       path: Routes.FORUM_DETAIL,
@@ -400,6 +406,7 @@ class _AdaptiveModalPage<T> extends Page<T> {
     this.maxWidth = 680,
     this.maxHeight = 620,
     this.shrinkWrapHeight = false,
+    this.barrierDismissible = true,
     super.key,
   });
 
@@ -407,6 +414,7 @@ class _AdaptiveModalPage<T> extends Page<T> {
   final double maxWidth;
   final double maxHeight;
   final bool shrinkWrapHeight;
+  final bool barrierDismissible;
 
   @override
   Route<T> createRoute(BuildContext context) {
@@ -423,7 +431,7 @@ class _AdaptiveModalPage<T> extends Page<T> {
     return DialogRoute<T>(
       context: context,
       settings: this,
-      barrierDismissible: true,
+      barrierDismissible: barrierDismissible,
       builder: (dialogContext) {
         final colorScheme = Theme.of(dialogContext).colorScheme;
         final isCompact = MediaQuery.sizeOf(dialogContext).width < 600;

@@ -17,6 +17,7 @@ import 'package:flutter_nga/providers/notification/notification_list_provider.da
 import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
@@ -196,7 +197,10 @@ const _loginPagePatchScript = r'''
 ''';
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key, this.asDialog = false});
+
+  /// 是否作为桌面居中模态弹窗展示
+  final bool asDialog;
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
@@ -204,6 +208,7 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   InAppWebViewController? _webViewController;
+  bool _isLoading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -228,87 +233,120 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _buildScaffold() {
+    final isApple = context.isAppleStyle;
     return AppScaffold(
+      embedded: widget.asDialog,
       leading: IconButton(
-        tooltip: '返回',
-        icon: Icon(AppIcons.back(context)),
-        onPressed: _handleBack,
+        tooltip: widget.asDialog ? '关闭' : '返回',
+        icon: Icon(
+          widget.asDialog ? AppIcons.close(context) : AppIcons.back(context),
+        ),
+        onPressed: widget.asDialog ? () => Routes.pop(context) : _handleBack,
       ),
       title: const Text("登录"),
       actions: <Widget>[
         IconButton(
           tooltip: "导入 Cookies",
           onPressed: _showImportCookiesDialog,
-          icon: const Icon(Icons.cookie_outlined),
+          icon: Icon(
+            isApple ? CupertinoIcons.doc_on_clipboard : Icons.cookie_outlined,
+          ),
         ),
       ],
       body: ColoredBox(
         color: _loginFormBgColor,
-        child: InAppWebView(
-          initialSettings: InAppWebViewSettings(transparentBackground: true),
-          initialUrlRequest: URLRequest(
-            url: WebUri.uri(
-              Uri.https(Data().domain, "nuke.php", {
-                '__lib': 'login',
-                '__act': 'account',
-                'login': null,
-              }),
-            ),
-          ),
-          initialUserScripts: UnmodifiableListView([
-            UserScript(
-              source: _isDesktopLoginHost
-                  ? _desktopLoginPageStyleScript
-                  : _mobileLoginPageStyleScript,
-              injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
-            ),
-            UserScript(
-              source: _loginPagePatchScript,
-              injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
-            ),
-          ]),
-          onWebViewCreated: (controller) {
-            _webViewController = controller;
-            controller.addJavaScriptHandler(
-              handlerName: 'pickOption',
-              callback: (args) => _pickOption(
-                title: args[0] as String,
-                options: [for (final option in args[1] as List) '$option'],
-                selectedIndex: args[2] as int,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            InAppWebView(
+              initialSettings: InAppWebViewSettings(
+                transparentBackground: true,
               ),
-            );
-          },
-          onJsAlert: (controller, request) async {
-            await _showWebMessage(request.message ?? '');
-            return JsAlertResponse(
-              handledByClient: true,
-              action: JsAlertResponseAction.CONFIRM,
-            );
-          },
-          onJsConfirm: (controller, request) async {
-            final confirmed = await _showWebMessage(
-              request.message ?? '',
-              cancelable: true,
-            );
-            return JsConfirmResponse(
-              handledByClient: true,
-              action: confirmed
-                  ? JsConfirmResponseAction.CONFIRM
-                  : JsConfirmResponseAction.CANCEL,
-            );
-          },
-          onConsoleMessage:
-              (
-                InAppWebViewController controller,
-                ConsoleMessage consoleMessage,
-              ) {
-                if (consoleMessage.message.startsWith("loginSuccess :")) {
-                  final cookiesJson = consoleMessage.message.substring(
-                    "loginSuccess : ".length,
-                  );
-                  _processCookieJson(cookiesJson);
+              initialUrlRequest: URLRequest(
+                url: WebUri.uri(
+                  Uri.https(Data().domain, "nuke.php", {
+                    '__lib': 'login',
+                    '__act': 'account',
+                    'login': null,
+                  }),
+                ),
+              ),
+              initialUserScripts: UnmodifiableListView([
+                UserScript(
+                  source: _isDesktopLoginHost
+                      ? _desktopLoginPageStyleScript
+                      : _mobileLoginPageStyleScript,
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                ),
+                UserScript(
+                  source: _loginPagePatchScript,
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
+                ),
+              ]),
+              onWebViewCreated: (controller) {
+                _webViewController = controller;
+                controller.addJavaScriptHandler(
+                  handlerName: 'pickOption',
+                  callback: (args) => _pickOption(
+                    title: args[0] as String,
+                    options: [for (final option in args[1] as List) '$option'],
+                    selectedIndex: args[2] as int,
+                  ),
+                );
+              },
+              onLoadStop: (_, _) {
+                if (mounted && _isLoading) {
+                  setState(() => _isLoading = false);
                 }
               },
+              onReceivedError: (_, _, _) {
+                if (mounted && _isLoading) {
+                  setState(() => _isLoading = false);
+                }
+              },
+              onReceivedHttpError: (_, _, _) {
+                if (mounted && _isLoading) {
+                  setState(() => _isLoading = false);
+                }
+              },
+              onJsAlert: (controller, request) async {
+                await _showWebMessage(request.message ?? '');
+                return JsAlertResponse(
+                  handledByClient: true,
+                  action: JsAlertResponseAction.CONFIRM,
+                );
+              },
+              onJsConfirm: (controller, request) async {
+                final confirmed = await _showWebMessage(
+                  request.message ?? '',
+                  cancelable: true,
+                );
+                return JsConfirmResponse(
+                  handledByClient: true,
+                  action: confirmed
+                      ? JsConfirmResponseAction.CONFIRM
+                      : JsConfirmResponseAction.CANCEL,
+                );
+              },
+              onConsoleMessage:
+                  (
+                    InAppWebViewController controller,
+                    ConsoleMessage consoleMessage,
+                  ) {
+                    if (consoleMessage.message.startsWith("loginSuccess :")) {
+                      final cookiesJson = consoleMessage.message.substring(
+                        "loginSuccess : ".length,
+                      );
+                      _processCookieJson(cookiesJson);
+                    }
+                  },
+            ),
+            if (_isLoading)
+              const ColoredBox(
+                color: _loginFormBgColor,
+                child: Center(child: AppActivityIndicator()),
+              ),
+          ],
         ),
       ),
     );

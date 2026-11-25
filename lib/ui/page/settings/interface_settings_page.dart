@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
@@ -97,12 +98,22 @@ class _TypographyPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      padding: EdgeInsets.fromLTRB(isApple ? 16 : 12, 8, isApple ? 16 : 12, 4),
       child: Material(
-        color: colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(Dimen.radiusL),
+        color: isApple
+            ? colorScheme.surfaceContainerLow
+            : colorScheme.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            isApple ? Dimen.radiusM : Dimen.radiusL,
+          ),
+          side: isApple
+              ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
+              : BorderSide.none,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(Dimen.spacingL),
           child: Column(
@@ -192,6 +203,7 @@ class _SliderSettingItem extends StatelessWidget {
                     Text(
                       title,
                       style: textTheme.bodyLarge?.copyWith(
+                        fontSize: context.isAppleStyle ? 15 : null,
                         color: colorScheme.onSurface,
                       ),
                     ),

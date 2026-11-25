@@ -24,8 +24,9 @@ import 'package:flutter_nga/ui/widget/username_text.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
-import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/haptics.dart';
+import 'package:flutter_nga/utils/motion.dart';
+import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
 import 'package:flutter_nga/utils/nga_links.dart';
 import 'package:flutter_nga/utils/parser/plain_text.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -203,27 +204,42 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (context.isMacDesktopAppleStyle &&
-                                  _hovered) ...[
-                                IconButton(
-                                  tooltip: '引用',
-                                  icon: const Icon(
-                                    CupertinoIcons.quote_bubble,
-                                    size: 15,
+                              if (context.isMacDesktopAppleStyle)
+                                IgnorePointer(
+                                  ignoring: !_hovered,
+                                  child: AnimatedOpacity(
+                                    opacity: _hovered ? 1.0 : 0.0,
+                                    duration: Motion.resolveDuration(
+                                      context,
+                                      Motion.durationShort2,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          tooltip: '引用',
+                                          icon: const Icon(
+                                            CupertinoIcons.quote_bubble,
+                                            size: 15,
+                                          ),
+                                          onPressed: () => _onMenuSelected(
+                                            ReplyMenuAction.quote,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          tooltip: '回复',
+                                          icon: const Icon(
+                                            CupertinoIcons.reply,
+                                            size: 15,
+                                          ),
+                                          onPressed: () => _onMenuSelected(
+                                            ReplyMenuAction.reply,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  onPressed: () =>
-                                      _onMenuSelected(ReplyMenuAction.quote),
                                 ),
-                                IconButton(
-                                  tooltip: '回复',
-                                  icon: const Icon(
-                                    CupertinoIcons.reply,
-                                    size: 15,
-                                  ),
-                                  onPressed: () =>
-                                      _onMenuSelected(ReplyMenuAction.reply),
-                                ),
-                              ],
                               Builder(
                                 builder: (btnContext) => IconButton(
                                   tooltip: '楼层操作',
@@ -712,7 +728,7 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
               child: Row(
                 children: [
                   Icon(
-                    Icons.chat_bubble_outline,
+                    AppIcons.reply(context),
                     size: 16,
                     color: colorScheme.primary,
                   ),
@@ -729,7 +745,15 @@ class _TopicReplyItemState extends ConsumerState<TopicReplyItemWidget> {
             ),
             for (final (index, (comment, mode)) in comments.indexed) ...[
               if (index > 0)
-                const Divider(height: 1, indent: 12, endIndent: 12),
+                Divider(
+                  height: context.isAppleStyle ? 0.5 : 1,
+                  thickness: context.isAppleStyle ? 0.5 : 1,
+                  indent: 12,
+                  endIndent: 12,
+                  color: context.isAppleStyle
+                      ? colorScheme.outlineVariant
+                      : null,
+                ),
               BlockedContent(
                 mode: mode,
                 child: TopicReplyCommentItemWidget(

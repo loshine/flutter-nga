@@ -4,9 +4,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/message/message_block_list_provider.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -22,7 +24,8 @@ class MessageBlockListPage extends HookConsumerWidget {
     final loaded = useState(false);
     final users = ref.watch(messageBlockListProvider);
     final notifier = ref.read(messageBlockListProvider.notifier);
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isApple = context.isAppleStyle;
 
     Future<void> onRefresh() async {
       try {
@@ -45,12 +48,8 @@ class MessageBlockListPage extends HookConsumerWidget {
           callback: (text) async {
             final input = splitMessageUsers(text);
             if (input.isEmpty) return;
-            try {
-              final message = await notifier.add(input);
-              AppToast.success(message ?? '已屏蔽');
-            } catch (err) {
-              AppToast.error(err);
-            }
+            final message = await notifier.add(input);
+            AppToast.success(message ?? '已屏蔽');
           },
         ),
       );
@@ -64,31 +63,31 @@ class MessageBlockListPage extends HookConsumerWidget {
         controller: refreshController,
         onRefresh: onRefresh,
         child: users.isEmpty
-            ? ReadableListPadding(
-                builder: (context, padding) => ListView(
-                  padding: padding,
-                  children: [
-                    if (loaded.value)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 120,
-                          horizontal: 32,
-                        ),
-                        child: Text(
-                          '未屏蔽任何用户\n被屏蔽的用户无法与你发起或回复对话',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+            ? CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  if (loaded.value)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: ListStatusView(
+                        icon: Icons.person_off_outlined,
+                        message: '未屏蔽任何用户\n被屏蔽的用户无法与你发起或回复对话',
                       ),
-                  ],
-                ),
+                    ),
+                ],
               )
             : ReadableListPadding(
-                builder: (context, padding) => ListView.builder(
+                builder: (context, padding) => ListView.separated(
                   padding: padding,
                   itemCount: users.length,
+                  separatorBuilder: (_, _) => Divider(
+                    height: isApple ? 0.5 : 1,
+                    thickness: isApple ? 0.5 : 1,
+                    indent: 16,
+                    color: isApple
+                        ? colorScheme.outlineVariant
+                        : colorScheme.surfaceContainerHighest,
+                  ),
                   itemBuilder: (context, index) {
                     final user = users[index];
                     return ListTile(

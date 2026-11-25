@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/user/user_info_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
@@ -169,11 +170,12 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                   runSpacing: Dimen.spacingXS,
                   children: [
                     ActionChip(
-                      avatar: const Icon(Icons.forum_outlined, size: 16),
+                      avatar: Icon(AppIcons.forum(context), size: 16),
                       label: Text(entry.value),
-                      onPressed: () => Routes.navigateTo(
+                      onPressed: () => Routes.navigateToWithParams(
                         context,
-                        "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
+                        Routes.FORUM_DETAIL,
+                        {'fid': '${entry.key}', 'name': entry.value},
                       ),
                     ),
                   ],
@@ -200,11 +202,12 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
             children: [
               for (final entry in userInfo.moderatorForums!.entries)
                 ActionChip(
-                  avatar: const Icon(Icons.shield_outlined, size: 16),
+                  avatar: Icon(AppIcons.shield(context), size: 16),
                   label: Text(entry.value),
-                  onPressed: () => Routes.navigateTo(
+                  onPressed: () => Routes.navigateToWithParams(
                     context,
-                    "${Routes.FORUM_DETAIL}?fid=${entry.key}&name=${code_utils.encodeParam(entry.value)}",
+                    Routes.FORUM_DETAIL,
+                    {'fid': '${entry.key}', 'name': entry.value},
                   ),
                 ),
             ],
@@ -235,12 +238,22 @@ class _HeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      padding: EdgeInsets.fromLTRB(isApple ? 16 : 12, 8, isApple ? 16 : 12, 8),
       child: Material(
-        color: colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(Dimen.radiusL),
+        color: isApple
+            ? colorScheme.surfaceContainerLow
+            : colorScheme.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            isApple ? Dimen.radiusM : Dimen.radiusL,
+          ),
+          side: isApple
+              ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
+              : BorderSide.none,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(Dimen.spacingL),
           child: Column(
@@ -416,42 +429,59 @@ class _EntryGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: isApple
+              ? const EdgeInsets.fromLTRB(28, 18, 16, 6)
+              : const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
             title,
-            style: textTheme.titleSmall?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
+            style: isApple
+                ? textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                  )
+                : textTheme.titleSmall?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(horizontal: isApple ? 16 : 12),
           child: Material(
             color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(Dimen.radiusL),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                isApple ? Dimen.radiusM : Dimen.radiusL,
+              ),
+              side: isApple
+                  ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
+                  : BorderSide.none,
+            ),
             clipBehavior: Clip.antiAlias,
-            child: Column(children: _buildItems(colorScheme)),
+            child: Column(children: _buildItems(colorScheme, isApple)),
           ),
         ),
       ],
     );
   }
 
-  List<Widget> _buildItems(ColorScheme colorScheme) {
+  List<Widget> _buildItems(ColorScheme colorScheme, bool isApple) {
     final items = <Widget>[];
     for (var i = 0; i < children.length; i++) {
       if (i > 0) {
         items.add(
           Divider(
-            height: 1,
-            indent: 72,
-            endIndent: 16,
+            height: isApple ? 0.5 : 1,
+            thickness: isApple ? 0.5 : 1,
+            indent: isApple ? 58 : 72,
+            endIndent: isApple ? 0 : 16,
             color: colorScheme.outlineVariant,
           ),
         );
@@ -482,6 +512,7 @@ class _EntryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
     final containerColors = [
       colorScheme.primaryContainer,
       colorScheme.secondaryContainer,
@@ -497,23 +528,30 @@ class _EntryTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: isApple ? 10 : 12,
+        ),
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: isApple ? 30 : 40,
+              height: isApple ? 30 : 40,
               decoration: BoxDecoration(
-                color: containerColors[index],
-                borderRadius: BorderRadius.circular(Dimen.radiusFull),
+                color: isApple
+                    ? colorScheme.primary.withValues(alpha: 0.14)
+                    : containerColors[index],
+                borderRadius: BorderRadius.circular(
+                  isApple ? 7 : Dimen.radiusFull,
+                ),
               ),
               child: Icon(
                 icon,
-                color: contentColors[index],
-                size: Dimen.iconSmall,
+                color: isApple ? colorScheme.primary : contentColors[index],
+                size: isApple ? 17 : Dimen.iconSmall,
               ),
             ),
-            const SizedBox(width: Dimen.spacingL),
+            SizedBox(width: isApple ? 12 : Dimen.spacingL),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -521,6 +559,7 @@ class _EntryTile extends StatelessWidget {
                   Text(
                     title,
                     style: textTheme.bodyLarge?.copyWith(
+                      fontSize: isApple ? 15 : null,
                       color: colorScheme.onSurface,
                     ),
                   ),
@@ -536,7 +575,10 @@ class _EntryTile extends StatelessWidget {
             ),
             Icon(
               AppIcons.chevronRight(context),
-              color: colorScheme.onSurfaceVariant,
+              size: isApple ? 16 : 24,
+              color: colorScheme.onSurfaceVariant.withValues(
+                alpha: isApple ? 0.65 : 1.0,
+              ),
             ),
           ],
         ),
@@ -545,7 +587,7 @@ class _EntryTile extends StatelessWidget {
   }
 }
 
-/// 信息分组卡片：M3 圆角卡片 + 分组标题与可选说明
+/// 信息分组卡片：M3 / Apple 自适应圆角卡片 + 分组标题与可选说明
 class _SectionCard extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -561,12 +603,20 @@ class _SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      padding: EdgeInsets.fromLTRB(isApple ? 16 : 12, 8, isApple ? 16 : 12, 8),
       child: Material(
         color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(Dimen.radiusL),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            isApple ? Dimen.radiusM : Dimen.radiusL,
+          ),
+          side: isApple
+              ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
+              : BorderSide.none,
+        ),
         child: SizedBox(
           width: double.infinity,
           child: Padding(
@@ -576,10 +626,15 @@ class _SectionCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: textTheme.titleSmall?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: isApple
+                      ? textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        )
+                      : textTheme.titleSmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: Dimen.spacingXS),

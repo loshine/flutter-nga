@@ -1,13 +1,15 @@
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/reply_detail_dialog.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 
-/// 单条提醒：点击跳转到关联的主题 / 回复 / 对话 / 版面，长按弹出更多操作。
+/// 单条提醒：点击跳转到关联的主题 / 回复 / 对话 / 版块，长按弹出更多操作。
 class NotificationItemWidget extends StatelessWidget {
   final NgaNotification notification;
 
@@ -32,95 +34,213 @@ class NotificationItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
+    final isMac = context.isMacDesktopAppleStyle;
     final description = notification.describe();
     final target = notification.target;
     final menuActions = _menuActions(context);
 
-    return GestureDetector(
-      onSecondaryTapDown: menuActions.isEmpty
-          ? null
-          : (details) => _showMenu(
-              context,
-              menuActions,
-              globalPosition: details.globalPosition,
+    final handleTap = target == null
+        ? null
+        : (onTap ?? () => openNotificationTarget(context, notification));
+    final handleLongPress = menuActions.isEmpty
+        ? null
+        : () => _showMenu(context, menuActions);
+
+    final bodyContent = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _NotificationIcon(notification: notification),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                TextSpan(
+                  children: [
+                    if (description.actor != null)
+                      TextSpan(
+                        text: '${description.actor} ',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    TextSpan(text: description.action),
+                  ],
+                ),
+                style: isApple
+                    ? TextStyle(
+                        fontSize: isMac ? 13.5 : 14.5,
+                        height: 1.35,
+                        color: colorScheme.onSurface,
+                      )
+                    : textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+              ),
+              if (description.detail != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  description.detail!,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: isApple
+                      ? TextStyle(
+                          fontSize: isMac ? 12 : 13,
+                          height: 1.35,
+                          color: colorScheme.onSurfaceVariant,
+                        )
+                      : textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                ),
+              ],
+              if (notification.time > 0) ...[
+                const SizedBox(height: 4),
+                Text(
+                  code_utils.formatPostDate(notification.time * 1000),
+                  style: isApple
+                      ? TextStyle(
+                          fontSize: isMac ? 11.5 : 12,
+                          color: colorScheme.outline,
+                        )
+                      : textTheme.labelSmall?.copyWith(
+                          color: colorScheme.outline,
+                        ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (isApple) {
+      final selectedBg = colorScheme.primary.withValues(
+        alpha: Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.14,
+      );
+      final padded = Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: isMac ? 12 : 16,
+          vertical: isMac ? 9 : 11,
+        ),
+        child: bodyContent,
+      );
+
+      if (isMac) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              child: GestureDetector(
+                onSecondaryTapDown: menuActions.isEmpty
+                    ? null
+                    : (details) => _showMenu(
+                        context,
+                        menuActions,
+                        globalPosition: details.globalPosition,
+                      ),
+                child: Material(
+                  color: selected ? selectedBg : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: handleTap,
+                    onLongPress: handleLongPress,
+                    child: padded,
+                  ),
+                ),
+              ),
             ),
-      child: Material(
-        color: selected
-            ? colorScheme.secondaryContainer.withValues(alpha: 0.45)
-            : Colors.transparent,
-        child: InkWell(
-          onTap: target == null
+            if (!selected)
+              Divider(
+                height: 0.5,
+                thickness: 0.5,
+                indent: 58,
+                endIndent: 18,
+                color: colorScheme.outlineVariant,
+              ),
+          ],
+        );
+      }
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onSecondaryTapDown: menuActions.isEmpty
+                ? null
+                : (details) => _showMenu(
+                    context,
+                    menuActions,
+                    globalPosition: details.globalPosition,
+                  ),
+            child: Material(
+              color: selected ? selectedBg : Colors.transparent,
+              child: InkWell(
+                onTap: handleTap,
+                onLongPress: handleLongPress,
+                child: padded,
+              ),
+            ),
+          ),
+          Divider(
+            height: 0.5,
+            thickness: 0.5,
+            indent: 62,
+            color: colorScheme.outlineVariant,
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onSecondaryTapDown: menuActions.isEmpty
               ? null
-              : (onTap ?? () => openNotificationTarget(context, notification)),
-          onLongPress: menuActions.isEmpty
-              ? null
-              : () => _showMenu(context, menuActions),
-          child: DecoratedBox(
-            decoration: selected
-                ? BoxDecoration(
-                    border: Border(
-                      left: BorderSide(color: colorScheme.primary, width: 3),
-                    ),
-                  )
-                : const BoxDecoration(),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(selected ? 13 : 16, 12, 16, 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _NotificationIcon(notification: notification),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              if (description.actor != null)
-                                TextSpan(
-                                  text: '${description.actor} ',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.primary,
-                                  ),
-                                ),
-                              TextSpan(text: description.action),
-                            ],
-                          ),
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface,
+              : (details) => _showMenu(
+                  context,
+                  menuActions,
+                  globalPosition: details.globalPosition,
+                ),
+          child: Material(
+            color: selected
+                ? colorScheme.secondaryContainer.withValues(alpha: 0.45)
+                : Colors.transparent,
+            child: InkWell(
+              onTap: handleTap,
+              onLongPress: handleLongPress,
+              child: DecoratedBox(
+                decoration: selected
+                    ? BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: colorScheme.primary,
+                            width: 3,
                           ),
                         ),
-                        if (description.detail != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            description.detail!,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                        if (notification.time > 0) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            code_utils.formatPostDate(notification.time * 1000),
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
+                      )
+                    : const BoxDecoration(),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(selected ? 13 : 16, 12, 16, 12),
+                  child: bodyContent,
+                ),
               ),
             ),
           ),
         ),
-      ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          indent: 64,
+          color: colorScheme.surfaceContainerHighest,
+        ),
+      ],
     );
   }
 
@@ -181,10 +301,10 @@ class NotificationItemWidget extends StatelessWidget {
       return;
     }
 
-    await showModalBottomSheet<void>(
+    await showM3SelectionSheet<void>(
       context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -220,11 +340,11 @@ void openNotificationTarget(
     case ConversationTarget(:final mid):
       Routes.navigateTo(context, "${Routes.CONVERSATION_DETAIL}?mid=$mid");
     case ForumTarget(:final fid):
-      final name = Uri.encodeQueryComponent('版面 $fid');
-      Routes.navigateTo(
-        context,
-        "${Routes.FORUM_DETAIL}?fid=$fid&name=$name&type=0",
-      );
+      Routes.navigateToWithParams(context, Routes.FORUM_DETAIL, {
+        'fid': '$fid',
+        'name': '版块 $fid',
+        'type': '0',
+      });
     case null:
       break;
   }
@@ -240,47 +360,59 @@ class _NotificationIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isApple = context.isAppleStyle;
     final (icon, background, foreground) = switch (notification.type) {
       NgaNotification.TYPE_MENTION_TOPIC ||
       NgaNotification.TYPE_MENTION_REPLY => (
-        Icons.alternate_email,
+        isApple ? CupertinoIcons.at : Icons.alternate_email,
         colorScheme.tertiaryContainer,
         colorScheme.onTertiaryContainer,
       ),
       NgaNotification.TYPE_COMMENT_TOPIC ||
       NgaNotification.TYPE_COMMENT_REPLY => (
-        Icons.comment_outlined,
+        isApple ? CupertinoIcons.chat_bubble_text : Icons.comment_outlined,
         colorScheme.primaryContainer,
         colorScheme.onPrimaryContainer,
       ),
       NgaNotification.TYPE_RECOMMEND_POST || NgaNotification.TYPE_UPVOTE => (
-        Icons.thumbs_up_down_outlined,
+        isApple ? CupertinoIcons.hand_thumbsup : Icons.thumbs_up_down_outlined,
         colorScheme.secondaryContainer,
         colorScheme.onSecondaryContainer,
       ),
       _ => switch (notification.category) {
         NotificationCategory.reply => (
-          Icons.reply,
+          isApple ? CupertinoIcons.arrowshape_turn_up_left : Icons.reply,
           colorScheme.primaryContainer,
           colorScheme.onPrimaryContainer,
         ),
         NotificationCategory.message => (
-          Icons.mail_outline,
+          isApple ? CupertinoIcons.chat_bubble_2 : Icons.mail_outline,
           colorScheme.secondaryContainer,
           colorScheme.onSecondaryContainer,
         ),
         NotificationCategory.moderation => (
-          Icons.shield_outlined,
+          isApple ? CupertinoIcons.shield : Icons.shield_outlined,
           colorScheme.surfaceContainerHighest,
           colorScheme.onSurfaceVariant,
         ),
         NotificationCategory.system => (
-          Icons.info_outline,
+          isApple ? CupertinoIcons.info_circle : Icons.info_outline,
           colorScheme.errorContainer,
           colorScheme.onErrorContainer,
         ),
       },
     };
+    if (isApple) {
+      return Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: background.withValues(alpha: 0.75),
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Icon(icon, size: 17, color: foreground),
+      );
+    }
     return CircleAvatar(
       radius: 18,
       backgroundColor: background,

@@ -331,6 +331,8 @@ class AppleWorkspaceShell extends HookConsumerWidget {
           meta: true,
         ): () =>
             sidebarCollapsed.value = !sidebarCollapsed.value,
+        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () =>
+            Routes.navigateTo(context, Routes.SEARCH),
       },
       child: Focus(
         autofocus: true,
@@ -957,7 +959,7 @@ class _SidebarSearchButton extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: SizedBox(
-              height: 30,
+              height: context.isMacDesktopAppleStyle ? 30 : 38,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(

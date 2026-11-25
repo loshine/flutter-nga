@@ -93,7 +93,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Icon(
-                        Icons.delete_outline,
+                        AppIcons.delete(context),
                         color: colorScheme.onErrorContainer,
                         semanticLabel: '移除屏蔽',
                       ),
@@ -101,7 +101,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
                     child: ListTile(
                       title: Text(displayWord),
                       trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
+                        icon: Icon(AppIcons.delete(context)),
                         tooltip: '移除屏蔽',
                         onPressed: () => remove(word),
                       ),

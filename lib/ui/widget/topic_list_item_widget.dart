@@ -194,7 +194,7 @@ class TopicListItemWidget extends ConsumerWidget {
         ? colorScheme.primary.withValues(alpha: 0.14)
         : colorScheme.primary.withValues(alpha: 0.10);
 
-    Future<void> showContextMenu(Offset position) async {
+    Future<void> showContextMenu(Offset? position) async {
       final tid = topic.tid;
       if (tid == null) return;
       final action = await showAppActionMenu<String>(
@@ -332,12 +332,15 @@ class TopicListItemWidget extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Material(
-          color: selected ? selectedBg : Colors.transparent,
-          child: InkWell(
-            onTap: () => _handleTap(context, topic, ref),
-            onLongPress: onLongPress,
-            child: rowBody,
+        GestureDetector(
+          onSecondaryTapDown: (d) => showContextMenu(d.globalPosition),
+          child: Material(
+            color: selected ? selectedBg : Colors.transparent,
+            child: InkWell(
+              onTap: () => _handleTap(context, topic, ref),
+              onLongPress: onLongPress ?? () => showContextMenu(null),
+              child: rowBody,
+            ),
           ),
         ),
         Divider(
