@@ -1,4 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/error_utils.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
@@ -53,8 +55,8 @@ class ListStatusView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              icon,
-              size: 64,
+              AppIcons.resolve(context, icon),
+              size: 56,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: Dimen.spacingL),
@@ -69,7 +71,7 @@ class ListStatusView extends StatelessWidget {
               if (_isAuthError)
                 FilledButton.icon(
                   onPressed: effectiveAction,
-                  icon: const Icon(Icons.login),
+                  icon: Icon(AppIcons.login(context)),
                   label: Text(label),
                 )
               else

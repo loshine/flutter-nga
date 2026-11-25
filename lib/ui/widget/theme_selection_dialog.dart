@@ -67,7 +67,7 @@ class ThemeSelectionDialog extends ConsumerWidget {
             _ThemeOption(
               title: "跟随系统",
               subtitle: "根据系统设置自动切换",
-              icon: Icons.brightness_auto,
+              icon: AppIcons.autoBrightness(context),
               selected:
                   state.mode == AdaptiveThemeMode.system || state.mode == null,
               onTap: () => notifier.update(context, AdaptiveThemeMode.system),
@@ -75,14 +75,14 @@ class ThemeSelectionDialog extends ConsumerWidget {
             _ThemeOption(
               title: "亮色主题",
               subtitle: "始终使用亮色主题",
-              icon: Icons.light_mode_outlined,
+              icon: AppIcons.lightMode(context),
               selected: state.mode == AdaptiveThemeMode.light,
               onTap: () => notifier.update(context, AdaptiveThemeMode.light),
             ),
             _ThemeOption(
               title: "暗色主题",
               subtitle: "始终使用暗色主题",
-              icon: Icons.dark_mode_outlined,
+              icon: AppIcons.darkMode(context),
               selected: state.mode == AdaptiveThemeMode.dark,
               onTap: () => notifier.update(context, AdaptiveThemeMode.dark),
             ),
@@ -115,7 +115,7 @@ class ThemeSelectionDialog extends ConsumerWidget {
                   child: Row(
                     children: [
                       Icon(
-                        Icons.wallpaper_outlined,
+                        AppIcons.wallpaper(context),
                         color: colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 16),

@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/forum/forum_category_list_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -39,13 +41,19 @@ class ForumCategoryPage extends HookConsumerWidget {
       collapsedGroups.value = groups;
     }
 
+    final isAppleDesktop = context.isMacDesktopAppleStyle;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= kCompactBreakpoint;
-        final horizontalPadding = isWide ? Dimen.spacingL : 0.0;
+        final horizontalPadding = isAppleDesktop
+            ? 20.0
+            : (isWide ? Dimen.spacingL : 0.0);
         final gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: isWide ? 136 : 120,
-          mainAxisExtent: isWide ? 112 : 108,
+          maxCrossAxisExtent: isAppleDesktop ? 156 : (isWide ? 136 : 120),
+          mainAxisExtent: isAppleDesktop ? 104 : (isWide ? 112 : 108),
+          crossAxisSpacing: isAppleDesktop ? 12 : 0,
+          mainAxisSpacing: isAppleDesktop ? 12 : 0,
         );
 
         return RefreshIndicator(
@@ -60,6 +68,8 @@ class ForumCategoryPage extends HookConsumerWidget {
             controller: scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
+              if (isAppleDesktop && !showGroupName)
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
               for (final (index, group) in category.groups.indexed)
                 // 组内标题吸顶，滚动到长分组中间也能直接折叠
                 SliverMainAxisGroup(
@@ -69,17 +79,20 @@ class ForumCategoryPage extends HookConsumerWidget {
                         child: _ForumGroupHeader(
                           group: group,
                           expanded: !collapsedGroups.value.contains(index),
-                          horizontalPadding: isWide
-                              ? Dimen.spacingXL
-                              : Dimen.spacingL,
+                          horizontalPadding: isAppleDesktop
+                              ? 20
+                              : (isWide ? Dimen.spacingXL : Dimen.spacingL),
                           onTap: () => toggleGroup(index),
                         ),
                       ),
                     SliverVisibility(
                       visible: !collapsedGroups.value.contains(index),
                       sliver: SliverPadding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: horizontalPadding,
+                        padding: EdgeInsets.fromLTRB(
+                          horizontalPadding,
+                          isAppleDesktop ? 4 : 0,
+                          horizontalPadding,
+                          isAppleDesktop ? 18 : 0,
                         ),
                         sliver: SliverGrid.builder(
                           gridDelegate: gridDelegate,
@@ -95,8 +108,9 @@ class ForumCategoryPage extends HookConsumerWidget {
                     ),
                   ],
                 ),
-              if (bottomPadding > 0)
-                SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
+              SliverToBoxAdapter(
+                child: SizedBox(height: bottomPadding > 0 ? bottomPadding : 16),
+              ),
             ],
           ),
         );
@@ -122,24 +136,53 @@ class _ForumGroupHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     // 吸顶时需要不透明背景遮住下方滚动的网格
     return Material(
       color: colorScheme.surface,
-      child: ListTile(
-        dense: true,
-        contentPadding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-        title: Text(
-          group.name,
-          style: textTheme.titleSmall?.copyWith(color: colorScheme.primary),
-        ),
-        trailing: AnimatedRotation(
-          turns: expanded ? 0 : -0.25,
-          duration: Motion.resolveDuration(context, Motion.durationShort4),
-          curve: Motion.emphasized,
-          child: Icon(Icons.expand_more, color: colorScheme.onSurfaceVariant),
-        ),
+      child: InkWell(
         onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            horizontalPadding,
+            isApple ? 14 : 12,
+            horizontalPadding,
+            isApple ? 8 : 12,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  group.name,
+                  style: isApple
+                      ? TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurfaceVariant,
+                          letterSpacing: 0.1,
+                        )
+                      : textTheme.titleSmall?.copyWith(
+                          color: colorScheme.primary,
+                        ),
+                ),
+              ),
+              AnimatedRotation(
+                turns: expanded ? 0 : -0.25,
+                duration: Motion.resolveDuration(
+                  context,
+                  Motion.durationShort4,
+                ),
+                curve: Motion.emphasized,
+                child: Icon(
+                  AppIcons.expandMore(context),
+                  size: isApple ? 14 : 22,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

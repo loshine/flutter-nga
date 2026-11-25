@@ -225,14 +225,6 @@ class AppleWorkspaceShell extends HookConsumerWidget {
           title: const Text('全部版块'),
           actions: [
             IconButton(
-              tooltip: '添加自定义版面',
-              icon: Icon(AppIcons.add(context), size: 18),
-              onPressed: () => showDialog<void>(
-                context: context,
-                builder: (_) => const CustomForumDialog(),
-              ),
-            ),
-            IconButton(
               tooltip: '高级搜索',
               icon: Icon(AppIcons.search(context), size: 17),
               onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
@@ -405,7 +397,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                             colorScheme: colorScheme,
                           ),
                           _SidebarRow(
-                            icon: Icon(AppIcons.forum(context), size: 16),
+                            icon: Icon(AppIcons.grid(context), size: 16),
                             label: '全部版块',
                             selected:
                                 destination.value is _AllForumsDestination,

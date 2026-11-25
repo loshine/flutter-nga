@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
 /// Material 3 Medium 断点：平板竖屏 / 折叠屏展开态，启用 NavigationRail
@@ -206,7 +207,7 @@ class MasterDetailEmptyPlaceholder extends StatelessWidget {
             children: [
               if (isApple)
                 Icon(
-                  icon,
+                  AppIcons.resolve(context, icon),
                   size: 40,
                   color: colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
                 )

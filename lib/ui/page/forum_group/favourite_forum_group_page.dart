@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
@@ -36,6 +38,8 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
     final forums = state.forums;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
+    final isAppleDesktop = context.isMacDesktopAppleStyle;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= kCompactBreakpoint;
@@ -53,14 +57,18 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
                 controller: scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(
-                  isWide ? Dimen.spacingL : 0,
-                  isWide ? Dimen.spacingS : 0,
-                  isWide ? Dimen.spacingL : 0,
-                  bottomPadding + 88,
+                  isAppleDesktop ? 20 : (isWide ? Dimen.spacingL : 0),
+                  isAppleDesktop ? 16 : (isWide ? Dimen.spacingS : 0),
+                  isAppleDesktop ? 20 : (isWide ? Dimen.spacingL : 0),
+                  bottomPadding + (isAppleDesktop ? 24 : 88),
                 ),
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: isWide ? 136 : 120,
-                  mainAxisExtent: isWide ? 112 : 108,
+                  maxCrossAxisExtent: isAppleDesktop
+                      ? 156
+                      : (isWide ? 136 : 120),
+                  mainAxisExtent: isAppleDesktop ? 104 : (isWide ? 112 : 108),
+                  crossAxisSpacing: isAppleDesktop ? 12 : 0,
+                  mainAxisSpacing: isAppleDesktop ? 12 : 0,
                 ),
                 itemCount: forums.length,
                 itemBuilder: (_, index) => ForumGridItemWidget(
@@ -75,7 +83,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
               ),
             ),
             if (state.isSyncing && forums.isEmpty)
-              const Center(child: CircularProgressIndicator()),
+              const Center(child: AppActivityIndicator()),
           ],
         );
       },

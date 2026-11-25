@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -44,14 +45,14 @@ class BlocklistSettingsPage extends HookConsumerWidget {
               title: "屏蔽开关",
               children: [
                 M3SettingsSwitchTile(
-                  icon: Icons.shield_outlined,
+                  icon: AppIcons.shield(context),
                   title: "开启客户端屏蔽功能",
                   subtitle: "默认关闭，开启后在客户端按规则过滤内容",
                   value: state.clientBlockEnabled,
                   onChanged: notifier.setClientBlockEnabled,
                 ),
                 M3SettingsSwitchTile(
-                  icon: Icons.view_list_outlined,
+                  icon: AppIcons.list(context),
                   title: "在列表页开启屏蔽功能",
                   value: state.listBlockEnabled,
                   onChanged: state.clientBlockEnabled
@@ -59,7 +60,7 @@ class BlocklistSettingsPage extends HookConsumerWidget {
                       : null,
                 ),
                 M3SettingsSwitchTile(
-                  icon: Icons.article_outlined,
+                  icon: AppIcons.article(context),
                   title: "在详情页开启屏蔽功能",
                   value: state.detailsBlockEnabled,
                   onChanged: state.clientBlockEnabled
@@ -72,7 +73,7 @@ class BlocklistSettingsPage extends HookConsumerWidget {
               title: "屏蔽规则",
               children: [
                 M3SettingsTile(
-                  icon: Icons.tune_outlined,
+                  icon: AppIcons.tune(context),
                   title: "屏蔽模式",
                   subtitle: "选择被屏蔽的用户、词语在客户端内的展示方式",
                   trailing: Text(
@@ -85,14 +86,14 @@ class BlocklistSettingsPage extends HookConsumerWidget {
                   onTap: () => BlockModeSelectionDialog.show(context),
                 ),
                 M3SettingsTile(
-                  icon: Icons.person_off_outlined,
+                  icon: AppIcons.personOff(context),
                   title: "屏蔽用户",
                   subtitle: "已屏蔽 ${state.blockUserList.length} 位用户的发言",
                   onTap: () =>
                       Routes.navigateTo(context, Routes.BLOCKLIST_USERS),
                 ),
                 M3SettingsTile(
-                  icon: Icons.text_snippet_outlined,
+                  icon: AppIcons.textSnippet(context),
                   title: "屏蔽关键词",
                   subtitle: "已屏蔽 ${state.blockWordList.length} 条关键词",
                   onTap: () =>

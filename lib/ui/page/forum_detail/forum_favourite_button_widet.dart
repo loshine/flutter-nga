@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -44,7 +45,7 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
           child: FadeTransition(opacity: animation, child: child),
         ),
         child: Icon(
-          isFavourite ? Icons.star : Icons.star_border,
+          AppIcons.star(context, filled: isFavourite),
           key: ValueKey(isFavourite),
           color: isFavourite ? Theme.of(context).colorScheme.primary : null,
         ),

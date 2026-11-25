@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
@@ -91,11 +92,11 @@ class AboutPage extends HookConsumerWidget {
 
           final detailGroups = <Widget>[
             // 技术栈区
-            const M3SettingsGroup(
+            M3SettingsGroup(
               title: '技术栈',
               children: [
                 // flutter run / build 会自动注入 FLUTTER_VERSION，无需手动维护版本号。
-                M3SettingsInfoTile(
+                const M3SettingsInfoTile(
                   title: 'Flutter',
                   subtitle: FlutterVersion.version ?? '未知',
                   icon: Icons.flutter_dash,
@@ -103,22 +104,22 @@ class AboutPage extends HookConsumerWidget {
                 M3SettingsInfoTile(
                   title: '状态管理',
                   subtitle: 'Riverpod 3.x + flutter_hooks',
-                  icon: Icons.timeline,
+                  icon: AppIcons.timeline(context),
                 ),
                 M3SettingsInfoTile(
                   title: '路由',
                   subtitle: 'go_router',
-                  icon: Icons.route,
+                  icon: AppIcons.route(context),
                 ),
                 M3SettingsInfoTile(
                   title: '网络',
                   subtitle: 'Dio',
-                  icon: Icons.cloud_outlined,
+                  icon: AppIcons.cloud(context),
                 ),
                 M3SettingsInfoTile(
                   title: '本地存储',
                   subtitle: 'Sembast',
-                  icon: Icons.storage_outlined,
+                  icon: AppIcons.storage(context),
                 ),
               ],
             ),
@@ -130,16 +131,16 @@ class AboutPage extends HookConsumerWidget {
                 M3SettingsTile(
                   title: 'GitHub 仓库',
                   subtitle: '查看源代码、参与贡献',
-                  icon: Icons.code,
-                  trailingIcon: Icons.open_in_new,
+                  icon: AppIcons.code(context),
+                  trailingIcon: AppIcons.openInNew(context),
                   onTap: () =>
                       _launchUrl('https://github.com/loshine/flutter-nga'),
                 ),
                 M3SettingsTile(
                   title: '问题反馈',
                   subtitle: '报告 Bug 或提出建议',
-                  icon: Icons.bug_report_outlined,
-                  trailingIcon: Icons.open_in_new,
+                  icon: AppIcons.bug(context),
+                  trailingIcon: AppIcons.openInNew(context),
                   onTap: () => _launchUrl(
                     'https://github.com/loshine/flutter-nga/issues',
                   ),
@@ -147,8 +148,8 @@ class AboutPage extends HookConsumerWidget {
                 M3SettingsTile(
                   title: 'NGA 官网',
                   subtitle: 'bbs.nga.cn',
-                  icon: Icons.language,
-                  trailingIcon: Icons.open_in_new,
+                  icon: AppIcons.server(context),
+                  trailingIcon: AppIcons.openInNew(context),
                   onTap: () => _launchUrl('https://bbs.nga.cn'),
                 ),
               ],
@@ -161,7 +162,7 @@ class AboutPage extends HookConsumerWidget {
                 M3SettingsTile(
                   title: '开源协议与许可',
                   subtitle: 'Apache License 2.0 · 查看第三方开源许可',
-                  icon: Icons.description_outlined,
+                  icon: AppIcons.description(context),
                   onTap: () => showLicensePage(
                     context: context,
                     applicationName: appInfo.appName,

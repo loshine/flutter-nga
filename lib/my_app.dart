@@ -110,6 +110,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
           );
 
           return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
             routerConfig: _router,
             builder: (context, child) {
               final appTheme = Theme.of(context);

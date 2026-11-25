@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/user/user_info_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
@@ -47,14 +48,14 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
       title: '发布',
       children: [
         _EntryTile(
-          icon: Icons.article_outlined,
+          icon: AppIcons.article(context),
           colorIndex: 0,
           title: '发布的主题',
           subtitle: '查看该用户发布的主题',
           onTap: () => _navigateToList(userInfo, Routes.USER_TOPICS),
         ),
         _EntryTile(
-          icon: Icons.chat_bubble_outline,
+          icon: AppIcons.reply(context),
           colorIndex: 1,
           title: '发布的回复',
           subtitle: '查看该用户发布的回复',
@@ -533,7 +534,10 @@ class _EntryTile extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+            Icon(
+              AppIcons.chevronRight(context),
+              color: colorScheme.onSurfaceVariant,
+            ),
           ],
         ),
       ),

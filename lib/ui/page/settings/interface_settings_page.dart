@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/line_height_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
@@ -61,7 +62,7 @@ class InterfaceSettingsPage extends ConsumerWidget {
                   onChanged: notifier.setContentSizeMultiple,
                 ),
                 M3SettingsTile(
-                  icon: Icons.format_line_spacing,
+                  icon: AppIcons.lineSpacing(context),
                   title: "贴子正文行间距",
                   subtitle: "控制贴子正文及列表标题的行间距",
                   trailing: Text(
@@ -110,7 +111,7 @@ class _TypographyPreviewCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    Icons.visibility_outlined,
+                    AppIcons.visibility(context),
                     size: 16,
                     color: colorScheme.primary,
                   ),
