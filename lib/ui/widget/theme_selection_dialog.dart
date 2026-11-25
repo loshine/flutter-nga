@@ -1,7 +1,11 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/motion.dart';
@@ -98,17 +102,50 @@ class ThemeSelectionDialog extends ConsumerWidget {
             const SizedBox(height: 4),
 
             if (state.isDynamicColorAvailable)
-              SwitchListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                secondary: Icon(
-                  Icons.wallpaper_outlined,
-                  color: colorScheme.onSurfaceVariant,
+              InkWell(
+                onTap: () => notifier.setUseDynamicColor(
+                  context,
+                  !state.useDynamicColor,
                 ),
-                title: const Text('动态配色'),
-                subtitle: const Text('跟随系统壁纸或系统强调色'),
-                value: state.useDynamicColor,
-                onChanged: (enabled) =>
-                    notifier.setUseDynamicColor(context, enabled),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.wallpaper_outlined,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '动态配色',
+                              style: textTheme.bodyLarge?.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            Text(
+                              '跟随系统壁纸或系统强调色',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      AppSwitch(
+                        value: state.useDynamicColor,
+                        onChanged: (enabled) =>
+                            notifier.setUseDynamicColor(context, enabled),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
             _ColorPicker(
@@ -327,11 +364,18 @@ class _ThemeOption extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
+    final selectedBg = isApple
+        ? colorScheme.primary.withValues(alpha: 0.12)
+        : colorScheme.secondaryContainer;
+    final selectedFg = isApple
+        ? colorScheme.primary
+        : colorScheme.onSecondaryContainer;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Material(
-        color: selected ? colorScheme.secondaryContainer : Colors.transparent,
+        color: selected ? selectedBg : Colors.transparent,
         borderRadius: BorderRadius.circular(Dimen.radiusM),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -342,9 +386,7 @@ class _ThemeOption extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: selected
-                      ? colorScheme.onSecondaryContainer
-                      : colorScheme.onSurfaceVariant,
+                  color: selected ? selectedFg : colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -354,26 +396,24 @@ class _ThemeOption extends StatelessWidget {
                       Text(
                         title,
                         style: textTheme.bodyLarge?.copyWith(
-                          color: selected
-                              ? colorScheme.onSecondaryContainer
-                              : colorScheme.onSurface,
+                          color: selected ? selectedFg : colorScheme.onSurface,
+                          fontWeight: selected && isApple
+                              ? FontWeight.w600
+                              : null,
                         ),
                       ),
                       Text(
                         subtitle,
                         style: textTheme.bodySmall?.copyWith(
                           color: selected
-                              ? colorScheme.onSecondaryContainer.withValues(
-                                  alpha: 0.8,
-                                )
+                              ? selectedFg.withValues(alpha: 0.8)
                               : colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ),
-                if (selected)
-                  Icon(Icons.check, color: colorScheme.onSecondaryContainer),
+                if (selected) Icon(AppIcons.check(context), color: selectedFg),
               ],
             ),
           ),

@@ -1,8 +1,13 @@
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoSearchTextField;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'package:flutter_nga/providers/search/input_deletion_status_provider.dart';
 import 'package:flutter_nga/providers/search/search_options_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
@@ -43,9 +48,11 @@ class SearchPage extends HookConsumerWidget {
     final hasBackButton =
         ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
 
+    final isApple = context.isAppleStyle;
+
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 68,
+        toolbarHeight: isApple ? 56 : 68,
         titleSpacing: 0,
         title: Padding(
           padding: EdgeInsets.only(
@@ -55,52 +62,78 @@ class SearchPage extends HookConsumerWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: kReadableMaxWidth),
-              child: SearchBar(
-                controller: searchQuery,
-                focusNode: focusNode,
-                autoFocus: true,
-                hintText: hintText,
-                elevation: const WidgetStatePropertyAll(0),
-                backgroundColor: WidgetStatePropertyAll(
-                  colorScheme.surfaceContainerHigh,
-                ),
-                constraints: const BoxConstraints(minHeight: 48, maxHeight: 52),
-                padding: const WidgetStatePropertyAll(
-                  EdgeInsets.only(left: 16, right: 4),
-                ),
-                textInputAction: TextInputAction.search,
-                keyboardType:
-                    searchOptions.firstRadio == FIRST_RADIO_USER &&
-                        searchOptions.userRadio == USER_RADIO_UID
-                    ? TextInputType.number
-                    : TextInputType.text,
-                onSubmitted: (text) =>
-                    _onSearch(context, text, searchOptions, fid),
-                trailing: [
-                  if (inputVisible)
-                    IconButton(
-                      tooltip: '清除',
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        searchQuery.clear();
-                        focusNode.requestFocus();
-                      },
+              child: isApple
+                  ? CupertinoSearchTextField(
+                      controller: searchQuery,
+                      focusNode: focusNode,
+                      autofocus: true,
+                      placeholder: hintText,
+                      keyboardType:
+                          searchOptions.firstRadio == FIRST_RADIO_USER &&
+                              searchOptions.userRadio == USER_RADIO_UID
+                          ? TextInputType.number
+                          : TextInputType.text,
+                      onSubmitted: (text) =>
+                          _onSearch(context, text, searchOptions, fid),
+                    )
+                  : SearchBar(
+                      controller: searchQuery,
+                      focusNode: focusNode,
+                      autoFocus: true,
+                      hintText: hintText,
+                      elevation: const WidgetStatePropertyAll(0),
+                      backgroundColor: WidgetStatePropertyAll(
+                        colorScheme.surfaceContainerHigh,
+                      ),
+                      constraints: const BoxConstraints(
+                        minHeight: 48,
+                        maxHeight: 52,
+                      ),
+                      padding: const WidgetStatePropertyAll(
+                        EdgeInsets.only(left: 16, right: 4),
+                      ),
+                      textInputAction: TextInputAction.search,
+                      keyboardType:
+                          searchOptions.firstRadio == FIRST_RADIO_USER &&
+                              searchOptions.userRadio == USER_RADIO_UID
+                          ? TextInputType.number
+                          : TextInputType.text,
+                      onSubmitted: (text) =>
+                          _onSearch(context, text, searchOptions, fid),
+                      trailing: [
+                        if (inputVisible)
+                          IconButton(
+                            tooltip: '清除',
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              searchQuery.clear();
+                              focusNode.requestFocus();
+                            },
+                          ),
+                        IconButton(
+                          tooltip: '搜索',
+                          icon: const Icon(Icons.search),
+                          onPressed: () => _onSearch(
+                            context,
+                            searchQuery.text,
+                            searchOptions,
+                            fid,
+                          ),
+                        ),
+                      ],
                     ),
-                  IconButton(
-                    tooltip: '搜索',
-                    icon: const Icon(Icons.search),
-                    onPressed: () => _onSearch(
-                      context,
-                      searchQuery.text,
-                      searchOptions,
-                      fid,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ),
+        actions: isApple
+            ? [
+                TextButton(
+                  onPressed: () =>
+                      _onSearch(context, searchQuery.text, searchOptions, fid),
+                  child: const Text('搜索'),
+                ),
+              ]
+            : null,
       ),
       body: _buildBody(context, searchOptions, searchOptionsNotifier),
     );
@@ -130,30 +163,26 @@ class SearchPage extends HookConsumerWidget {
             title: '搜索类型',
             colorScheme: colorScheme,
             textTheme: textTheme,
-            child: SizedBox(
-              width: double.infinity,
-              child: SegmentedButton<int>(
-                segments: const [
-                  ButtonSegment(
-                    value: FIRST_RADIO_TOPIC,
-                    label: Text('主题'),
-                    icon: Icon(Icons.article_outlined),
-                  ),
-                  ButtonSegment(
-                    value: FIRST_RADIO_FORUM,
-                    label: Text('版块'),
-                    icon: Icon(Icons.forum_outlined),
-                  ),
-                  ButtonSegment(
-                    value: FIRST_RADIO_USER,
-                    label: Text('用户'),
-                    icon: Icon(Icons.person_outline),
-                  ),
-                ],
-                selected: {state.firstRadio},
-                onSelectionChanged: (selected) =>
-                    notifier.checkFirstRadio(selected.first),
-              ),
+            child: AppSegmentedControl<int>(
+              segments: [
+                const AppSegment(
+                  value: FIRST_RADIO_TOPIC,
+                  label: '主题',
+                  icon: Icons.article_outlined,
+                ),
+                AppSegment(
+                  value: FIRST_RADIO_FORUM,
+                  label: '版块',
+                  icon: AppIcons.forum(context),
+                ),
+                AppSegment(
+                  value: FIRST_RADIO_USER,
+                  label: '用户',
+                  icon: AppIcons.person(context),
+                ),
+              ],
+              selected: state.firstRadio,
+              onChanged: notifier.checkFirstRadio,
             ),
           ),
 
@@ -164,40 +193,47 @@ class SearchPage extends HookConsumerWidget {
                 title: '搜索范围',
                 colorScheme: colorScheme,
                 textTheme: textTheme,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: SegmentedButton<int>(
-                    segments: const [
-                      ButtonSegment(
-                        value: TOPIC_RADIO_CURRENT_FORUM,
-                        label: Text('当前版块'),
-                      ),
-                      ButtonSegment(
-                        value: TOPIC_RADIO_ALL_FORUM,
-                        label: Text('全部版块'),
-                      ),
-                    ],
-                    selected: {state.topicRadio},
-                    onSelectionChanged: (selected) =>
-                        notifier.checkTopicRadio(selected.first),
-                  ),
+                child: AppSegmentedControl<int>(
+                  segments: const [
+                    AppSegment(value: TOPIC_RADIO_CURRENT_FORUM, label: '当前版块'),
+                    AppSegment(value: TOPIC_RADIO_ALL_FORUM, label: '全部版块'),
+                  ],
+                  selected: state.topicRadio,
+                  onChanged: notifier.checkTopicRadio,
                 ),
               ),
             _buildOptionSection(
               title: '搜索选项',
               colorScheme: colorScheme,
               textTheme: textTheme,
-              child: Wrap(
-                spacing: Dimen.spacingS,
-                runSpacing: Dimen.spacingS,
-                children: [
-                  FilterChip(
-                    label: const Text('包括正文'),
-                    selected: state.content,
-                    onSelected: notifier.checkContent,
-                  ),
-                ],
-              ),
+              child: context.isAppleStyle
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '包括正文',
+                            style: textTheme.bodyLarge?.copyWith(
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        AppSwitch(
+                          value: state.content,
+                          onChanged: notifier.checkContent,
+                        ),
+                      ],
+                    )
+                  : Wrap(
+                      spacing: Dimen.spacingS,
+                      runSpacing: Dimen.spacingS,
+                      children: [
+                        FilterChip(
+                          label: const Text('包括正文'),
+                          selected: state.content,
+                          onSelected: notifier.checkContent,
+                        ),
+                      ],
+                    ),
             ),
           ],
 
@@ -207,17 +243,13 @@ class SearchPage extends HookConsumerWidget {
               title: '搜索方式',
               colorScheme: colorScheme,
               textTheme: textTheme,
-              child: SizedBox(
-                width: double.infinity,
-                child: SegmentedButton<int>(
-                  segments: const [
-                    ButtonSegment(value: USER_RADIO_NAME, label: Text('用户名')),
-                    ButtonSegment(value: USER_RADIO_UID, label: Text('用户ID')),
-                  ],
-                  selected: {state.userRadio},
-                  onSelectionChanged: (selected) =>
-                      notifier.checkUserRadio(selected.first),
-                ),
+              child: AppSegmentedControl<int>(
+                segments: const [
+                  AppSegment(value: USER_RADIO_NAME, label: '用户名'),
+                  AppSegment(value: USER_RADIO_UID, label: '用户ID'),
+                ],
+                selected: state.userRadio,
+                onChanged: notifier.checkUserRadio,
               ),
             ),
         ],

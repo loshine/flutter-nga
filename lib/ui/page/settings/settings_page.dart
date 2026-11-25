@@ -57,7 +57,7 @@ class SettingsPage extends HookConsumerWidget {
                 title: "账户",
                 children: [
                   M3SettingsTile(
-                    icon: Icons.person_outline,
+                    icon: AppIcons.person(context),
                     title: "账号管理",
                     subtitle: "管理您的账号",
                     selected:
@@ -78,13 +78,13 @@ class SettingsPage extends HookConsumerWidget {
                 title: "网络",
                 children: [
                   M3SettingsTile(
-                    icon: Icons.dns_outlined,
+                    icon: AppIcons.server(context),
                     title: "服务器设置",
                     subtitle: "当前: ${baseUrlState.currentConfig.name}",
                     onTap: () => BaseUrlSelectionDialog.show(context),
                   ),
                   M3SettingsTile(
-                    icon: Icons.devices_outlined,
+                    icon: AppIcons.devices(context),
                     title: "User-Agent 设置",
                     subtitle: "当前: ${userAgentState.currentConfig.name}",
                     onTap: () => UserAgentSelectionDialog.show(context),
@@ -122,7 +122,7 @@ class SettingsPage extends HookConsumerWidget {
                     onTap: () => DesignStyleSelectionDialog.show(context),
                   ),
                   M3SettingsTile(
-                    icon: Icons.text_fields,
+                    icon: AppIcons.textFields(context),
                     title: "界面设置",
                     subtitle: "文字大小、行间距等阅读排版",
                     selected:
@@ -143,7 +143,7 @@ class SettingsPage extends HookConsumerWidget {
                 title: "内容",
                 children: [
                   M3SettingsTile(
-                    icon: Icons.block_outlined,
+                    icon: AppIcons.block(context),
                     title: "屏蔽设置",
                     subtitle: "屏蔽用户、关键词",
                     selected:

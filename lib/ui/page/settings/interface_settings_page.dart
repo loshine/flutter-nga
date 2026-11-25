@@ -1,6 +1,8 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/line_height_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -214,7 +216,7 @@ class _SliderSettingItem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Dimen.spacingXS),
-          Slider(
+          AppSlider(
             value: value,
             min: min,
             max: max,
