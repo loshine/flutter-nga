@@ -60,7 +60,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
                   isAppleDesktop ? 20 : (isWide ? Dimen.spacingL : 0),
                   isAppleDesktop ? 16 : (isWide ? Dimen.spacingS : 0),
                   isAppleDesktop ? 20 : (isWide ? Dimen.spacingL : 0),
-                  bottomPadding + (isAppleDesktop ? 24 : 88),
+                  bottomPadding + (context.isAppleStyle ? 16 : 88),
                 ),
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: isAppleDesktop

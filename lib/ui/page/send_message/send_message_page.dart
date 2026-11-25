@@ -78,6 +78,7 @@ class SendMessagePage extends HookConsumerWidget {
         AppToast.warning(error);
         return;
       }
+      final pageRoute = ModalRoute.of(context);
       sending.value = true;
       try {
         await notifier.send(
@@ -86,7 +87,11 @@ class SendMessagePage extends HookConsumerWidget {
           contentController.text.trim(),
         );
         AppToast.success('发送成功');
-        if (context.mounted) Navigator.of(context).pop(true);
+        if (context.mounted) {
+          final navigator = Navigator.of(context);
+          if (pageRoute != null) navigator.popUntil((r) => r == pageRoute);
+          navigator.pop(true);
+        }
       } catch (err) {
         AppToast.error(err);
       } finally {
@@ -202,13 +207,15 @@ class SendMessagePage extends HookConsumerWidget {
                 if (isNew) ...[
                   InkWell(
                     borderRadius: BorderRadius.circular(8),
-                    onTap: () {
-                      showDialog<void>(
-                        context: context,
-                        builder: (_) =>
-                            ContactEditDialog(callback: notifier.add),
-                      );
-                    },
+                    onTap: sending.value
+                        ? null
+                        : () {
+                            showDialog<void>(
+                              context: context,
+                              builder: (_) =>
+                                  ContactEditDialog(callback: notifier.add),
+                            );
+                          },
                     child: Padding(
                       padding: EdgeInsets.symmetric(
                         vertical: isApple ? 12 : 16,
@@ -245,7 +252,9 @@ class SendMessagePage extends HookConsumerWidget {
                             for (final contact in state.contacts)
                               InputChip(
                                 label: Text(contact),
-                                onDeleted: () => notifier.remove(contact),
+                                onDeleted: sending.value
+                                    ? null
+                                    : () => notifier.remove(contact),
                                 deleteButtonTooltipMessage: '移除',
                               ),
                           ],

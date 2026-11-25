@@ -190,6 +190,7 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
             const SizedBox(height: 12),
             Center(
               child: AppSegmentedControl<bool>(
+                expand: false,
                 segments: [
                   AppSegment<bool>(
                     value: true,

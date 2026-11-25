@@ -27,6 +27,28 @@ final forumGroupFabVisibleProvider =
       ForumGroupFabVisibleNotifier.new,
     );
 
+class LibraryHubTabNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void setTab(int tab) => state = tab;
+}
+
+final libraryHubTabProvider = NotifierProvider<LibraryHubTabNotifier, int>(
+  LibraryHubTabNotifier.new,
+);
+
+class InboxHubTabNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void setTab(int tab) => state = tab;
+}
+
+final inboxHubTabProvider = NotifierProvider<InboxHubTabNotifier, int>(
+  InboxHubTabNotifier.new,
+);
+
 typedef WorkspaceMenuRouteHandler = bool Function(String path);
 
 /// 协调 macOS 原生系统菜单（⌘1~⌘4、⌘,）与当前活跃的三栏工作区。

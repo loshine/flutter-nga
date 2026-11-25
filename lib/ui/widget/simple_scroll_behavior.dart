@@ -34,4 +34,9 @@ class SimpleScrollBehavior extends ScrollBehavior {
     }
     return child;
   }
+
+  @override
+  bool shouldNotify(covariant SimpleScrollBehavior oldDelegate) {
+    return isAppleStyle != oldDelegate.isAppleStyle;
+  }
 }

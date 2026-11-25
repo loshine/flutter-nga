@@ -94,6 +94,9 @@ class FavouriteTopicListPage extends HookConsumerWidget {
     void remove(BuildContext hostContext, Topic topic) {
       final tid = topic.tid;
       if (tid == null) return;
+      if (selectedTopic.value?.tid == tid) {
+        selectedTopic.value = null;
+      }
       notifier.removeLocally(topic);
       activeUndo.value = AppSnackBar.undo(
         hostContext,
@@ -168,12 +171,19 @@ class FavouriteTopicListPage extends HookConsumerWidget {
           ),
         ),
       ),
-      detailBuilder: (context) => TopicDetailPane(
-        selected: selectedTopic.value,
-        initiallyFavourited: true,
-        emptySubtitle: '从左侧收藏列表选择一篇帖子查看详情',
-        onClose: () => selectedTopic.value = null,
-      ),
+      detailBuilder: (context) {
+        final current = selectedTopic.value;
+        final activeSelected =
+            current != null && state.list.any((t) => t.tid == current.tid)
+            ? current
+            : null;
+        return TopicDetailPane(
+          selected: activeSelected,
+          initiallyFavourited: true,
+          emptySubtitle: '从左侧收藏列表选择一篇帖子查看详情',
+          onClose: () => selectedTopic.value = null,
+        );
+      },
     );
   }
 }

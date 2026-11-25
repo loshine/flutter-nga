@@ -1,20 +1,21 @@
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
+import 'package:flutter_nga/providers/home/home_provider.dart';
 import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
 import 'package:flutter_nga/ui/page/notification/notification_list_page.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 
 /// 顶级「消息」Tab 聚合页：分段切换「短消息」与「提醒信息」，各自展示未读计数。
-class InboxHubPage extends HookConsumerWidget {
+class InboxHubPage extends ConsumerWidget {
   const InboxHubPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tab = useState(0);
+    final tab = ref.watch(inboxHubTabProvider);
+    final accountSession = ref.watch(accountSessionVersionProvider);
     final userInfo = ref.watch(homeDrawerHeaderProvider);
     ref.watch(unreadCountProvider);
     final unread = ref
@@ -43,18 +44,27 @@ class InboxHubPage extends HookConsumerWidget {
               constraints: const BoxConstraints(maxWidth: 420),
               child: AppSegmentedControl<int>(
                 segments: segments,
-                selected: tab.value,
-                onChanged: (next) => tab.value = next,
+                selected: tab,
+                onChanged: (next) =>
+                    ref.read(inboxHubTabProvider.notifier).setTab(next),
               ),
             ),
           ),
         ),
         Expanded(
           child: IndexedStack(
-            index: tab.value,
-            children: const [
-              ConversationListPage(embedded: true, showAppBar: false),
-              NotificationListPage(embedded: true, showAppBar: false),
+            index: tab,
+            children: [
+              ConversationListPage(
+                key: ValueKey('inbox-conversations-$accountSession'),
+                embedded: true,
+                showAppBar: false,
+              ),
+              NotificationListPage(
+                key: ValueKey('inbox-notifications-$accountSession'),
+                embedded: true,
+                showAppBar: false,
+              ),
             ],
           ),
         ),

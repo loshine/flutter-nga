@@ -65,6 +65,20 @@ void main() {
         isError: true,
         message: '登录',
       ));
+
+      const negatedTitleHtml =
+          '<html><head><title>未发表成功</title></head><body></body></html>';
+      expect(TopicDataRepository.parsePostResultHtml(negatedTitleHtml), (
+        isError: true,
+        message: '未发表成功',
+      ));
+
+      const legacyErrorSpanHtml =
+          "<html><body><span style='color:#aaa'>&gt;</span>请先登录<br/></body></html>";
+      expect(TopicDataRepository.parsePostResultHtml(legacyErrorSpanHtml), (
+        isError: true,
+        message: '请先登录',
+      ));
     });
 
     test('空响应或无法识别结构返回错误', () {

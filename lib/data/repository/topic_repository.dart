@@ -101,7 +101,9 @@ class TopicDataRepository implements TopicRepository {
     r'<title>([\s\S]*?)</title>',
     caseSensitive: false,
   );
-  static final _titleSuccessPattern = RegExp(r'发[贴帖]完毕|发表成功|修改完毕|回复成功|操作成功');
+  static final _titleSuccessPattern = RegExp(
+    r'(?<![未不没无非])(发[贴帖]完毕|发表成功|修改完毕|回复成功|操作成功)',
+  );
   static final _htmlCommentOrTagPattern = RegExp(r'<!--[\s\S]*?-->|<[^>]+>');
 
   TopicDataRepository(this.database, this._dio);
@@ -403,12 +405,12 @@ class TopicDataRepository implements TopicRepository {
 
     final code = _msgCodePattern.firstMatch(html)?.group(1);
     final hasErrorPrefix = html.contains('(ERROR:');
-    final isUnverifiedTitleFallback =
-        structuredMessage == null && !_titleSuccessPattern.hasMatch(message);
+    // 缺少新版 msginfostart 且无明确状态码时，仅命中已知成功文案才视为成功。
+    final hasVerifiedSuccessMarker = msgInfo != null || code == '0';
+    final isUnverifiedFallback =
+        !hasVerifiedSuccessMarker && !_titleSuccessPattern.hasMatch(message);
     final isError =
-        hasErrorPrefix ||
-        (code != null && code != '0') ||
-        isUnverifiedTitleFallback;
+        hasErrorPrefix || (code != null && code != '0') || isUnverifiedFallback;
     return (isError: isError, message: message);
   }
 

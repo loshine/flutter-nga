@@ -175,7 +175,7 @@ class NotificationItemWidget extends StatelessWidget {
             ),
         ],
       );
-      if (chosen != null) {
+      if (chosen != null && context.mounted) {
         actions[chosen].onTap();
       }
       return;

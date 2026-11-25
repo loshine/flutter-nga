@@ -1,6 +1,7 @@
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
+import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -206,4 +207,41 @@ void main() {
     notifier.markKnownFavourited();
     expect(container.read(provider).favourite, FavouriteStatus.notFavourited);
   });
+
+  test(
+    'cancelling favourite in detail removes matching topic from favourite list',
+    () async {
+      final repository = _FakeFavouriteRepository();
+      final container = ProviderContainer(
+        overrides: [topicRepositoryProvider.overrideWithValue(repository)],
+      );
+      const key = (tid: 88);
+      final detailProvider = topicDetailProvider(key);
+      final detailSub = container.listen(detailProvider, (_, _) {});
+      final listSub = container.listen(favouriteTopicListProvider, (_, _) {});
+      addTearDown(() {
+        detailSub.close();
+        listSub.close();
+        container.dispose();
+      });
+
+      container
+          .read(favouriteTopicListProvider.notifier)
+          .state = const FavouriteTopicListState(
+        list: [
+          Topic(tid: 88, subject: '已收藏帖'),
+          Topic(tid: 99, subject: '另一帖'),
+        ],
+      );
+
+      final notifier = container.read(detailProvider.notifier);
+      notifier.markKnownFavourited();
+      await notifier.toggleFavourite();
+
+      expect(
+        container.read(favouriteTopicListProvider).list.map((t) => t.tid),
+        [99],
+      );
+    },
+  );
 }

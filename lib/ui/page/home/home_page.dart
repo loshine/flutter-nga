@@ -5,10 +5,13 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/providers/home/home_provider.dart';
+import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
+import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
+import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/home/apple_workspace_shell.dart';
 import 'package:flutter_nga/ui/page/home/inbox_hub_page.dart';
@@ -19,6 +22,8 @@ import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
@@ -109,16 +114,114 @@ class _HomePageContent extends HookConsumerWidget {
     WidgetRef ref,
     int index,
   ) {
-    return switch (index) {
-      0 => [
-        IconButton(
-          tooltip: '搜索',
-          icon: Icon(AppIcons.search(context)),
-          onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
-        ),
-      ],
-      _ => const [],
-    };
+    switch (index) {
+      case 0:
+        return [
+          IconButton(
+            tooltip: '搜索',
+            icon: Icon(AppIcons.search(context)),
+            onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
+          ),
+        ];
+      case 1:
+        final libraryTab = ref.watch(libraryHubTabProvider);
+        if (libraryTab == 1) {
+          final hasHistory = ref.watch(
+            topicHistoryListProvider.select((s) => s.list.isNotEmpty),
+          );
+          return [
+            IconButton(
+              tooltip: '清空浏览历史',
+              icon: Icon(AppIcons.delete(context)),
+              onPressed: hasHistory
+                  ? () => _confirmClearHistory(context, ref)
+                  : null,
+            ),
+          ];
+        }
+        return const [];
+      case 2:
+        final inboxTab = ref.watch(inboxHubTabProvider);
+        if (inboxTab == 0) {
+          return [
+            if (context.isAppleStyle)
+              IconButton(
+                tooltip: '新建短消息',
+                icon: Icon(AppIcons.edit(context)),
+                onPressed: () async {
+                  final sent = await Routes.navigateTo(
+                    context,
+                    '${Routes.SEND_MESSAGE}?mid=0',
+                  );
+                  if (sent == true && context.mounted) {
+                    ref
+                        .read(conversationListProvider.notifier)
+                        .refresh()
+                        .catchError((_) => ConversationListState.initial());
+                  }
+                },
+              ),
+            IconButton(
+              tooltip: '屏蔽用户',
+              icon: Icon(AppIcons.block(context)),
+              onPressed: () =>
+                  Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
+            ),
+          ];
+        }
+        final hasNotifications = ref.watch(
+          notificationListProvider.select((s) => s.notifications.isNotEmpty),
+        );
+        return [
+          IconButton(
+            tooltip: '清空提醒',
+            icon: Icon(AppIcons.delete(context)),
+            onPressed: hasNotifications
+                ? () => _confirmClearNotifications(context, ref)
+                : null,
+          ),
+        ];
+      default:
+        return const [];
+    }
+  }
+
+  void _confirmClearHistory(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => M3ConfirmDialog(
+        title: '清空浏览历史',
+        content: '确定删除全部本地浏览记录吗？此操作无法撤销。',
+        confirmText: '清空',
+        destructive: true,
+        onConfirm: () {
+          ref.read(topicHistoryListProvider.notifier).clean().catchError((err) {
+            AppToast.error(err);
+            return 0;
+          });
+        },
+      ),
+    );
+  }
+
+  void _confirmClearNotifications(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => M3ConfirmDialog(
+        title: '清空提醒',
+        content: '确定清空所有提醒信息吗？此操作无法撤销。',
+        confirmText: '清空',
+        destructive: true,
+        onConfirm: () async {
+          try {
+            await ref.read(notificationListProvider.notifier).clear();
+            AppToast.success('已清空提醒');
+          } catch (err) {
+            AppToast.error(err);
+          }
+        },
+      ),
+    );
   }
 
   void _openCustomForumDialog(BuildContext context) {
@@ -305,22 +408,15 @@ class _HomePageContent extends HookConsumerWidget {
     ValueChanged<int> onDestinationSelected,
     VoidCallback? onTitleTap,
   ) {
-    final mediaQuery = MediaQuery.of(context);
-    final bottomInset = mediaQuery.padding.bottom;
     return AppScaffold(
       title: _buildAnimatedTitle(context, index, onTitleTap),
       actions: _getActionsByPage(context, ref, index),
       automaticallyImplyLeading: false,
       extendBody: true,
       primaryAction: _buildPrimaryAction(context, ref, index),
-      // 通过增大 MediaQuery 底部安全区而非外层 Padding，让列表内容可以滚动穿过
-      // 悬浮 Liquid Glass 底栏下方产生毛玻璃透出，同时滚到底部时不被遮挡。
-      body: MediaQuery(
-        data: mediaQuery.copyWith(
-          padding: mediaQuery.padding.copyWith(bottom: bottomInset + 72),
-        ),
-        child: _buildAnimatedBody(context, index, pageList),
-      ),
+      // extendBody: true 会由 Scaffold 按底栏实测高度自动向 body 注入 padding.bottom，
+      // 既能让滚动列表穿过液态玻璃底栏产生透出效果，又自动适配动态大字体与键盘弹出。
+      body: _buildAnimatedBody(context, index, pageList),
       bottomNavigationBar: _AppleFloatingTabBar(
         selectedIndex: index,
         destinations: destinations,

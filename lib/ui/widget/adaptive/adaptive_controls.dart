@@ -90,76 +90,72 @@ class AppSegmentedControl<T extends Object> extends StatelessWidget {
     required this.segments,
     required this.selected,
     required this.onChanged,
+    this.expand = true,
   });
 
   final List<AppSegment<T>> segments;
   final T selected;
   final ValueChanged<T> onChanged;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
     if (context.isAppleStyle) {
       final colorScheme = Theme.of(context).colorScheme;
       final isDark = Theme.of(context).brightness == Brightness.dark;
-      return SizedBox(
-        width: double.infinity,
-        child: CupertinoSlidingSegmentedControl<T>(
-          groupValue: selected,
-          backgroundColor: isDark
-              ? const Color(0xFF2C2C2E)
-              : const Color(0xFFE5E5EA),
-          thumbColor: isDark ? const Color(0xFF48484A) : Colors.white,
-          onValueChanged: (value) {
-            if (value != null) onChanged(value);
-          },
-          children: {
-            for (final segment in segments)
-              segment.value: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (segment.icon != null) ...[
-                      Icon(
-                        segment.icon,
-                        size: 16,
-                        color: colorScheme.onSurface,
-                      ),
-                      const SizedBox(width: 6),
-                    ],
-                    Text(
-                      segment.label,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: segment.value == selected
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
+      final control = CupertinoSlidingSegmentedControl<T>(
+        groupValue: selected,
+        backgroundColor: isDark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFE5E5EA),
+        thumbColor: isDark ? const Color(0xFF48484A) : Colors.white,
+        onValueChanged: (value) {
+          if (value != null) onChanged(value);
+        },
+        children: {
+          for (final segment in segments)
+            segment.value: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (segment.icon != null) ...[
+                    Icon(segment.icon, size: 16, color: colorScheme.onSurface),
+                    const SizedBox(width: 6),
                   ],
-                ),
+                  Text(
+                    segment.label,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: segment.value == selected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
-          },
-        ),
+            ),
+        },
       );
+      return expand
+          ? SizedBox(width: double.infinity, child: control)
+          : control;
     }
 
-    return SizedBox(
-      width: double.infinity,
-      child: SegmentedButton<T>(
-        segments: [
-          for (final segment in segments)
-            ButtonSegment<T>(
-              value: segment.value,
-              label: Text(segment.label),
-              icon: segment.icon != null ? Icon(segment.icon) : null,
-            ),
-        ],
-        selected: {selected},
-        onSelectionChanged: (values) => onChanged(values.first),
-      ),
+    final button = SegmentedButton<T>(
+      segments: [
+        for (final segment in segments)
+          ButtonSegment<T>(
+            value: segment.value,
+            label: Text(segment.label),
+            icon: segment.icon != null ? Icon(segment.icon) : null,
+          ),
+      ],
+      selected: {selected},
+      onSelectionChanged: (values) => onChanged(values.first),
     );
+    return expand ? SizedBox(width: double.infinity, child: button) : button;
   }
 }
 

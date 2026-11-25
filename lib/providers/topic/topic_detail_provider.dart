@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 
 typedef TopicDetailKey = ({int tid});
 
@@ -127,6 +129,11 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
             : FavouriteStatus.favourited,
         favouriteBusy: false,
       );
+      if (remove) {
+        ref
+            .read(favouriteTopicListProvider.notifier)
+            .removeConfirmedByTid(key.tid);
+      }
       return message;
     } catch (err) {
       if (ref.mounted) state = state.copyWith(favouriteBusy: false);

@@ -189,6 +189,7 @@ class TopicHistoryListNotifier extends Notifier<TopicHistoryListState> {
   Future<int> clean() async {
     _pending.clear();
     final count = await Data().topicRepository.deleteAllTopicHistory();
+    state = const TopicHistoryListState();
     ref.read(readTopicIdsProvider.notifier).reload();
     return count;
   }

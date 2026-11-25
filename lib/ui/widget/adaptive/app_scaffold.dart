@@ -350,6 +350,9 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
+    final mediaPadding = MediaQuery.paddingOf(context);
+    final baseHorizontal = isMacDesktop ? 10.0 : 8.0;
+
     return LiquidGlassSurface(
       variant: LiquidGlassVariant.bar,
       borderRadius: BorderRadius.zero,
@@ -368,8 +371,11 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
               SizedBox(
                 height: _baseHeight,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMacDesktop ? 10 : 8,
+                  padding: EdgeInsets.fromLTRB(
+                    baseHorizontal + mediaPadding.left,
+                    0,
+                    baseHorizontal + mediaPadding.right,
+                    0,
                   ),
                   child: toolbarContent,
                 ),
