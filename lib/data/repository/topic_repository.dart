@@ -85,8 +85,23 @@ abstract class TopicRepository {
 }
 
 class TopicDataRepository implements TopicRepository {
-  static const _RESULT_START_TAG = "<span style='color:#aaa'>&gt;</span>";
-  static const _RESULT_END_TAG = "<br/>";
+  static final _msgInfoPattern = RegExp(
+    r'<!--msginfostart-->([\s\S]*?)<!--msginfoend-->',
+    caseSensitive: false,
+  );
+  static final _msgCodePattern = RegExp(
+    r'<!--msgcodestart-->\s*(\d+)\s*<!--msgcodeend-->',
+    caseSensitive: false,
+  );
+  static final _spanMessagePattern = RegExp(
+    r'<span[^>]*>&gt;</span>\s*([\s\S]*?)<br\s*/?>',
+    caseSensitive: false,
+  );
+  static final _titlePattern = RegExp(
+    r'<title>([\s\S]*?)</title>',
+    caseSensitive: false,
+  );
+  static final _htmlCommentOrTagPattern = RegExp(r'<!--[\s\S]*?-->|<[^>]+>');
 
   TopicDataRepository(this.database, this._dio);
 
@@ -312,27 +327,10 @@ class TopicDataRepository implements TopicRepository {
         "&post_content=${code_utils.urlEncode(content)}"
         "&action=new"
         "&post_subject=${code_utils.urlEncode(subject)}"
-        "&fid=$fid${isAnonymous ? "anony=1" : ""}"
+        "&fid=$fid${isAnonymous ? "&anony=1" : ""}"
         "${!code_utils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
         "${!code_utils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
-    try {
-      final options = Options()
-        ..contentType = Headers.formUrlEncodedContentType;
-      Response<String> response = await _dio.post(
-        "post.php",
-        data: postData,
-        options: options,
-      );
-      final html = response.data!;
-      int start = html.indexOf(_RESULT_START_TAG);
-      if (start == -1) return "发帖失败";
-      start += _RESULT_START_TAG.length;
-      int end = html.indexOf(_RESULT_END_TAG, start);
-      if (end < 0) return "发帖失败";
-      return html.substring(start, end);
-    } catch (err) {
-      rethrow;
-    }
+    return _submitPostForm(postData);
   }
 
   @override
@@ -351,27 +349,58 @@ class TopicDataRepository implements TopicRepository {
         "&tid=$tid"
         "&action=reply"
         "&post_subject=${code_utils.urlEncode(subject)}"
-        "&fid=$fid${isAnonymous ? "anony=1" : ""}"
+        "&fid=$fid${isAnonymous ? "&anony=1" : ""}"
         "${!code_utils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
         "${!code_utils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
-    try {
-      final options = Options();
-      options.contentType = Headers.formUrlEncodedContentType;
-      Response<String> response = await _dio.post(
-        "post.php",
-        data: postData,
-        options: options,
+    return _submitPostForm(postData);
+  }
+
+  Future<String> _submitPostForm(String postData) async {
+    final options = Options()..contentType = Headers.formUrlEncodedContentType;
+    final Response<String> response = await _dio.post(
+      "post.php",
+      data: postData,
+      options: options,
+    );
+    final result = parsePostResultHtml(response.data ?? '');
+    if (result.isError) {
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        error: result.message,
+        type: DioExceptionType.unknown,
       );
-      final html = response.data!;
-      int start = html.indexOf(_RESULT_START_TAG);
-      if (start == -1) return "发帖失败";
-      start += _RESULT_START_TAG.length;
-      int end = html.indexOf(_RESULT_END_TAG, start);
-      if (end < 0) return "发帖失败";
-      return html.substring(start, end);
-    } catch (err) {
-      rethrow;
     }
+    return result.message;
+  }
+
+  /// 解析 `post.php` 返回的 HTML 结果页：
+  /// - 兼容新版 `<!--msginfostart-->...<!--msginfoend-->`、`<span class='sub'>&gt;</span>`
+  ///   与旧版 `<span style='color:#aaa'>&gt;</span>`，以及 `<title>` 兜底；
+  /// - 检测到 `(ERROR:` 或非 0 的 `<!--msgcodestart-->` 时标记为错误，避免失败被当成成功。
+  @visibleForTesting
+  static ({bool isError, String message}) parsePostResultHtml(String html) {
+    String? clean(String? raw) {
+      if (raw == null) return null;
+      final stripped = code_utils
+          .unescapeHtml(raw.replaceAll(_htmlCommentOrTagPattern, ''))
+          .trim();
+      return stripped.isEmpty ? null : stripped;
+    }
+
+    final message =
+        clean(_msgInfoPattern.firstMatch(html)?.group(1)) ??
+        clean(_spanMessagePattern.firstMatch(html)?.group(1)) ??
+        clean(_titlePattern.firstMatch(html)?.group(1));
+
+    if (message == null) {
+      return (isError: true, message: '发帖失败');
+    }
+
+    final code = _msgCodePattern.firstMatch(html)?.group(1);
+    final hasErrorPrefix = html.contains('(ERROR:');
+    final isError = hasErrorPrefix || (code != null && code != '0');
+    return (isError: isError, message: message);
   }
 
   @override
