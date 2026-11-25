@@ -57,6 +57,9 @@ class ForumIdentity {
 
   @override
   int get hashCode => Object.hash(id, type);
+
+  @override
+  String toString() => 'ForumIdentity($storageKey)';
 }
 
 /// 版块组实体类

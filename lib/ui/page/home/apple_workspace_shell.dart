@@ -212,7 +212,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
     Widget buildMainWorkspace() {
       return switch (destination.value) {
         _FavouriteForumDestination(:final forum) => ForumDetailPage(
-          key: ValueKey('workspace-fav-forum-${forum.identity}'),
+          key: ValueKey('workspace-fav-forum-${forum.identity.storageKey}'),
           fid: forum.fid,
           name: forum.name,
           type: forum.type,
@@ -221,7 +221,9 @@ class AppleWorkspaceShell extends HookConsumerWidget {
         ),
         _AllForumsDestination(:final openedForum) when openedForum != null =>
           ForumDetailPage(
-            key: ValueKey('workspace-dir-forum-${openedForum.identity}'),
+            key: ValueKey(
+              'workspace-dir-forum-${openedForum.identity.storageKey}',
+            ),
             fid: openedForum.fid,
             name: openedForum.name,
             type: openedForum.type,

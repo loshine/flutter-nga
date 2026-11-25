@@ -4,15 +4,19 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
+import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/data/repository/message_repository.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/forum_category_list_provider.dart';
+import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
+import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
+import 'package:flutter_nga/ui/page/forum_detail/forum_detail_page.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
 import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
@@ -54,11 +58,38 @@ class _FakeInterfaceSettingsNotifier extends InterfaceSettingsNotifier {
 }
 
 class _FakeFavouriteForumListNotifier extends FavouriteForumListNotifier {
+  _FakeFavouriteForumListNotifier([this._forums = const []]);
+
+  final List<Forum> _forums;
+
   @override
-  FavouriteForumListState build() => const FavouriteForumListState();
+  FavouriteForumListState build() =>
+      FavouriteForumListState(forums: _forums, isInitialized: true);
 
   @override
   Future<void> refresh() async {}
+}
+
+class _RecordingForumDetailNotifier extends ForumDetailNotifier {
+  _RecordingForumDetailNotifier(super.fid, this.refreshedFids);
+
+  final List<int> refreshedFids;
+
+  @override
+  Future<ForumDetailState> refresh(bool recommend, int? type) async {
+    refreshedFids.add(fid);
+    state = ForumDetailState(
+      page: 1,
+      maxPage: 1,
+      list: [Topic(tid: fid.abs() + 100, fid: fid, subject: '版块 $fid 主题')],
+    );
+    return state;
+  }
+}
+
+class _FakeReadTopicIdsNotifier extends ReadTopicIdsNotifier {
+  @override
+  Set<int> build() => const {};
 }
 
 class _FakeForumCategoryListNotifier extends ForumCategoryListNotifier {
@@ -308,6 +339,89 @@ void main() {
       await tester.tap(find.byTooltip('展开侧边栏'));
       await tester.pumpAndSettle();
       expect(find.byTooltip('收起侧边栏'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'switching favourite forums in AppleWorkspaceShell creates distinct ForumDetailPage keys and auto-refreshes each forum',
+    (tester) async {
+      expect(
+        const ForumIdentity(-7, 0).toString(),
+        isNot(equals(const ForumIdentity(334, 0).toString())),
+      );
+
+      final refreshedFids = <int>[];
+      const forumA = Forum(-7, '大漩涡');
+      const forumB = Forum(334, '硬件区');
+
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            homeDrawerHeaderProvider.overrideWith(
+              () => _FakeHeaderNotifier(const UserInfo(uid: 1, username: '测试')),
+            ),
+            messageRepositoryProvider.overrideWithValue(
+              _FakeMessageRepository(),
+            ),
+            blocklistSettingsProvider.overrideWith(_FakeBlocklistNotifier.new),
+            interfaceSettingsProvider.overrideWith(
+              _FakeInterfaceSettingsNotifier.new,
+            ),
+            favouriteForumListProvider.overrideWith(
+              () => _FakeFavouriteForumListNotifier(const [forumA, forumB]),
+            ),
+            forumCategoryListProvider.overrideWith(
+              _FakeForumCategoryListNotifier.new,
+            ),
+            forumDetailProvider(forumA.fid).overrideWith(
+              () => _RecordingForumDetailNotifier(forumA.fid, refreshedFids),
+            ),
+            forumDetailProvider(forumB.fid).overrideWith(
+              () => _RecordingForumDetailNotifier(forumB.fid, refreshedFids),
+            ),
+            readTopicIdsProvider.overrideWith(_FakeReadTopicIdsNotifier.new),
+          ],
+          child: AppDesignStyleScope(
+            style: AppDesignStyle.apple,
+            nativeLiquidGlassSupported: false,
+            macTitlebarInset: 52,
+            child: MaterialApp(
+              theme: ThemeBuilder.applyDesignStyle(
+                ThemeBuilder.buildLightTheme(Colors.brown),
+                isAppleStyle: true,
+                isMacDesktop: true,
+              ),
+              home: const HomePage(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(refreshedFids, contains(-7));
+      expect(find.text('版块 -7 主题'), findsOneWidget);
+      final firstKey = tester
+          .widget<ForumDetailPage>(find.byType(ForumDetailPage))
+          .key;
+
+      await tester.tap(find.text('硬件区'));
+      await tester.pumpAndSettle();
+
+      final secondKey = tester
+          .widget<ForumDetailPage>(find.byType(ForumDetailPage))
+          .key;
+      expect(secondKey, isNot(equals(firstKey)));
+      expect(refreshedFids, contains(334));
+      expect(find.text('版块 334 主题'), findsOneWidget);
+      expect(find.text('暂无帖子'), findsNothing);
+
+      // 让 EasyRefresh 完成态的默认 1s 计时器走完，避免 teardown 残留 pending timer
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
     },
   );
 }
