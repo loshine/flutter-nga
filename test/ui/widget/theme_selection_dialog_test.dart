@@ -92,5 +92,14 @@ void main() {
 
     expect(find.byType(Dialog), findsOneWidget);
     expect(find.byType(BottomSheet), findsNothing);
+
+    // 宽屏 Dialog 标题顶部留白应符合 M3 24dp 规范
+    final dialogRect = tester.getRect(
+      find
+          .descendant(of: find.byType(Dialog), matching: find.byType(Material))
+          .first,
+    );
+    final titleRect = tester.getRect(find.text('主题与配色'));
+    expect(titleRect.top - dialogRect.top, greaterThanOrEqualTo(24));
   });
 }

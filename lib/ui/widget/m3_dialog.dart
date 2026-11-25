@@ -39,7 +39,12 @@ Future<T?> showM3SelectionSheet<T>({
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxDialogWidth),
-        child: builder(dialogContext),
+        // 子面板在 embedded 模式下按带 DragHandle 的 BottomSheet 预留了 4dp 顶部间距，
+        // Dialog 无拖动手柄，在此补足 20dp 以对齐 M3 Dialog 的 24dp 顶部规范。
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: builder(dialogContext),
+        ),
       ),
     ),
   );

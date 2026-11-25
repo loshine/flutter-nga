@@ -52,43 +52,53 @@ class SearchPage extends HookConsumerWidget {
             left: hasBackButton ? Dimen.spacingXS : Dimen.spacingL,
             right: Dimen.spacingL,
           ),
-          child: SearchBar(
-            controller: searchQuery,
-            focusNode: focusNode,
-            autoFocus: true,
-            hintText: hintText,
-            elevation: const WidgetStatePropertyAll(0),
-            backgroundColor: WidgetStatePropertyAll(
-              colorScheme.surfaceContainerHigh,
-            ),
-            constraints: const BoxConstraints(minHeight: 48, maxHeight: 52),
-            padding: const WidgetStatePropertyAll(
-              EdgeInsets.only(left: 16, right: 4),
-            ),
-            textInputAction: TextInputAction.search,
-            keyboardType:
-                searchOptions.firstRadio == FIRST_RADIO_USER &&
-                    searchOptions.userRadio == USER_RADIO_UID
-                ? TextInputType.number
-                : TextInputType.text,
-            onSubmitted: (text) => _onSearch(context, text, searchOptions, fid),
-            trailing: [
-              if (inputVisible)
-                IconButton(
-                  tooltip: '清除',
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    searchQuery.clear();
-                    focusNode.requestFocus();
-                  },
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: kReadableMaxWidth),
+              child: SearchBar(
+                controller: searchQuery,
+                focusNode: focusNode,
+                autoFocus: true,
+                hintText: hintText,
+                elevation: const WidgetStatePropertyAll(0),
+                backgroundColor: WidgetStatePropertyAll(
+                  colorScheme.surfaceContainerHigh,
                 ),
-              IconButton(
-                tooltip: '搜索',
-                icon: const Icon(Icons.search),
-                onPressed: () =>
-                    _onSearch(context, searchQuery.text, searchOptions, fid),
+                constraints: const BoxConstraints(minHeight: 48, maxHeight: 52),
+                padding: const WidgetStatePropertyAll(
+                  EdgeInsets.only(left: 16, right: 4),
+                ),
+                textInputAction: TextInputAction.search,
+                keyboardType:
+                    searchOptions.firstRadio == FIRST_RADIO_USER &&
+                        searchOptions.userRadio == USER_RADIO_UID
+                    ? TextInputType.number
+                    : TextInputType.text,
+                onSubmitted: (text) =>
+                    _onSearch(context, text, searchOptions, fid),
+                trailing: [
+                  if (inputVisible)
+                    IconButton(
+                      tooltip: '清除',
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        searchQuery.clear();
+                        focusNode.requestFocus();
+                      },
+                    ),
+                  IconButton(
+                    tooltip: '搜索',
+                    icon: const Icon(Icons.search),
+                    onPressed: () => _onSearch(
+                      context,
+                      searchQuery.text,
+                      searchOptions,
+                      fid,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

@@ -14,15 +14,17 @@ class ReadableWidth extends StatelessWidget {
     super.key,
     required this.child,
     this.maxWidth = kReadableMaxWidth,
+    this.alignment = Alignment.topCenter,
   });
 
   final Widget child;
   final double maxWidth;
+  final AlignmentGeometry alignment;
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.topCenter,
+      alignment: alignment,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: child,

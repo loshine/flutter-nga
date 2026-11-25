@@ -11,10 +11,18 @@ class NotificationItemWidget extends StatelessWidget {
   /// 长按菜单中「不再提示」的回调，为空时不显示该项。
   final ValueChanged<NoHintTarget>? onNoHint;
 
+  /// 自定义点击回调（如大屏双栏时在右侧打开目标内容）
+  final VoidCallback? onTap;
+
+  /// 是否在大屏双栏列表中处于选中状态
+  final bool selected;
+
   const NotificationItemWidget({
     super.key,
     required this.notification,
     this.onNoHint,
+    this.onTap,
+    this.selected = false,
   });
 
   @override
@@ -25,66 +33,80 @@ class NotificationItemWidget extends StatelessWidget {
     final target = notification.target;
     final menuActions = _menuActions(context);
 
-    return InkWell(
-      onTap: target == null
-          ? null
-          : () => openNotificationTarget(context, notification),
-      onLongPress: menuActions.isEmpty
-          ? null
-          : () => _showMenu(context, menuActions),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _NotificationIcon(notification: notification),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        if (description.actor != null)
-                          TextSpan(
-                            text: '${description.actor} ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                        TextSpan(text: description.action),
-                      ],
-                    ),
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                    ),
+    return Material(
+      color: selected
+          ? colorScheme.secondaryContainer.withValues(alpha: 0.45)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: target == null
+            ? null
+            : (onTap ?? () => openNotificationTarget(context, notification)),
+        onLongPress: menuActions.isEmpty
+            ? null
+            : () => _showMenu(context, menuActions),
+        child: DecoratedBox(
+          decoration: selected
+              ? BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: colorScheme.primary, width: 3),
                   ),
-                  if (description.detail != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      description.detail!,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                )
+              : const BoxDecoration(),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(selected ? 13 : 16, 12, 16, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _NotificationIcon(notification: notification),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            if (description.actor != null)
+                              TextSpan(
+                                text: '${description.actor} ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            TextSpan(text: description.action),
+                          ],
+                        ),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                  ],
-                  if (notification.time > 0) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      code_utils.formatPostDate(notification.time * 1000),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.outline,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+                      if (description.detail != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          description.detail!,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                      if (notification.time > 0) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          code_utils.formatPostDate(notification.time * 1000),
+                          style: textTheme.labelSmall?.copyWith(
+                            color: colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

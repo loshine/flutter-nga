@@ -51,4 +51,29 @@ void main() {
       expect(errorMessage(Exception('boom')), 'Exception: boom');
     });
   });
+
+  group('isAuthRequiredError', () {
+    test('detects NGA unauthenticated error messages', () {
+      for (final msg in [
+        '未登录',
+        '1:未登录',
+        '请登录后访问',
+        '15:访客不能直接访问',
+        '未登录时服务端返回数据不完整，请登录后重试',
+      ]) {
+        final err = DioException(
+          requestOptions: RequestOptions(path: '/thread.php'),
+          error: msg,
+        );
+        expect(isAuthRequiredError(err), isTrue, reason: msg);
+        expect(isAuthRequiredError(msg), isTrue, reason: msg);
+      }
+    });
+
+    test('returns false for non-auth errors', () {
+      expect(isAuthRequiredError(null), isFalse);
+      expect(isAuthRequiredError('网络错误，请稍候重试。'), isFalse);
+      expect(isAuthRequiredError(Exception('连接超时')), isFalse);
+    });
+  });
 }

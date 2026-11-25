@@ -56,76 +56,97 @@ class MinePage extends HookConsumerWidget {
     }, []);
 
     final mediaPadding = MediaQuery.paddingOf(context);
+    final communityGroup = M3SettingsGroup(
+      title: '社区',
+      children: [
+        M3SettingsTile(
+          icon: Icons.bookmark_outline,
+          title: '贴子收藏',
+          subtitle: '收藏的贴子',
+          onTap: () => Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
+        ),
+        M3SettingsTile(
+          icon: Icons.history_outlined,
+          title: '浏览历史',
+          subtitle: '最近浏览的贴子',
+          onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
+        ),
+        // 从短消息 / 提醒页返回后刷新角标
+        M3SettingsTile(
+          icon: Icons.mail_outlined,
+          title: '短消息',
+          subtitle: '私信会话',
+          badgeCount: unread.messages,
+          onTap: () => Routes.navigateTo(
+            context,
+            Routes.CONVERSATIONS,
+          ).whenComplete(refreshUnread),
+        ),
+        M3SettingsTile(
+          icon: Icons.notifications_outlined,
+          title: '提醒信息',
+          subtitle: '回复与系统通知',
+          badgeCount: unread.notifications,
+          onTap: () => Routes.navigateTo(
+            context,
+            Routes.NOTIFICATIONS,
+          ).whenComplete(refreshUnread),
+        ),
+      ],
+    );
+    final appGroup = M3SettingsGroup(
+      title: '应用',
+      children: [
+        M3SettingsTile(
+          icon: Icons.settings_outlined,
+          title: '设置',
+          subtitle: '主题、网络与屏蔽',
+          onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
+        ),
+        M3SettingsTile(
+          icon: Icons.info_outline,
+          title: '关于',
+          subtitle: '版本与开源信息',
+          onTap: () => Routes.navigateTo(context, Routes.ABOUT),
+        ),
+      ],
+    );
 
-    return ReadableListPadding(
-      padding: EdgeInsets.fromLTRB(
-        mediaPadding.left,
-        Dimen.spacingS,
-        mediaPadding.right,
-        Dimen.spacingL + mediaPadding.bottom,
-      ),
-      builder: (context, padding) => ListView(
-        padding: padding,
-        children: [
-          _UserHeaderCard(userInfo: userInfo),
-          M3SettingsGroup(
-            title: '社区',
-            children: [
-              M3SettingsTile(
-                icon: Icons.bookmark_outline,
-                title: '贴子收藏',
-                subtitle: '收藏的贴子',
-                onTap: () =>
-                    Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
-              ),
-              M3SettingsTile(
-                icon: Icons.history_outlined,
-                title: '浏览历史',
-                subtitle: '最近浏览的贴子',
-                onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
-              ),
-              // 从短消息 / 提醒页返回后刷新角标
-              M3SettingsTile(
-                icon: Icons.mail_outlined,
-                title: '短消息',
-                subtitle: '私信会话',
-                badgeCount: unread.messages,
-                onTap: () => Routes.navigateTo(
-                  context,
-                  Routes.CONVERSATIONS,
-                ).whenComplete(refreshUnread),
-              ),
-              M3SettingsTile(
-                icon: Icons.notifications_outlined,
-                title: '提醒信息',
-                subtitle: '回复与系统通知',
-                badgeCount: unread.notifications,
-                onTap: () => Routes.navigateTo(
-                  context,
-                  Routes.NOTIFICATIONS,
-                ).whenComplete(refreshUnread),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTwoColumn = constraints.maxWidth >= 720;
+        final basePadding = EdgeInsets.fromLTRB(
+          mediaPadding.left,
+          Dimen.spacingS,
+          mediaPadding.right,
+          Dimen.spacingL + mediaPadding.bottom,
+        );
+        final listPadding = readableListPadding(
+          constraints.maxWidth,
+          base: basePadding,
+          maxWidth: isTwoColumn ? 1000 : kReadableMaxWidth,
+        );
+
+        return ListView(
+          padding: listPadding,
+          children: [
+            _UserHeaderCard(userInfo: userInfo),
+            if (isTwoColumn)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: communityGroup),
+                  const SizedBox(width: Dimen.spacingS),
+                  Expanded(child: appGroup),
+                ],
+              )
+            else ...[
+              communityGroup,
+              appGroup,
             ],
-          ),
-          M3SettingsGroup(
-            title: '应用',
-            children: [
-              M3SettingsTile(
-                icon: Icons.settings_outlined,
-                title: '设置',
-                subtitle: '主题、网络与屏蔽',
-                onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
-              ),
-              M3SettingsTile(
-                icon: Icons.info_outline,
-                title: '关于',
-                subtitle: '版本与开源信息',
-                onTap: () => Routes.navigateTo(context, Routes.ABOUT),
-              ),
-            ],
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }

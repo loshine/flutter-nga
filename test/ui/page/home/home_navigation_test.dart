@@ -165,7 +165,7 @@ void main() {
   );
 
   testWidgets(
-    'expanded screen uses extended NavigationRail with bottom-right FAB',
+    'expanded screen uses permanent NavigationDrawer wrapping icon and label with bottom-right FAB',
     (tester) async {
       await _pumpHome(
         tester,
@@ -173,12 +173,38 @@ void main() {
         user: const UserInfo(uid: 1, username: '测试用户'),
       );
 
-      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.extended, isTrue);
-      expect(rail.labelType, NavigationRailLabelType.none);
+      expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(NavigationDrawer), findsOneWidget);
+      final drawer = tester.widget<NavigationDrawer>(
+        find.byType(NavigationDrawer),
+      );
+      expect(drawer.selectedIndex, 0);
+
+      // 选中胶囊同时包裹图标和文字
+      final indicatorFinder = find.descendant(
+        of: find.byType(NavigationDrawer),
+        matching: find.byType(NavigationIndicator),
+      );
+      expect(indicatorFinder, findsNWidgets(2));
+      final indicatorRect = tester.getRect(indicatorFinder.first);
+      final iconRect = tester.getRect(
+        find.descendant(
+          of: find.byType(NavigationDrawer),
+          matching: find.byIcon(Icons.forum),
+        ),
+      );
+      final labelRect = tester.getRect(
+        find.descendant(
+          of: find.byType(NavigationDrawer),
+          matching: find.text('社区'),
+        ),
+      );
+      expect(indicatorRect.left, lessThanOrEqualTo(iconRect.left));
+      expect(indicatorRect.right, greaterThanOrEqualTo(labelRect.right));
+
       expect(
         find.descendant(
-          of: find.byType(NavigationRail),
+          of: find.byType(NavigationDrawer),
           matching: find.byTooltip('添加自定义版面'),
         ),
         findsNothing,
@@ -191,14 +217,34 @@ void main() {
       final fabRect = tester.getRect(fabFinder);
       expect(fabRect.right, greaterThan(800));
       expect(fabRect.bottom, greaterThan(600));
+
+      // 点击「我的」切换到第二个目标，选中胶囊随之切换
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationDrawer),
+          matching: find.text('我的'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<NavigationDrawer>(find.byType(NavigationDrawer))
+            .selectedIndex,
+        1,
+      );
     },
   );
 
-  test('NavigationBar theme uses surfaceContainer for tonal separation', () {
+  test('NavigationBar and NavigationDrawer themes use expected M3 colors', () {
     final theme = ThemeBuilder.buildLightTheme(Colors.brown);
     expect(
       theme.navigationBarTheme.backgroundColor,
       theme.colorScheme.surfaceContainer,
     );
+    expect(
+      theme.navigationDrawerTheme.indicatorColor,
+      theme.colorScheme.secondaryContainer,
+    );
+    expect(theme.navigationDrawerTheme.indicatorShape, const StadiumBorder());
   });
 }

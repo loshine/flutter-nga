@@ -18,7 +18,22 @@ enum _MenuAction { invite, leave }
 class ConversationDetailPage extends HookConsumerWidget {
   final int mid;
 
-  const ConversationDetailPage({super.key, required this.mid});
+  /// 是否作为大屏双栏布局的右侧内嵌面板展示
+  final bool embedded;
+
+  /// 内嵌模式下退出对话成功后的回调（替代路由 pop）
+  final VoidCallback? onLeft;
+
+  /// 内嵌模式下关闭详情面板的回调
+  final VoidCallback? onClose;
+
+  const ConversationDetailPage({
+    super.key,
+    required this.mid,
+    this.embedded = false,
+    this.onLeft,
+    this.onClose,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -93,7 +108,12 @@ class ConversationDetailPage extends HookConsumerWidget {
       try {
         final message = await notifier.leave();
         AppToast.success(message ?? '已退出对话');
-        if (context.mounted) Routes.pop(context, true);
+        if (!context.mounted) return;
+        if (embedded) {
+          onLeft?.call();
+        } else {
+          Routes.pop(context, true);
+        }
       } catch (err) {
         AppToast.error(err);
       }
@@ -121,6 +141,8 @@ class ConversationDetailPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: !embedded,
+        centerTitle: embedded ? false : null,
         title: const Text('消息详情'),
         actions: [
           PopupMenuButton<_MenuAction>(
@@ -147,6 +169,12 @@ class ConversationDetailPage extends HookConsumerWidget {
               ),
             ],
           ),
+          if (embedded && onClose != null)
+            IconButton(
+              tooltip: '关闭',
+              icon: const Icon(Icons.close),
+              onPressed: onClose,
+            ),
         ],
       ),
       body: EasyRefresh(

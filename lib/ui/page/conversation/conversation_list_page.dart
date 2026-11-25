@@ -1,7 +1,10 @@
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
+import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -18,6 +21,7 @@ class ConversationListPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final loadStatus = useListLoadStatus();
+    final selectedMid = useState<int?>(null);
     final state = ref.watch(conversationListProvider);
     final notifier = ref.read(conversationListProvider.notifier);
 
@@ -53,51 +57,83 @@ class ConversationListPage extends HookConsumerWidget {
 
     useInitialRefresh(refreshController);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('短消息'),
-        actions: [
-          IconButton(
-            tooltip: '屏蔽用户',
-            icon: const Icon(Icons.block),
-            onPressed: () =>
-                Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
-          ),
-        ],
-      ),
-      body: EasyRefresh(
-        controller: refreshController,
-        onRefresh: onRefresh,
-        onLoad: state.enablePullUp ? onLoading : null,
-        child: ListStatusSwitcher(
-          status: loadStatus,
-          isEmpty: state.list.isEmpty,
-          emptyMessage: '暂无短消息',
-          emptyIcon: Icons.mail_outline,
-          onRetry: refreshController.callRefresh,
-          child: ReadableListPadding(
-            builder: (context, padding) => ListView.builder(
-              padding: padding,
-              itemCount: state.list.length,
-              itemBuilder: (context, index) => ConversationItemWidget(
-                conversation: state.list[index],
-                onLeft: refreshController.callRefresh,
+    return MasterDetailLayout(
+      masterBuilder: (context, isTwoPane) => Scaffold(
+        appBar: AppBar(
+          title: const Text('短消息'),
+          actions: [
+            IconButton(
+              tooltip: '屏蔽用户',
+              icon: const Icon(Icons.block),
+              onPressed: () =>
+                  Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
+            ),
+          ],
+        ),
+        body: EasyRefresh(
+          controller: refreshController,
+          onRefresh: onRefresh,
+          onLoad: state.enablePullUp ? onLoading : null,
+          child: ListStatusSwitcher(
+            status: loadStatus,
+            isEmpty: state.list.isEmpty,
+            emptyMessage: '暂无短消息',
+            emptyIcon: Icons.mail_outline,
+            onRetry: refreshController.callRefresh,
+            child: ReadableListPadding(
+              builder: (context, padding) => ListView.builder(
+                padding: padding,
+                itemCount: state.list.length,
+                itemBuilder: (context, index) {
+                  final conversation = state.list[index];
+                  return ConversationItemWidget(
+                    conversation: conversation,
+                    selected:
+                        isTwoPane && selectedMid.value == conversation.mid,
+                    onTap: isTwoPane && conversation.mid != null
+                        ? () => selectedMid.value = conversation.mid
+                        : null,
+                    onLeft: refreshController.callRefresh,
+                  );
+                },
               ),
             ),
           ),
         ),
+        floatingActionButton: FloatingActionButton(
+          tooltip: '新建短消息',
+          onPressed: () async {
+            final sent = await Routes.navigateTo(
+              context,
+              "${Routes.SEND_MESSAGE}?mid=0",
+            );
+            if (sent == true && context.mounted) {
+              refreshController.callRefresh();
+            }
+          },
+          child: const Icon(Icons.edit_outlined),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: '新建短消息',
-        onPressed: () async {
-          final sent = await Routes.navigateTo(
-            context,
-            "${Routes.SEND_MESSAGE}?mid=0",
+      detailBuilder: (context) {
+        final mid = selectedMid.value;
+        if (mid == null) {
+          return const MasterDetailEmptyPlaceholder(
+            icon: Icons.mail_outline,
+            title: '选择一段对话查看消息',
+            subtitle: '点击左下角按钮可新建短消息',
           );
-          if (sent == true && context.mounted) refreshController.callRefresh();
-        },
-        child: const Icon(Icons.edit_outlined),
-      ),
+        }
+        return ConversationDetailPage(
+          key: ValueKey('embedded-conversation-$mid'),
+          mid: mid,
+          embedded: true,
+          onLeft: () {
+            selectedMid.value = null;
+            refreshController.callRefresh();
+          },
+          onClose: () => selectedMid.value = null,
+        );
+      },
     );
   }
 }

@@ -14,6 +14,8 @@ class TopicListItemWidget extends ConsumerWidget {
     super.key,
     required this.topic,
     this.blockMode,
+    this.onTap,
+    this.selected = false,
     this.onLongPress,
     this.trailing,
   });
@@ -22,6 +24,13 @@ class TopicListItemWidget extends ConsumerWidget {
 
   /// 主题被屏蔽时的展示模式，由页面通过 [BlockFilter] 判定；null 表示正常展示
   final BlockMode? blockMode;
+
+  /// 自定义点击回调（如大屏双栏时在右侧打开详情）；为空则跳转到独立详情页
+  final VoidCallback? onTap;
+
+  /// 是否在大屏双栏列表中处于当前选中状态
+  final bool selected;
+
   final GestureLongPressCallback? onLongPress;
 
   /// 行尾操作区（如「更多」菜单按钮），显示在标题右侧
@@ -55,38 +64,52 @@ class TopicListItemWidget extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        InkWell(
-          onTap: () => _goTopicDetail(context, topic, ref),
-          onLongPress: onLongPress,
-          child: Opacity(
-            opacity: alpha,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                16,
-                trailing == null ? 16 : 4,
-                16,
-              ),
-              child: _withTrailing(
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 标题
-                    _buildTitle(
-                      context,
-                      topic,
-                      topicSubject,
-                      interfaceState,
-                      textTheme,
-                      colorScheme,
-                      isRead: isRead,
+        Material(
+          color: selected
+              ? colorScheme.secondaryContainer.withValues(alpha: 0.45)
+              : Colors.transparent,
+          child: InkWell(
+            onTap: () => _handleTap(context, topic, ref),
+            onLongPress: onLongPress,
+            child: DecoratedBox(
+              decoration: selected
+                  ? BoxDecoration(
+                      border: Border(
+                        left: BorderSide(color: colorScheme.primary, width: 3),
+                      ),
+                    )
+                  : const BoxDecoration(),
+              child: Opacity(
+                opacity: alpha,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    selected ? 13 : 16,
+                    16,
+                    trailing == null ? 16 : 4,
+                    16,
+                  ),
+                  child: _withTrailing(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 标题
+                        _buildTitle(
+                          context,
+                          topic,
+                          topicSubject,
+                          interfaceState,
+                          textTheme,
+                          colorScheme,
+                          isRead: isRead,
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // 元信息行
+                        _buildMetaRow(context, colorScheme, textTheme),
+                      ],
                     ),
-
-                    const SizedBox(height: 8),
-
-                    // 元信息行
-                    _buildMetaRow(context, colorScheme, textTheme),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -290,10 +313,14 @@ class TopicListItemWidget extends ConsumerWidget {
     );
   }
 
-  void _goTopicDetail(BuildContext context, Topic topic, WidgetRef ref) {
+  void _handleTap(BuildContext context, Topic topic, WidgetRef ref) {
     ref
         .read(topicHistoryProvider.notifier)
         .insertHistory(topic.createHistory());
+    if (onTap != null) {
+      onTap!();
+      return;
+    }
     Routes.navigateTo(
       context,
       "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${topic.subject!}",

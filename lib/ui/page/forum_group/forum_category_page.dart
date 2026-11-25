@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/forum/forum_category_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
@@ -27,10 +28,6 @@ class ForumCategoryPage extends HookConsumerWidget {
     final scrollController = useScrollToTopController(scrollToTop);
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
-    const gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-      maxCrossAxisExtent: 120,
-      mainAxisExtent: 108,
-    );
     // 只有一个组时组名通常与分类名相同，不再重复展示，也无需折叠
     final showGroupName = category.groups.length > 1;
 
@@ -40,45 +37,64 @@ class ForumCategoryPage extends HookConsumerWidget {
       collapsedGroups.value = groups;
     }
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        try {
-          await ref.read(forumCategoryListProvider.notifier).refresh();
-        } catch (error) {
-          AppToast.error(error);
-        }
-      },
-      child: CustomScrollView(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          for (final (index, group) in category.groups.indexed)
-            // 组内标题吸顶，滚动到长分组中间也能直接折叠
-            SliverMainAxisGroup(
-              slivers: [
-                if (showGroupName)
-                  PinnedHeaderSliver(
-                    child: _ForumGroupHeader(
-                      group: group,
-                      expanded: !collapsedGroups.value.contains(index),
-                      onTap: () => toggleGroup(index),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= kCompactBreakpoint;
+        final horizontalPadding = isWide ? Dimen.spacingL : 0.0;
+        final gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: isWide ? 136 : 120,
+          mainAxisExtent: isWide ? 112 : 108,
+        );
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            try {
+              await ref.read(forumCategoryListProvider.notifier).refresh();
+            } catch (error) {
+              AppToast.error(error);
+            }
+          },
+          child: CustomScrollView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              for (final (index, group) in category.groups.indexed)
+                // 组内标题吸顶，滚动到长分组中间也能直接折叠
+                SliverMainAxisGroup(
+                  slivers: [
+                    if (showGroupName)
+                      PinnedHeaderSliver(
+                        child: _ForumGroupHeader(
+                          group: group,
+                          expanded: !collapsedGroups.value.contains(index),
+                          horizontalPadding: isWide
+                              ? Dimen.spacingXL
+                              : Dimen.spacingL,
+                          onTap: () => toggleGroup(index),
+                        ),
+                      ),
+                    SliverVisibility(
+                      visible: !collapsedGroups.value.contains(index),
+                      sliver: SliverPadding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                        ),
+                        sliver: SliverGrid.builder(
+                          gridDelegate: gridDelegate,
+                          itemCount: group.forumList.length,
+                          itemBuilder: (_, i) =>
+                              ForumGridItemWidget(group.forumList[i]),
+                        ),
+                      ),
                     ),
-                  ),
-                SliverVisibility(
-                  visible: !collapsedGroups.value.contains(index),
-                  sliver: SliverGrid.builder(
-                    gridDelegate: gridDelegate,
-                    itemCount: group.forumList.length,
-                    itemBuilder: (_, i) =>
-                        ForumGridItemWidget(group.forumList[i]),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          if (bottomPadding > 0)
-            SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
-        ],
-      ),
+              if (bottomPadding > 0)
+                SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -87,11 +103,13 @@ class _ForumGroupHeader extends StatelessWidget {
   const _ForumGroupHeader({
     required this.group,
     required this.expanded,
+    required this.horizontalPadding,
     required this.onTap,
   });
 
   final ForumGroup group;
   final bool expanded;
+  final double horizontalPadding;
   final VoidCallback onTap;
 
   @override
@@ -104,7 +122,7 @@ class _ForumGroupHeader extends StatelessWidget {
       color: colorScheme.surface,
       child: ListTile(
         dense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: Dimen.spacingL),
+        contentPadding: EdgeInsets.symmetric(horizontal: horizontalPadding),
         title: Text(
           group.name,
           style: textTheme.titleSmall?.copyWith(color: colorScheme.primary),

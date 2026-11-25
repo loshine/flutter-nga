@@ -65,6 +65,34 @@ void main() {
 
       expect(tester.getSize(find.byKey(const Key('content'))).width, 720);
     });
+
+    testWidgets('honours a custom alignment such as vertical centering', (
+      tester,
+    ) async {
+      await _setSurface(tester, const Size(1200, 800));
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 80,
+              width: double.infinity,
+              child: ReadableWidth(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  key: Key('bar_content'),
+                  width: double.infinity,
+                  height: 48,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final rect = tester.getRect(find.byKey(const Key('bar_content')));
+      expect(rect.top, 16);
+      expect(rect.bottom, 64);
+    });
   });
 
   group('ReadableListPadding', () {

@@ -82,6 +82,23 @@ class NgaDioConfigurator {
     final responseBody = _formatResponseBody(response);
     final map = _tryDecodeMap(responseBody);
     if (map == null) {
+      if (_expectsJsonResponse(response.requestOptions, responseBody)) {
+        final hasLoginCookie =
+            response.requestOptions.headers["Cookie"] != null;
+        final isTruncated = _looksLikeTruncatedJson(responseBody);
+        final message = isTruncated && !hasLoginCookie
+            ? "未登录时服务端返回数据不完整，请登录后重试"
+            : "服务端返回数据解析失败，请稍后重试";
+        handler.reject(
+          DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+            error: message,
+            type: DioExceptionType.unknown,
+          ),
+        );
+        return;
+      }
       response.data = responseBody;
       handler.next(response);
       return;
@@ -133,9 +150,26 @@ class NgaDioConfigurator {
   bool _isRawResponse(RequestOptions options) =>
       options.extra[rawResponseKey] == true;
 
+  /// 判断请求/响应是否期望为 JSON 结构（避免把损坏的 JSON 字符串交给
+  /// 期望 `Map<String, dynamic>` 的业务层而触发类型转换异常）。
+  bool _expectsJsonResponse(RequestOptions options, String responseBody) {
+    final uri = options.uri.toString();
+    if (uri.contains('__output=') || uri.contains('lite=js')) return true;
+    final trimmed = responseBody.trimLeft();
+    return trimmed.startsWith('{');
+  }
+
+  bool _looksLikeTruncatedJson(String responseBody) {
+    final trimmed = responseBody.trim();
+    return trimmed.startsWith('{') && !trimmed.endsWith('}');
+  }
+
   Map<String, dynamic>? _tryDecodeMap(String responseBody) {
     try {
-      return json.decode(responseBody);
+      final decoded = json.decode(responseBody);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      return null;
     } catch (err) {
       debugPrint(err.toString());
       return null;

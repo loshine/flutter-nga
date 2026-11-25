@@ -97,7 +97,7 @@ class TopicDetailData {
         {};
     List<int> hotReplies = [];
     if (topicMisc.containsKey("17")) {
-      String hots = topicMisc["17"];
+      final hots = topicMisc["17"]?.toString() ?? "";
       hotReplies.addAll(
         hots
             .split(",")
@@ -114,9 +114,9 @@ class TopicDetailData {
       groupList: tempGroupMap,
       medalList: tempMedalMap,
       reputationList: tempReputationMap,
-      currentRows: map["__R__ROWS"],
-      replyPageRows: map["__R__ROWS_PAGE"],
-      rows: map["__ROWS"],
+      currentRows: _asInt(map["__R__ROWS"]) ?? tempReplyMap.length,
+      replyPageRows: _asInt(map["__R__ROWS_PAGE"]) ?? 20,
+      rows: _asInt(map["__ROWS"]) ?? tempReplyMap.length,
       topic: Topic.fromJson(asJsonMap(map["__T"], 'TopicDetailData.__T')),
       hotReplies: hotReplies,
     );
@@ -186,22 +186,22 @@ class Reply {
     }
     return Reply(
       content: map["content"] == null ? "" : map["content"].toString(),
-      // 这都可能会是 int 我也是服气
-      alterInfo: map["alterinfo"],
-      tid: map["tid"],
-      score: map["score"] ?? 0,
-      score2: map["score_2"],
-      postDate: map["postdate"],
-      authorId: map["authorid"],
+      // 服务端弱类型兼容：可能返回 int / String / null
+      alterInfo: map["alterinfo"]?.toString(),
+      tid: _asInt(map["tid"]),
+      score: _asInt(map["score"]) ?? 0,
+      score2: _asInt(map["score_2"]),
+      postDate: map["postdate"]?.toString(),
+      authorId: _asInt(map["authorid"]),
       subject: map["subject"] == null ? "" : map["subject"].toString(),
-      type: map["type"],
-      fid: map["fid"],
-      pid: map["pid"],
-      recommend: map["recommend"],
-      lou: map["lou"],
+      type: _asInt(map["type"]),
+      fid: _asInt(map["fid"]),
+      pid: _asInt(map["pid"]),
+      recommend: _asInt(map["recommend"]),
+      lou: _asInt(map["lou"]),
       // 实际上无用属性，还可能是字符串，干脆不要了
       //      contentLength: int.tryParse(map["content_length"]) ?? 0,
-      postDateTimestamp: map["postdatetimestamp"],
+      postDateTimestamp: _asInt(map["postdatetimestamp"]),
       commentList: commentList,
       attachmentList: attachmentList,
     );
@@ -237,7 +237,7 @@ class Group {
   const Group(this.id, this.name);
 
   factory Group.fromJson(Map<String, dynamic> map) {
-    return Group(map["2"], map["0"]);
+    return Group(_asInt(map["2"]), map["0"]?.toString());
   }
 }
 
@@ -250,7 +250,12 @@ class Medal {
   const Medal(this.id, this.name, this.description, this.image);
 
   factory Medal.fromJson(Map<String, dynamic> map) {
-    return Medal(map["3"], map["1"], map["2"], map["0"]);
+    return Medal(
+      _asInt(map["3"]),
+      map["1"]?.toString(),
+      map["2"]?.toString(),
+      map["0"]?.toString(),
+    );
   }
 }
 
@@ -277,14 +282,14 @@ class Attachment {
 
   factory Attachment.fromJson(Map<String, dynamic> map) {
     return Attachment(
-      attachUrl: map['attachurl'],
-      size: map['size'],
-      type: map['type'],
-      urlUtf8OrgName: map['url_utf8_org_name'],
-      dscp: map['dscp'],
-      path: map['path'],
-      name: map['name'],
-      ext: map['ext'],
+      attachUrl: map['attachurl']?.toString(),
+      size: _asInt(map['size']),
+      type: map['type']?.toString(),
+      urlUtf8OrgName: map['url_utf8_org_name']?.toString(),
+      dscp: map['dscp']?.toString(),
+      path: map['path']?.toString(),
+      name: map['name']?.toString(),
+      ext: map['ext']?.toString(),
       thumb: map['thumb'],
     );
   }
@@ -300,4 +305,11 @@ class Attachment {
   final dynamic thumb;
 
   String get realUrl => "$ngaAttachmentBase/$attachUrl";
+}
+
+int? _asInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }

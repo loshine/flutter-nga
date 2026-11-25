@@ -1,6 +1,7 @@
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -15,12 +16,16 @@ class ForumRecommendTopicListPage extends HookConsumerWidget {
   final int fid;
   final int? type;
   final ScrollToTopSignal? scrollToTop;
+  final int? selectedTid;
+  final ValueChanged<Topic>? onTopicSelected;
 
   const ForumRecommendTopicListPage(
     this.fid, {
     super.key,
     this.type,
     this.scrollToTop,
+    this.selectedTid,
+    this.onTopicSelected,
   });
 
   @override
@@ -86,10 +91,17 @@ class ForumRecommendTopicListPage extends HookConsumerWidget {
             padding: padding,
             controller: scrollController,
             itemCount: topics.length,
-            itemBuilder: (context, index) => TopicListItemWidget(
-              topic: topics[index],
-              blockMode: blockFilter.topicMode(topics[index]),
-            ),
+            itemBuilder: (context, index) {
+              final topic = topics[index];
+              return TopicListItemWidget(
+                topic: topic,
+                blockMode: blockFilter.topicMode(topic),
+                selected: selectedTid != null && selectedTid == topic.tid,
+                onTap: onTopicSelected != null
+                    ? () => onTopicSelected!(topic)
+                    : null,
+              );
+            },
           ),
         ),
       ),

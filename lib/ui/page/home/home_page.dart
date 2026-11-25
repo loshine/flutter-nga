@@ -8,7 +8,9 @@ import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart'
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
 import 'package:flutter_nga/ui/page/mine/mine_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
+import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 import 'package:flutter_nga/utils/motion.dart';
@@ -42,12 +44,6 @@ class HomePage extends HookConsumerWidget {
 
 class _HomePageContent extends HookConsumerWidget {
   const _HomePageContent();
-
-  /// M3 Medium 断点：大于等于此宽度使用 NavigationRail
-  static const double _railBreakpoint = 600.0;
-
-  /// M3 Expanded 断点：大于等于此宽度展开 NavigationRail
-  static const double _expandedBreakpoint = 840.0;
 
   List<NavigationDestination> _buildDestinations(int unreadTotal) {
     Widget withBadge(Widget icon) {
@@ -146,9 +142,9 @@ class _HomePageContent extends HookConsumerWidget {
     useEffect(() => scrollToTop.dispose, [scrollToTop]);
     final doubleTap = useMemoized(DoubleTapDetector.new);
     final pageList = _buildPageList(scrollToTop);
-    final width = MediaQuery.sizeOf(context).width;
-    final isLargeScreen = width >= _railBreakpoint;
-    final isExpanded = width >= _expandedBreakpoint;
+    final sizeClass = WindowSizeClass.of(context);
+    final isLargeScreen = sizeClass.isMediumOrLarger;
+    final isExpanded = sizeClass.isExpandedOrLarger;
 
     // 双击当前导航项回到顶部，点击其他项正常切换
     void onDestinationSelected(int i) {
@@ -262,7 +258,10 @@ class _HomePageContent extends HookConsumerWidget {
     );
   }
 
-  /// 大屏布局：NavigationRail 延伸全屏高度，FAB 保持在右下角
+  /// 大屏布局：
+  /// - Expanded（>= 840dp）：使用永久展开的 [NavigationDrawer]，选中胶囊同时包裹图标和文字；
+  /// - Medium（600~839dp）：使用折叠态 [NavigationRail]；
+  /// 右侧内容区域独立持有 AppBar 与右下角 FAB。
   Widget _buildLargeScreenLayout(
     BuildContext context,
     WidgetRef ref,
@@ -273,41 +272,124 @@ class _HomePageContent extends HookConsumerWidget {
     VoidCallback? onTitleTap, {
     required bool isExpanded,
   }) {
+    final navigationPane = isExpanded
+        ? _buildExpandedDrawer(
+            context,
+            index,
+            destinations,
+            onDestinationSelected,
+          )
+        : NavigationRail(
+            extended: false,
+            selectedIndex: index,
+            onDestinationSelected: onDestinationSelected,
+            labelType: NavigationRailLabelType.all,
+            destinations: destinations
+                .map(
+                  (d) => NavigationRailDestination(
+                    icon: d.icon,
+                    selectedIcon: d.selectedIcon,
+                    label: Text(d.label),
+                  ),
+                )
+                .toList(),
+          );
+
     return Row(
       children: [
-        // NavigationRail 独立于 Scaffold，占据全屏高度
-        NavigationRail(
-          extended: isExpanded,
-          selectedIndex: index,
-          onDestinationSelected: onDestinationSelected,
-          labelType: isExpanded
-              ? NavigationRailLabelType.none
-              : NavigationRailLabelType.all,
-          destinations: destinations
-              .map(
-                (d) => NavigationRailDestination(
+        // 侧边导航栏独立于 Scaffold，占据全屏高度
+        navigationPane,
+        const VerticalDivider(thickness: 1, width: 1),
+        // 内容区域包含 AppBar 与右下角 FAB
+        Expanded(
+          child: MediaQuery.removePadding(
+            context: context,
+            removeLeft: true,
+            child: Scaffold(
+              appBar: AppBar(
+                title: _buildAnimatedTitle(context, index, onTitleTap),
+                scrolledUnderElevation: index == 0 ? 0 : 2,
+                actions: _getActionsByPage(context, ref, index),
+                automaticallyImplyLeading: false,
+              ),
+              body: _buildAnimatedBody(context, index, pageList),
+              floatingActionButton: _getFloatingActionButton(
+                context,
+                ref,
+                index,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 大屏永久侧边导航栏（M3 NavigationDrawer）：选中胶囊整体包裹 icon 与文字。
+  Widget _buildExpandedDrawer(
+    BuildContext context,
+    int index,
+    List<NavigationDestination> destinations,
+    ValueChanged<int> onDestinationSelected,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final drawerTheme = theme.navigationDrawerTheme;
+    const tileHorizontalPadding = 12.0;
+
+    return SizedBox(
+      width: kExpandedNavDrawerWidth,
+      child: DrawerTheme(
+        data: theme.drawerTheme.copyWith(
+          width: kExpandedNavDrawerWidth,
+          elevation: 0,
+          shape: const RoundedRectangleBorder(),
+          backgroundColor: colorScheme.surface,
+        ),
+        child: NavigationDrawerTheme(
+          data: drawerTheme.copyWith(
+            indicatorSize: Size(
+              kExpandedNavDrawerWidth - tileHorizontalPadding * 2,
+              drawerTheme.tileHeight ?? 52,
+            ),
+          ),
+          child: NavigationDrawer(
+            selectedIndex: index,
+            onDestinationSelected: onDestinationSelected,
+            tilePadding: const EdgeInsets.symmetric(
+              horizontal: tileHorizontalPadding,
+              vertical: 2,
+            ),
+            header: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Dimen.spacingXL,
+                Dimen.spacingL,
+                Dimen.spacingL,
+                Dimen.spacingM,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'FNGA',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ),
+            children: [
+              for (final d in destinations)
+                NavigationDrawerDestination(
                   icon: d.icon,
                   selectedIcon: d.selectedIcon,
                   label: Text(d.label),
                 ),
-              )
-              .toList(),
-        ),
-        const VerticalDivider(thickness: 1, width: 1),
-        // 内容区域包含 AppBar 与右下角 FAB
-        Expanded(
-          child: Scaffold(
-            appBar: AppBar(
-              title: _buildAnimatedTitle(context, index, onTitleTap),
-              scrolledUnderElevation: index == 0 ? 0 : 2,
-              actions: _getActionsByPage(context, ref, index),
-              automaticallyImplyLeading: false,
-            ),
-            body: _buildAnimatedBody(context, index, pageList),
-            floatingActionButton: _getFloatingActionButton(context, ref, index),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

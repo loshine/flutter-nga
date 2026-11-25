@@ -9,9 +9,11 @@ import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_single_page_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/hot_replies_section.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_reply_item_widget.dart';
+import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
+import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 
 class TopicSinglePage extends HookConsumerWidget {
@@ -33,6 +35,7 @@ class TopicSinglePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController();
+    final loadStatus = useListLoadStatus();
     final replyWidgetCache = useRef(<String, Widget>{});
     final detailProviderKey = TopicDetailKey(tid: tid);
     final providerKey = TopicSinglePageKey(
@@ -57,12 +60,17 @@ class TopicSinglePage extends HookConsumerWidget {
               maxFloor: next.maxFloor,
               topic: next.topic,
             );
+        loadStatus.succeed();
         refreshController.finishRefresh();
       } catch (err) {
         if (!context.mounted) return;
 
         refreshController.finishRefresh(IndicatorResult.fail);
-        AppToast.error(err);
+        final hasData = ref
+            .read(topicSinglePageProvider(providerKey))
+            .replyList
+            .isNotEmpty;
+        if (!loadStatus.fail(err, hasData: hasData)) AppToast.error(err);
       }
     }
 
@@ -70,16 +78,23 @@ class TopicSinglePage extends HookConsumerWidget {
       controller: refreshController,
       refreshOnStart: state.replyList.isEmpty,
       onRefresh: onRefresh,
-      child: ReadableListPadding(
-        builder: (context, padding) => ListView.builder(
-          padding: padding,
-          itemCount: state.replyList.length,
-          itemBuilder: (context, position) => _buildListItem(
-            context,
-            position,
-            state,
-            blockFilter,
-            replyWidgetCache.value,
+      child: ListStatusSwitcher(
+        status: loadStatus,
+        isEmpty: state.replyList.isEmpty,
+        emptyMessage: '暂无回复',
+        emptyIcon: Icons.article_outlined,
+        onRetry: refreshController.callRefresh,
+        child: ReadableListPadding(
+          builder: (context, padding) => ListView.builder(
+            padding: padding,
+            itemCount: state.replyList.length,
+            itemBuilder: (context, position) => _buildListItem(
+              context,
+              position,
+              state,
+              blockFilter,
+              replyWidgetCache.value,
+            ),
           ),
         ),
       ),

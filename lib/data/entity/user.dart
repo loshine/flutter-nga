@@ -46,47 +46,50 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> map) {
-    dynamic avatar = map["avatar"];
+    dynamic rawAvatar = map["avatar"];
+    String? avatar;
     List<String?> avatarList = [];
-    if (avatar != null) {
-      if (avatar is String) {
-        avatarList.add(avatar);
-      } else if (avatar is Map) {
-        final size = avatar["l"];
-        if (size != null && size is int) {
+    if (rawAvatar != null) {
+      if (rawAvatar is String) {
+        avatar = rawAvatar;
+        avatarList.add(rawAvatar);
+      } else if (rawAvatar is Map) {
+        final size = _asUserInt(rawAvatar["l"]);
+        if (size != null) {
           for (int i = 0; i < size; i++) {
-            if (avatar["$i"] is String) {
-              avatarList.add(avatar["$i"]);
-            } else if (avatar["$i"] is Map) {
-              avatarList.add(avatar["$i"][0]);
+            final item = rawAvatar["$i"];
+            if (item is String) {
+              avatarList.add(item);
+            } else if (item is Map) {
+              avatarList.add(item[0]?.toString() ?? item["0"]?.toString());
             }
           }
         }
-        avatar = avatarList[0];
+        avatar = avatarList.isNotEmpty ? avatarList[0] : null;
       }
     }
     return User(
-      uid: map["uid"],
-      username: map["username"].toString(),
+      uid: _asUserInt(map["uid"]),
+      username: map["username"]?.toString(),
       // 可能是int
-      credit: map["credit"],
-      medal: map["medal"].toString(),
-      reputation: map["reputation"].toString(),
-      groupId: map["groupid"],
-      memberId: map["memberid"],
+      credit: _asUserInt(map["credit"]),
+      medal: map["medal"]?.toString(),
+      reputation: map["reputation"]?.toString(),
+      groupId: _asUserInt(map["groupid"]),
+      memberId: _asUserInt(map["memberid"]),
       avatar: avatar,
       avatarList: avatarList,
-      yz: map["yz"],
-      site: map["site"],
-      honor: map["honor"],
-      regDate: map["regdate"],
-      muteTime: map["mute_time"].toString(),
-      postNum: map["postnum"],
-      rvrc: map["rvrc"],
-      money: map["money"],
-      thisVisit: map["thisvisit"],
-      signature: map["signature"].toString(),
-      bitData: map["bit_data"],
+      yz: _asUserInt(map["yz"]),
+      site: map["site"]?.toString(),
+      honor: map["honor"]?.toString(),
+      regDate: _asUserInt(map["regdate"]),
+      muteTime: map["mute_time"]?.toString(),
+      postNum: _asUserInt(map["postnum"]),
+      rvrc: _asUserInt(map["rvrc"]),
+      money: _asUserInt(map["money"]),
+      thisVisit: _asUserInt(map["thisvisit"]),
+      signature: map["signature"]?.toString(),
+      bitData: _asUserInt(map["bit_data"]),
     );
   }
 
@@ -194,10 +197,17 @@ class ForumReputation {
 
   factory ForumReputation.fromJson(Map map) {
     return ForumReputation(
-      id: map['id'],
-      name: map['0'],
-      value: map['1'],
-      description: map['2'],
+      id: _asUserInt(map['id']),
+      name: map['0']?.toString(),
+      value: _asUserInt(map['1']),
+      description: map['2']?.toString(),
     );
   }
+}
+
+int? _asUserInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }

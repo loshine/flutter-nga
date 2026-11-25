@@ -1,8 +1,12 @@
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
+import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
+import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -19,6 +23,7 @@ class NotificationListPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController();
     final loadStatus = useListLoadStatus();
+    final selectedNotification = useState<NgaNotification?>(null);
     final state = ref.watch(notificationListProvider);
     final notifier = ref.read(notificationListProvider.notifier);
 
@@ -54,50 +59,99 @@ class NotificationListPage extends HookConsumerWidget {
       for (final section in state.sections) ...[section.key, ...section.value],
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('提醒信息'),
-        actions: [
-          IconButton(
-            tooltip: '清空提醒',
-            icon: const Icon(Icons.delete_sweep_outlined),
-            onPressed: state.notifications.isEmpty
-                ? null
-                : () => _confirmClear(context, notifier),
-          ),
-        ],
-      ),
-      body: EasyRefresh(
-        controller: refreshController,
-        onRefresh: onRefresh,
-        child: ListStatusSwitcher(
-          status: loadStatus,
-          isEmpty: entries.isEmpty,
-          emptyMessage: '暂无提醒',
-          emptyIcon: Icons.notifications_none_outlined,
-          onRetry: refreshController.callRefresh,
-          child: ReadableListPadding(
-            builder: (context, padding) => ListView.builder(
-              padding: padding,
-              itemCount: entries.length,
-              itemBuilder: (context, index) {
-                final entry = entries[index];
-                if (entry is NotificationCategory) {
-                  return _SectionHeader(category: entry);
-                }
-                return NotificationItemWidget(
-                  notification: entry as NgaNotification,
-                  onNoHint: onNoHint,
-                );
-              },
+    void onNotificationTap(NgaNotification notification) {
+      switch (notification.target) {
+        case TopicTarget() || ConversationTarget():
+          selectedNotification.value = notification;
+        default:
+          openNotificationTarget(context, notification);
+      }
+    }
+
+    return MasterDetailLayout(
+      masterBuilder: (context, isTwoPane) => Scaffold(
+        appBar: AppBar(
+          title: const Text('提醒信息'),
+          actions: [
+            IconButton(
+              tooltip: '清空提醒',
+              icon: const Icon(Icons.delete_sweep_outlined),
+              onPressed: state.notifications.isEmpty
+                  ? null
+                  : () => _confirmClear(
+                      context,
+                      notifier,
+                      onCleared: () => selectedNotification.value = null,
+                    ),
+            ),
+          ],
+        ),
+        body: EasyRefresh(
+          controller: refreshController,
+          onRefresh: onRefresh,
+          child: ListStatusSwitcher(
+            status: loadStatus,
+            isEmpty: entries.isEmpty,
+            emptyMessage: '暂无提醒',
+            emptyIcon: Icons.notifications_none_outlined,
+            onRetry: refreshController.callRefresh,
+            child: ReadableListPadding(
+              builder: (context, padding) => ListView.builder(
+                padding: padding,
+                itemCount: entries.length,
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  if (entry is NotificationCategory) {
+                    return _SectionHeader(category: entry);
+                  }
+                  final notification = entry as NgaNotification;
+                  return NotificationItemWidget(
+                    notification: notification,
+                    selected:
+                        isTwoPane && selectedNotification.value == notification,
+                    onTap: isTwoPane
+                        ? () => onNotificationTap(notification)
+                        : null,
+                    onNoHint: onNoHint,
+                  );
+                },
+              ),
             ),
           ),
         ),
       ),
+      detailBuilder: (context) {
+        final target = selectedNotification.value?.target;
+        return switch (target) {
+          TopicTarget(:final tid) => TopicDetailPage(
+            tid,
+            null,
+            key: ValueKey('embedded-notification-topic-$tid'),
+            embedded: true,
+            onClose: () => selectedNotification.value = null,
+          ),
+          ConversationTarget(:final mid) => ConversationDetailPage(
+            key: ValueKey('embedded-notification-conversation-$mid'),
+            mid: mid,
+            embedded: true,
+            onLeft: () => selectedNotification.value = null,
+            onClose: () => selectedNotification.value = null,
+          ),
+          _ => const MasterDetailEmptyPlaceholder(
+            icon: Icons.notifications_none_outlined,
+            title: '选择一条提醒查看详情',
+            subtitle: '主题与私信提醒将在此处直接展示',
+          ),
+        };
+      },
     );
   }
 
-  void _confirmClear(BuildContext context, NotificationListNotifier notifier) {
+  void _confirmClear(
+    BuildContext context,
+    NotificationListNotifier notifier, {
+    VoidCallback? onCleared,
+  }) {
     showDialog<void>(
       context: context,
       builder: (_) => M3ConfirmDialog(
@@ -108,6 +162,7 @@ class NotificationListPage extends HookConsumerWidget {
         onConfirm: () async {
           try {
             await notifier.clear();
+            onCleared?.call();
             AppToast.success('已清空提醒');
           } catch (err) {
             AppToast.error(err);

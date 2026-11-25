@@ -27,6 +27,16 @@ String errorMessage(Object? error, {String fallback = '操作失败'}) {
   return text.isEmpty ? fallback : text;
 }
 
+/// 判断错误是否属于需要登录才能访问的场景（如 NGA 返回「未登录」「请登录后访问」等）。
+bool isAuthRequiredError(Object? error) {
+  final msg = errorMessage(error, fallback: '');
+  if (msg.isEmpty) return false;
+  return msg.contains('未登录') ||
+      msg.contains('请登录') ||
+      msg.contains('登录后') ||
+      msg.contains('访客不能直接访问');
+}
+
 String? _nonEmpty(Object? value) {
   if (value == null) return null;
   final text = value.toString().trim();

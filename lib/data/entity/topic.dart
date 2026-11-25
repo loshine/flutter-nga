@@ -96,40 +96,41 @@ class Topic {
 
   factory Topic.fromJson(Map<String, dynamic> map) {
     return Topic(
-      tid: map["tid"],
-      fid: map["fid"],
-      tpcurl: map["tpcurl"],
+      tid: _asTopicInt(map["tid"]),
+      fid: _asTopicInt(map["fid"]),
+      tpcurl: map["tpcurl"]?.toString(),
       quoteFrom: map["quote_from"],
-      quoteTo: map["quote_to"].toString(),
+      quoteTo: map["quote_to"]?.toString(),
       // 有一些不正常数据是 int 类型
-      author: map["author"].toString(),
+      author: map["author"]?.toString(),
       // 写 PHP 的都没有一点数据类型的意识么？
       authorId: map["authorid"],
-      subject: map["subject"].toString(),
-      icon: map["icon"],
-      postDate: map["postdate"],
+      subject: map["subject"]?.toString() ?? "",
+      icon: _asTopicInt(map["icon"]),
+      postDate: _asTopicInt(map["postdate"]),
       lastPoster: map["lastposter"],
-      lastPost: map["lastpost"],
-      lastModify: map["lastmodify"],
-      recommend: map["recommend"],
-      type: map["type"],
-      replies: map["replies"],
-      topicMisc: map["topic_misc"],
-      page: map["page"],
+      lastPost: _asTopicInt(map["lastpost"]),
+      lastModify: _asTopicInt(map["lastmodify"]),
+      recommend: _asTopicInt(map["recommend"]),
+      type: _asTopicInt(map["type"]),
+      replies: _asTopicInt(map["replies"]),
+      topicMisc: map["topic_misc"]?.toString(),
+      page: _asTopicInt(map["page"]),
       parent: TopicParent.parse(map["parent"]),
     );
   }
 
   bool hasAttachment() {
-    return type! & TOPIC_MASK_TYPE_ATTACHMENT == TOPIC_MASK_TYPE_ATTACHMENT;
+    return (type ?? 0) & TOPIC_MASK_TYPE_ATTACHMENT ==
+        TOPIC_MASK_TYPE_ATTACHMENT;
   }
 
   bool isAssemble() {
-    return type! & TOPIC_MASK_TYPE_ASSEMBLE == TOPIC_MASK_TYPE_ASSEMBLE;
+    return (type ?? 0) & TOPIC_MASK_TYPE_ASSEMBLE == TOPIC_MASK_TYPE_ASSEMBLE;
   }
 
   bool locked() {
-    return type! & TOPIC_MASK_TYPE_LOCK == TOPIC_MASK_TYPE_LOCK;
+    return (type ?? 0) & TOPIC_MASK_TYPE_LOCK == TOPIC_MASK_TYPE_LOCK;
   }
 
   bool isBold() {
@@ -298,4 +299,11 @@ class TopicReply {
       map['content'],
     );
   }
+}
+
+int? _asTopicInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }

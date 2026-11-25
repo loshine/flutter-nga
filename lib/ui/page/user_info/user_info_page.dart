@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/user/user_info_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/info_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_extensions.dart';
@@ -41,52 +42,89 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     }, [widget.uid, widget.username]);
 
     final userInfo = ref.watch(userInfoProvider(query));
+    final entryGroup = _EntryGroup(
+      title: '发布',
+      children: [
+        _EntryTile(
+          icon: Icons.article_outlined,
+          colorIndex: 0,
+          title: '发布的主题',
+          subtitle: '查看该用户发布的主题',
+          onTap: () => _navigateToList(userInfo, Routes.USER_TOPICS),
+        ),
+        _EntryTile(
+          icon: Icons.chat_bubble_outline,
+          colorIndex: 1,
+          title: '发布的回复',
+          subtitle: '查看该用户发布的回复',
+          onTap: () => _navigateToList(userInfo, Routes.USER_REPLIES),
+        ),
+      ],
+    );
 
     return Scaffold(
-      // 应用栏保持全宽，其余内容在宽屏下居中收窄。
-      body: ReadableListPadding(
-        padding: EdgeInsets.zero,
-        builder: (context, padding) => CustomScrollView(
-          slivers: [
-            SliverAppBar(pinned: true, title: Text(userInfo.username ?? "")),
-            SliverPadding(
-              padding: padding,
-              sliver: SliverMainAxisGroup(
-                slivers: [
-                  SliverToBoxAdapter(child: _HeaderCard(userInfo: userInfo)),
-                  SliverToBoxAdapter(
-                    child: _EntryGroup(
-                      title: '发布',
-                      children: [
-                        _EntryTile(
-                          icon: Icons.article_outlined,
-                          colorIndex: 0,
-                          title: '发布的主题',
-                          subtitle: '查看该用户发布的主题',
-                          onTap: () =>
-                              _navigateToList(userInfo, Routes.USER_TOPICS),
+      // 应用栏保持全宽，其余内容在大屏下分左右两栏，中小屏居中收窄。
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= kExpandedBreakpoint;
+          final padding = readableListPadding(
+            constraints.maxWidth,
+            maxWidth: isWide ? 1120 : kReadableMaxWidth,
+          );
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(pinned: true, title: Text(userInfo.username ?? "")),
+              SliverPadding(
+                padding: padding,
+                sliver: isWide
+                    ? SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: Dimen.spacingS,
+                            vertical: Dimen.spacingS,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 360,
+                                child: Column(
+                                  children: [
+                                    _HeaderCard(userInfo: userInfo),
+                                    entryGroup,
+                                    const SizedBox(height: Dimen.spacingXXL),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: Dimen.spacingS),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: _getBodyWidgets(userInfo),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        _EntryTile(
-                          icon: Icons.chat_bubble_outline,
-                          colorIndex: 1,
-                          title: '发布的回复',
-                          subtitle: '查看该用户发布的回复',
-                          onTap: () =>
-                              _navigateToList(userInfo, Routes.USER_REPLIES),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SliverList(
-                    delegate: SliverChildListDelegate(
-                      _getBodyWidgets(userInfo),
-                    ),
-                  ),
-                ],
+                      )
+                    : SliverMainAxisGroup(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: _HeaderCard(userInfo: userInfo),
+                          ),
+                          SliverToBoxAdapter(child: entryGroup),
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              _getBodyWidgets(userInfo),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }

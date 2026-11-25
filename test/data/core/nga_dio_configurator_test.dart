@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
@@ -8,7 +9,10 @@ import 'package:flutter_nga/data/core/nga_domains.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 
 class _RecordingAdapter implements HttpClientAdapter {
+  _RecordingAdapter([this.responder]);
+
   final List<RequestOptions> requests = [];
+  final ResponseBody Function(RequestOptions options)? responder;
 
   @override
   Future<ResponseBody> fetch(
@@ -17,7 +21,8 @@ class _RecordingAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     requests.add(options);
-    return ResponseBody.fromString('{"data":{}}', 200);
+    return responder?.call(options) ??
+        ResponseBody.fromString('{"data":{}}', 200);
   }
 
   @override
@@ -137,5 +142,80 @@ void main() {
       NgaDioConfigurator(() async => null).configure(dio);
       expect(hasLogger(dio), kDebugMode);
     });
+  });
+
+  group('malformed / truncated JSON handling', () {
+    test('rejects truncated JSON for guest with login hint instead of leaking String', () async {
+      final dio = Dio();
+      dio.httpClientAdapter = _RecordingAdapter(
+        (_) => ResponseBody.fromString(
+          '{"data":{"__R":{"0":{"lou":0,"postdate":"2026',
+          200,
+        ),
+      );
+      NgaDioConfigurator(() async => null, enableLogging: false).configure(dio);
+      dio.options.baseUrl = 'https://bbs.nga.cn/';
+
+      await expectLater(
+        () => dio.get<Map<String, dynamic>>(
+          'read.php?__output=8&tid=8494523&page=1',
+        ),
+        throwsA(
+          isA<DioException>().having(
+            (e) => e.error,
+            'error',
+            contains('请登录后重试'),
+          ),
+        ),
+      );
+    });
+
+    test(
+      'rejects malformed JSON for logged-in user with parse error',
+      () async {
+        final dio = Dio();
+        dio.httpClientAdapter = _RecordingAdapter(
+          (_) => ResponseBody.fromString('{"data":{"broken', 200),
+        );
+        NgaDioConfigurator(
+          () async => CacheUser('42', 'cid', 'nick', true),
+          enableLogging: false,
+        ).configure(dio);
+        dio.options.baseUrl = 'https://bbs.nga.cn/';
+
+        await expectLater(
+          () =>
+              dio.get<Map<String, dynamic>>('read.php?__output=8&tid=1&page=1'),
+          throwsA(
+            isA<DioException>().having(
+              (e) => e.error,
+              'error',
+              contains('解析失败'),
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'keeps HTML string response for non-JSON endpoints like post.php',
+      () async {
+        final dio = Dio();
+        dio.httpClientAdapter = _RecordingAdapter(
+          (_) => ResponseBody.fromBytes(
+            gbk.encode('<html><body>发帖成功</body></html>'),
+            200,
+          ),
+        );
+        NgaDioConfigurator(
+          () async => null,
+          enableLogging: false,
+        ).configure(dio);
+        dio.options.baseUrl = 'https://bbs.nga.cn/';
+
+        final response = await dio.post<String>('post.php');
+        expect(response.data, contains('发帖成功'));
+      },
+    );
   });
 }
