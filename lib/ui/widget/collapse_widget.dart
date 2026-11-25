@@ -24,9 +24,11 @@ class _CollapseState extends State<CollapseWidget> {
         children: [
           FilledButton.tonal(
             onPressed: () => setState(() => _collapsed = !_collapsed),
-            child: Text(
-              "${_collapsed ? "点击展开" : "点击收起"}:${widget.title ?? ""}",
-            ),
+            child: Text(() {
+              final action = _collapsed ? '点击展开' : '点击收起';
+              final title = widget.title?.trim() ?? '';
+              return title.isEmpty ? action : '$action:$title';
+            }()),
           ),
           AnimatedSize(
             duration: Motion.resolveDuration(context, Motion.durationMedium2),

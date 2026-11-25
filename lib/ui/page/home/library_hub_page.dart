@@ -12,7 +12,7 @@ class LibraryHubPage extends ConsumerWidget {
   const LibraryHubPage({super.key});
 
   static const _segments = [
-    AppSegment(value: 0, label: '贴子收藏'),
+    AppSegment(value: 0, label: '帖子收藏'),
     AppSegment(value: 1, label: '浏览历史'),
   ];
 

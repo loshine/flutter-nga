@@ -467,7 +467,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                                                     AppIcons.bookmark(context),
                                                     size: 16,
                                                   ),
-                                                  label: '贴子收藏',
+                                                  label: '帖子收藏',
                                                   selected:
                                                       destination.value
                                                           is _FavouriteTopicsDestination,

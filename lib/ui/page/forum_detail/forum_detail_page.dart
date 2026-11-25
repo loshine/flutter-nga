@@ -152,13 +152,12 @@ class ForumDetailPage extends HookConsumerWidget {
               ),
         actions: [
           ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
-          if (!embedded)
-            IconButton(
-              tooltip: '搜索',
-              icon: Icon(AppIcons.search(context)),
-              onPressed: () =>
-                  Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
-            ),
+          IconButton(
+            tooltip: '搜索本版',
+            icon: Icon(AppIcons.search(context)),
+            onPressed: () =>
+                Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
+          ),
         ],
         body: TabBarView(
           controller: tabController,
@@ -213,7 +212,7 @@ class ForumDetailPage extends HookConsumerWidget {
         primaryAction: AppPrimaryAction(
           key: const ValueKey('forum_publish_fab'),
           tooltip: '发帖',
-          visible: fabScroll.visible && mainPage,
+          visible: isApple || (fabScroll.visible && mainPage),
           icon: const Icon(Icons.edit),
           appleIcon: Icon(AppIcons.edit(context)),
           onPressed: () async {

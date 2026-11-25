@@ -145,12 +145,12 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
       ),
       _SectionCard(
         title: '声望',
-        subtitle: '表示与 论坛/某版面/某用户 的关系',
+        subtitle: '表示与 论坛/某版块/某用户 的关系',
         children: _getReputationWidgets(userInfo),
       ),
       _SectionCard(
         title: '管理权限',
-        subtitle: '在以下版面担任版主',
+        subtitle: '在以下版块担任版主',
         children: _getAdminForumWidgets(userInfo),
       ),
     ];
@@ -158,8 +158,8 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     if (userInfo.personalForum != null && userInfo.personalForum!.isNotEmpty) {
       widgets.add(
         _SectionCard(
-          title: '个人版面',
-          subtitle: '个人版面是由用户自己管理的版面',
+          title: '个人版块',
+          subtitle: '个人版块是由用户自己管理的版块',
           children: [
             Builder(
               builder: (context) {
@@ -261,12 +261,13 @@ class _HeaderCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: Dimen.spacingXS),
-                        Row(
+                        Wrap(
+                          spacing: Dimen.spacingS,
+                          runSpacing: Dimen.spacingXS,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
-                            if (!code_utils.isStringEmpty(userInfo.group)) ...[
+                            if (!code_utils.isStringEmpty(userInfo.group))
                               _GroupChip(label: userInfo.group!),
-                              const SizedBox(width: Dimen.spacingS),
-                            ],
                             Text(
                               'UID: ${userInfo.uid ?? '-'}',
                               style: textTheme.bodySmall?.copyWith(

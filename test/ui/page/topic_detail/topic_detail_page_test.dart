@@ -198,7 +198,6 @@ void main() {
     );
     expect(button('上一页').onPressed, isNull);
     expect(button('下一页').onPressed, isNotNull);
-    expect(find.byTooltip('切换到夜间模式'), findsOneWidget);
     expect(find.byTooltip('收藏'), findsOneWidget);
     expect(find.byTooltip('回复'), findsOneWidget);
 
@@ -206,6 +205,7 @@ void main() {
     // 首次刷新挂起时 EasyRefresh 指示器一直在动，不能 pumpAndSettle。
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('切换到夜间模式'), findsOneWidget);
     expect(find.text('复制帖子链接'), findsOneWidget);
     expect(find.text('在浏览器中打开'), findsOneWidget);
   });
@@ -233,6 +233,9 @@ void main() {
       page: 1,
       authorid: null,
     ));
-    expect(find.byTooltip('切换到日间模式'), findsOneWidget);
+    await tester.tap(find.byTooltip('更多'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('切换到日间模式'), findsOneWidget);
   });
 }

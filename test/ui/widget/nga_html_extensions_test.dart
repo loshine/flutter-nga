@@ -133,10 +133,10 @@ void main() {
       expect(tester.getSize(_richText('隐藏内容')).height, greaterThan(0));
     });
 
-    testWidgets('untitled collapse keeps empty title', (tester) async {
+    testWidgets('untitled collapse omits trailing colon', (tester) async {
       await _pumpHtml(tester, '<collapse>内容</collapse>');
 
-      expect(find.text('点击展开:'), findsOneWidget);
+      expect(find.text('点击展开'), findsOneWidget);
     });
   });
 

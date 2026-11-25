@@ -44,12 +44,11 @@ class ForumCategoryPage extends HookConsumerWidget {
       collapsedGroups.value = groups;
     }
 
-    final isAppleDesktop = context.isMacDesktopAppleStyle;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= kCompactBreakpoint;
-        final baseGridHorizontal = isAppleDesktop
+        final useAppleCards = context.isAppleStyle && isWide;
+        final baseGridHorizontal = useAppleCards
             ? 20.0
             : (isWide ? Dimen.spacingL : 0.0);
         final gridLeftPadding = math.max(baseGridHorizontal, mediaPadding.left);
@@ -57,7 +56,7 @@ class ForumCategoryPage extends HookConsumerWidget {
           baseGridHorizontal,
           mediaPadding.right,
         );
-        final baseHeaderHorizontal = isAppleDesktop
+        final baseHeaderHorizontal = useAppleCards
             ? 20.0
             : (isWide ? Dimen.spacingXL : Dimen.spacingL);
         final headerLeftPadding = math.max(
@@ -69,10 +68,10 @@ class ForumCategoryPage extends HookConsumerWidget {
           mediaPadding.right,
         );
         final gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: isAppleDesktop ? 156 : (isWide ? 136 : 120),
-          mainAxisExtent: isAppleDesktop ? 104 : (isWide ? 112 : 108),
-          crossAxisSpacing: isAppleDesktop ? 12 : 0,
-          mainAxisSpacing: isAppleDesktop ? 12 : 0,
+          maxCrossAxisExtent: useAppleCards ? 156 : (isWide ? 136 : 120),
+          mainAxisExtent: useAppleCards ? 104 : (isWide ? 112 : 108),
+          crossAxisSpacing: useAppleCards ? 12 : 0,
+          mainAxisSpacing: useAppleCards ? 12 : 0,
         );
 
         return RefreshIndicator.adaptive(
@@ -87,7 +86,7 @@ class ForumCategoryPage extends HookConsumerWidget {
             controller: scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              if (isAppleDesktop && !showGroupName)
+              if (useAppleCards && !showGroupName)
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
               for (final (index, group) in category.groups.indexed)
                 // 组内标题吸顶，滚动到长分组中间也能直接折叠
@@ -108,15 +107,16 @@ class ForumCategoryPage extends HookConsumerWidget {
                       sliver: SliverPadding(
                         padding: EdgeInsets.fromLTRB(
                           gridLeftPadding,
-                          isAppleDesktop ? 4 : 0,
+                          useAppleCards ? 4 : 0,
                           gridRightPadding,
-                          isAppleDesktop ? 18 : 0,
+                          useAppleCards ? 18 : 0,
                         ),
                         sliver: SliverGrid.builder(
                           gridDelegate: gridDelegate,
                           itemCount: group.forumList.length,
                           itemBuilder: (_, i) => ForumGridItemWidget(
                             group.forumList[i],
+                            cardStyle: useAppleCards,
                             onTap: onForumTap != null
                                 ? () => onForumTap!(group.forumList[i])
                                 : null,

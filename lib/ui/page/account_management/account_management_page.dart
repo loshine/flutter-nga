@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/user/account_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
@@ -184,7 +185,7 @@ class _AccountItem extends StatefulWidget {
 }
 
 class _AccountItemState extends State<_AccountItem> {
-  final _menuKey = GlobalKey<PopupMenuButtonState<String>>();
+  final _menuKey = GlobalKey<AppMoreMenuButtonState<String>>();
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +195,7 @@ class _AccountItemState extends State<_AccountItem> {
       children: [
         ListTile(
           onTap: widget.onSetDefault,
-          onLongPress: () => _menuKey.currentState?.showButtonMenu(),
+          onLongPress: () => _menuKey.currentState?.showMenu(),
           // 只有默认账号显示选中标记
           leading: Icon(
             user.enabled ? Icons.check_circle : Icons.circle_outlined,
@@ -211,19 +212,26 @@ class _AccountItemState extends State<_AccountItem> {
           ),
           subtitle: Text(
             "UID:${user.uid}",
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color,
-            ),
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
           ),
-          trailing: PopupMenuButton<String>(
+          trailing: AppMoreMenuButton<String>(
             key: _menuKey,
             tooltip: '更多操作',
             onSelected: (action) =>
                 action == 'default' ? widget.onSetDefault() : widget.onDelete(),
-            itemBuilder: (_) => [
+            actions: [
               if (!user.enabled)
-                const PopupMenuItem(value: 'default', child: Text('设为默认')),
-              const PopupMenuItem(value: 'delete', child: Text('删除')),
+                AppMenuAction(
+                  value: 'default',
+                  label: '设为默认',
+                  icon: AppIcons.check(context),
+                ),
+              AppMenuAction(
+                value: 'delete',
+                label: '删除',
+                icon: AppIcons.delete(context),
+                destructive: true,
+              ),
             ],
           ),
         ),

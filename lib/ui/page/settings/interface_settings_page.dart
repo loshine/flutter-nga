@@ -41,8 +41,8 @@ class InterfaceSettingsPage extends ConsumerWidget {
               dividerIndent: 16,
               children: [
                 _SliderSettingItem(
-                  title: "贴子列表标题缩放",
-                  subtitle: "控制贴子列表标题字体大小",
+                  title: "帖子列表标题缩放",
+                  subtitle: "控制帖子列表标题字体大小",
                   valueLabel: "${state.titleSizeMultiple.toStringAsFixed(1)}x",
                   value: state.titleSizeMultiple,
                   min: 1.0,
@@ -51,8 +51,8 @@ class InterfaceSettingsPage extends ConsumerWidget {
                   onChanged: notifier.setTitleSizeMultiple,
                 ),
                 _SliderSettingItem(
-                  title: "贴子正文字体缩放",
-                  subtitle: "控制贴子正文内容字体大小",
+                  title: "帖子正文字体缩放",
+                  subtitle: "控制帖子正文内容字体大小",
                   valueLabel:
                       "${state.contentSizeMultiple.toStringAsFixed(1)}x",
                   value: state.contentSizeMultiple,
@@ -63,8 +63,8 @@ class InterfaceSettingsPage extends ConsumerWidget {
                 ),
                 M3SettingsTile(
                   icon: AppIcons.lineSpacing(context),
-                  title: "贴子正文行间距",
-                  subtitle: "控制贴子正文及列表标题的行间距",
+                  title: "帖子正文行间距",
+                  subtitle: "控制帖子正文及列表标题的行间距",
                   trailing: Text(
                     state.lineHeight.nameWithSize,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(

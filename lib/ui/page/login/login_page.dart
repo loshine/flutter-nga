@@ -484,25 +484,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  void _showImportCookiesDialog() {
-    showDialog(
+  Future<void> _showImportCookiesDialog() async {
+    final imported = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return ImportCookiesDialog(cookiesCallback: _processCookiesString);
-      },
+      builder: (_) =>
+          ImportCookiesDialog(cookiesCallback: _saveImportedCookies),
     );
-  }
-
-  Future<void> _processCookiesString(String cookies) async {
-    try {
-      await Data().userRepository.saveLoginCookies(cookies);
-      _notifyAccountChanged();
-      if (!mounted) return;
+    if (imported == true && mounted) {
       AppToast.success("登录成功");
       Routes.pop(context);
-    } catch (error, stack) {
-      debugPrintStack(stackTrace: stack);
-      AppToast.error(error);
     }
+  }
+
+  Future<void> _saveImportedCookies(String cookies) async {
+    await Data().userRepository.saveLoginCookies(cookies);
+    _notifyAccountChanged();
   }
 }

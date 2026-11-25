@@ -63,14 +63,14 @@ class MinePage extends HookConsumerWidget {
       children: [
         M3SettingsTile(
           icon: AppIcons.bookmark(context),
-          title: '贴子收藏',
-          subtitle: '收藏的贴子',
+          title: '帖子收藏',
+          subtitle: '收藏的帖子',
           onTap: () => Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
         ),
         M3SettingsTile(
           icon: AppIcons.history(context),
           title: '浏览历史',
-          subtitle: '最近浏览的贴子',
+          subtitle: '最近浏览的帖子',
           onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
         ),
         // 从短消息 / 提醒页返回后刷新角标

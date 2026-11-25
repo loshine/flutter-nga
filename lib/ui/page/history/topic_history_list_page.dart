@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
@@ -266,7 +267,7 @@ class _HistoryDismissibleItem extends StatefulWidget {
 }
 
 class _HistoryDismissibleItemState extends State<_HistoryDismissibleItem> {
-  final _menuKey = GlobalKey<PopupMenuButtonState<String>>();
+  final _menuKey = GlobalKey<AppMoreMenuButtonState<String>>();
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +282,7 @@ class _HistoryDismissibleItemState extends State<_HistoryDismissibleItem> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Icon(
-          Icons.delete_outline,
+          AppIcons.delete(context),
           color: colorScheme.onErrorContainer,
           semanticLabel: '删除记录',
         ),
@@ -290,13 +291,18 @@ class _HistoryDismissibleItemState extends State<_HistoryDismissibleItem> {
         topicHistory: widget.history,
         selected: widget.selected,
         onTap: widget.onTap,
-        onLongPress: () => _menuKey.currentState?.showButtonMenu(),
-        trailing: PopupMenuButton<String>(
+        onLongPress: () => _menuKey.currentState?.showMenu(),
+        trailing: AppMoreMenuButton<String>(
           key: _menuKey,
           tooltip: '更多操作',
           onSelected: (_) => widget.onRemove(),
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'delete', child: Text('删除记录')),
+          actions: [
+            AppMenuAction(
+              value: 'delete',
+              label: '删除记录',
+              icon: AppIcons.delete(context),
+              destructive: true,
+            ),
           ],
         ),
       ),

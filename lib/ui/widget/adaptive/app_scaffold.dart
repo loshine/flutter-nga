@@ -3,6 +3,7 @@ import 'package:cupertino_ui/cupertino_ui.dart'
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
 import 'package:flutter_nga/utils/motion.dart';
 
@@ -178,10 +179,7 @@ class AppScaffold extends StatelessWidget {
     if (action.loading) {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 12),
-        child: SizedBox.square(
-          dimension: 18,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
+        child: AppActivityIndicator(radius: 9, strokeWidth: 2),
       );
     }
     if (action.appleLabel != null) {

@@ -107,16 +107,10 @@ class FontStyleWidget extends StatelessWidget {
     if (callback == null) return;
     switch (key) {
       case "字号":
-        showDialog(
-          context: context,
-          builder: (context) => FontSizeDialog(callback: callback),
-        );
+        FontSizeDialog.show(context, callback: callback);
         break;
       case "颜色":
-        showDialog(
-          context: context,
-          builder: (context) => FontColorDialog(callback: callback),
-        );
+        FontColorDialog.show(context, callback: callback);
         break;
       case "加粗":
         callback?.call("[b]", "[/b]", true);

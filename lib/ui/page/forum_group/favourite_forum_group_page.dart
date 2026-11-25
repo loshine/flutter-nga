@@ -40,12 +40,11 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
     final forums = state.forums;
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    final isAppleDesktop = context.isMacDesktopAppleStyle;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= kCompactBreakpoint;
-        final baseHorizontal = isAppleDesktop
+        final useAppleCards = context.isAppleStyle && isWide;
+        final baseHorizontal = useAppleCards
             ? 20.0
             : (isWide ? Dimen.spacingL : 0.0);
         return Stack(
@@ -63,21 +62,22 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(
                   math.max(baseHorizontal, mediaPadding.left),
-                  isAppleDesktop ? 16 : (isWide ? Dimen.spacingS : 0),
+                  useAppleCards ? 16 : (isWide ? Dimen.spacingS : 0),
                   math.max(baseHorizontal, mediaPadding.right),
                   mediaPadding.bottom + (context.isAppleStyle ? 16 : 88),
                 ),
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: isAppleDesktop
+                  maxCrossAxisExtent: useAppleCards
                       ? 156
                       : (isWide ? 136 : 120),
-                  mainAxisExtent: isAppleDesktop ? 104 : (isWide ? 112 : 108),
-                  crossAxisSpacing: isAppleDesktop ? 12 : 0,
-                  mainAxisSpacing: isAppleDesktop ? 12 : 0,
+                  mainAxisExtent: useAppleCards ? 104 : (isWide ? 112 : 108),
+                  crossAxisSpacing: useAppleCards ? 12 : 0,
+                  mainAxisSpacing: useAppleCards ? 12 : 0,
                 ),
                 itemCount: forums.length,
                 itemBuilder: (_, index) => ForumGridItemWidget(
                   forums[index],
+                  cardStyle: useAppleCards,
                   onTap: widget.onForumTap != null
                       ? () => widget.onForumTap!(forums[index])
                       : null,
@@ -103,7 +103,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
           final isBusy = ref.watch(favouriteForumBusyProvider(forum.identity));
           final colorScheme = Theme.of(context).colorScheme;
           return M3Dialog(
-            title: '移除收藏版面',
+            title: '移除收藏版块',
             content: Text(
               '确定从我的收藏中移除「${forum.name}」吗？',
               style: Theme.of(context).textTheme.bodyMedium

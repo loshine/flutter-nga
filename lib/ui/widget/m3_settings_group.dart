@@ -25,8 +25,9 @@ class M3SettingsGroup extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isApple = context.isAppleStyle;
+    final isHighContrast = MediaQuery.highContrastOf(context);
     final effectiveIndent = isApple
-        ? (dividerIndent > 16 ? 56.0 : dividerIndent)
+        ? (dividerIndent > 16 ? 58.0 : dividerIndent)
         : dividerIndent;
 
     return Column(
@@ -57,8 +58,16 @@ class M3SettingsGroup extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: isApple ? 16 : 12),
           child: Material(
             color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(
-              isApple ? Dimen.radiusM : Dimen.radiusL,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                isApple ? Dimen.radiusM : Dimen.radiusL,
+              ),
+              side: isApple
+                  ? BorderSide(
+                      color: colorScheme.outlineVariant,
+                      width: isHighContrast ? 1 : 0.5,
+                    )
+                  : BorderSide.none,
             ),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -256,64 +265,70 @@ class M3SettingsSwitchTile extends StatelessWidget {
 
     return InkWell(
       onTap: enabled ? () => onChanged!(!value) : null,
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.45,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: isApple ? 8 : 10,
-          ),
-          child: Row(
-            children: [
-              if (icon != null) ...[
-                Container(
-                  width: isApple ? 30 : 40,
-                  height: isApple ? 30 : 40,
-                  decoration: BoxDecoration(
-                    color: isApple
-                        ? colorScheme.primary.withValues(alpha: 0.14)
-                        : colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(
-                      isApple ? 7 : Dimen.radiusFull,
-                    ),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isApple
-                        ? colorScheme.primary
-                        : colorScheme.onPrimaryContainer,
-                    size: isApple ? 17 : Dimen.iconSmall,
-                  ),
-                ),
-                SizedBox(width: isApple ? 12 : Dimen.spacingL),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: isApple ? 8 : 10,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Opacity(
+                opacity: enabled ? 1.0 : 0.45,
+                child: Row(
                   children: [
-                    Text(
-                      title,
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontSize: isApple ? 15 : null,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                    if (icon != null) ...[
+                      Container(
+                        width: isApple ? 30 : 40,
+                        height: isApple ? 30 : 40,
+                        decoration: BoxDecoration(
+                          color: isApple
+                              ? colorScheme.primary.withValues(alpha: 0.14)
+                              : colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(
+                            isApple ? 7 : Dimen.radiusFull,
+                          ),
+                        ),
+                        child: Icon(
+                          icon,
+                          color: isApple
+                              ? colorScheme.primary
+                              : colorScheme.onPrimaryContainer,
+                          size: isApple ? 17 : Dimen.iconSmall,
                         ),
                       ),
+                      SizedBox(width: isApple ? 12 : Dimen.spacingL),
                     ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: textTheme.bodyLarge?.copyWith(
+                              fontSize: isApple ? 15 : null,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          if (subtitle != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle!,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: Dimen.spacingS),
-              AppSwitch(value: value, onChanged: onChanged),
-            ],
-          ),
+            ),
+            const SizedBox(width: Dimen.spacingS),
+            AppSwitch(value: value, onChanged: onChanged),
+          ],
         ),
       ),
     );

@@ -168,16 +168,11 @@ class M3Dialog extends StatelessWidget {
                 : content,
             if (actions != null) ...[
               SizedBox(height: isApple ? 20 : 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: actions!
-                    .map(
-                      (action) => Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: action,
-                      ),
-                    )
-                    .toList(),
+              OverflowBar(
+                alignment: MainAxisAlignment.end,
+                spacing: 8,
+                overflowSpacing: 8,
+                children: actions!,
               ),
             ],
           ],

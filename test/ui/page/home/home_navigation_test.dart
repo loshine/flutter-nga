@@ -333,7 +333,7 @@ void main() {
       expect(find.byType(NavigationDrawer), findsNothing);
       expect(find.byType(NavigationRail), findsNothing);
       expect(find.byType(FloatingActionButton), findsNothing);
-      expect(find.text('贴子收藏'), findsOneWidget);
+      expect(find.text('帖子收藏'), findsOneWidget);
       expect(find.text('浏览历史'), findsOneWidget);
       expect(find.text('短消息'), findsOneWidget);
       expect(find.text('提醒信息'), findsOneWidget);
@@ -483,7 +483,7 @@ void main() {
       );
 
       expect(find.byType(AppleWorkspaceShell), findsOneWidget);
-      final favTopicsRect = tester.getRect(find.text('贴子收藏'));
+      final favTopicsRect = tester.getRect(find.text('帖子收藏'));
       expect(favTopicsRect.left, greaterThanOrEqualTo(44));
     },
   );

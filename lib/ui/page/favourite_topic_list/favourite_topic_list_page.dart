@@ -4,6 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
@@ -138,7 +140,7 @@ class FavouriteTopicListPage extends HookConsumerWidget {
         embedded: embedded,
         showAppBar: showAppBar,
         leading: leading,
-        title: const Text('贴子收藏'),
+        title: const Text('帖子收藏'),
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,
@@ -208,7 +210,7 @@ class _FavouriteTopicItem extends StatefulWidget {
 }
 
 class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
-  final _menuKey = GlobalKey<PopupMenuButtonState<String>>();
+  final _menuKey = GlobalKey<AppMoreMenuButtonState<String>>();
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +225,7 @@ class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Icon(
-          Icons.delete_outline,
+          AppIcons.delete(context),
           color: colorScheme.onErrorContainer,
           semanticLabel: '取消收藏',
         ),
@@ -233,13 +235,18 @@ class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
         selected: widget.selected,
         onTap: widget.onTap,
         // 长按弹出与行尾按钮相同的菜单
-        onLongPress: () => _menuKey.currentState?.showButtonMenu(),
-        trailing: PopupMenuButton<String>(
+        onLongPress: () => _menuKey.currentState?.showMenu(),
+        trailing: AppMoreMenuButton<String>(
           key: _menuKey,
           tooltip: '更多操作',
           onSelected: (_) => widget.onRemove(),
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'remove', child: Text('取消收藏')),
+          actions: [
+            AppMenuAction(
+              value: 'remove',
+              label: '取消收藏',
+              icon: AppIcons.delete(context),
+              destructive: true,
+            ),
           ],
         ),
       ),

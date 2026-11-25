@@ -11,6 +11,7 @@ class ForumGridItemWidget extends StatelessWidget {
   final GestureLongPressCallback? onLongPress;
   final VoidCallback? onTap;
   final GestureTapDownCallback? onSecondaryTapDown;
+  final bool? cardStyle;
 
   const ForumGridItemWidget(
     this.forum, {
@@ -18,13 +19,14 @@ class ForumGridItemWidget extends StatelessWidget {
     this.onLongPress,
     this.onTap,
     this.onSecondaryTapDown,
+    this.cardStyle,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isAppleDesktop = context.isMacDesktopAppleStyle;
+    final isAppleCard = cardStyle ?? context.isMacDesktopAppleStyle;
 
     void handleTap() {
       if (onTap != null) {
@@ -42,11 +44,11 @@ class ForumGridItemWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: isAppleDesktop ? 42 : 48,
-          height: isAppleDesktop ? 42 : 48,
+          width: isAppleCard ? 42 : 48,
+          height: isAppleCard ? 42 : 48,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(
-              isAppleDesktop ? 10 : Dimen.radiusL,
+              isAppleCard ? 10 : Dimen.radiusL,
             ),
           ),
           clipBehavior: Clip.antiAlias,
@@ -55,13 +57,13 @@ class ForumGridItemWidget extends StatelessWidget {
             fit: BoxFit.cover,
             placeholder: (context, url) => Image.asset(
               'images/default_forum_icon.png',
-              width: isAppleDesktop ? 42 : 48,
-              height: isAppleDesktop ? 42 : 48,
+              width: isAppleCard ? 42 : 48,
+              height: isAppleCard ? 42 : 48,
             ),
             errorWidget: (context, url, err) => Image.asset(
               'images/default_forum_icon.png',
-              width: isAppleDesktop ? 42 : 48,
-              height: isAppleDesktop ? 42 : 48,
+              width: isAppleCard ? 42 : 48,
+              height: isAppleCard ? 42 : 48,
             ),
           ),
         ),
@@ -70,10 +72,10 @@ class ForumGridItemWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 6),
           child: Text(
             forum.name,
-            style: (isAppleDesktop ? textTheme.bodySmall : textTheme.titleSmall)
+            style: (isAppleCard ? textTheme.bodySmall : textTheme.titleSmall)
                 ?.copyWith(
                   color: colorScheme.onSurface,
-                  fontWeight: isAppleDesktop ? FontWeight.w500 : null,
+                  fontWeight: isAppleCard ? FontWeight.w500 : null,
                 ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -83,7 +85,7 @@ class ForumGridItemWidget extends StatelessWidget {
       ],
     );
 
-    if (isAppleDesktop) {
+    if (isAppleCard) {
       return GestureDetector(
         onSecondaryTapDown: onSecondaryTapDown,
         child: Material(
@@ -102,11 +104,14 @@ class ForumGridItemWidget extends StatelessWidget {
       );
     }
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(Dimen.radiusM),
-      onTap: handleTap,
-      onLongPress: onLongPress,
-      child: content,
+    return GestureDetector(
+      onSecondaryTapDown: onSecondaryTapDown,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(Dimen.radiusM),
+        onTap: handleTap,
+        onLongPress: onLongPress,
+        child: content,
+      ),
     );
   }
 }

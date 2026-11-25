@@ -25,6 +25,7 @@ import 'package:flutter_nga/utils/route.dart';
 
 /// 帖子详情 AppBar 溢出菜单
 enum TopicDetailMenuAction {
+  toggleTheme('切换外观'),
   copyLink('复制帖子链接'),
   openInBrowser('在浏览器中打开');
 
@@ -186,46 +187,46 @@ class TopicDetailPage extends HookConsumerWidget {
       }
     }
 
-    Future<void> openAppleMoreMenu(BuildContext btnContext) async {
-      final box = btnContext.findRenderObject() as RenderBox?;
-      final pos = box?.localToGlobal(Offset(box.size.width, box.size.height));
-      final selected = await showAppActionMenu<TopicDetailMenuAction>(
-        context: context,
-        globalPosition: pos,
-        actions: const [
-          AppMenuAction(
-            value: TopicDetailMenuAction.copyLink,
-            label: '复制帖子链接',
-            icon: CupertinoIcons.link,
-          ),
-          AppMenuAction(
-            value: TopicDetailMenuAction.openInBrowser,
-            label: '在浏览器中打开',
-            icon: CupertinoIcons.compass,
-          ),
-        ],
-      );
-      if (selected != null) _onMenuSelected(selected);
+    void handleMenuSelected(TopicDetailMenuAction action) {
+      switch (action) {
+        case TopicDetailMenuAction.toggleTheme:
+          ref
+              .read(themeProvider.notifier)
+              .update(
+                context,
+                isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
+              );
+        case TopicDetailMenuAction.copyLink:
+        case TopicDetailMenuAction.openInBrowser:
+          _onMenuSelected(action);
+      }
     }
 
-    final moreActionWidget = isApple
-        ? Builder(
-            builder: (btnContext) => IconButton(
-              tooltip: '更多',
-              icon: Icon(AppIcons.more(context)),
-              onPressed: () => openAppleMoreMenu(btnContext),
-            ),
-          )
-        : PopupMenuButton<TopicDetailMenuAction>(
-            tooltip: '更多',
-            onSelected: (action) => _onMenuSelected(action),
-            itemBuilder: (context) => [
-              for (final action in TopicDetailMenuAction.values)
-                PopupMenuItem(value: action, child: Text(action.label)),
-            ],
-          );
+    final moreActionWidget = AppMoreMenuButton<TopicDetailMenuAction>(
+      tooltip: '更多',
+      actions: [
+        AppMenuAction(
+          value: TopicDetailMenuAction.toggleTheme,
+          label: isDark ? '切换到日间模式' : '切换到夜间模式',
+          icon: isDark
+              ? AppIcons.lightMode(context)
+              : AppIcons.darkMode(context),
+        ),
+        AppMenuAction(
+          value: TopicDetailMenuAction.copyLink,
+          label: '复制帖子链接',
+          icon: isApple ? CupertinoIcons.link : Icons.link,
+        ),
+        AppMenuAction(
+          value: TopicDetailMenuAction.openInBrowser,
+          label: '在浏览器中打开',
+          icon: isApple ? CupertinoIcons.compass : Icons.open_in_browser,
+        ),
+      ],
+      onSelected: handleMenuSelected,
+    );
 
-    // macOS 桌面阅读器：把翻页、收藏、回复、日夜间全部整合进顶部 52pt Toolbar，取消手机底栏
+    // macOS 桌面阅读器：把翻页、收藏、回复整合进顶部 52pt Toolbar，取消手机底栏
     if (isMacDesktop) {
       final colorScheme = Theme.of(context).colorScheme;
       return AppScaffold(
@@ -280,18 +281,6 @@ class TopicDetailPage extends HookConsumerWidget {
                 ),
               ],
             ),
-          ),
-          IconButton(
-            tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
-            icon: Icon(
-              isDark ? AppIcons.lightMode(context) : AppIcons.darkMode(context),
-            ),
-            onPressed: () => ref
-                .read(themeProvider.notifier)
-                .update(
-                  context,
-                  isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
-                ),
           ),
           IconButton(
             tooltip: favourited ? '取消收藏' : '收藏',
@@ -358,19 +347,6 @@ class TopicDetailPage extends HookConsumerWidget {
             onPressed: hasNext ? () => goToPage(tabController.index + 1) : null,
           ),
           const Spacer(flex: 1),
-          // 按当前实际亮度在日间 / 夜间之间切换，图标与提示显示切换目标。
-          IconButton(
-            tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
-            icon: Icon(
-              isDark ? AppIcons.lightMode(context) : AppIcons.darkMode(context),
-            ),
-            onPressed: () => ref
-                .read(themeProvider.notifier)
-                .update(
-                  context,
-                  isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
-                ),
-          ),
           IconButton(
             tooltip: favourited ? '取消收藏' : '收藏',
             isSelected: favourited,
@@ -449,6 +425,8 @@ class TopicDetailPage extends HookConsumerWidget {
   void _onMenuSelected(TopicDetailMenuAction action) {
     final url = topicWebUrl(tid!);
     switch (action) {
+      case TopicDetailMenuAction.toggleTheme:
+        return;
       case TopicDetailMenuAction.copyLink:
         Clipboard.setData(ClipboardData(text: url))
             .then((_) => AppToast.success('已复制帖子链接'));

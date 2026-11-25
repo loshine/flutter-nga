@@ -63,12 +63,18 @@ class LiquidGlassSurface extends StatelessWidget {
         : child;
 
     // 高对比度无障碍模式下退回清晰不透明表面，确保可读性。
+    // bar / sidebar 变体由外层容器绘制单侧分割线，避免四边描边叠加出双底边。
     if (highContrast) {
+      final isFullBleed =
+          variant == LiquidGlassVariant.bar ||
+          variant == LiquidGlassVariant.sidebar;
       return DecoratedBox(
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHigh,
           borderRadius: borderRadius,
-          border: Border.all(color: theme.colorScheme.outline, width: 1),
+          border: isFullBleed
+              ? null
+              : Border.all(color: theme.colorScheme.outline, width: 1),
         ),
         child: ClipRRect(borderRadius: borderRadius, child: content),
       );

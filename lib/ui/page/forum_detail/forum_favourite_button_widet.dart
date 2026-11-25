@@ -34,7 +34,7 @@ class ForumFavouriteButtonWidget extends HookConsumerWidget {
     final notifier = ref.read(favouriteForumListProvider.notifier);
 
     return IconButton(
-      tooltip: isFavourite ? '取消收藏版面' : '收藏版面',
+      tooltip: isFavourite ? '取消收藏版块' : '收藏版块',
       isSelected: isFavourite,
       icon: AnimatedSwitcher(
         duration: Motion.resolveDuration(context, Motion.durationShort4),

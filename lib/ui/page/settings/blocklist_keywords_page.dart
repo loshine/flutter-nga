@@ -159,7 +159,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
       context: context,
       builder: (_) {
         return BlocklistEditDialog(
-          title: "添加屏蔽词语",
+          title: "添加屏蔽关键词",
           inputHint: "需要屏蔽的关键词",
           callback: (word) => _add(notifier, word),
         );
