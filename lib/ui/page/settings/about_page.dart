@@ -1,11 +1,9 @@
-import 'dart:math' as math;
-
 import 'package:flutter/services.dart' show FlutterVersion;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/page/settings/open_source_license_page.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
@@ -259,48 +257,11 @@ class AboutPage extends HookConsumerWidget {
   }
 
   void _openLicensePage(BuildContext context, PackageInfo appInfo) {
-    final version = '${appInfo.version} (Build ${appInfo.buildNumber})';
-    final appIcon = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Image.asset(
-          'images/launcher/icon_1024.png',
-          width: 64,
-          height: 64,
-        ),
-      ),
-    );
-    final trafficLightInset = context.macTitlebarInset;
-    if (trafficLightInset <= 0) {
-      showLicensePage(
-        context: context,
-        applicationName: appInfo.appName,
-        applicationVersion: version,
-        applicationIcon: appIcon,
-      );
-      return;
-    }
-    Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute<void>(
-        builder: (licenseContext) {
-          final mediaQuery = MediaQuery.of(licenseContext);
-          final leftInset = math.max(
-            mediaQuery.padding.left,
-            trafficLightInset,
-          );
-          return MediaQuery(
-            data: mediaQuery.copyWith(
-              padding: mediaQuery.padding.copyWith(left: leftInset),
-            ),
-            child: LicensePage(
-              applicationName: appInfo.appName,
-              applicationVersion: version,
-              applicationIcon: appIcon,
-            ),
-          );
-        },
-      ),
+    OpenSourceLicensePage.show(
+      context,
+      applicationName: appInfo.appName,
+      applicationVersion: '${appInfo.version} (Build ${appInfo.buildNumber})',
+      asDialog: embedded,
     );
   }
 
