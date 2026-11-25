@@ -116,6 +116,10 @@ class AppScaffold extends StatelessWidget {
         _buildApplePrimaryAction(context, primaryAction!),
     ];
 
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final macInset = includeMacTitlebarInset ? context.macTitlebarInset : 0.0;
+    final extraTopInset = macInset > topPadding ? macInset - topPadding : 0.0;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       extendBody: extendBody,
@@ -129,7 +133,7 @@ class AppScaffold extends StatelessWidget {
               actions: mergedActions,
               bottom: bottom,
               toolbarHeight: toolbarHeight,
-              includeMacTitlebarInset: includeMacTitlebarInset,
+              extraTopInset: extraTopInset,
             )
           : null,
       body: body,
@@ -222,7 +226,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.bottom,
     this.toolbarHeight,
-    this.includeMacTitlebarInset = true,
+    this.extraTopInset = 0.0,
   });
 
   final Widget? title;
@@ -232,13 +236,16 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final PreferredSizeWidget? bottom;
   final double? toolbarHeight;
-  final bool includeMacTitlebarInset;
+
+  /// 超出 `MediaQuery.padding.top` 的额外顶部安全区（如 macOS 融合标题栏红绿灯区）。
+  final double extraTopInset;
 
   double get _baseHeight => toolbarHeight ?? 48.0;
 
   @override
-  Size get preferredSize =>
-      Size.fromHeight(_baseHeight + (bottom?.preferredSize.height ?? 0));
+  Size get preferredSize => Size.fromHeight(
+    _baseHeight + extraTopInset + (bottom?.preferredSize.height ?? 0),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -246,9 +253,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     final colorScheme = theme.colorScheme;
     final canPop = ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
     final isMacDesktop = context.isMacDesktopAppleStyle;
-    final topPadding = MediaQuery.paddingOf(context).top;
-    final macInset = includeMacTitlebarInset ? context.macTitlebarInset : 0.0;
-    final effectiveTop = topPadding > macInset ? topPadding : macInset;
+    final effectiveTop = MediaQuery.paddingOf(context).top + extraTopInset;
 
     Widget? resolvedLeading = leading;
     if (resolvedLeading == null && automaticallyImplyLeading && canPop) {

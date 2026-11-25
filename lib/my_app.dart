@@ -16,6 +16,7 @@ import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/ui/widget/app_adaptive_theme.dart';
 import 'package:flutter_nga/ui/widget/legacy_theme_bridge.dart';
 import 'package:flutter_nga/ui/widget/simple_scroll_behavior.dart';
+import 'package:flutter_nga/utils/apple_native_service.dart';
 import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/route_observer.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
@@ -131,7 +132,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
                     ? () => const CupertinoFooter()
                     : () => const ClassicFooter();
               }
-              return AnnotatedRegion<SystemUiOverlayStyle>(
+              Widget content = AnnotatedRegion<SystemUiOverlayStyle>(
                 value: overlayStyle,
                 child: CupertinoTheme(
                   data: ThemeBuilder.buildCupertinoTheme(colorScheme),
@@ -145,6 +146,13 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
                   ),
                 ),
               );
+              if (AppleNativeService.isRealMacOS) {
+                content = PlatformMenuBar(
+                  menus: _buildMacMenuBar(),
+                  child: content,
+                );
+              }
+              return content;
             },
             theme: styledLight,
             darkTheme: styledDark,
@@ -161,5 +169,111 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
         },
       ),
     );
+  }
+
+  /// macOS 顶部原生系统菜单栏与常用快捷键（⌘, 设置、⌘F 搜索、⌘1~4 快捷导航）。
+  List<PlatformMenuItem> _buildMacMenuBar() {
+    void pushRoute(String path) {
+      if (_router.routerDelegate.currentConfiguration.uri.path == path) return;
+      _router.push(path);
+    }
+
+    return [
+      PlatformMenu(
+        label: 'FNGA',
+        menus: [
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: '关于 FNGA',
+                onSelected: () => pushRoute(Routes.ABOUT),
+              ),
+            ],
+          ),
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: '设置…',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.comma,
+                  meta: true,
+                ),
+                onSelected: () => pushRoute(Routes.SETTINGS),
+              ),
+            ],
+          ),
+          const PlatformMenuItemGroup(
+            members: [
+              PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.hide),
+              PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
+            ],
+          ),
+        ],
+      ),
+      PlatformMenu(
+        label: '前往',
+        menus: [
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: '搜索…',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyF,
+                  meta: true,
+                ),
+                onSelected: () => pushRoute(Routes.SEARCH),
+              ),
+            ],
+          ),
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: '贴子收藏',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.digit1,
+                  meta: true,
+                ),
+                onSelected: () => pushRoute(Routes.FAVOURITE_TOPICS),
+              ),
+              PlatformMenuItem(
+                label: '浏览历史',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.digit2,
+                  meta: true,
+                ),
+                onSelected: () => pushRoute(Routes.TOPIC_HISTORY),
+              ),
+              PlatformMenuItem(
+                label: '短消息',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.digit3,
+                  meta: true,
+                ),
+                onSelected: () => pushRoute(Routes.CONVERSATIONS),
+              ),
+              PlatformMenuItem(
+                label: '提醒信息',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.digit4,
+                  meta: true,
+                ),
+                onSelected: () => pushRoute(Routes.NOTIFICATIONS),
+              ),
+            ],
+          ),
+        ],
+      ),
+      const PlatformMenu(
+        label: '窗口',
+        menus: [
+          PlatformProvidedMenuItem(
+            type: PlatformProvidedMenuItemType.minimizeWindow,
+          ),
+          PlatformProvidedMenuItem(
+            type: PlatformProvidedMenuItemType.zoomWindow,
+          ),
+        ],
+      ),
+    ];
   }
 }
