@@ -307,6 +307,90 @@ class ThemeBuilder {
     return buildLightTheme(seedColor, isDynamic: isDynamic, contrastLevel: 1.0);
   }
 
+  /// 根据当前生效的设计风格调整 [ThemeData]：
+  /// Apple 风格下关闭水波纹、改用苹果系统分组背景与细分割线，并同步 [CupertinoThemeData]。
+  static ThemeData applyDesignStyle(
+    ThemeData base, {
+    required bool isAppleStyle,
+  }) {
+    final cupertinoTheme = buildCupertinoTheme(base.colorScheme);
+    if (!isAppleStyle) {
+      return base.copyWith(cupertinoOverrideTheme: cupertinoTheme);
+    }
+
+    final isDark = base.brightness == Brightness.dark;
+    final groupedBackground = isDark
+        ? const Color(0xFF000000)
+        : const Color(0xFFF2F2F7);
+    final groupedSurface = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final separatorColor = isDark
+        ? const Color(0xFF38383A)
+        : const Color(0xFFC6C6C8);
+
+    final colorScheme = base.colorScheme.copyWith(
+      surface: groupedBackground,
+      surfaceContainerLow: groupedSurface,
+      surfaceContainer: isDark
+          ? const Color(0xFF1C1C1E)
+          : const Color(0xFFF9F9FB),
+      surfaceContainerHigh: isDark
+          ? const Color(0xFF2C2C2E)
+          : const Color(0xFFFFFFFF),
+      surfaceContainerHighest: isDark
+          ? const Color(0xFF3A3A3C)
+          : const Color(0xFFE5E5EA),
+      outlineVariant: separatorColor,
+    );
+
+    return base.copyWith(
+      colorScheme: colorScheme,
+      cupertinoOverrideTheme: buildCupertinoTheme(colorScheme),
+      scaffoldBackgroundColor: groupedBackground,
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: colorScheme.onSurface.withValues(alpha: 0.06),
+      hoverColor: colorScheme.onSurface.withValues(alpha: 0.04),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.linux: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: CupertinoPageTransitionsBuilder(),
+        },
+      ),
+      dividerTheme: DividerThemeData(color: separatorColor, thickness: 0.5),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        color: groupedSurface,
+      ),
+      appBarTheme: AppBarTheme(
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: groupedBackground,
+        foregroundColor: colorScheme.onSurface,
+      ),
+    );
+  }
+
+  /// 构建与当前配色方案同步的 [CupertinoThemeData]。
+  static CupertinoThemeData buildCupertinoTheme(ColorScheme colorScheme) {
+    final isDark = colorScheme.brightness == Brightness.dark;
+    return CupertinoThemeData(
+      brightness: colorScheme.brightness,
+      primaryColor: colorScheme.primary,
+      primaryContrastingColor: colorScheme.onPrimary,
+      scaffoldBackgroundColor: isDark
+          ? const Color(0xFF000000)
+          : const Color(0xFFF2F2F7),
+      barBackgroundColor: isDark
+          ? const Color(0xB81C1C1E)
+          : const Color(0xCCF9F9F9),
+    );
+  }
+
   /// 高对比度暗色主题（响应系统高对比度无障碍设置）
   static ThemeData buildHighContrastDarkTheme(
     Color seedColor, {

@@ -1,6 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:cupertino_ui/cupertino_ui.dart'
-    show GlobalCupertinoLocalizations;
+    show CupertinoTheme, GlobalCupertinoLocalizations;
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'
@@ -11,6 +11,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/ui/widget/app_adaptive_theme.dart';
 import 'package:flutter_nga/ui/widget/legacy_theme_bridge.dart';
@@ -30,7 +31,7 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   late final GoRouter _router;
-  (int, int)? _lastRefreshColors;
+  (int, int, bool)? _lastRefreshConfig;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -63,66 +64,102 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     final isDynamic = ref.watch(
       themeProvider.select((s) => s.isDynamicColorActive),
     );
-    return AppAdaptiveTheme(
-      initialMode: widget.savedThemeMode,
-      builder: (theme, darkTheme) {
-        return MaterialApp.router(
-          routerConfig: _router,
-          builder: (context, child) {
-            final appTheme = Theme.of(context);
-            final colorScheme = appTheme.colorScheme;
-            final isDark = appTheme.brightness == Brightness.dark;
-            final overlayStyle =
-                (isDark
-                        ? SystemUiOverlayStyle.light
-                        : SystemUiOverlayStyle.dark)
-                    .copyWith(
-                      statusBarColor: Colors.transparent,
-                      systemNavigationBarColor: Colors.transparent,
-                      systemNavigationBarContrastEnforced: false,
-                    );
-            final refreshColors = (
-              colorScheme.primary.toARGB32(),
-              colorScheme.surfaceContainerHighest.toARGB32(),
-            );
-            if (_lastRefreshColors != refreshColors) {
-              _lastRefreshColors = refreshColors;
-              EasyRefresh.defaultHeaderBuilder = () => MaterialHeader(
-                triggerOffset: 50,
-                color: colorScheme.primary,
-                backgroundColor: colorScheme.surfaceContainerHighest,
+    final designState = ref.watch(designStyleProvider);
+    final effectiveStyle = designState.effectiveStyle;
+    final isAppleStyle = effectiveStyle == AppDesignStyle.apple;
+
+    return AppDesignStyleScope(
+      style: effectiveStyle,
+      nativeLiquidGlassSupported: designState.nativeLiquidGlassSupported,
+      macTitlebarInset: designState.macTitlebarInset,
+      child: AppAdaptiveTheme(
+        initialMode: widget.savedThemeMode,
+        builder: (theme, darkTheme) {
+          final styledLight = ThemeBuilder.applyDesignStyle(
+            theme,
+            isAppleStyle: isAppleStyle,
+          );
+          final styledDark = ThemeBuilder.applyDesignStyle(
+            darkTheme,
+            isAppleStyle: isAppleStyle,
+          );
+          final highContrastLight = ThemeBuilder.applyDesignStyle(
+            ThemeBuilder.buildHighContrastLightTheme(
+              seedColor,
+              isDynamic: isDynamic,
+            ),
+            isAppleStyle: isAppleStyle,
+          );
+          final highContrastDark = ThemeBuilder.applyDesignStyle(
+            ThemeBuilder.buildHighContrastDarkTheme(
+              seedColor,
+              isDynamic: isDynamic,
+            ),
+            isAppleStyle: isAppleStyle,
+          );
+
+          return MaterialApp.router(
+            routerConfig: _router,
+            builder: (context, child) {
+              final appTheme = Theme.of(context);
+              final colorScheme = appTheme.colorScheme;
+              final isDark = appTheme.brightness == Brightness.dark;
+              final overlayStyle =
+                  (isDark
+                          ? SystemUiOverlayStyle.light
+                          : SystemUiOverlayStyle.dark)
+                      .copyWith(
+                        statusBarColor: Colors.transparent,
+                        systemNavigationBarColor: Colors.transparent,
+                        systemNavigationBarContrastEnforced: false,
+                      );
+              final refreshConfig = (
+                colorScheme.primary.toARGB32(),
+                colorScheme.surfaceContainerHighest.toARGB32(),
+                isAppleStyle,
               );
-              EasyRefresh.defaultFooterBuilder = () => const ClassicFooter();
-            }
-            return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: overlayStyle,
-              child: LegacyThemeBridge(
-                child: ScrollConfiguration(
-                  behavior: SimpleScrollBehavior(),
-                  child: child!,
+              if (_lastRefreshConfig != refreshConfig) {
+                _lastRefreshConfig = refreshConfig;
+                EasyRefresh.defaultHeaderBuilder = isAppleStyle
+                    ? () => const CupertinoHeader()
+                    : () => MaterialHeader(
+                        triggerOffset: 50,
+                        color: colorScheme.primary,
+                        backgroundColor: colorScheme.surfaceContainerHighest,
+                      );
+                EasyRefresh.defaultFooterBuilder = isAppleStyle
+                    ? () => const CupertinoFooter()
+                    : () => const ClassicFooter();
+              }
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: overlayStyle,
+                child: CupertinoTheme(
+                  data: ThemeBuilder.buildCupertinoTheme(colorScheme),
+                  child: LegacyThemeBridge(
+                    child: ScrollConfiguration(
+                      behavior: SimpleScrollBehavior(
+                        isAppleStyle: isAppleStyle,
+                      ),
+                      child: child!,
+                    ),
+                  ),
                 ),
-              ),
-            );
-          },
-          theme: theme,
-          darkTheme: darkTheme,
-          highContrastTheme: ThemeBuilder.buildHighContrastLightTheme(
-            seedColor,
-            isDynamic: isDynamic,
-          ),
-          highContrastDarkTheme: ThemeBuilder.buildHighContrastDarkTheme(
-            seedColor,
-            isDynamic: isDynamic,
-          ),
-          localizationsDelegates: [
-            GlobalWidgetsLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: [const Locale('en'), const Locale('zh', 'CN')],
-          localeResolutionCallback: (locale, supportedLocales) => locale,
-        );
-      },
+              );
+            },
+            theme: styledLight,
+            darkTheme: styledDark,
+            highContrastTheme: highContrastLight,
+            highContrastDarkTheme: highContrastDark,
+            localizationsDelegates: [
+              GlobalWidgetsLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [const Locale('en'), const Locale('zh', 'CN')],
+            localeResolutionCallback: (locale, supportedLocales) => locale,
+          );
+        },
+      ),
     );
   }
 }

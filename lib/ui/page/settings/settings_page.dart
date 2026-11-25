@@ -2,13 +2,16 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/base_url_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/settings/user_agent_settings_provider.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/base_url_selection_dialog.dart';
+import 'package:flutter_nga/ui/widget/design_style_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
@@ -31,6 +34,7 @@ class SettingsPage extends HookConsumerWidget {
 
     final selectedPane = useState(_SettingsDetailPane.interface);
     final themeState = ref.watch(themeProvider);
+    final designStyleState = ref.watch(designStyleProvider);
     final baseUrlState = ref.watch(baseUrlSettingsProvider);
     final userAgentState = ref.watch(userAgentSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
@@ -91,7 +95,7 @@ class SettingsPage extends HookConsumerWidget {
                 title: "外观",
                 children: [
                   M3SettingsTile(
-                    icon: Icons.palette_outlined,
+                    icon: AppIcons.palette(context),
                     title: "主题与配色",
                     subtitle:
                         "${themeState.modeName} · ${themeState.colorDisplayName}",
@@ -108,6 +112,14 @@ class SettingsPage extends HookConsumerWidget {
                       ),
                     ),
                     onTap: () => ThemeSelectionDialog.show(context),
+                  ),
+                  M3SettingsTile(
+                    icon: AppIcons.style(context),
+                    title: "界面风格",
+                    subtitle: designStyleState.displaySummary(
+                      Theme.of(context).platform,
+                    ),
+                    onTap: () => DesignStyleSelectionDialog.show(context),
                   ),
                   M3SettingsTile(
                     icon: Icons.text_fields,
