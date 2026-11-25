@@ -1,8 +1,13 @@
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/base_url_settings_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/settings/user_agent_settings_provider.dart';
+import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
+import 'package:flutter_nga/ui/page/settings/blocklist_settings_page.dart';
+import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/base_url_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -10,6 +15,8 @@ import 'package:flutter_nga/ui/widget/theme_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/user_agent_selection_dialog.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/route.dart';
+
+enum _SettingsDetailPane { account, interface, blocklist }
 
 class SettingsPage extends HookConsumerWidget {
   const SettingsPage({super.key});
@@ -22,99 +29,143 @@ class SettingsPage extends HookConsumerWidget {
       ref.read(userAgentSettingsProvider.notifier).init();
     });
 
+    final selectedPane = useState(_SettingsDetailPane.interface);
     final themeState = ref.watch(themeProvider);
     final baseUrlState = ref.watch(baseUrlSettingsProvider);
     final userAgentState = ref.watch(userAgentSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("设置")),
-      body: ReadableListPadding(
-        padding: EdgeInsets.fromLTRB(
-          mediaPadding.left,
-          8,
-          mediaPadding.right,
-          16 + mediaPadding.bottom,
-        ),
-        builder: (context, padding) => ListView(
-          padding: padding,
-          children: [
-            M3SettingsGroup(
-              title: "账户",
-              children: [
-                M3SettingsTile(
-                  icon: Icons.person_outline,
-                  title: "账号管理",
-                  subtitle: "管理您的账号",
-                  onTap: () =>
-                      Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT),
-                ),
-              ],
-            ),
-            M3SettingsGroup(
-              title: "网络",
-              children: [
-                M3SettingsTile(
-                  icon: Icons.dns_outlined,
-                  title: "服务器设置",
-                  subtitle: "当前: ${baseUrlState.currentConfig.name}",
-                  onTap: () => BaseUrlSelectionDialog.show(context),
-                ),
-                M3SettingsTile(
-                  icon: Icons.devices_outlined,
-                  title: "User-Agent 设置",
-                  subtitle: "当前: ${userAgentState.currentConfig.name}",
-                  onTap: () => UserAgentSelectionDialog.show(context),
-                ),
-              ],
-            ),
-            M3SettingsGroup(
-              title: "外观",
-              children: [
-                M3SettingsTile(
-                  icon: Icons.palette_outlined,
-                  title: "主题与配色",
-                  subtitle:
-                      "${themeState.modeName} · ${themeState.colorDisplayName}",
-                  trailing: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: themeState.effectiveSeedColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: colorScheme.outlineVariant,
-                        width: 1.5,
+    return MasterDetailLayout(
+      masterBuilder: (context, isTwoPane) => Scaffold(
+        appBar: AppBar(title: const Text("设置")),
+        body: ReadableListPadding(
+          padding: EdgeInsets.fromLTRB(
+            mediaPadding.left,
+            8,
+            isTwoPane ? 0 : mediaPadding.right,
+            16 + mediaPadding.bottom,
+          ),
+          builder: (context, padding) => ListView(
+            padding: padding,
+            children: [
+              M3SettingsGroup(
+                title: "账户",
+                children: [
+                  M3SettingsTile(
+                    icon: Icons.person_outline,
+                    title: "账号管理",
+                    subtitle: "管理您的账号",
+                    selected:
+                        isTwoPane &&
+                        selectedPane.value == _SettingsDetailPane.account,
+                    showChevron: !isTwoPane,
+                    onTap: () {
+                      if (isTwoPane) {
+                        selectedPane.value = _SettingsDetailPane.account;
+                      } else {
+                        Routes.navigateTo(context, Routes.ACCOUNT_MANAGEMENT);
+                      }
+                    },
+                  ),
+                ],
+              ),
+              M3SettingsGroup(
+                title: "网络",
+                children: [
+                  M3SettingsTile(
+                    icon: Icons.dns_outlined,
+                    title: "服务器设置",
+                    subtitle: "当前: ${baseUrlState.currentConfig.name}",
+                    onTap: () => BaseUrlSelectionDialog.show(context),
+                  ),
+                  M3SettingsTile(
+                    icon: Icons.devices_outlined,
+                    title: "User-Agent 设置",
+                    subtitle: "当前: ${userAgentState.currentConfig.name}",
+                    onTap: () => UserAgentSelectionDialog.show(context),
+                  ),
+                ],
+              ),
+              M3SettingsGroup(
+                title: "外观",
+                children: [
+                  M3SettingsTile(
+                    icon: Icons.palette_outlined,
+                    title: "主题与配色",
+                    subtitle:
+                        "${themeState.modeName} · ${themeState.colorDisplayName}",
+                    trailing: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: themeState.effectiveSeedColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.outlineVariant,
+                          width: 1.5,
+                        ),
                       ),
                     ),
+                    onTap: () => ThemeSelectionDialog.show(context),
                   ),
-                  onTap: () => ThemeSelectionDialog.show(context),
-                ),
-                M3SettingsTile(
-                  icon: Icons.text_fields,
-                  title: "界面设置",
-                  subtitle: "文字大小、行间距等阅读排版",
-                  onTap: () =>
-                      Routes.navigateTo(context, Routes.INTERFACE_SETTINGS),
-                ),
-              ],
-            ),
-            M3SettingsGroup(
-              title: "内容",
-              children: [
-                M3SettingsTile(
-                  icon: Icons.block_outlined,
-                  title: "屏蔽设置",
-                  subtitle: "屏蔽用户、关键词",
-                  onTap: () =>
-                      Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS),
-                ),
-              ],
-            ),
-          ],
+                  M3SettingsTile(
+                    icon: Icons.text_fields,
+                    title: "界面设置",
+                    subtitle: "文字大小、行间距等阅读排版",
+                    selected:
+                        isTwoPane &&
+                        selectedPane.value == _SettingsDetailPane.interface,
+                    showChevron: !isTwoPane,
+                    onTap: () {
+                      if (isTwoPane) {
+                        selectedPane.value = _SettingsDetailPane.interface;
+                      } else {
+                        Routes.navigateTo(context, Routes.INTERFACE_SETTINGS);
+                      }
+                    },
+                  ),
+                ],
+              ),
+              M3SettingsGroup(
+                title: "内容",
+                children: [
+                  M3SettingsTile(
+                    icon: Icons.block_outlined,
+                    title: "屏蔽设置",
+                    subtitle: "屏蔽用户、关键词",
+                    selected:
+                        isTwoPane &&
+                        selectedPane.value == _SettingsDetailPane.blocklist,
+                    showChevron: !isTwoPane,
+                    onTap: () {
+                      if (isTwoPane) {
+                        selectedPane.value = _SettingsDetailPane.blocklist;
+                      } else {
+                        Routes.navigateTo(context, Routes.BLOCKLIST_SETTINGS);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
+      detailBuilder: (context) => switch (selectedPane.value) {
+        _SettingsDetailPane.account => const AccountManagementPage(
+          key: ValueKey('settings-pane-account'),
+          embedded: true,
+        ),
+        _SettingsDetailPane.interface => const InterfaceSettingsPage(
+          key: ValueKey('settings-pane-interface'),
+          embedded: true,
+        ),
+        _SettingsDetailPane.blocklist => const BlocklistSettingsPage(
+          key: ValueKey('settings-pane-blocklist'),
+          embedded: true,
+        ),
+      },
     );
   }
 }

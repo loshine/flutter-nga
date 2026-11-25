@@ -337,46 +337,54 @@ class PublishPage extends HookWidget {
                       bottom: panelOpen ? 0 : bottomPadding,
                     ),
                     color: colorScheme.surfaceContainer,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        IconButton(
-                          tooltip: isAnonymous.value ? '关闭匿名' : '开启匿名',
-                          isSelected: isAnonymous.value,
-                          icon: const Icon(
-                            CommunityMaterialIcons.incognito_off,
+                    child: ReadableWidth(
+                      maxWidth: _contentMaxWidth,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton(
+                            tooltip: isAnonymous.value ? '关闭匿名' : '开启匿名',
+                            isSelected: isAnonymous.value,
+                            icon: const Icon(
+                              CommunityMaterialIcons.incognito_off,
+                            ),
+                            selectedIcon: const Icon(
+                              CommunityMaterialIcons.incognito,
+                            ),
+                            onPressed: () {
+                              AppToast.info(
+                                isAnonymous.value ? "关闭匿名" : "开启匿名",
+                              );
+                              isAnonymous.value = !isAnonymous.value;
+                            },
                           ),
-                          selectedIcon: const Icon(
-                            CommunityMaterialIcons.incognito,
+                          IconButton(
+                            tooltip: '表情',
+                            isSelected:
+                                openPanel.value == _BottomPanel.emoticon,
+                            icon: const Icon(CommunityMaterialIcons.emoticon),
+                            onPressed: () =>
+                                openPanelAction(_BottomPanel.emoticon, '表情'),
                           ),
-                          onPressed: () {
-                            AppToast.info(isAnonymous.value ? "关闭匿名" : "开启匿名");
-                            isAnonymous.value = !isAnonymous.value;
-                          },
-                        ),
-                        IconButton(
-                          tooltip: '表情',
-                          isSelected: openPanel.value == _BottomPanel.emoticon,
-                          icon: const Icon(CommunityMaterialIcons.emoticon),
-                          onPressed: () =>
-                              openPanelAction(_BottomPanel.emoticon, '表情'),
-                        ),
-                        IconButton(
-                          tooltip: '格式',
-                          isSelected: openPanel.value == _BottomPanel.font,
-                          icon: const Icon(CommunityMaterialIcons.format_text),
-                          onPressed: () =>
-                              openPanelAction(_BottomPanel.font, '格式'),
-                        ),
-                        IconButton(
-                          tooltip: '附件',
-                          isSelected:
-                              openPanel.value == _BottomPanel.attachment,
-                          icon: const Icon(CommunityMaterialIcons.attachment),
-                          onPressed: () =>
-                              openPanelAction(_BottomPanel.attachment, '附件'),
-                        ),
-                      ],
+                          IconButton(
+                            tooltip: '格式',
+                            isSelected: openPanel.value == _BottomPanel.font,
+                            icon: const Icon(
+                              CommunityMaterialIcons.format_text,
+                            ),
+                            onPressed: () =>
+                                openPanelAction(_BottomPanel.font, '格式'),
+                          ),
+                          IconButton(
+                            tooltip: '附件',
+                            isSelected:
+                                openPanel.value == _BottomPanel.attachment,
+                            icon: const Icon(CommunityMaterialIcons.attachment),
+                            onPressed: () =>
+                                openPanelAction(_BottomPanel.attachment, '附件'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Container(

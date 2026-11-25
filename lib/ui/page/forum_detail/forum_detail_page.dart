@@ -2,9 +2,11 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
@@ -38,6 +40,7 @@ class ForumDetailPage extends HookConsumerWidget {
     final fabScroll = useScrollFabVisibility();
     final tabSignals = useScrollToTopSignals(_tabs.length);
     final latestScrollController = useScrollToTopController(tabSignals[0]);
+    final selectedTopic = useState<SelectedTopic?>(null);
 
     useListenable(tabController);
     final mainPage = tabController.index == 0;
@@ -85,90 +88,116 @@ class ForumDetailPage extends HookConsumerWidget {
       canLoadMore: state.enablePullUp,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        // 点击标题让当前 Tab 回到顶部
-        title: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => tabSignals[tabController.index].fire(),
-          child: Text(name!),
-        ),
-        bottom: TabBar(
-          controller: tabController,
-          tabs: _tabs,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-        ),
-        actions: [
-          ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
-          IconButton(
-            tooltip: '搜索',
-            icon: const Icon(Icons.search),
-            onPressed: () =>
-                Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
+    void selectTopic(Topic topic) {
+      final tid = topic.tid;
+      if (tid == null) return;
+      selectedTopic.value = SelectedTopic(
+        tid: tid,
+        fid: topic.fid ?? fid,
+        subject: topic.subject,
+      );
+    }
+
+    return MasterDetailLayout(
+      masterBuilder: (context, isTwoPane) => Scaffold(
+        appBar: AppBar(
+          // 点击标题让当前 Tab 回到顶部
+          title: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => tabSignals[tabController.index].fire(),
+            child: Text(name!),
           ),
-        ],
-      ),
-      body: TabBarView(
-        controller: tabController,
-        children: [
-          KeepAliveTabView(
-            child: NotificationListener<UserScrollNotification>(
-              onNotification: fabScroll.onNotification,
-              child: EasyRefresh(
-                controller: refreshController,
-                onRefresh: onRefresh,
-                onLoad: state.enablePullUp ? onLoading : null,
-                child: ListStatusSwitcher(
-                  status: loadStatus,
-                  isEmpty: topics.isEmpty,
-                  emptyMessage: '暂无帖子',
-                  emptyIcon: Icons.article_outlined,
-                  onRetry: refreshController.callRefresh,
-                  child: ReadableListPadding(
-                    builder: (context, padding) => ListView.builder(
-                      padding: padding,
-                      controller: latestScrollController,
-                      itemCount: topics.length,
-                      itemBuilder: (context, index) => TopicListItemWidget(
-                        topic: topics[index],
-                        blockMode: blockFilter.topicMode(topics[index]),
+          bottom: TabBar(
+            controller: tabController,
+            tabs: _tabs,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+          ),
+          actions: [
+            ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
+            IconButton(
+              tooltip: '搜索',
+              icon: const Icon(Icons.search),
+              onPressed: () =>
+                  Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
+            ),
+          ],
+        ),
+        body: TabBarView(
+          controller: tabController,
+          children: [
+            KeepAliveTabView(
+              child: NotificationListener<UserScrollNotification>(
+                onNotification: fabScroll.onNotification,
+                child: EasyRefresh(
+                  controller: refreshController,
+                  onRefresh: onRefresh,
+                  onLoad: state.enablePullUp ? onLoading : null,
+                  child: ListStatusSwitcher(
+                    status: loadStatus,
+                    isEmpty: topics.isEmpty,
+                    emptyMessage: '暂无帖子',
+                    emptyIcon: Icons.article_outlined,
+                    onRetry: refreshController.callRefresh,
+                    child: ReadableListPadding(
+                      builder: (context, padding) => ListView.builder(
+                        padding: padding,
+                        controller: latestScrollController,
+                        itemCount: topics.length,
+                        itemBuilder: (context, index) {
+                          final topic = topics[index];
+                          return TopicListItemWidget(
+                            topic: topic,
+                            blockMode: blockFilter.topicMode(topic),
+                            selected:
+                                isTwoPane &&
+                                selectedTopic.value?.tid == topic.tid,
+                            onTap: isTwoPane ? () => selectTopic(topic) : null,
+                          );
+                        },
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          KeepAliveTabView(
-            child: ForumRecommendTopicListPage(
-              fid,
-              type: type,
-              scrollToTop: tabSignals[1],
+            KeepAliveTabView(
+              child: ForumRecommendTopicListPage(
+                fid,
+                type: type,
+                scrollToTop: tabSignals[1],
+                selectedTid: isTwoPane ? selectedTopic.value?.tid : null,
+                onTopicSelected: isTwoPane ? selectTopic : null,
+              ),
             ),
-          ),
-          KeepAliveTabView(child: ChildForumListPage(state.info)),
-        ],
-      ),
-      floatingActionButton: AnimatedSwitcher(
-        duration: Motion.resolveDuration(context, Motion.durationShort4),
-        switchInCurve: Motion.emphasizedDecelerate,
-        switchOutCurve: Motion.emphasizedAccelerate,
-        transitionBuilder: (child, animation) => ScaleTransition(
-          scale: animation,
-          child: FadeTransition(opacity: animation, child: child),
+            KeepAliveTabView(child: ChildForumListPage(state.info)),
+          ],
         ),
-        child: fabScroll.visible && mainPage
-            ? FloatingActionButton(
-                key: const ValueKey('forum_publish_fab'),
-                tooltip: '发帖',
-                onPressed: () => Routes.navigateTo(
-                  context,
-                  "${Routes.TOPIC_PUBLISH}?fid=$fid",
-                ),
-                child: const Icon(Icons.edit),
-              )
-            : null,
+        floatingActionButton: AnimatedSwitcher(
+          duration: Motion.resolveDuration(context, Motion.durationShort4),
+          switchInCurve: Motion.emphasizedDecelerate,
+          switchOutCurve: Motion.emphasizedAccelerate,
+          transitionBuilder: (child, animation) => ScaleTransition(
+            scale: animation,
+            child: FadeTransition(opacity: animation, child: child),
+          ),
+          child: fabScroll.visible && mainPage
+              ? FloatingActionButton(
+                  key: const ValueKey('forum_publish_fab'),
+                  tooltip: '发帖',
+                  onPressed: () => Routes.navigateTo(
+                    context,
+                    "${Routes.TOPIC_PUBLISH}?fid=$fid",
+                  ),
+                  child: const Icon(Icons.edit),
+                )
+              : null,
+        ),
+      ),
+      detailBuilder: (context) => TopicDetailPane(
+        selected: selectedTopic.value,
+        emptySubtitle: name?.isNotEmpty == true ? '当前版块：$name' : null,
+        onClose: () => selectedTopic.value = null,
       ),
     );
   }

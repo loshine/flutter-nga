@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
@@ -20,6 +21,7 @@ class FavouriteTopicListPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
     final loadStatus = useListLoadStatus();
+    final selectedTopic = useState<SelectedTopic?>(null);
     final state = ref.watch(favouriteTopicListProvider);
     final notifier = ref.read(favouriteTopicListProvider.notifier);
 
@@ -89,33 +91,53 @@ class FavouriteTopicListPage extends HookConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('贴子收藏')),
-      body: EasyRefresh(
-        controller: refreshController,
-        onRefresh: onRefresh,
-        onLoad: state.enablePullUp ? onLoading : null,
-        child: ListStatusSwitcher(
-          status: loadStatus,
-          isEmpty: state.list.isEmpty,
-          emptyMessage: '暂无收藏',
-          emptyIcon: Icons.favorite_border,
-          onRetry: refreshController.callRefresh,
-          child: ReadableListPadding(
-            builder: (context, padding) => ListView.builder(
-              padding: padding,
-              itemCount: state.list.length,
-              itemBuilder: (context, index) {
-                final topic = state.list[index];
-                return _FavouriteTopicItem(
-                  key: ValueKey(topic.tid),
-                  topic: topic,
-                  onRemove: () => remove(topic),
-                );
-              },
+    void selectTopic(Topic topic) {
+      final tid = topic.tid;
+      if (tid == null) return;
+      selectedTopic.value = SelectedTopic(
+        tid: tid,
+        fid: topic.fid,
+        subject: topic.subject,
+      );
+    }
+
+    return MasterDetailLayout(
+      masterBuilder: (context, isTwoPane) => Scaffold(
+        appBar: AppBar(title: const Text('贴子收藏')),
+        body: EasyRefresh(
+          controller: refreshController,
+          onRefresh: onRefresh,
+          onLoad: state.enablePullUp ? onLoading : null,
+          child: ListStatusSwitcher(
+            status: loadStatus,
+            isEmpty: state.list.isEmpty,
+            emptyMessage: '暂无收藏',
+            emptyIcon: Icons.favorite_border,
+            onRetry: refreshController.callRefresh,
+            child: ReadableListPadding(
+              builder: (context, padding) => ListView.builder(
+                padding: padding,
+                itemCount: state.list.length,
+                itemBuilder: (context, index) {
+                  final topic = state.list[index];
+                  return _FavouriteTopicItem(
+                    key: ValueKey(topic.tid),
+                    topic: topic,
+                    selected:
+                        isTwoPane && selectedTopic.value?.tid == topic.tid,
+                    onTap: isTwoPane ? () => selectTopic(topic) : null,
+                    onRemove: () => remove(topic),
+                  );
+                },
+              ),
             ),
           ),
         ),
+      ),
+      detailBuilder: (context) => TopicDetailPane(
+        selected: selectedTopic.value,
+        emptySubtitle: '从左侧收藏列表选择一篇帖子查看详情',
+        onClose: () => selectedTopic.value = null,
       ),
     );
   }
@@ -127,10 +149,14 @@ class _FavouriteTopicItem extends StatefulWidget {
     super.key,
     required this.topic,
     required this.onRemove,
+    this.onTap,
+    this.selected = false,
   });
 
   final Topic topic;
   final VoidCallback onRemove;
+  final VoidCallback? onTap;
+  final bool selected;
 
   @override
   State<_FavouriteTopicItem> createState() => _FavouriteTopicItemState();
@@ -159,6 +185,8 @@ class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
       ),
       child: TopicListItemWidget(
         topic: widget.topic,
+        selected: widget.selected,
+        onTap: widget.onTap,
         // 长按弹出与行尾按钮相同的菜单
         onLongPress: () => _menuKey.currentState?.showButtonMenu(),
         trailing: PopupMenuButton<String>(

@@ -4,9 +4,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/forum.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/forum_grid_item_widget.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 
@@ -33,34 +35,44 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
     final forums = state.forums;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
-    return Stack(
-      children: [
-        RefreshIndicator(
-          onRefresh: () async {
-            try {
-              await notifier.refresh();
-            } catch (error) {
-              AppToast.error(error);
-            }
-          },
-          child: GridView.builder(
-            controller: scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.only(bottom: bottomPadding + 88),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 120,
-              mainAxisExtent: 108,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= kCompactBreakpoint;
+        return Stack(
+          children: [
+            RefreshIndicator(
+              onRefresh: () async {
+                try {
+                  await notifier.refresh();
+                } catch (error) {
+                  AppToast.error(error);
+                }
+              },
+              child: GridView.builder(
+                controller: scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  isWide ? Dimen.spacingL : 0,
+                  isWide ? Dimen.spacingS : 0,
+                  isWide ? Dimen.spacingL : 0,
+                  bottomPadding + 88,
+                ),
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: isWide ? 136 : 120,
+                  mainAxisExtent: isWide ? 112 : 108,
+                ),
+                itemCount: forums.length,
+                itemBuilder: (_, index) => ForumGridItemWidget(
+                  forums[index],
+                  onLongPress: () => _showDeleteDialog(notifier, forums[index]),
+                ),
+              ),
             ),
-            itemCount: forums.length,
-            itemBuilder: (_, index) => ForumGridItemWidget(
-              forums[index],
-              onLongPress: () => _showDeleteDialog(notifier, forums[index]),
-            ),
-          ),
-        ),
-        if (state.isSyncing && forums.isEmpty)
-          const Center(child: CircularProgressIndicator()),
-      ],
+            if (state.isSyncing && forums.isEmpty)
+              const Center(child: CircularProgressIndicator()),
+          ],
+        );
+      },
     );
   }
 

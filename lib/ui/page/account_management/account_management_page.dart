@@ -12,7 +12,10 @@ import 'package:flutter_nga/utils/route.dart';
 import 'package:flutter_nga/utils/route_observer.dart';
 
 class AccountManagementPage extends StatefulHookConsumerWidget {
-  const AccountManagementPage({super.key});
+  const AccountManagementPage({super.key, this.embedded = false});
+
+  /// 是否作为大屏双栏设置页的右侧内嵌面板展示
+  final bool embedded;
 
   @override
   ConsumerState<AccountManagementPage> createState() =>
@@ -44,6 +47,8 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: !widget.embedded,
+        centerTitle: widget.embedded ? false : null,
         title: const Text("账号管理"),
         actions: [
           IconButton(

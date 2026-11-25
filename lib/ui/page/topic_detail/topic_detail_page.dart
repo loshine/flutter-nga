@@ -8,6 +8,7 @@ import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
+import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/haptics.dart';
@@ -32,12 +33,20 @@ class TopicDetailPage extends HookConsumerWidget {
     super.key,
     this.subject,
     this.authorid,
+    this.embedded = false,
+    this.onClose,
   });
 
   final int? tid;
   final int? fid;
   final String? subject;
   final int? authorid;
+
+  /// 是否作为大屏双栏布局的右侧内嵌面板展示
+  final bool embedded;
+
+  /// 内嵌模式下关闭详情面板的回调
+  final VoidCallback? onClose;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -124,6 +133,8 @@ class TopicDetailPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: !embedded,
+        centerTitle: embedded ? false : null,
         title: Text(code_utils.unescapeHtml(state.subject ?? subject ?? "")),
         actions: [
           PopupMenuButton<TopicDetailMenuAction>(
@@ -134,6 +145,12 @@ class TopicDetailPage extends HookConsumerWidget {
                 PopupMenuItem(value: action, child: Text(action.label)),
             ],
           ),
+          if (embedded && onClose != null)
+            IconButton(
+              tooltip: '关闭',
+              icon: const Icon(Icons.close),
+              onPressed: onClose,
+            ),
         ],
       ),
       body: TabBarView(
@@ -142,104 +159,106 @@ class TopicDetailPage extends HookConsumerWidget {
         children: widgets,
       ),
       bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              tooltip: '上一页',
-              icon: Icon(Icons.chevron_left),
-              onPressed: hasPrevious
-                  ? () => goToPage(tabController.index - 1)
-                  : null,
-            ),
-            Tooltip(
-              message: '跳转页码',
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: ReadableWidth(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                tooltip: '上一页',
+                icon: Icon(Icons.chevron_left),
+                onPressed: hasPrevious
+                    ? () => goToPage(tabController.index - 1)
+                    : null,
+              ),
+              Tooltip(
+                message: '跳转页码',
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  onPressed: () {
+                    TopicPageSelectDialog.show(
+                      context,
+                      currentPage: state.currentPage,
+                      maxPage: state.maxPage,
+                      maxFloor: state.maxFloor,
+                      pageSelectedCallback: (isPage, target) {
+                        final index = isPage
+                            ? target - 1
+                            : (target / 20 - 1).ceil();
+                        goToPage(
+                          index.clamp(0, tabController.length - 1).toInt(),
+                        );
+                      },
+                    );
+                  },
+                  child: Text(
+                    "${state.currentPage}/${state.maxPage}",
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 ),
+              ),
+              IconButton(
+                tooltip: '下一页',
+                icon: Icon(Icons.chevron_right),
+                onPressed: hasNext
+                    ? () => goToPage(tabController.index + 1)
+                    : null,
+              ),
+              Spacer(flex: 1),
+              // 按当前实际亮度在日间 / 夜间之间切换，图标与提示显示切换目标。
+              IconButton(
+                tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
+                icon: Icon(
+                  isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                ),
+                onPressed: () => ref
+                    .read(themeProvider.notifier)
+                    .update(
+                      context,
+                      isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
+                    ),
+              ),
+              IconButton(
+                tooltip: favourited ? '取消收藏' : '收藏',
+                isSelected: favourited,
+                icon: const Icon(Icons.favorite_border),
+                selectedIcon: Icon(
+                  Icons.favorite,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: state.favouriteBusy
+                    ? null
+                    : () {
+                        notifier
+                            .toggleFavourite()
+                            .then((message) {
+                              AppHaptics.selectionChanged();
+                              if (message != null) AppToast.success(message);
+                            })
+                            .catchError((e) {
+                              AppToast.error(e);
+                            });
+                      },
+              ),
+              const SizedBox(width: 4),
+              IconButton.filledTonal(
+                tooltip: '回复',
+                icon: const Icon(Icons.chat_bubble_outline),
                 onPressed: () {
-                  TopicPageSelectDialog.show(
+                  if (fid == null && state.topic == null) return;
+                  Routes.navigateTo(
                     context,
-                    currentPage: state.currentPage,
-                    maxPage: state.maxPage,
-                    maxFloor: state.maxFloor,
-                    pageSelectedCallback: (isPage, target) {
-                      final index = isPage
-                          ? target - 1
-                          : (target / 20 - 1).ceil();
-                      goToPage(
-                        index.clamp(0, tabController.length - 1).toInt(),
-                      );
-                    },
+                    "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
                   );
                 },
-                child: Text(
-                  "${state.currentPage}/${state.maxPage}",
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
               ),
-            ),
-            IconButton(
-              tooltip: '下一页',
-              icon: Icon(Icons.chevron_right),
-              onPressed: hasNext
-                  ? () => goToPage(tabController.index + 1)
-                  : null,
-            ),
-            Spacer(flex: 1),
-            // 按当前实际亮度在日间 / 夜间之间切换，图标与提示显示切换目标。
-            IconButton(
-              tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
-              icon: Icon(
-                isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-              ),
-              onPressed: () => ref
-                  .read(themeProvider.notifier)
-                  .update(
-                    context,
-                    isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
-                  ),
-            ),
-            IconButton(
-              tooltip: favourited ? '取消收藏' : '收藏',
-              isSelected: favourited,
-              icon: const Icon(Icons.favorite_border),
-              selectedIcon: Icon(
-                Icons.favorite,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              onPressed: state.favouriteBusy
-                  ? null
-                  : () {
-                      notifier
-                          .toggleFavourite()
-                          .then((message) {
-                            AppHaptics.selectionChanged();
-                            if (message != null) AppToast.success(message);
-                          })
-                          .catchError((e) {
-                            AppToast.error(e);
-                          });
-                    },
-            ),
-            const SizedBox(width: 4),
-            IconButton.filledTonal(
-              tooltip: '回复',
-              icon: const Icon(Icons.chat_bubble_outline),
-              onPressed: () {
-                if (fid == null && state.topic == null) return;
-                Routes.navigateTo(
-                  context,
-                  "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

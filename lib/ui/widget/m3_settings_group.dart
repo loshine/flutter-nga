@@ -75,6 +75,7 @@ class M3SettingsTile extends StatelessWidget {
     this.badgeCount = 0,
     this.showChevron = true,
     this.trailingIcon,
+    this.selected = false,
   });
 
   final IconData? icon;
@@ -86,72 +87,93 @@ class M3SettingsTile extends StatelessWidget {
   final bool showChevron;
   final IconData? trailingIcon;
 
+  /// 是否在大屏双栏设置页中处于当前选中状态
+  final bool selected;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            if (icon != null) ...[
-              Badge.count(
-                count: badgeCount,
-                isLabelVisible: badgeCount > 0,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(Dimen.radiusFull),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: colorScheme.onPrimaryContainer,
-                    size: Dimen.iconSmall,
+    return Material(
+      color: selected
+          ? colorScheme.secondaryContainer.withValues(alpha: 0.6)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              if (icon != null) ...[
+                Badge.count(
+                  count: badgeCount,
+                  isLabelVisible: badgeCount > 0,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? colorScheme.primary
+                          : colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(Dimen.radiusFull),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: selected
+                          ? colorScheme.onPrimary
+                          : colorScheme.onPrimaryContainer,
+                      size: Dimen.iconSmall,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: Dimen.spacingL),
-            ],
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
+                const SizedBox(width: Dimen.spacingL),
+              ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      subtitle!,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      title,
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: selected
+                            ? colorScheme.onSecondaryContainer
+                            : colorScheme.onSurface,
+                        fontWeight: selected ? FontWeight.w600 : null,
                       ),
                     ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: selected
+                              ? colorScheme.onSecondaryContainer.withValues(
+                                  alpha: 0.8,
+                                )
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            if (trailing != null) ...[
-              const SizedBox(width: Dimen.spacingS),
-              trailing!,
+              if (trailing != null) ...[
+                const SizedBox(width: Dimen.spacingS),
+                trailing!,
+              ],
+              if (onTap != null && showChevron) ...[
+                const SizedBox(width: Dimen.spacingXS),
+                Icon(
+                  trailingIcon ?? Icons.chevron_right,
+                  color: selected
+                      ? colorScheme.onSecondaryContainer
+                      : colorScheme.onSurfaceVariant,
+                  size: trailingIcon != null ? 18 : 24,
+                ),
+              ],
             ],
-            if (onTap != null && showChevron) ...[
-              const SizedBox(width: Dimen.spacingXS),
-              Icon(
-                trailingIcon ?? Icons.chevron_right,
-                color: colorScheme.onSurfaceVariant,
-                size: trailingIcon != null ? 18 : 24,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

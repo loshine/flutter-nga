@@ -12,11 +12,20 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
   const TopicHistoryListItemWidget({
     super.key,
     this.topicHistory,
+    this.onTap,
+    this.selected = false,
     this.onLongPress,
     this.trailing,
   });
 
   final TopicHistory? topicHistory;
+
+  /// 自定义点击回调（如大屏双栏时在右侧打开详情）；为空则跳转到独立详情页
+  final VoidCallback? onTap;
+
+  /// 是否在大屏双栏列表中处于当前选中状态
+  final bool selected;
+
   final GestureLongPressCallback? onLongPress;
   final Widget? trailing;
 
@@ -65,20 +74,39 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        InkWell(
-          onTap: () => _goTopicDetail(context, topicHistory!, ref),
-          onLongPress: onLongPress,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, trailing == null ? 16 : 4, 16),
-            child: trailing == null
-                ? content
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: content),
-                      trailing!,
-                    ],
-                  ),
+        Material(
+          color: selected
+              ? colorScheme.secondaryContainer.withValues(alpha: 0.45)
+              : Colors.transparent,
+          child: InkWell(
+            onTap: () => _handleTap(context, topicHistory!, ref),
+            onLongPress: onLongPress,
+            child: DecoratedBox(
+              decoration: selected
+                  ? BoxDecoration(
+                      border: Border(
+                        left: BorderSide(color: colorScheme.primary, width: 3),
+                      ),
+                    )
+                  : const BoxDecoration(),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  selected ? 13 : 16,
+                  16,
+                  trailing == null ? 16 : 4,
+                  16,
+                ),
+                child: trailing == null
+                    ? content
+                    : Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: content),
+                          trailing!,
+                        ],
+                      ),
+              ),
+            ),
           ),
         ),
         Divider(
@@ -163,7 +191,7 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     );
   }
 
-  void _goTopicDetail(
+  void _handleTap(
     BuildContext context,
     TopicHistory topicHistory,
     WidgetRef ref,
@@ -171,6 +199,10 @@ class TopicHistoryListItemWidget extends ConsumerWidget {
     ref
         .read(topicHistoryProvider.notifier)
         .insertHistory(topicHistory.createNewHistory());
+    if (onTap != null) {
+      onTap!();
+      return;
+    }
     Routes.navigateTo(
       context,
       "${Routes.TOPIC_DETAIL}?tid=${topicHistory.tid}&fid=${topicHistory.fid}&subject=${topicHistory.subject}",

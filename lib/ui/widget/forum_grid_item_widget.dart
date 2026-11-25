@@ -16,6 +16,7 @@ class ForumGridItemWidget extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return InkWell(
+      borderRadius: BorderRadius.circular(Dimen.radiusM),
       onTap: () => Routes.navigateTo(
         context,
         "${Routes.FORUM_DETAIL}?fid=${forum.fid}&name=${forum.name}&type=${forum.type}",

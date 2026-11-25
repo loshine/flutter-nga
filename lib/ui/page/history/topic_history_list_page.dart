@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -19,6 +20,7 @@ class TopicHistoryListPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshController = useEasyRefreshController(controlFinishLoad: true);
+    final selectedTopic = useState<SelectedTopic?>(null);
     final historyState = ref.watch(topicHistoryListProvider);
     final notifier = ref.read(topicHistoryListProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
@@ -85,24 +87,50 @@ class TopicHistoryListPage extends HookConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('浏览历史'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: '清空浏览历史',
-            onPressed: historyState.list.isEmpty
-                ? null
-                : () => _showCleanDialog(context, notifier, refreshController),
+    void selectHistory(TopicHistory history) {
+      selectedTopic.value = SelectedTopic(
+        tid: history.tid,
+        fid: history.fid,
+        subject: history.subject,
+      );
+    }
+
+    return MasterDetailLayout(
+      masterBuilder: (context, isTwoPane) => Scaffold(
+        appBar: AppBar(
+          title: const Text('浏览历史'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: '清空浏览历史',
+              onPressed: historyState.list.isEmpty
+                  ? null
+                  : () => _showCleanDialog(
+                      context,
+                      notifier,
+                      refreshController,
+                      onCleaned: () => selectedTopic.value = null,
+                    ),
+            ),
+          ],
+        ),
+        body: EasyRefresh(
+          controller: refreshController,
+          onRefresh: onRefresh,
+          onLoad: historyState.enablePullUp ? onLoading : null,
+          child: _buildChild(
+            context,
+            historyState,
+            remove,
+            selectedTid: isTwoPane ? selectedTopic.value?.tid : null,
+            onSelect: isTwoPane ? selectHistory : null,
           ),
-        ],
+        ),
       ),
-      body: EasyRefresh(
-        controller: refreshController,
-        onRefresh: onRefresh,
-        onLoad: historyState.enablePullUp ? onLoading : null,
-        child: _buildChild(context, historyState, remove),
+      detailBuilder: (context) => TopicDetailPane(
+        selected: selectedTopic.value,
+        emptySubtitle: '从左侧历史记录选择一篇帖子继续阅读',
+        onClose: () => selectedTopic.value = null,
       ),
     );
   }
@@ -110,12 +138,16 @@ class TopicHistoryListPage extends HookConsumerWidget {
   Widget _buildListItem(
     BuildContext context,
     dynamic itemData,
-    ValueChanged<TopicHistory> onRemove,
-  ) {
+    ValueChanged<TopicHistory> onRemove, {
+    int? selectedTid,
+    ValueChanged<TopicHistory>? onSelect,
+  }) {
     if (itemData is TopicHistory) {
       return _HistoryDismissibleItem(
         key: ValueKey('history-${itemData.id}'),
         history: itemData,
+        selected: selectedTid != null && selectedTid == itemData.tid,
+        onTap: onSelect != null ? () => onSelect(itemData) : null,
         onRemove: () => onRemove(itemData),
       );
     } else {
@@ -136,8 +168,9 @@ class TopicHistoryListPage extends HookConsumerWidget {
   void _showCleanDialog(
     BuildContext context,
     TopicHistoryListNotifier notifier,
-    EasyRefreshController refreshController,
-  ) {
+    EasyRefreshController refreshController, {
+    VoidCallback? onCleaned,
+  }) {
     showDialog(
       context: context,
       builder: (_) => M3ConfirmDialog(
@@ -148,6 +181,7 @@ class TopicHistoryListPage extends HookConsumerWidget {
         onConfirm: () {
           notifier
               .clean()
+              .then((_) => onCleaned?.call())
               .catchError((err) {
                 AppToast.error(err);
                 return 0;
@@ -163,15 +197,22 @@ class TopicHistoryListPage extends HookConsumerWidget {
   Widget _buildChild(
     BuildContext context,
     TopicHistoryListState historyState,
-    ValueChanged<TopicHistory> onRemove,
-  ) {
+    ValueChanged<TopicHistory> onRemove, {
+    int? selectedTid,
+    ValueChanged<TopicHistory>? onSelect,
+  }) {
     if (historyState.list.isNotEmpty) {
       return ReadableListPadding(
         builder: (context, padding) => ListView.builder(
           padding: padding,
           itemCount: historyState.list.length,
-          itemBuilder: (_, position) =>
-              _buildListItem(context, historyState.list[position], onRemove),
+          itemBuilder: (_, position) => _buildListItem(
+            context,
+            historyState.list[position],
+            onRemove,
+            selectedTid: selectedTid,
+            onSelect: onSelect,
+          ),
         ),
       );
     } else {
@@ -193,10 +234,14 @@ class _HistoryDismissibleItem extends StatefulWidget {
     super.key,
     required this.history,
     required this.onRemove,
+    this.onTap,
+    this.selected = false,
   });
 
   final TopicHistory history;
   final VoidCallback onRemove;
+  final VoidCallback? onTap;
+  final bool selected;
 
   @override
   State<_HistoryDismissibleItem> createState() =>
@@ -226,6 +271,8 @@ class _HistoryDismissibleItemState extends State<_HistoryDismissibleItem> {
       ),
       child: TopicHistoryListItemWidget(
         topicHistory: widget.history,
+        selected: widget.selected,
+        onTap: widget.onTap,
         onLongPress: () => _menuKey.currentState?.showButtonMenu(),
         trailing: PopupMenuButton<String>(
           key: _menuKey,

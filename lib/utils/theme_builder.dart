@@ -160,6 +160,34 @@ class ThemeBuilder {
           color: colorScheme.onSurfaceVariant,
         ),
       ),
+      // M3 NavigationDrawer Theme（大屏永久侧边导航栏：胶囊同时包裹图标和文字）
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        tileHeight: 52,
+        indicatorColor: colorScheme.secondaryContainer,
+        indicatorShape: const StadiumBorder(),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          return IconThemeData(
+            size: 24,
+            color: states.contains(WidgetState.selected)
+                ? colorScheme.onSecondaryContainer
+                : colorScheme.onSurfaceVariant,
+          );
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final isSelected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected
+                ? colorScheme.onSecondaryContainer
+                : colorScheme.onSurfaceVariant,
+          );
+        }),
+      ),
       // M3 2024+ Slider 样式：垂直手柄 + 轨道间隙 + 拖动数值气泡
       sliderTheme: SliderThemeData(
         trackHeight: 16,

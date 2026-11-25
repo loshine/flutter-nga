@@ -7,7 +7,10 @@ import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
 class InterfaceSettingsPage extends ConsumerWidget {
-  const InterfaceSettingsPage({super.key});
+  const InterfaceSettingsPage({super.key, this.embedded = false});
+
+  /// 是否作为大屏双栏设置页的右侧内嵌面板展示
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -16,7 +19,11 @@ class InterfaceSettingsPage extends ConsumerWidget {
     final mediaPadding = MediaQuery.paddingOf(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("界面设置")),
+      appBar: AppBar(
+        automaticallyImplyLeading: !embedded,
+        centerTitle: embedded ? false : null,
+        title: const Text("界面设置"),
+      ),
       body: ReadableListPadding(
         padding: EdgeInsets.fromLTRB(
           mediaPadding.left,

@@ -9,7 +9,10 @@ import 'package:flutter_nga/utils/route.dart';
 import '../../widget/block_mode_selection_dialog.dart';
 
 class BlocklistSettingsPage extends HookConsumerWidget {
-  const BlocklistSettingsPage({super.key});
+  const BlocklistSettingsPage({super.key, this.embedded = false});
+
+  /// 是否作为大屏双栏设置页的右侧内嵌面板展示
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +27,11 @@ class BlocklistSettingsPage extends HookConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("屏蔽设置")),
+      appBar: AppBar(
+        automaticallyImplyLeading: !embedded,
+        centerTitle: embedded ? false : null,
+        title: const Text("屏蔽设置"),
+      ),
       body: ReadableListPadding(
         padding: EdgeInsets.fromLTRB(
           mediaPadding.left,
