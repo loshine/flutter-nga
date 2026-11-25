@@ -30,16 +30,31 @@ const _mobileLoginPageStyleScript = r'''
 })();
 ''';
 
-/// 桌面端登录页样式：保持 NGA 网页原生的居中表单尺寸与背景，不强行拉满窗口宽度，
-/// 仅在切换完成前隐藏 iframe 避免闪现。
-const _desktopLoginPageStyleScript = r'''
+/// 桌面端登录页样式：保持 NGA 网页原生的居中表单尺寸，不强行拉满窗口宽度，
+/// 仅把外层默认灰色背景替换为当前应用主题背景色，并在切换完成前隐藏 iframe 避免闪现。
+String _desktopLoginPageStyleScript(
+  Color backgroundColor, {
+  required bool isDark,
+}) {
+  final r = (backgroundColor.r * 255.0).round() & 0xFF;
+  final g = (backgroundColor.g * 255.0).round() & 0xFF;
+  final b = (backgroundColor.b * 255.0).round() & 0xFF;
+  final bgCss = 'rgb($r, $g, $b)';
+  final shadowCss = isDark
+      ? '0 12px 32px rgba(0, 0, 0, 0.45)'
+      : '0 8px 24px rgba(0, 0, 0, 0.10)';
+  return '''
 (function () {
-  if (!/[?&]__lib=login(&|$)/.test(location.search)) return;
+  if (!/[?&]__lib=login(&|\$)/.test(location.search)) return;
   var style = document.createElement('style');
-  style.textContent = '#iff:not([data-fnga-ready]) { visibility: hidden; }';
+  style.textContent =
+    'html, body { background: $bgCss !important; margin: 0 !important; padding: 32px 0 !important; width: 100% !important; min-height: 100vh !important; box-sizing: border-box !important; display: flex !important; justify-content: center !important; align-items: flex-start !important; }' +
+    '#iff { border-radius: 12px !important; box-shadow: $shadowCss !important; overflow: hidden !important; background: rgb(255, 246, 223) !important; }' +
+    '#iff:not([data-fnga-ready]) { visibility: hidden; }';
   (document.head || document.documentElement).appendChild(style);
 })();
 ''';
+}
 
 bool get _isDesktopLoginHost =>
     !kIsWeb &&
@@ -188,6 +203,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _buildScaffold() {
+    final theme = Theme.of(context);
+    final bgColor = theme.colorScheme.surface;
+    final isDark = theme.brightness == Brightness.dark;
+
     return AppScaffold(
       leading: IconButton(
         tooltip: '返回',
@@ -203,6 +222,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ),
       ],
       body: InAppWebView(
+        initialSettings: InAppWebViewSettings(transparentBackground: true),
         initialUrlRequest: URLRequest(
           url: WebUri.uri(
             Uri.https(Data().domain, "nuke.php", {
@@ -215,7 +235,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         initialUserScripts: UnmodifiableListView([
           UserScript(
             source: _isDesktopLoginHost
-                ? _desktopLoginPageStyleScript
+                ? _desktopLoginPageStyleScript(bgColor, isDark: isDark)
                 : _mobileLoginPageStyleScript,
             injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
           ),
