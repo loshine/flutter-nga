@@ -11,8 +11,10 @@ import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
 import 'package:flutter_nga/providers/forum/forum_category_list_provider.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/page/home/home_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
 class _FakeHeaderNotifier extends HomeDrawerHeaderNotifier {
@@ -77,6 +79,8 @@ Future<void> _pumpHome(
   WidgetTester tester, {
   required Size size,
   UserInfo? user,
+  AppDesignStyle style = AppDesignStyle.material,
+  double macTitlebarInset = 0,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
@@ -98,9 +102,17 @@ Future<void> _pumpHome(
           _FakeForumCategoryListNotifier.new,
         ),
       ],
-      child: MaterialApp(
-        theme: ThemeBuilder.buildLightTheme(Colors.brown),
-        home: const HomePage(),
+      child: AppDesignStyleScope(
+        style: style,
+        nativeLiquidGlassSupported: false,
+        macTitlebarInset: macTitlebarInset,
+        child: MaterialApp(
+          theme: ThemeBuilder.applyDesignStyle(
+            ThemeBuilder.buildLightTheme(Colors.brown),
+            isAppleStyle: style == AppDesignStyle.apple,
+          ),
+          home: const HomePage(),
+        ),
       ),
     ),
   );
@@ -247,4 +259,50 @@ void main() {
     );
     expect(theme.navigationDrawerTheme.indicatorShape, const StadiumBorder());
   });
+
+  testWidgets(
+    'Apple compact layout uses floating LiquidGlass tab bar and no FAB',
+    (tester) async {
+      await _pumpHome(
+        tester,
+        size: const Size(400, 800),
+        user: const UserInfo(uid: 1, username: '测试用户'),
+        style: AppDesignStyle.apple,
+      );
+
+      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(find.byType(LiquidGlassSurface), findsWidgets);
+      expect(find.byTooltip('添加自定义版面'), findsOneWidget);
+      expect(find.text('社区'), findsOneWidget);
+      expect(find.text('我的'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Apple large layout uses collapsible LiquidGlass sidebar without FAB',
+    (tester) async {
+      await _pumpHome(
+        tester,
+        size: const Size(1000, 800),
+        user: const UserInfo(uid: 1, username: '测试用户'),
+        style: AppDesignStyle.apple,
+        macTitlebarInset: 28,
+      );
+
+      expect(find.byType(NavigationDrawer), findsNothing);
+      expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(find.byTooltip('收起侧边栏'), findsOneWidget);
+      expect(find.byTooltip('添加自定义版面'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('收起侧边栏'));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('展开侧边栏'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('展开侧边栏'));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('收起侧边栏'), findsOneWidget);
+    },
+  );
 }
