@@ -9,6 +9,7 @@ import 'package:flutter_nga/ui/page/account_management/account_management_page.d
 import 'package:flutter_nga/ui/page/settings/blocklist_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/base_url_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/design_style_selection_dialog.dart';
@@ -41,8 +42,8 @@ class SettingsPage extends HookConsumerWidget {
     final mediaPadding = MediaQuery.paddingOf(context);
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(title: const Text("设置")),
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        title: const Text("设置"),
         body: ReadableListPadding(
           padding: EdgeInsets.fromLTRB(
             mediaPadding.left,

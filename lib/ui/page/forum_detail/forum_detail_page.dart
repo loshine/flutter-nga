@@ -6,6 +6,8 @@ import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/keep_alive_tab_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -17,7 +19,6 @@ import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 import 'package:flutter_nga/utils/hooks/scroll_hooks.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
-import 'package:flutter_nga/utils/motion.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 import 'child_forum_list_page.dart';
@@ -99,30 +100,28 @@ class ForumDetailPage extends HookConsumerWidget {
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(
-          // 点击标题让当前 Tab 回到顶部
-          title: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => tabSignals[tabController.index].fire(),
-            child: Text(name!),
-          ),
-          bottom: TabBar(
-            controller: tabController,
-            tabs: _tabs,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-          ),
-          actions: [
-            ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
-            IconButton(
-              tooltip: '搜索',
-              icon: const Icon(Icons.search),
-              onPressed: () =>
-                  Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
-            ),
-          ],
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        // 点击标题让当前 Tab 回到顶部
+        title: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => tabSignals[tabController.index].fire(),
+          child: Text(name!),
         ),
+        bottom: TabBar(
+          controller: tabController,
+          tabs: _tabs,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+        ),
+        actions: [
+          ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
+          IconButton(
+            tooltip: '搜索',
+            icon: Icon(AppIcons.search(context)),
+            onPressed: () =>
+                Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
+          ),
+        ],
         body: TabBarView(
           controller: tabController,
           children: [
@@ -173,25 +172,14 @@ class ForumDetailPage extends HookConsumerWidget {
             KeepAliveTabView(child: ChildForumListPage(state.info)),
           ],
         ),
-        floatingActionButton: AnimatedSwitcher(
-          duration: Motion.resolveDuration(context, Motion.durationShort4),
-          switchInCurve: Motion.emphasizedDecelerate,
-          switchOutCurve: Motion.emphasizedAccelerate,
-          transitionBuilder: (child, animation) => ScaleTransition(
-            scale: animation,
-            child: FadeTransition(opacity: animation, child: child),
-          ),
-          child: fabScroll.visible && mainPage
-              ? FloatingActionButton(
-                  key: const ValueKey('forum_publish_fab'),
-                  tooltip: '发帖',
-                  onPressed: () => Routes.navigateTo(
-                    context,
-                    "${Routes.TOPIC_PUBLISH}?fid=$fid",
-                  ),
-                  child: const Icon(Icons.edit),
-                )
-              : null,
+        primaryAction: AppPrimaryAction(
+          key: const ValueKey('forum_publish_fab'),
+          tooltip: '发帖',
+          visible: fabScroll.visible && mainPage,
+          icon: const Icon(Icons.edit),
+          appleIcon: Icon(AppIcons.edit(context)),
+          onPressed: () =>
+              Routes.navigateTo(context, "${Routes.TOPIC_PUBLISH}?fid=$fid"),
         ),
       ),
       detailBuilder: (context) => TopicDetailPane(

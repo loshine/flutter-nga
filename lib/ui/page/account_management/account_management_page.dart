@@ -3,6 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/user/account_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -45,21 +47,18 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
 
     useInitialRefresh(_refreshController);
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !widget.embedded,
-        centerTitle: widget.embedded ? false : null,
-        title: const Text("账号管理"),
-        actions: [
-          IconButton(
-            onPressed: state.list.isEmpty
-                ? null
-                : () => _confirmQuitAll(notifier),
-            icon: const Icon(Icons.delete_forever),
-            tooltip: "退出所有账号",
-          ),
-        ],
-      ),
+    return AppScaffold(
+      embedded: widget.embedded,
+      title: const Text("账号管理"),
+      actions: [
+        IconButton(
+          onPressed: state.list.isEmpty
+              ? null
+              : () => _confirmQuitAll(notifier),
+          icon: Icon(AppIcons.delete(context)),
+          tooltip: "退出所有账号",
+        ),
+      ],
       body: EasyRefresh(
         controller: _refreshController,
         onRefresh: onRefresh,
@@ -93,10 +92,11 @@ class _AccountManagementState extends ConsumerState<AccountManagementPage>
                 ),
               ),
       ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: "添加账号",
         onPressed: () => Routes.navigateTo(context, Routes.LOGIN),
-        child: Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        appleIcon: Icon(AppIcons.add(context)),
       ),
     );
   }

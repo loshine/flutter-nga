@@ -2,6 +2,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -58,19 +60,17 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("屏蔽关键词"),
-        actions: [
-          IconButton(
-            onPressed: state.blockWordList.isEmpty
-                ? null
-                : () => _confirmDeleteAll(context, notifier),
-            icon: const Icon(Icons.delete_forever),
-            tooltip: "删除所有屏蔽关键词",
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: const Text("屏蔽关键词"),
+      actions: [
+        IconButton(
+          onPressed: state.blockWordList.isEmpty
+              ? null
+              : () => _confirmDeleteAll(context, notifier),
+          icon: Icon(AppIcons.delete(context)),
+          tooltip: "删除所有屏蔽关键词",
+        ),
+      ],
       body: state.blockWordList.isEmpty
           ? const ListStatusView(icon: Icons.block_outlined, message: '暂无屏蔽关键词')
           : ReadableListPadding(
@@ -107,10 +107,11 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
                 },
               ),
             ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: "添加屏蔽关键词",
         onPressed: () => _showAddDialog(context, notifier),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        appleIcon: Icon(AppIcons.add(context)),
       ),
     );
   }

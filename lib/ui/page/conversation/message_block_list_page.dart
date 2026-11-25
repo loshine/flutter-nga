@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/message/message_block_list_provider.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -56,8 +58,8 @@ class MessageBlockListPage extends HookConsumerWidget {
 
     useInitialRefresh(refreshController);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('屏蔽用户')),
+    return AppScaffold(
+      title: const Text('屏蔽用户'),
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
@@ -112,10 +114,11 @@ class MessageBlockListPage extends HookConsumerWidget {
                 ),
               ),
       ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: '屏蔽用户',
         onPressed: add,
-        child: const Icon(Icons.person_off_outlined),
+        icon: const Icon(Icons.person_off_outlined),
+        appleIcon: Icon(AppIcons.add(context)),
       ),
     );
   }

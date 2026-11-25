@@ -4,10 +4,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/theme_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_single_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
+import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
@@ -130,138 +134,173 @@ class TopicDetailPage extends HookConsumerWidget {
     final hasNext = state.currentPage < state.maxPage;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final favourited = state.favourite == FavouriteStatus.favourited;
+    final isApple = context.isAppleStyle;
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !embedded,
-        centerTitle: embedded ? false : null,
-        title: Text(code_utils.unescapeHtml(state.subject ?? subject ?? "")),
-        actions: [
-          PopupMenuButton<TopicDetailMenuAction>(
-            tooltip: '更多',
-            onSelected: (action) => _onMenuSelected(action),
-            itemBuilder: (context) => [
-              for (final action in TopicDetailMenuAction.values)
-                PopupMenuItem(value: action, child: Text(action.label)),
-            ],
+    final toolbarRow = ReadableWidth(
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            tooltip: '上一页',
+            icon: Icon(AppIcons.chevronLeft(context)),
+            onPressed: hasPrevious
+                ? () => goToPage(tabController.index - 1)
+                : null,
           ),
-          if (embedded && onClose != null)
-            IconButton(
-              tooltip: '关闭',
-              icon: const Icon(Icons.close),
-              onPressed: onClose,
+          Tooltip(
+            message: '跳转页码',
+            child: TextButton(
+              style: TextButton.styleFrom(
+                minimumSize: const Size(48, 44),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              onPressed: () {
+                TopicPageSelectDialog.show(
+                  context,
+                  currentPage: state.currentPage,
+                  maxPage: state.maxPage,
+                  maxFloor: state.maxFloor,
+                  pageSelectedCallback: (isPage, target) {
+                    final index = isPage
+                        ? target - 1
+                        : (target / 20 - 1).ceil();
+                    goToPage(index.clamp(0, tabController.length - 1).toInt());
+                  },
+                );
+              },
+              child: Text(
+                "${state.currentPage}/${state.maxPage}",
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
             ),
+          ),
+          IconButton(
+            tooltip: '下一页',
+            icon: Icon(AppIcons.chevronRight(context)),
+            onPressed: hasNext ? () => goToPage(tabController.index + 1) : null,
+          ),
+          const Spacer(flex: 1),
+          // 按当前实际亮度在日间 / 夜间之间切换，图标与提示显示切换目标。
+          IconButton(
+            tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
+            icon: Icon(
+              isDark ? AppIcons.lightMode(context) : AppIcons.darkMode(context),
+            ),
+            onPressed: () => ref
+                .read(themeProvider.notifier)
+                .update(
+                  context,
+                  isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
+                ),
+          ),
+          IconButton(
+            tooltip: favourited ? '取消收藏' : '收藏',
+            isSelected: favourited,
+            icon: Icon(AppIcons.favorite(context)),
+            selectedIcon: Icon(
+              AppIcons.favorite(context, filled: true),
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            onPressed: state.favouriteBusy
+                ? null
+                : () {
+                    notifier
+                        .toggleFavourite()
+                        .then((message) {
+                          AppHaptics.selectionChanged();
+                          if (message != null) AppToast.success(message);
+                        })
+                        .catchError((e) {
+                          AppToast.error(e);
+                        });
+                  },
+          ),
+          const SizedBox(width: 4),
+          isApple
+              ? IconButton(
+                  tooltip: '回复',
+                  color: Theme.of(context).colorScheme.primary,
+                  icon: Icon(AppIcons.reply(context)),
+                  onPressed: () {
+                    if (fid == null && state.topic == null) return;
+                    Routes.navigateTo(
+                      context,
+                      "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
+                    );
+                  },
+                )
+              : IconButton.filledTonal(
+                  tooltip: '回复',
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  onPressed: () {
+                    if (fid == null && state.topic == null) return;
+                    Routes.navigateTo(
+                      context,
+                      "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
+                    );
+                  },
+                ),
         ],
       ),
+    );
+
+    return AppScaffold(
+      embedded: embedded,
+      title: Text(code_utils.unescapeHtml(state.subject ?? subject ?? "")),
+      actions: [
+        PopupMenuButton<TopicDetailMenuAction>(
+          tooltip: '更多',
+          icon: Icon(AppIcons.more(context)),
+          onSelected: (action) => _onMenuSelected(action),
+          itemBuilder: (context) => [
+            for (final action in TopicDetailMenuAction.values)
+              PopupMenuItem(value: action, child: Text(action.label)),
+          ],
+        ),
+        if (embedded && onClose != null)
+          IconButton(
+            tooltip: '关闭',
+            icon: Icon(AppIcons.close(context)),
+            onPressed: onClose,
+          ),
+      ],
       body: TabBarView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         controller: tabController,
         children: widgets,
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: ReadableWidth(
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                tooltip: '上一页',
-                icon: Icon(Icons.chevron_left),
-                onPressed: hasPrevious
-                    ? () => goToPage(tabController.index - 1)
-                    : null,
-              ),
-              Tooltip(
-                message: '跳转页码',
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+      bottomNavigationBar: isApple
+          ? LiquidGlassSurface(
+              variant: LiquidGlassVariant.bar,
+              borderRadius: BorderRadius.zero,
+              showShadow: false,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant
+                          .withValues(alpha: 0.65),
+                      width: 0.5,
+                    ),
                   ),
-                  onPressed: () {
-                    TopicPageSelectDialog.show(
-                      context,
-                      currentPage: state.currentPage,
-                      maxPage: state.maxPage,
-                      maxFloor: state.maxFloor,
-                      pageSelectedCallback: (isPage, target) {
-                        final index = isPage
-                            ? target - 1
-                            : (target / 20 - 1).ceil();
-                        goToPage(
-                          index.clamp(0, tabController.length - 1).toInt(),
-                        );
-                      },
-                    );
-                  },
-                  child: Text(
-                    "${state.currentPage}/${state.maxPage}",
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: SizedBox(
+                    height: 52,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: toolbarRow,
                     ),
                   ),
                 ),
               ),
-              IconButton(
-                tooltip: '下一页',
-                icon: Icon(Icons.chevron_right),
-                onPressed: hasNext
-                    ? () => goToPage(tabController.index + 1)
-                    : null,
-              ),
-              Spacer(flex: 1),
-              // 按当前实际亮度在日间 / 夜间之间切换，图标与提示显示切换目标。
-              IconButton(
-                tooltip: isDark ? '切换到日间模式' : '切换到夜间模式',
-                icon: Icon(
-                  isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-                ),
-                onPressed: () => ref
-                    .read(themeProvider.notifier)
-                    .update(
-                      context,
-                      isDark ? AdaptiveThemeMode.light : AdaptiveThemeMode.dark,
-                    ),
-              ),
-              IconButton(
-                tooltip: favourited ? '取消收藏' : '收藏',
-                isSelected: favourited,
-                icon: const Icon(Icons.favorite_border),
-                selectedIcon: Icon(
-                  Icons.favorite,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                onPressed: state.favouriteBusy
-                    ? null
-                    : () {
-                        notifier
-                            .toggleFavourite()
-                            .then((message) {
-                              AppHaptics.selectionChanged();
-                              if (message != null) AppToast.success(message);
-                            })
-                            .catchError((e) {
-                              AppToast.error(e);
-                            });
-                      },
-              ),
-              const SizedBox(width: 4),
-              IconButton.filledTonal(
-                tooltip: '回复',
-                icon: const Icon(Icons.chat_bubble_outline),
-                onPressed: () {
-                  if (fid == null && state.topic == null) return;
-                  Routes.navigateTo(
-                    context,
-                    "${Routes.TOPIC_PUBLISH}?tid=$tid&fid=${fid ?? state.topic!.fid}",
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : BottomAppBar(child: toolbarRow),
     );
   }
 

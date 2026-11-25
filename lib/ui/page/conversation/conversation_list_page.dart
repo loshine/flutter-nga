@@ -4,6 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -58,18 +60,16 @@ class ConversationListPage extends HookConsumerWidget {
     useInitialRefresh(refreshController);
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(
-          title: const Text('短消息'),
-          actions: [
-            IconButton(
-              tooltip: '屏蔽用户',
-              icon: const Icon(Icons.block),
-              onPressed: () =>
-                  Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
-            ),
-          ],
-        ),
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        title: const Text('短消息'),
+        actions: [
+          IconButton(
+            tooltip: '屏蔽用户',
+            icon: Icon(AppIcons.block(context)),
+            onPressed: () =>
+                Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
+          ),
+        ],
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,
@@ -100,7 +100,7 @@ class ConversationListPage extends HookConsumerWidget {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
+        primaryAction: AppPrimaryAction(
           tooltip: '新建短消息',
           onPressed: () async {
             final sent = await Routes.navigateTo(
@@ -111,7 +111,8 @@ class ConversationListPage extends HookConsumerWidget {
               refreshController.callRefresh();
             }
           },
-          child: const Icon(Icons.edit_outlined),
+          icon: const Icon(Icons.edit_outlined),
+          appleIcon: Icon(AppIcons.edit(context)),
         ),
       ),
       detailBuilder: (context) {

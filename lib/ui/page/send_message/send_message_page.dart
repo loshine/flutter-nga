@@ -3,6 +3,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -74,8 +77,8 @@ class SendMessagePage extends HookConsumerWidget {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(isNew ? '新建短消息' : '回复消息')),
+    return AppScaffold(
+      title: Text(isNew ? '新建短消息' : '回复消息'),
       // 整页可滚动：小屏打开键盘时内容框不会被挤没，可以滚到输入位置；大屏居中收窄。
       body: ReadableListPadding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
@@ -133,12 +136,32 @@ class SendMessagePage extends HookConsumerWidget {
                     ),
                   ),
                 ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('对话参与者只能看到自己的回复'),
-                subtitle: const Text('每条回复只有发起人和回复者自己可见'),
-                value: state.isolate,
-                onChanged: notifier.setIsolate,
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '对话参与者只能看到自己的回复',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          Text(
+                            '每条回复只有发起人和回复者自己可见',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: colorScheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    AppSwitch(
+                      value: state.isolate,
+                      onChanged: notifier.setIsolate,
+                    ),
+                  ],
+                ),
               ),
             ],
             TextField(
@@ -156,16 +179,13 @@ class SendMessagePage extends HookConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: '发送',
-        onPressed: sending.value ? null : send,
-        child: sending.value
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.send),
+        loading: sending.value,
+        onPressed: send,
+        icon: const Icon(Icons.send),
+        appleIcon: Icon(AppIcons.send(context)),
+        appleLabel: '发送',
       ),
     );
   }

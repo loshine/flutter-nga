@@ -5,6 +5,8 @@ import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/providers/message/conversation_detail_provider.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -139,44 +141,42 @@ class ConversationDetailPage extends HookConsumerWidget {
 
     final hasHeader = state.participants.isNotEmpty || state.isIsolated;
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !embedded,
-        centerTitle: embedded ? false : null,
-        title: const Text('消息详情'),
-        actions: [
-          PopupMenuButton<_MenuAction>(
-            onSelected: (action) => switch (action) {
-              _MenuAction.invite => invite(),
-              _MenuAction.leave => leave(),
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                value: _MenuAction.invite,
-                child: ListTile(
-                  leading: Icon(Icons.person_add_alt_outlined),
-                  title: Text('邀请用户加入'),
-                  contentPadding: EdgeInsets.zero,
-                ),
+    return AppScaffold(
+      embedded: embedded,
+      title: const Text('消息详情'),
+      actions: [
+        PopupMenuButton<_MenuAction>(
+          icon: Icon(AppIcons.more(context)),
+          onSelected: (action) => switch (action) {
+            _MenuAction.invite => invite(),
+            _MenuAction.leave => leave(),
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(
+              value: _MenuAction.invite,
+              child: ListTile(
+                leading: Icon(Icons.person_add_alt_outlined),
+                title: Text('邀请用户加入'),
+                contentPadding: EdgeInsets.zero,
               ),
-              PopupMenuItem(
-                value: _MenuAction.leave,
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text('退出对话'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
-          ),
-          if (embedded && onClose != null)
-            IconButton(
-              tooltip: '关闭',
-              icon: const Icon(Icons.close),
-              onPressed: onClose,
             ),
-        ],
-      ),
+            PopupMenuItem(
+              value: _MenuAction.leave,
+              child: ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('退出对话'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+        ),
+        if (embedded && onClose != null)
+          IconButton(
+            tooltip: '关闭',
+            icon: Icon(AppIcons.close(context)),
+            onPressed: onClose,
+          ),
+      ],
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
@@ -201,10 +201,11 @@ class ConversationDetailPage extends HookConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: '回复',
         onPressed: reply,
-        child: const Icon(Icons.reply),
+        icon: const Icon(Icons.reply),
+        appleIcon: Icon(AppIcons.reply(context)),
       ),
     );
   }

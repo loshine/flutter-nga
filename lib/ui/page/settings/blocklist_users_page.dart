@@ -2,6 +2,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -58,19 +60,17 @@ class BlocklistUsersPage extends HookConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("屏蔽用户"),
-        actions: [
-          IconButton(
-            onPressed: state.blockUserList.isEmpty
-                ? null
-                : () => _confirmDeleteAll(context, notifier),
-            icon: const Icon(Icons.delete_forever),
-            tooltip: "删除所有屏蔽用户",
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: const Text("屏蔽用户"),
+      actions: [
+        IconButton(
+          onPressed: state.blockUserList.isEmpty
+              ? null
+              : () => _confirmDeleteAll(context, notifier),
+          icon: Icon(AppIcons.delete(context)),
+          tooltip: "删除所有屏蔽用户",
+        ),
+      ],
       body: state.blockUserList.isEmpty
           ? const ListStatusView(
               icon: Icons.person_off_outlined,
@@ -110,10 +110,11 @@ class BlocklistUsersPage extends HookConsumerWidget {
                 },
               ),
             ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: "添加屏蔽用户",
         onPressed: () => _showAddDialog(context, notifier),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        appleIcon: Icon(AppIcons.add(context)),
       ),
     );
   }

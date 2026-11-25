@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/line_height_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -20,12 +21,9 @@ class InterfaceSettingsPage extends ConsumerWidget {
     final notifier = ref.read(interfaceSettingsProvider.notifier);
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !embedded,
-        centerTitle: embedded ? false : null,
-        title: const Text("界面设置"),
-      ),
+    return AppScaffold(
+      embedded: embedded,
+      title: const Text("界面设置"),
       body: ReadableListPadding(
         padding: EdgeInsets.fromLTRB(
           mediaPadding.left,

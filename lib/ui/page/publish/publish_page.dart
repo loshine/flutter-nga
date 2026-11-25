@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/ui/page/topic_detail/forum_tag_dialog.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/attachment_widget.dart';
 import 'package:flutter_nga/ui/widget/emoticon_group_tabs_widget.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
@@ -261,8 +263,8 @@ class PublishPage extends HookWidget {
           confirmDiscard();
         }
       },
-      child: Scaffold(
-        appBar: AppBar(title: Text(tid != null ? "回帖" : "发帖")),
+      child: AppScaffold(
+        title: Text(tid != null ? "回帖" : "发帖"),
         body: Column(
           children: [
             Expanded(
@@ -404,15 +406,13 @@ class PublishPage extends HookWidget {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
+        primaryAction: AppPrimaryAction(
           tooltip: '发送',
-          onPressed: submitting.value ? null : publish,
-          child: submitting.value
-              ? const SizedBox.square(
-                  dimension: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.send),
+          loading: submitting.value,
+          onPressed: publish,
+          icon: const Icon(Icons.send),
+          appleIcon: Icon(AppIcons.send(context)),
+          appleLabel: '发送',
         ),
       ),
     );
