@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/providers/forum/child_forum_subscription_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class ChildForumItemWidget extends ConsumerWidget {
@@ -52,7 +53,7 @@ class ChildForumItemWidget extends ConsumerWidget {
             title: Text(childForum.name),
             subtitle: Text(childForum.desc ?? ""),
             trailing: tid != null && notifier != null
-                ? Switch(
+                ? AppSwitch(
                     value: subscribed,
                     onChanged: (v) {
                       if (v) {

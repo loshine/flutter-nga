@@ -4,6 +4,7 @@ import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import 'package:html/dom.dart' as dom;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/ui/widget/collapse_widget.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/username_text.dart';
 import 'package:flutter_nga/utils/parser/content_parser.dart';
 import 'package:flutter_nga/utils/parser/nga_crypt.dart';
@@ -735,14 +736,13 @@ class _NgaDictionaryTerm extends StatelessWidget {
   void _showDefinition(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(term),
-        content: SingleChildScrollView(
-          child: NgaHtml(
-            definition,
-            textStyle: TextStyle(
-              color: Theme.of(dialogContext).textTheme.bodyMedium?.color,
-            ),
+      builder: (dialogContext) => M3Dialog(
+        title: term,
+        scrollable: true,
+        content: NgaHtml(
+          definition,
+          textStyle: TextStyle(
+            color: Theme.of(dialogContext).textTheme.bodyMedium?.color,
           ),
         ),
         actions: [

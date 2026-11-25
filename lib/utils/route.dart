@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
@@ -196,6 +197,7 @@ List<GoRoute> buildRoutes() {
         int.tryParse(state.uri.queryParameters["fid"] ?? ""),
         subject: state.uri.queryParameters["subject"],
         authorid: int.tryParse(state.uri.queryParameters["authorid"] ?? ""),
+        initiallyFavourited: state.uri.queryParameters["favourited"] == "1",
       ),
     ),
     GoRoute(
@@ -220,7 +222,11 @@ List<GoRoute> buildRoutes() {
         if (asDialog) {
           return _DesktopDialogPage<Object?>(key: state.pageKey, child: page);
         }
-        return MaterialPage<Object?>(key: state.pageKey, child: page);
+        return MaterialPage<Object?>(
+          key: state.pageKey,
+          fullscreenDialog: context.isAppleStyle,
+          child: page,
+        );
       },
     ),
     GoRoute(
@@ -345,9 +351,26 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.SEND_MESSAGE,
       name: Routes.SEND_MESSAGE,
-      builder: (context, state) => SendMessagePage(
-        mid: int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0,
-      ),
+      pageBuilder: (context, state) {
+        final asDialog = _shouldUseDesktopDialog(context);
+        final page = SendMessagePage(
+          mid: int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0,
+          asDialog: asDialog,
+        );
+        if (asDialog) {
+          return _DesktopDialogPage<Object?>(
+            key: state.pageKey,
+            maxWidth: 620,
+            maxHeight: 560,
+            child: page,
+          );
+        }
+        return MaterialPage<Object?>(
+          key: state.pageKey,
+          fullscreenDialog: context.isAppleStyle,
+          child: page,
+        );
+      },
     ),
     GoRoute(
       path: Routes.ABOUT,

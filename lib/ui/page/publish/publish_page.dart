@@ -297,7 +297,12 @@ class PublishPage extends HookWidget {
                   icon: Icon(AppIcons.close(context), size: 18),
                   onPressed: () => Navigator.of(context).maybePop(),
                 )
-              : null,
+              : (isApple
+                    ? TextButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
+                        child: const Text('取消'),
+                      )
+                    : null),
           title: Text(tid != null ? "回帖" : "发帖"),
           actions: [
             if (asDialog && !isApple)

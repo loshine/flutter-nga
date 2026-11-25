@@ -11,9 +11,11 @@ import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_snack_bar.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class FavouriteTopicListPage extends HookConsumerWidget {
   const FavouriteTopicListPage({
@@ -115,6 +117,19 @@ class FavouriteTopicListPage extends HookConsumerWidget {
       );
     }
 
+    void openFavouritedTopic(Topic topic) {
+      final tid = topic.tid;
+      if (tid == null) return;
+      final subject = topic.subject;
+      final buffer = StringBuffer('${Routes.TOPIC_DETAIL}?tid=$tid');
+      if (topic.fid != null) buffer.write('&fid=${topic.fid}');
+      if (subject != null && subject.isNotEmpty) {
+        buffer.write('&subject=${code_utils.encodeParam(subject)}');
+      }
+      buffer.write('&favourited=1');
+      Routes.navigateTo(context, buffer.toString());
+    }
+
     return MasterDetailLayout(
       masterBuilder: (paneContext, isTwoPane) => AppScaffold(
         embedded: embedded,
@@ -142,7 +157,9 @@ class FavouriteTopicListPage extends HookConsumerWidget {
                     topic: topic,
                     selected:
                         isTwoPane && selectedTopic.value?.tid == topic.tid,
-                    onTap: isTwoPane ? () => selectTopic(topic) : null,
+                    onTap: () => isTwoPane
+                        ? selectTopic(topic)
+                        : openFavouritedTopic(topic),
                     onRemove: () => remove(paneContext, topic),
                   );
                 },
@@ -153,6 +170,7 @@ class FavouriteTopicListPage extends HookConsumerWidget {
       ),
       detailBuilder: (context) => TopicDetailPane(
         selected: selectedTopic.value,
+        initiallyFavourited: true,
         emptySubtitle: '从左侧收藏列表选择一篇帖子查看详情',
         onClose: () => selectedTopic.value = null,
       ),

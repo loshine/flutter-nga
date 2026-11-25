@@ -18,6 +18,7 @@ import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/haptics.dart';
+import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/material_tab_controller_hook.dart';
 import 'package:flutter_nga/utils/nga_links.dart';
 import 'package:flutter_nga/utils/route.dart';
@@ -41,6 +42,7 @@ class TopicDetailPage extends HookConsumerWidget {
     this.authorid,
     this.embedded = false,
     this.onClose,
+    this.initiallyFavourited = false,
   });
 
   final int? tid;
@@ -54,11 +56,20 @@ class TopicDetailPage extends HookConsumerWidget {
   /// 内嵌模式下关闭详情面板的回调
   final VoidCallback? onClose;
 
+  /// 从收藏列表等已知已收藏入口进入时设为 true，使收藏按钮初始即呈现「取消收藏」。
+  final bool initiallyFavourited;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final providerKey = (tid: tid!);
     final state = ref.watch(topicDetailProvider(providerKey));
     final notifier = ref.read(topicDetailProvider(providerKey).notifier);
+
+    usePostFrameEffect(() {
+      if (initiallyFavourited) {
+        notifier.markKnownFavourited();
+      }
+    }, [providerKey, initiallyFavourited]);
 
     final length = state.maxPage < 1 ? 1 : state.maxPage;
     final initialIndex = (state.currentPage - 1).clamp(0, length - 1);

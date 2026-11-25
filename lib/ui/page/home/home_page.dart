@@ -305,15 +305,20 @@ class _HomePageContent extends HookConsumerWidget {
     ValueChanged<int> onDestinationSelected,
     VoidCallback? onTitleTap,
   ) {
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final mediaQuery = MediaQuery.of(context);
+    final bottomInset = mediaQuery.padding.bottom;
     return AppScaffold(
       title: _buildAnimatedTitle(context, index, onTitleTap),
       actions: _getActionsByPage(context, ref, index),
       automaticallyImplyLeading: false,
       extendBody: true,
       primaryAction: _buildPrimaryAction(context, ref, index),
-      body: Padding(
-        padding: EdgeInsets.only(bottom: 68 + bottomInset),
+      // 通过增大 MediaQuery 底部安全区而非外层 Padding，让列表内容可以滚动穿过
+      // 悬浮 Liquid Glass 底栏下方产生毛玻璃透出，同时滚到底部时不被遮挡。
+      body: MediaQuery(
+        data: mediaQuery.copyWith(
+          padding: mediaQuery.padding.copyWith(bottom: bottomInset + 72),
+        ),
         child: _buildAnimatedBody(context, index, pageList),
       ),
       bottomNavigationBar: _AppleFloatingTabBar(

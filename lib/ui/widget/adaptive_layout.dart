@@ -132,12 +132,14 @@ class TopicDetailPane extends StatelessWidget {
     this.onClose,
     this.emptyTitle = '选择一篇帖子开始阅读',
     this.emptySubtitle,
+    this.initiallyFavourited = false,
   });
 
   final SelectedTopic? selected;
   final VoidCallback? onClose;
   final String emptyTitle;
   final String? emptySubtitle;
+  final bool initiallyFavourited;
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +159,7 @@ class TopicDetailPane extends StatelessWidget {
       authorid: topic.authorid,
       embedded: true,
       onClose: onClose,
+      initiallyFavourited: initiallyFavourited,
     );
   }
 }

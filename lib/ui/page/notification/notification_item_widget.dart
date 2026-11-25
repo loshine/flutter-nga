@@ -1,6 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/notification.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/reply_detail_dialog.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/route.dart';
 
@@ -33,78 +36,87 @@ class NotificationItemWidget extends StatelessWidget {
     final target = notification.target;
     final menuActions = _menuActions(context);
 
-    return Material(
-      color: selected
-          ? colorScheme.secondaryContainer.withValues(alpha: 0.45)
-          : Colors.transparent,
-      child: InkWell(
-        onTap: target == null
-            ? null
-            : (onTap ?? () => openNotificationTarget(context, notification)),
-        onLongPress: menuActions.isEmpty
-            ? null
-            : () => _showMenu(context, menuActions),
-        child: DecoratedBox(
-          decoration: selected
-              ? BoxDecoration(
-                  border: Border(
-                    left: BorderSide(color: colorScheme.primary, width: 3),
-                  ),
-                )
-              : const BoxDecoration(),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(selected ? 13 : 16, 12, 16, 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _NotificationIcon(notification: notification),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            if (description.actor != null)
-                              TextSpan(
-                                text: '${description.actor} ',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
+    return GestureDetector(
+      onSecondaryTapDown: menuActions.isEmpty
+          ? null
+          : (details) => _showMenu(
+              context,
+              menuActions,
+              globalPosition: details.globalPosition,
+            ),
+      child: Material(
+        color: selected
+            ? colorScheme.secondaryContainer.withValues(alpha: 0.45)
+            : Colors.transparent,
+        child: InkWell(
+          onTap: target == null
+              ? null
+              : (onTap ?? () => openNotificationTarget(context, notification)),
+          onLongPress: menuActions.isEmpty
+              ? null
+              : () => _showMenu(context, menuActions),
+          child: DecoratedBox(
+            decoration: selected
+                ? BoxDecoration(
+                    border: Border(
+                      left: BorderSide(color: colorScheme.primary, width: 3),
+                    ),
+                  )
+                : const BoxDecoration(),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(selected ? 13 : 16, 12, 16, 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _NotificationIcon(notification: notification),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              if (description.actor != null)
+                                TextSpan(
+                                  text: '${description.actor} ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary,
+                                  ),
                                 ),
-                              ),
-                            TextSpan(text: description.action),
-                          ],
-                        ),
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      if (description.detail != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          description.detail!,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                              TextSpan(text: description.action),
+                            ],
+                          ),
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface,
                           ),
                         ),
-                      ],
-                      if (notification.time > 0) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          code_utils.formatPostDate(notification.time * 1000),
-                          style: textTheme.labelSmall?.copyWith(
-                            color: colorScheme.outline,
+                        if (description.detail != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            description.detail!,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                        ),
+                        ],
+                        if (notification.time > 0) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            code_utils.formatPostDate(notification.time * 1000),
+                            style: textTheme.labelSmall?.copyWith(
+                              color: colorScheme.outline,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -117,7 +129,7 @@ class NotificationItemWidget extends StatelessWidget {
     final topicId = notification.topicId;
     if (topicId != null && notification.target is! TopicTarget) {
       actions.add((
-        icon: Icons.article_outlined,
+        icon: AppIcons.resolve(context, Icons.article_outlined),
         label: '进入主题',
         onTap: () =>
             Routes.navigateTo(context, "${Routes.TOPIC_DETAIL}?tid=$topicId"),
@@ -126,7 +138,7 @@ class NotificationItemWidget extends StatelessWidget {
     if (notification.hasActor) {
       final name = notification.fromUsername ?? 'UID:${notification.fromUid}';
       actions.add((
-        icon: Icons.person_outline,
+        icon: AppIcons.person(context),
         label: '查看 $name 的主页',
         onTap: () => Routes.navigateTo(
           context,
@@ -137,7 +149,7 @@ class NotificationItemWidget extends StatelessWidget {
     final noHint = notification.noHintTarget;
     if (noHint != null && onNoHint != null) {
       actions.add((
-        icon: Icons.notifications_off_outlined,
+        icon: AppIcons.resolve(context, Icons.notifications_off_outlined),
         label: noHint.isTopic ? '不再提示此主题的回复或评论' : '不再提示此回复的回复或评论',
         onTap: () => onNoHint!(noHint),
       ));
@@ -145,8 +157,31 @@ class NotificationItemWidget extends StatelessWidget {
     return actions;
   }
 
-  void _showMenu(BuildContext context, List<_MenuAction> actions) {
-    showModalBottomSheet<void>(
+  Future<void> _showMenu(
+    BuildContext context,
+    List<_MenuAction> actions, {
+    Offset? globalPosition,
+  }) async {
+    if (context.isAppleStyle || globalPosition != null) {
+      final chosen = await showAppActionMenu<int>(
+        context: context,
+        globalPosition: globalPosition,
+        actions: [
+          for (var i = 0; i < actions.length; i++)
+            AppMenuAction<int>(
+              value: i,
+              label: actions[i].label,
+              icon: actions[i].icon,
+            ),
+        ],
+      );
+      if (chosen != null) {
+        actions[chosen].onTap();
+      }
+      return;
+    }
+
+    await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(

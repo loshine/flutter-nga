@@ -569,6 +569,31 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                                                     _FavouriteForumDestination(
                                                       forum,
                                                     ),
+                                                onLongPress: () async {
+                                                  final act =
+                                                      await showAppActionMenu<
+                                                        String
+                                                      >(
+                                                        context: context,
+                                                        title: forum.name,
+                                                        actions: [
+                                                          AppMenuAction(
+                                                            value: 'remove',
+                                                            label: '移除收藏',
+                                                            icon:
+                                                                AppIcons.delete(
+                                                                  context,
+                                                                ),
+                                                            destructive: true,
+                                                          ),
+                                                        ],
+                                                      );
+                                                  if (act == 'remove') {
+                                                    await confirmRemoveFavouriteForum(
+                                                      forum,
+                                                    );
+                                                  }
+                                                },
                                                 onSecondaryTapDown: (details) async {
                                                   final act =
                                                       await showAppActionMenu<
@@ -776,6 +801,7 @@ class _SidebarRow extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.badgeCount = 0,
+    this.onLongPress,
     this.onSecondaryTapDown,
   });
 
@@ -784,11 +810,13 @@ class _SidebarRow extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final int badgeCount;
+  final VoidCallback? onLongPress;
   final GestureTapDownCallback? onSecondaryTapDown;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isTouchSidebar = !context.isMacDesktopAppleStyle;
     final bg = selected ? colorScheme.primary : Colors.transparent;
     final fg = selected ? colorScheme.onPrimary : colorScheme.onSurface;
     final iconColor = selected ? colorScheme.onPrimary : colorScheme.primary;
@@ -803,8 +831,12 @@ class _SidebarRow extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
+            onLongPress: onLongPress,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: isTouchSidebar ? 10 : 6,
+              ),
               child: Row(
                 children: [
                   IconTheme(

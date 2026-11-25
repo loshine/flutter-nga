@@ -144,7 +144,7 @@ void main() {
     await tester.tap(find.text('SCP-087', findRichText: true));
     await tester.pumpAndSettle();
 
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(Dialog), findsOneWidget);
     expect(
       find.textContaining('一座向下延伸的楼梯', findRichText: true),
       findsOneWidget,

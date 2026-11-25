@@ -56,7 +56,7 @@ class ForumCategoryPage extends HookConsumerWidget {
           mainAxisSpacing: isAppleDesktop ? 12 : 0,
         );
 
-        return RefreshIndicator(
+        return RefreshIndicator.adaptive(
           onRefresh: () async {
             try {
               await ref.read(forumCategoryListProvider.notifier).refresh();

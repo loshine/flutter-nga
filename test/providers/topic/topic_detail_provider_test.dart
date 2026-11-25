@@ -179,4 +179,31 @@ void main() {
     notifier.notifyReplyPublished();
     expect(container.read(provider).latestPageRefreshTick, 1);
   });
+
+  test('markKnownFavourited initializes unknown state without overriding manual toggle', () async {
+    final repository = _FakeFavouriteRepository();
+    final container = ProviderContainer(
+      overrides: [topicRepositoryProvider.overrideWithValue(repository)],
+    );
+    const key = (tid: 88);
+    final provider = topicDetailProvider(key);
+    final subscription = container.listen(provider, (_, _) {});
+    addTearDown(() {
+      subscription.close();
+      container.dispose();
+    });
+
+    final notifier = container.read(provider.notifier);
+    notifier.markKnownFavourited();
+    expect(container.read(provider).favourite, FavouriteStatus.favourited);
+
+    // 首次点击即执行取消收藏而非重复添加
+    expect(await notifier.toggleFavourite(), '删除成功');
+    expect(container.read(provider).favourite, FavouriteStatus.notFavourited);
+    expect(repository.calls, ['del 88 1']);
+
+    // 手动取消后再调用 markKnownFavourited 不会覆盖已知未收藏状态
+    notifier.markKnownFavourited();
+    expect(container.read(provider).favourite, FavouriteStatus.notFavourited);
+  });
 }

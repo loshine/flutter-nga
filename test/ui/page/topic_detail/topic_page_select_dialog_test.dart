@@ -1,6 +1,9 @@
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show CupertinoSlider, CupertinoSlidingSegmentedControl;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_page_select_dialog.dart';
 import 'package:flutter_nga/utils/theme_builder.dart';
 
@@ -67,5 +70,34 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result, (false, 1281));
+  });
+
+  testWidgets('Apple 风格使用 CupertinoSlider 与 CupertinoSlidingSegmentedControl', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      AppDesignStyleScope(
+        style: AppDesignStyle.apple,
+        nativeLiquidGlassSupported: false,
+        macTitlebarInset: 0,
+        child: MaterialApp(
+          theme: ThemeBuilder.applyDesignStyle(
+            ThemeBuilder.buildLightTheme(Colors.brown),
+            isAppleStyle: true,
+          ),
+          home: const Scaffold(
+            body: TopicPageSelectDialog(
+              currentPage: 2,
+              maxPage: 20,
+              maxFloor: 400,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoSlider), findsOneWidget);
+    expect(find.byType(CupertinoSlidingSegmentedControl<bool>), findsOneWidget);
   });
 }

@@ -91,6 +91,13 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
     state = state.copyWith(currentPage: safeCurrentPage);
   }
 
+  /// 从收藏列表等已知来源进入时，将初始未知状态标记为已收藏（不覆盖本页手动取消后的状态）。
+  void markKnownFavourited() {
+    if (state.favourite == FavouriteStatus.unknown) {
+      state = state.copyWith(favourite: FavouriteStatus.favourited);
+    }
+  }
+
   /// 回帖成功后调用：仅当当前正处于最后一页（最新一页）时触发该页自动刷新。
   void notifyReplyPublished() {
     if (state.currentPage >= state.maxPage) {

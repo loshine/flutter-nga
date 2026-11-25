@@ -1,6 +1,8 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show CupertinoAlertDialog, CupertinoDialogAction, CupertinoIcons;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,9 +10,11 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/route.dart';
 
@@ -330,21 +334,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return false;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('提示'),
-        content: Text(message),
-        actions: [
-          if (cancelable)
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+      builder: (dialogContext) {
+        if (cancelable) {
+          return M3ConfirmDialog(title: '提示', content: message);
+        }
+        if (dialogContext.isAppleStyle) {
+          return CupertinoAlertDialog(
+            title: const Text('提示'),
+            content: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(message),
             ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        }
+        return M3Dialog(
+          title: '提示',
+          content: Text(message),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
     );
     return confirmed ?? !cancelable;
   }
@@ -358,30 +378,78 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return null;
     return showDialog<int>(
       context: context,
-      builder: (context) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return AlertDialog(
-          title: title.isEmpty ? null : Text(title),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: RadioGroup<int>(
-              groupValue: selectedIndex,
-              onChanged: (index) => Navigator.of(context).pop(index),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (context, index) => RadioListTile<int>(
-                  title: Text(options[index]),
-                  value: index,
-                  activeColor: colorScheme.primary,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ),
+      builder: (dialogContext) {
+        final colorScheme = Theme.of(dialogContext).colorScheme;
+        final isApple = dialogContext.isAppleStyle;
+        return M3Dialog(
+          title: title.isEmpty ? '请选择' : title,
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 360),
+            child: isApple
+                ? ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    separatorBuilder: (_, _) => Divider(
+                      height: 0.5,
+                      thickness: 0.5,
+                      color: colorScheme.outlineVariant,
+                    ),
+                    itemBuilder: (_, index) {
+                      final selected = index == selectedIndex;
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () => Navigator.of(dialogContext).pop(index),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 11,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  options[index],
+                                  style: TextStyle(
+                                    color: selected
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurface,
+                                    fontWeight: selected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                              if (selected)
+                                Icon(
+                                  CupertinoIcons.check_mark,
+                                  size: 16,
+                                  color: colorScheme.primary,
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : RadioGroup<int>(
+                    groupValue: selectedIndex,
+                    onChanged: (index) =>
+                        Navigator.of(dialogContext).pop(index),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (_, index) => RadioListTile<int>(
+                        title: Text(options[index]),
+                        value: index,
+                        activeColor: colorScheme.primary,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('取消'),
             ),
           ],

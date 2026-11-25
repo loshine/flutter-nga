@@ -45,7 +45,7 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
         final isWide = constraints.maxWidth >= kCompactBreakpoint;
         return Stack(
           children: [
-            RefreshIndicator(
+            RefreshIndicator.adaptive(
               onRefresh: () async {
                 try {
                   await notifier.refresh();
