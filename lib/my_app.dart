@@ -75,7 +75,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
             defaultTargetPlatform == TargetPlatform.windows ||
             defaultTargetPlatform == TargetPlatform.linux);
 
-    return AppDesignStyleScope(
+    Widget app = AppDesignStyleScope(
       style: effectiveStyle,
       nativeLiquidGlassSupported: designState.nativeLiquidGlassSupported,
       macTitlebarInset: designState.macTitlebarInset,
@@ -143,7 +143,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
                     ? () => const CupertinoFooter()
                     : () => const ClassicFooter();
               }
-              Widget content = AnnotatedRegion<SystemUiOverlayStyle>(
+              return AnnotatedRegion<SystemUiOverlayStyle>(
                 value: overlayStyle,
                 child: CupertinoTheme(
                   data: ThemeBuilder.buildCupertinoTheme(
@@ -160,13 +160,6 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
                   ),
                 ),
               );
-              if (AppleNativeService.isRealMacOS) {
-                content = PlatformMenuBar(
-                  menus: _buildMacMenuBar(),
-                  child: content,
-                );
-              }
-              return content;
             },
             theme: styledLight,
             darkTheme: styledDark,
@@ -183,6 +176,11 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
         },
       ),
     );
+
+    if (AppleNativeService.isRealMacOS) {
+      app = PlatformMenuBar(menus: _buildMacMenuBar(), child: app);
+    }
+    return app;
   }
 
   /// macOS 顶部原生系统菜单栏与常用快捷键（⌘, 设置、⌘F 搜索、⌘1~4 快捷导航）。
