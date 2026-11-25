@@ -5,7 +5,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/forum/forum_detail_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/forum_detail/forum_favourite_button_widet.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
@@ -25,13 +27,31 @@ import 'child_forum_list_page.dart';
 import 'forum_recommend_topic_list_page.dart';
 
 class ForumDetailPage extends HookConsumerWidget {
-  const ForumDetailPage({required this.fid, this.name, this.type, super.key});
+  const ForumDetailPage({
+    required this.fid,
+    this.name,
+    this.type,
+    this.embedded = false,
+    this.leading,
+    super.key,
+  });
 
   final int fid;
   final String? name;
   final int? type;
 
+  /// 是否内嵌在 macOS / iPadOS 三栏工作区中（不显示路由返回箭头、不重复避让红绿灯）
+  final bool embedded;
+
+  /// 内嵌模式下可选自定义左侧操作（如展开侧边栏或返回全部版块）
+  final Widget? leading;
+
   static const _tabs = [Tab(text: '最新'), Tab(text: '精华'), Tab(text: '子版')];
+  static const _segments = [
+    AppSegment(value: 0, label: '最新'),
+    AppSegment(value: 1, label: '精华'),
+    AppSegment(value: 2, label: '子版'),
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -99,28 +119,45 @@ class ForumDetailPage extends HookConsumerWidget {
       );
     }
 
+    final isApple = context.isAppleStyle;
+
     return MasterDetailLayout(
       masterBuilder: (context, isTwoPane) => AppScaffold(
+        embedded: embedded,
+        leading: leading,
         // 点击标题让当前 Tab 回到顶部
         title: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => tabSignals[tabController.index].fire(),
-          child: Text(name!),
+          child: Text(name ?? ''),
         ),
-        bottom: TabBar(
-          controller: tabController,
-          tabs: _tabs,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-        ),
+        bottom: isApple
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(44),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: AppSegmentedControl<int>(
+                    segments: _segments,
+                    selected: tabController.index,
+                    onChanged: (i) => tabController.animateTo(i),
+                  ),
+                ),
+              )
+            : TabBar(
+                controller: tabController,
+                tabs: _tabs,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+              ),
         actions: [
           ForumFavouriteButtonWidget(fid: fid, name: name, type: type),
-          IconButton(
-            tooltip: '搜索',
-            icon: Icon(AppIcons.search(context)),
-            onPressed: () =>
-                Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
-          ),
+          if (!embedded)
+            IconButton(
+              tooltip: '搜索',
+              icon: Icon(AppIcons.search(context)),
+              onPressed: () =>
+                  Routes.navigateTo(context, "${Routes.SEARCH}?fid=$fid"),
+            ),
         ],
         body: TabBarView(
           controller: tabController,

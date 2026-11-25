@@ -19,7 +19,16 @@ import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 import 'notification_item_widget.dart';
 
 class NotificationListPage extends HookConsumerWidget {
-  const NotificationListPage({super.key});
+  const NotificationListPage({
+    super.key,
+    this.embedded = false,
+    this.showAppBar = true,
+    this.leading,
+  });
+
+  final bool embedded;
+  final bool showAppBar;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -72,6 +81,9 @@ class NotificationListPage extends HookConsumerWidget {
 
     return MasterDetailLayout(
       masterBuilder: (context, isTwoPane) => AppScaffold(
+        embedded: embedded,
+        showAppBar: showAppBar,
+        leading: leading,
         title: const Text('提醒信息'),
         actions: [
           IconButton(

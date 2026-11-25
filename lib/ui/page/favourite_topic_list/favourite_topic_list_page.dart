@@ -16,7 +16,16 @@ import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
 
 class FavouriteTopicListPage extends HookConsumerWidget {
-  const FavouriteTopicListPage({super.key});
+  const FavouriteTopicListPage({
+    super.key,
+    this.embedded = false,
+    this.showAppBar = true,
+    this.leading,
+  });
+
+  final bool embedded;
+  final bool showAppBar;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -104,6 +113,9 @@ class FavouriteTopicListPage extends HookConsumerWidget {
 
     return MasterDetailLayout(
       masterBuilder: (context, isTwoPane) => AppScaffold(
+        embedded: embedded,
+        showAppBar: showAppBar,
+        leading: leading,
         title: const Text('贴子收藏'),
         body: EasyRefresh(
           controller: refreshController,

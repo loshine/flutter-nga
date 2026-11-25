@@ -13,9 +13,10 @@ import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
 
 class FavouriteForumGroupPage extends StatefulHookConsumerWidget {
-  const FavouriteForumGroupPage({super.key, this.scrollToTop});
+  const FavouriteForumGroupPage({super.key, this.scrollToTop, this.onForumTap});
 
   final ScrollToTopSignal? scrollToTop;
+  final ValueChanged<Forum>? onForumTap;
 
   @override
   ConsumerState<FavouriteForumGroupPage> createState() =>
@@ -64,7 +65,12 @@ class _FavouriteForumGroupState extends ConsumerState<FavouriteForumGroupPage> {
                 itemCount: forums.length,
                 itemBuilder: (_, index) => ForumGridItemWidget(
                   forums[index],
+                  onTap: widget.onForumTap != null
+                      ? () => widget.onForumTap!(forums[index])
+                      : null,
                   onLongPress: () => _showDeleteDialog(notifier, forums[index]),
+                  onSecondaryTapDown: (_) =>
+                      _showDeleteDialog(notifier, forums[index]),
                 ),
               ),
             ),

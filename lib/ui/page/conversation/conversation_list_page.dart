@@ -17,7 +17,16 @@ import 'package:flutter_nga/utils/route.dart';
 import 'conversation_item_widget.dart';
 
 class ConversationListPage extends HookConsumerWidget {
-  const ConversationListPage({super.key});
+  const ConversationListPage({
+    super.key,
+    this.embedded = false,
+    this.showAppBar = true,
+    this.leading,
+  });
+
+  final bool embedded;
+  final bool showAppBar;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,6 +70,9 @@ class ConversationListPage extends HookConsumerWidget {
 
     return MasterDetailLayout(
       masterBuilder: (context, isTwoPane) => AppScaffold(
+        embedded: embedded,
+        showAppBar: showAppBar,
+        leading: leading,
         title: const Text('短消息'),
         actions: [
           IconButton(

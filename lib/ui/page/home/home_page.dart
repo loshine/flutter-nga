@@ -9,6 +9,9 @@ import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart'
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
+import 'package:flutter_nga/ui/page/home/apple_workspace_shell.dart';
+import 'package:flutter_nga/ui/page/home/inbox_hub_page.dart';
+import 'package:flutter_nga/ui/page/home/library_hub_page.dart';
 import 'package:flutter_nga/ui/page/mine/mine_page.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
@@ -66,11 +69,21 @@ class _HomePageContent extends HookConsumerWidget {
       NavigationDestination(
         icon: Icon(AppIcons.forum(context)),
         selectedIcon: Icon(AppIcons.forum(context, filled: true)),
-        label: '社区',
+        label: '版块',
       ),
       NavigationDestination(
-        icon: withBadge(Icon(AppIcons.person(context))),
-        selectedIcon: withBadge(Icon(AppIcons.person(context, filled: true))),
+        icon: Icon(AppIcons.bookmark(context)),
+        selectedIcon: Icon(AppIcons.bookmark(context)),
+        label: '收藏',
+      ),
+      NavigationDestination(
+        icon: withBadge(Icon(AppIcons.mail(context))),
+        selectedIcon: withBadge(Icon(AppIcons.mail(context))),
+        label: '消息',
+      ),
+      NavigationDestination(
+        icon: Icon(AppIcons.person(context)),
+        selectedIcon: Icon(AppIcons.person(context, filled: true)),
         label: '我的',
       ),
     ];
@@ -79,12 +92,14 @@ class _HomePageContent extends HookConsumerWidget {
   List<Widget> _buildPageList(ScrollToTopSignal communityScrollToTop) {
     return [
       ForumGroupTabsPage(scrollToTop: communityScrollToTop),
+      const LibraryHubPage(),
+      const InboxHubPage(),
       const MinePage(),
     ];
   }
 
   String _getTitleText(int index) {
-    const titles = ['FNGA', '我的'];
+    const titles = ['FNGA', '收藏', '消息', '我的'];
     return titles.elementAtOrNull(index) ?? '';
   }
 
@@ -139,16 +154,21 @@ class _HomePageContent extends HookConsumerWidget {
     final scrollToTop = useMemoized(ScrollToTopSignal.new);
     useEffect(() => scrollToTop.dispose, [scrollToTop]);
     final doubleTap = useMemoized(DoubleTapDetector.new);
-    final sidebarCollapsed = useState(false);
     final pageList = _buildPageList(scrollToTop);
+    final safeIndex = index.clamp(0, pageList.length - 1);
     final sizeClass = WindowSizeClass.of(context);
     final isLargeScreen = sizeClass.isMediumOrLarger;
     final isExpanded = sizeClass.isExpandedOrLarger;
     final isApple = context.isAppleStyle;
 
+    // Apple 风格大屏（macOS / iPadOS 横屏）采用完整的三栏 Source List 工作区
+    if (isApple && isLargeScreen) {
+      return const AppleWorkspaceShell();
+    }
+
     // 双击当前导航项回到顶部，点击其他项正常切换
     void onDestinationSelected(int i) {
-      if (i != index) {
+      if (i != safeIndex) {
         doubleTap.reset();
         ref.read(homeIndexProvider.notifier).setIndex(i);
       } else if (doubleTap.tap() && i == 0) {
@@ -156,47 +176,34 @@ class _HomePageContent extends HookConsumerWidget {
       }
     }
 
-    // 点击社区页标题回到顶部
-    final onTitleTap = index == 0 ? scrollToTop.fire : null;
+    // 点击版块页标题回到顶部
+    final onTitleTap = safeIndex == 0 ? scrollToTop.fire : null;
 
     return PopScope(
-      canPop: index == 0,
+      canPop: safeIndex == 0,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
-        if (index != 0) {
+        if (safeIndex != 0) {
           ref.read(homeIndexProvider.notifier).setIndex(0);
         }
       },
       child: isLargeScreen
-          ? (isApple
-                ? _buildAppleLargeScreenLayout(
-                    context,
-                    ref,
-                    index,
-                    destinations,
-                    pageList,
-                    onDestinationSelected,
-                    onTitleTap,
-                    collapsed: sidebarCollapsed.value,
-                    onToggleSidebar: () =>
-                        sidebarCollapsed.value = !sidebarCollapsed.value,
-                  )
-                : _buildLargeScreenLayout(
-                    context,
-                    ref,
-                    index,
-                    destinations,
-                    pageList,
-                    onDestinationSelected,
-                    onTitleTap,
-                    isExpanded: isExpanded,
-                  ))
+          ? _buildLargeScreenLayout(
+              context,
+              ref,
+              safeIndex,
+              destinations,
+              pageList,
+              onDestinationSelected,
+              onTitleTap,
+              isExpanded: isExpanded,
+            )
           : (isApple
                 ? _buildAppleMobileLayout(
                     context,
                     ref,
-                    index,
+                    safeIndex,
                     destinations,
                     pageList,
                     onDestinationSelected,
@@ -205,7 +212,7 @@ class _HomePageContent extends HookConsumerWidget {
                 : _buildMobileLayout(
                     context,
                     ref,
-                    index,
+                    safeIndex,
                     destinations,
                     pageList,
                     onDestinationSelected,
@@ -305,107 +312,6 @@ class _HomePageContent extends HookConsumerWidget {
         destinations: destinations,
         onSelected: onDestinationSelected,
       ),
-    );
-  }
-
-  /// Apple iPadOS / macOS 大屏布局：Liquid Glass 可折叠 Sidebar + 紧凑工具栏内容区（无 FAB）。
-  Widget _buildAppleLargeScreenLayout(
-    BuildContext context,
-    WidgetRef ref,
-    int index,
-    List<NavigationDestination> destinations,
-    List<Widget> pageList,
-    ValueChanged<int> onDestinationSelected,
-    VoidCallback? onTitleTap, {
-    required bool collapsed,
-    required VoidCallback onToggleSidebar,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final macInset = context.macTitlebarInset;
-    final topPadding = MediaQuery.paddingOf(context).top;
-    final sidebarTop = topPadding > macInset ? topPadding : macInset;
-
-    return Row(
-      children: [
-        if (!collapsed) ...[
-          SizedBox(
-            width: 224,
-            child: LiquidGlassSurface(
-              variant: LiquidGlassVariant.sidebar,
-              borderRadius: BorderRadius.zero,
-              showShadow: false,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(12, sidebarTop + 10, 12, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 4, 4, 14),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'FNGA',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.3,
-                                  ),
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: '收起侧边栏',
-                            visualDensity: VisualDensity.compact,
-                            icon: Icon(
-                              AppIcons.sidebar(context),
-                              size: 18,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            onPressed: onToggleSidebar,
-                          ),
-                        ],
-                      ),
-                    ),
-                    for (var i = 0; i < destinations.length; i++)
-                      _AppleSidebarItem(
-                        destination: destinations[i],
-                        selected: i == index,
-                        onTap: () => onDestinationSelected(i),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          VerticalDivider(
-            width: 0.5,
-            thickness: 0.5,
-            color: colorScheme.outlineVariant,
-          ),
-        ],
-        Expanded(
-          child: MediaQuery.removePadding(
-            context: context,
-            removeLeft: !collapsed,
-            child: AppScaffold(
-              leading: collapsed
-                  ? IconButton(
-                      tooltip: '展开侧边栏',
-                      icon: Icon(AppIcons.sidebar(context), size: 20),
-                      onPressed: onToggleSidebar,
-                    )
-                  : null,
-              automaticallyImplyLeading: false,
-              centerTitle: false,
-              title: _buildAnimatedTitle(context, index, onTitleTap),
-              actions: _getActionsByPage(context, ref, index),
-              primaryAction: _buildPrimaryAction(context, ref, index),
-              body: _buildAnimatedBody(context, index, pageList),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -566,7 +472,7 @@ class _AppleFloatingTabBar extends StatelessWidget {
       child: Center(
         heightFactor: 1,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
+          constraints: const BoxConstraints(maxWidth: 420),
           child: LiquidGlassSurface(
             borderRadius: BorderRadius.circular(30),
             interactive: true,
@@ -643,61 +549,6 @@ class _AppleTabBarButton extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AppleSidebarItem extends StatelessWidget {
-  const _AppleSidebarItem({
-    required this.destination,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final NavigationDestination destination;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final fg = selected ? colorScheme.primary : colorScheme.onSurface;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Material(
-        color: selected
-            ? colorScheme.primary.withValues(alpha: 0.14)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-            child: Row(
-              children: [
-                IconTheme(
-                  data: IconThemeData(color: fg, size: 19),
-                  child: selected
-                      ? (destination.selectedIcon ?? destination.icon)
-                      : destination.icon,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    destination.label,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: fg,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

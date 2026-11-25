@@ -17,7 +17,16 @@ import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 
 class TopicHistoryListPage extends HookConsumerWidget {
-  const TopicHistoryListPage({super.key});
+  const TopicHistoryListPage({
+    super.key,
+    this.embedded = false,
+    this.showAppBar = true,
+    this.leading,
+  });
+
+  final bool embedded;
+  final bool showAppBar;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -99,6 +108,9 @@ class TopicHistoryListPage extends HookConsumerWidget {
 
     return MasterDetailLayout(
       masterBuilder: (context, isTwoPane) => AppScaffold(
+        embedded: embedded,
+        showAppBar: showAppBar,
+        leading: leading,
         title: const Text('浏览历史'),
         actions: [
           IconButton(

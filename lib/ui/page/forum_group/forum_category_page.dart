@@ -17,10 +17,12 @@ class ForumCategoryPage extends HookConsumerWidget {
     required this.category,
     super.key,
     this.scrollToTop,
+    this.onForumTap,
   });
 
   final ForumCategory category;
   final ScrollToTopSignal? scrollToTop;
+  final ValueChanged<Forum>? onForumTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -82,8 +84,12 @@ class ForumCategoryPage extends HookConsumerWidget {
                         sliver: SliverGrid.builder(
                           gridDelegate: gridDelegate,
                           itemCount: group.forumList.length,
-                          itemBuilder: (_, i) =>
-                              ForumGridItemWidget(group.forumList[i]),
+                          itemBuilder: (_, i) => ForumGridItemWidget(
+                            group.forumList[i],
+                            onTap: onForumTap != null
+                                ? () => onForumTap!(group.forumList[i])
+                                : null,
+                          ),
                         ),
                       ),
                     ),

@@ -23,7 +23,10 @@ import 'package:flutter_nga/utils/route.dart';
 enum _SettingsDetailPane { account, interface, blocklist }
 
 class SettingsPage extends HookConsumerWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.embedded = false, this.onClose});
+
+  final bool embedded;
+  final VoidCallback? onClose;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +46,16 @@ class SettingsPage extends HookConsumerWidget {
 
     return MasterDetailLayout(
       masterBuilder: (context, isTwoPane) => AppScaffold(
+        embedded: embedded,
         title: const Text("设置"),
+        actions: [
+          if (onClose != null && !isTwoPane)
+            IconButton(
+              tooltip: '关闭',
+              icon: Icon(AppIcons.close(context)),
+              onPressed: onClose,
+            ),
+        ],
         body: ReadableListPadding(
           padding: EdgeInsets.fromLTRB(
             mediaPadding.left,
