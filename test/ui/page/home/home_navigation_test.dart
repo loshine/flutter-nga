@@ -605,6 +605,22 @@ void main() {
       expect(find.text('SEARCH_PAGE'), findsNothing);
       expect(handledPaths.length, 3);
 
+      // 4. 在设置 Sheet 上再压入子路由后触发 ⌘1/⌘,，退回露出设置 Sheet 后停止分发
+      router.push(Routes.SEARCH);
+      await tester.pumpAndSettle();
+      expect(find.text('SEARCH_PAGE'), findsOneWidget);
+
+      dispatchNativeMenuNavigate(
+        router: router,
+        routeObserver: observer,
+        workspaceMenu: workspaceMenu,
+        path: Routes.FAVOURITE_TOPICS,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('SEARCH_PAGE'), findsNothing);
+      expect(find.text('MODAL_OPEN'), findsOneWidget);
+      expect(handledPaths.length, 3);
+
       Navigator.of(homeContext).pop();
       await tester.pumpAndSettle();
     },

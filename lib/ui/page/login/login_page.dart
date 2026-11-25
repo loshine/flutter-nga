@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -10,7 +11,12 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
+import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
+import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
+import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
@@ -308,6 +314,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
+  void _notifyAccountChanged() {
+    ref.read(accountSessionVersionProvider.notifier).bump();
+    ref.read(unreadCountProvider.notifier).clear();
+    ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+    ref.invalidate(conversationListProvider);
+    ref.invalidate(notificationListProvider);
+    ref.invalidate(favouriteTopicListProvider);
+    unawaited(
+      ref
+          .read(homeDrawerHeaderProvider.notifier)
+          .refresh()
+          .then((_) {
+            if (mounted) {
+              return ref.read(unreadCountProvider.notifier).refresh();
+            }
+          })
+          .catchError((_) {}),
+    );
+  }
+
   Future<void> _processCookieJson(String cookiesJson) async {
     try {
       final map = json.decode(cookiesJson) as Map;
@@ -316,7 +342,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         map['token'],
         map['username'],
       );
-      ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+      _notifyAccountChanged();
       if (mounted) {
         AppToast.success("登录成功");
         Routes.pop(context);
@@ -470,7 +496,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _processCookiesString(String cookies) async {
     try {
       await Data().userRepository.saveLoginCookies(cookies);
-      ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+      _notifyAccountChanged();
       if (!mounted) return;
       AppToast.success("登录成功");
       Routes.pop(context);

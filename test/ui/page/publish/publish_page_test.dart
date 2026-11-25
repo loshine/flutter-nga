@@ -134,6 +134,12 @@ void main() {
     await tester.enterText(_contentField, '桌面弹窗回复内容');
     await tester.pump();
 
+    // 拖动窗口宽度跨过 600pt 断点，编辑器不重建、草稿不丢失
+    tester.view.physicalSize = const Size(500, 800);
+    await tester.pumpAndSettle();
+    expect(find.byType(PublishPage), findsOneWidget);
+    expect(find.text('桌面弹窗回复内容'), findsOneWidget);
+
     await tester.tap(find.byTooltip('关闭'));
     await tester.pumpAndSettle();
     expect(find.text('放弃编辑？'), findsOneWidget);

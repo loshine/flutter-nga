@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 
 class FavouriteTopicListState {
   final int size;
@@ -122,13 +124,28 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
     if (err != null) debugPrint('提交收藏删除失败: $err');
   }
 
+  /// 详情页已成功取消收藏时直接从本地列表移除（不再进入待撤销队列）。
+  void removeConfirmedByTid(int tid) {
+    _pending.remove(tid);
+    final index = state.list.indexWhere((t) => t.tid == tid);
+    if (index < 0) return;
+    state = state.copyWith(list: [...state.list]..removeAt(index));
+  }
+
   Future<FavouriteTopicListState> refresh() async {
+    final session = ref.read(accountSessionVersionProvider);
     await _flushBeforeLoading();
+    if (!ref.mounted || ref.read(accountSessionVersionProvider) != session) {
+      return FavouriteTopicListState.initial();
+    }
     state = state.copyWith(isLoading: true);
     try {
       TopicListData data = await ref
           .read(topicRepositoryProvider)
           .getFavouriteTopicList(1);
+      if (!ref.mounted || ref.read(accountSessionVersionProvider) != session) {
+        return FavouriteTopicListState.initial();
+      }
       state = FavouriteTopicListState(
         size: data.topicRows,
         page: 1,
@@ -139,19 +156,28 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
       );
       return state;
     } catch (err) {
-      state = state.copyWith(isLoading: false);
+      if (ref.mounted && ref.read(accountSessionVersionProvider) == session) {
+        state = state.copyWith(isLoading: false);
+      }
       rethrow;
     }
   }
 
   Future<FavouriteTopicListState> loadMore() async {
     if (state.isLoading) return state;
+    final session = ref.read(accountSessionVersionProvider);
     await _flushBeforeLoading();
+    if (!ref.mounted || ref.read(accountSessionVersionProvider) != session) {
+      return FavouriteTopicListState.initial();
+    }
     state = state.copyWith(isLoading: true);
     try {
       TopicListData data = await ref
           .read(topicRepositoryProvider)
           .getFavouriteTopicList(state.page + 1);
+      if (!ref.mounted || ref.read(accountSessionVersionProvider) != session) {
+        return FavouriteTopicListState.initial();
+      }
       final loadedTids = {for (final t in state.list) t.tid};
       state = FavouriteTopicListState(
         size: data.topicRows,
@@ -167,7 +193,9 @@ class FavouriteTopicListNotifier extends Notifier<FavouriteTopicListState> {
       );
       return state;
     } catch (err) {
-      state = state.copyWith(isLoading: false);
+      if (ref.mounted && ref.read(accountSessionVersionProvider) == session) {
+        state = state.copyWith(isLoading: false);
+      }
       rethrow;
     }
   }

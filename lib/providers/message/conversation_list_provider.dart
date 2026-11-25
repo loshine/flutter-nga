@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/conversation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 
 class ConversationListState {
   final int page;
@@ -37,41 +39,53 @@ class ConversationListNotifier extends Notifier<ConversationListState> {
   ConversationListState build() => ConversationListState.initial();
 
   Future<ConversationListState> refresh() async {
+    final session = ref.read(accountSessionVersionProvider);
     state = state.copyWith(isLoading: true);
     try {
       ConversationListData data = await Data().messageRepository
           .getConversationList(1);
+      if (!ref.mounted || ref.read(accountSessionVersionProvider) != session) {
+        return ConversationListState.initial();
+      }
       final result = ConversationListState(
         page: 1,
         enablePullUp: data.hasNext,
         list: data.conversationList.toList(),
         isLoading: false,
       );
-      if (ref.mounted) state = result;
+      state = result;
       return result;
     } catch (err) {
-      if (ref.mounted) state = state.copyWith(isLoading: false);
+      if (ref.mounted && ref.read(accountSessionVersionProvider) == session) {
+        state = state.copyWith(isLoading: false);
+      }
       rethrow;
     }
   }
 
   Future<ConversationListState> loadMore() async {
     if (state.isLoading) return state;
+    final session = ref.read(accountSessionVersionProvider);
     final current = state;
     state = current.copyWith(isLoading: true);
     try {
       ConversationListData data = await Data().messageRepository
           .getConversationList(current.page + 1);
+      if (!ref.mounted || ref.read(accountSessionVersionProvider) != session) {
+        return ConversationListState.initial();
+      }
       final result = ConversationListState(
         page: current.page + 1,
         enablePullUp: data.hasNext,
         list: [...current.list, ...data.conversationList],
         isLoading: false,
       );
-      if (ref.mounted) state = result;
+      state = result;
       return result;
     } catch (err) {
-      if (ref.mounted) state = state.copyWith(isLoading: false);
+      if (ref.mounted && ref.read(accountSessionVersionProvider) == session) {
+        state = state.copyWith(isLoading: false);
+      }
       rethrow;
     }
   }

@@ -81,9 +81,12 @@ void dispatchNativeMenuNavigate({
   if (topPath == path) return;
 
   if (workspaceMenu.hasHandler && _workspaceMenuPaths.contains(path)) {
-    while (router.canPop() && router.state.uri.path != Routes.HOME) {
+    while (router.canPop() &&
+        !routeObserver.hasPopupOnTop &&
+        router.state.uri.path != Routes.HOME) {
       router.pop();
     }
+    if (routeObserver.hasPopupOnTop) return;
     if (workspaceMenu.dispatch(path)) {
       return;
     }

@@ -92,6 +92,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
     final favForumsState = ref.watch(favouriteForumListProvider);
     final favForums = favForumsState.forums;
     final userInfo = ref.watch(homeDrawerHeaderProvider);
+    final accountSession = ref.watch(accountSessionVersionProvider);
     ref.watch(unreadCountProvider);
     final unread = ref
         .read(unreadCountProvider.notifier)
@@ -293,7 +294,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
           ),
         ),
         _FavouriteTopicsDestination() => FavouriteTopicListPage(
-          key: const ValueKey('workspace-fav-topics'),
+          key: ValueKey('workspace-fav-topics-$accountSession'),
           embedded: true,
           leading: collapsedToggleLeading(),
         ),
@@ -303,12 +304,12 @@ class AppleWorkspaceShell extends HookConsumerWidget {
           leading: collapsedToggleLeading(),
         ),
         _ConversationsDestination() => ConversationListPage(
-          key: const ValueKey('workspace-conversations'),
+          key: ValueKey('workspace-conversations-$accountSession'),
           embedded: true,
           leading: collapsedToggleLeading(),
         ),
         _NotificationsDestination() => NotificationListPage(
-          key: const ValueKey('workspace-notifications'),
+          key: ValueKey('workspace-notifications-$accountSession'),
           embedded: true,
           leading: collapsedToggleLeading(),
         ),

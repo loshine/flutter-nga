@@ -207,25 +207,19 @@ List<GoRoute> buildRoutes() {
         final tid = state.uri.queryParameters["tid"];
         final fid = state.uri.queryParameters["fid"];
         final content = state.extra as String? ?? "";
-        final asDialog = _shouldUseDesktopDialog(context);
-        final page = tid != null && tid.isNotEmpty
-            ? PublishPage(
-                tid: int.tryParse(tid) ?? 0,
-                fid: int.tryParse(fid ?? "") ?? 0,
-                content: content,
-                asDialog: asDialog,
-              )
-            : PublishPage(
-                fid: int.tryParse(fid ?? "") ?? 0,
-                asDialog: asDialog,
-              );
-        if (asDialog) {
-          return _DesktopDialogPage<Object?>(key: state.pageKey, child: page);
-        }
-        return MaterialPage<Object?>(
+        return _AdaptiveModalPage<Object?>(
           key: state.pageKey,
-          fullscreenDialog: context.isAppleStyle,
-          child: page,
+          builder: (asDialog) => tid != null && tid.isNotEmpty
+              ? PublishPage(
+                  tid: int.tryParse(tid) ?? 0,
+                  fid: int.tryParse(fid ?? "") ?? 0,
+                  content: content,
+                  asDialog: asDialog,
+                )
+              : PublishPage(
+                  fid: int.tryParse(fid ?? "") ?? 0,
+                  asDialog: asDialog,
+                ),
         );
       },
     ),
@@ -352,23 +346,12 @@ List<GoRoute> buildRoutes() {
       path: Routes.SEND_MESSAGE,
       name: Routes.SEND_MESSAGE,
       pageBuilder: (context, state) {
-        final asDialog = _shouldUseDesktopDialog(context);
-        final page = SendMessagePage(
-          mid: int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0,
-          asDialog: asDialog,
-        );
-        if (asDialog) {
-          return _DesktopDialogPage<Object?>(
-            key: state.pageKey,
-            maxWidth: 620,
-            maxHeight: 560,
-            child: page,
-          );
-        }
-        return MaterialPage<Object?>(
+        final mid = int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0;
+        return _AdaptiveModalPage<Object?>(
           key: state.pageKey,
-          fullscreenDialog: context.isAppleStyle,
-          child: page,
+          maxWidth: 620,
+          maxHeight: 560,
+          builder: (asDialog) => SendMessagePage(mid: mid, asDialog: asDialog),
         );
       },
     ),
@@ -409,50 +392,67 @@ bool _shouldUseDesktopDialog(BuildContext context) {
   return isDesktop && MediaQuery.sizeOf(context).width >= 600;
 }
 
-/// 桌面端宽屏下将路由以居中圆角模态弹窗呈现（支持遮罩点击与 Esc 触发 `PopScope` 确认）。
-class _DesktopDialogPage<T> extends Page<T> {
-  const _DesktopDialogPage({
-    required this.child,
+/// 自适应模态编辑页：始终保持单一 [Page] 运行时类型，避免窗口跨越 600pt 断点时
+/// 触发 Navigator 重建路由并丢失正在编辑的草稿。
+/// - 打开时为桌面宽屏：创建居中圆角 `DialogRoute`，窗口拉窄时自动收缩边距贴合；
+/// - 其余情况：创建 `MaterialPageRoute`（Apple 风格下启用 `fullscreenDialog`）。
+class _AdaptiveModalPage<T> extends Page<T> {
+  const _AdaptiveModalPage({
+    required this.builder,
     this.maxWidth = 680,
     this.maxHeight = 620,
     super.key,
   });
 
-  final Widget child;
+  final Widget Function(bool asDialog) builder;
   final double maxWidth;
   final double maxHeight;
 
   @override
   Route<T> createRoute(BuildContext context) {
+    final openAsDialog = _shouldUseDesktopDialog(context);
+    if (!openAsDialog) {
+      return MaterialPageRoute<T>(
+        settings: this,
+        fullscreenDialog: context.isAppleStyle,
+        builder: (_) => builder(false),
+      );
+    }
+
+    final child = builder(true);
     return DialogRoute<T>(
       context: context,
       settings: this,
       barrierDismissible: true,
       builder: (dialogContext) {
         final colorScheme = Theme.of(dialogContext).colorScheme;
+        final isCompact = MediaQuery.sizeOf(dialogContext).width < 600;
+        final radius = isCompact ? 0.0 : 14.0;
         return Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.all(32),
+          insetPadding: isCompact ? EdgeInsets.zero : const EdgeInsets.all(32),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: maxWidth,
-              maxHeight: maxHeight,
+              maxWidth: isCompact ? double.infinity : maxWidth,
+              maxHeight: isCompact ? double.infinity : maxHeight,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(radius),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant,
-                    width: 0.5,
-                  ),
+                  borderRadius: BorderRadius.circular(radius),
+                  border: isCompact
+                      ? null
+                      : Border.all(
+                          color: colorScheme.outlineVariant,
+                          width: 0.5,
+                        ),
                 ),
                 child: MediaQuery.removePadding(
                   context: dialogContext,
-                  removeTop: true,
-                  removeBottom: true,
+                  removeTop: !isCompact,
+                  removeBottom: !isCompact,
                   child: child,
                 ),
               ),

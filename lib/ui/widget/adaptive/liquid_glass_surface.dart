@@ -26,7 +26,7 @@ enum LiquidGlassVariant {
 /// 1. 高对比度无障碍模式 → 实色高对比度表面；
 /// 2. iOS 26+ / macOS 26+ 原生宿主且允许原生视图 → 底层嵌入 `UIGlassEffect` / `NSGlassEffectView`；
 /// 3. iOS 15–18 / macOS 12–15 或非 Apple 平台手动切 Apple 风格 →
-///    Impeller 友好的 `BackdropFilter` + 镜面高光描边 + 柔和投影模拟液态玻璃。
+///    通过 `BackdropFilter` + 镜面高光描边 + 柔和投影模拟液态玻璃。
 class LiquidGlassSurface extends StatelessWidget {
   const LiquidGlassSurface({
     super.key,

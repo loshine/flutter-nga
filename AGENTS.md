@@ -41,6 +41,9 @@ iOS 构建（最低 iOS 15.0）：
 - 若 `pod install` 报 `Unicode Normalization not appropriate for ASCII-8BIT`，设置 `LANG=en_US.UTF-8` 后重试。
 - 原生单元测试在 `ios/RunnerTests/`（Swift Testing，以 Runner.app 为 `TEST_HOST`），已加入 Runner scheme 的 Test。先 `mise exec -- flutter build ios --simulator --debug` 生成 Pods 与 SPM 包，再运行 `xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination 'platform=iOS Simulator,name=<机型>'`。
 
+macOS 构建：
+- `macos/Runner/Info.plist` 中临时设置 `FLTEnableImpeller=false` 以规避 Flutter 3.50.0 在 macOS 上拖动/缩放窗口触发的 Impeller Metal 纹理尺寸失同步崩溃（`flutter/flutter#185394`）；项目升级到包含 `#192522` 修复的 Flutter 版本后可移除该开关。
+
 ## 核心架构
 
 ### Data() 单例（lib/data/data.dart）

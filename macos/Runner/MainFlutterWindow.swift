@@ -3,6 +3,7 @@ import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
   private static let goMenuItemTag = 9001
+  private static let unifiedToolbarIdentifier = NSToolbar.Identifier("FNGAUnifiedToolbar")
 
   private var appleNativeChannel: FlutterMethodChannel?
   private var isAppleWindowStyle = false
@@ -215,11 +216,18 @@ class MainFlutterWindow: NSWindow {
       titlebarAppearsTransparent = true
       titleVisibility = .hidden
       isMovableByWindowBackground = true
+      // 挂载空 NSToolbar 使 .unified 样式生效，让左上角红绿灯垂直居中于 52pt 顶栏。
+      if toolbar == nil {
+        let unifiedToolbar = NSToolbar(identifier: Self.unifiedToolbarIdentifier)
+        unifiedToolbar.showsBaselineSeparator = false
+        toolbar = unifiedToolbar
+      }
       if #available(macOS 11.0, *) {
         toolbarStyle = .unified
       }
       return currentTrafficLightInset()
     } else {
+      toolbar = nil
       styleMask.remove(.fullSizeContentView)
       titlebarAppearsTransparent = false
       titleVisibility = .visible
@@ -230,6 +238,19 @@ class MainFlutterWindow: NSWindow {
       return 0.0
     }
   }
+}
+
+#if compiler(>=6.2)
+  @available(macOS 26.0, *)
+  private final class NonInteractiveGlassEffectView: NSGlassEffectView {
+    override var mouseDownCanMoveWindow: Bool { false }
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+  }
+#endif
+
+private final class NonInteractiveVisualEffectView: NSVisualEffectView {
+  override var mouseDownCanMoveWindow: Bool { false }
+  override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 private final class MacOSLiquidGlassViewFactory: NSObject, FlutterPlatformViewFactory {
@@ -249,7 +270,7 @@ private final class MacOSLiquidGlassViewFactory: NSObject, FlutterPlatformViewFa
 
     #if compiler(>=6.2)
       if #available(macOS 26.0, *) {
-        let glassView = NSGlassEffectView(frame: .zero)
+        let glassView = NonInteractiveGlassEffectView(frame: .zero)
         glassView.style = variant == "clear" ? .clear : .regular
         glassView.cornerRadius = CGFloat(cornerRadius)
         if let tintValue {
@@ -260,7 +281,7 @@ private final class MacOSLiquidGlassViewFactory: NSObject, FlutterPlatformViewFa
       }
     #endif
 
-    let effectView = NSVisualEffectView(frame: .zero)
+    let effectView = NonInteractiveVisualEffectView(frame: .zero)
     effectView.blendingMode = .withinWindow
     effectView.state = .active
     effectView.material = switch variant {

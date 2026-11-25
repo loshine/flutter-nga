@@ -49,7 +49,7 @@ class SettingsPage extends HookConsumerWidget {
         embedded: embedded,
         title: const Text("设置"),
         actions: [
-          if (onClose != null && !isTwoPane)
+          if (onClose != null)
             IconButton(
               tooltip: '关闭',
               icon: Icon(AppIcons.close(context)),
