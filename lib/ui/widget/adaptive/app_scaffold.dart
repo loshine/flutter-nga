@@ -117,11 +117,9 @@ class AppScaffold extends StatelessWidget {
     ];
 
     final isMacDesktop = context.isMacDesktopAppleStyle;
-    // macOS 融合标题栏采用 52pt 单行统一工具栏：红绿灯与工具栏按钮在同一水平线上，
-    // 当顶部属于窗口最左侧区域（非 embedded 且存在融合标题栏）时左侧水平避让红绿灯（76pt），
-    // 不再垂直叠加 28pt 制造巨厚双层顶栏。
-    final reserveTrafficLights =
-        includeMacTitlebarInset && !embedded && context.macTitlebarInset > 0;
+    final trafficLightInset = includeMacTitlebarInset && !embedded
+        ? context.macTitlebarInset
+        : 0.0;
     final resolvedHeight = toolbarHeight ?? (isMacDesktop ? 52.0 : 48.0);
 
     return Scaffold(
@@ -136,7 +134,7 @@ class AppScaffold extends StatelessWidget {
               actions: mergedActions,
               bottom: bottom,
               toolbarHeight: resolvedHeight,
-              reserveTrafficLights: reserveTrafficLights,
+              trafficLightInset: trafficLightInset,
             )
           : null,
       body: body,
@@ -229,7 +227,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.bottom,
     this.toolbarHeight,
-    this.reserveTrafficLights = false,
+    this.trafficLightInset = 0.0,
   });
 
   final Widget? title;
@@ -240,9 +238,9 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final PreferredSizeWidget? bottom;
   final double? toolbarHeight;
 
-  /// 为 true 时在左侧预留 macOS 窗口红绿灯（关闭/最小化/缩放）水平安全区，
-  /// 使返回/侧边栏按钮与红绿灯保持在同一水平线上。
-  final bool reserveTrafficLights;
+  /// 非零时在左侧预留 macOS 窗口红绿灯（关闭/最小化/缩放）水平安全区宽度；
+  /// 全屏模式下自动为 0。
+  final double trafficLightInset;
 
   double get _baseHeight => toolbarHeight ?? 48.0;
 
@@ -284,11 +282,11 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    if (reserveTrafficLights) {
+    if (trafficLightInset > 0) {
       resolvedLeading = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(width: 70),
+          SizedBox(width: trafficLightInset),
           if (resolvedLeading != null) ...[
             const SizedBox(width: 4),
             resolvedLeading,

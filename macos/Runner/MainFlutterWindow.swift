@@ -2,6 +2,9 @@ import Cocoa
 import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
+  private var appleNativeChannel: FlutterMethodChannel?
+  private var isAppleWindowStyle = false
+
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
@@ -31,11 +34,12 @@ class MainFlutterWindow: NSWindow {
       }
     }
 
-    let appleNativeChannel = FlutterMethodChannel(
+    let channel = FlutterMethodChannel(
       name: "io.github.loshine.flutternga/apple_native",
       binaryMessenger: flutterViewController.engine.binaryMessenger
     )
-    appleNativeChannel.setMethodCallHandler { [weak self] call, result in
+    self.appleNativeChannel = channel
+    channel.setMethodCallHandler { [weak self] call, result in
       switch call.method {
       case "isLiquidGlassSupported":
         #if compiler(>=6.2)
@@ -57,6 +61,32 @@ class MainFlutterWindow: NSWindow {
       }
     }
 
+    let center = NotificationCenter.default
+    center.addObserver(
+      self,
+      selector: #selector(handleFullScreenChange),
+      name: NSWindow.willEnterFullScreenNotification,
+      object: self
+    )
+    center.addObserver(
+      self,
+      selector: #selector(handleFullScreenChange),
+      name: NSWindow.didEnterFullScreenNotification,
+      object: self
+    )
+    center.addObserver(
+      self,
+      selector: #selector(handleFullScreenChange),
+      name: NSWindow.willExitFullScreenNotification,
+      object: self
+    )
+    center.addObserver(
+      self,
+      selector: #selector(handleFullScreenChange),
+      name: NSWindow.didExitFullScreenNotification,
+      object: self
+    )
+
     let registrar = flutterViewController.registrar(forPlugin: "MacOSLiquidGlassBridge")
     registrar.register(
       MacOSLiquidGlassViewFactory(),
@@ -66,8 +96,40 @@ class MainFlutterWindow: NSWindow {
     super.awakeFromNib()
   }
 
-  /// 按当前界面风格动态切换 macOS 融合透明标题栏与常规标题栏，并返回红绿灯安全区高度。
+  deinit {
+    NotificationCenter.default.removeObserver(self)
+  }
+
+  @objc private func handleFullScreenChange(_ notification: Notification) {
+    let entering = notification.name == NSWindow.willEnterFullScreenNotification
+    let exiting = notification.name == NSWindow.willExitFullScreenNotification
+    let isFullScreen: Bool
+    if entering {
+      isFullScreen = true
+    } else if exiting {
+      isFullScreen = false
+    } else {
+      isFullScreen = styleMask.contains(.fullScreen)
+    }
+    let inset = currentTrafficLightInset(isFullScreen: isFullScreen)
+    appleNativeChannel?.invokeMethod("onTrafficLightInsetChanged", arguments: inset)
+  }
+
+  /// 计算左上角红绿灯需要预留的水平安全区宽度；全屏或 Material 模式下返回 0。
+  private func currentTrafficLightInset(isFullScreen: Bool? = nil) -> Double {
+    let fullScreen = isFullScreen ?? styleMask.contains(.fullScreen)
+    if !isAppleWindowStyle || fullScreen {
+      return 0.0
+    }
+    if let zoomButton = standardWindowButton(.zoomButton), !zoomButton.isHidden {
+      return Double(max(zoomButton.frame.maxX + 6.0, 68.0))
+    }
+    return 72.0
+  }
+
+  /// 按当前界面风格动态切换 macOS 融合透明标题栏与常规标题栏，并返回红绿灯水平安全区宽度。
   private func applyWindowStyle(appleStyle: Bool) -> Double {
+    isAppleWindowStyle = appleStyle
     if appleStyle {
       styleMask.insert(.fullSizeContentView)
       titlebarAppearsTransparent = true
@@ -76,8 +138,7 @@ class MainFlutterWindow: NSWindow {
       if #available(macOS 11.0, *) {
         toolbarStyle = .unified
       }
-      // 返回标准红绿灯水平安全区标记（单行 52pt 统一工具栏使用，不再额外叠高顶栏）
-      return 52.0
+      return currentTrafficLightInset()
     } else {
       styleMask.remove(.fullSizeContentView)
       titlebarAppearsTransparent = false

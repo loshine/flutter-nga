@@ -99,7 +99,17 @@ class DesignStyleNotifier extends Notifier<DesignStyleState> {
   final DesignStyleState? _initialState;
 
   @override
-  DesignStyleState build() => _initialState ?? const DesignStyleState();
+  DesignStyleState build() {
+    AppleNativeService.setTrafficLightInsetListener((inset) {
+      if (state.macTitlebarInset != inset) {
+        state = state.copyWith(macTitlebarInset: inset);
+      }
+    });
+    ref.onDispose(() {
+      AppleNativeService.setTrafficLightInsetListener(null);
+    });
+    return _initialState ?? const DesignStyleState();
+  }
 
   /// 启动前预读已保存的界面风格和原生能力，并同步 macOS 窗口标题栏形态。
   static Future<DesignStyleState> loadSaved() async {

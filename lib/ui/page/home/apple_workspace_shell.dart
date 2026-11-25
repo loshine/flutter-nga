@@ -105,7 +105,8 @@ class AppleWorkspaceShell extends HookConsumerWidget {
     }, [favForums.length]);
 
     final colorScheme = Theme.of(context).colorScheme;
-    final hasTrafficLights = context.macTitlebarInset > 0;
+    final trafficLightInset = context.macTitlebarInset;
+    final hasTrafficLights = trafficLightInset > 0;
 
     void openSettingsSheet() {
       showDialog<void>(
@@ -172,14 +173,15 @@ class AppleWorkspaceShell extends HookConsumerWidget {
       }
     }
 
-    // 侧边栏折叠时，在右侧工作区顶栏左侧紧贴红绿灯右侧放紧凑的展开按钮
+    // 侧边栏折叠时，在右侧工作区顶栏左侧紧贴红绿灯右侧放紧凑的展开按钮；
+    // 全屏模式下 trafficLightInset 自动归 0，不留多余空白。
     Widget? collapsedToggleLeading({Widget? extra}) {
       if (!sidebarCollapsed.value) return extra;
       return Row(
         mainAxisSize: MainAxisSize.min,
         spacing: 2,
         children: [
-          if (hasTrafficLights) const SizedBox(width: 68),
+          if (hasTrafficLights) SizedBox(width: trafficLightInset),
           IconButton(
             tooltip: '展开侧边栏',
             icon: Icon(
@@ -280,7 +282,7 @@ class AppleWorkspaceShell extends HookConsumerWidget {
                       child: Padding(
                         padding: EdgeInsets.only(
                           top: MediaQuery.paddingOf(context).top,
-                          left: hasTrafficLights ? 76 : 12,
+                          left: hasTrafficLights ? trafficLightInset + 4 : 12,
                           right: 8,
                         ),
                         child: Row(

@@ -14,9 +14,26 @@ abstract final class AppleNativeService {
       'io.github.loshine.flutternga/liquid_glass_view';
 
   static bool? _cachedLiquidGlassSupported;
+  static ValueChanged<double>? _trafficLightInsetListener;
 
   @visibleForTesting
   static bool? debugOverrideLiquidGlassSupported;
+
+  /// 监听 macOS 窗口进入/退出全屏导致的红绿灯水平安全区宽度变化。
+  static void setTrafficLightInsetListener(ValueChanged<double>? listener) {
+    _trafficLightInsetListener = listener;
+    if (!isRealMacOS) return;
+    channel.setMethodCallHandler(
+      listener == null
+          ? null
+          : (call) async {
+              if (call.method == 'onTrafficLightInsetChanged') {
+                final inset = (call.arguments as num?)?.toDouble() ?? 0.0;
+                _trafficLightInsetListener?.call(inset);
+              }
+            },
+    );
+  }
 
   /// 当前运行宿主是否为真实 Apple 平台（排除 Web）。
   static bool get isRealApplePlatform =>
