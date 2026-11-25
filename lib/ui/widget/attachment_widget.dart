@@ -1,9 +1,13 @@
 import 'dart:io';
 
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
 import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'package:flutter_nga/data/data.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/ui/widget/font_style_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 
@@ -34,64 +38,103 @@ class _AttachmentState extends State<AttachmentWidget> {
   final List<String?> _list = [];
   final List<XFile> _imageFileList = [];
   String? _authCode;
-  Widget? _addImageWidget;
 
   final _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(crossAxisCount: 4, children: _getImageWidgetList());
+    final isApple = context.isAppleStyle;
+    return GridView.count(
+      crossAxisCount: 4,
+      crossAxisSpacing: isApple ? 8 : 0,
+      mainAxisSpacing: isApple ? 8 : 0,
+      children: _getImageWidgetList(context),
+    );
   }
 
-  List<Widget> _getImageWidgetList() {
+  List<Widget> _getImageWidgetList(BuildContext context) {
+    final isApple = context.isAppleStyle;
+    final colorScheme = Theme.of(context).colorScheme;
     List<Widget> widgets = [];
-    _addImageWidget ??= Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () async {
-          final image = await _picker.pickImage(
-            source: ImageSource.gallery,
-            requestFullMetadata: false,
+    Future<void> pickAndUpload() async {
+      final image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        requestFullMetadata: false,
+      );
+      if (image == null || !mounted) return;
+
+      setState(() => _imageFileList.add(image));
+      try {
+        final topicRepository = Data().topicRepository;
+        _authCode ??= await topicRepository.getAuthCode(
+          widget.fid,
+          widget.tid,
+          widget.tid == null ? "new" : "reply",
+        );
+        final data = await topicRepository.uploadAttachment(
+          widget.fid,
+          _authCode,
+          image.path,
+        );
+        if (!mounted) return;
+
+        widget.attachmentCallback?.call(
+          data["attachments"],
+          data["attachments_check"],
+        );
+        setState(() => _list.add(data["url"]));
+      } catch (err) {
+        if (!mounted) return;
+
+        debugPrint(err.toString());
+        AppToast.error(err);
+        setState(() => _imageFileList.remove(image));
+      }
+    }
+
+    final addImageWidget = isApple
+        ? Material(
+            color: colorScheme.surfaceContainerLow,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: pickAndUpload,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    CupertinoIcons.photo_on_rectangle,
+                    size: 22,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '添加图片',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: pickAndUpload,
+              child: const Icon(CommunityMaterialIcons.image_plus),
+            ),
           );
-          if (image == null || !mounted) return;
-
-          setState(() => _imageFileList.add(image));
-          try {
-            final topicRepository = Data().topicRepository;
-            _authCode ??= await topicRepository.getAuthCode(
-              widget.fid,
-              widget.tid,
-              widget.tid == null ? "new" : "reply",
-            );
-            final data = await topicRepository.uploadAttachment(
-              widget.fid,
-              _authCode,
-              image.path,
-            );
-            if (!mounted) return;
-
-            widget.attachmentCallback?.call(
-              data["attachments"],
-              data["attachments_check"],
-            );
-            setState(() => _list.add(data["url"]));
-          } catch (err) {
-            if (!mounted) return;
-
-            debugPrint(err.toString());
-            AppToast.error(err);
-            setState(() => _imageFileList.remove(image));
-          }
-        },
-        child: Icon(CommunityMaterialIcons.image_plus),
-      ),
-    );
-    widgets.add(_addImageWidget!);
+    widgets.add(addImageWidget);
     if (_imageFileList.isNotEmpty) {
       widgets.addAll(
         _imageFileList.map((image) {
           var index = _imageFileList.indexOf(image);
-          return Material(
+          final tile = Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
@@ -114,11 +157,16 @@ class _AttachmentState extends State<AttachmentWidget> {
                   ),
                   Opacity(
                     opacity: _list.length == index ? 1 : 0,
-                    child: Center(child: CircularProgressIndicator()),
+                    child: const Center(child: AppActivityIndicator()),
                   ),
                 ],
               ),
             ),
+          );
+          if (!isApple) return tile;
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: tile,
           );
         }),
       );

@@ -1,4 +1,8 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
@@ -15,20 +19,18 @@ import 'package:flutter_nga/ui/page/search/search_forum_page.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/search/search_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/send_message/send_message_page.dart';
+import 'package:flutter_nga/ui/page/settings/about_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_keywords_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_users_page.dart';
 import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings_page.dart';
-import 'package:flutter_nga/ui/page/settings/about_page.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_replies_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_topics_page.dart';
 import 'package:flutter_nga/utils/linkroute/link_route.dart';
-import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Routes {
   static late GoRouter router;
@@ -199,19 +201,26 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.TOPIC_PUBLISH,
       name: Routes.TOPIC_PUBLISH,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final tid = state.uri.queryParameters["tid"];
         final fid = state.uri.queryParameters["fid"];
         final content = state.extra as String? ?? "";
-        if (tid != null && tid.isNotEmpty) {
-          return PublishPage(
-            tid: int.tryParse(tid) ?? 0,
-            fid: int.tryParse(fid ?? "") ?? 0,
-            content: content,
-          );
-        } else {
-          return PublishPage(fid: int.tryParse(fid ?? "") ?? 0);
+        final asDialog = _shouldUseDesktopDialog(context);
+        final page = tid != null && tid.isNotEmpty
+            ? PublishPage(
+                tid: int.tryParse(tid) ?? 0,
+                fid: int.tryParse(fid ?? "") ?? 0,
+                content: content,
+                asDialog: asDialog,
+              )
+            : PublishPage(
+                fid: int.tryParse(fid ?? "") ?? 0,
+                asDialog: asDialog,
+              );
+        if (asDialog) {
+          return _DesktopDialogPage<void>(key: state.pageKey, child: page);
         }
+        return MaterialPage<void>(key: state.pageKey, child: page);
       },
     ),
     GoRoute(
@@ -366,4 +375,68 @@ List<GoRoute> buildRoutes() {
       builder: (context, state) => const NotificationListPage(),
     ),
   ];
+}
+
+bool _shouldUseDesktopDialog(BuildContext context) {
+  final isDesktop =
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.linux);
+  return isDesktop && MediaQuery.sizeOf(context).width >= 600;
+}
+
+/// 桌面端宽屏下将路由以居中圆角模态弹窗呈现（支持遮罩点击与 Esc 触发 `PopScope` 确认）。
+class _DesktopDialogPage<T> extends Page<T> {
+  const _DesktopDialogPage({
+    required this.child,
+    this.maxWidth = 680,
+    this.maxHeight = 620,
+    super.key,
+  });
+
+  final Widget child;
+  final double maxWidth;
+  final double maxHeight;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return DialogRoute<T>(
+      context: context,
+      settings: this,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        final colorScheme = Theme.of(dialogContext).colorScheme;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(32),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: maxWidth,
+              maxHeight: maxHeight,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant,
+                    width: 0.5,
+                  ),
+                ),
+                child: MediaQuery.removePadding(
+                  context: dialogContext,
+                  removeTop: true,
+                  removeBottom: true,
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

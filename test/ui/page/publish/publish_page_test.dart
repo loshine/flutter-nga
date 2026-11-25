@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/publish/publish_page.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 Future<void> _openPublishPage(WidgetTester tester, {String? content}) async {
   await tester.pumpWidget(
@@ -78,5 +82,65 @@ void main() {
     await _tapBack(tester);
 
     expect(find.text('放弃编辑？'), findsOneWidget);
+  });
+
+  testWidgets('桌面端宽屏以居中弹窗打开，关闭按钮仍走放弃编辑确认', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      tester.view.reset();
+    });
+
+    final publishRoute = buildRoutes().firstWhere(
+      (r) => r.path == Routes.TOPIC_PUBLISH,
+    );
+    final router = GoRouter(
+      initialLocation: '/host',
+      routes: [
+        GoRoute(
+          path: '/host',
+          builder: (context, _) => Scaffold(
+            body: TextButton(
+              onPressed: () =>
+                  context.push('${Routes.TOPIC_PUBLISH}?tid=1&fid=2'),
+              child: const Text('发帖入口'),
+            ),
+          ),
+        ),
+        publishRoute,
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      AppDesignStyleScope(
+        style: AppDesignStyle.apple,
+        nativeLiquidGlassSupported: false,
+        macTitlebarInset: 52,
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('发帖入口'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(find.byType(PublishPage), findsOneWidget);
+    expect(find.byTooltip('关闭'), findsOneWidget);
+
+    await tester.enterText(_contentField, '桌面弹窗回复内容');
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('关闭'));
+    await tester.pumpAndSettle();
+    expect(find.text('放弃编辑？'), findsOneWidget);
+
+    await tester.tap(find.text('放弃'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PublishPage), findsNothing);
+    expect(find.byType(Dialog), findsNothing);
   });
 }
