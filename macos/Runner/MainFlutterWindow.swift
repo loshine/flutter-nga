@@ -181,19 +181,36 @@ class MainFlutterWindow: NSWindow {
     appleNativeChannel?.invokeMethod("onMenuNavigate", arguments: route)
   }
 
-  @objc private func handleFullScreenChange(_ notification: Notification) {
-    let entering = notification.name == NSWindow.willEnterFullScreenNotification
-    let exiting = notification.name == NSWindow.willExitFullScreenNotification
-    let isFullScreen: Bool
-    if entering {
-      isFullScreen = true
-    } else if exiting {
-      isFullScreen = false
-    } else {
-      isFullScreen = styleMask.contains(.fullScreen)
+  override func toggleFullScreen(_ sender: Any?) {
+    if isAppleWindowStyle && !styleMask.contains(.fullScreen) {
+      // 在 AppKit 开始全屏过渡前卸载空 NSToolbar，避免全屏空间顶部出现不透明工具栏条遮挡内容。
+      detachUnifiedToolbar()
     }
-    let inset = currentTrafficLightInset(isFullScreen: isFullScreen)
-    appleNativeChannel?.invokeMethod("onTrafficLightInsetChanged", arguments: inset)
+    super.toggleFullScreen(sender)
+  }
+
+  @objc private func handleFullScreenChange(_ notification: Notification) {
+    switch notification.name {
+    case NSWindow.willEnterFullScreenNotification,
+         NSWindow.didEnterFullScreenNotification:
+      if isAppleWindowStyle && toolbar != nil {
+        detachUnifiedToolbar()
+      }
+      appleNativeChannel?.invokeMethod("onTrafficLightInsetChanged", arguments: 0.0)
+    case NSWindow.willExitFullScreenNotification:
+      let inset = currentTrafficLightInset(isFullScreen: false)
+      appleNativeChannel?.invokeMethod("onTrafficLightInsetChanged", arguments: inset)
+    case NSWindow.didExitFullScreenNotification:
+      if isAppleWindowStyle {
+        attachUnifiedToolbar()
+        layoutIfNeeded()
+      }
+      let inset = currentTrafficLightInset(isFullScreen: false)
+      appleNativeChannel?.invokeMethod("onTrafficLightInsetChanged", arguments: inset)
+    default:
+      let inset = currentTrafficLightInset()
+      appleNativeChannel?.invokeMethod("onTrafficLightInsetChanged", arguments: inset)
+    }
   }
 
   /// 计算左上角红绿灯需要预留的水平安全区宽度；全屏或 Material 模式下返回 0。
@@ -208,6 +225,25 @@ class MainFlutterWindow: NSWindow {
     return 72.0
   }
 
+  /// 窗口模式下挂载空 NSToolbar 使 .unified 样式生效，让左上角红绿灯垂直居中于 52pt 顶栏。
+  private func attachUnifiedToolbar() {
+    if toolbar == nil {
+      let unifiedToolbar = NSToolbar(identifier: Self.unifiedToolbarIdentifier)
+      unifiedToolbar.showsBaselineSeparator = false
+      toolbar = unifiedToolbar
+    }
+    if #available(macOS 11.0, *) {
+      toolbarStyle = .unified
+    }
+  }
+
+  private func detachUnifiedToolbar() {
+    toolbar = nil
+    if #available(macOS 11.0, *) {
+      toolbarStyle = .automatic
+    }
+  }
+
   /// 按当前界面风格动态切换 macOS 融合透明标题栏与常规标题栏，并返回红绿灯水平安全区宽度。
   private func applyWindowStyle(appleStyle: Bool) -> Double {
     isAppleWindowStyle = appleStyle
@@ -216,24 +252,23 @@ class MainFlutterWindow: NSWindow {
       titlebarAppearsTransparent = true
       titleVisibility = .hidden
       isMovableByWindowBackground = true
-      // 挂载空 NSToolbar 使 .unified 样式生效，让左上角红绿灯垂直居中于 52pt 顶栏。
-      if toolbar == nil {
-        let unifiedToolbar = NSToolbar(identifier: Self.unifiedToolbarIdentifier)
-        unifiedToolbar.showsBaselineSeparator = false
-        toolbar = unifiedToolbar
-      }
       if #available(macOS 11.0, *) {
-        toolbarStyle = .unified
+        titlebarSeparatorStyle = .none
+      }
+      if styleMask.contains(.fullScreen) {
+        detachUnifiedToolbar()
+      } else {
+        attachUnifiedToolbar()
       }
       return currentTrafficLightInset()
     } else {
-      toolbar = nil
+      detachUnifiedToolbar()
       styleMask.remove(.fullSizeContentView)
       titlebarAppearsTransparent = false
       titleVisibility = .visible
       isMovableByWindowBackground = false
       if #available(macOS 11.0, *) {
-        toolbarStyle = .automatic
+        titlebarSeparatorStyle = .automatic
       }
       return 0.0
     }
