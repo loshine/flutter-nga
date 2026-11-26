@@ -358,7 +358,7 @@ class TopicDetailPage extends HookConsumerWidget {
             message: '跳转页码',
             child: TextButton(
               style: TextButton.styleFrom(
-                minimumSize: const Size(48, 44),
+                minimumSize: Size(48, isApple ? 44 : 48),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
               ),
               onPressed: openPageSelector,

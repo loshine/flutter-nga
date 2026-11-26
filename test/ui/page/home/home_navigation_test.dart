@@ -75,6 +75,10 @@ class _FakeFavouriteForumListNotifier extends FavouriteForumListNotifier {
 
   @override
   Future<void> refresh() async {}
+
+  void setStateForTest(FavouriteForumListState next) {
+    state = next;
+  }
 }
 
 class _RecordingForumDetailNotifier extends ForumDetailNotifier {
@@ -633,6 +637,91 @@ void main() {
       expect(handledPaths.length, 3);
 
       Navigator.of(homeContext).pop();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'AppleWorkspaceShell resets selected favourite forum on account switch and selects new account favourite once loaded',
+    (tester) async {
+      final refreshedFids = <int>[];
+      const forumA = Forum(-7, '大漩涡');
+      const forumB = Forum(334, '硬件区');
+      late _FakeFavouriteForumListNotifier favNotifier;
+
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            homeDrawerHeaderProvider.overrideWith(
+              () =>
+                  _FakeHeaderNotifier(const UserInfo(uid: 1, username: '账号A')),
+            ),
+            messageRepositoryProvider.overrideWithValue(
+              _FakeMessageRepository(),
+            ),
+            blocklistSettingsProvider.overrideWith(_FakeBlocklistNotifier.new),
+            interfaceSettingsProvider.overrideWith(
+              _FakeInterfaceSettingsNotifier.new,
+            ),
+            favouriteForumListProvider.overrideWith(() {
+              favNotifier = _FakeFavouriteForumListNotifier(const [forumA]);
+              return favNotifier;
+            }),
+            forumCategoryListProvider.overrideWith(
+              _FakeForumCategoryListNotifier.new,
+            ),
+            forumDetailProvider(forumA.fid).overrideWith(
+              () => _RecordingForumDetailNotifier(forumA.fid, refreshedFids),
+            ),
+            forumDetailProvider(forumB.fid).overrideWith(
+              () => _RecordingForumDetailNotifier(forumB.fid, refreshedFids),
+            ),
+            readTopicIdsProvider.overrideWith(_FakeReadTopicIdsNotifier.new),
+          ],
+          child: AppDesignStyleScope(
+            style: AppDesignStyle.apple,
+            nativeLiquidGlassSupported: false,
+            macTitlebarInset: 52,
+            child: MaterialApp(
+              theme: ThemeBuilder.applyDesignStyle(
+                ThemeBuilder.buildLightTheme(Colors.brown),
+                isAppleStyle: true,
+                isMacDesktop: true,
+              ),
+              home: const HomePage(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('版块 -7 主题'), findsOneWidget);
+
+      // 模拟切换账号：会话版本递增且收藏列表被清空重置为未初始化态
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(HomePage)),
+      );
+      container.read(accountSessionVersionProvider.notifier).bump();
+      favNotifier.setStateForTest(const FavouriteForumListState());
+      await tester.pumpAndSettle();
+
+      // 旧账号收藏版块不再滞留
+      expect(find.text('版块 -7 主题'), findsNothing);
+      expect(find.byType(ForumDetailPage), findsNothing);
+
+      // 新账号收藏加载完成后自动选中其首个收藏版块
+      favNotifier.setStateForTest(
+        const FavouriteForumListState(forums: [forumB], isInitialized: true),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('版块 334 主题'), findsOneWidget);
+      expect(refreshedFids, contains(334));
+
+      await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
     },
   );

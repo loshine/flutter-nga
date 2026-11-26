@@ -104,16 +104,30 @@ class AppleWorkspaceShell extends HookConsumerWidget {
         .read(unreadCountProvider.notifier)
         .countsFor(userInfo?.uid);
 
-    // 首次加载到收藏版块时自动打开第一个收藏版块，进应用即可阅读
+    // 账号切换或退出时重置已选中的收藏版块与初选状态，避免内容区滞留旧账号收藏。
+    final lastAccountSession = useRef(accountSession);
+    useEffect(() {
+      if (lastAccountSession.value != accountSession) {
+        lastAccountSession.value = accountSession;
+        autoSelectedInitial.value = false;
+        if (destination.value is _FavouriteForumDestination) {
+          destination.value = const _AllForumsDestination();
+        }
+      }
+      return null;
+    }, [accountSession]);
+
+    // 首次加载（或切换账号重新加载）到收藏版块时自动打开第一个收藏版块，进应用即可阅读
     useEffect(() {
       if (!autoSelectedInitial.value &&
+          favForumsState.isInitialized &&
           favForums.isNotEmpty &&
           destination.value is _AllForumsDestination) {
         autoSelectedInitial.value = true;
         destination.value = _FavouriteForumDestination(favForums.first);
       }
       return null;
-    }, [favForums.length]);
+    }, [accountSession, favForumsState.isInitialized, favForums.length]);
 
     final colorScheme = Theme.of(context).colorScheme;
     final trafficLightInset = context.macTitlebarInset;
@@ -247,7 +261,9 @@ class AppleWorkspaceShell extends HookConsumerWidget {
     Widget buildMainWorkspace() {
       return switch (destination.value) {
         _FavouriteForumDestination(:final forum) => ForumDetailPage(
-          key: ValueKey('workspace-fav-forum-${forum.identity.storageKey}'),
+          key: ValueKey(
+            'workspace-fav-forum-$accountSession-${forum.identity.storageKey}',
+          ),
           fid: forum.fid,
           name: forum.name,
           type: forum.type,

@@ -31,8 +31,12 @@ class ImportCookiesDialog extends HookWidget {
       submitting.value = true;
       try {
         await cookiesCallback(trimmed);
-        if (context.mounted && (ModalRoute.of(context)?.isCurrent ?? false)) {
-          Navigator.of(context).pop(true);
+        if (context.mounted) {
+          if (ModalRoute.of(context)?.isCurrent ?? false) {
+            Navigator.of(context).pop(true);
+          } else {
+            submitting.value = false;
+          }
         }
       } catch (err) {
         if (context.mounted) {

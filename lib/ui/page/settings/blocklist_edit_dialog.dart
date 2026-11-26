@@ -37,8 +37,12 @@ class BlocklistEditDialog extends HookWidget {
       submitting.value = true;
       try {
         await callback?.call(trimmed);
-        if (context.mounted && (ModalRoute.of(context)?.isCurrent ?? false)) {
-          Navigator.of(context).pop();
+        if (context.mounted) {
+          if (ModalRoute.of(context)?.isCurrent ?? false) {
+            Navigator.of(context).pop();
+          } else {
+            submitting.value = false;
+          }
         }
       } catch (err) {
         if (context.mounted) {

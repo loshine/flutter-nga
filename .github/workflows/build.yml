@@ -157,7 +157,15 @@ jobs:
           mkdir -p "$DMG_STAGE"
           cp -R "$APP_PATH" "$DMG_STAGE/"
           ln -s /Applications "$DMG_STAGE/Applications"
-          hdiutil create -volname "FNGA" -srcfolder "$DMG_STAGE" -ov -format UDZO "dist/flutter-nga-${RELEASE_TAG}-macos.dmg"
+          for attempt in 1 2 3; do
+            if hdiutil create -volname "FNGA" -srcfolder "$DMG_STAGE" -ov -format UDZO "dist/flutter-nga-${RELEASE_TAG}-macos.dmg"; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep 5
+          done
           ls -lh dist
       - uses: actions/upload-artifact@v7
         with:
@@ -238,7 +246,15 @@ jobs:
           mkdir -p "$DMG_STAGE"
           cp -R "$APP_PATH" "$DMG_STAGE/"
           ln -s /Applications "$DMG_STAGE/Applications"
-          hdiutil create -volname "FNGA" -srcfolder "$DMG_STAGE" -ov -format UDZO "dist/flutter-nga-${RELEASE_TAG}-macos.dmg"
+          for attempt in 1 2 3; do
+            if hdiutil create -volname "FNGA" -srcfolder "$DMG_STAGE" -ov -format UDZO "dist/flutter-nga-${RELEASE_TAG}-macos.dmg"; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep 5
+          done
       - name: Package Windows app
         if: matrix.target == 'windows'
         run: |
