@@ -1,10 +1,15 @@
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/message.dart';
 import 'package:flutter_nga/providers/message/conversation_detail_provider.dart';
 import 'package:flutter_nga/providers/message/send_message_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/send_message/contact_edit_dialog.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -85,13 +90,11 @@ class ConversationDetailPage extends HookConsumerWidget {
           title: '邀请用户加入对话',
           callback: (text) async {
             final users = splitMessageUsers(text);
-            if (users.isEmpty) return;
-            try {
-              final message = await notifier.invite(users);
-              AppToast.success(message ?? '已邀请');
-            } catch (err) {
-              AppToast.error(err);
+            if (users.isEmpty) {
+              throw '请输入有效的 UID 或用户名';
             }
+            final message = await notifier.invite(users);
+            AppToast.success(message ?? '已邀请');
           },
         ),
       );
@@ -139,44 +142,42 @@ class ConversationDetailPage extends HookConsumerWidget {
 
     final hasHeader = state.participants.isNotEmpty || state.isIsolated;
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !embedded,
-        centerTitle: embedded ? false : null,
-        title: const Text('消息详情'),
-        actions: [
-          PopupMenuButton<_MenuAction>(
-            onSelected: (action) => switch (action) {
-              _MenuAction.invite => invite(),
-              _MenuAction.leave => leave(),
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                value: _MenuAction.invite,
-                child: ListTile(
-                  leading: Icon(Icons.person_add_alt_outlined),
-                  title: Text('邀请用户加入'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              PopupMenuItem(
-                value: _MenuAction.leave,
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text('退出对话'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
-          ),
-          if (embedded && onClose != null)
-            IconButton(
-              tooltip: '关闭',
-              icon: const Icon(Icons.close),
-              onPressed: onClose,
+    return AppScaffold(
+      embedded: embedded,
+      title: const Text('消息详情'),
+      actions: [
+        AppMoreMenuButton<_MenuAction>(
+          tooltip: '更多操作',
+          icon: Icon(AppIcons.more(context)),
+          onSelected: (action) => switch (action) {
+            _MenuAction.invite => invite(),
+            _MenuAction.leave => leave(),
+          },
+          actions: [
+            AppMenuAction(
+              value: _MenuAction.invite,
+              label: '邀请用户加入',
+              icon: context.isAppleStyle
+                  ? CupertinoIcons.person_badge_plus
+                  : Icons.person_add_alt_outlined,
             ),
-        ],
-      ),
+            AppMenuAction(
+              value: _MenuAction.leave,
+              label: '退出对话',
+              icon: context.isAppleStyle
+                  ? CupertinoIcons.square_arrow_left
+                  : Icons.logout,
+              destructive: true,
+            ),
+          ],
+        ),
+        if (embedded && onClose != null)
+          IconButton(
+            tooltip: '关闭',
+            icon: Icon(AppIcons.close(context)),
+            onPressed: onClose,
+          ),
+      ],
       body: EasyRefresh(
         controller: refreshController,
         onRefresh: onRefresh,
@@ -201,10 +202,11 @@ class ConversationDetailPage extends HookConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: '回复',
         onPressed: reply,
-        child: const Icon(Icons.reply),
+        icon: const Icon(Icons.reply),
+        appleIcon: Icon(AppIcons.reply(context)),
       ),
     );
   }

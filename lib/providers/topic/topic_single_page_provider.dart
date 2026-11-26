@@ -72,29 +72,7 @@ class TopicSinglePageState {
 }
 
 /// Key for identifying a specific topic single page
-class TopicSinglePageKey {
-  final int tid;
-  final int page;
-  final int? authorid;
-
-  const TopicSinglePageKey({
-    required this.tid,
-    required this.page,
-    this.authorid,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TopicSinglePageKey &&
-          runtimeType == other.runtimeType &&
-          tid == other.tid &&
-          page == other.page &&
-          authorid == other.authorid;
-
-  @override
-  int get hashCode => tid.hashCode ^ page.hashCode ^ authorid.hashCode;
-}
+typedef TopicSinglePageKey = ({int tid, int page, int? authorid});
 
 class TopicSinglePageNotifier extends Notifier<TopicSinglePageState> {
   TopicSinglePageNotifier(this.key);

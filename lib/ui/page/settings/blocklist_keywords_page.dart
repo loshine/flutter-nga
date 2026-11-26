@@ -2,6 +2,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -24,30 +26,33 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
 
     final state = ref.watch(blocklistSettingsProvider);
     final notifier = ref.read(blocklistSettingsProvider.notifier);
-    final messenger = ScaffoldMessenger.of(context);
+    final activeUndo = useRef<UndoSnackBarHandle?>(null);
     final colorScheme = Theme.of(context).colorScheme;
 
     useEffect(() {
       return () {
         if (!notifier.hasPendingWordDeletion) return;
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
         notifier.commitAllPendingWordDeletions().then((err) {
           if (err != null) AppToast.error(err);
         });
       };
-    }, [notifier, messenger]);
+    }, [notifier]);
 
     useOnAppLifecycleStateChange((_, lifecycle) {
-      if (lifecycle == AppLifecycleState.paused &&
+      if ((lifecycle == AppLifecycleState.paused ||
+              lifecycle == AppLifecycleState.hidden) &&
           notifier.hasPendingWordDeletion) {
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
       }
     });
 
     void remove(String word) {
       final displayWord = code_utils.unescapeHtml(word);
       notifier.removeWordLocally(word);
-      AppSnackBar.undo(
+      activeUndo.value = AppSnackBar.undo(
         context,
         message: '已移除屏蔽关键词「$displayWord」',
         onUndo: () => notifier.undoWordDeletion(word),
@@ -58,19 +63,17 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("屏蔽关键词"),
-        actions: [
-          IconButton(
-            onPressed: state.blockWordList.isEmpty
-                ? null
-                : () => _confirmDeleteAll(context, notifier),
-            icon: const Icon(Icons.delete_forever),
-            tooltip: "删除所有屏蔽关键词",
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: const Text("屏蔽关键词"),
+      actions: [
+        IconButton(
+          onPressed: state.blockWordList.isEmpty
+              ? null
+              : () => _confirmDeleteAll(context, notifier),
+          icon: Icon(AppIcons.delete(context)),
+          tooltip: "删除所有屏蔽关键词",
+        ),
+      ],
       body: state.blockWordList.isEmpty
           ? const ListStatusView(icon: Icons.block_outlined, message: '暂无屏蔽关键词')
           : ReadableListPadding(
@@ -90,7 +93,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Icon(
-                        Icons.delete_outline,
+                        AppIcons.delete(context),
                         color: colorScheme.onErrorContainer,
                         semanticLabel: '移除屏蔽',
                       ),
@@ -98,7 +101,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
                     child: ListTile(
                       title: Text(displayWord),
                       trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
+                        icon: Icon(AppIcons.delete(context)),
                         tooltip: '移除屏蔽',
                         onPressed: () => remove(word),
                       ),
@@ -107,10 +110,11 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
                 },
               ),
             ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: "添加屏蔽关键词",
         onPressed: () => _showAddDialog(context, notifier),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        appleIcon: Icon(AppIcons.add(context)),
       ),
     );
   }
@@ -140,11 +144,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
   }
 
   Future<void> _add(BlocklistSettingsNotifier notifier, String word) async {
-    try {
-      AppToast.success(await notifier.addWord(word));
-    } catch (e) {
-      AppToast.error(e);
-    }
+    AppToast.success(await notifier.addWord(word));
   }
 
   void _showAddDialog(
@@ -155,7 +155,7 @@ class BlocklistKeywordsPage extends HookConsumerWidget {
       context: context,
       builder: (_) {
         return BlocklistEditDialog(
-          title: "添加屏蔽词语",
+          title: "添加屏蔽关键词",
           inputHint: "需要屏蔽的关键词",
           callback: (word) => _add(notifier, word),
         );

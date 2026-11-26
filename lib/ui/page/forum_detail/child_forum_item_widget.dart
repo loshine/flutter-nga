@@ -3,6 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/child_forum.dart';
 import 'package:flutter_nga/providers/forum/child_forum_subscription_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class ChildForumItemWidget extends ConsumerWidget {
@@ -22,37 +24,48 @@ class ChildForumItemWidget extends ConsumerWidget {
     final notifier = subscriptionKey == null
         ? null
         : ref.read(childForumSubscriptionProvider(subscriptionKey).notifier);
+    final isApple = context.isAppleStyle;
+    final desc = childForum.desc?.trim();
 
     return InkWell(
-      onTap: () => Routes.navigateTo(
-        context,
-        "${Routes.FORUM_DETAIL}?fid=${childForum.fid}"
-        "&name=${childForum.name}"
-        "&type=${childForum.type}",
-      ),
+      onTap: () => Routes.navigateToWithParams(context, Routes.FORUM_DETAIL, {
+        'fid': '${childForum.fid}',
+        'name': childForum.name,
+        'type': '${childForum.type}',
+      }),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            leading: CachedNetworkImage(
-              width: 48,
-              height: 48,
-              imageUrl: childForum.getIconUrl(),
-              placeholder: (context, url) => Image.asset(
-                'images/default_forum_icon.png',
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
                 width: 48,
                 height: 48,
-              ),
-              errorWidget: (context, url, err) => Image.asset(
-                'images/default_forum_icon.png',
-                width: 48,
-                height: 48,
+                fit: BoxFit.cover,
+                imageUrl: childForum.getIconUrl(),
+                placeholder: (context, url) => Image.asset(
+                  'images/default_forum_icon.png',
+                  width: 48,
+                  height: 48,
+                ),
+                errorWidget: (context, url, err) => Image.asset(
+                  'images/default_forum_icon.png',
+                  width: 48,
+                  height: 48,
+                ),
               ),
             ),
-            title: Text(childForum.name),
-            subtitle: Text(childForum.desc ?? ""),
+            title: Text(
+              childForum.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: desc != null && desc.isNotEmpty
+                ? Text(desc, maxLines: 1, overflow: TextOverflow.ellipsis)
+                : null,
             trailing: tid != null && notifier != null
-                ? Switch(
+                ? AppSwitch(
                     value: subscribed,
                     onChanged: (v) {
                       if (v) {
@@ -64,7 +77,13 @@ class ChildForumItemWidget extends ConsumerWidget {
                   )
                 : null,
           ),
-          Divider(height: 1),
+          Divider(
+            height: isApple ? 0.5 : 1,
+            thickness: isApple ? 0.5 : null,
+            color: isApple
+                ? Theme.of(context).colorScheme.outlineVariant
+                : null,
+          ),
         ],
       ),
     );

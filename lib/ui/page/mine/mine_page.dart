@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/user.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -60,20 +62,20 @@ class MinePage extends HookConsumerWidget {
       title: '社区',
       children: [
         M3SettingsTile(
-          icon: Icons.bookmark_outline,
-          title: '贴子收藏',
-          subtitle: '收藏的贴子',
+          icon: AppIcons.bookmark(context),
+          title: '帖子收藏',
+          subtitle: '收藏的帖子',
           onTap: () => Routes.navigateTo(context, Routes.FAVOURITE_TOPICS),
         ),
         M3SettingsTile(
-          icon: Icons.history_outlined,
+          icon: AppIcons.history(context),
           title: '浏览历史',
-          subtitle: '最近浏览的贴子',
+          subtitle: '最近浏览的帖子',
           onTap: () => Routes.navigateTo(context, Routes.TOPIC_HISTORY),
         ),
         // 从短消息 / 提醒页返回后刷新角标
         M3SettingsTile(
-          icon: Icons.mail_outlined,
+          icon: AppIcons.mail(context),
           title: '短消息',
           subtitle: '私信会话',
           badgeCount: unread.messages,
@@ -83,7 +85,7 @@ class MinePage extends HookConsumerWidget {
           ).whenComplete(refreshUnread),
         ),
         M3SettingsTile(
-          icon: Icons.notifications_outlined,
+          icon: AppIcons.notifications(context),
           title: '提醒信息',
           subtitle: '回复与系统通知',
           badgeCount: unread.notifications,
@@ -98,13 +100,13 @@ class MinePage extends HookConsumerWidget {
       title: '应用',
       children: [
         M3SettingsTile(
-          icon: Icons.settings_outlined,
+          icon: AppIcons.settings(context),
           title: '设置',
           subtitle: '主题、网络与屏蔽',
           onTap: () => Routes.navigateTo(context, Routes.SETTINGS),
         ),
         M3SettingsTile(
-          icon: Icons.info_outline,
+          icon: AppIcons.info(context),
           title: '关于',
           subtitle: '版本与开源信息',
           onTap: () => Routes.navigateTo(context, Routes.ABOUT),
@@ -162,12 +164,17 @@ class _UserHeaderCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isLoggedIn = userInfo != null;
+    final isApple = context.isAppleStyle;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      padding: EdgeInsets.fromLTRB(isApple ? 16 : 12, 8, isApple ? 16 : 12, 8),
       child: Material(
-        color: colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(Dimen.radiusL),
+        color: isApple
+            ? colorScheme.surfaceContainerLow
+            : colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(
+          isApple ? Dimen.radiusM : Dimen.radiusL,
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => _onTap(context, ref, isLoggedIn),
@@ -198,7 +205,11 @@ class _UserHeaderCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+                Icon(
+                  AppIcons.chevronRight(context),
+                  color: colorScheme.onSurfaceVariant,
+                  size: isApple ? 16 : 24,
+                ),
               ],
             ),
           ),

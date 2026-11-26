@@ -34,16 +34,7 @@ class DiceContext {
   }
 }
 
-class DiceResult {
-  final String original;
-  final String expanded;
-  final String total;
-  DiceResult({
-    required this.original,
-    required this.expanded,
-    required this.total,
-  });
-}
+typedef DiceResult = ({String original, String expanded, String total});
 
 class DiceRoller {
   static final _pattern = RegExp(
@@ -53,7 +44,7 @@ class DiceRoller {
 
   static DiceResult roll(String expression, DiceContext context) {
     if (expression.trim().isEmpty) {
-      return DiceResult(original: expression, expanded: '', total: 'ERROR');
+      return (original: expression, expanded: '', total: 'ERROR');
     }
     final working = '+$expression';
     final matches = _pattern.allMatches(working).toList();
@@ -94,7 +85,7 @@ class DiceRoller {
     var expanded = output.toString();
     if (expanded.isNotEmpty) expanded = expanded.substring(1);
 
-    return DiceResult(
+    return (
       original: expression,
       expanded: expanded,
       total: hasError ? 'ERROR' : '$sum',

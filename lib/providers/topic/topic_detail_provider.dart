@@ -1,19 +1,10 @@
-import 'package:flutter_nga/data/entity/topic.dart';
-import 'package:flutter_nga/providers/core/repository_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TopicDetailKey {
-  const TopicDetailKey({required this.tid});
+import 'package:flutter_nga/data/entity/topic.dart';
+import 'package:flutter_nga/providers/core/repository_providers.dart';
+import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 
-  final int tid;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is TopicDetailKey && tid == other.tid;
-
-  @override
-  int get hashCode => tid.hashCode;
-}
+typedef TopicDetailKey = ({int tid});
 
 /// 帖子收藏状态。帖子详情接口不返回是否已收藏，进入页面时为 [unknown]。
 enum FavouriteStatus { unknown, favourited, notFavourited }
@@ -28,6 +19,9 @@ class TopicDetailState {
   /// 收藏 / 取消收藏请求进行中
   final bool favouriteBusy;
 
+  /// 回帖成功且处于最后一页时递增，通知当前页自动刷新
+  final int latestPageRefreshTick;
+
   const TopicDetailState({
     this.currentPage = 1,
     this.maxPage = 1,
@@ -35,6 +29,7 @@ class TopicDetailState {
     this.topic,
     this.favourite = FavouriteStatus.unknown,
     this.favouriteBusy = false,
+    this.latestPageRefreshTick = 0,
   });
 
   String? get subject => topic?.subject;
@@ -46,6 +41,7 @@ class TopicDetailState {
     Topic? topic,
     FavouriteStatus? favourite,
     bool? favouriteBusy,
+    int? latestPageRefreshTick,
   }) {
     return TopicDetailState(
       currentPage: currentPage ?? this.currentPage,
@@ -54,6 +50,8 @@ class TopicDetailState {
       topic: topic ?? this.topic,
       favourite: favourite ?? this.favourite,
       favouriteBusy: favouriteBusy ?? this.favouriteBusy,
+      latestPageRefreshTick:
+          latestPageRefreshTick ?? this.latestPageRefreshTick,
     );
   }
 }
@@ -95,6 +93,22 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
     state = state.copyWith(currentPage: safeCurrentPage);
   }
 
+  /// 从收藏列表等已知来源进入时，将初始未知状态标记为已收藏（不覆盖本页手动取消后的状态）。
+  void markKnownFavourited() {
+    if (state.favourite == FavouriteStatus.unknown) {
+      state = state.copyWith(favourite: FavouriteStatus.favourited);
+    }
+  }
+
+  /// 回帖成功后调用：仅当当前正处于最后一页（最新一页）时触发该页自动刷新。
+  void notifyReplyPublished() {
+    if (state.currentPage >= state.maxPage) {
+      state = state.copyWith(
+        latestPageRefreshTick: state.latestPageRefreshTick + 1,
+      );
+    }
+  }
+
   /// 已收藏时取消收藏，否则（含状态未知）加入收藏，返回服务端提示。
   ///
   /// 请求进行中再次调用返回 null，不重复提交。
@@ -115,6 +129,11 @@ class TopicDetailNotifier extends Notifier<TopicDetailState> {
             : FavouriteStatus.favourited,
         favouriteBusy: false,
       );
+      if (remove) {
+        ref
+            .read(favouriteTopicListProvider.notifier)
+            .removeConfirmedByTid(key.tid);
+      }
       return message;
     } catch (err) {
       if (ref.mounted) state = state.copyWith(favouriteBusy: false);

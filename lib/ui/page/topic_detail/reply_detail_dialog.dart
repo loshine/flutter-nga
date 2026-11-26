@@ -1,10 +1,15 @@
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/data.dart';
 import 'package:flutter_nga/data/entity/topic_detail.dart';
 import 'package:flutter_nga/data/entity/user.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_reply_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
 import 'package:flutter_nga/ui/widget/avatar_widget.dart';
 import 'package:flutter_nga/ui/widget/nga_html_content_widget.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
@@ -25,9 +30,14 @@ class ReplyDetailDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    usePostFrameEffect(() {
-      ref.read(topicReplyProvider(pid).notifier).load();
-    }, [pid]);
+    void loadReply() {
+      ref
+          .read(topicReplyProvider(pid).notifier)
+          .load()
+          .catchError((_) => const TopicReplyState());
+    }
+
+    usePostFrameEffect(loadReply, [pid]);
 
     final state = ref.watch(topicReplyProvider(pid));
     // 避免 AlertDialog 对 HTML 内嵌引用卡执行固有宽度测量。
@@ -35,37 +45,132 @@ class ReplyDetailDialog extends HookConsumerWidget {
       0.0,
       560.0,
     );
+    final actions = [
+      if (tid != null && tid != 0)
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            Routes.navigateTo(context, "${Routes.TOPIC_DETAIL}?tid=$tid");
+          },
+          child: const Text('进入主题'),
+        ),
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('关闭'),
+      ),
+    ];
+
+    if (context.isAppleStyle) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: SizedBox(
+          width: dialogWidth,
+          child: LiquidGlassSurface(
+            borderRadius: BorderRadius.circular(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: _buildContent(context, state, loadReply),
+                  ),
+                ),
+                Divider(
+                  height: 0.5,
+                  thickness: 0.5,
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: actions,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     // 背景走 DialogTheme（surfaceContainerHigh），与全应用 M3 弹窗一致。
     return AlertDialog(
+      scrollable: true,
       constraints: BoxConstraints.tightFor(width: dialogWidth),
       contentPadding: EdgeInsets.zero,
-      content: _buildContent(state),
-      actions: [
-        if (tid != null && tid != 0)
-          TextButton(
-            onPressed: () {
-              Routes.pop(context);
-              Routes.navigateTo(context, "${Routes.TOPIC_DETAIL}?tid=$tid");
-            },
-            child: Text('进入主题'),
-          ),
-        TextButton(onPressed: () => Routes.pop(context), child: Text('关闭')),
-      ],
+      content: _buildContent(context, state, loadReply),
+      actions: actions,
     );
   }
 
-  Widget _buildContent(TopicReplyState state) {
-    if (state.replyList.isEmpty) {
+  Widget _buildContent(
+    BuildContext context,
+    TopicReplyState state,
+    VoidCallback onRetry,
+  ) {
+    if (state.replyList.isNotEmpty) {
+      final reply = state.replyList[0];
+      final user = state.userList.firstWhere(
+        (u) => u.uid == reply.authorId,
+        orElse: () => state.userList.isNotEmpty ? state.userList[0] : User(),
+      );
+      return _ReplyWidget(reply: reply, user: user);
+    }
+    if (state.error != null) {
+      final colorScheme = Theme.of(context).colorScheme;
       return Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [CircularProgressIndicator()],
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              AppIcons.resolve(context, Icons.cloud_off_outlined),
+              size: 32,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '加载回复失败',
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 12),
+            TextButton(onPressed: onRetry, child: const Text('重试')),
+          ],
         ),
       );
-    } else {
-      return _ReplyWidget(reply: state.replyList[0], user: state.userList[0]);
     }
+    if (state.isLoading || !state.hasLoaded) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 28),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [AppActivityIndicator()],
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '未找到该楼层内容',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(onPressed: onRetry, child: const Text('重试')),
+        ],
+      ),
+    );
   }
 }
 
@@ -80,14 +185,19 @@ class _ReplyWidget extends StatefulWidget {
 }
 
 class _ReplyWidgetState extends State<_ReplyWidget> {
+  bool _reacting = false;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isApple = context.isAppleStyle;
+    final isMac = context.isMacDesktopAppleStyle;
     final thumbBg = colorScheme.surfaceContainerHigh;
     final thumbFgActive = colorScheme.primary;
     final thumbFgInactive = colorScheme.onSurfaceVariant;
     final isLiked = widget.reply.recommend == 1;
     final isDisliked = widget.reply.recommend == -1;
+    final reactionTapSize = isMac ? 32.0 : 44.0;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -95,7 +205,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: AvatarWidget(
                 widget.user.avatar,
                 size: 24,
@@ -116,7 +226,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           height: code_utils.isStringEmpty(widget.reply.subject) ? 0 : null,
           width: double.infinity,
           child: Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Text(
               code_utils.unescapeHtml(widget.reply.subject),
               style: TextStyle(
@@ -132,7 +242,7 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           // HtmlWidget 宽度随内容收缩，不撑满会被外层 Column 居中。
           width: double.infinity,
           child: Padding(
-            padding: EdgeInsets.only(left: 16, right: 16),
+            padding: const EdgeInsets.only(left: 16, right: 16),
             child: NgaHtmlContentWidget(
               content: widget.reply.content,
               authorId: widget.reply.authorId,
@@ -143,59 +253,82 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: thumbBg,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                  child: Row(
-                    children: <Widget>[
-                      GestureDetector(
-                        onTap: _toggleLike,
-                        child: Icon(
-                          isLiked
-                              ? CommunityMaterialIcons.thumb_up
-                              : CommunityMaterialIcons.thumb_up_outline,
+              Material(
+                color: thumbBg,
+                borderRadius: BorderRadius.circular(isApple ? 8 : 6),
+                clipBehavior: Clip.antiAlias,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    SizedBox(
+                      width: reactionTapSize,
+                      height: reactionTapSize,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints.tightFor(
+                          width: reactionTapSize,
+                          height: reactionTapSize,
+                        ),
+                        tooltip: '赞',
+                        onPressed: _reacting ? null : _toggleLike,
+                        icon: Icon(
+                          isApple
+                              ? (isLiked
+                                    ? CupertinoIcons.hand_thumbsup_fill
+                                    : CupertinoIcons.hand_thumbsup)
+                              : (isLiked
+                                    ? CommunityMaterialIcons.thumb_up
+                                    : CommunityMaterialIcons.thumb_up_outline),
                           color: isLiked ? thumbFgActive : thumbFgInactive,
-                          size: 14,
+                          size: 16,
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 8),
-                        child: Text(
-                          "${widget.reply.score}",
-                          style: TextStyle(
-                            fontSize: Dimen.bodySmall,
-                            color: isLiked || isDisliked
-                                ? thumbFgActive
-                                : thumbFgInactive,
-                          ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: Text(
+                        "${widget.reply.score}",
+                        style: TextStyle(
+                          fontSize: Dimen.bodySmall,
+                          color: isLiked || isDisliked
+                              ? thumbFgActive
+                              : thumbFgInactive,
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 8),
-                        child: GestureDetector(
-                          onTap: _toggleDislike,
-                          child: Icon(
-                            isDisliked
-                                ? CommunityMaterialIcons.thumb_down
-                                : CommunityMaterialIcons.thumb_down_outline,
-                            color: isDisliked ? thumbFgActive : thumbFgInactive,
-                            size: 14,
-                          ),
+                    ),
+                    SizedBox(
+                      width: reactionTapSize,
+                      height: reactionTapSize,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints.tightFor(
+                          width: reactionTapSize,
+                          height: reactionTapSize,
+                        ),
+                        tooltip: '踩',
+                        onPressed: _reacting ? null : _toggleDislike,
+                        icon: Icon(
+                          isApple
+                              ? (isDisliked
+                                    ? CupertinoIcons.hand_thumbsdown_fill
+                                    : CupertinoIcons.hand_thumbsdown)
+                              : (isDisliked
+                                    ? CommunityMaterialIcons.thumb_down
+                                    : CommunityMaterialIcons
+                                          .thumb_down_outline),
+                          color: isDisliked ? thumbFgActive : thumbFgInactive,
+                          size: 16,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
                 widget.reply.postDate ?? "",
                 style: TextStyle(
@@ -211,11 +344,14 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
   }
 
   Future<void> _toggleLike() async {
+    if (_reacting) return;
+    setState(() => _reacting = true);
     try {
       final reaction = await Data().topicRepository.likeReply(
         widget.reply.tid,
         widget.reply.pid,
       );
+      if (!mounted) return;
       setState(() {
         widget.reply.score += reaction.countChange;
         if (reaction.countChange > 0) {
@@ -229,15 +365,22 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
     } catch (err) {
       debugPrint(err.toString());
       AppToast.error(err);
+    } finally {
+      if (mounted) {
+        setState(() => _reacting = false);
+      }
     }
   }
 
   Future<void> _toggleDislike() async {
+    if (_reacting) return;
+    setState(() => _reacting = true);
     try {
       final reaction = await Data().topicRepository.dislikeReply(
         widget.reply.tid,
         widget.reply.pid,
       );
+      if (!mounted) return;
       setState(() {
         widget.reply.score += reaction.countChange;
         if (reaction.countChange < 0) {
@@ -251,6 +394,10 @@ class _ReplyWidgetState extends State<_ReplyWidget> {
     } catch (err) {
       debugPrint(err.toString());
       AppToast.error(err);
+    } finally {
+      if (mounted) {
+        setState(() => _reacting = false);
+      }
     }
   }
 }

@@ -17,24 +17,7 @@ int? _parseInt(dynamic value) {
 }
 
 /// 对话参与者。
-class MessageParticipant {
-  final int uid;
-  final String username;
-
-  const MessageParticipant(this.uid, this.username);
-
-  @override
-  bool operator ==(Object other) =>
-      other is MessageParticipant &&
-      other.uid == uid &&
-      other.username == username;
-
-  @override
-  int get hashCode => Object.hash(uid, username);
-
-  @override
-  String toString() => 'MessageParticipant($uid, $username)';
-}
+typedef MessageParticipant = ({int uid, String username});
 
 /// 解析网页版以 `\t` 分隔的 `uid\tusername\tuid\tusername…` 参与者串
 /// （对话列表的 `all_user`、消息详情的 `allUsers`）。
@@ -45,7 +28,7 @@ List<MessageParticipant> parseMessageParticipants(dynamic value) {
   for (var i = 0; i + 1 < parts.length; i += 2) {
     final uid = int.tryParse(parts[i].trim());
     if (uid == null) continue;
-    result.add(MessageParticipant(uid, parts[i + 1]));
+    result.add((uid: uid, username: parts[i + 1]));
   }
   return result;
 }

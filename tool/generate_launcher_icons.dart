@@ -23,8 +23,20 @@ final _darkSplashForeground = ColorRgba8(0xF5, 0xE8, 0xCB, 0xFF);
 /// 需在 macOS 上运行（借助 `tool/render_svg.swift` 用 AppKit 光栅化 SVG）：
 /// `mise exec -- dart run tool/generate_launcher_icons.dart`，
 /// 然后执行 `mise exec -- dart run flutter_native_splash:create` 刷新原生启动屏。
-Future<void> main() async {
+///
+/// 仅需从现有 `images/launcher/icon_1024.png` 重新生成桌面端图标（macOS / Windows）时，
+/// 可附加 `--desktop-only`（无 GUI 上下文或非 macOS 环境均可执行）。
+Future<void> main(List<String> args) async {
   const size = 1024;
+  if (args.contains('--desktop-only')) {
+    final full = _decode('images/launcher/icon_1024.png');
+    _writeDesktopIcons(full);
+    stdout.writeln(
+      'Desktop icons regenerated from images/launcher/icon_1024.png.',
+    );
+    return;
+  }
+
   final svg = File(_svgPath).readAsStringSync();
 
   _writeVectorDrawables(_parseSvgPaths(svg));
@@ -96,7 +108,36 @@ Future<void> main() async {
     _writePng(path, _resize(full, px));
   }
 
+  _writeDesktopIcons(full);
+
   stdout.writeln('Launcher icons regenerated from $_svgPath.');
+}
+
+void _writeDesktopIcons(Image full) {
+  // macOS AppIcon：遵循 Apple HIG 网格，在 1024×1024 画布内居中放置 824×824 超椭圆图标并带柔和投影。
+  final macIcon = _macOsIcon(full);
+  const macIcons = <String, int>{
+    'app_icon_16.png': 16,
+    'app_icon_32.png': 32,
+    'app_icon_64.png': 64,
+    'app_icon_128.png': 128,
+    'app_icon_256.png': 256,
+    'app_icon_512.png': 512,
+    'app_icon_1024.png': 1024,
+  };
+  for (final MapEntry(key: name, value: px) in macIcons.entries) {
+    _writePng(
+      'macos/Runner/Assets.xcassets/AppIcon.appiconset/$name',
+      _resize(macIcon, px),
+    );
+  }
+
+  // Windows 多分辨率 ICO（16–256px），轻微圆角更贴合任务栏与标题栏外观。
+  final winBase = _squircleMask(full, exponent: 5.0);
+  const winSizes = [16, 24, 32, 48, 64, 128, 256];
+  final winImages = [for (final px in winSizes) _resize(winBase, px)];
+  File('windows/runner/resources/app_icon.ico')
+      .writeAsBytesSync(IcoEncoder().encodeImages(winImages));
 }
 
 typedef _SvgPath = ({String fill, String d});
@@ -213,6 +254,60 @@ Image _circularMask(Image src) {
     final dy = p.y - cy;
     if (dx * dx + dy * dy > radiusSq) {
       p.a = 0;
+    }
+  }
+  return out;
+}
+
+/// 生成 macOS HIG 风格应用图标：1024×1024 透明画布 + 居中 824×824 超椭圆主体 + 柔和底投影。
+Image _macOsIcon(Image full) {
+  const canvasSize = 1024;
+  const tileSize = 824;
+  const inset = (canvasSize - tileSize) ~/ 2;
+
+  final tile = _squircleMask(_resize(full, tileSize), exponent: 5.0);
+
+  // 先生成柔和底投影层
+  final shadow = Image(width: canvasSize, height: canvasSize, numChannels: 4);
+  for (final p in tile) {
+    if (p.a > 0) {
+      final sx = p.x + inset;
+      final sy = p.y + inset + 12;
+      if (sx >= 0 && sx < canvasSize && sy >= 0 && sy < canvasSize) {
+        final alpha = ((p.a / 255.0) * 62).round().clamp(0, 255);
+        shadow.setPixelRgba(sx, sy, 0, 0, 0, alpha);
+      }
+    }
+  }
+  final blurredShadow = gaussianBlur(shadow, radius: 14);
+
+  final canvas = Image(width: canvasSize, height: canvasSize, numChannels: 4);
+  compositeImage(canvas, blurredShadow);
+  compositeImage(canvas, tile, dstX: inset, dstY: inset);
+  return canvas;
+}
+
+/// 使用连续超椭圆（Apple Squircle 近似）裁切并做边缘抗锯齿。
+Image _squircleMask(Image src, {double exponent = 5.0}) {
+  final out = Image.from(src);
+  final halfW = (out.width - 1) / 2.0;
+  final halfH = (out.height - 1) / 2.0;
+  final invHalfW = 1.0 / halfW;
+  final invHalfH = 1.0 / halfH;
+  // 约 1.5px 抗锯齿过渡带
+  final feather = 1.5 / math.min(halfW, halfH);
+
+  for (final p in out) {
+    final nx = (p.x - halfW).abs() * invHalfW;
+    final ny = (p.y - halfH).abs() * invHalfH;
+    final dist = math
+        .pow(math.pow(nx, exponent) + math.pow(ny, exponent), 1.0 / exponent)
+        .toDouble();
+    if (dist >= 1.0) {
+      p.a = 0;
+    } else if (dist > 1.0 - feather) {
+      final coverage = ((1.0 - dist) / feather).clamp(0.0, 1.0);
+      p.a = (p.a * coverage).round();
     }
   }
   return out;

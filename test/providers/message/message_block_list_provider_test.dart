@@ -16,7 +16,7 @@ class _FakeMessageRepository extends Fake implements MessageRepository {
 void main() {
   test('离开页面后释放屏蔽列表，再次进入不会看到上一个账号的缓存', () async {
     final repository = _FakeMessageRepository()
-      ..blockList = const [MessageParticipant(7, 'bob')];
+      ..blockList = const [(uid: 7, username: 'bob')];
     final container = ProviderContainer(
       overrides: [messageRepositoryProvider.overrideWithValue(repository)],
     );
@@ -24,7 +24,7 @@ void main() {
 
     final subscription = container.listen(messageBlockListProvider, (_, _) {});
     await container.read(messageBlockListProvider.notifier).refresh();
-    expect(subscription.read(), const [MessageParticipant(7, 'bob')]);
+    expect(subscription.read(), const [(uid: 7, username: 'bob')]);
 
     // 模拟离开页面（例如去切换账号），provider 无人监听后被释放
     subscription.close();

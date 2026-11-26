@@ -41,6 +41,9 @@ iOS 构建（最低 iOS 15.0）：
 - 若 `pod install` 报 `Unicode Normalization not appropriate for ASCII-8BIT`，设置 `LANG=en_US.UTF-8` 后重试。
 - 原生单元测试在 `ios/RunnerTests/`（Swift Testing，以 Runner.app 为 `TEST_HOST`），已加入 Runner scheme 的 Test。先 `mise exec -- flutter build ios --simulator --debug` 生成 Pods 与 SPM 包，再运行 `xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination 'platform=iOS Simulator,name=<机型>'`。
 
+macOS 构建：
+- `macos/Runner/Info.plist` 中临时设置 `FLTEnableImpeller=false` 以规避 Flutter 3.50.0 在 macOS 上拖动/缩放窗口触发的 Impeller Metal 纹理尺寸失同步崩溃（`flutter/flutter#185394`）；项目升级到包含 `#192522` 修复的 Flutter 版本后可移除该开关。
+
 ## 核心架构
 
 ### Data() 单例（lib/data/data.dart）
@@ -114,4 +117,4 @@ Riverpod 3.x + flutter_hooks。Provider 全部基于 `Notifier` / `NotifierProvi
 - PR 触发 `.github/workflows/check.yml`：
   - `lint` job（仅 ubuntu）：`dart format --output=none --set-exit-if-changed lib test tool` 检查格式，`flutter analyze --no-pub` 要求 0 条问题（info 也会让 job 失败）。新增存放 Dart 源码的目录时，要同步加入格式检查的路径。
   - `check` job：在 ubuntu / windows / macos 上运行 `flutter test --no-pub test/`。
-- `build.yml` 在发版相关 PR 中验证 Android（Universal APK、分 ABI APK、AAB）、iOS、macOS、Windows、Linux 和 Web 构建。iOS 只做无签名编译检查，Web 只在 PR 中提供预览产物。推送版本 tag 时校验 `pubspec.yaml` 版本名，Android job 用 Environment「Android Build」的 `JKS`（base64）/ `STORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD` 还原签名配置。Release job 只上传 Android 签名分 ABI APK（`arm64-v8a` / `armeabi-v7a` / `x86_64`）、Universal APK 和 AAB。缺少 Android 签名 Secrets 时构建失败。各平台产物和发版步骤见 README「发布新版本」。
+- `build.yml` 在发版相关 PR 中验证 Android（Universal APK、分 ABI APK、AAB）、iOS、macOS（DMG + ZIP）、Windows、Linux 和 Web 构建。iOS 只做无签名编译检查，Web 只在 PR 中提供预览产物。推送版本 tag 时校验 `pubspec.yaml` 版本名，Android job 用 Environment「Android Build」的 `JKS`（base64）/ `STORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD` 还原签名配置，同时运行 macOS job 打包 DMG 与 ZIP。Release job 上传 Android 签名分 ABI APK（`arm64-v8a` / `armeabi-v7a` / `x86_64`）、Universal APK、AAB 以及 macOS DMG / ZIP。缺少 Android 签名 Secrets 时构建失败。各平台产物和发版步骤见 README「发布新版本」。

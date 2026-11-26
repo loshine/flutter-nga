@@ -1,5 +1,8 @@
 import 'package:material_ui/material_ui.dart';
+
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
 /// Material 3 Medium 断点：平板竖屏 / 折叠屏展开态，启用 NavigationRail
@@ -46,30 +49,7 @@ double masterPaneWidthFor(double availableWidth) {
 }
 
 /// 双栏布局中当前选中的帖子描述信息。
-class SelectedTopic {
-  const SelectedTopic({
-    required this.tid,
-    this.fid,
-    this.subject,
-    this.authorid,
-  });
-
-  final int tid;
-  final int? fid;
-  final String? subject;
-  final int? authorid;
-
-  @override
-  bool operator ==(Object other) =>
-      other is SelectedTopic &&
-      other.tid == tid &&
-      other.fid == fid &&
-      other.subject == subject &&
-      other.authorid == authorid;
-
-  @override
-  int get hashCode => Object.hash(tid, fid, subject, authorid);
-}
+typedef SelectedTopic = ({int tid, int? fid, String? subject, int? authorid});
 
 /// 通用响应式左右双栏（List-Detail / Master-Detail）布局容器。
 ///
@@ -91,15 +71,25 @@ class MasterDetailLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMacApple = context.isMacDesktopAppleStyle;
+    // 在 macOS 三栏工作区中，外层侧边栏已占用 244pt，允许在稍窄的剩余宽度（700pt）
+    // 即展开中栏列表 + 右栏详情，确保常规 1000~1280pt 桌面窗口完整呈现三栏。
+    final effectiveBreakpoint = isMacApple && breakpoint == kExpandedBreakpoint
+        ? 680.0
+        : breakpoint;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isTwoPane = constraints.maxWidth >= breakpoint;
+        final isTwoPane = constraints.maxWidth >= effectiveBreakpoint;
         if (!isTwoPane) {
           return masterBuilder(context, false);
         }
 
         final paneWidth =
-            masterWidth ?? masterPaneWidthFor(constraints.maxWidth);
+            masterWidth ??
+            (isMacApple
+                ? (constraints.maxWidth * 0.36).clamp(300.0, 380.0)
+                : masterPaneWidthFor(constraints.maxWidth));
         return Row(
           children: [
             SizedBox(
@@ -107,12 +97,17 @@ class MasterDetailLayout extends StatelessWidget {
               child: MediaQuery.removePadding(
                 context: context,
                 removeRight: true,
-                child: masterBuilder(context, true),
+                // 为列表栏提供独立 ScaffoldMessenger，使撤销提示胶囊就近浮在操作栏底部
+                child: ScaffoldMessenger(
+                  child: Builder(
+                    builder: (paneContext) => masterBuilder(paneContext, true),
+                  ),
+                ),
               ),
             ),
             VerticalDivider(
-              width: 1,
-              thickness: 1,
+              width: isMacApple ? 0.5 : 1,
+              thickness: isMacApple ? 0.5 : 1,
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
             Expanded(
@@ -137,12 +132,14 @@ class TopicDetailPane extends StatelessWidget {
     this.onClose,
     this.emptyTitle = '选择一篇帖子开始阅读',
     this.emptySubtitle,
+    this.initiallyFavourited = false,
   });
 
   final SelectedTopic? selected;
   final VoidCallback? onClose;
   final String emptyTitle;
   final String? emptySubtitle;
+  final bool initiallyFavourited;
 
   @override
   Widget build(BuildContext context) {
@@ -162,6 +159,7 @@ class TopicDetailPane extends StatelessWidget {
       authorid: topic.authorid,
       embedded: true,
       onClose: onClose,
+      initiallyFavourited: initiallyFavourited,
     );
   }
 }
@@ -183,6 +181,7 @@ class MasterDetailEmptyPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Scaffold(
       body: Center(
@@ -191,20 +190,29 @@ class MasterDetailEmptyPlaceholder extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(Dimen.radiusXL),
+              if (isApple)
+                Icon(
+                  AppIcons.resolve(context, icon),
+                  size: 40,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+                )
+              else
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(Dimen.radiusXL),
+                  ),
+                  child: Icon(icon, size: 32, color: colorScheme.primary),
                 ),
-                child: Icon(icon, size: 32, color: colorScheme.primary),
-              ),
               const SizedBox(height: Dimen.spacingL),
               Text(
                 title,
                 style: textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
+                  color: isApple
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
@@ -214,7 +222,9 @@ class MasterDetailEmptyPlaceholder extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant.withValues(
+                      alpha: isApple ? 0.8 : 1.0,
+                    ),
                   ),
                   textAlign: TextAlign.center,
                 ),

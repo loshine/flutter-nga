@@ -176,6 +176,38 @@ void main() {
       expect(list.padding, const EdgeInsets.fromLTRB(180, 0, 180, 24));
     });
 
+    testWidgets(
+      'preserves horizontal safe area on landscape phones without double-padding',
+      (tester) async {
+        await _setSurface(tester, const Size(844, 390));
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(
+                size: Size(844, 390),
+                padding: EdgeInsets.fromLTRB(59, 0, 59, 21),
+              ),
+              child: Scaffold(
+                body: ReadableListPadding(
+                  builder: (context, padding) => ListView.builder(
+                    key: const Key('landscape-list'),
+                    padding: padding,
+                    itemCount: 3,
+                    itemBuilder: (_, index) => SizedBox(height: 40),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final list = tester.widget<ListView>(
+          find.byKey(const Key('landscape-list')),
+        );
+        expect(list.padding, const EdgeInsets.fromLTRB(59, 0, 59, 21));
+      },
+    );
+
     testWidgets('adds the readable inset on top of an explicit padding', (
       tester,
     ) async {

@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_nga/data/entity/notification.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
+import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 
 class NotificationListState {
   /// 按时间倒序排列的全部提醒。
@@ -37,20 +39,27 @@ class NotificationListNotifier extends Notifier<NotificationListState> {
   NotificationListState build() => const NotificationListState();
 
   Future<NotificationListState> refresh() async {
+    final session = ref.read(accountSessionVersionProvider);
     final repository = ref.read(messageRepositoryProvider);
     final data = await repository.getNotificationList();
+    if (!ref.mounted || ref.read(accountSessionVersionProvider) != session) {
+      return const NotificationListState();
+    }
     final result = NotificationListState(
       notifications: data.notifications,
       unread: data.unread ?? 0,
     );
-    if (ref.mounted) state = result;
+    state = result;
     return result;
   }
 
   /// 清空服务端信箱并清空本地列表。
   Future<void> clear() async {
+    final session = ref.read(accountSessionVersionProvider);
     await ref.read(messageRepositoryProvider).clearNotifications();
-    if (ref.mounted) state = const NotificationListState();
+    if (ref.mounted && ref.read(accountSessionVersionProvider) == session) {
+      state = const NotificationListState();
+    }
   }
 
   /// 不再提示该主题 / 回复的回复或评论。

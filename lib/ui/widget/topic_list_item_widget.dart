@@ -1,12 +1,20 @@
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_history_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/name_utils.dart' as name_utils;
+import 'package:flutter_nga/utils/nga_links.dart';
 import 'package:flutter_nga/utils/route.dart';
 
 class TopicListItemWidget extends ConsumerWidget {
@@ -60,6 +68,19 @@ class TopicListItemWidget extends ConsumerWidget {
 
     // 计算透明度
     final alpha = blockMode == BlockMode.ALPHA ? 0.38 : 1.0;
+
+    if (context.isAppleStyle) {
+      return _buildAppleItem(
+        context,
+        ref,
+        topicSubject: topicSubject,
+        interfaceState: interfaceState,
+        colorScheme: colorScheme,
+        textTheme: textTheme,
+        isRead: isRead,
+        alpha: alpha,
+      );
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -158,6 +179,183 @@ class TopicListItemWidget extends ConsumerWidget {
     );
   }
 
+  Widget _buildAppleItem(
+    BuildContext context,
+    WidgetRef ref, {
+    required String topicSubject,
+    required InterfaceSettingsState interfaceState,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+    required bool isRead,
+    required double alpha,
+  }) {
+    final isMac = context.isMacDesktopAppleStyle;
+    final selectedBg = isMac
+        ? colorScheme.primary.withValues(alpha: 0.14)
+        : colorScheme.primary.withValues(alpha: 0.10);
+
+    Future<void> showContextMenu(Offset? position) async {
+      final tid = topic.tid;
+      if (tid == null) return;
+      final action = await showAppActionMenu<String>(
+        context: context,
+        globalPosition: position,
+        title: topicSubject,
+        actions: const [
+          AppMenuAction(
+            value: 'copy_link',
+            label: '复制帖子链接',
+            icon: CupertinoIcons.link,
+          ),
+          AppMenuAction(
+            value: 'open_browser',
+            label: '在浏览器中打开',
+            icon: CupertinoIcons.compass,
+          ),
+        ],
+      );
+      if (action == null) return;
+      final url = topicWebUrl(tid);
+      if (action == 'copy_link') {
+        await Clipboard.setData(ClipboardData(text: url));
+        AppToast.success('已复制帖子链接');
+      } else if (action == 'open_browser') {
+        final opened = await launchUrl(
+          Uri.parse(url),
+          mode: LaunchMode.externalApplication,
+        );
+        if (!opened) AppToast.error('无法打开浏览器');
+      }
+    }
+
+    final isPaintBlockMode = blockMode == BlockMode.PAINT;
+    final authorName = name_utils.getShowName(topic.author ?? '');
+    final dateText = topic.lastPost != null
+        ? code_utils.formatPostDate(topic.lastPost! * 1000)
+        : '';
+
+    final metaStyle = textTheme.bodySmall?.copyWith(
+      fontSize: isMac ? 11.5 : 12,
+      color: isPaintBlockMode
+          ? Colors.transparent
+          : colorScheme.onSurfaceVariant,
+      backgroundColor: isPaintBlockMode ? colorScheme.onSurfaceVariant : null,
+    );
+
+    final rowBody = Opacity(
+      opacity: alpha,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          isMac ? 10 : 16,
+          isMac ? 9 : 12,
+          trailing == null ? (isMac ? 10 : 16) : 4,
+          isMac ? 9 : 12,
+        ),
+        child: _withTrailing(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTitle(
+                context,
+                topic,
+                topicSubject,
+                interfaceState,
+                textTheme,
+                colorScheme,
+                isRead: isRead,
+                appleCompact: isMac,
+              ),
+              SizedBox(height: isMac ? 5 : 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      authorName,
+                      style: metaStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (topic.hasAttachment()) ...[
+                    Icon(
+                      CupertinoIcons.paperclip,
+                      size: 12,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Text('${topic.replies} 回复', style: metaStyle),
+                  if (dateText.isNotEmpty) ...[
+                    Text(' · ', style: metaStyle),
+                    Text(dateText, style: metaStyle),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (isMac) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            child: GestureDetector(
+              onSecondaryTapDown: (d) => showContextMenu(d.globalPosition),
+              child: Material(
+                color: selected ? selectedBg : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => _handleTap(context, topic, ref),
+                  onLongPress: onLongPress,
+                  child: rowBody,
+                ),
+              ),
+            ),
+          ),
+          if (!selected)
+            Divider(
+              height: 0.5,
+              thickness: 0.5,
+              indent: 18,
+              endIndent: 18,
+              color: colorScheme.outlineVariant,
+            ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onSecondaryTapDown: (d) => showContextMenu(d.globalPosition),
+          onLongPressStart: onLongPress != null
+              ? null
+              : (d) => showContextMenu(d.globalPosition),
+          child: Material(
+            color: selected ? selectedBg : Colors.transparent,
+            child: InkWell(
+              onTap: () => _handleTap(context, topic, ref),
+              onLongPress: onLongPress,
+              child: rowBody,
+            ),
+          ),
+        ),
+        Divider(
+          height: 0.5,
+          thickness: 0.5,
+          indent: 16,
+          color: colorScheme.outlineVariant,
+        ),
+      ],
+    );
+  }
+
   Widget _buildTitle(
     BuildContext context,
     Topic topic,
@@ -166,6 +364,7 @@ class TopicListItemWidget extends ConsumerWidget {
     TextTheme textTheme,
     ColorScheme colorScheme, {
     required bool isRead,
+    bool appleCompact = false,
   }) {
     final isPaintBlockMode = blockMode == BlockMode.PAINT;
     final subjectColor = topic.getSubjectColor();
@@ -174,17 +373,20 @@ class TopicListItemWidget extends ConsumerWidget {
         ? subjectColor?.withValues(alpha: 0.6) ?? colorScheme.onSurfaceVariant
         : subjectColor ?? textTheme.bodyLarge?.color;
     final isDeleteBlockMode = blockMode == BlockMode.DELETE_LINE;
+    final baseFontSize = appleCompact ? 13.5 : Dimen.titleMedium;
 
     return Text.rich(
       TextSpan(
         text: topicSubject,
         style: textTheme.titleMedium?.copyWith(
-          fontSize: Dimen.titleMedium * interfaceState.titleSizeMultiple,
+          fontSize: baseFontSize * interfaceState.titleSizeMultiple,
           backgroundColor: isPaintBlockMode
               ? textTheme.bodyMedium?.color
               : null,
           color: isPaintBlockMode ? Colors.transparent : titleColor,
-          fontWeight: topic.isBold() ? FontWeight.bold : FontWeight.normal,
+          fontWeight: topic.isBold()
+              ? FontWeight.w600
+              : (appleCompact ? FontWeight.w500 : FontWeight.normal),
           fontStyle: topic.isItalic() ? FontStyle.italic : FontStyle.normal,
           decoration: isDeleteBlockMode
               ? TextDecoration.lineThrough
@@ -321,9 +523,10 @@ class TopicListItemWidget extends ConsumerWidget {
       onTap!();
       return;
     }
-    Routes.navigateTo(
-      context,
-      "${Routes.TOPIC_DETAIL}?tid=${topic.tid}&fid=${topic.fid}&subject=${topic.subject!}",
-    );
+    Routes.navigateToWithParams(context, Routes.TOPIC_DETAIL, {
+      'tid': '${topic.tid}',
+      'fid': '${topic.fid}',
+      if (topic.subject != null) 'subject': topic.subject!,
+    });
   }
 }

@@ -4,6 +4,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic_history.dart';
 import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
@@ -15,7 +18,16 @@ import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 
 class TopicHistoryListPage extends HookConsumerWidget {
-  const TopicHistoryListPage({super.key});
+  const TopicHistoryListPage({
+    super.key,
+    this.embedded = false,
+    this.showAppBar = true,
+    this.leading,
+  });
+
+  final bool embedded;
+  final bool showAppBar;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +35,6 @@ class TopicHistoryListPage extends HookConsumerWidget {
     final selectedTopic = useState<SelectedTopic?>(null);
     final historyState = ref.watch(topicHistoryListProvider);
     final notifier = ref.read(topicHistoryListProvider.notifier);
-    final messenger = ScaffoldMessenger.of(context);
 
     Future<void> onRefresh() async {
       try {
@@ -56,29 +67,34 @@ class TopicHistoryListPage extends HookConsumerWidget {
 
     useInitialRefresh(refreshController);
 
+    final activeUndo = useRef<UndoSnackBarHandle?>(null);
+
     useEffect(() {
       return () {
         if (!notifier.hasPendingDeletion) return;
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
         notifier.commitAllDeletions().then((err) {
           if (err != null) AppToast.error(err);
         });
       };
-    }, [notifier, messenger]);
+    }, [notifier]);
 
     useOnAppLifecycleStateChange((_, lifecycle) {
-      if (lifecycle == AppLifecycleState.paused &&
+      if ((lifecycle == AppLifecycleState.paused ||
+              lifecycle == AppLifecycleState.hidden) &&
           notifier.hasPendingDeletion) {
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
       }
     });
 
-    void remove(TopicHistory history) {
+    void remove(BuildContext hostContext, TopicHistory history) {
       final id = history.id;
       if (id == null) return;
       notifier.removeLocally(history);
-      AppSnackBar.undo(
-        context,
+      activeUndo.value = AppSnackBar.undo(
+        hostContext,
         message: '已删除浏览记录',
         onUndo: () => notifier.undoDeletion(id),
         onCommit: () => notifier.commitDeletion(id).catchError((err) {
@@ -88,40 +104,42 @@ class TopicHistoryListPage extends HookConsumerWidget {
     }
 
     void selectHistory(TopicHistory history) {
-      selectedTopic.value = SelectedTopic(
+      selectedTopic.value = (
         tid: history.tid,
         fid: history.fid,
         subject: history.subject,
+        authorid: null,
       );
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(
-          title: const Text('浏览历史'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: '清空浏览历史',
-              onPressed: historyState.list.isEmpty
-                  ? null
-                  : () => _showCleanDialog(
-                      context,
-                      notifier,
-                      refreshController,
-                      onCleaned: () => selectedTopic.value = null,
-                    ),
-            ),
-          ],
-        ),
+      masterBuilder: (paneContext, isTwoPane) => AppScaffold(
+        embedded: embedded,
+        showAppBar: showAppBar,
+        leading: leading,
+        title: const Text('浏览历史'),
+        actions: [
+          IconButton(
+            icon: Icon(AppIcons.delete(paneContext)),
+            tooltip: '清空浏览历史',
+            onPressed: historyState.list.isEmpty
+                ? null
+                : () => _showCleanDialog(
+                    paneContext,
+                    notifier,
+                    refreshController,
+                    onCleaned: () => selectedTopic.value = null,
+                  ),
+          ),
+        ],
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,
           onLoad: historyState.enablePullUp ? onLoading : null,
           child: _buildChild(
-            context,
+            paneContext,
             historyState,
-            remove,
+            (history) => remove(paneContext, history),
             selectedTid: isTwoPane ? selectedTopic.value?.tid : null,
             onSelect: isTwoPane ? selectHistory : null,
           ),
@@ -249,7 +267,7 @@ class _HistoryDismissibleItem extends StatefulWidget {
 }
 
 class _HistoryDismissibleItemState extends State<_HistoryDismissibleItem> {
-  final _menuKey = GlobalKey<PopupMenuButtonState<String>>();
+  final _menuKey = GlobalKey<AppMoreMenuButtonState<String>>();
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +282,7 @@ class _HistoryDismissibleItemState extends State<_HistoryDismissibleItem> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Icon(
-          Icons.delete_outline,
+          AppIcons.delete(context),
           color: colorScheme.onErrorContainer,
           semanticLabel: '删除记录',
         ),
@@ -273,13 +291,18 @@ class _HistoryDismissibleItemState extends State<_HistoryDismissibleItem> {
         topicHistory: widget.history,
         selected: widget.selected,
         onTap: widget.onTap,
-        onLongPress: () => _menuKey.currentState?.showButtonMenu(),
-        trailing: PopupMenuButton<String>(
+        onLongPress: () => _menuKey.currentState?.showMenu(),
+        trailing: AppMoreMenuButton<String>(
           key: _menuKey,
           tooltip: '更多操作',
           onSelected: (_) => widget.onRemove(),
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'delete', child: Text('删除记录')),
+          actions: [
+            AppMenuAction(
+              value: 'delete',
+              label: '删除记录',
+              icon: AppIcons.delete(context),
+              destructive: true,
+            ),
           ],
         ),
       ),

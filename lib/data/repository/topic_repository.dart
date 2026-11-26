@@ -85,8 +85,26 @@ abstract class TopicRepository {
 }
 
 class TopicDataRepository implements TopicRepository {
-  static const _RESULT_START_TAG = "<span style='color:#aaa'>&gt;</span>";
-  static const _RESULT_END_TAG = "<br/>";
+  static final _msgInfoPattern = RegExp(
+    r'<!--msginfostart-->([\s\S]*?)<!--msginfoend-->',
+    caseSensitive: false,
+  );
+  static final _msgCodePattern = RegExp(
+    r'<!--msgcodestart-->\s*(\d+)\s*<!--msgcodeend-->',
+    caseSensitive: false,
+  );
+  static final _spanMessagePattern = RegExp(
+    r'<span[^>]*>&gt;</span>\s*([\s\S]*?)<br\s*/?>',
+    caseSensitive: false,
+  );
+  static final _titlePattern = RegExp(
+    r'<title>([\s\S]*?)</title>',
+    caseSensitive: false,
+  );
+  static final _titleSuccessPattern = RegExp(
+    r'(?<![未不没无非])(发[贴帖]完毕|发表成功|修改完毕|回复成功|操作成功)',
+  );
+  static final _htmlCommentOrTagPattern = RegExp(r'<!--[\s\S]*?-->|<[^>]+>');
 
   TopicDataRepository(this.database, this._dio);
 
@@ -227,7 +245,7 @@ class TopicDataRepository implements TopicRepository {
       List<TopicTag> list = [];
       Map<String, dynamic> tagMap = response.data!["0"];
       tagMap.forEach((k, v) {
-        list.add(TopicTag(id: int.tryParse(k)!, content: v["0"]));
+        list.add((id: int.tryParse(k)!, content: v["0"]));
       });
       return list;
     } catch (err) {
@@ -312,27 +330,10 @@ class TopicDataRepository implements TopicRepository {
         "&post_content=${code_utils.urlEncode(content)}"
         "&action=new"
         "&post_subject=${code_utils.urlEncode(subject)}"
-        "&fid=$fid${isAnonymous ? "anony=1" : ""}"
+        "&fid=$fid${isAnonymous ? "&anony=1" : ""}"
         "${!code_utils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
         "${!code_utils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
-    try {
-      final options = Options()
-        ..contentType = Headers.formUrlEncodedContentType;
-      Response<String> response = await _dio.post(
-        "post.php",
-        data: postData,
-        options: options,
-      );
-      final html = response.data!;
-      int start = html.indexOf(_RESULT_START_TAG);
-      if (start == -1) return "发帖失败";
-      start += _RESULT_START_TAG.length;
-      int end = html.indexOf(_RESULT_END_TAG, start);
-      if (end < 0) return "发帖失败";
-      return html.substring(start, end);
-    } catch (err) {
-      rethrow;
-    }
+    return _submitPostForm(postData);
   }
 
   @override
@@ -351,27 +352,66 @@ class TopicDataRepository implements TopicRepository {
         "&tid=$tid"
         "&action=reply"
         "&post_subject=${code_utils.urlEncode(subject)}"
-        "&fid=$fid${isAnonymous ? "anony=1" : ""}"
+        "&fid=$fid${isAnonymous ? "&anony=1" : ""}"
         "${!code_utils.isStringEmpty(attachments) ? "&attachments=$attachments" : ""}"
         "${!code_utils.isStringEmpty(attachmentsCheck) ? "&attachments_check=$attachmentsCheck" : ""}";
-    try {
-      final options = Options();
-      options.contentType = Headers.formUrlEncodedContentType;
-      Response<String> response = await _dio.post(
-        "post.php",
-        data: postData,
-        options: options,
+    return _submitPostForm(postData);
+  }
+
+  Future<String> _submitPostForm(String postData) async {
+    final options = Options()..contentType = Headers.formUrlEncodedContentType;
+    final Response<String> response = await _dio.post(
+      "post.php",
+      data: postData,
+      options: options,
+    );
+    final result = parsePostResultHtml(response.data ?? '');
+    if (result.isError) {
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        error: result.message,
+        type: DioExceptionType.unknown,
       );
-      final html = response.data!;
-      int start = html.indexOf(_RESULT_START_TAG);
-      if (start == -1) return "发帖失败";
-      start += _RESULT_START_TAG.length;
-      int end = html.indexOf(_RESULT_END_TAG, start);
-      if (end < 0) return "发帖失败";
-      return html.substring(start, end);
-    } catch (err) {
-      rethrow;
     }
+    return result.message;
+  }
+
+  /// 解析 `post.php` 返回的 HTML 结果页：
+  /// - 兼容新版 `<!--msginfostart-->...<!--msginfoend-->`、`<span class='sub'>&gt;</span>`
+  ///   与旧版 `<span style='color:#aaa'>&gt;</span>`，以及 `<title>` 兜底；
+  /// - 检测到 `(ERROR:` 或非 0 的 `<!--msgcodestart-->` 时标记为错误；
+  /// - 仅命中 `<title>` 兜底（无结构化结果标记）时，只有明确包含已知成功文案才视为成功，
+  ///   避免登录跳转/验证码等非结果 HTML 页被误判为发帖成功。
+  @visibleForTesting
+  static ({bool isError, String message}) parsePostResultHtml(String html) {
+    String? clean(String? raw) {
+      if (raw == null) return null;
+      final stripped = code_utils
+          .unescapeHtml(raw.replaceAll(_htmlCommentOrTagPattern, ''))
+          .trim();
+      return stripped.isEmpty ? null : stripped;
+    }
+
+    final msgInfo = clean(_msgInfoPattern.firstMatch(html)?.group(1));
+    final spanMessage = clean(_spanMessagePattern.firstMatch(html)?.group(1));
+    final titleMessage = clean(_titlePattern.firstMatch(html)?.group(1));
+    final structuredMessage = msgInfo ?? spanMessage;
+    final message = structuredMessage ?? titleMessage;
+
+    if (message == null) {
+      return (isError: true, message: '发帖失败');
+    }
+
+    final code = _msgCodePattern.firstMatch(html)?.group(1);
+    final hasErrorPrefix = html.contains('(ERROR:');
+    // 缺少新版 msginfostart 且无明确状态码时，仅命中已知成功文案才视为成功。
+    final hasVerifiedSuccessMarker = msgInfo != null || code == '0';
+    final isUnverifiedFallback =
+        !hasVerifiedSuccessMarker && !_titleSuccessPattern.hasMatch(message);
+    final isError =
+        hasErrorPrefix || (code != null && code != '0') || isUnverifiedFallback;
+    return (isError: isError, message: message);
   }
 
   @override

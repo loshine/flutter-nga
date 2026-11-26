@@ -1,4 +1,9 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/page/account_management/account_management_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_list_page.dart';
@@ -15,20 +20,18 @@ import 'package:flutter_nga/ui/page/search/search_forum_page.dart';
 import 'package:flutter_nga/ui/page/search/search_page.dart';
 import 'package:flutter_nga/ui/page/search/search_topic_list_page.dart';
 import 'package:flutter_nga/ui/page/send_message/send_message_page.dart';
+import 'package:flutter_nga/ui/page/settings/about_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_keywords_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/blocklist_users_page.dart';
 import 'package:flutter_nga/ui/page/settings/interface_settings_page.dart';
 import 'package:flutter_nga/ui/page/settings/settings_page.dart';
-import 'package:flutter_nga/ui/page/settings/about_page.dart';
 import 'package:flutter_nga/ui/page/splash/splash_page.dart';
 import 'package:flutter_nga/ui/page/topic_detail/topic_detail_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_info_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_replies_page.dart';
 import 'package:flutter_nga/ui/page/user_info/user_topics_page.dart';
 import 'package:flutter_nga/utils/linkroute/link_route.dart';
-import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Routes {
   static late GoRouter router;
@@ -80,7 +83,7 @@ class Routes {
     final newUri = uri.replace(queryParameters: mergedQueryParams);
 
     if (clearStack) {
-      context.pushReplacement(newUri.toString(), extra: extra);
+      context.go(newUri.toString(), extra: extra);
       return Future.value();
     } else if (replace) {
       context.replace(newUri.toString(), extra: extra);
@@ -111,10 +114,7 @@ class Routes {
 
   /// 打开图片预览页。[url] 作为查询参数编码，可含中文与 `?`、`&` 等字符。
   static Future openPhotoPreview(BuildContext context, String url) {
-    return navigateToWithParams(context, PHOTO_PREVIEW, {
-      'url': url,
-      'screenWidth': '${MediaQuery.sizeOf(context).width}',
-    });
+    return navigateToWithParams(context, PHOTO_PREVIEW, {'url': url});
   }
 
   /// 简单的页面跳转（无参数）
@@ -175,7 +175,13 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.LOGIN,
       name: Routes.LOGIN,
-      builder: (context, state) => LoginPage(),
+      pageBuilder: (context, state) => _AdaptiveModalPage<Object?>(
+        key: state.pageKey,
+        maxWidth: 520,
+        maxHeight: 640,
+        barrierDismissible: false,
+        builder: (asDialog) => LoginPage(asDialog: asDialog),
+      ),
     ),
     GoRoute(
       path: Routes.FORUM_DETAIL,
@@ -194,24 +200,30 @@ List<GoRoute> buildRoutes() {
         int.tryParse(state.uri.queryParameters["fid"] ?? ""),
         subject: state.uri.queryParameters["subject"],
         authorid: int.tryParse(state.uri.queryParameters["authorid"] ?? ""),
+        initiallyFavourited: state.uri.queryParameters["favourited"] == "1",
       ),
     ),
     GoRoute(
       path: Routes.TOPIC_PUBLISH,
       name: Routes.TOPIC_PUBLISH,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final tid = state.uri.queryParameters["tid"];
         final fid = state.uri.queryParameters["fid"];
         final content = state.extra as String? ?? "";
-        if (tid != null && tid.isNotEmpty) {
-          return PublishPage(
-            tid: int.tryParse(tid) ?? 0,
-            fid: int.tryParse(fid ?? "") ?? 0,
-            content: content,
-          );
-        } else {
-          return PublishPage(fid: int.tryParse(fid ?? "") ?? 0);
-        }
+        return _AdaptiveModalPage<Object?>(
+          key: state.pageKey,
+          builder: (asDialog) => tid != null && tid.isNotEmpty
+              ? PublishPage(
+                  tid: int.tryParse(tid) ?? 0,
+                  fid: int.tryParse(fid ?? "") ?? 0,
+                  content: content,
+                  asDialog: asDialog,
+                )
+              : PublishPage(
+                  fid: int.tryParse(fid ?? "") ?? 0,
+                  asDialog: asDialog,
+                ),
+        );
       },
     ),
     GoRoute(
@@ -276,13 +288,18 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.SEARCH,
       name: Routes.SEARCH,
-      builder: (context, state) {
-        final fid = state.uri.queryParameters["fid"];
-        if (fid != null && fid.isNotEmpty) {
-          return SearchPage(fid: int.tryParse(fid) ?? 0);
-        } else {
-          return SearchPage();
-        }
+      pageBuilder: (context, state) {
+        final fidStr = state.uri.queryParameters["fid"];
+        final fid = fidStr != null && fidStr.isNotEmpty
+            ? int.tryParse(fidStr) ?? 0
+            : null;
+        return _AdaptiveModalPage<Object?>(
+          key: state.pageKey,
+          maxWidth: 560,
+          maxHeight: 420,
+          shrinkWrapHeight: true,
+          builder: (asDialog) => SearchPage(fid: fid, asDialog: asDialog),
+        );
       },
     ),
     GoRoute(
@@ -314,12 +331,8 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.PHOTO_PREVIEW,
       name: Routes.PHOTO_PREVIEW,
-      builder: (context, state) => PhotoPreviewPage(
-        url: state.uri.queryParameters["url"] ?? "",
-        screenWidth:
-            double.tryParse(state.uri.queryParameters["screenWidth"] ?? "") ??
-            0,
-      ),
+      builder: (context, state) =>
+          PhotoPreviewPage(url: state.uri.queryParameters["url"] ?? ""),
     ),
     GoRoute(
       path: Routes.CONVERSATION_DETAIL,
@@ -336,9 +349,15 @@ List<GoRoute> buildRoutes() {
     GoRoute(
       path: Routes.SEND_MESSAGE,
       name: Routes.SEND_MESSAGE,
-      builder: (context, state) => SendMessagePage(
-        mid: int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0,
-      ),
+      pageBuilder: (context, state) {
+        final mid = int.tryParse(state.uri.queryParameters["mid"] ?? "") ?? 0;
+        return _AdaptiveModalPage<Object?>(
+          key: state.pageKey,
+          maxWidth: 620,
+          maxHeight: 560,
+          builder: (asDialog) => SendMessagePage(mid: mid, asDialog: asDialog),
+        );
+      },
     ),
     GoRoute(
       path: Routes.ABOUT,
@@ -366,4 +385,94 @@ List<GoRoute> buildRoutes() {
       builder: (context, state) => const NotificationListPage(),
     ),
   ];
+}
+
+bool _shouldUseDesktopDialog(BuildContext context) {
+  final isDesktop =
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.linux);
+  return isDesktop && MediaQuery.sizeOf(context).width >= 600;
+}
+
+/// 自适应模态编辑页：始终保持单一 [Page] 运行时类型，避免窗口跨越 600pt 断点时
+/// 触发 Navigator 重建路由并丢失正在编辑的草稿。
+/// - 打开时为桌面宽屏：创建居中圆角 `DialogRoute`，窗口拉窄时自动收缩边距贴合；
+/// - 其余情况：创建 `MaterialPageRoute`（Apple 风格下启用 `fullscreenDialog`）。
+class _AdaptiveModalPage<T> extends Page<T> {
+  const _AdaptiveModalPage({
+    required this.builder,
+    this.maxWidth = 680,
+    this.maxHeight = 620,
+    this.shrinkWrapHeight = false,
+    this.barrierDismissible = true,
+    super.key,
+  });
+
+  final Widget Function(bool asDialog) builder;
+  final double maxWidth;
+  final double maxHeight;
+  final bool shrinkWrapHeight;
+  final bool barrierDismissible;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    final openAsDialog = _shouldUseDesktopDialog(context);
+    if (!openAsDialog) {
+      return MaterialPageRoute<T>(
+        settings: this,
+        fullscreenDialog: context.isAppleStyle,
+        builder: (_) => builder(false),
+      );
+    }
+
+    final child = builder(true);
+    return DialogRoute<T>(
+      context: context,
+      settings: this,
+      barrierDismissible: barrierDismissible,
+      builder: (dialogContext) {
+        final colorScheme = Theme.of(dialogContext).colorScheme;
+        final isCompact = MediaQuery.sizeOf(dialogContext).width < 600;
+        final radius = isCompact ? 0.0 : 14.0;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: isCompact ? EdgeInsets.zero : const EdgeInsets.all(32),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isCompact ? double.infinity : maxWidth,
+              maxHeight: isCompact ? double.infinity : maxHeight,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(radius),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(radius),
+                  border: isCompact
+                      ? null
+                      : Border.all(
+                          color: colorScheme.outlineVariant,
+                          width: 0.5,
+                        ),
+                ),
+                child: MediaQuery.removePadding(
+                  context: dialogContext,
+                  removeTop: !isCompact,
+                  removeBottom: !isCompact,
+                  child: shrinkWrapHeight
+                      ? Material(
+                          type: MaterialType.transparency,
+                          child: SingleChildScrollView(child: child),
+                        )
+                      : child,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

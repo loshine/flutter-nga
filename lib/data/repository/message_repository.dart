@@ -117,7 +117,7 @@ class MessageDataRepository extends MessageRepository {
       if (value is! Map) continue;
       final uid = int.tryParse('${value['uid']}');
       if (uid == null) continue;
-      result.add(MessageParticipant(uid, '${value['username'] ?? 'UID:$uid'}'));
+      result.add((uid: uid, username: '${value['username'] ?? 'UID:$uid'}'));
     }
     return result;
   }

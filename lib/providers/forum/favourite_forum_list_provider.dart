@@ -94,7 +94,7 @@ class FavouriteForumListNotifier extends Notifier<FavouriteForumListState> {
     final forum = Forum(fid, name, type: type, iconId: iconId);
     final repository = ref.read(forumRepositoryProvider);
     if (await repository.isFavourite(forum)) {
-      AppToast.warning('您已添加过该版面');
+      AppToast.warning('您已添加过该版块');
       return false;
     }
 

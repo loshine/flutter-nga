@@ -2,6 +2,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -24,30 +26,33 @@ class BlocklistUsersPage extends HookConsumerWidget {
 
     final state = ref.watch(blocklistSettingsProvider);
     final notifier = ref.read(blocklistSettingsProvider.notifier);
-    final messenger = ScaffoldMessenger.of(context);
+    final activeUndo = useRef<UndoSnackBarHandle?>(null);
     final colorScheme = Theme.of(context).colorScheme;
 
     useEffect(() {
       return () {
         if (!notifier.hasPendingUserDeletion) return;
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
         notifier.commitAllPendingUserDeletions().then((err) {
           if (err != null) AppToast.error(err);
         });
       };
-    }, [notifier, messenger]);
+    }, [notifier]);
 
     useOnAppLifecycleStateChange((_, lifecycle) {
-      if (lifecycle == AppLifecycleState.paused &&
+      if ((lifecycle == AppLifecycleState.paused ||
+              lifecycle == AppLifecycleState.hidden) &&
           notifier.hasPendingUserDeletion) {
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
       }
     });
 
     void remove(String user) {
       final displayName = code_utils.unescapeHtml(user);
       notifier.removeUserLocally(user);
-      AppSnackBar.undo(
+      activeUndo.value = AppSnackBar.undo(
         context,
         message: '已移除屏蔽用户「$displayName」',
         onUndo: () => notifier.undoUserDeletion(user),
@@ -58,19 +63,17 @@ class BlocklistUsersPage extends HookConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("屏蔽用户"),
-        actions: [
-          IconButton(
-            onPressed: state.blockUserList.isEmpty
-                ? null
-                : () => _confirmDeleteAll(context, notifier),
-            icon: const Icon(Icons.delete_forever),
-            tooltip: "删除所有屏蔽用户",
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: const Text("屏蔽用户"),
+      actions: [
+        IconButton(
+          onPressed: state.blockUserList.isEmpty
+              ? null
+              : () => _confirmDeleteAll(context, notifier),
+          icon: Icon(AppIcons.delete(context)),
+          tooltip: "删除所有屏蔽用户",
+        ),
+      ],
       body: state.blockUserList.isEmpty
           ? const ListStatusView(
               icon: Icons.person_off_outlined,
@@ -93,7 +96,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Icon(
-                        Icons.delete_outline,
+                        AppIcons.delete(context),
                         color: colorScheme.onErrorContainer,
                         semanticLabel: '移除屏蔽',
                       ),
@@ -101,7 +104,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
                     child: ListTile(
                       title: Text(displayName),
                       trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
+                        icon: Icon(AppIcons.delete(context)),
                         tooltip: '移除屏蔽',
                         onPressed: () => remove(user),
                       ),
@@ -110,10 +113,11 @@ class BlocklistUsersPage extends HookConsumerWidget {
                 },
               ),
             ),
-      floatingActionButton: FloatingActionButton(
+      primaryAction: AppPrimaryAction(
         tooltip: "添加屏蔽用户",
         onPressed: () => _showAddDialog(context, notifier),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        appleIcon: Icon(AppIcons.add(context)),
       ),
     );
   }
@@ -143,11 +147,7 @@ class BlocklistUsersPage extends HookConsumerWidget {
   }
 
   Future<void> _add(BlocklistSettingsNotifier notifier, String user) async {
-    try {
-      AppToast.success(await notifier.addUser(user));
-    } catch (e) {
-      AppToast.error(e);
-    }
+    AppToast.success(await notifier.addUser(user));
   }
 
   void _showAddDialog(

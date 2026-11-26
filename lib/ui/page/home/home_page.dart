@@ -1,15 +1,29 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 import 'package:flutter_nga/providers/home/home_provider.dart';
+import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
+import 'package:flutter_nga/providers/notification/notification_list_provider.dart';
 import 'package:flutter_nga/providers/notification/unread_count_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
+import 'package:flutter_nga/providers/topic/topic_history_list_provider.dart';
 import 'package:flutter_nga/ui/page/forum_group/forum_group_tabs.dart';
+import 'package:flutter_nga/ui/page/home/apple_workspace_shell.dart';
+import 'package:flutter_nga/ui/page/home/inbox_hub_page.dart';
+import 'package:flutter_nga/ui/page/home/library_hub_page.dart';
 import 'package:flutter_nga/ui/page/mine/mine_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
+import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/custom_forum_dialog.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
+import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/scroll_to_top.dart';
@@ -45,7 +59,10 @@ class HomePage extends HookConsumerWidget {
 class _HomePageContent extends HookConsumerWidget {
   const _HomePageContent();
 
-  List<NavigationDestination> _buildDestinations(int unreadTotal) {
+  List<NavigationDestination> _buildDestinations(
+    BuildContext context,
+    int unreadTotal,
+  ) {
     Widget withBadge(Widget icon) {
       return Badge.count(
         count: unreadTotal,
@@ -55,14 +72,24 @@ class _HomePageContent extends HookConsumerWidget {
     }
 
     return [
-      const NavigationDestination(
-        icon: Icon(Icons.forum_outlined),
-        selectedIcon: Icon(Icons.forum),
-        label: '社区',
+      NavigationDestination(
+        icon: Icon(AppIcons.forum(context)),
+        selectedIcon: Icon(AppIcons.forum(context, filled: true)),
+        label: '版块',
       ),
       NavigationDestination(
-        icon: withBadge(const Icon(Icons.person_outline)),
-        selectedIcon: withBadge(const Icon(Icons.person)),
+        icon: Icon(AppIcons.bookmark(context)),
+        selectedIcon: Icon(AppIcons.bookmark(context)),
+        label: '收藏',
+      ),
+      NavigationDestination(
+        icon: withBadge(Icon(AppIcons.mail(context))),
+        selectedIcon: withBadge(Icon(AppIcons.mail(context))),
+        label: '消息',
+      ),
+      NavigationDestination(
+        icon: Icon(AppIcons.person(context)),
+        selectedIcon: Icon(AppIcons.person(context, filled: true)),
         label: '我的',
       ),
     ];
@@ -71,12 +98,14 @@ class _HomePageContent extends HookConsumerWidget {
   List<Widget> _buildPageList(ScrollToTopSignal communityScrollToTop) {
     return [
       ForumGroupTabsPage(scrollToTop: communityScrollToTop),
+      const LibraryHubPage(),
+      const InboxHubPage(),
       const MinePage(),
     ];
   }
 
   String _getTitleText(int index) {
-    const titles = ['FNGA', '我的'];
+    const titles = ['FNGA', '收藏', '消息', '我的'];
     return titles.elementAtOrNull(index) ?? '';
   }
 
@@ -85,45 +114,133 @@ class _HomePageContent extends HookConsumerWidget {
     WidgetRef ref,
     int index,
   ) {
-    return switch (index) {
-      0 => [
-        IconButton(
-          tooltip: '搜索',
-          icon: const Icon(Icons.search),
-          onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
-        ),
-      ],
-      _ => const [],
-    };
+    switch (index) {
+      case 0:
+        return [
+          IconButton(
+            tooltip: '搜索',
+            icon: Icon(AppIcons.search(context)),
+            onPressed: () => Routes.navigateTo(context, Routes.SEARCH),
+          ),
+        ];
+      case 1:
+        final libraryTab = ref.watch(libraryHubTabProvider);
+        if (libraryTab == 1) {
+          final hasHistory = ref.watch(
+            topicHistoryListProvider.select((s) => s.list.isNotEmpty),
+          );
+          return [
+            IconButton(
+              tooltip: '清空浏览历史',
+              icon: Icon(AppIcons.delete(context)),
+              onPressed: hasHistory
+                  ? () => _confirmClearHistory(context, ref)
+                  : null,
+            ),
+          ];
+        }
+        return const [];
+      case 2:
+        final inboxTab = ref.watch(inboxHubTabProvider);
+        if (inboxTab == 0) {
+          return [
+            if (context.isAppleStyle)
+              IconButton(
+                tooltip: '新建短消息',
+                icon: Icon(AppIcons.edit(context)),
+                onPressed: () async {
+                  final sent = await Routes.navigateTo(
+                    context,
+                    '${Routes.SEND_MESSAGE}?mid=0',
+                  );
+                  if (sent == true && context.mounted) {
+                    ref
+                        .read(conversationListProvider.notifier)
+                        .refresh()
+                        .catchError((_) => ConversationListState.initial());
+                  }
+                },
+              ),
+            IconButton(
+              tooltip: '屏蔽用户',
+              icon: Icon(AppIcons.block(context)),
+              onPressed: () =>
+                  Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
+            ),
+          ];
+        }
+        final hasNotifications = ref.watch(
+          notificationListProvider.select((s) => s.notifications.isNotEmpty),
+        );
+        return [
+          IconButton(
+            tooltip: '清空提醒',
+            icon: Icon(AppIcons.delete(context)),
+            onPressed: hasNotifications
+                ? () => _confirmClearNotifications(context, ref)
+                : null,
+          ),
+        ];
+      default:
+        return const [];
+    }
+  }
+
+  void _confirmClearHistory(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => M3ConfirmDialog(
+        title: '清空浏览历史',
+        content: '确定删除全部本地浏览记录吗？此操作无法撤销。',
+        confirmText: '清空',
+        destructive: true,
+        onConfirm: () {
+          ref.read(topicHistoryListProvider.notifier).clean().catchError((err) {
+            AppToast.error(err);
+            return 0;
+          });
+        },
+      ),
+    );
+  }
+
+  void _confirmClearNotifications(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => M3ConfirmDialog(
+        title: '清空提醒',
+        content: '确定清空所有提醒信息吗？此操作无法撤销。',
+        confirmText: '清空',
+        destructive: true,
+        onConfirm: () async {
+          try {
+            await ref.read(notificationListProvider.notifier).clear();
+            AppToast.success('已清空提醒');
+          } catch (err) {
+            AppToast.error(err);
+          }
+        },
+      ),
+    );
   }
 
   void _openCustomForumDialog(BuildContext context) {
     showDialog(context: context, builder: (_) => const CustomForumDialog());
   }
 
-  Widget _getFloatingActionButton(
+  AppPrimaryAction _buildPrimaryAction(
     BuildContext context,
     WidgetRef ref,
     int index,
   ) {
     final fabVisible = index == 0 && ref.watch(forumGroupFabVisibleProvider);
-    final Widget? fab = fabVisible
-        ? FloatingActionButton(
-            key: const ValueKey('home_fab'),
-            tooltip: '添加自定义版面',
-            onPressed: () => _openCustomForumDialog(context),
-            child: const Icon(Icons.add),
-          )
-        : null;
-    return AnimatedSwitcher(
-      duration: Motion.resolveDuration(context, Motion.durationShort4),
-      switchInCurve: Motion.emphasizedDecelerate,
-      switchOutCurve: Motion.emphasizedAccelerate,
-      transitionBuilder: (child, animation) => ScaleTransition(
-        scale: animation,
-        child: FadeTransition(opacity: animation, child: child),
-      ),
-      child: fab,
+    return AppPrimaryAction(
+      key: const ValueKey('home_fab'),
+      tooltip: '添加自定义版块',
+      visible: fabVisible,
+      icon: const Icon(Icons.add),
+      appleIcon: Icon(AppIcons.addForum(context)),
+      onPressed: () => _openCustomForumDialog(context),
     );
   }
 
@@ -136,19 +253,34 @@ class _HomePageContent extends HookConsumerWidget {
         .read(unreadCountProvider.notifier)
         .countsFor(userInfo?.uid)
         .total;
-    final destinations = _buildDestinations(unreadTotal);
+    final destinations = _buildDestinations(context, unreadTotal);
 
     final scrollToTop = useMemoized(ScrollToTopSignal.new);
     useEffect(() => scrollToTop.dispose, [scrollToTop]);
     final doubleTap = useMemoized(DoubleTapDetector.new);
     final pageList = _buildPageList(scrollToTop);
-    final sizeClass = WindowSizeClass.of(context);
+    final safeIndex = index.clamp(0, pageList.length - 1);
+    final size = MediaQuery.sizeOf(context);
+    final sizeClass = WindowSizeClass.fromWidth(size.width);
     final isLargeScreen = sizeClass.isMediumOrLarger;
     final isExpanded = sizeClass.isExpandedOrLarger;
+    final isApple = context.isAppleStyle;
+    final isDesktopPlatform =
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux;
+    final isTabletOrDesktop =
+        isDesktopPlatform || size.shortestSide >= kCompactBreakpoint;
+
+    // Apple 风格大屏（macOS / 桌面端或 iPad 等平板设备）采用完整的三栏 Source List 工作区；
+    // iPhone 横屏虽然宽度 >= 600，但 shortestSide < 600，继续保持 Apple 4-Tab 移动端布局。
+    if (isApple && isLargeScreen && isTabletOrDesktop) {
+      return const AppleWorkspaceShell();
+    }
 
     // 双击当前导航项回到顶部，点击其他项正常切换
     void onDestinationSelected(int i) {
-      if (i != index) {
+      if (i != safeIndex) {
         doubleTap.reset();
         ref.read(homeIndexProvider.notifier).setIndex(i);
       } else if (doubleTap.tap() && i == 0) {
@@ -156,38 +288,48 @@ class _HomePageContent extends HookConsumerWidget {
       }
     }
 
-    // 点击社区页标题回到顶部
-    final onTitleTap = index == 0 ? scrollToTop.fire : null;
+    // 点击版块页标题回到顶部
+    final onTitleTap = safeIndex == 0 ? scrollToTop.fire : null;
 
     return PopScope(
-      canPop: index == 0,
+      canPop: safeIndex == 0,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
-        if (index != 0) {
+        if (safeIndex != 0) {
           ref.read(homeIndexProvider.notifier).setIndex(0);
         }
       },
-      child: isLargeScreen
-          ? _buildLargeScreenLayout(
+      child: isApple
+          ? _buildAppleMobileLayout(
               context,
               ref,
-              index,
+              safeIndex,
               destinations,
               pageList,
               onDestinationSelected,
               onTitleTap,
-              isExpanded: isExpanded,
             )
-          : _buildMobileLayout(
-              context,
-              ref,
-              index,
-              destinations,
-              pageList,
-              onDestinationSelected,
-              onTitleTap,
-            ),
+          : (isLargeScreen
+                ? _buildLargeScreenLayout(
+                    context,
+                    ref,
+                    safeIndex,
+                    destinations,
+                    pageList,
+                    onDestinationSelected,
+                    onTitleTap,
+                    isExpanded: isExpanded,
+                  )
+                : _buildMobileLayout(
+                    context,
+                    ref,
+                    safeIndex,
+                    destinations,
+                    pageList,
+                    onDestinationSelected,
+                    onTitleTap,
+                  )),
     );
   }
 
@@ -231,7 +373,7 @@ class _HomePageContent extends HookConsumerWidget {
     );
   }
 
-  /// 移动端布局：AppBar + Content + NavigationBar
+  /// Material 移动端布局：AppBar + Content + NavigationBar
   Widget _buildMobileLayout(
     BuildContext context,
     WidgetRef ref,
@@ -241,20 +383,45 @@ class _HomePageContent extends HookConsumerWidget {
     ValueChanged<int> onDestinationSelected,
     VoidCallback? onTitleTap,
   ) {
-    return Scaffold(
-      appBar: AppBar(
-        title: _buildAnimatedTitle(context, index, onTitleTap),
-        scrolledUnderElevation: index == 0 ? 0 : 2,
-        actions: _getActionsByPage(context, ref, index),
-        automaticallyImplyLeading: false,
-      ),
+    return AppScaffold(
+      title: _buildAnimatedTitle(context, index, onTitleTap),
+      scrolledUnderElevation: index == 0 ? 0 : 2,
+      actions: _getActionsByPage(context, ref, index),
+      automaticallyImplyLeading: false,
       body: _buildAnimatedBody(context, index, pageList),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: onDestinationSelected,
         destinations: destinations,
       ),
-      floatingActionButton: _getFloatingActionButton(context, ref, index),
+      primaryAction: _buildPrimaryAction(context, ref, index),
+    );
+  }
+
+  /// Apple iPhone 移动端布局：Liquid Glass 顶部导航栏 + 底部悬浮胶囊 Liquid Glass TabBar（无 FAB）。
+  Widget _buildAppleMobileLayout(
+    BuildContext context,
+    WidgetRef ref,
+    int index,
+    List<NavigationDestination> destinations,
+    List<Widget> pageList,
+    ValueChanged<int> onDestinationSelected,
+    VoidCallback? onTitleTap,
+  ) {
+    return AppScaffold(
+      title: _buildAnimatedTitle(context, index, onTitleTap),
+      actions: _getActionsByPage(context, ref, index),
+      automaticallyImplyLeading: false,
+      extendBody: true,
+      primaryAction: _buildPrimaryAction(context, ref, index),
+      // extendBody: true 会由 Scaffold 按底栏实测高度自动向 body 注入 padding.bottom，
+      // 既能让滚动列表穿过液态玻璃底栏产生透出效果，又自动适配动态大字体与键盘弹出。
+      body: _buildAnimatedBody(context, index, pageList),
+      bottomNavigationBar: _AppleFloatingTabBar(
+        selectedIndex: index,
+        destinations: destinations,
+        onSelected: onDestinationSelected,
+      ),
     );
   }
 
@@ -305,19 +472,13 @@ class _HomePageContent extends HookConsumerWidget {
           child: MediaQuery.removePadding(
             context: context,
             removeLeft: true,
-            child: Scaffold(
-              appBar: AppBar(
-                title: _buildAnimatedTitle(context, index, onTitleTap),
-                scrolledUnderElevation: index == 0 ? 0 : 2,
-                actions: _getActionsByPage(context, ref, index),
-                automaticallyImplyLeading: false,
-              ),
+            child: AppScaffold(
+              title: _buildAnimatedTitle(context, index, onTitleTap),
+              scrolledUnderElevation: index == 0 ? 0 : 2,
+              actions: _getActionsByPage(context, ref, index),
+              automaticallyImplyLeading: false,
               body: _buildAnimatedBody(context, index, pageList),
-              floatingActionButton: _getFloatingActionButton(
-                context,
-                ref,
-                index,
-              ),
+              primaryAction: _buildPrimaryAction(context, ref, index),
             ),
           ),
         ),
@@ -386,6 +547,117 @@ class _HomePageContent extends HookConsumerWidget {
                   selectedIcon: d.selectedIcon,
                   label: Text(d.label),
                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// iOS 26 Liquid Glass 悬浮胶囊底部 TabBar。
+class _AppleFloatingTabBar extends StatelessWidget {
+  const _AppleFloatingTabBar({
+    required this.selectedIndex,
+    required this.destinations,
+    required this.onSelected,
+  });
+
+  final int selectedIndex;
+  final List<NavigationDestination> destinations;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        4,
+        20,
+        bottomPadding > 0 ? bottomPadding : 12,
+      ),
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: LiquidGlassSurface(
+            borderRadius: BorderRadius.circular(30),
+            interactive: true,
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              children: [
+                for (var i = 0; i < destinations.length; i++)
+                  Expanded(
+                    child: _AppleTabBarButton(
+                      destination: destinations[i],
+                      selected: i == selectedIndex,
+                      colorScheme: colorScheme,
+                      onTap: () => onSelected(i),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AppleTabBarButton extends StatelessWidget {
+  const _AppleTabBarButton({
+    required this.destination,
+    required this.selected,
+    required this.colorScheme,
+    required this.onTap,
+  });
+
+  final NavigationDestination destination;
+  final bool selected;
+  final ColorScheme colorScheme;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = selected ? colorScheme.primary : colorScheme.onSurfaceVariant;
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: destination.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: Motion.resolveDuration(context, Motion.durationShort3),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          decoration: BoxDecoration(
+            color: selected
+                ? colorScheme.primary.withValues(alpha: 0.14)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(26),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconTheme(
+                data: IconThemeData(color: fg, size: 22),
+                child: selected
+                    ? (destination.selectedIcon ?? destination.icon)
+                    : destination.icon,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                destination.label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  color: fg,
+                ),
+              ),
             ],
           ),
         ),

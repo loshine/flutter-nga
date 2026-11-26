@@ -3,6 +3,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_nga/ui/page/settings/open_source_license_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -14,7 +18,10 @@ final appInfoProvider = FutureProvider<PackageInfo>((ref) async {
 });
 
 class AboutPage extends HookConsumerWidget {
-  const AboutPage({super.key});
+  const AboutPage({super.key, this.embedded = false});
+
+  /// 是否作为大屏双栏设置页的右侧内嵌面板展示
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,10 +30,11 @@ class AboutPage extends HookConsumerWidget {
     final appInfoAsync = ref.watch(appInfoProvider);
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('关于')),
+    return AppScaffold(
+      embedded: embedded,
+      title: const Text('关于'),
       body: appInfoAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: AppActivityIndicator()),
         error: (error, stack) => Center(child: Text('加载失败: $error')),
         data: (appInfo) {
           final brandHeader = Column(
@@ -89,11 +97,11 @@ class AboutPage extends HookConsumerWidget {
 
           final detailGroups = <Widget>[
             // 技术栈区
-            const M3SettingsGroup(
+            M3SettingsGroup(
               title: '技术栈',
               children: [
                 // flutter run / build 会自动注入 FLUTTER_VERSION，无需手动维护版本号。
-                M3SettingsInfoTile(
+                const M3SettingsInfoTile(
                   title: 'Flutter',
                   subtitle: FlutterVersion.version ?? '未知',
                   icon: Icons.flutter_dash,
@@ -101,22 +109,22 @@ class AboutPage extends HookConsumerWidget {
                 M3SettingsInfoTile(
                   title: '状态管理',
                   subtitle: 'Riverpod 3.x + flutter_hooks',
-                  icon: Icons.timeline,
+                  icon: AppIcons.timeline(context),
                 ),
                 M3SettingsInfoTile(
                   title: '路由',
                   subtitle: 'go_router',
-                  icon: Icons.route,
+                  icon: AppIcons.route(context),
                 ),
                 M3SettingsInfoTile(
                   title: '网络',
                   subtitle: 'Dio',
-                  icon: Icons.cloud_outlined,
+                  icon: AppIcons.cloud(context),
                 ),
                 M3SettingsInfoTile(
                   title: '本地存储',
                   subtitle: 'Sembast',
-                  icon: Icons.storage_outlined,
+                  icon: AppIcons.storage(context),
                 ),
               ],
             ),
@@ -128,16 +136,16 @@ class AboutPage extends HookConsumerWidget {
                 M3SettingsTile(
                   title: 'GitHub 仓库',
                   subtitle: '查看源代码、参与贡献',
-                  icon: Icons.code,
-                  trailingIcon: Icons.open_in_new,
+                  icon: AppIcons.code(context),
+                  trailingIcon: AppIcons.openInNew(context),
                   onTap: () =>
                       _launchUrl('https://github.com/loshine/flutter-nga'),
                 ),
                 M3SettingsTile(
                   title: '问题反馈',
                   subtitle: '报告 Bug 或提出建议',
-                  icon: Icons.bug_report_outlined,
-                  trailingIcon: Icons.open_in_new,
+                  icon: AppIcons.bug(context),
+                  trailingIcon: AppIcons.openInNew(context),
                   onTap: () => _launchUrl(
                     'https://github.com/loshine/flutter-nga/issues',
                   ),
@@ -145,8 +153,8 @@ class AboutPage extends HookConsumerWidget {
                 M3SettingsTile(
                   title: 'NGA 官网',
                   subtitle: 'bbs.nga.cn',
-                  icon: Icons.language,
-                  trailingIcon: Icons.open_in_new,
+                  icon: AppIcons.server(context),
+                  trailingIcon: AppIcons.openInNew(context),
                   onTap: () => _launchUrl('https://bbs.nga.cn'),
                 ),
               ],
@@ -159,24 +167,8 @@ class AboutPage extends HookConsumerWidget {
                 M3SettingsTile(
                   title: '开源协议与许可',
                   subtitle: 'Apache License 2.0 · 查看第三方开源许可',
-                  icon: Icons.description_outlined,
-                  onTap: () => showLicensePage(
-                    context: context,
-                    applicationName: appInfo.appName,
-                    applicationVersion:
-                        '${appInfo.version} (Build ${appInfo.buildNumber})',
-                    applicationIcon: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          'images/launcher/icon_1024.png',
-                          width: 64,
-                          height: 64,
-                        ),
-                      ),
-                    ),
-                  ),
+                  icon: AppIcons.description(context),
+                  onTap: () => _openLicensePage(context, appInfo),
                 ),
               ],
             ),
@@ -261,6 +253,15 @@ class AboutPage extends HookConsumerWidget {
           );
         },
       ),
+    );
+  }
+
+  void _openLicensePage(BuildContext context, PackageInfo appInfo) {
+    OpenSourceLicensePage.show(
+      context,
+      applicationName: appInfo.appName,
+      applicationVersion: '${appInfo.version} (Build ${appInfo.buildNumber})',
+      asDialog: embedded,
     );
   }
 

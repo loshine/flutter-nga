@@ -1,6 +1,7 @@
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/data/repository/topic_repository.dart';
 import 'package:flutter_nga/providers/core/repository_providers.dart';
+import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
 import 'package:flutter_nga/providers/topic/topic_detail_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,7 +31,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [topicRepositoryProvider.overrideWithValue(repository)],
     );
-    const key = TopicDetailKey(tid: 9);
+    const key = (tid: 9);
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
     addTearDown(() {
@@ -53,7 +54,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [topicRepositoryProvider.overrideWithValue(repository)],
     );
-    const key = TopicDetailKey(tid: 9);
+    const key = (tid: 9);
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
     addTearDown(() {
@@ -70,8 +71,8 @@ void main() {
 
   test('different topics keep independent detail state', () {
     final container = ProviderContainer();
-    const topicAKey = TopicDetailKey(tid: 1);
-    const topicBKey = TopicDetailKey(tid: 2);
+    const topicAKey = (tid: 1);
+    const topicBKey = (tid: 2);
     final topicA = topicDetailProvider(topicAKey);
     final topicB = topicDetailProvider(topicBKey);
     final topicASubscription = container.listen(topicA, (_, _) {});
@@ -99,7 +100,7 @@ void main() {
 
   test('metadata update clamps the current page atomically', () {
     final container = ProviderContainer();
-    const key = TopicDetailKey(tid: 1);
+    const key = (tid: 1);
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
     addTearDown(() {
@@ -130,7 +131,7 @@ void main() {
   test('detail state resets after its last listener is removed', () async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
-    const key = TopicDetailKey(tid: 1);
+    const key = (tid: 1);
     final provider = topicDetailProvider(key);
     final subscription = container.listen(provider, (_, _) {});
 
@@ -151,4 +152,96 @@ void main() {
     expect(state.maxPage, 1);
     expect(state.subject, isNull);
   });
+
+  test('notifyReplyPublished only ticks when on the latest page', () {
+    final container = ProviderContainer();
+    const key = (tid: 42);
+    final provider = topicDetailProvider(key);
+    final subscription = container.listen(provider, (_, _) {});
+    addTearDown(() {
+      subscription.close();
+      container.dispose();
+    });
+
+    final notifier = container.read(provider.notifier);
+    notifier.updateMetadata(maxPage: 3, maxFloor: 50, topic: null);
+
+    // 不在最后一页时不触发刷新
+    notifier.setCurrentPage(1);
+    notifier.notifyReplyPublished();
+    expect(container.read(provider).latestPageRefreshTick, 0);
+
+    notifier.setCurrentPage(2);
+    notifier.notifyReplyPublished();
+    expect(container.read(provider).latestPageRefreshTick, 0);
+
+    // 处于最后一页时递增刷新信号
+    notifier.setCurrentPage(3);
+    notifier.notifyReplyPublished();
+    expect(container.read(provider).latestPageRefreshTick, 1);
+  });
+
+  test('markKnownFavourited initializes unknown state without overriding manual toggle', () async {
+    final repository = _FakeFavouriteRepository();
+    final container = ProviderContainer(
+      overrides: [topicRepositoryProvider.overrideWithValue(repository)],
+    );
+    const key = (tid: 88);
+    final provider = topicDetailProvider(key);
+    final subscription = container.listen(provider, (_, _) {});
+    addTearDown(() {
+      subscription.close();
+      container.dispose();
+    });
+
+    final notifier = container.read(provider.notifier);
+    notifier.markKnownFavourited();
+    expect(container.read(provider).favourite, FavouriteStatus.favourited);
+
+    // 首次点击即执行取消收藏而非重复添加
+    expect(await notifier.toggleFavourite(), '删除成功');
+    expect(container.read(provider).favourite, FavouriteStatus.notFavourited);
+    expect(repository.calls, ['del 88 1']);
+
+    // 手动取消后再调用 markKnownFavourited 不会覆盖已知未收藏状态
+    notifier.markKnownFavourited();
+    expect(container.read(provider).favourite, FavouriteStatus.notFavourited);
+  });
+
+  test(
+    'cancelling favourite in detail removes matching topic from favourite list',
+    () async {
+      final repository = _FakeFavouriteRepository();
+      final container = ProviderContainer(
+        overrides: [topicRepositoryProvider.overrideWithValue(repository)],
+      );
+      const key = (tid: 88);
+      final detailProvider = topicDetailProvider(key);
+      final detailSub = container.listen(detailProvider, (_, _) {});
+      final listSub = container.listen(favouriteTopicListProvider, (_, _) {});
+      addTearDown(() {
+        detailSub.close();
+        listSub.close();
+        container.dispose();
+      });
+
+      container
+          .read(favouriteTopicListProvider.notifier)
+          .state = const FavouriteTopicListState(
+        list: [
+          Topic(tid: 88, subject: '已收藏帖'),
+          Topic(tid: 99, subject: '另一帖'),
+        ],
+      );
+
+      final notifier = container.read(detailProvider.notifier);
+      notifier.markKnownFavourited();
+      await notifier.toggleFavourite();
+
+      expect(
+        container.read(favouriteTopicListProvider).list.map((t) => t.tid),
+        [99],
+      );
+    },
+  );
 }

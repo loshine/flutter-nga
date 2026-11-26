@@ -84,6 +84,64 @@ void main() {
     );
     expect(text.left, content.left);
   });
+
+  testWidgets('shows retry view when loading reply fails', (tester) async {
+    const errorState = TopicReplyState(hasLoaded: true, error: 'network error');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          topicReplyProvider(126)
+              .overrideWith(() => _FakeTopicReplyNotifier(126, errorState)),
+        ],
+        child: const MaterialApp(
+          home: Scaffold(body: ReplyDetailDialog(pid: 126)),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('加载回复失败'), findsOneWidget);
+    expect(find.text('重试'), findsOneWidget);
+  });
+
+  testWidgets('matches reply author by authorId instead of userList[0]', (
+    tester,
+  ) async {
+    final reply = Reply(
+      content: '楼层正文',
+      tid: 456,
+      pid: 127,
+      authorId: 2,
+      postDate: '2026-11-26 00:00',
+      commentList: [],
+      attachmentList: [],
+    );
+    final state = TopicReplyState(
+      replyList: [reply],
+      userList: [
+        User(uid: 1, username: '路人甲'),
+        User(uid: 2, username: '真实作者'),
+      ],
+      hasLoaded: true,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          topicReplyProvider(127)
+              .overrideWith(() => _FakeTopicReplyNotifier(127, state)),
+        ],
+        child: const MaterialApp(
+          home: Scaffold(body: ReplyDetailDialog(pid: 127)),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('真实作者'), findsOneWidget);
+    expect(find.text('路人甲'), findsNothing);
+  });
 }
 
 class _FakeTopicReplyNotifier extends TopicReplyNotifier {

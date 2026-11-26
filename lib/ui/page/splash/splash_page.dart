@@ -29,21 +29,36 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashState extends State<SplashPage> {
+  Object? _initError;
+
   @override
   void initState() {
+    super.initState();
     time_ago.setLocaleMessages('en', CustomTimeMessages());
+    _runInit();
+  }
+
+  Future<void> _runInit() async {
+    if (_initError != null && mounted) {
+      setState(() => _initError = null);
+    }
     final init = widget.initData ?? () => Data().init();
-    init().then((_) {
+    try {
+      await init();
       if (!mounted) return;
       FlutterNativeSplash.remove();
       Routes.navigateTo(context, Routes.HOME, replace: true);
-    });
-    super.initState();
+    } catch (err) {
+      FlutterNativeSplash.remove();
+      if (!mounted) return;
+      setState(() => _initError = err);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
     final overlayStyle =
         (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
             .copyWith(
@@ -58,11 +73,44 @@ class _SplashState extends State<SplashPage> {
             ? SplashPage.darkBackground
             : SplashPage.lightBackground,
         body: Center(
-          child: Image.asset(
-            isDark ? SplashPage.darkIconAsset : SplashPage.lightIconAsset,
-            width: 200,
-            height: 200,
-          ),
+          child: _initError == null
+              ? Image.asset(
+                  isDark ? SplashPage.darkIconAsset : SplashPage.lightIconAsset,
+                  width: 200,
+                  height: 200,
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 44,
+                        color: colorScheme.error,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '初始化失败',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '$_initError',
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: colorScheme.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: _runInit,
+                        child: const Text('重试'),
+                      ),
+                    ],
+                  ),
+                ),
         ),
       ),
     );

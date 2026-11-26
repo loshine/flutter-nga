@@ -4,6 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/providers/message/conversation_list_provider.dart';
 import 'package:flutter_nga/ui/page/conversation/conversation_detail_page.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -15,7 +17,16 @@ import 'package:flutter_nga/utils/route.dart';
 import 'conversation_item_widget.dart';
 
 class ConversationListPage extends HookConsumerWidget {
-  const ConversationListPage({super.key});
+  const ConversationListPage({
+    super.key,
+    this.embedded = false,
+    this.showAppBar = true,
+    this.leading,
+  });
+
+  final bool embedded;
+  final bool showAppBar;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,18 +69,19 @@ class ConversationListPage extends HookConsumerWidget {
     useInitialRefresh(refreshController);
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(
-          title: const Text('短消息'),
-          actions: [
-            IconButton(
-              tooltip: '屏蔽用户',
-              icon: const Icon(Icons.block),
-              onPressed: () =>
-                  Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
-            ),
-          ],
-        ),
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        embedded: embedded,
+        showAppBar: showAppBar,
+        leading: leading,
+        title: const Text('短消息'),
+        actions: [
+          IconButton(
+            tooltip: '屏蔽用户',
+            icon: Icon(AppIcons.block(context)),
+            onPressed: () =>
+                Routes.navigateTo(context, Routes.MESSAGE_BLOCKLIST),
+          ),
+        ],
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,
@@ -100,7 +112,7 @@ class ConversationListPage extends HookConsumerWidget {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
+        primaryAction: AppPrimaryAction(
           tooltip: '新建短消息',
           onPressed: () async {
             final sent = await Routes.navigateTo(
@@ -111,7 +123,8 @@ class ConversationListPage extends HookConsumerWidget {
               refreshController.callRefresh();
             }
           },
-          child: const Icon(Icons.edit_outlined),
+          icon: const Icon(Icons.edit_outlined),
+          appleIcon: Icon(AppIcons.edit(context)),
         ),
       ),
       detailBuilder: (context) {
@@ -120,7 +133,7 @@ class ConversationListPage extends HookConsumerWidget {
           return const MasterDetailEmptyPlaceholder(
             icon: Icons.mail_outline,
             title: '选择一段对话查看消息',
-            subtitle: '点击左下角按钮可新建短消息',
+            subtitle: '点击新建按钮可发起短消息',
           );
         }
         return ConversationDetailPage(

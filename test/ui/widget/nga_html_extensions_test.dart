@@ -133,10 +133,10 @@ void main() {
       expect(tester.getSize(_richText('隐藏内容')).height, greaterThan(0));
     });
 
-    testWidgets('untitled collapse keeps empty title', (tester) async {
+    testWidgets('untitled collapse omits trailing colon', (tester) async {
       await _pumpHtml(tester, '<collapse>内容</collapse>');
 
-      expect(find.text('点击展开:'), findsOneWidget);
+      expect(find.text('点击展开'), findsOneWidget);
     });
   });
 
@@ -169,13 +169,13 @@ void main() {
       await tester.tap(_richText('SCP-087'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byType(Dialog), findsOneWidget);
       expect(_richText('延伸的楼梯'), findsOneWidget);
       expect(_styleOf(tester, '向下')?.fontWeight, FontWeight.bold);
 
       await tester.tap(find.text('关闭'));
       await tester.pumpAndSettle();
-      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(Dialog), findsNothing);
     });
 
     testWidgets('missing definition renders plain term', (tester) async {

@@ -28,5 +28,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<!-- 规避 Flutter 3.50.0 macOS Impeller 窗口拖动/缩放崩溃 (flutter/flutter#185394)，项目升级到包含 #192522 修复的 Flutter 版本后移除 -->
+	<key>FLTEnableImpeller</key>
+	<false/>
 </dict>
 </plist>

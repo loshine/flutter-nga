@@ -4,18 +4,32 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/topic/favourite_topic_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_action_menu.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
 import 'package:flutter_nga/ui/widget/topic_list_item_widget.dart';
 import 'package:flutter_nga/utils/app_snack_bar.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
+import 'package:flutter_nga/utils/code_utils.dart' as code_utils;
 import 'package:flutter_nga/utils/haptics.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
 import 'package:flutter_nga/utils/hooks/list_load_status.dart';
+import 'package:flutter_nga/utils/route.dart';
 
 class FavouriteTopicListPage extends HookConsumerWidget {
-  const FavouriteTopicListPage({super.key});
+  const FavouriteTopicListPage({
+    super.key,
+    this.embedded = false,
+    this.showAppBar = true,
+    this.leading,
+  });
+
+  final bool embedded;
+  final bool showAppBar;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -57,31 +71,37 @@ class FavouriteTopicListPage extends HookConsumerWidget {
 
     useInitialRefresh(refreshController);
 
-    final messenger = ScaffoldMessenger.of(context);
+    final activeUndo = useRef<UndoSnackBarHandle?>(null);
 
-    // 离开页面、App 退到后台时关掉撤销提示，使待删条目立即提交
+    // 离开页面、App 退到后台/隐藏时关掉撤销提示，使待删条目立即提交
     useEffect(() {
       return () {
         if (!notifier.hasPendingDeletion) return;
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
         notifier.commitAllDeletions().then((err) {
           if (err != null) AppToast.error(err);
         });
       };
-    }, [notifier, messenger]);
+    }, [notifier]);
     useOnAppLifecycleStateChange((_, lifecycle) {
-      if (lifecycle == AppLifecycleState.paused &&
+      if ((lifecycle == AppLifecycleState.paused ||
+              lifecycle == AppLifecycleState.hidden) &&
           notifier.hasPendingDeletion) {
-        messenger.hideCurrentSnackBar();
+        activeUndo.value?.dismiss();
+        activeUndo.value = null;
       }
     });
 
-    void remove(Topic topic) {
+    void remove(BuildContext hostContext, Topic topic) {
       final tid = topic.tid;
       if (tid == null) return;
+      if (selectedTopic.value?.tid == tid) {
+        selectedTopic.value = null;
+      }
       notifier.removeLocally(topic);
-      AppSnackBar.undo(
-        context,
+      activeUndo.value = AppSnackBar.undo(
+        hostContext,
         message: '已取消收藏',
         onUndo: () => notifier.undoDeletion(tid),
         onCommit: () => notifier.commitDeletion(tid).catchError((err) {
@@ -94,16 +114,33 @@ class FavouriteTopicListPage extends HookConsumerWidget {
     void selectTopic(Topic topic) {
       final tid = topic.tid;
       if (tid == null) return;
-      selectedTopic.value = SelectedTopic(
+      selectedTopic.value = (
         tid: tid,
         fid: topic.fid,
         subject: topic.subject,
+        authorid: null,
       );
     }
 
+    void openFavouritedTopic(Topic topic) {
+      final tid = topic.tid;
+      if (tid == null) return;
+      final subject = topic.subject;
+      final buffer = StringBuffer('${Routes.TOPIC_DETAIL}?tid=$tid');
+      if (topic.fid != null) buffer.write('&fid=${topic.fid}');
+      if (subject != null && subject.isNotEmpty) {
+        buffer.write('&subject=${code_utils.encodeParam(subject)}');
+      }
+      buffer.write('&favourited=1');
+      Routes.navigateTo(context, buffer.toString());
+    }
+
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(title: const Text('贴子收藏')),
+      masterBuilder: (paneContext, isTwoPane) => AppScaffold(
+        embedded: embedded,
+        showAppBar: showAppBar,
+        leading: leading,
+        title: const Text('帖子收藏'),
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,
@@ -125,8 +162,10 @@ class FavouriteTopicListPage extends HookConsumerWidget {
                     topic: topic,
                     selected:
                         isTwoPane && selectedTopic.value?.tid == topic.tid,
-                    onTap: isTwoPane ? () => selectTopic(topic) : null,
-                    onRemove: () => remove(topic),
+                    onTap: () => isTwoPane
+                        ? selectTopic(topic)
+                        : openFavouritedTopic(topic),
+                    onRemove: () => remove(paneContext, topic),
                   );
                 },
               ),
@@ -134,11 +173,19 @@ class FavouriteTopicListPage extends HookConsumerWidget {
           ),
         ),
       ),
-      detailBuilder: (context) => TopicDetailPane(
-        selected: selectedTopic.value,
-        emptySubtitle: '从左侧收藏列表选择一篇帖子查看详情',
-        onClose: () => selectedTopic.value = null,
-      ),
+      detailBuilder: (context) {
+        final current = selectedTopic.value;
+        final activeSelected =
+            current != null && state.list.any((t) => t.tid == current.tid)
+            ? current
+            : null;
+        return TopicDetailPane(
+          selected: activeSelected,
+          initiallyFavourited: true,
+          emptySubtitle: '从左侧收藏列表选择一篇帖子查看详情',
+          onClose: () => selectedTopic.value = null,
+        );
+      },
     );
   }
 }
@@ -163,7 +210,7 @@ class _FavouriteTopicItem extends StatefulWidget {
 }
 
 class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
-  final _menuKey = GlobalKey<PopupMenuButtonState<String>>();
+  final _menuKey = GlobalKey<AppMoreMenuButtonState<String>>();
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +225,7 @@ class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Icon(
-          Icons.delete_outline,
+          AppIcons.delete(context),
           color: colorScheme.onErrorContainer,
           semanticLabel: '取消收藏',
         ),
@@ -188,13 +235,18 @@ class _FavouriteTopicItemState extends State<_FavouriteTopicItem> {
         selected: widget.selected,
         onTap: widget.onTap,
         // 长按弹出与行尾按钮相同的菜单
-        onLongPress: () => _menuKey.currentState?.showButtonMenu(),
-        trailing: PopupMenuButton<String>(
+        onLongPress: () => _menuKey.currentState?.showMenu(),
+        trailing: AppMoreMenuButton<String>(
           key: _menuKey,
           tooltip: '更多操作',
           onSelected: (_) => widget.onRemove(),
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'remove', child: Text('取消收藏')),
+          actions: [
+            AppMenuAction(
+              value: 'remove',
+              label: '取消收藏',
+              icon: AppIcons.delete(context),
+              destructive: true,
+            ),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_nga/data/entity/topic.dart';
 import 'package:flutter_nga/providers/search/search_topic_list_provider.dart';
 import 'package:flutter_nga/providers/settings/blocklist_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/adaptive_layout.dart';
 import 'package:flutter_nga/ui/widget/list_status_view.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -80,16 +81,17 @@ class SearchTopicListPage extends HookConsumerWidget {
     void selectTopic(Topic topic) {
       final tid = topic.tid;
       if (tid == null) return;
-      selectedTopic.value = SelectedTopic(
+      selectedTopic.value = (
         tid: tid,
         fid: topic.fid ?? fid,
         subject: topic.subject,
+        authorid: null,
       );
     }
 
     return MasterDetailLayout(
-      masterBuilder: (context, isTwoPane) => Scaffold(
-        appBar: AppBar(title: Text('搜索: $keyword')),
+      masterBuilder: (context, isTwoPane) => AppScaffold(
+        title: Text('搜索: $keyword'),
         body: EasyRefresh(
           controller: refreshController,
           onRefresh: onRefresh,

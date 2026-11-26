@@ -1,6 +1,11 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/providers/settings/interface_settings_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/line_height_selection_dialog.dart';
 import 'package:flutter_nga/ui/widget/m3_settings_group.dart';
 import 'package:flutter_nga/ui/widget/readable_width.dart';
@@ -18,12 +23,9 @@ class InterfaceSettingsPage extends ConsumerWidget {
     final notifier = ref.read(interfaceSettingsProvider.notifier);
     final mediaPadding = MediaQuery.paddingOf(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !embedded,
-        centerTitle: embedded ? false : null,
-        title: const Text("界面设置"),
-      ),
+    return AppScaffold(
+      embedded: embedded,
+      title: const Text("界面设置"),
       body: ReadableListPadding(
         padding: EdgeInsets.fromLTRB(
           mediaPadding.left,
@@ -40,8 +42,8 @@ class InterfaceSettingsPage extends ConsumerWidget {
               dividerIndent: 16,
               children: [
                 _SliderSettingItem(
-                  title: "贴子列表标题缩放",
-                  subtitle: "控制贴子列表标题字体大小",
+                  title: "帖子列表标题缩放",
+                  subtitle: "控制帖子列表标题字体大小",
                   valueLabel: "${state.titleSizeMultiple.toStringAsFixed(1)}x",
                   value: state.titleSizeMultiple,
                   min: 1.0,
@@ -50,8 +52,8 @@ class InterfaceSettingsPage extends ConsumerWidget {
                   onChanged: notifier.setTitleSizeMultiple,
                 ),
                 _SliderSettingItem(
-                  title: "贴子正文字体缩放",
-                  subtitle: "控制贴子正文内容字体大小",
+                  title: "帖子正文字体缩放",
+                  subtitle: "控制帖子正文内容字体大小",
                   valueLabel:
                       "${state.contentSizeMultiple.toStringAsFixed(1)}x",
                   value: state.contentSizeMultiple,
@@ -61,9 +63,9 @@ class InterfaceSettingsPage extends ConsumerWidget {
                   onChanged: notifier.setContentSizeMultiple,
                 ),
                 M3SettingsTile(
-                  icon: Icons.format_line_spacing,
-                  title: "贴子正文行间距",
-                  subtitle: "控制贴子正文及列表标题的行间距",
+                  icon: AppIcons.lineSpacing(context),
+                  title: "帖子正文行间距",
+                  subtitle: "控制帖子正文及列表标题的行间距",
                   trailing: Text(
                     state.lineHeight.nameWithSize,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -96,12 +98,22 @@ class _TypographyPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      padding: EdgeInsets.fromLTRB(isApple ? 16 : 12, 8, isApple ? 16 : 12, 4),
       child: Material(
-        color: colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(Dimen.radiusL),
+        color: isApple
+            ? colorScheme.surfaceContainerLow
+            : colorScheme.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            isApple ? Dimen.radiusM : Dimen.radiusL,
+          ),
+          side: isApple
+              ? BorderSide(color: colorScheme.outlineVariant, width: 0.5)
+              : BorderSide.none,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(Dimen.spacingL),
           child: Column(
@@ -110,7 +122,7 @@ class _TypographyPreviewCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    Icons.visibility_outlined,
+                    AppIcons.visibility(context),
                     size: 16,
                     color: colorScheme.primary,
                   ),
@@ -191,6 +203,7 @@ class _SliderSettingItem extends StatelessWidget {
                     Text(
                       title,
                       style: textTheme.bodyLarge?.copyWith(
+                        fontSize: context.isAppleStyle ? 15 : null,
                         color: colorScheme.onSurface,
                       ),
                     ),
@@ -214,7 +227,7 @@ class _SliderSettingItem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Dimen.spacingXS),
-          Slider(
+          AppSlider(
             value: value,
             min: min,
             max: max,

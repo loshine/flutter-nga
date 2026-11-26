@@ -1,21 +1,30 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show CupertinoAlertDialog, CupertinoDialogAction, CupertinoIcons;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_nga/data/data.dart';
-import 'package:flutter_nga/providers/forum/favourite_forum_list_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/providers/user/account_list_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_scaffold.dart';
 import 'package:flutter_nga/ui/widget/import_cookies_dialog.dart';
+import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/route.dart';
 
-/// NGA 登录页（`nuke.php?__lib=login`）外层页面把 `body` 与登录 iframe `#iff`
-/// 限宽 350px 并居中、背景为灰色；覆盖为 100% 宽并改用表单背景色，让表单撑满屏幕。
+/// 移动端登录页样式：NGA 登录页（`nuke.php?__lib=login`）外层页面把 `body` 与登录 iframe `#iff`
+/// 限宽 350px 并居中、背景为灰色；在移动端覆盖为 100% 宽并改用表单背景色，让表单撑满屏幕。
 /// 内页按自身宽度计算字号，须在 iframe 加载前生效，因此于文档开始时注入。
 /// 同时在 [_loginPagePatchScript] 完成切换前隐藏 iframe，避免闪现扫码界面。
-const _loginPageStyleScript = r'''
+const _mobileLoginPageStyleScript = r'''
 (function () {
   if (!/[?&]__lib=login(&|$)/.test(location.search)) return;
   var style = document.createElement('style');
@@ -26,6 +35,30 @@ const _loginPageStyleScript = r'''
   (document.head || document.documentElement).appendChild(style);
 })();
 ''';
+
+/// NGA 登录表单本身的米黄色底色。
+const _loginFormBgColor = Color(0xFFFFF6DF);
+
+/// 桌面端登录页样式：保持 NGA 网页原生的居中表单尺寸（不拉满全屏），
+/// 外层底色统一为登录表单本身的米黄色 `rgb(255, 246, 223)` 使整页自然融合，
+/// 并在切换完成前隐藏 iframe 避免闪现。
+const _desktopLoginPageStyleScript = r'''
+(function () {
+  if (!/[?&]__lib=login(&|$)/.test(location.search)) return;
+  var style = document.createElement('style');
+  style.textContent =
+    'html, body { background: rgb(255, 246, 223) !important; margin: 0 !important; padding: 32px 0 !important; width: 100% !important; min-height: 100vh !important; box-sizing: border-box !important; display: flex !important; justify-content: center !important; align-items: flex-start !important; }' +
+    '#iff { background: rgb(255, 246, 223) !important; border: none !important; }' +
+    '#iff:not([data-fnga-ready]) { visibility: hidden; }';
+  (document.head || document.documentElement).appendChild(style);
+})();
+''';
+
+bool get _isDesktopLoginHost =>
+    !kIsWeb &&
+    (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux);
 
 /// 调整 NGA 登录页的交互，于主框架 DOM 解析完成时注入：
 ///
@@ -65,8 +98,11 @@ const _loginPagePatchScript = r'''
       var main = d.getElementById('main');
       if (main) {
         hideLoginTitle(main);
-        new w.MutationObserver(function () { hideLoginTitle(main); })
-          .observe(main, { childList: true });
+        enhanceAutoFill(main);
+        new w.MutationObserver(function () {
+          hideLoginTitle(main);
+          enhanceAutoFill(main);
+        }).observe(main, { childList: true, subtree: true });
       }
       w.__client = (w.__client | 16384) & ~1024;
       if (/^\?login(&|$)/.test(w.location.search)) {
@@ -92,6 +128,26 @@ const _loginPagePatchScript = r'''
     title.style.display = 'none';
     for (var n = title.nextElementSibling; n && n.tagName === 'BR'; n = n.nextElementSibling) {
       n.style.display = 'none';
+    }
+  }
+
+  // 为密码登录输入框补充标准 autocomplete 属性，便于系统「编辑 → 自动填充」与密码管理器识别
+  function enhanceAutoFill(root) {
+    var pwd = root.querySelector('input[type="password"]');
+    if (!pwd) return;
+    if (!pwd.getAttribute('autocomplete')) {
+      pwd.setAttribute('autocomplete', 'current-password');
+    }
+    var inputs = root.querySelectorAll('input');
+    for (var i = 0; i < inputs.length; i++) {
+      var input = inputs[i];
+      if (input === pwd) break;
+      if (input.type === 'text' || input.type === 'email' || input.type === 'tel') {
+        if (!input.getAttribute('autocomplete')) {
+          input.setAttribute('autocomplete', 'username');
+        }
+        break;
+      }
     }
   }
 
@@ -136,14 +192,68 @@ const _loginPagePatchScript = r'''
 ''';
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key, this.asDialog = false});
+
+  /// 是否作为桌面居中模态弹窗展示
+  final bool asDialog;
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  static const _initialLoadTimeout = Duration(seconds: 15);
+
   InAppWebViewController? _webViewController;
+  bool _isLoading = true;
+  bool _loadFailed = false;
+  Timer? _loadTimeoutTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startLoadTimeout();
+  }
+
+  @override
+  void dispose() {
+    _loadTimeoutTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startLoadTimeout() {
+    _loadTimeoutTimer?.cancel();
+    _loadTimeoutTimer = Timer(_initialLoadTimeout, () {
+      if (!mounted || !_isLoading) return;
+      setState(() {
+        _isLoading = false;
+        _loadFailed = true;
+      });
+    });
+  }
+
+  void _finishLoading({bool failed = false}) {
+    _loadTimeoutTimer?.cancel();
+    if (!mounted) return;
+    if (_isLoading || _loadFailed != failed) {
+      setState(() {
+        _isLoading = false;
+        _loadFailed = failed;
+      });
+    }
+  }
+
+  Future<void> _reloadLoginPage() async {
+    setState(() {
+      _isLoading = true;
+      _loadFailed = false;
+    });
+    _startLoadTimeout();
+    final controller = _webViewController;
+    if (controller != null) {
+      await controller.reload();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,82 +278,147 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _buildScaffold() {
-    return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(onPressed: _handleBack),
-        title: Text("登录"),
-        actions: <Widget>[
-          IconButton(
-            tooltip: "导入 Cookies",
-            onPressed: _showImportCookiesDialog,
-            icon: const Icon(Icons.cookie_outlined),
-          ),
-        ],
+    final isApple = context.isAppleStyle;
+    final showCloseLeading = widget.asDialog || isApple;
+    return AppScaffold(
+      embedded: widget.asDialog,
+      leading: IconButton(
+        tooltip: showCloseLeading ? '关闭' : '返回',
+        icon: Icon(
+          showCloseLeading ? AppIcons.close(context) : AppIcons.back(context),
+        ),
+        onPressed: showCloseLeading ? () => Routes.pop(context) : _handleBack,
       ),
-      body: InAppWebView(
-        initialUrlRequest: URLRequest(
-          url: WebUri.uri(
-            Uri.https(Data().domain, "nuke.php", {
-              '__lib': 'login',
-              '__act': 'account',
-              'login': null,
-            }),
+      title: const Text("登录"),
+      actions: <Widget>[
+        IconButton(
+          tooltip: "导入 Cookies",
+          onPressed: _showImportCookiesDialog,
+          icon: Icon(
+            isApple ? CupertinoIcons.doc_on_clipboard : Icons.cookie_outlined,
           ),
         ),
-        initialUserScripts: UnmodifiableListView([
-          UserScript(
-            source: _loginPageStyleScript,
-            injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
-          ),
-          UserScript(
-            source: _loginPagePatchScript,
-            injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
-          ),
-        ]),
-        onWebViewCreated: (controller) {
-          _webViewController = controller;
-          controller.addJavaScriptHandler(
-            handlerName: 'pickOption',
-            callback: (args) => _pickOption(
-              title: args[0] as String,
-              options: [for (final option in args[1] as List) '$option'],
-              selectedIndex: args[2] as int,
-            ),
-          );
-        },
-        onJsAlert: (controller, request) async {
-          await _showWebMessage(request.message ?? '');
-          return JsAlertResponse(
-            handledByClient: true,
-            action: JsAlertResponseAction.CONFIRM,
-          );
-        },
-        onJsConfirm: (controller, request) async {
-          final confirmed = await _showWebMessage(
-            request.message ?? '',
-            cancelable: true,
-          );
-          return JsConfirmResponse(
-            handledByClient: true,
-            action: confirmed
-                ? JsConfirmResponseAction.CONFIRM
-                : JsConfirmResponseAction.CANCEL,
-          );
-        },
-        onConsoleMessage:
-            (InAppWebViewController controller, ConsoleMessage consoleMessage) {
-              if (consoleMessage.message.startsWith("loginSuccess :")) {
-                final cookiesJson = consoleMessage.message.substring(
-                  "loginSuccess : ".length,
+      ],
+      body: ColoredBox(
+        color: _loginFormBgColor,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            InAppWebView(
+              initialSettings: InAppWebViewSettings(
+                transparentBackground: true,
+              ),
+              initialUrlRequest: URLRequest(
+                url: WebUri.uri(
+                  Uri.https(Data().domain, "nuke.php", {
+                    '__lib': 'login',
+                    '__act': 'account',
+                    'login': null,
+                  }),
+                ),
+              ),
+              initialUserScripts: UnmodifiableListView([
+                UserScript(
+                  source: _isDesktopLoginHost
+                      ? _desktopLoginPageStyleScript
+                      : _mobileLoginPageStyleScript,
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                ),
+                UserScript(
+                  source: _loginPagePatchScript,
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
+                ),
+              ]),
+              onWebViewCreated: (controller) {
+                _webViewController = controller;
+                controller.addJavaScriptHandler(
+                  handlerName: 'pickOption',
+                  callback: (args) => _pickOption(
+                    title: args[0] as String,
+                    options: [for (final option in args[1] as List) '$option'],
+                    selectedIndex: args[2] as int,
+                  ),
                 );
-                _processCookieJson(cookiesJson);
-              }
-            },
+              },
+              onLoadStop: (_, _) => _finishLoading(),
+              onReceivedError: (_, _, _) => _finishLoading(),
+              onReceivedHttpError: (_, _, _) => _finishLoading(),
+              onWebContentProcessDidTerminate: (_) =>
+                  _finishLoading(failed: true),
+              onJsAlert: (controller, request) async {
+                await _showWebMessage(request.message ?? '');
+                return JsAlertResponse(
+                  handledByClient: true,
+                  action: JsAlertResponseAction.CONFIRM,
+                );
+              },
+              onJsConfirm: (controller, request) async {
+                final confirmed = await _showWebMessage(
+                  request.message ?? '',
+                  cancelable: true,
+                );
+                return JsConfirmResponse(
+                  handledByClient: true,
+                  action: confirmed
+                      ? JsConfirmResponseAction.CONFIRM
+                      : JsConfirmResponseAction.CANCEL,
+                );
+              },
+              onConsoleMessage:
+                  (
+                    InAppWebViewController controller,
+                    ConsoleMessage consoleMessage,
+                  ) {
+                    if (consoleMessage.message.startsWith("loginSuccess :")) {
+                      final cookiesJson = consoleMessage.message.substring(
+                        "loginSuccess : ".length,
+                      );
+                      _processCookieJson(cookiesJson);
+                    }
+                  },
+            ),
+            if (_isLoading)
+              const ColoredBox(
+                color: _loginFormBgColor,
+                child: Center(child: AppActivityIndicator()),
+              )
+            else if (_loadFailed)
+              ColoredBox(
+                color: _loginFormBgColor,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          AppIcons.resolve(context, Icons.cloud_off_outlined),
+                          size: 36,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          '登录页加载超时或异常中断',
+                          style: TextStyle(color: Colors.black87, fontSize: 15),
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: _reloadLoginPage,
+                          child: const Text('重新加载'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
 
   Future<void> _processCookieJson(String cookiesJson) async {
+    final accountNotifier = ref.read(accountListProvider.notifier);
     try {
       final map = json.decode(cookiesJson) as Map;
       await Data().userRepository.saveLogin(
@@ -251,7 +426,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         map['token'],
         map['username'],
       );
-      ref.read(favouriteForumListProvider.notifier).onAccountChanged();
+      accountNotifier.notifyAccountChanged();
       if (mounted) {
         AppToast.success("登录成功");
         Routes.pop(context);
@@ -269,21 +444,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return false;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('提示'),
-        content: Text(message),
-        actions: [
-          if (cancelable)
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+      builder: (dialogContext) {
+        if (cancelable) {
+          return M3ConfirmDialog(title: '提示', content: message);
+        }
+        if (dialogContext.isAppleStyle) {
+          return CupertinoAlertDialog(
+            title: const Text('提示'),
+            content: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(message),
             ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        }
+        return M3Dialog(
+          title: '提示',
+          content: Text(message),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
     );
     return confirmed ?? !cancelable;
   }
@@ -297,30 +488,78 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return null;
     return showDialog<int>(
       context: context,
-      builder: (context) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return AlertDialog(
-          title: title.isEmpty ? null : Text(title),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: RadioGroup<int>(
-              groupValue: selectedIndex,
-              onChanged: (index) => Navigator.of(context).pop(index),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (context, index) => RadioListTile<int>(
-                  title: Text(options[index]),
-                  value: index,
-                  activeColor: colorScheme.primary,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ),
+      builder: (dialogContext) {
+        final colorScheme = Theme.of(dialogContext).colorScheme;
+        final isApple = dialogContext.isAppleStyle;
+        return M3Dialog(
+          title: title.isEmpty ? '请选择' : title,
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 360),
+            child: isApple
+                ? ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    separatorBuilder: (_, _) => Divider(
+                      height: 0.5,
+                      thickness: 0.5,
+                      color: colorScheme.outlineVariant,
+                    ),
+                    itemBuilder: (_, index) {
+                      final selected = index == selectedIndex;
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () => Navigator.of(dialogContext).pop(index),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 11,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  options[index],
+                                  style: TextStyle(
+                                    color: selected
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurface,
+                                    fontWeight: selected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                              if (selected)
+                                Icon(
+                                  CupertinoIcons.check_mark,
+                                  size: 16,
+                                  color: colorScheme.primary,
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : RadioGroup<int>(
+                    groupValue: selectedIndex,
+                    onChanged: (index) =>
+                        Navigator.of(dialogContext).pop(index),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (_, index) => RadioListTile<int>(
+                        title: Text(options[index]),
+                        value: index,
+                        activeColor: colorScheme.primary,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('取消'),
             ),
           ],
@@ -329,25 +568,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  void _showImportCookiesDialog() {
-    showDialog(
+  Future<void> _showImportCookiesDialog() async {
+    final imported = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return ImportCookiesDialog(cookiesCallback: _processCookiesString);
-      },
+      builder: (_) =>
+          ImportCookiesDialog(cookiesCallback: _saveImportedCookies),
     );
-  }
-
-  Future<void> _processCookiesString(String cookies) async {
-    try {
-      await Data().userRepository.saveLoginCookies(cookies);
-      ref.read(favouriteForumListProvider.notifier).onAccountChanged();
-      if (!mounted) return;
+    if (imported == true && mounted) {
       AppToast.success("登录成功");
       Routes.pop(context);
-    } catch (error, stack) {
-      debugPrintStack(stackTrace: stack);
-      AppToast.error(error);
     }
+  }
+
+  Future<void> _saveImportedCookies(String cookies) async {
+    final accountNotifier = ref.read(accountListProvider.notifier);
+    await Data().userRepository.saveLoginCookies(cookies);
+    accountNotifier.notifyAccountChanged();
   }
 }

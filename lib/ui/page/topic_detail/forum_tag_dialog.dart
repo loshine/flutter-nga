@@ -1,7 +1,10 @@
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoButton;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'package:flutter_nga/data/entity/topic_tag.dart';
 import 'package:flutter_nga/providers/forum/forum_tag_list_provider.dart';
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/app_toast.dart';
 import 'package:flutter_nga/utils/hooks/easy_refresh_hooks.dart';
@@ -68,6 +71,7 @@ class ForumTagDialog extends HookConsumerWidget {
     final tags = ref.watch(forumTagListProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     final content = tags.isEmpty
         ? Padding(
@@ -86,36 +90,88 @@ class ForumTagDialog extends HookConsumerWidget {
             runSpacing: 8,
             children: [
               for (final tag in tags)
-                ActionChip(
-                  label: Text(tag.content),
-                  onPressed: () => onSelected?.call(tag.content),
-                ),
+                if (isApple)
+                  Material(
+                    color: colorScheme.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: colorScheme.outlineVariant,
+                        width: 0.5,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => onSelected?.call(tag.content),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        child: Text(
+                          tag.content,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ActionChip(
+                    label: Text(tag.content),
+                    onPressed: () => onSelected?.call(tag.content),
+                  ),
             ],
           );
 
     if (embedded) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
+        padding: EdgeInsets.fromLTRB(
+          isApple ? 20 : 24,
+          isApple ? 16 : 4,
+          isApple ? 20 : 24,
+          16,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               '主题分类',
-              style: textTheme.headlineSmall?.copyWith(
-                color: colorScheme.onSurface,
-              ),
+              style: (isApple ? textTheme.titleMedium : textTheme.headlineSmall)
+                  ?.copyWith(
+                    fontWeight: isApple ? FontWeight.w600 : null,
+                    color: colorScheme.onSurface,
+                  ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Flexible(child: SingleChildScrollView(child: content)),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('关闭'),
-                ),
+                if (isApple)
+                  CupertinoButton(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      '关闭',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  )
+                else
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('关闭'),
+                  ),
               ],
             ),
           ],

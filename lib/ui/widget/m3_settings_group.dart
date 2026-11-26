@@ -1,7 +1,13 @@
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
 import 'package:material_ui/material_ui.dart';
+
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
-/// Material You 分组设置卡片：组标题 + `surfaceContainerLow` 圆角容器 + 组内细分割线。
+/// 分组设置卡片：
+/// - Material You：组标题 + `surfaceContainerLow` 圆角容器 + 组内分割线；
+/// - Apple 风格：Inset Grouped 分组列表（次要灰标题 + 12pt 圆角卡片 + 0.5px hairline 分割线）。
 class M3SettingsGroup extends StatelessWidget {
   const M3SettingsGroup({
     super.key,
@@ -18,28 +24,51 @@ class M3SettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
+    final isHighContrast = MediaQuery.highContrastOf(context);
+    final effectiveIndent = isApple
+        ? (dividerIndent > 16 ? 58.0 : dividerIndent)
+        : dividerIndent;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (title != null)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: isApple
+                ? const EdgeInsets.fromLTRB(28, 18, 16, 6)
+                : const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
               title!,
-              style: textTheme.titleSmall?.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
+              style: isApple
+                  ? textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
+                    )
+                  : textTheme.titleSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
             ),
           )
         else
-          const SizedBox(height: Dimen.spacingM),
+          SizedBox(height: isApple ? Dimen.spacingL : Dimen.spacingM),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(horizontal: isApple ? 16 : 12),
           child: Material(
             color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(Dimen.radiusL),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                isApple ? Dimen.radiusM : Dimen.radiusL,
+              ),
+              side: isApple
+                  ? BorderSide(
+                      color: colorScheme.outlineVariant,
+                      width: isHighContrast ? 1 : 0.5,
+                    )
+                  : BorderSide.none,
+            ),
             clipBehavior: Clip.antiAlias,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -47,10 +76,13 @@ class M3SettingsGroup extends StatelessWidget {
                 for (var i = 0; i < children.length; i++) ...[
                   if (i > 0)
                     Divider(
-                      height: 1,
-                      indent: dividerIndent,
-                      endIndent: 16,
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+                      height: isApple ? 0.5 : 1,
+                      thickness: isApple ? 0.5 : 1,
+                      indent: effectiveIndent,
+                      endIndent: isApple ? 0 : 16,
+                      color: colorScheme.outlineVariant.withValues(
+                        alpha: isApple ? 0.7 : 0.6,
+                      ),
                     ),
                   children[i],
                 ],
@@ -94,15 +126,21 @@ class M3SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Material(
       color: selected
-          ? colorScheme.secondaryContainer.withValues(alpha: 0.6)
+          ? (isApple
+                ? colorScheme.primary.withValues(alpha: 0.14)
+                : colorScheme.secondaryContainer.withValues(alpha: 0.6))
           : Colors.transparent,
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: isApple ? 10 : 12,
+          ),
           child: Row(
             children: [
               if (icon != null) ...[
@@ -110,24 +148,34 @@ class M3SettingsTile extends StatelessWidget {
                   count: badgeCount,
                   isLabelVisible: badgeCount > 0,
                   child: Container(
-                    width: 40,
-                    height: 40,
+                    width: isApple ? 30 : 40,
+                    height: isApple ? 30 : 40,
                     decoration: BoxDecoration(
-                      color: selected
-                          ? colorScheme.primary
-                          : colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(Dimen.radiusFull),
+                      color: isApple
+                          ? (selected
+                                ? colorScheme.primary
+                                : colorScheme.primary.withValues(alpha: 0.14))
+                          : (selected
+                                ? colorScheme.primary
+                                : colorScheme.primaryContainer),
+                      borderRadius: BorderRadius.circular(
+                        isApple ? 7 : Dimen.radiusFull,
+                      ),
                     ),
                     child: Icon(
                       icon,
-                      color: selected
-                          ? colorScheme.onPrimary
-                          : colorScheme.onPrimaryContainer,
-                      size: Dimen.iconSmall,
+                      color: isApple
+                          ? (selected
+                                ? colorScheme.onPrimary
+                                : colorScheme.primary)
+                          : (selected
+                                ? colorScheme.onPrimary
+                                : colorScheme.onPrimaryContainer),
+                      size: isApple ? 17 : Dimen.iconSmall,
                     ),
                   ),
                 ),
-                const SizedBox(width: Dimen.spacingL),
+                SizedBox(width: isApple ? 12 : Dimen.spacingL),
               ],
               Expanded(
                 child: Column(
@@ -136,8 +184,11 @@ class M3SettingsTile extends StatelessWidget {
                     Text(
                       title,
                       style: textTheme.bodyLarge?.copyWith(
+                        fontSize: isApple ? 15 : null,
                         color: selected
-                            ? colorScheme.onSecondaryContainer
+                            ? (isApple
+                                  ? colorScheme.primary
+                                  : colorScheme.onSecondaryContainer)
                             : colorScheme.onSurface,
                         fontWeight: selected ? FontWeight.w600 : null,
                       ),
@@ -148,9 +199,10 @@ class M3SettingsTile extends StatelessWidget {
                         subtitle!,
                         style: textTheme.bodySmall?.copyWith(
                           color: selected
-                              ? colorScheme.onSecondaryContainer.withValues(
-                                  alpha: 0.8,
-                                )
+                              ? (isApple
+                                    ? colorScheme.primary.withValues(alpha: 0.8)
+                                    : colorScheme.onSecondaryContainer
+                                          .withValues(alpha: 0.8))
                               : colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -165,11 +217,18 @@ class M3SettingsTile extends StatelessWidget {
               if (onTap != null && showChevron) ...[
                 const SizedBox(width: Dimen.spacingXS),
                 Icon(
-                  trailingIcon ?? Icons.chevron_right,
+                  trailingIcon ??
+                      (isApple
+                          ? CupertinoIcons.chevron_forward
+                          : Icons.chevron_right),
                   color: selected
-                      ? colorScheme.onSecondaryContainer
-                      : colorScheme.onSurfaceVariant,
-                  size: trailingIcon != null ? 18 : 24,
+                      ? (isApple
+                            ? colorScheme.primary
+                            : colorScheme.onSecondaryContainer)
+                      : colorScheme.onSurfaceVariant.withValues(
+                          alpha: isApple ? 0.65 : 1.0,
+                        ),
+                  size: trailingIcon != null ? 18 : (isApple ? 16 : 24),
                 ),
               ],
             ],
@@ -202,57 +261,74 @@ class M3SettingsSwitchTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final enabled = onChanged != null;
+    final isApple = context.isAppleStyle;
 
     return InkWell(
       onTap: enabled ? () => onChanged!(!value) : null,
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.45,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            children: [
-              if (icon != null) ...[
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(Dimen.radiusFull),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: colorScheme.onPrimaryContainer,
-                    size: Dimen.iconSmall,
-                  ),
-                ),
-                const SizedBox(width: Dimen.spacingL),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: isApple ? 8 : 10,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Opacity(
+                opacity: enabled ? 1.0 : 0.45,
+                child: Row(
                   children: [
-                    Text(
-                      title,
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                    if (icon != null) ...[
+                      Container(
+                        width: isApple ? 30 : 40,
+                        height: isApple ? 30 : 40,
+                        decoration: BoxDecoration(
+                          color: isApple
+                              ? colorScheme.primary.withValues(alpha: 0.14)
+                              : colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(
+                            isApple ? 7 : Dimen.radiusFull,
+                          ),
+                        ),
+                        child: Icon(
+                          icon,
+                          color: isApple
+                              ? colorScheme.primary
+                              : colorScheme.onPrimaryContainer,
+                          size: isApple ? 17 : Dimen.iconSmall,
                         ),
                       ),
+                      SizedBox(width: isApple ? 12 : Dimen.spacingL),
                     ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: textTheme.bodyLarge?.copyWith(
+                              fontSize: isApple ? 15 : null,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          if (subtitle != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle!,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: Dimen.spacingS),
-              Switch(value: value, onChanged: onChanged),
-            ],
-          ),
+            ),
+            const SizedBox(width: Dimen.spacingS),
+            AppSwitch(value: value, onChanged: onChanged),
+          ],
         ),
       ),
     );
@@ -276,25 +352,33 @@ class M3SettingsInfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isApple = context.isAppleStyle;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: isApple ? 10 : 12,
+      ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: isApple ? 30 : 40,
+            height: isApple ? 30 : 40,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(Dimen.radiusFull),
+              color: isApple
+                  ? colorScheme.onSurfaceVariant.withValues(alpha: 0.12)
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(
+                isApple ? 7 : Dimen.radiusFull,
+              ),
             ),
             child: Icon(
               icon,
               color: colorScheme.onSurfaceVariant,
-              size: Dimen.iconSmall,
+              size: isApple ? 17 : Dimen.iconSmall,
             ),
           ),
-          const SizedBox(width: Dimen.spacingL),
+          SizedBox(width: isApple ? 12 : Dimen.spacingL),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,6 +386,7 @@ class M3SettingsInfoTile extends StatelessWidget {
                 Text(
                   title,
                   style: textTheme.bodyLarge?.copyWith(
+                    fontSize: isApple ? 15 : null,
                     color: colorScheme.onSurface,
                   ),
                 ),

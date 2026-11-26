@@ -77,8 +77,8 @@ void main() {
   group('参与者与位标志', () {
     test('parseMessageParticipants 解析 tab 分隔的 uid/用户名', () {
       expect(parseMessageParticipants('1\talice\t2\tbob'), const [
-        MessageParticipant(1, 'alice'),
-        MessageParticipant(2, 'bob'),
+        (uid: 1, username: 'alice'),
+        (uid: 2, username: 'bob'),
       ]);
       expect(parseMessageParticipants(null), isEmpty);
       expect(parseMessageParticipants('x\ty\t3'), isEmpty);
@@ -141,7 +141,7 @@ void main() {
         },
       });
       expect(fallback.isIsolated, isFalse);
-      expect(fallback.participants, const [MessageParticipant(3, 'carol')]);
+      expect(fallback.participants, const [(uid: 3, username: 'carol')]);
     });
   });
 }

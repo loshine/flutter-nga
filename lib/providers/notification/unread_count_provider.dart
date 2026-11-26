@@ -6,25 +6,20 @@ import 'package:flutter_nga/providers/core/repository_providers.dart';
 import 'package:flutter_nga/providers/home/home_drawer_header_provider.dart';
 
 /// 「我的」页入口角标用的未读数。
-class UnreadCounts {
-  const UnreadCounts({this.uid, this.notifications = 0, this.messages = 0});
+///
+/// - `uid`：计数所属账号；与当前登录账号不一致时不应显示
+/// - `notifications`：提醒（回复 / 提及与系统通知）
+/// - `messages`：短消息
+typedef UnreadCounts = ({int? uid, int notifications, int messages});
 
-  /// 计数所属账号；与当前登录账号不一致时不应显示
-  final int? uid;
-
-  /// 提醒：回复 / 提及与系统通知
-  final int notifications;
-
-  /// 短消息
-  final int messages;
-
+extension UnreadCountsX on UnreadCounts {
   /// 总未读数，用于首页底部/侧边导航栏聚合角标
   int get total => notifications + messages;
 
-  static const none = UnreadCounts();
+  static const UnreadCounts none = (uid: null, notifications: 0, messages: 0);
 
-  factory UnreadCounts.fromInfo(NotificationInfo info, {required int uid}) {
-    return UnreadCounts(
+  static UnreadCounts fromInfo(NotificationInfo info, {required int uid}) {
+    return (
       uid: uid,
       notifications:
           (info.unreadReplyCount ?? 0) +
@@ -40,17 +35,17 @@ class UnreadCounts {
 /// 变化（登录、退出、切换）则丢弃结果，避免把上一个账号的未读数显示出来。
 class UnreadCountNotifier extends Notifier<UnreadCounts> {
   @override
-  UnreadCounts build() => UnreadCounts.none;
+  UnreadCounts build() => UnreadCountsX.none;
 
-  /// 当前账号的未读数；未登录或计数属于其他账号时为 [UnreadCounts.none]
+  /// 当前账号的未读数；未登录或计数属于其他账号时为 [UnreadCountsX.none]
   UnreadCounts countsFor(int? uid) =>
-      uid != null && state.uid == uid ? state : UnreadCounts.none;
+      uid != null && state.uid == uid ? state : UnreadCountsX.none;
 
   /// 刷新未读数；角标只是提示，失败时保留旧值不打扰用户。
   Future<void> refresh() async {
     final uid = ref.read(homeDrawerHeaderProvider)?.uid;
     if (uid == null) {
-      state = UnreadCounts.none;
+      state = UnreadCountsX.none;
       return;
     }
     try {
@@ -60,14 +55,14 @@ class UnreadCountNotifier extends Notifier<UnreadCounts> {
       if (!ref.mounted || ref.read(homeDrawerHeaderProvider)?.uid != uid) {
         return;
       }
-      state = UnreadCounts.fromInfo(info, uid: uid);
+      state = UnreadCountsX.fromInfo(info, uid: uid);
     } catch (err) {
       debugPrint('刷新未读数失败: $err');
     }
   }
 
   /// 未登录或切换账号时清空
-  void clear() => state = UnreadCounts.none;
+  void clear() => state = UnreadCountsX.none;
 }
 
 final unreadCountProvider = NotifierProvider<UnreadCountNotifier, UnreadCounts>(

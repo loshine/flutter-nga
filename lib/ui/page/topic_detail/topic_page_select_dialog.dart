@@ -1,5 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'package:flutter_nga/providers/settings/design_style_provider.dart';
+import 'package:flutter_nga/ui/widget/adaptive/adaptive_controls.dart';
+import 'package:flutter_nga/ui/widget/adaptive/app_icons.dart';
+import 'package:flutter_nga/ui/widget/adaptive/liquid_glass_surface.dart';
 import 'package:flutter_nga/ui/widget/m3_dialog.dart';
 import 'package:flutter_nga/utils/dimen.dart';
 
@@ -172,7 +177,7 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
               ),
             ),
             const SizedBox(height: 8),
-            Slider(
+            AppSlider(
               value: _currentVal.clamp(1, maxVal).toDouble(),
               min: 1,
               max: maxVal > 1 ? maxVal.toDouble() : 2.0,
@@ -184,22 +189,23 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
             ),
             const SizedBox(height: 12),
             Center(
-              child: SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment<bool>(
+              child: AppSegmentedControl<bool>(
+                expand: false,
+                segments: [
+                  AppSegment<bool>(
                     value: true,
-                    label: Text('页码'),
-                    icon: Icon(Icons.pages),
+                    label: '页码',
+                    icon: AppIcons.resolve(context, Icons.pages),
                   ),
-                  ButtonSegment<bool>(
+                  AppSegment<bool>(
                     value: false,
-                    label: Text('楼层'),
-                    icon: Icon(Icons.layers),
+                    label: '楼层',
+                    icon: AppIcons.resolve(context, Icons.layers),
                   ),
                 ],
-                selected: {_isPage},
-                onSelectionChanged: (Set<bool> newSelection) {
-                  _isPage = newSelection.first;
+                selected: _isPage,
+                onChanged: (bool nextIsPage) {
+                  _isPage = nextIsPage;
                   _setValue(_isPage ? widget.currentPage : 1);
                 },
               ),
@@ -222,6 +228,20 @@ class _TopicPageSelectState extends State<TopicPageSelectDialog> {
     );
 
     if (widget.embedded) return body;
+
+    if (context.isAppleStyle) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: LiquidGlassSurface(
+            borderRadius: BorderRadius.circular(22),
+            child: body,
+          ),
+        ),
+      );
+    }
 
     return Dialog(
       shape: RoundedRectangleBorder(
